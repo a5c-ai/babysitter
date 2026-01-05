@@ -39,9 +39,14 @@ suite('Run Details webview template', () => {
     assert.ok(source.includes('id="keyFilesRevealRun"'), 'expected run-folder Reveal action in empty/error states');
     assert.ok(source.includes('id="keyFilesCopyRun"'), 'expected run-folder Copy path action in empty/error states');
     assert.ok(source.includes('Copy contents'), 'expected Copy contents quick action label');
+    assert.ok(source.includes('Save as…') || source.includes('Save as...'), 'expected Save as quick action label');
     assert.ok(
       source.includes("{ type: 'copyFileContents'") || source.includes('{ type: "copyFileContents"'),
       'expected Copy contents action to postMessage type copyFileContents',
+    );
+    assert.ok(
+      source.includes("{ type: 'saveFileAs'") || source.includes('{ type: "saveFileAs"'),
+      'expected Save as action to postMessage type saveFileAs',
     );
   });
 

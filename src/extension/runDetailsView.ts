@@ -30,6 +30,7 @@ type WebviewInboundMessage =
   | { type: 'refresh' }
   | { type: 'openInEditor'; fsPath: string }
   | { type: 'revealInExplorer'; fsPath: string }
+  | { type: 'saveFileAs'; fsPath: string }
   | { type: 'loadTextFile'; fsPath: string; tail?: boolean }
   | { type: 'copyText'; text: string }
   | { type: 'copyFileContents'; fsPath: string }
@@ -832,6 +833,8 @@ function renderWebviewHtml(webview: vscode.Webview): string {
 	            keyFilesEmptyActions.style.display = '';
 	            setButtonEnabled(keyFilesRevealRun, model.canRevealRunRoot);
 	            setButtonEnabled(keyFilesCopyRun, model.canCopyRunRoot);
+              keyFilesRevealRun.title = 'Reveal the run folder in your OS';
+              keyFilesCopyRun.title = 'Copy the run folder path';
 	            if (model.canRevealRunRoot) {
 	              keyFilesRevealRun.onclick = () => vscode.postMessage({ type: 'revealInExplorer', fsPath: runRoot });
 	            }
@@ -880,6 +883,7 @@ function renderWebviewHtml(webview: vscode.Webview): string {
 	          const canCopy = Boolean(fsPath);
 	          const canReveal = Boolean(fsPath);
 	          const canOpen = Boolean(fsPath);
+            const canSaveAs = Boolean(fsPath) && item && item.isDirectory !== true;
 	          const ext = extOf(item.relPath || item.displayName || fsPath);
 	          const canCopyContents =
 	            Boolean(fsPath) &&
@@ -918,6 +922,7 @@ function renderWebviewHtml(webview: vscode.Webview): string {
 	          const pinBtn = document.createElement('button');
 	          const isPinned = pinnedSet.has(item.id);
 	          pinBtn.textContent = isPinned ? 'Unpin' : 'Pin';
+            pinBtn.title = isPinned ? 'Unpin this file' : 'Pin this file';
 	          pinBtn.setAttribute('aria-pressed', isPinned ? 'true' : 'false');
 	          pinBtn.setAttribute('aria-label', (isPinned ? 'Unpin ' : 'Pin ') + (primary || 'file'));
 	          pinBtn.addEventListener('click', (e) => {
@@ -928,6 +933,7 @@ function renderWebviewHtml(webview: vscode.Webview): string {
 
 	          const copyBtn = document.createElement('button');
 	          copyBtn.textContent = 'Copy path';
+            copyBtn.title = 'Copy file path';
 	          copyBtn.setAttribute('aria-label', 'Copy path for ' + (primary || 'file'));
 	          setButtonEnabled(copyBtn, canCopy);
 	          copyBtn.addEventListener('click', (e) => {
@@ -960,8 +966,29 @@ function renderWebviewHtml(webview: vscode.Webview): string {
 	          });
 	          actions.appendChild(copyContentsBtn);
 
+            const saveAsBtn = document.createElement('button');
+            saveAsBtn.textContent = 'Save as…';
+            saveAsBtn.setAttribute('aria-label', 'Save a copy of ' + (primary || 'file'));
+            if (!canSaveAs) {
+              if (item && item.isDirectory) {
+                saveAsBtn.title = 'Disabled: not a file';
+              } else {
+                saveAsBtn.title = 'Disabled';
+              }
+            } else {
+              saveAsBtn.title = 'Save a copy of this file to another location';
+            }
+            setButtonEnabled(saveAsBtn, canSaveAs);
+            saveAsBtn.addEventListener('click', (e) => {
+              e.stopPropagation();
+              if (!canSaveAs) return;
+              vscode.postMessage({ type: 'saveFileAs', fsPath });
+            });
+            actions.appendChild(saveAsBtn);
+
 	          const revealBtn = document.createElement('button');
 	          revealBtn.textContent = 'Reveal';
+            revealBtn.title = 'Reveal this file in your OS';
 	          revealBtn.setAttribute('aria-label', 'Reveal ' + (primary || 'file') + ' in Explorer');
 	          setButtonEnabled(revealBtn, canReveal);
 	          revealBtn.addEventListener('click', (e) => {
@@ -973,6 +1000,7 @@ function renderWebviewHtml(webview: vscode.Webview): string {
 
 	          const openBtn = document.createElement('button');
 	          openBtn.textContent = 'Open';
+            openBtn.title = 'Open this file in VS Code';
 	          openBtn.setAttribute('aria-label', 'Open ' + (primary || 'file'));
 	          setButtonEnabled(openBtn, canOpen);
 	          openBtn.addEventListener('click', (e) => {
@@ -1390,6 +1418,9 @@ class RunDetailsPanel {
       case 'revealInExplorer':
         await this.revealInExplorer(msg.fsPath);
         return;
+      case 'saveFileAs':
+        await this.saveFileAs(msg.fsPath);
+        return;
       case 'loadTextFile':
         await this.loadTextFile(msg.fsPath, msg.tail ?? true);
         return;
@@ -1525,8 +1556,80 @@ class RunDetailsPanel {
   private async revealInExplorer(fsPath: string): Promise<void> {
     const value = typeof fsPath === 'string' ? fsPath : '';
     if (!value) return;
-    if (!isFsPathInsideRoot(this.run.paths.runRoot, value)) return;
-    await vscode.commands.executeCommand('revealFileInOS', vscode.Uri.file(value));
+    if (!isFsPathInsideRoot(this.run.paths.runRoot, value)) {
+      await this.post({ type: 'error', message: 'Refusing to reveal a file outside the run directory.' });
+      return;
+    }
+    try {
+      await vscode.workspace.fs.stat(vscode.Uri.file(value));
+    } catch {
+      await this.post({ type: 'error', message: `Could not reveal: ${path.basename(value)} (file not found)` });
+      return;
+    }
+    try {
+      await vscode.commands.executeCommand('revealFileInOS', vscode.Uri.file(value));
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      await this.post({ type: 'error', message: `Could not reveal in OS: ${message}` });
+    }
+  }
+
+  private async saveFileAs(fsPath: string): Promise<void> {
+    const value = typeof fsPath === 'string' ? fsPath : '';
+    if (!value) return;
+
+    if (!isFsPathInsideRoot(this.run.paths.runRoot, value)) {
+      await this.post({ type: 'error', message: 'Refusing to save a file outside the run directory.' });
+      return;
+    }
+
+    const sourceUri = vscode.Uri.file(value);
+    let stat: vscode.FileStat;
+    try {
+      stat = await vscode.workspace.fs.stat(sourceUri);
+    } catch {
+      await this.post({ type: 'error', message: `Could not save: ${path.basename(value)} (file not found)` });
+      return;
+    }
+    if (stat.type & vscode.FileType.Directory) {
+      await this.post({ type: 'error', message: 'Save as is not supported for directories.' });
+      return;
+    }
+
+    const basename = path.basename(value) || 'file';
+    const defaultUri = vscode.Uri.file(path.join(path.dirname(value), basename));
+    const destUri = await vscode.window.showSaveDialog({
+      title: `Save a copy of ${basename}`,
+      saveLabel: 'Save As…',
+      defaultUri,
+    });
+    if (!destUri) return;
+
+    try {
+      await vscode.workspace.fs.copy(sourceUri, destUri, { overwrite: true });
+      vscode.window.setStatusBarMessage('Babysitter: saved file', 2000);
+      return;
+    } catch {
+      // Fall back to read/write to support some cross-filesystem cases.
+    }
+
+    const MAX_FALLBACK_BYTES = 25 * 1024 * 1024;
+    if (stat.size > MAX_FALLBACK_BYTES) {
+      await this.post({
+        type: 'error',
+        message: `Could not save file (copy failed and file is too large for fallback): ${basename}`,
+      });
+      return;
+    }
+
+    try {
+      const data = await vscode.workspace.fs.readFile(sourceUri);
+      await vscode.workspace.fs.writeFile(destUri, data);
+      vscode.window.setStatusBarMessage('Babysitter: saved file', 2000);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      await this.post({ type: 'error', message: `Could not save file: ${message}` });
+    }
   }
 
   private async loadTextFile(fsPath: string, tail: boolean): Promise<void> {
