@@ -176,7 +176,18 @@ export function registerRunsTreeView(context: vscode.ExtensionContext): {
       const fromArg = toRun(target);
       const run = fromArg ?? (await pickRun(provider.getRunsSnapshot()));
       if (!run) return;
-      await vscode.commands.executeCommand('revealFileInOS', vscode.Uri.file(run.paths.runRoot));
+      try {
+        await vscode.workspace.fs.stat(vscode.Uri.file(run.paths.runRoot));
+      } catch {
+        await vscode.window.showWarningMessage('Babysitter: could not reveal run folder (path not found)');
+        return;
+      }
+      try {
+        await vscode.commands.executeCommand('revealFileInOS', vscode.Uri.file(run.paths.runRoot));
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        await vscode.window.showWarningMessage(`Babysitter: could not reveal run folder (${message})`);
+      }
     },
   );
 
