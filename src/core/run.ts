@@ -12,6 +12,8 @@ export type RunPaths = {
   artifactsDir: string;
   promptsDir: string;
   workSummariesDir: string;
+  codeDir: string;
+  mainJs: string;
 };
 
 export type Run = {

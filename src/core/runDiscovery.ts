@@ -22,6 +22,7 @@ function statMtimeMs(filePath: string): number | undefined {
 }
 
 function buildRunPaths(runRoot: string): RunPaths {
+  const codeDir = path.join(runRoot, 'code');
   return {
     runRoot,
     stateJson: path.join(runRoot, 'state.json'),
@@ -29,6 +30,8 @@ function buildRunPaths(runRoot: string): RunPaths {
     artifactsDir: path.join(runRoot, 'artifacts'),
     promptsDir: path.join(runRoot, 'prompts'),
     workSummariesDir: path.join(runRoot, 'work_summaries'),
+    codeDir,
+    mainJs: path.join(codeDir, 'main.js'),
   };
 }
 

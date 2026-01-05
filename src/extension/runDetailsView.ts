@@ -7,6 +7,7 @@ import type { RunChangeBatch } from '../core/runFileChanges';
 import {
   isFsPathInsideRoot,
   readRunDetailsSnapshot,
+  readTextFileWithLimit,
   type RunDetailsSnapshot,
 } from '../core/runDetailsSnapshot';
 import { WorkSummaryTailSession } from '../core/workSummaryTailSession';
@@ -17,7 +18,8 @@ type WebviewInboundMessage =
   | { type: 'refresh' }
   | { type: 'openInEditor'; fsPath: string }
   | { type: 'revealInExplorer'; fsPath: string }
-  | { type: 'loadTextFile'; fsPath: string }
+  | { type: 'loadTextFile'; fsPath: string; tail?: boolean }
+  | { type: 'copyText'; text: string }
   | { type: 'sendUserInput'; runId: string; text: string }
   | { type: 'sendEnter'; runId: string }
   | { type: 'sendEsc'; runId: string };
@@ -324,9 +326,38 @@ function renderWebviewHtml(webview: vscode.Webview): string {
           <span class="pill" id="workPill"></span>
         </h2>
         <div class="list" id="workList"></div>
-        <div style="margin-top: 10px;">
-          <pre id="workPreview" style="display:none;"></pre>
-          <div id="workEmpty" class="empty">No work summaries found.</div>
+        <div id="textPreviewCard" style="margin-top: 10px; display:none;">
+          <div class="actions" style="justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <div class="empty" id="textPreviewTitle" style="margin: 0;"></div>
+            <div class="actions" style="justify-content: flex-end;">
+              <button id="textPreviewCopy">Copy</button>
+              <button id="textPreviewClose">Close</button>
+            </div>
+          </div>
+          <pre id="workPreview"></pre>
+        </div>
+        <div id="workEmpty" class="empty" style="margin-top: 10px;">No work summaries found.</div>
+      </section>
+    </div>
+
+    <div class="grid2">
+      <section class="card">
+        <h2>
+          Prompts
+          <span class="pill" id="promptPill"></span>
+        </h2>
+        <div class="list" id="promptList"></div>
+        <div id="promptEmpty" class="empty">No prompts found.</div>
+      </section>
+      <section class="card">
+        <h2>
+          code/main.js
+          <span class="pill" id="mainJsPill"></span>
+        </h2>
+        <div class="empty" id="mainJsHint" style="margin-bottom: 10px;">Shows the run's process file when present.</div>
+        <div class="actions" id="mainJsActions" style="display:none; justify-content: flex-start;">
+          <button id="mainJsPreview">Preview</button>
+          <button id="mainJsOpen">Open</button>
         </div>
       </section>
     </div>
@@ -354,9 +385,21 @@ function renderWebviewHtml(webview: vscode.Webview): string {
     const journalErrors = el('journalErrors');
     const journalPill = el('journalPill');
     const workList = el('workList');
+    const textPreviewCard = el('textPreviewCard');
+    const textPreviewTitle = el('textPreviewTitle');
+    const textPreviewCopy = el('textPreviewCopy');
+    const textPreviewClose = el('textPreviewClose');
     const workPreview = el('workPreview');
     const workEmpty = el('workEmpty');
     const workPill = el('workPill');
+    const promptList = el('promptList');
+    const promptEmpty = el('promptEmpty');
+    const promptPill = el('promptPill');
+    const mainJsPill = el('mainJsPill');
+    const mainJsHint = el('mainJsHint');
+    const mainJsActions = el('mainJsActions');
+    const mainJsPreview = el('mainJsPreview');
+    const mainJsOpen = el('mainJsOpen');
     const artifactsList = el('artifactsList');
     const artifactsEmpty = el('artifactsEmpty');
     const artifactsPill = el('artifactsPill');
@@ -381,9 +424,22 @@ function renderWebviewHtml(webview: vscode.Webview): string {
 	    let activeWorkPreviewContent = '';
 	    let activeWorkPreviewTruncated = false;
 	    let activeWorkPreviewError = '';
+      let activeWorkPreviewAutoScroll = false;
 
     refreshBtn.addEventListener('click', () => vscode.postMessage({ type: 'refresh' }));
     bannerDismissBtn.addEventListener('click', () => hideBanner());
+    textPreviewCopy.addEventListener('click', () => {
+      if (!activeWorkPreviewContent) return;
+      vscode.postMessage({ type: 'copyText', text: activeWorkPreviewContent });
+    });
+    textPreviewClose.addEventListener('click', () => {
+      activeWorkPreviewFsPath = '';
+      activeWorkPreviewContent = '';
+      activeWorkPreviewTruncated = false;
+      activeWorkPreviewError = '';
+      activeWorkPreviewAutoScroll = false;
+      renderActiveWorkPreview();
+    });
 
     function showBanner(text, opts) {
       banner.classList.add('show');
@@ -539,6 +595,8 @@ function renderWebviewHtml(webview: vscode.Webview): string {
       }
 
 	      renderWorkSummaries(snapshot.workSummaries || []);
+        renderPrompts(snapshot.prompts || []);
+        renderMainJs(snapshot.mainJs || null);
 	      renderArtifacts(snapshot.artifacts || []);
 	      renderInteraction(snapshot.awaitingInput);
 	      renderActiveWorkPreview();
@@ -572,6 +630,7 @@ function renderWebviewHtml(webview: vscode.Webview): string {
 	        activeWorkPreviewContent = '';
 	        activeWorkPreviewTruncated = false;
 	        activeWorkPreviewError = '';
+          activeWorkPreviewAutoScroll = false;
 	      }
 
 	      if (items.length === 0) {
@@ -580,6 +639,7 @@ function renderWebviewHtml(webview: vscode.Webview): string {
 	        activeWorkPreviewContent = '';
 	        activeWorkPreviewTruncated = false;
 	        activeWorkPreviewError = '';
+          activeWorkPreviewAutoScroll = false;
 	        return;
 	      }
 	      workEmpty.style.display = 'none';
@@ -612,8 +672,9 @@ function renderWebviewHtml(webview: vscode.Webview): string {
 	          activeWorkPreviewContent = '';
 	          activeWorkPreviewTruncated = false;
 	          activeWorkPreviewError = '';
+            activeWorkPreviewAutoScroll = true;
 	          renderActiveWorkPreview();
-	          vscode.postMessage({ type: 'loadTextFile', fsPath: item.fsPath });
+	          vscode.postMessage({ type: 'loadTextFile', fsPath: item.fsPath, tail: true });
 	        });
 
         const openBtn = document.createElement('button');
@@ -627,6 +688,87 @@ function renderWebviewHtml(webview: vscode.Webview): string {
         row.appendChild(actions);
         workList.appendChild(row);
       }
+    }
+
+    function renderPrompts(items) {
+      promptPill.textContent = items.length + ' files';
+      promptList.innerHTML = '';
+
+      if (items.length === 0) {
+        promptEmpty.style.display = '';
+        return;
+      }
+      promptEmpty.style.display = 'none';
+
+      for (const item of items) {
+        const row = document.createElement('div');
+        row.className = 'item';
+
+        const left = document.createElement('div');
+        left.className = 'left';
+
+        const name = document.createElement('div');
+        name.className = 'name';
+        name.textContent = item.relPath;
+        left.appendChild(name);
+
+        const hint = document.createElement('div');
+        hint.className = 'hint';
+        const size = item.size != null ? formatBytes(item.size) : '';
+        hint.textContent = [size].filter(Boolean).join(' | ');
+        left.appendChild(hint);
+
+        const actions = document.createElement('div');
+        actions.className = 'actions';
+
+        const previewBtn = document.createElement('button');
+        previewBtn.textContent = 'Preview';
+        previewBtn.addEventListener('click', () => {
+          activeWorkPreviewFsPath = item.fsPath;
+          activeWorkPreviewContent = '';
+          activeWorkPreviewTruncated = false;
+          activeWorkPreviewError = '';
+          activeWorkPreviewAutoScroll = false;
+          renderActiveWorkPreview();
+          vscode.postMessage({ type: 'loadTextFile', fsPath: item.fsPath, tail: false });
+        });
+
+        const openBtn = document.createElement('button');
+        openBtn.textContent = 'Open';
+        openBtn.addEventListener('click', () => vscode.postMessage({ type: 'openInEditor', fsPath: item.fsPath }));
+
+        actions.appendChild(previewBtn);
+        actions.appendChild(openBtn);
+
+        row.appendChild(left);
+        row.appendChild(actions);
+        promptList.appendChild(row);
+      }
+    }
+
+    function renderMainJs(item) {
+      if (!item || !item.fsPath) {
+        mainJsPill.textContent = 'Missing';
+        mainJsHint.textContent = 'No code/main.js found for this run.';
+        mainJsActions.style.display = 'none';
+        return;
+      }
+
+      mainJsPill.textContent = item.size != null ? formatBytes(item.size) : 'Present';
+      mainJsHint.textContent = item.mtimeMs ? 'Updated: ' + new Date(item.mtimeMs).toLocaleString() : '';
+      mainJsActions.style.display = '';
+
+      mainJsPreview.onclick = () => {
+        activeWorkPreviewFsPath = item.fsPath;
+        activeWorkPreviewContent = '';
+        activeWorkPreviewTruncated = false;
+        activeWorkPreviewError = '';
+        activeWorkPreviewAutoScroll = false;
+        renderActiveWorkPreview();
+        vscode.postMessage({ type: 'loadTextFile', fsPath: item.fsPath, tail: false });
+      };
+
+      mainJsOpen.onclick = () => vscode.postMessage({ type: 'openInEditor', fsPath: item.fsPath });
     }
 
     function renderArtifacts(items) {
@@ -698,12 +840,14 @@ function renderWebviewHtml(webview: vscode.Webview): string {
 
 	    function renderActiveWorkPreview() {
 	      if (!activeWorkPreviewFsPath) {
-	        workPreview.style.display = 'none';
+          textPreviewCard.style.display = 'none';
 	        workPreview.textContent = '';
 	        return;
 	      }
 
-	      workPreview.style.display = '';
+        textPreviewCard.style.display = '';
+        textPreviewTitle.textContent =
+          pathBasename(activeWorkPreviewFsPath) + (activeWorkPreviewAutoScroll ? ' (tailing)' : '');
 
 	      if (activeWorkPreviewError) {
 	        workPreview.textContent = 'Error loading work summary preview: ' + activeWorkPreviewError;
@@ -727,8 +871,15 @@ function renderWebviewHtml(webview: vscode.Webview): string {
 	          ? '\\n\\n(Run finished)'
 	          : '';
 	      workPreview.textContent = activeWorkPreviewContent + suffixTruncated + suffixDone;
-	      workPreview.scrollTop = workPreview.scrollHeight;
+        if (activeWorkPreviewAutoScroll) workPreview.scrollTop = workPreview.scrollHeight;
+        else workPreview.scrollTop = 0;
 	    }
+
+      function pathBasename(fsPath) {
+        if (!fsPath) return '';
+        const parts = String(fsPath).split(/[/\\\\]+/);
+        return parts[parts.length - 1] || fsPath;
+      }
 
     showBanner('Loading run details...', { spinner: true });
     vscode.postMessage({ type: 'ready' });
@@ -747,7 +898,7 @@ class RunDetailsPanel {
     maxBytes: 200_000,
     maxChars: 200_000,
   });
-  private activeTextPreviewFsPath: string | undefined;
+  private activeTextTailFsPath: string | undefined;
 
   private readonly disposables: vscode.Disposable[] = [];
 
@@ -805,7 +956,10 @@ class RunDetailsPanel {
         await this.revealInExplorer(msg.fsPath);
         return;
       case 'loadTextFile':
-        await this.loadTextFile(msg.fsPath);
+        await this.loadTextFile(msg.fsPath, msg.tail ?? true);
+        return;
+      case 'copyText':
+        await this.copyText(msg.text);
         return;
       case 'sendUserInput':
         await this.sendUserInput(msg.runId, msg.text);
@@ -838,13 +992,14 @@ class RunDetailsPanel {
         maxJournalEntries: 30,
         maxArtifacts: 500,
         maxWorkSummaries: 50,
+        maxPrompts: 50,
       });
       this.journalEntries = nextJournalEntries;
       const processAwaiting = this.interaction?.getAwaitingInput(this.run.id);
       if (processAwaiting) snapshot.awaitingInput = processAwaiting;
       await this.post({ type: 'snapshot', snapshot });
 
-      if (this.activeTextPreviewFsPath) {
+      if (this.activeTextTailFsPath) {
         const update = this.workSummaryTailSession.poll();
         if (update?.type === 'set') {
           await this.post({
@@ -856,7 +1011,7 @@ class RunDetailsPanel {
           });
         } else if (update?.type === 'error') {
           await this.post({ type: 'textFileError', fsPath: update.fsPath, message: update.message });
-          this.activeTextPreviewFsPath = undefined;
+          this.activeTextTailFsPath = undefined;
         }
       }
     } catch (err) {
@@ -932,23 +1087,46 @@ class RunDetailsPanel {
     await vscode.commands.executeCommand('revealFileInOS', vscode.Uri.file(fsPath));
   }
 
-  private async loadTextFile(fsPath: string): Promise<void> {
+  private async loadTextFile(fsPath: string, tail: boolean): Promise<void> {
     if (!isFsPathInsideRoot(this.run.paths.runRoot, fsPath)) return;
 
-    this.activeTextPreviewFsPath = fsPath;
+    if (!tail) {
+      this.activeTextTailFsPath = undefined;
+      try {
+        const res = readTextFileWithLimit(fsPath, 200_000);
+        await this.post({
+          type: 'textFile',
+          fsPath,
+          content: res.content,
+          truncated: res.truncated,
+          size: res.size,
+        });
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        await this.post({ type: 'textFileError', fsPath, message });
+      }
+      return;
+    }
+
+    this.activeTextTailFsPath = fsPath;
     const res = this.workSummaryTailSession.start(fsPath);
     if (res.type === 'set') {
-      await this.post({
-        type: 'textFile',
-        fsPath,
-        content: res.content,
-        truncated: res.truncated,
-        size: res.size,
-      });
+      await this.post({ type: 'textFile', fsPath, content: res.content, truncated: res.truncated, size: res.size });
       return;
     }
 
     await this.post({ type: 'textFileError', fsPath, message: res.message });
+  }
+
+  private async copyText(text: string): Promise<void> {
+    const value = typeof text === 'string' ? text : '';
+    if (!value) return;
+    try {
+      await vscode.env.clipboard.writeText(value);
+      vscode.window.setStatusBarMessage('Babysitter: copied to clipboard', 2000);
+    } catch {
+      // ignore
+    }
   }
 }
 

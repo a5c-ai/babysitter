@@ -50,7 +50,9 @@ export type RunDetailsSnapshot = {
   journal: JournalView;
   awaitingInput?: AwaitingInputStatus;
   workSummaries: RunFileItem[];
+  prompts: RunFileItem[];
   artifacts: RunFileItem[];
+  mainJs: RunFileItem | null;
 };
 
 function normalizeForPlatform(p: string): string {
@@ -180,6 +182,7 @@ export function readRunDetailsSnapshot(params: {
   maxJournalEntries: number;
   maxArtifacts: number;
   maxWorkSummaries: number;
+  maxPrompts: number;
 }): { snapshot: RunDetailsSnapshot; nextJournalEntries: unknown[] } {
   const state = readStateJsonFile(params.run.paths.stateJson);
   const tail = params.journalTailer.tail(params.run.paths.journalJsonl);
@@ -197,11 +200,29 @@ export function readRunDetailsSnapshot(params: {
     maxFiles: params.maxWorkSummaries,
   });
 
+  const prompts = listFilesSortedByMtimeDesc({
+    dir: params.run.paths.promptsDir,
+    rootForRel: params.run.paths.promptsDir,
+    maxFiles: params.maxPrompts,
+  });
+
   const artifacts = listFilesRecursive({
     dir: params.run.paths.artifactsDir,
     rootForRel: params.run.paths.artifactsDir,
     maxFiles: params.maxArtifacts,
   });
+
+  const mainJsStat = safeStat(params.run.paths.mainJs);
+  const mainJs =
+    mainJsStat && mainJsStat.isFile()
+      ? {
+          relPath: path.relative(path.resolve(params.run.paths.runRoot), params.run.paths.mainJs),
+          fsPath: params.run.paths.mainJs,
+          isDirectory: false,
+          size: mainJsStat.size,
+          mtimeMs: mainJsStat.mtimeMs,
+        }
+      : null;
 
   return {
     snapshot: {
@@ -216,7 +237,9 @@ export function readRunDetailsSnapshot(params: {
       journal: toJournalView({ ...tail, entries: nextJournalEntries }),
       ...(awaitingInput ? { awaitingInput } : {}),
       workSummaries,
+      prompts,
       artifacts,
+      mainJs,
     },
     nextJournalEntries,
   };

@@ -14,6 +14,10 @@ suite('Run Details webview template', () => {
     assert.ok(source.includes('Work Summaries'), 'expected Work Summaries section label');
     assert.ok(source.includes('id="workList"'), 'expected Work Summaries list container');
     assert.ok(source.includes('id="workPreview"'), 'expected Work Summaries preview container');
+    assert.ok(source.includes('Prompts'), 'expected Prompts section label');
+    assert.ok(source.includes('id="promptList"'), 'expected Prompts list container');
+    assert.ok(source.includes('code/main.js'), 'expected main.js section label');
+    assert.ok(source.includes('id="mainJsPreview"'), 'expected main.js preview button');
 
     assert.ok(
       source.includes("{ type: 'loadTextFile'") || source.includes('{ type: "loadTextFile"'),
