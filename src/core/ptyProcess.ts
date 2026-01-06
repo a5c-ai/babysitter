@@ -75,8 +75,7 @@ export function wrapCommandForPlatform(params: {
       const shebang = readShebang(params.filePath);
       if (shebang && /\bbash\b/i.test(shebang)) {
         const configuredBash = params.windowsBashPath?.trim();
-        const bashPath =
-          configuredBash && fs.existsSync(configuredBash) ? configuredBash : 'bash';
+        const bashPath = configuredBash && fs.existsSync(configuredBash) ? configuredBash : 'bash';
         // Prefer forward slashes so MSYS bash treats it as a Windows path.
         const scriptPathForBash = params.filePath.replace(/\\/g, '/');
         return { filePath: bashPath, args: [scriptPathForBash, ...params.args] };

@@ -11,6 +11,7 @@ import {
   readRunDetailsSnapshot,
 } from '../core/runDetailsSnapshot';
 import { JournalTailer } from '../core/journal';
+import type { Run } from '../core/run';
 
 function makeTempDir(prefix: string): string {
   return fs.mkdtempSync(path.join(os.tmpdir(), prefix));
@@ -86,14 +87,18 @@ suite('runDetailsSnapshot', () => {
       fs.mkdirSync(path.join(runRoot, 'code'), { recursive: true });
       fs.mkdirSync(path.join(runRoot, 'nested'), { recursive: true });
 
-      fs.writeFileSync(path.join(runRoot, 'state.json'), JSON.stringify({ status: 'running' }), 'utf8');
+      fs.writeFileSync(
+        path.join(runRoot, 'state.json'),
+        JSON.stringify({ status: 'running' }),
+        'utf8',
+      );
       fs.writeFileSync(path.join(runRoot, 'journal.jsonl'), '', 'utf8');
       fs.writeFileSync(path.join(runRoot, 'process.md'), '# process', 'utf8');
       fs.writeFileSync(path.join(runRoot, 'code', 'main.js'), 'console.log(1)', 'utf8');
       fs.writeFileSync(path.join(runRoot, 'artifacts', 'other.txt'), 'artifact', 'utf8');
       fs.writeFileSync(path.join(runRoot, 'nested', 'x.txt'), 'nested', 'utf8');
 
-      const run: any = {
+      const run: Run = {
         id: 'run-20260105-182700',
         status: 'running',
         timestamps: { createdAt: new Date(), updatedAt: new Date() },
@@ -127,7 +132,10 @@ suite('runDetailsSnapshot', () => {
       assert.equal(snapshot.keyFilesMeta.truncated, false);
       assert.equal(snapshot.keyFilesMeta.totalFiles, snapshot.runFiles.length);
 
-      assert.equal(snapshot.runFiles.every((f) => f.isDirectory === false), true);
+      assert.equal(
+        snapshot.runFiles.every((f) => f.isDirectory === false),
+        true,
+      );
       const rels = snapshot.runFiles.map((f) => f.relPath.replace(/\\/g, '/'));
       assert.ok(rels.includes('state.json'));
       assert.ok(rels.includes('journal.jsonl'));
@@ -157,11 +165,15 @@ suite('runDetailsSnapshot', () => {
       fs.mkdirSync(path.join(runRoot, 'code'), { recursive: true });
       fs.mkdirSync(path.join(runRoot, 'run'), { recursive: true });
 
-      fs.writeFileSync(path.join(runRoot, 'state.json'), JSON.stringify({ status: 'running' }), 'utf8');
+      fs.writeFileSync(
+        path.join(runRoot, 'state.json'),
+        JSON.stringify({ status: 'running' }),
+        'utf8',
+      );
       fs.writeFileSync(path.join(runRoot, 'journal.jsonl'), '', 'utf8');
       fs.writeFileSync(path.join(runRoot, 'run', 'process.md'), '# process (run variant)', 'utf8');
 
-      const run: any = {
+      const run: Run = {
         id: 'run-20260105-182701',
         status: 'running',
         timestamps: { createdAt: new Date(), updatedAt: new Date() },

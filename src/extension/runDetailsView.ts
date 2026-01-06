@@ -11,7 +11,10 @@ import {
   readTextFileWithLimit,
   type RunDetailsSnapshot,
 } from '../core/runDetailsSnapshot';
-import { DEFAULT_MAX_COPY_CONTENTS_BYTES, readFileContentsForClipboard } from '../core/copyFileContents';
+import {
+  DEFAULT_MAX_COPY_CONTENTS_BYTES,
+  readFileContentsForClipboard,
+} from '../core/copyFileContents';
 import { WorkSummaryTailSession } from '../core/workSummaryTailSession';
 import type { AwaitingInputStatus } from '../core/awaitingInput';
 import {
@@ -74,17 +77,17 @@ function renderWebviewHtml(webview: vscode.Webview, extensionUri: vscode.Uri): s
   const mermaidScriptUri = webview.asWebviewUri(
     vscode.Uri.joinPath(extensionUri, 'node_modules', 'mermaid', 'dist', 'mermaid.min.js'),
   );
-		  const keyFilesHelpersJs = [
-		    computeKeyFilesGroupForRelPath,
-		    groupOrderIndex,
-		    matchesKeyFilesFilter,
-	    normalizePinnedIdsByRunId,
-	    getPinnedIdsForRun,
-	    togglePinnedId,
-	    setPinnedIdsForRun,
-	    groupKeyFiles,
-	    computeKeyFilesModel,
-	  ]
+  const keyFilesHelpersJs = [
+    computeKeyFilesGroupForRelPath,
+    groupOrderIndex,
+    matchesKeyFilesFilter,
+    normalizePinnedIdsByRunId,
+    getPinnedIdsForRun,
+    togglePinnedId,
+    setPinnedIdsForRun,
+    groupKeyFiles,
+    computeKeyFilesModel,
+  ]
     .map((fn) => fn.toString())
     .join('\n\n');
 
@@ -628,7 +631,7 @@ function renderWebviewHtml(webview: vscode.Webview, extensionUri: vscode.Uri): s
     </section>
   </main>
 
-    <script nonce="${scriptNonce}" src="${mermaidScriptUri}"></script>
+    <script nonce="${scriptNonce}" src="${mermaidScriptUri.toString()}"></script>
 	  <script nonce="${scriptNonce}">
 	    const vscode = acquireVsCodeApi();
 
@@ -1790,7 +1793,7 @@ function renderWebviewHtml(webview: vscode.Webview, extensionUri: vscode.Uri): s
 	          .replace(/&/g, '&amp;')
 	          .replace(/</g, '&lt;')
 	          .replace(/>/g, '&gt;')
-	          .replace(/\"/g, '&quot;')
+              .replace(/"/g, '&quot;')
 	          .replace(/'/g, '&#39;');
 	      }
 
@@ -1888,7 +1891,7 @@ function renderWebviewHtml(webview: vscode.Webview, extensionUri: vscode.Uri): s
             .replace(/&/g, '&amp;')
             .replace(/</g, '&lt;')
             .replace(/>/g, '&gt;')
-            .replace(/\"/g, '&quot;')
+            .replace(/"/g, '&quot;')
             .replace(/'/g, '&#39;');
         }
 
@@ -1929,7 +1932,7 @@ function renderWebviewHtml(webview: vscode.Webview, extensionUri: vscode.Uri): s
               continue;
             }
 
-	            if (ch === '\"' || ch === '\\'' || ch === '\\x60') {
+	            if (ch === '"' || ch === '\\'' || ch === '\\x60') {
               const quote = ch;
               const start = i;
               i++;
@@ -2282,42 +2285,50 @@ class RunDetailsPanel {
         maxPrompts: 50,
       });
       this.journalEntries = nextJournalEntries;
-	      const processAwaiting = this.interaction?.getAwaitingInput(this.run.id);
-	      if (processAwaiting) snapshot.awaitingInput = processAwaiting;
-	      await this.post({ type: 'snapshot', snapshot });
+      const processAwaiting = this.interaction?.getAwaitingInput(this.run.id);
+      if (processAwaiting) snapshot.awaitingInput = processAwaiting;
+      await this.post({ type: 'snapshot', snapshot });
 
-        const pid = this.interaction?.getPidForRunId?.(this.run.id);
-        const label = this.interaction?.getLabelForRunId?.(this.run.id);
-        const tail = this.interaction?.getOutputTailForRunId?.(this.run.id);
-        await this.post({ type: 'oInfo', pid: typeof pid === 'number' ? pid : null, label: label ?? null });
-        await this.post({ type: 'oOutputSet', text: typeof tail === 'string' ? tail : '' });
+      const pid = this.interaction?.getPidForRunId?.(this.run.id);
+      const label = this.interaction?.getLabelForRunId?.(this.run.id);
+      const tail = this.interaction?.getOutputTailForRunId?.(this.run.id);
+      await this.post({
+        type: 'oInfo',
+        pid: typeof pid === 'number' ? pid : null,
+        label: label ?? null,
+      });
+      await this.post({ type: 'oOutputSet', text: typeof tail === 'string' ? tail : '' });
 
-	      if (this.activeTextTailFsPath) {
-	        const update = this.workSummaryTailSession.poll();
-	        if (update?.type === 'set') {
-	          await this.post({
-	            type: 'textFile',
-	            fsPath: update.fsPath,
-	            content: update.content,
-	            truncated: update.truncated,
-	            size: update.size,
-	          });
-	        } else if (update?.type === 'error') {
-	          await this.post({ type: 'textFileError', fsPath: update.fsPath, message: update.message });
-	          this.activeTextTailFsPath = undefined;
-	        }
-	      }
-	    } catch (err) {
-	      const message = err instanceof Error ? err.message : String(err);
-	      await this.post({ type: 'error', message: `Failed to refresh run details: ${message}` });
-	    }
-	  }
-
-    async appendOOutput(chunk: string): Promise<void> {
-      const text = typeof chunk === 'string' ? chunk : '';
-      if (!text) return;
-      await this.post({ type: 'oOutputAppend', text });
+      if (this.activeTextTailFsPath) {
+        const update = this.workSummaryTailSession.poll();
+        if (update?.type === 'set') {
+          await this.post({
+            type: 'textFile',
+            fsPath: update.fsPath,
+            content: update.content,
+            truncated: update.truncated,
+            size: update.size,
+          });
+        } else if (update?.type === 'error') {
+          await this.post({
+            type: 'textFileError',
+            fsPath: update.fsPath,
+            message: update.message,
+          });
+          this.activeTextTailFsPath = undefined;
+        }
+      }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      await this.post({ type: 'error', message: `Failed to refresh run details: ${message}` });
     }
+  }
+
+  async appendOOutput(chunk: string): Promise<void> {
+    const text = typeof chunk === 'string' ? chunk : '';
+    if (!text) return;
+    await this.post({ type: 'oOutputAppend', text });
+  }
 
   private async sendUserInput(runId: string, text: string): Promise<void> {
     if (!this.interaction) {
@@ -2449,13 +2460,19 @@ class RunDetailsPanel {
     const value = typeof fsPath === 'string' ? fsPath : '';
     if (!value) return;
     if (!isFsPathInsideRoot(this.run.paths.runRoot, value)) {
-      await this.post({ type: 'error', message: 'Refusing to reveal a file outside the run directory.' });
+      await this.post({
+        type: 'error',
+        message: 'Refusing to reveal a file outside the run directory.',
+      });
       return;
     }
     try {
       await vscode.workspace.fs.stat(vscode.Uri.file(value));
     } catch {
-      await this.post({ type: 'error', message: `Could not reveal: ${path.basename(value)} (file not found)` });
+      await this.post({
+        type: 'error',
+        message: `Could not reveal: ${path.basename(value)} (file not found)`,
+      });
       return;
     }
     try {
@@ -2471,7 +2488,10 @@ class RunDetailsPanel {
     if (!value) return;
 
     if (!isFsPathInsideRoot(this.run.paths.runRoot, value)) {
-      await this.post({ type: 'error', message: 'Refusing to save a file outside the run directory.' });
+      await this.post({
+        type: 'error',
+        message: 'Refusing to save a file outside the run directory.',
+      });
       return;
     }
 
@@ -2480,7 +2500,10 @@ class RunDetailsPanel {
     try {
       stat = await vscode.workspace.fs.stat(sourceUri);
     } catch {
-      await this.post({ type: 'error', message: `Could not save: ${path.basename(value)} (file not found)` });
+      await this.post({
+        type: 'error',
+        message: `Could not save: ${path.basename(value)} (file not found)`,
+      });
       return;
     }
     if (stat.type & vscode.FileType.Directory) {
@@ -2548,7 +2571,13 @@ class RunDetailsPanel {
     this.activeTextTailFsPath = fsPath;
     const res = this.workSummaryTailSession.start(fsPath);
     if (res.type === 'set') {
-      await this.post({ type: 'textFile', fsPath, content: res.content, truncated: res.truncated, size: res.size });
+      await this.post({
+        type: 'textFile',
+        fsPath,
+        content: res.content,
+        truncated: res.truncated,
+        size: res.size,
+      });
       return;
     }
 
@@ -2599,23 +2628,23 @@ export function createRunDetailsViewManager(
   const panelsByRunId = new Map<string, RunDetailsPanel>();
   const interaction = params?.interaction;
 
-	  if (interaction) {
-	    context.subscriptions.push(
-	      interaction.onDidChange((runId) => {
-	        const panel = panelsByRunId.get(runId);
-	        if (panel) void panel.refresh();
-	      }),
-	    );
-	  }
+  if (interaction) {
+    context.subscriptions.push(
+      interaction.onDidChange((runId) => {
+        const panel = panelsByRunId.get(runId);
+        if (panel) void panel.refresh();
+      }),
+    );
+  }
 
-    if (interaction?.onDidOutput) {
-      context.subscriptions.push(
-        interaction.onDidOutput((evt) => {
-          const panel = panelsByRunId.get(evt.runId);
-          if (panel) void panel.appendOOutput(evt.chunk);
-        }),
-      );
-    }
+  if (interaction?.onDidOutput) {
+    context.subscriptions.push(
+      interaction.onDidOutput((evt) => {
+        const panel = panelsByRunId.get(evt.runId);
+        if (panel) void panel.appendOOutput(evt.chunk);
+      }),
+    );
+  }
 
   const open = async (run: Run): Promise<void> => {
     const existing = panelsByRunId.get(run.id);

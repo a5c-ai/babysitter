@@ -12,7 +12,7 @@ suite('Prompt Builder webview template', () => {
     const source = readWorkspaceFile('src/extension/promptBuilderView.ts');
     assert.ok(source.includes('id="preview"'), 'expected Preview button id="preview"');
     assert.ok(
-      source.includes("{ type: 'previewPrompt'") || source.includes('{ type: \'previewPrompt\''),
+      source.includes("{ type: 'previewPrompt'") || source.includes("{ type: 'previewPrompt'"),
       'expected webview to postMessage type previewPrompt',
     );
   });
@@ -62,10 +62,13 @@ suite('Prompt Builder webview template', () => {
         source.includes('els.request.addEventListener("input"'),
       'expected request input listener',
     );
-    assert.ok(source.includes('els.request.addEventListener') && source.includes('scheduleGenerate();'));
+    assert.ok(
+      source.includes('els.request.addEventListener') && source.includes('scheduleGenerate();'),
+    );
 
     assert.ok(
-      source.includes("input.addEventListener('input'") || source.includes('input.addEventListener("input"'),
+      source.includes("input.addEventListener('input'") ||
+        source.includes('input.addEventListener("input"'),
       'expected param input listener(s)',
     );
 
@@ -74,7 +77,8 @@ suite('Prompt Builder webview template', () => {
       'expected webview to post generate messages',
     );
     assert.ok(
-      source.includes('request: els.request.value') && source.includes('attachments: state.attachments.slice()'),
+      source.includes('request: els.request.value') &&
+        source.includes('attachments: state.attachments.slice()'),
       'expected generate payload to use current request + attachments',
     );
 

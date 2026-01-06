@@ -37,7 +37,10 @@ suite('runDiscovery', () => {
 
       const runPlus = path.join(runsRoot, 'run-20260105-105111+');
       fs.mkdirSync(runPlus, { recursive: true });
-      writeJson(path.join(runPlus, 'state.json'), { runId: 'run-20260105-105111+', status: 'completed' });
+      writeJson(path.join(runPlus, 'state.json'), {
+        runId: 'run-20260105-105111+',
+        status: 'completed',
+      });
 
       const runWeird = path.join(runsRoot, 'anything-goes');
       fs.mkdirSync(runWeird, { recursive: true });
@@ -51,9 +54,9 @@ suite('runDiscovery', () => {
       assert.strictEqual(byId.get('anything-goes')?.status, 'running');
 
       assert.ok(
-        byId.get('run-20260105-010206')?.paths.runRoot.endsWith(
-          path.join('.a5c', 'runs', 'run-20260105-010206'),
-        ),
+        byId
+          .get('run-20260105-010206')
+          ?.paths.runRoot.endsWith(path.join('.a5c', 'runs', 'run-20260105-010206')),
       );
     } finally {
       fs.rmSync(tempDir, { recursive: true, force: true });
@@ -92,8 +95,14 @@ suite('runDiscovery', () => {
       const newer = path.join(runsRoot, 'run-20260105-000001');
       fs.mkdirSync(older, { recursive: true });
       fs.mkdirSync(newer, { recursive: true });
-      writeJson(path.join(older, 'state.json'), { runId: 'run-20260104-235959', status: 'running' });
-      writeJson(path.join(newer, 'state.json'), { runId: 'run-20260105-000001', status: 'running' });
+      writeJson(path.join(older, 'state.json'), {
+        runId: 'run-20260104-235959',
+        status: 'running',
+      });
+      writeJson(path.join(newer, 'state.json'), {
+        runId: 'run-20260105-000001',
+        status: 'running',
+      });
 
       const runs = discoverRuns(runsRoot);
       assert.deepStrictEqual(

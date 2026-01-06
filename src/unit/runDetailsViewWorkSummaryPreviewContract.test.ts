@@ -36,12 +36,19 @@ suite('Run Details webview template', () => {
     assert.ok(source.includes('Key files'), 'expected Key files section label');
     assert.ok(source.includes('id="keyFilesFilter"'), 'expected Key files filter input');
     assert.ok(source.includes('pinnedIdsByRunId'), 'expected pinned-file persistence hook');
-    assert.ok(source.includes('id="keyFilesRevealRun"'), 'expected run-folder Reveal action in empty/error states');
-    assert.ok(source.includes('id="keyFilesCopyRun"'), 'expected run-folder Copy path action in empty/error states');
+    assert.ok(
+      source.includes('id="keyFilesRevealRun"'),
+      'expected run-folder Reveal action in empty/error states',
+    );
+    assert.ok(
+      source.includes('id="keyFilesCopyRun"'),
+      'expected run-folder Copy path action in empty/error states',
+    );
     assert.ok(source.includes('Copy contents'), 'expected Copy contents quick action label');
     assert.ok(source.includes('Save as...'), 'expected Save as quick action label');
     assert.ok(
-      source.includes("{ type: 'copyFileContents'") || source.includes('{ type: "copyFileContents"'),
+      source.includes("{ type: 'copyFileContents'") ||
+        source.includes('{ type: "copyFileContents"'),
       'expected Copy contents action to postMessage type copyFileContents',
     );
     assert.ok(
@@ -80,4 +87,3 @@ suite('Run Details webview template', () => {
     );
   });
 });
-

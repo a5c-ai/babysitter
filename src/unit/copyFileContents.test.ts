@@ -51,4 +51,3 @@ suite('copyFileContents', () => {
     if (!res.ok) assert.equal(res.code, 'outside_root');
   });
 });
-

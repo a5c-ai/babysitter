@@ -56,15 +56,24 @@ export async function readFileContentsForClipboard(params: {
 
   if (!runRoot || !fsPath) return { ok: false, code: 'read_error', message: 'Missing file path.' };
   if (!isFsPathInsideRoot(runRoot, fsPath))
-    return { ok: false, code: 'outside_root', message: 'Refusing to read a file outside the run directory.' };
+    return {
+      ok: false,
+      code: 'outside_root',
+      message: 'Refusing to read a file outside the run directory.',
+    };
 
   try {
     const lst = await fs.promises.lstat(fsPath);
     if (lst.isSymbolicLink())
-      return { ok: false, code: 'symlink', message: 'Refusing to copy contents of a symbolic link.' };
+      return {
+        ok: false,
+        code: 'symlink',
+        message: 'Refusing to copy contents of a symbolic link.',
+      };
   } catch (err) {
     const errno = err as NodeJS.ErrnoException | undefined;
-    if (errno?.code === 'ENOENT') return { ok: false, code: 'not_found', message: 'File not found.' };
+    if (errno?.code === 'ENOENT')
+      return { ok: false, code: 'not_found', message: 'File not found.' };
     return { ok: false, code: 'read_error', message: 'Could not read file.' };
   }
 
@@ -73,7 +82,8 @@ export async function readFileContentsForClipboard(params: {
     stat = await fs.promises.stat(fsPath);
   } catch (err) {
     const errno = err as NodeJS.ErrnoException | undefined;
-    if (errno?.code === 'ENOENT') return { ok: false, code: 'not_found', message: 'File not found.' };
+    if (errno?.code === 'ENOENT')
+      return { ok: false, code: 'not_found', message: 'File not found.' };
     return { ok: false, code: 'read_error', message: 'Could not read file.' };
   }
 
@@ -91,7 +101,11 @@ export async function readFileContentsForClipboard(params: {
     fd = await fs.promises.open(fsPath, 'r');
     const prefix = await readPrefix(fd, Math.min(DEFAULT_BINARY_SNIFF_BYTES, size));
     if (isProbablyBinary(prefix))
-      return { ok: false, code: 'binary', message: 'File appears to be binary; Copy contents is disabled.' };
+      return {
+        ok: false,
+        code: 'binary',
+        message: 'File appears to be binary; Copy contents is disabled.',
+      };
 
     const buffer = Buffer.allocUnsafe(size);
     const { bytesRead } = await fd.read(buffer, 0, size, 0);
@@ -107,4 +121,3 @@ export async function readFileContentsForClipboard(params: {
     }
   }
 }
-

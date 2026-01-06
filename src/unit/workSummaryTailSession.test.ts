@@ -53,7 +53,9 @@ suite('WorkSummaryTailSession', () => {
     const missingPath = path.join(os.tmpdir(), 'babysitter-missing', 'nope.txt');
     const start = session.start(missingPath);
     assert.strictEqual(start.type, 'error');
-    assert.ok(start.message.toLowerCase().includes('not found') || start.message.includes('ENOENT'));
+    assert.ok(
+      start.message.toLowerCase().includes('not found') || start.message.includes('ENOENT'),
+    );
   });
 
   test('resets and reports truncation on shrink', () => {
@@ -79,4 +81,3 @@ suite('WorkSummaryTailSession', () => {
     }
   });
 });
-

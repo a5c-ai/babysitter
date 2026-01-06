@@ -389,10 +389,7 @@ export function readRunDetailsSnapshot(params: {
 
   const prompts = (() => {
     const runRoot = params.run.paths.runRoot;
-    const candidates = [
-      params.run.paths.promptsDir,
-      path.join(runRoot, 'run', 'prompts'),
-    ];
+    const candidates = [params.run.paths.promptsDir, path.join(runRoot, 'run', 'prompts')];
 
     const merged: RunFileItem[] = [];
     const seen = new Set<string>();

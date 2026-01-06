@@ -366,7 +366,10 @@ export function activate(context: vscode.ExtensionContext): BabysitterApi {
         const windowsInvocation = workspaceFolder
           ? await resolveWindowsInvocationOptions(workspaceFolder, result.config.oBinary.path)
           : {};
-        if (process.platform === 'win32' && !isLikelyWindowsNativeBinary(result.config.oBinary.path)) {
+        if (
+          process.platform === 'win32' &&
+          !isLikelyWindowsNativeBinary(result.config.oBinary.path)
+        ) {
           const runtimeLabel = windowsInvocation.windowsRuntime
             ? 'WSL'
             : windowsInvocation.windowsBashPath
@@ -396,8 +399,8 @@ export function activate(context: vscode.ExtensionContext): BabysitterApi {
           const baselineIds = new Set(listRunIds(result.config.runsRoot.path));
           const bashCmd = [
             'set -euo pipefail',
-            `cd \"$(cygpath -u ${bashSingleQuote(workspaceRoot)})\"`,
-            `\"$(cygpath -u ${bashSingleQuote(result.config.oBinary.path)})\" ${bashSingleQuote(prompt)}`,
+            `cd "$(cygpath -u ${bashSingleQuote(workspaceRoot)})"`,
+            `"$(cygpath -u ${bashSingleQuote(result.config.oBinary.path)})" ${bashSingleQuote(prompt)}`,
           ].join('; ');
 
           openGitBashTerminalAndSend({
@@ -561,7 +564,10 @@ export function activate(context: vscode.ExtensionContext): BabysitterApi {
         const windowsInvocation = workspaceFolder
           ? await resolveWindowsInvocationOptions(workspaceFolder, result.config.oBinary.path)
           : {};
-        if (process.platform === 'win32' && !isLikelyWindowsNativeBinary(result.config.oBinary.path)) {
+        if (
+          process.platform === 'win32' &&
+          !isLikelyWindowsNativeBinary(result.config.oBinary.path)
+        ) {
           const runtimeLabel = windowsInvocation.windowsRuntime
             ? 'WSL'
             : windowsInvocation.windowsBashPath
@@ -590,8 +596,8 @@ export function activate(context: vscode.ExtensionContext): BabysitterApi {
         ) {
           const bashCmd = [
             'set -euo pipefail',
-            `cd \"$(cygpath -u ${bashSingleQuote(workspaceRoot)})\"`,
-            `\"$(cygpath -u ${bashSingleQuote(result.config.oBinary.path)})\" ${bashSingleQuote(runId)} ${bashSingleQuote(prompt)}`,
+            `cd "$(cygpath -u ${bashSingleQuote(workspaceRoot)})"`,
+            `"$(cygpath -u ${bashSingleQuote(result.config.oBinary.path)})" ${bashSingleQuote(runId)} ${bashSingleQuote(prompt)}`,
           ].join('; ');
 
           openGitBashTerminalAndSend({

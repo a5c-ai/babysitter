@@ -40,8 +40,14 @@ suite('keyFilesModel', () => {
   });
 
   test('matchesKeyFilesFilter checks relPath and displayName', () => {
-    assert.equal(matchesKeyFilesFilter({ relPath: 'foo/bar.txt', displayName: 'bar.txt' }, 'bar'), true);
-    assert.equal(matchesKeyFilesFilter({ relPath: 'foo/baz.txt', displayName: 'something' }, 'bar'), false);
+    assert.equal(
+      matchesKeyFilesFilter({ relPath: 'foo/bar.txt', displayName: 'bar.txt' }, 'bar'),
+      true,
+    );
+    assert.equal(
+      matchesKeyFilesFilter({ relPath: 'foo/baz.txt', displayName: 'something' }, 'bar'),
+      false,
+    );
   });
 
   test('pins persist per run and prune missing ids', () => {
@@ -50,9 +56,16 @@ suite('keyFilesModel', () => {
       run2: ['x'],
     });
 
-    const snapshot: any = {
+    const snapshot: unknown = {
       run: { id: 'run1', paths: { runRoot: 'C:\\runs\\run1' } },
-      runFiles: [{ id: 'a', relPath: 'code/main.js', fsPath: 'C:\\runs\\run1\\code\\main.js', isDirectory: false }],
+      runFiles: [
+        {
+          id: 'a',
+          relPath: 'code/main.js',
+          fsPath: 'C:\\runs\\run1\\code\\main.js',
+          isDirectory: false,
+        },
+      ],
       importantFiles: [],
       keyFilesMeta: {
         runRoot: 'C:\\runs\\run1',
@@ -64,7 +77,10 @@ suite('keyFilesModel', () => {
     };
 
     const model = computeKeyFilesModel({ snapshot, filterValue: '', pinnedIdsByRunId });
-    assert.deepStrictEqual(model.groupedPinned.flatMap((g) => g.items.map((i) => i.id)), ['a']);
+    assert.deepStrictEqual(
+      model.groupedPinned.flatMap((g) => g.items.map((i) => i.id)),
+      ['a'],
+    );
     assert.deepStrictEqual(model.nextPinnedIds, ['a']);
 
     const updated = setPinnedIdsForRun(pinnedIdsByRunId, 'run2', togglePinnedId(['x'], 'y'));
@@ -73,7 +89,7 @@ suite('keyFilesModel', () => {
   });
 
   test('empty states reflect run-folder availability', () => {
-    const missing: any = {
+    const missing: unknown = {
       run: { id: 'r', paths: { runRoot: 'C:\\runs\\missing' } },
       runFiles: [],
       importantFiles: [],
@@ -85,12 +101,16 @@ suite('keyFilesModel', () => {
         totalFiles: 0,
       },
     };
-    const missingModel = computeKeyFilesModel({ snapshot: missing, filterValue: '', pinnedIdsByRunId: {} });
+    const missingModel = computeKeyFilesModel({
+      snapshot: missing,
+      filterValue: '',
+      pinnedIdsByRunId: {},
+    });
     assert.equal(missingModel.emptyMessage, 'Run folder is missing.');
     assert.equal(missingModel.canRevealRunRoot, false);
     assert.equal(missingModel.canCopyRunRoot, true);
 
-    const unreadable: any = {
+    const unreadable: unknown = {
       run: { id: 'r', paths: { runRoot: 'C:\\runs\\unreadable' } },
       runFiles: [],
       importantFiles: [],
@@ -103,13 +123,18 @@ suite('keyFilesModel', () => {
         totalFiles: 0,
       },
     };
-    const unreadableModel = computeKeyFilesModel({ snapshot: unreadable, filterValue: '', pinnedIdsByRunId: {} });
+    const unreadableModel = computeKeyFilesModel({
+      snapshot: unreadable,
+      filterValue: '',
+      pinnedIdsByRunId: {},
+    });
     assert.equal(unreadableModel.emptyMessage, 'Run folder is not readable.');
     assert.equal(unreadableModel.canRevealRunRoot, true);
   });
 
   test('does not throw when snapshot is nullish', () => {
-    assert.doesNotThrow(() => computeKeyFilesModel({ snapshot: undefined, filterValue: '', pinnedIdsByRunId: {} }));
+    assert.doesNotThrow(() =>
+      computeKeyFilesModel({ snapshot: undefined, filterValue: '', pinnedIdsByRunId: {} }),
+    );
   });
 });
-

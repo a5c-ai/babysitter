@@ -9,9 +9,7 @@ export type OInstallOptions = {
   noGitignore: boolean;
 };
 
-export type WindowsInstallerRuntime =
-  | { kind: 'wsl' }
-  | { kind: 'git-bash'; bashPath: string };
+export type WindowsInstallerRuntime = { kind: 'wsl' } | { kind: 'git-bash'; bashPath: string };
 
 export type RunOInstallerParams = {
   workspaceRoot: string;
@@ -199,4 +197,3 @@ export async function runOInstaller(params: RunOInstallerParams): Promise<void> 
     // Best-effort; installer typically sets executable bit.
   }
 }
-

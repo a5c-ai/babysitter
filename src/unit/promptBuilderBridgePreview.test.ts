@@ -1,6 +1,9 @@
 import * as assert from 'assert';
 
-import { PromptBuilderBridge, type PromptBuilderWebviewLike } from '../extension/promptBuilderBridge';
+import {
+  PromptBuilderBridge,
+  type PromptBuilderWebviewLike,
+} from '../extension/promptBuilderBridge';
 
 function makeWebview(): { webview: PromptBuilderWebviewLike; messages: unknown[] } {
   const messages: unknown[] = [];

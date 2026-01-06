@@ -110,7 +110,11 @@ export function buildKeyFilesSnapshotAugment(params: {
 
   let rawRunFiles: RunFileItem[] = [];
   if (runRootReadable) {
-    rawRunFiles = listFilesRecursive({ dir: runRoot, rootForRel: runRoot, maxFiles: maxRunFiles + 1 });
+    rawRunFiles = listFilesRecursive({
+      dir: runRoot,
+      rootForRel: runRoot,
+      maxFiles: maxRunFiles + 1,
+    });
   }
 
   const truncated = rawRunFiles.length > maxRunFiles;
@@ -124,7 +128,9 @@ export function buildKeyFilesSnapshotAugment(params: {
   ];
 
   const importantFiles = importantCandidates
-    .map((c) => buildImportantFile({ runRoot, fsPath: c.fsPath, displayName: c.displayName, group: c.group }))
+    .map((c) =>
+      buildImportantFile({ runRoot, fsPath: c.fsPath, displayName: c.displayName, group: c.group }),
+    )
     .filter((v): v is KeyFilesItem => Boolean(v));
 
   return {
@@ -198,7 +204,9 @@ export function setPinnedIdsForRun(
 export function togglePinnedId(ids: readonly string[], fileId: string): string[] {
   const current = Array.isArray(ids) ? ids.filter((v) => typeof v === 'string') : [];
   if (typeof fileId !== 'string' || !fileId.trim()) return current;
-  return current.includes(fileId) ? current.filter((id) => id !== fileId) : current.concat([fileId]);
+  return current.includes(fileId)
+    ? current.filter((id) => id !== fileId)
+    : current.concat([fileId]);
 }
 
 export type GroupedKeyFiles = Array<{ group: string; items: KeyFilesItem[] }>;
@@ -244,54 +252,94 @@ export type KeyFilesModel = {
   groupedAll: GroupedKeyFiles;
 };
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return Boolean(value) && typeof value === 'object' && !Array.isArray(value);
+}
+
+function getString(value: unknown): string | undefined {
+  return typeof value === 'string' ? value : undefined;
+}
+
+function getNumberOrNull(value: unknown): number | null {
+  if (typeof value === 'number') return value;
+  return value === null ? null : null;
+}
+
+function getBoolean(value: unknown): boolean | undefined {
+  return typeof value === 'boolean' ? value : undefined;
+}
+
 export function computeKeyFilesModel(params: {
   snapshot: unknown;
   filterValue: string;
   pinnedIdsByRunId: unknown;
 }): KeyFilesModel {
-  const snapshot = (params && typeof params === 'object' ? (params as { snapshot?: unknown }).snapshot : undefined) as
-    | any
-    | undefined;
+  const snapshot =
+    params && typeof params === 'object' ? (params as { snapshot?: unknown }).snapshot : undefined;
+  const snapshotRecord = isRecord(snapshot) ? snapshot : undefined;
 
-  const runId = typeof snapshot?.run?.id === 'string' ? snapshot.run.id : '';
-  const runRoot = typeof snapshot?.run?.paths?.runRoot === 'string' ? snapshot.run.paths.runRoot : '';
-  const keyFilesMeta = snapshot && typeof snapshot.keyFilesMeta === 'object' ? (snapshot.keyFilesMeta as KeyFilesMeta) : undefined;
+  const runRecord =
+    snapshotRecord && isRecord(snapshotRecord['run']) ? snapshotRecord['run'] : undefined;
+  const runId = getString(runRecord?.['id']) ?? '';
+  const runPathsRecord = runRecord && isRecord(runRecord['paths']) ? runRecord['paths'] : undefined;
+  const runRoot = getString(runPathsRecord?.['runRoot']) ?? '';
+
+  const keyFilesMetaRecord =
+    snapshotRecord && isRecord(snapshotRecord['keyFilesMeta'])
+      ? snapshotRecord['keyFilesMeta']
+      : undefined;
+  const runRootError =
+    typeof keyFilesMetaRecord?.['runRootError'] === 'string'
+      ? keyFilesMetaRecord['runRootError']
+      : undefined;
+  const keyFilesMeta: KeyFilesMeta | undefined = keyFilesMetaRecord
+    ? {
+        runRoot: getString(keyFilesMetaRecord['runRoot']) ?? runRoot,
+        runRootExists: getBoolean(keyFilesMetaRecord['runRootExists']) ?? false,
+        runRootReadable: getBoolean(keyFilesMetaRecord['runRootReadable']) ?? false,
+        ...(runRootError ? { runRootError } : {}),
+        truncated: getBoolean(keyFilesMetaRecord['truncated']) ?? false,
+        totalFiles:
+          typeof keyFilesMetaRecord['totalFiles'] === 'number'
+            ? keyFilesMetaRecord['totalFiles']
+            : 0,
+      }
+    : undefined;
   const runRootExists = Boolean(keyFilesMeta?.runRootExists);
   const runRootReadable = Boolean(keyFilesMeta?.runRootReadable);
 
-  const runFilesRaw: unknown[] = Array.isArray(snapshot?.runFiles) ? snapshot.runFiles : [];
-  const importantFilesRaw: unknown[] = Array.isArray(snapshot?.importantFiles) ? snapshot.importantFiles : [];
+  const runFilesRaw: unknown[] =
+    snapshotRecord && Array.isArray(snapshotRecord['runFiles']) ? snapshotRecord['runFiles'] : [];
+  const importantFilesRaw: unknown[] =
+    snapshotRecord && Array.isArray(snapshotRecord['importantFiles'])
+      ? snapshotRecord['importantFiles']
+      : [];
 
   const normalizeItem = (raw: unknown): KeyFilesItem | undefined => {
-    if (!raw || typeof raw !== 'object') return undefined;
-    const relPath = typeof (raw as any).relPath === 'string' ? (raw as any).relPath : '';
-    const fsPath = typeof (raw as any).fsPath === 'string' ? (raw as any).fsPath : '';
+    if (!isRecord(raw)) return undefined;
+    const relPath = getString(raw['relPath']) ?? '';
+    const fsPath = getString(raw['fsPath']) ?? '';
     if (!fsPath) return undefined;
-    const id = typeof (raw as any).id === 'string' && (raw as any).id ? (raw as any).id : relPath || fsPath;
+    const id = typeof raw['id'] === 'string' && raw['id'] ? raw['id'] : relPath || fsPath;
     if (!id) return undefined;
-    const isDirectory = Boolean((raw as any).isDirectory);
+    const isDirectory = Boolean(raw['isDirectory']);
     const group =
-      typeof (raw as any).group === 'string' && (raw as any).group
-        ? (raw as any).group
+      typeof raw['group'] === 'string' && raw['group']
+        ? raw['group']
         : computeKeyFilesGroupForRelPath(relPath);
     const displayName =
-      typeof (raw as any).displayName === 'string' && (raw as any).displayName
-        ? (raw as any).displayName
+      typeof raw['displayName'] === 'string' && raw['displayName']
+        ? raw['displayName']
         : relPath
           ? relPath
           : fsPath;
-    const exists = (raw as any).exists === false ? false : true;
+    const exists = raw['exists'] === false ? false : true;
     return {
       relPath,
       fsPath,
       isDirectory,
-      size: typeof (raw as any).size === 'number' ? (raw as any).size : (raw as any).size === null ? null : null,
-      mtimeMs:
-        typeof (raw as any).mtimeMs === 'number'
-          ? (raw as any).mtimeMs
-          : (raw as any).mtimeMs === null
-            ? null
-            : null,
+      size: getNumberOrNull(raw['size']),
+      mtimeMs: getNumberOrNull(raw['mtimeMs']),
       id,
       group,
       displayName,
@@ -322,7 +370,9 @@ export function computeKeyFilesModel(params: {
     .filter((v) => !v.isDirectory && v.exists !== false && !pinnedSet.has(v.id));
 
   const importantSet = new Set(importantItems.map((f) => f.id));
-  const remainingItems = runFiles.filter((f) => f.exists !== false && !pinnedSet.has(f.id) && !importantSet.has(f.id));
+  const remainingItems = runFiles.filter(
+    (f) => f.exists !== false && !pinnedSet.has(f.id) && !importantSet.has(f.id),
+  );
 
   const filterLower = (params.filterValue || '').toString().trim().toLowerCase();
   const filteredPinned = pinnedItems.filter((f) => matchesKeyFilesFilter(f, filterLower));
@@ -340,7 +390,8 @@ export function computeKeyFilesModel(params: {
     pillSuffix;
 
   const hasAny = pinnedItems.length > 0 || importantItems.length > 0 || runFiles.length > 0;
-  const anyFiltered = filteredPinned.length > 0 || filteredImportant.length > 0 || filteredRemaining.length > 0;
+  const anyFiltered =
+    filteredPinned.length > 0 || filteredImportant.length > 0 || filteredRemaining.length > 0;
 
   let emptyMessage: string | undefined;
   if (!hasAny) {

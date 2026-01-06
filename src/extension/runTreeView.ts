@@ -141,18 +141,22 @@ async function archiveRun(run: Run): Promise<void> {
     fs.mkdirSync(archiveRoot, { recursive: true });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
-    await vscode.window.showWarningMessage(`Babysitter: could not create runs_archive (${message})`);
+    await vscode.window.showWarningMessage(
+      `Babysitter: could not create runs_archive (${message})`,
+    );
     return;
   }
 
   if (fs.existsSync(dest)) {
-    await vscode.window.showWarningMessage(`Babysitter: archive destination already exists: ${dest}`);
+    await vscode.window.showWarningMessage(
+      `Babysitter: archive destination already exists: ${dest}`,
+    );
     return;
   }
 
   try {
     fs.renameSync(run.paths.runRoot, dest);
-    await vscode.window.setStatusBarMessage(`Babysitter: archived ${run.id}`, 2500);
+    vscode.window.setStatusBarMessage(`Babysitter: archived ${run.id}`, 2500);
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     await vscode.window.showWarningMessage(`Babysitter: could not archive run (${message})`);
@@ -176,9 +180,9 @@ async function markRunComplete(run: Run): Promise<void> {
     return;
   }
 
-  let parsed: any;
+  let parsed: unknown;
   try {
-    parsed = JSON.parse(raw);
+    parsed = JSON.parse(raw) as unknown;
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     await vscode.window.showWarningMessage(`Babysitter: state.json is not valid JSON (${message})`);
@@ -190,10 +194,10 @@ async function markRunComplete(run: Run): Promise<void> {
     return;
   }
 
-  parsed.status = 'completed';
+  (parsed as Record<string, unknown>)['status'] = 'completed';
   try {
     fs.writeFileSync(run.paths.stateJson, `${JSON.stringify(parsed, null, 2)}\n`, 'utf8');
-    await vscode.window.setStatusBarMessage(`Babysitter: marked ${run.id} completed`, 2500);
+    vscode.window.setStatusBarMessage(`Babysitter: marked ${run.id} completed`, 2500);
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     await vscode.window.showWarningMessage(`Babysitter: could not write state.json (${message})`);
@@ -258,14 +262,18 @@ export function registerRunsTreeView(context: vscode.ExtensionContext): {
       try {
         await vscode.workspace.fs.stat(vscode.Uri.file(run.paths.runRoot));
       } catch {
-        await vscode.window.showWarningMessage('Babysitter: could not reveal run folder (path not found)');
+        await vscode.window.showWarningMessage(
+          'Babysitter: could not reveal run folder (path not found)',
+        );
         return;
       }
       try {
         await vscode.commands.executeCommand('revealFileInOS', vscode.Uri.file(run.paths.runRoot));
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err);
-        await vscode.window.showWarningMessage(`Babysitter: could not reveal run folder (${message})`);
+        await vscode.window.showWarningMessage(
+          `Babysitter: could not reveal run folder (${message})`,
+        );
       }
     },
   );

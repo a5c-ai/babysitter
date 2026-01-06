@@ -82,4 +82,3 @@ suite('ptyProcess command wrapping', () => {
     assert.deepStrictEqual(wrapped.args, ['x']);
   });
 });
-

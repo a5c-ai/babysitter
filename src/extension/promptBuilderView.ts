@@ -852,7 +852,10 @@ export async function openPromptBuilder(context: vscode.ExtensionContext): Promi
         if (typed.type === 'dispatch') {
           const text = typeof typed.text === 'string' ? typed.text.trim() : '';
           if (!text) {
-            void promptBuilderPanel.webview.postMessage({ type: 'status', text: 'Prompt is empty.' });
+            void promptBuilderPanel.webview.postMessage({
+              type: 'status',
+              text: 'Prompt is empty.',
+            });
             return;
           }
           await vscode.commands.executeCommand('babysitter.dispatchRun', text);

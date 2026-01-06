@@ -88,8 +88,7 @@ function extractRunIdFromText(text: string): string | undefined {
   // Current `o` run ids are typically `run-YYYYMMDD-HHMMSS` (optionally with an extra suffix).
   // Keep the older `YYYYMMDD-HHMMSS-...` matcher for backwards compatibility.
   const match =
-    text.match(/\brun-\d{8}-\d{6}(?:-[A-Za-z0-9_]+)?\b/) ??
-    text.match(/\b\d{8}-\d{6}-\w+\b/);
+    text.match(/\brun-\d{8}-\d{6}(?:-[A-Za-z0-9_]+)?\b/) ?? text.match(/\b\d{8}-\d{6}-\w+\b/);
   return match?.[0];
 }
 
@@ -99,7 +98,7 @@ function isLikelyPathToken(token: string): boolean {
   return token.startsWith('.') || token.startsWith('/') || /^[A-Za-z]:[\\/]/.test(token);
 }
 function trimToken(token: string): string {
-  return token.replace(/^['"(\[]+/, '').replace(/[\])'",.]+$/, '');
+  return token.replace(/^['"([]+/, '').replace(/[\])'",.]+$/, '');
 }
 function extractRunRootPathFromText(text: string, runId: string, cwd: string): string | undefined {
   const tokens = text
@@ -307,8 +306,7 @@ export async function dispatchNewRunViaO(
     ].join(', ');
     const hint = buildInvocationHelp(`${stdout}\n${stderr}`) ?? '';
     const err = new Error(
-      `\`o\` exited before a run id/path could be parsed (${details}).` +
-        (hint ? ` ${hint}` : ''),
+      `\`o\` exited before a run id/path could be parsed (${details}).` + (hint ? ` ${hint}` : ''),
     );
     (err as { stdout?: string; stderr?: string }).stdout = stdout;
     (err as { stdout?: string; stderr?: string }).stderr = stderr;
