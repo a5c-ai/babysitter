@@ -19,6 +19,8 @@ import {
 import type { PtyProcess } from './core/ptyProcess';
 import { OProcessInteractionTracker } from './core/oProcessInteraction';
 import { isRunId } from './core/runId';
+import { listRunIds, waitForNewRunId } from './core/runPolling';
+import { sanitizeTerminalOutput } from './core/terminalSanitize';
 import type { Run } from './core/run';
 import { createRunFileWatchers } from './extension/runFileWatchers';
 import {
@@ -61,6 +63,10 @@ function toRunFromCommandArg(value: unknown): Run | undefined {
   if (typeof value === 'object' && value !== null && 'id' in value && 'paths' in value)
     return value as Run;
   return undefined;
+}
+
+function sanitizeForOutputChannel(text: string): string {
+  return sanitizeTerminalOutput(text).trimEnd();
 }
 
 export function activate(context: vscode.ExtensionContext): BabysitterApi {
@@ -158,33 +164,6 @@ export function activate(context: vscode.ExtensionContext): BabysitterApi {
   };
 
   const bashSingleQuote = (value: string): string => `'${value.replace(/'/g, `'"'"'`)}'`;
-
-  const listRunIds = (runsRootPath: string): string[] => {
-    try {
-      const dirents = fs.readdirSync(runsRootPath, { withFileTypes: true });
-      return dirents
-        .filter((d) => d.isDirectory() && isRunId(d.name))
-        .map((d) => d.name)
-        .sort((a, b) => b.localeCompare(a));
-    } catch {
-      return [];
-    }
-  };
-
-  const waitForNewRunId = async (params: {
-    runsRootPath: string;
-    baselineIds: Set<string>;
-    timeoutMs: number;
-  }): Promise<string | undefined> => {
-    const start = Date.now();
-    while (Date.now() - start < params.timeoutMs) {
-      const current = listRunIds(params.runsRootPath);
-      const found = current.find((id) => !params.baselineIds.has(id));
-      if (found) return found;
-      await new Promise((r) => setTimeout(r, 250));
-    }
-    return undefined;
-  };
 
   const openGitBashTerminalAndSend = (params: {
     name: string;
@@ -403,6 +382,7 @@ export function activate(context: vscode.ExtensionContext): BabysitterApi {
             `"$(cygpath -u ${bashSingleQuote(result.config.oBinary.path)})" ${bashSingleQuote(prompt)}`,
           ].join('; ');
 
+          const dispatchStartMs = Date.now();
           openGitBashTerminalAndSend({
             name: 'o (dispatch)',
             bashPath: windowsInvocation.windowsBashPath,
@@ -414,6 +394,7 @@ export function activate(context: vscode.ExtensionContext): BabysitterApi {
             runsRootPath: result.config.runsRoot.path,
             baselineIds,
             timeoutMs: 120_000,
+            afterTimeMs: dispatchStartMs,
           });
           if (!runId) {
             throw new Error(
@@ -453,15 +434,31 @@ export function activate(context: vscode.ExtensionContext): BabysitterApi {
         output.appendLine(`Dispatched run: ${dispatched.runId}`);
         output.appendLine(`Run root: ${dispatched.runRootPath}`);
         if (dispatched.stdout.trim())
-          output.appendLine(`o stdout:\n${dispatched.stdout.trimEnd()}`);
+          output.appendLine(`o stdout:\n${sanitizeForOutputChannel(dispatched.stdout)}`);
         if (dispatched.stderr.trim())
-          output.appendLine(`o stderr:\n${dispatched.stderr.trimEnd()}`);
+          output.appendLine(`o stderr:\n${sanitizeForOutputChannel(dispatched.stderr)}`);
 
         runsTreeView.refresh();
         return dispatched;
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err);
-        output.appendLine(`Dispatch failed: ${message}`);
+        output.appendLine(`Dispatch failed: ${sanitizeForOutputChannel(message)}`);
+        const capturedStdout =
+          typeof (err as { stdout?: unknown }).stdout === 'string'
+            ? ((err as { stdout?: string }).stdout ?? '')
+            : '';
+        const capturedStderr =
+          typeof (err as { stderr?: unknown }).stderr === 'string'
+            ? ((err as { stderr?: string }).stderr ?? '')
+            : '';
+        const combined = `${capturedStdout}${capturedStderr ? `\n${capturedStderr}` : ''}`.trimEnd();
+        if (combined.trim()) {
+          const maxChars = 8_000;
+          const tail = combined.length > maxChars ? combined.slice(-maxChars) : combined;
+          output.appendLine(
+            `Captured \`o\` output (tail${combined.length > maxChars ? ', truncated' : ''}):\n${sanitizeForOutputChannel(tail)}`,
+          );
+        }
         if (process.platform === 'win32' && /error code:\s*193\b/i.test(message)) {
           await vscode.window.showErrorMessage(
             'Babysitter: dispatch failed because the configured `o` path is not runnable on Windows. ' +
@@ -638,14 +635,16 @@ export function activate(context: vscode.ExtensionContext): BabysitterApi {
         }
         output.appendLine(`Resumed run: ${resumed.runId}`);
         output.appendLine(`Run root: ${resumed.runRootPath}`);
-        if (resumed.stdout.trim()) output.appendLine(`o stdout:\n${resumed.stdout.trimEnd()}`);
-        if (resumed.stderr.trim()) output.appendLine(`o stderr:\n${resumed.stderr.trimEnd()}`);
+        if (resumed.stdout.trim())
+          output.appendLine(`o stdout:\n${sanitizeForOutputChannel(resumed.stdout)}`);
+        if (resumed.stderr.trim())
+          output.appendLine(`o stderr:\n${sanitizeForOutputChannel(resumed.stderr)}`);
 
         runsTreeView.refresh();
         return resumed;
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err);
-        output.appendLine(`Resume failed: ${message}`);
+        output.appendLine(`Resume failed: ${sanitizeForOutputChannel(message)}`);
         if (process.platform === 'win32' && /error code:\s*193\b/i.test(message)) {
           await vscode.window.showErrorMessage(
             'Babysitter: resume failed because the configured `o` path is not runnable on Windows. ' +

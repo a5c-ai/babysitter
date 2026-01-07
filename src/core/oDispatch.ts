@@ -4,6 +4,8 @@ import * as path from 'path';
 import type { PtyProcess } from './ptyProcess';
 import { spawnPtyProcess } from './ptyProcess';
 import { windowsPathToWslPath } from './oInstaller';
+import { listRunIds, waitForNewRunId } from './runPolling';
+import { sanitizeTerminalOutput } from './terminalSanitize';
 
 export type DispatchNewRunOptions = {
   oBinaryPath: string;
@@ -30,6 +32,19 @@ export type DispatchNewRunOptions = {
    * Time to wait for the `o` process to print the run id/path.
    */
   runInfoTimeoutMs?: number;
+  /**
+   * If `o` doesn't report a run id/path in time, wait for a new run directory to appear.
+   * Default: 120s.
+   */
+  runDirFallbackTimeoutMs?: number;
+  /**
+   * Poll interval for run directory fallback detection. Default: 250ms.
+   */
+  runDirFallbackPollIntervalMs?: number;
+  /**
+   * Test-only override to avoid spawning a real PTY.
+   */
+  __testOnly_spawnPtyProcess?: typeof spawnPtyProcess;
 };
 
 export type DispatchNewRunResult = {
@@ -203,14 +218,36 @@ function buildInvocationHelp(output: string): string | undefined {
   return undefined;
 }
 
+function formatCapturedOutputForError(params: { stdout: string; stderr: string }): string {
+  const maxChars = 8_000;
+  const combinedRaw = `${params.stdout}${params.stderr ? `\n${params.stderr}` : ''}`.trimEnd();
+  const combined = sanitizeTerminalOutput(combinedRaw);
+  if (!combined.trim()) return '';
+  const truncated = combined.length > maxChars ? combined.slice(-maxChars) : combined;
+  return `\n\nCaptured output (tail${combined.length > maxChars ? ', truncated' : ''}):\n${truncated}`;
+}
+
+function bestEffortKill(process: PtyProcess): void {
+  try {
+    process.kill();
+  } catch {
+    // ignore
+  }
+}
+
 export async function dispatchNewRunViaO(
   options: DispatchNewRunOptions,
 ): Promise<DispatchNewRunResult> {
-  const timeoutMs = options.runInfoTimeoutMs ?? 30_000;
+  const runInfoTimeoutMs = options.runInfoTimeoutMs ?? 30_000;
+  const runDirTimeoutMs = options.runDirFallbackTimeoutMs ?? 120_000;
+  const baselineIds = new Set(listRunIds(options.runsRootPath));
+  const dispatchStartMs = Date.now();
   const deferred = createDeferred<DispatchNewRunResult>();
+  const runDirAbort = new AbortController();
 
   let child: PtyProcess;
   try {
+    const spawn = options.__testOnly_spawnPtyProcess ?? spawnPtyProcess;
     if (
       process.platform === 'win32' &&
       options.windowsRuntime === 'wsl' &&
@@ -223,12 +260,12 @@ export async function dispatchNewRunViaO(
         oBinaryPath: wslOBinaryPath,
         args: [options.prompt],
       });
-      child = spawnPtyProcess(invocation.filePath, invocation.args, {
+      child = spawn(invocation.filePath, invocation.args, {
         cwd: options.workspaceRoot,
         ...(options.env ? { env: options.env } : {}),
       });
     } else {
-      child = spawnPtyProcess(options.oBinaryPath, [options.prompt], {
+      child = spawn(options.oBinaryPath, [options.prompt], {
         cwd: options.workspaceRoot,
         ...(options.env ? { env: options.env } : {}),
         ...(options.windowsBashPath ? { windowsBashPath: options.windowsBashPath } : {}),
@@ -252,6 +289,34 @@ export async function dispatchNewRunViaO(
   let pendingTimer: NodeJS.Timeout | undefined;
   let pendingInfo: { runId: string; runRootPath: string } | undefined;
 
+  const settleSuccess = (info: { runId: string; runRootPath: string }): void => {
+    if (settled) return;
+    settled = true;
+    runDirAbort.abort();
+    if (pendingTimer) {
+      clearTimeout(pendingTimer);
+      pendingTimer = undefined;
+    }
+    const result: DispatchNewRunResult = { ...info, stdout, stderr };
+    if (child.pid !== undefined) result.pid = child.pid;
+    deferred.resolve(result);
+  };
+
+  const settleFailure = (err: Error, { kill }: { kill: boolean }): void => {
+    if (settled) return;
+    settled = true;
+    runDirAbort.abort();
+    if (pendingTimer) {
+      clearTimeout(pendingTimer);
+      pendingTimer = undefined;
+    }
+    if (kill) bestEffortKill(child);
+    const wrapped = new Error(err.message + formatCapturedOutputForError({ stdout, stderr }));
+    (wrapped as { stdout?: string; stderr?: string }).stdout = stdout;
+    (wrapped as { stdout?: string; stderr?: string }).stderr = stderr;
+    deferred.reject(wrapped);
+  };
+
   const trySettle = (): void => {
     if (settled) return;
     const info = parseDispatchedRunInfo(
@@ -268,10 +333,7 @@ export async function dispatchNewRunViaO(
     pendingTimer = setTimeout(() => {
       pendingTimer = undefined;
       if (settled || !pendingInfo) return;
-      settled = true;
-      const result: DispatchNewRunResult = { ...pendingInfo, stdout, stderr };
-      if (child.pid !== undefined) result.pid = child.pid;
-      deferred.resolve(result);
+      settleSuccess(pendingInfo);
     }, 25);
   };
 
@@ -291,10 +353,7 @@ export async function dispatchNewRunViaO(
       parseDispatchedRunInfo(stdout, stderr, options.workspaceRoot, options.runsRootPath) ??
       pendingInfo;
     if (info) {
-      settled = true;
-      const result: DispatchNewRunResult = { ...info, stdout, stderr };
-      if (child.pid !== undefined) result.pid = child.pid;
-      deferred.resolve(result);
+      settleSuccess(info);
       return;
     }
 
@@ -308,31 +367,37 @@ export async function dispatchNewRunViaO(
     const err = new Error(
       `\`o\` exited before a run id/path could be parsed (${details}).` + (hint ? ` ${hint}` : ''),
     );
-    (err as { stdout?: string; stderr?: string }).stdout = stdout;
-    (err as { stdout?: string; stderr?: string }).stderr = stderr;
-    settled = true;
-    deferred.reject(err);
+    settleFailure(err, { kill: false });
   });
 
-  const timer = setTimeout(() => {
-    if (settled) return;
-    if (pendingTimer) {
-      clearTimeout(pendingTimer);
-      pendingTimer = undefined;
+  void (async () => {
+    const runId = await waitForNewRunId({
+      runsRootPath: options.runsRootPath,
+      baselineIds,
+      timeoutMs: runDirTimeoutMs,
+      afterTimeMs: dispatchStartMs,
+      signal: runDirAbort.signal,
+      ...(options.runDirFallbackPollIntervalMs !== undefined
+        ? { pollIntervalMs: options.runDirFallbackPollIntervalMs }
+        : {}),
+    });
+    if (settled || runDirAbort.signal.aborted) return;
+    if (runId) {
+      settleSuccess({ runId, runRootPath: path.join(options.runsRootPath, runId) });
+      return;
     }
-    settled = true;
+
+    const hint = buildInvocationHelp(`${stdout}\n${stderr}`) ?? '';
     const err = new Error(
-      `Timed out waiting for \`o\` to report a run id/path after ${timeoutMs}ms.`,
+      `Timed out waiting for a run id/path from \`o\` output (>${runInfoTimeoutMs}ms) or a new run directory (>${runDirTimeoutMs}ms).` +
+        (hint ? ` ${hint}` : ''),
     );
-    (err as { stdout?: string; stderr?: string }).stdout = stdout;
-    (err as { stdout?: string; stderr?: string }).stderr = stderr;
-    deferred.reject(err);
-  }, timeoutMs);
+    settleFailure(err, { kill: true });
+  })();
 
   try {
     return await deferred.promise;
   } finally {
-    clearTimeout(timer);
     disposeData();
     disposeExit();
   }
@@ -484,7 +549,12 @@ export async function resumeExistingRunViaO(
   }, timeoutMs);
 
   try {
-    return await deferred.promise;
+    try {
+      return await deferred.promise;
+    } catch (err) {
+      bestEffortKill(child);
+      throw err;
+    }
   } finally {
     clearTimeout(timer);
     disposeData();
