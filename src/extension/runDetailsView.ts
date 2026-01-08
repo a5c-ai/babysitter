@@ -325,6 +325,22 @@ function renderWebviewHtml(webview: vscode.Webview, extensionUri: vscode.Uri): s
       overflow: auto;
       margin: 8px 0;
     }
+    .md details.md-mermaid-source {
+      border: 1px dashed var(--border);
+      border-radius: 6px;
+      padding: 6px 8px;
+      margin: 8px 0;
+    }
+    .md details.md-mermaid-source summary {
+      cursor: pointer;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    .md details.md-mermaid-source pre {
+      margin: 0;
+      border: none;
+      padding: 0;
+    }
 	    .md code {
 	      font-family: var(--vscode-editor-font-family);
 	      font-size: 12px;
@@ -1826,8 +1842,17 @@ function renderWebviewHtml(webview: vscode.Webview, extensionUri: vscode.Uri): s
 
 	        let mermaidInitialized = false;
 	        function renderMermaidIn(root) {
+	          if (!root) return;
 	          const lib = window.mermaid;
-	          if (!root || !lib) return;
+	          if (!lib) {
+	            const attempts = Number(root.dataset?.mermaidRetryCount || '0');
+	            if (attempts < 20) {
+	              if (root.dataset) root.dataset.mermaidRetryCount = String(attempts + 1);
+	              setTimeout(() => renderMermaidIn(root), 150);
+	            }
+	            return;
+	          }
+          if (root.dataset) delete root.dataset.mermaidRetryCount;
 
           const nodes = Array.from(root.querySelectorAll('.mermaid[data-mermaid-b64]'));
           if (nodes.length === 0) return;
@@ -2058,10 +2083,16 @@ function renderWebviewHtml(webview: vscode.Webview, extensionUri: vscode.Uri): s
 			            } else {
                   const lower = String(codeLang).toLowerCase();
                   if (lower === 'mermaid') {
+                    const mermaidRaw = mermaidLines.join('\\n');
                     out +=
                       '<div class="mermaid" data-mermaid-b64="' +
-                      b64EncodeUnicode(mermaidLines.join('\\n')) +
+                      b64EncodeUnicode(mermaidRaw) +
                       '"></div>';
+                    out +=
+                      '<details class="md-mermaid-source"><summary>Mermaid source</summary>' +
+                      '<pre><code class="lang-mermaid">' +
+                      escapeHtml(mermaidRaw) +
+                      '\\n</code></pre></details>';
                     mermaidLines = [];
                   } else {
 			              inCode = false;
