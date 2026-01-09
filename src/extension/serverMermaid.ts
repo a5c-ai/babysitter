@@ -11,7 +11,8 @@ export type HostRenderedMermaidBlock = {
   error?: string;
 };
 
-type GlobalShim = typeof globalThis & Record<string, unknown>;
+type DomWindow = Window & typeof globalThis;
+type GlobalShim = Window & typeof globalThis & Record<string, unknown>;
 
 const DEFAULT_MAX_BLOCKS = 12;
 let envReady: Promise<void> | undefined;
@@ -36,7 +37,7 @@ async function ensureMermaidEnvironment(): Promise<void> {
   if (envReady) return envReady;
   envReady = Promise.resolve().then(() => {
     const dom = new JSDOM('<div id="mermaid-root"></div>', { pretendToBeVisual: true });
-    const windowAny = dom.window as unknown as GlobalShim;
+    const windowAny = dom.window as unknown as DomWindow;
     const globalAny = globalThis as GlobalShim;
 
     globalAny.window = windowAny;
@@ -106,7 +107,8 @@ export async function renderMermaidBlocksFromMarkdown(params: {
   maxBlocks?: number;
 }): Promise<HostRenderedMermaidBlock[]> {
   const { markdown, preferMermaid, maxBlocks } = params;
-  const blocks = extractMermaidCodeBlocks(markdown, { preferMermaid });
+  const extractOpts = preferMermaid === undefined ? undefined : { preferMermaid };
+  const blocks = extractMermaidCodeBlocks(markdown, extractOpts);
   if (blocks.length === 0) {
     return [];
   }

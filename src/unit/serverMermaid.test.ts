@@ -8,6 +8,7 @@ suite('serverMermaid renderer', () => {
     const blocks = await renderMermaidBlocksFromMarkdown({ markdown: input });
     assert.strictEqual(blocks.length, 1);
     const block = blocks[0];
+    assert.ok(block, 'expected first block');
     assert.strictEqual(block.blockIndex, 0);
     assert.ok(
       block.lightSvgDataUrl?.startsWith('data:image/svg+xml;base64,'),
@@ -23,7 +24,9 @@ suite('serverMermaid renderer', () => {
   test('reports an error for empty diagrams', async () => {
     const blocks = await renderMermaidBlocksFromMarkdown({ markdown: '```mermaid\n```' });
     assert.strictEqual(blocks.length, 1);
-    assert.match(blocks[0].error || '', /empty/i);
+    const onlyBlock = blocks[0];
+    assert.ok(onlyBlock, 'expected block for empty diagram');
+    assert.match(onlyBlock.error || '', /empty/i);
   });
 
   test('enforces the max block limit with readable errors', async () => {
@@ -39,7 +42,10 @@ suite('serverMermaid renderer', () => {
     ].join('\n');
     const blocks = await renderMermaidBlocksFromMarkdown({ markdown: input, maxBlocks: 1 });
     assert.strictEqual(blocks.length, 2);
-    assert.ifError(blocks[0].error);
-    assert.match(blocks[1].error || '', /limit/i);
+    const first = blocks[0];
+    const second = blocks[1];
+    assert.ok(first && second, 'expected two blocks');
+    assert.ifError(first.error);
+    assert.match(second.error || '', /limit/i);
   });
 });
