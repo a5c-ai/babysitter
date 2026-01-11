@@ -4,6 +4,10 @@
   "description": "VS Code extension for orchestrating and monitoring `o` runs.",
   "version": "0.0.6",
   "publisher": "a5c-ai",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/a5c-ai/babysitter.git"
+  },
   "license": "UNLICENSED",
   "private": true,
   "workspaces": [
@@ -236,6 +240,7 @@
     "build": "npm run clean && tsc -p .",
     "watch": "tsc -watch -p .",
     "lint": "eslint . --ext .ts",
+    "verify:metadata": "node ./scripts/check-package-metadata.cjs",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "package": "vsce package --allow-missing-repository",
