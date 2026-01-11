@@ -26,7 +26,7 @@ type GlobalShim = Window &
 const DEFAULT_MAX_BLOCKS = 12;
 let envReady: Promise<void> | undefined;
 let renderSeq = 0;
-let mermaidPromise: Promise<typeof import('mermaid')['default']> | undefined;
+let mermaidPromise: Promise<(typeof import('mermaid'))['default']> | undefined;
 const globalOverrides = new Map<PropertyKey, unknown>();
 
 const loadMermaid = async () => {
@@ -225,16 +225,18 @@ async function ensureMermaidEnvironment(): Promise<void> {
     forceSetGlobalProperty(
       'requestAnimationFrame',
       windowAny.requestAnimationFrame?.bind(windowAny) ||
-        ((cb: (...args: unknown[]) => void) => setTimeout(() => cb(Date.now()), 16))
+        ((cb: (...args: unknown[]) => void) => setTimeout(() => cb(Date.now()), 16)),
     );
     forceSetGlobalProperty(
       'cancelAnimationFrame',
-      windowAny.cancelAnimationFrame?.bind(windowAny) || ((id: number) => clearTimeout(Number(id)))
+      windowAny.cancelAnimationFrame?.bind(windowAny) || ((id: number) => clearTimeout(Number(id))),
     );
     forceSetGlobalProperty('performance', windowAny.performance);
     forceSetGlobalProperty('MutationObserver', windowAny.MutationObserver);
 
-    const createDOMPurify = ((await import('dompurify')) as { default: (win?: unknown) => DOMPurifyInstance }).default;
+    const createDOMPurify = (
+      (await import('dompurify')) as { default: (win?: unknown) => DOMPurifyInstance }
+    ).default;
     const DOMPurify = createDOMPurify(windowAny as unknown as Window);
     windowAny.DOMPurify = DOMPurify;
     forceSetGlobalProperty('DOMPurify', DOMPurify);
