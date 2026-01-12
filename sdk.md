@@ -886,8 +886,10 @@ A simple test harness layered on top of the SDK could:
 Example pseudo-API:
 
 ```ts
-const testRun = await createRun({
-  baseDir: tmpDir,
+import { runToCompletionWithFakeRunner } from "@a5c/babysitter-sdk/testing";
+
+const { runDir } = await createRun({
+  runsDir: tmpDir,
   process: {
     processId: "test/ci",
     importPath: "../process/ci-pipeline.js",
@@ -896,17 +898,29 @@ const testRun = await createRun({
   inputs: { branch: "main" },
 });
 
-await runToCompletionWithFakeRunner(testRun.runDir, (action) => {
-  switch (action.kind) {
-    case "node":
-      return fakeNodeResult(action); // synchronous stub
-    default:
-      throw new Error("unexpected kind" + action.kind);
-  }
+const result = await runToCompletionWithFakeRunner({
+  runDir,
+  resolve(action) {
+    if (action.kind === "node" && action.taskId === "lint") {
+      return { status: "ok", value: { status: "passed" } };
+    }
+    return undefined; // leave breakpoints/sleeps unresolved
+  },
 });
+
+if (result.status === "waiting") {
+  // inspect result.pending to see which actions remain
+}
 ```
 
----
+`runToCompletionWithFakeRunner` ships as part of `@a5c/babysitter-sdk/testing` and:
+
+* Accepts a `resolve(action)` callback that returns either `{ status: "ok", value }` or `{ status: "error", error }` (plus optional stdout/stderr/metadata) for actions you want to satisfy deterministically.
+* Commits those fake results to the run directory, accumulating a log of executed actions so your tests can assert against them.
+* Returns `{ status, output|error, pending, metadata, executed }`, giving you the same high-level surface as the CLI / orchestrator but without invoking real runners.
+* Supports safety rails such as `maxIterations` (defaults to 100) and `onIteration` hooks for advanced inspection.
+
+--- 
 
 ## 11. Reasoning Recap
 
@@ -1076,6 +1090,8 @@ Options:
 * `--dry-run`: describe the next iteration without mutating on-disk state (auto-node plans are logged instead of executed).
 * `--json`: machine-readable output.
 * `--auto-node-tasks`: automatically execute every `kind="node"` action by piping its TaskDef into `runNodeTaskFromCli`, committing the result, then looping back through `orchestrateIteration` until only manual actions remain.
+* `--auto-node-max <n>`: optional safety cap that limits how many node tasks will be auto-run during this invocation. Once the budget is exhausted, the CLI exits in the current `waiting` state and logs a reminder to re-run with a higher cap if desired.
+* `--auto-node-label <text>`: only auto-run node tasks whose label (or effect id) contains the provided substring (case-insensitive). Combine with `--auto-node-max` when you want to stage specific slices of pending work. Both flags require `--auto-node-tasks`.
 
 In JSON mode stdout stays quiet except for the final payload:
 
@@ -1098,7 +1114,7 @@ In JSON mode stdout stays quiet except for the final payload:
 }
 ```
 
-`pending` only appears while the run is still waiting. `autoRun.executed` accumulates every node task launched via `--auto-node-tasks`, and `autoRun.pending` lists the remaining `kind="node"` actions automation could run (or the would-be plan under `--dry-run`) instead of duplicating manual work. Terminal payloads append either `output` (`completed`) or `error` (`failed`), and `metadata.pendingEffectsByKind` is always populated (derived from the pending list when the runtime omits it). All file/effect references are normalized to POSIX-style paths so downstream tooling can resolve them consistently across platforms.
+`pending` only appears while the run is still waiting. `autoRun.executed` accumulates every node task launched via `--auto-node-tasks`, and `autoRun.pending` lists the next slice of node actions automation plans to run (respecting `--auto-node-max` / `--auto-node-label` filters or, when the flag is absent, every pending node action). Terminal payloads append either `output` (`completed`) or `error` (`failed`), and `metadata.pendingEffectsByKind` is always populated (derived from the pending list when the runtime omits it). All file/effect references are normalized to POSIX-style paths so downstream tooling can resolve them consistently across platforms.
 
 This gives you a just-run-it loop for simple processes; when the CLI reports pending breakpoints/orchestrator tasks you can follow up with the other commands.
 

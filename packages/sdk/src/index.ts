@@ -6,3 +6,4 @@ export * from "./tasks";
 export * from "./runner";
 export * from "./cli/nodeTaskRunner";
 export * from "./cli/main";
+export * from "./testing";

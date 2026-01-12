@@ -4,13 +4,15 @@
 **/.a5c/**
 **/.github/**
 node_modules/**
+!node_modules/**
 !node_modules/node-pty/**
 !node_modules/jsdom/**
 !node_modules/dompurify/**
 !node_modules/mermaid/**
 !node_modules/tough-cookie/**
-!node_modules/**/*
 node_modules/@a5c/**
+node_modules/@a5c
+node_modules/@a5c/babysitter-sdk
 **/*.map
 *.vsix
 src/**
