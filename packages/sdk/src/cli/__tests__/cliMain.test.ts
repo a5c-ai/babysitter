@@ -194,7 +194,7 @@ describe("CLI main entry", () => {
       status: "waiting",
       autoRun: {
         executed: [],
-        pending: [{ effectId: "ef-json", kind: "breakpoint", label: "manual" }],
+        pending: [],
       },
       pending: [{ effectId: "ef-json", kind: "breakpoint", label: "manual" }],
     });

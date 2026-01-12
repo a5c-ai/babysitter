@@ -203,6 +203,38 @@ export function activate(context: vscode.ExtensionContext): BabysitterApi {
     return terminal;
   };
 
+  const openPosixTerminalAndSend = (params: {
+    name: string;
+    workspaceRoot: string;
+    command: string;
+    workspaceFolder?: vscode.WorkspaceFolder;
+  }): { terminal: vscode.Terminal; shellPath: string } => {
+    const cfg = vscode.workspace.getConfiguration('babysitter', params.workspaceFolder);
+    const configuredShellPath = cfg.get<string>('dispatch.shellPath')?.trim();
+    const shellArgsSetting = cfg.get<string | string[]>('dispatch.shellArgs');
+    const envShell = (process.env.SHELL ?? '').trim();
+    const shellPath = configuredShellPath || envShell || '/bin/bash';
+    let configuredShellArgs: string[] | undefined;
+    if (Array.isArray(shellArgsSetting) && shellArgsSetting.length > 0) {
+      configuredShellArgs = shellArgsSetting
+        .map((arg) => (typeof arg === 'string' ? arg.trim() : ''))
+        .filter((arg): arg is string => Boolean(arg));
+    } else if (typeof shellArgsSetting === 'string' && shellArgsSetting.trim()) {
+      configuredShellArgs = [shellArgsSetting.trim()];
+    }
+    const shellArgs = configuredShellArgs ?? ['-l'];
+
+    const terminal = vscode.window.createTerminal({
+      name: params.name,
+      shellPath,
+      shellArgs,
+      cwd: params.workspaceRoot,
+    });
+    terminal.show(true);
+    terminal.sendText(params.command, true);
+    return { terminal, shellPath };
+  };
+
   context.subscriptions.push(
     new vscode.Disposable(() => {
       // Do not kill running `o` processes on deactivation; just detach listeners.
@@ -429,6 +461,67 @@ export function activate(context: vscode.ExtensionContext): BabysitterApi {
           output.appendLine(`Run root: ${runRootPath}`);
           runsTreeView.refresh();
           return { runId, runRootPath, stdout: '', stderr: '' };
+        }
+
+        if (process.platform !== 'win32') {
+          const baselineIds = new Set(listRunIds(result.config.runsRoot.path));
+          const dispatchStartMs = Date.now();
+          const shellCommand = [
+            'set -euo pipefail',
+            `cd ${bashSingleQuote(workspaceRoot)}`,
+            `${bashSingleQuote(result.config.oBinary.path)} ${bashSingleQuote(prompt)}`,
+          ].join('; ');
+          try {
+            const { terminal, shellPath } = openPosixTerminalAndSend({
+              name: 'o (dispatch)',
+              workspaceRoot,
+              command: shellCommand,
+              workspaceFolder,
+            });
+            const runId = await waitForNewRunId({
+              runsRootPath: result.config.runsRoot.path,
+              baselineIds,
+              timeoutMs: 120_000,
+              afterTimeMs: dispatchStartMs,
+            });
+            if (!runId) {
+              throw new Error(
+                'Timed out waiting for a new run directory to appear under runsRoot. ' +
+                  'The `o` session is running in the terminal; check its output for errors.',
+              );
+            }
+
+            try {
+              const pid = await terminal.processId;
+              if (typeof pid === 'number') {
+                interactions.setRunIdForPid(pid, runId);
+                interactions.setLabelForPid(pid, `o (dispatch ${runId})`);
+              } else {
+                output.appendLine(
+                  'Babysitter: VS Code did not expose a terminal pid; ESC/Enter shortcuts are unavailable for this run.',
+                );
+              }
+            } catch (pidErr) {
+              const pidMessage = pidErr instanceof Error ? pidErr.message : String(pidErr);
+              output.appendLine(
+                `Babysitter: failed to read terminal pid; ESC/Enter shortcuts unavailable (${sanitizeForOutputChannel(pidMessage)}).`,
+              );
+            }
+            const runRootPath = path.join(result.config.runsRoot.path, runId);
+            output.appendLine(`Dispatched run (from terminal): ${runId}`);
+            output.appendLine(`Run root: ${runRootPath}`);
+            output.appendLine(`Terminal shell: ${sanitizeForOutputChannel(shellPath)}`);
+            runsTreeView.refresh();
+            return { runId, runRootPath, stdout: '', stderr: '' };
+          } catch (terminalErr) {
+            const message =
+              terminalErr instanceof Error ? terminalErr.message : String(terminalErr);
+            output.appendLine(
+              `POSIX terminal dispatch failed; falling back to direct \`o\`: ${sanitizeForOutputChannel(
+                message,
+              )}`,
+            );
+          }
         }
 
         const dispatched = await dispatchNewRunViaO({

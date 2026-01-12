@@ -1059,6 +1059,8 @@ Human output mirrors the lifecycle status:
 * `waiting` - prints the header plus one `- <effectId> [<kind>] <label?>` line for every pending action (the same formatting used by `run:continue`) and exits `0`.
 * `failed` - prints the status line, dumps the error payload, and exits `1`.
 
+Status lines append deterministic metadata pairs (`stateVersion`, `pending[...]`, etc.) whenever the runtime reports them or they can be inferred from the pending list. If any pending action exposes `schedulerHints.sleepUntilEpochMs`, `run:step` logs `[run:step] sleep-until=<iso> effect=<effectId> ... pendingCount=<n?>` so operators know when to revisit the run.
+
 Flags:
 
 * `--now <iso8601>`: override the wall clock passed to `orchestrateIteration`. The CLI validates the value as an ISO timestamp and surfaces a helpful error instead of running with an invalid date.
@@ -1066,16 +1068,39 @@ Flags:
 
 #### `babysitter run:continue <runDir>`
 
-Drive a run until it either completes, hits an error, or is waiting on manual work. The CLI prints a terse status line plus each pending action; `--json` emits `{ status, autoRun: { executed[], pending[] }, output|error }`.
+Drive a run until it either completes, hits an error, or is waiting on manual intervention. Every iteration prints `[run:continue] status=<...>` (stderr) with `dryRun=true` when applicable, the cumulative `autoNode=<count>` tally, and metadata pairs such as `stateVersion` plus `pending[...]`. Waiting passes also list each pending action (`- <effectId> [<kind>] <label?>`) and surface scheduler hints as `[run:continue] sleep-until=<iso> effect=<effectId> pendingCount=<n?>`.
 
 Options:
 
 * `--runs-dir <path>`: override the base runs directory (default current working dir).
-* `--dry-run`: show the planned actions without executing node tasks.
+* `--dry-run`: describe the next iteration without mutating on-disk state (auto-node plans are logged instead of executed).
 * `--json`: machine-readable output.
 * `--auto-node-tasks`: automatically execute every `kind="node"` action by piping its TaskDef into `runNodeTaskFromCli`, committing the result, then looping back through `orchestrateIteration` until only manual actions remain.
 
-This gives you a “just run it” loop for simple processes; when the CLI reports pending breakpoints/orchestrator tasks you can follow up with the other commands.
+In JSON mode stdout stays quiet except for the final payload:
+
+```json
+{
+  "status": "waiting",
+  "pending": [
+    { "effectId": "ef-node", "kind": "node", "label": "build workspace" }
+  ],
+  "autoRun": {
+    "executed": [],
+    "pending": [
+      { "effectId": "ef-node", "kind": "node", "label": "build workspace" }
+    ]
+  },
+  "metadata": {
+    "stateVersion": 7,
+    "pendingEffectsByKind": { "node": 1 }
+  }
+}
+```
+
+`pending` only appears while the run is still waiting. `autoRun.executed` accumulates every node task launched via `--auto-node-tasks`, and `autoRun.pending` lists the remaining `kind="node"` actions automation could run (or the would-be plan under `--dry-run`) instead of duplicating manual work. Terminal payloads append either `output` (`completed`) or `error` (`failed`), and `metadata.pendingEffectsByKind` is always populated (derived from the pending list when the runtime omits it). All file/effect references are normalized to POSIX-style paths so downstream tooling can resolve them consistently across platforms.
+
+This gives you a just-run-it loop for simple processes; when the CLI reports pending breakpoints/orchestrator tasks you can follow up with the other commands.
 
 ### 12.4 Task interaction commands
 

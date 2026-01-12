@@ -571,6 +571,45 @@ describe("run lifecycle inspection commands", () => {
       });
     });
 
+    it("returns pending summaries with inferred metadata and auto-run plans in JSON mode", async () => {
+      const runDir = await createRunSkeleton("run-wait-json");
+      await stubRunMetadata(runDir);
+      orchestrateSpy.mockResolvedValueOnce({
+        status: "waiting",
+        nextActions: [
+          {
+            effectId: "ef-node",
+            invocationKey: "invoke-node",
+            kind: "node",
+            label: "auto me",
+            taskDef: { kind: "node", node: { entry: "./auto.js" } },
+          },
+          {
+            effectId: "ef-break",
+            invocationKey: "invoke-break",
+            kind: "breakpoint",
+            label: "manual check",
+            taskDef: { kind: "breakpoint", breakpoint: { confirmationRequired: true } },
+          },
+        ],
+      });
+
+      const exitCode = await cli.run(["run:continue", runDir, "--json"]);
+
+      expect(exitCode).toBe(0);
+      const payload = readLastJson(logSpy);
+      expect(payload.status).toBe("waiting");
+      expect(payload.pending).toEqual([
+        { effectId: "ef-node", kind: "node", label: "auto me" },
+        { effectId: "ef-break", kind: "breakpoint", label: "manual check" },
+      ]);
+      expect(payload.autoRun.executed).toEqual([]);
+      expect(payload.autoRun.pending).toEqual([{ effectId: "ef-node", kind: "node", label: "auto me" }]);
+      expect(payload.metadata).toEqual({
+        pendingEffectsByKind: { breakpoint: 1, node: 1 },
+      });
+    });
+
     it("propagates failure metadata and errors", async () => {
       const runDir = await createRunSkeleton("run-failure");
       await stubRunMetadata(runDir);

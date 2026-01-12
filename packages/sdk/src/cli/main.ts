@@ -262,7 +262,7 @@ function enrichIterationMetadata(
   };
 }
 
-function logSleepHints(actions: EffectAction[]) {
+function logSleepHints(command: string, actions: EffectAction[]) {
   for (const action of actions) {
     const sleepMs = action.schedulerHints?.sleepUntilEpochMs;
     if (typeof sleepMs !== "number") continue;
@@ -272,7 +272,7 @@ function logSleepHints(actions: EffectAction[]) {
       typeof action.schedulerHints?.pendingCount === "number"
         ? ` pendingCount=${action.schedulerHints.pendingCount}`
         : "";
-    console.error(`[run:continue] sleep-until=${iso} effect=${action.effectId}${label}${pendingInfo}`);
+    console.error(`[${command}] sleep-until=${iso} effect=${action.effectId}${label}${pendingInfo}`);
   }
 }
 
@@ -730,7 +730,7 @@ async function handleRunContinue(parsed: ParsedArgs): Promise<number> {
         command: "run:continue",
         includeHeader: false,
       });
-      logSleepHints(iteration.nextActions);
+      logSleepHints("run:continue", iteration.nextActions);
       const nodeActions = iteration.nextActions.filter((action) => action.kind === "node");
       const nodeSummaries = summarizeActions(nodeActions);
       if (parsed.autoNodeTasks && nodeActions.length > 0) {
@@ -758,7 +758,7 @@ async function handleRunContinue(parsed: ParsedArgs): Promise<number> {
           {
             executed,
             pending,
-            autoPending: parsed.autoNodeTasks ? nodeSummaries : [],
+            autoPending: nodeSummaries,
             metadata: formattedMetadata.jsonMetadata ?? null,
           }
         );
@@ -851,7 +851,7 @@ async function handleRunStep(parsed: ParsedArgs): Promise<number> {
       command: "run:step",
       metadataParts: formattedMetadata.textParts,
     });
-    logSleepHints(iteration.nextActions);
+    logSleepHints("run:step", iteration.nextActions);
     return 0;
   }
 

@@ -242,6 +242,24 @@
           "type": "string",
           "default": "",
           "description": "Windows only: optional full path to a Bash executable (e.g. Git Bash `bash.exe`) for running the upstream `o` installer when WSL is unavailable."
+        },
+        "babysitter.dispatch.shellPath": {
+          "type": "string",
+          "default": "",
+          "description": "macOS/Linux: optional shell executable to use when launching dispatch terminals. Defaults to $SHELL or /bin/bash."
+        },
+        "babysitter.dispatch.shellArgs": {
+          "type": [
+            "array",
+            "string"
+          ],
+          "items": {
+            "type": "string"
+          },
+          "default": [
+            "-l"
+          ],
+          "description": "macOS/Linux: additional shell arguments for dispatch terminals. Provide a string or array; use an empty array to disable the -l default."
         }
       }
     }
