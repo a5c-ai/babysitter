@@ -61,6 +61,10 @@ describe("CLI task commands", () => {
     const payload = readLastJson(logSpy);
     expect(payload.tasks).toHaveLength(1);
     expect(payload.tasks[0]).toMatchObject({ effectId: "ef-1", status: "requested", label: "needs-review" });
+    expect(payload.tasks[0]).toMatchObject({
+      taskDefRef: "tasks/ef-1/task.json",
+      resultRef: "tasks/ef-1/result.json",
+    });
   });
 
   it("filters tasks by kind when requested", async () => {
@@ -92,6 +96,18 @@ describe("CLI task commands", () => {
     expectLogContaining(logSpy, "resultRef=tasks/ef-123/result.json");
     expectLogContaining(logSpy, '"kind": "node"');
     expectLogContaining(logSpy, '"status": "ok"');
+  });
+
+  it("indicates when task results are not yet written", async () => {
+    buildEffectIndexMock.mockResolvedValue(mockEffectIndex([effectRecord("ef-missing")]));
+    readTaskDefinitionMock.mockResolvedValue({ schemaVersion: "v1", kind: "node" } as JsonRecord);
+    readTaskResultMock.mockResolvedValue(undefined);
+
+    const cli = createBabysitterCli();
+    const exitCode = await cli.run(["task:show", "runs/demo", "ef-missing"]);
+
+    expect(exitCode).toBe(0);
+    expectLogContaining(logSpy, "result: (not yet written)");
   });
 
   it("returns error when effect is missing", async () => {

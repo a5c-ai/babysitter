@@ -69,6 +69,27 @@ function sanitizeForOutputChannel(text: string): string {
   return sanitizeTerminalOutput(text).trimEnd();
 }
 
+function toUriFromExplorerArg(value: unknown): vscode.Uri | undefined {
+  if (!value) return undefined;
+  if (value instanceof vscode.Uri) return value;
+  if (Array.isArray(value)) {
+    for (const entry of value) {
+      const uri = toUriFromExplorerArg(entry);
+      if (uri) return uri;
+    }
+    return undefined;
+  }
+  if (typeof value === 'object' && value !== null) {
+    if ('resourceUri' in value && value.resourceUri instanceof vscode.Uri) {
+      return value.resourceUri;
+    }
+    if ('uri' in value && value.uri instanceof vscode.Uri) {
+      return value.uri;
+    }
+  }
+  return undefined;
+}
+
 export function activate(context: vscode.ExtensionContext): BabysitterApi {
   const output = vscode.window.createOutputChannel(OUTPUT_CHANNEL_NAME);
   output.appendLine('Babysitter extension activated.');
@@ -469,6 +490,62 @@ export function activate(context: vscode.ExtensionContext): BabysitterApi {
         }
         await vscode.window.showErrorMessage(
           'Babysitter: dispatch failed. See output for details.',
+        );
+        throw err;
+      }
+    },
+  );
+
+  const dispatchRunFromTaskFileDisposable = vscode.commands.registerCommand(
+    'babysitter.dispatchRunFromTaskFile',
+    async (arg?: unknown): Promise<void> => {
+      const uri = toUriFromExplorerArg(arg);
+      if (!uri || uri.scheme !== 'file') {
+        await vscode.window.showErrorMessage(
+          'Babysitter: select a workspace .task.md file to dispatch.',
+        );
+        return;
+      }
+      if (!uri.fsPath.toLowerCase().endsWith('.task.md')) {
+        await vscode.window.showErrorMessage(
+          'Babysitter: select a file ending in .task.md to dispatch.',
+        );
+        return;
+      }
+
+      let promptText: string;
+      try {
+        promptText = (await fs.promises.readFile(uri.fsPath, 'utf8')).trim();
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        output.appendLine(
+          `Failed to read task file ${uri.fsPath}: ${sanitizeForOutputChannel(message)}`,
+        );
+        await vscode.window.showErrorMessage(
+          `Babysitter: failed to read ${path.basename(uri.fsPath)}. See output for details.`,
+        );
+        throw err instanceof Error ? err : new Error(message);
+      }
+
+      if (!promptText) {
+        await vscode.window.showErrorMessage(
+          `Babysitter: ${path.basename(uri.fsPath)} is empty. Add content before dispatching.`,
+        );
+        return;
+      }
+
+      output.show(true);
+      output.appendLine(`Dispatching run from task file: ${uri.fsPath}`);
+
+      try {
+        await vscode.commands.executeCommand('babysitter.dispatchRun', promptText);
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        output.appendLine(
+          `Dispatch from task file failed (${uri.fsPath}): ${sanitizeForOutputChannel(message)}`,
+        );
+        await vscode.window.showErrorMessage(
+          `Babysitter: dispatch failed for ${path.basename(uri.fsPath)}. See output for details.`,
         );
         throw err;
       }
@@ -963,6 +1040,7 @@ export function activate(context: vscode.ExtensionContext): BabysitterApi {
     disposable,
     openPromptBuilderDisposable,
     dispatchRunDisposable,
+    dispatchRunFromTaskFileDisposable,
     resumeRunDisposable,
     sendEscDisposable,
     sendEnterDisposable,

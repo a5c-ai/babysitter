@@ -29,6 +29,12 @@ suite('Extension manifest', () => {
     const pkg = readPackageJson();
     assertIsRecord(pkg, 'expected package.json to be an object');
 
+    const activationEvents = Array.isArray(pkg.activationEvents) ? pkg.activationEvents : [];
+    assert.ok(
+      activationEvents.includes('onCommand:babysitter.dispatchRunFromTaskFile'),
+      'missing activation event for babysitter.dispatchRunFromTaskFile',
+    );
+
     const contributes = pkg.contributes;
     assertIsRecord(contributes, 'expected contributes to be an object');
 
@@ -36,6 +42,10 @@ suite('Extension manifest', () => {
     assert.ok(
       commands.some((c) => isRecord(c) && c.command === 'babysitter.runs.refresh'),
       'missing contributes.commands babysitter.runs.refresh',
+    );
+    assert.ok(
+      commands.some((c) => isRecord(c) && c.command === 'babysitter.dispatchRunFromTaskFile'),
+      'missing contributes.commands babysitter.dispatchRunFromTaskFile',
     );
 
     const keybindings = Array.isArray(contributes.keybindings) ? contributes.keybindings : [];
@@ -56,6 +66,19 @@ suite('Extension manifest', () => {
         `missing keybinding: ${command} -> ${key}`,
       );
     }
+
+    assertIsRecord(contributes.menus, 'expected contributes.menus to be an object');
+    const explorerValue = contributes.menus['explorer/context'];
+    const explorer = Array.isArray(explorerValue) ? explorerValue : [];
+    assert.ok(
+      explorer.some(
+        (entry) =>
+          isRecord(entry) &&
+          entry.command === 'babysitter.dispatchRunFromTaskFile' &&
+          entry.when === 'resourceScheme == file && resourceFilename =~ /\\.task\\.md$/',
+      ),
+      'missing explorer context menu for babysitter.dispatchRunFromTaskFile',
+    );
   });
 
   test('has packaging metadata and a safe .vscodeignore', () => {
