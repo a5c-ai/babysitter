@@ -5,6 +5,9 @@
 **/.github/**
 node_modules/**
 !node_modules/node-pty/**
+!node_modules/jsdom/**
+!node_modules/dompurify/**
+!node_modules/mermaid/**
 !node_modules/typescript/**
 **/*.map
 *.vsix
