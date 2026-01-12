@@ -10,6 +10,8 @@ node_modules/**
 !node_modules/mermaid/**
 !node_modules/tough-cookie/**
 !node_modules/**/*
+node_modules/@a5c/**
+!node_modules/**/*
 **/*.map
 *.vsix
 src/**
