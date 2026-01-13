@@ -25,18 +25,26 @@ describe("CLI task commands", () => {
   let logSpy: ReturnType<typeof vi.spyOn>;
   let errorSpy: ReturnType<typeof vi.spyOn>;
   let statSpy: ReturnType<typeof vi.spyOn>;
+  let secretEnvSnapshot: string | undefined;
 
   beforeEach(() => {
     vi.clearAllMocks();
     logSpy = vi.spyOn(console, "log").mockImplementation(() => undefined);
     errorSpy = vi.spyOn(console, "error").mockImplementation(() => undefined);
     statSpy = vi.spyOn(fs, "stat").mockResolvedValue({ size: 512 } as unknown as Stats);
+    secretEnvSnapshot = process.env.BABYSITTER_ALLOW_SECRET_LOGS;
+    delete process.env.BABYSITTER_ALLOW_SECRET_LOGS;
   });
 
   afterEach(() => {
     logSpy.mockRestore();
     errorSpy.mockRestore();
     statSpy.mockRestore();
+    if (secretEnvSnapshot === undefined) {
+      delete process.env.BABYSITTER_ALLOW_SECRET_LOGS;
+    } else {
+      process.env.BABYSITTER_ALLOW_SECRET_LOGS = secretEnvSnapshot;
+    }
   });
 
   it("lists tasks with human output", async () => {
@@ -133,17 +141,19 @@ describe("CLI task commands", () => {
     expect(exitCode).toBe(0);
     expectLogContaining(logSpy, "[task:show] ef-123 [node resolved_ok]");
     expectLogContaining(logSpy, "resultRef=tasks/ef-123/result.json");
-    expectLogContaining(logSpy, '"kind": "node"');
-    expectLogContaining(logSpy, '"status": "ok"');
+    expectLogContaining(logSpy, "payloads: redacted (set BABYSITTER_ALLOW_SECRET_LOGS=true");
+    expectLogNotContaining(logSpy, '"kind": "node"');
+    expectLogNotContaining(logSpy, '"status": "ok"');
   });
 
-  it("returns effect/task/result payloads in JSON mode", async () => {
+  it("returns effect/task/result payloads in JSON mode when opt-in is enabled", async () => {
     buildEffectIndexMock.mockResolvedValue(mockEffectIndex([effectRecord("ef-json")]));
     readTaskDefinitionMock.mockResolvedValue({ schemaVersion: "v1", kind: "node" } as JsonRecord);
     readTaskResultMock.mockResolvedValue({ schemaVersion: "v1", status: "ok", value: { ok: true } });
+    process.env.BABYSITTER_ALLOW_SECRET_LOGS = "1";
 
     const cli = createBabysitterCli();
-    const exitCode = await cli.run(["task:show", "runs/demo", "ef-json", "--json"]);
+    const exitCode = await cli.run(["task:show", "runs/demo", "ef-json", "--json", "--verbose"]);
 
     expect(exitCode).toBe(0);
     const payload = readLastJson(logSpy);
@@ -151,6 +161,36 @@ describe("CLI task commands", () => {
     expect(payload.task).toMatchObject({ kind: "node" });
     expect(payload.result).toMatchObject({ status: "ok" });
     expect(payload.largeResult).toBeNull();
+  });
+
+  it("keeps payloads redacted for verbose JSON output without opt-in env", async () => {
+    buildEffectIndexMock.mockResolvedValue(mockEffectIndex([effectRecord("ef-json-secret")]));
+    readTaskDefinitionMock.mockResolvedValue({ schemaVersion: "v1", kind: "node" } as JsonRecord);
+    readTaskResultMock.mockResolvedValue({ schemaVersion: "v1", status: "ok" });
+
+    const cli = createBabysitterCli();
+    const exitCode = await cli.run(["task:show", "runs/demo", "ef-json-secret", "--json", "--verbose"]);
+
+    expect(exitCode).toBe(0);
+    const payload = readLastJson(logSpy);
+    expect(payload.task).toBeNull();
+    expect(payload.result).toBeNull();
+    expect(payload.largeResult).toBeNull();
+  });
+
+  it("reveals payloads when BABYSITTER_ALLOW_SECRET_LOGS is truthy with verbose JSON", async () => {
+    buildEffectIndexMock.mockResolvedValue(mockEffectIndex([effectRecord("ef-json-secret")]));
+    readTaskDefinitionMock.mockResolvedValue({ schemaVersion: "v1", kind: "node" } as JsonRecord);
+    readTaskResultMock.mockResolvedValue({ schemaVersion: "v1", status: "ok" });
+    process.env.BABYSITTER_ALLOW_SECRET_LOGS = "true";
+
+    const cli = createBabysitterCli();
+    const exitCode = await cli.run(["task:show", "runs/demo", "ef-json-secret", "--json", "--verbose"]);
+
+    expect(exitCode).toBe(0);
+    const payload = readLastJson(logSpy);
+    expect(payload.task).toMatchObject({ kind: "node" });
+    expect(payload.result).toMatchObject({ status: "ok" });
   });
 
   it("omits inline result when blob exceeds preview limit", async () => {
@@ -263,6 +303,13 @@ function expectLogContaining(spy: ReturnType<typeof vi.spyOn>, substring: string
   const lines = collectLines(spy);
   if (!lines.some((line) => line.includes(substring))) {
     throw new Error(`Expected substring "${substring}" in logs:\n${lines.join("\n")}`);
+  }
+}
+
+function expectLogNotContaining(spy: ReturnType<typeof vi.spyOn>, substring: string) {
+  const lines = collectLines(spy);
+  if (lines.some((line) => line.includes(substring))) {
+    throw new Error(`Did not expect substring "${substring}" in logs:\n${lines.join("\n")}`);
   }
 }
 

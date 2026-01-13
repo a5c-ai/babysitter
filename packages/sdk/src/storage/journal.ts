@@ -5,6 +5,7 @@ import { AppendEventOptions, AppendEventResult, JournalEvent, JsonRecord } from 
 import { getJournalDir } from "./paths";
 import { writeFileAtomic } from "./atomic";
 import { nextUlid } from "./ulids";
+import { getClockIsoString } from "./clock";
 
 function formatSeq(seq: number) {
   return seq.toString().padStart(6, "0");
@@ -30,7 +31,7 @@ export async function appendEvent(opts: AppendEventOptions): Promise<AppendEvent
   const seq = (seqs.length ? Math.max(...seqs) : 0) + 1;
   const ulid = nextUlid();
   const filename = `${formatSeq(seq)}.${ulid}.json`;
-  const recordedAt = new Date().toISOString();
+  const recordedAt = getClockIsoString();
   const eventPayload: JsonRecord = {
     type: opts.eventType,
     recordedAt,
@@ -71,7 +72,7 @@ export async function loadJournal(runDir: string): Promise<JournalEvent[]> {
         filename: file,
         path: fullPath,
         type: raw.type,
-        recordedAt: typeof raw.recordedAt === "string" ? raw.recordedAt : new Date().toISOString(),
+        recordedAt: typeof raw.recordedAt === "string" ? raw.recordedAt : getClockIsoString(),
         data: (raw.data ?? {}) as JsonRecord,
         checksum: typeof raw.checksum === "string" ? raw.checksum : undefined,
       });

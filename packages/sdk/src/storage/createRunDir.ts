@@ -1,6 +1,6 @@
 import { promises as fs } from "fs";
 import path from "path";
-import { CreateRunOptions, RunEntrypointMetadata, RunMetadata } from "./types";
+import { CreateRunDirOptions, RunEntrypointMetadata, RunMetadata } from "./types";
 import {
   DEFAULT_LAYOUT_VERSION,
   INPUTS_FILE,
@@ -14,10 +14,11 @@ import {
   PROCESS_DIR,
 } from "./paths";
 import { writeFileAtomic } from "./atomic";
+import { getClockIsoString } from "./clock";
 
 const GITIGNORE_CONTENT = `state/\ntasks/*/artifacts/\nblobs/\norphaned/\n`;
 
-export async function createRunDir(options: CreateRunOptions) {
+export async function createRunDir(options: CreateRunDirOptions) {
   const runDir = getRunDir(options.runsRoot, options.runId);
   await fs.mkdir(runDir, { recursive: true });
   await Promise.all([
@@ -32,7 +33,7 @@ export async function createRunDir(options: CreateRunOptions) {
 
   const layoutVersion = options.layoutVersion ?? DEFAULT_LAYOUT_VERSION;
   const entrypoint = resolveEntrypoint(options);
-  const createdAt = new Date().toISOString();
+  const createdAt = getClockIsoString();
   const metadata: RunMetadata = {
     runId: options.runId,
     request: options.request,
@@ -53,7 +54,7 @@ export async function createRunDir(options: CreateRunOptions) {
   return { runDir, metadata };
 }
 
-function resolveEntrypoint(options: CreateRunOptions): RunEntrypointMetadata {
+function resolveEntrypoint(options: CreateRunDirOptions): RunEntrypointMetadata {
   if (options.entrypoint?.importPath) {
     return {
       importPath: options.entrypoint.importPath,

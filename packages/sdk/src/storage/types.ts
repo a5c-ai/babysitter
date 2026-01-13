@@ -18,7 +18,7 @@ export interface RunMetadata extends JsonRecord {
   createdAt: string;
 }
 
-export interface CreateRunOptions {
+export interface CreateRunDirOptions {
   runsRoot: string;
   runId: string;
   request: string;

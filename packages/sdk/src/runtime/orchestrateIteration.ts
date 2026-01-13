@@ -21,6 +21,11 @@ import { serializeUnknownError } from "./errorUtils";
 import { emitRuntimeMetric } from "./instrumentation";
 
 type ProcessFunction = (inputs: unknown, ctx: any, extra?: unknown) => unknown | Promise<unknown>;
+// Use an indirect dynamic import so TypeScript does not downlevel to require() in CommonJS builds.
+const dynamicImportModule = new Function(
+  "specifier",
+  "return import(specifier);"
+) as (specifier: string) => Promise<Record<string, unknown>>;
 
 export async function orchestrateIteration(options: OrchestrateOptions): Promise<IterationResult> {
   const iterationStartedAt = Date.now();
@@ -102,7 +107,7 @@ async function loadProcessFunction(
   const moduleUrl = pathToFileURL(resolvedPath).href;
   let mod: Record<string, unknown>;
   try {
-    mod = await import(moduleUrl);
+    mod = await dynamicImportModule(moduleUrl);
   } catch (error) {
     throw new RunFailedError(`Failed to load process module at ${resolvedPath}`, {
       error: serializeUnknownError(error),
@@ -122,7 +127,9 @@ async function loadProcessFunction(
   return candidate as ProcessFunction;
 }
 
-function asWaitingResult(error: unknown): IterationResult | null {
+type WaitingIterationResult = Extract<IterationResult, { status: "waiting" }>;
+
+function asWaitingResult(error: unknown): WaitingIterationResult | null {
   if (error instanceof ParallelPendingError) {
     return { status: "waiting", nextActions: error.batch.actions };
   }

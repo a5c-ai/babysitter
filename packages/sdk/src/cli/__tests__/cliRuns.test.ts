@@ -287,6 +287,22 @@ describe("run lifecycle inspection commands", () => {
       expect(line).toContain("pending[node]=1");
     });
 
+    it("surfaces rebuild metadata after run:rebuild-state", async () => {
+      const runDir = await createRunWithPendingEffects();
+
+      await cli.run(["run:rebuild-state", runDir]);
+      logSpy.mockClear();
+
+      const exitCode = await cli.run(["run:status", runDir]);
+
+      expect(exitCode).toBe(0);
+      const line = findSingleLine(logSpy, (entry) => entry.startsWith("[run:status]"));
+      expect(line).toContain("stateVersion=");
+      expect(line).toContain("journalHead=#");
+      expect(line).toContain("journalHead.ulid=");
+      expect(line).toContain("stateRebuilt=true(cli_manual)");
+    });
+
     it("fails clearly when the run directory is missing", async () => {
       const missingDir = path.join(runsRoot, "missing-run");
 
@@ -359,6 +375,7 @@ describe("run lifecycle inspection commands", () => {
       expect(payload.events).toHaveLength(2);
       expect(payload.events[0]).toMatchObject({ seq: 1, type: "RUN_CREATED" });
       expect(payload.events[1]).toMatchObject({ seq: 2, type: "EFFECT_REQUESTED" });
+      expect(payload.metadata).toBeNull();
     });
 
     it("fails fast when --limit is invalid", async () => {
@@ -406,6 +423,56 @@ describe("run lifecycle inspection commands", () => {
       expect(Array.isArray(payload.events)).toBe(true);
       const lastEvent = payload.events.at(-1);
       expect(lastEvent.data.iteration.metadata).toEqual(iterationMetadata);
+    });
+
+    it("keeps pagination summaries while appending metadata after run:rebuild-state", async () => {
+      const runDir = await createRunWithHistory();
+      await cli.run(["run:rebuild-state", runDir]);
+      logSpy.mockClear();
+
+      const exitCode = await cli.run([
+        "run:events",
+        runDir,
+        "--filter-type",
+        "effect_requested",
+        "--limit",
+        "1",
+        "--reverse",
+      ]);
+
+      expect(exitCode).toBe(0);
+      const header = findSingleLine(logSpy, (entry) => entry.startsWith("[run:events]"));
+      expect(header).toContain("total=5");
+      expect(header).toContain("matching=2");
+      expect(header).toContain("showing=1");
+      expect(header).toContain("filter=EFFECT_REQUESTED");
+      expect(header).toContain("limit=1");
+      expect(header).toContain("order=desc");
+      expect(header).toContain("stateVersion=");
+      expect(header).toContain("journalHead=#");
+      expect(header).toContain("stateRebuilt=true(cli_manual)");
+    });
+
+    it("exposes metadata in JSON mode when a rebuilt cache exists", async () => {
+      const runDir = await createRunWithHistory();
+      await cli.run(["run:rebuild-state", runDir]);
+      logSpy.mockClear();
+
+      const exitCode = await cli.run(["run:events", runDir, "--json"]);
+
+      expect(exitCode).toBe(0);
+      const payload = readLastJson(logSpy);
+      expect(payload.metadata).toMatchObject({
+        stateRebuilt: true,
+        stateRebuildReason: "cli_manual",
+      });
+      expect(typeof payload.metadata.stateVersion).toBe("number");
+      expect(payload.metadata.journalHead).toEqual(
+        expect.objectContaining({
+          seq: expect.any(Number),
+          ulid: expect.any(String),
+        })
+      );
     });
   });
 
@@ -610,6 +677,45 @@ describe("run lifecycle inspection commands", () => {
       });
     });
 
+    it("injects rebuilt state metadata into waiting payloads when the runtime omits it", async () => {
+      const runDir = await createRunSkeleton("run-wait-cache");
+      await cli.run(["run:rebuild-state", runDir]);
+      await stubRunMetadata(runDir);
+      logSpy.mockClear();
+      errorSpy.mockClear();
+      orchestrateSpy.mockResolvedValueOnce({
+        status: "waiting",
+        nextActions: [
+          {
+            effectId: "ef-node",
+            invocationKey: "invoke-node",
+            kind: "node",
+            label: "auto me",
+            taskDef: { kind: "node", node: { entry: "./auto.js" } },
+          },
+          {
+            effectId: "ef-break",
+            invocationKey: "invoke-break",
+            kind: "breakpoint",
+            label: "manual check",
+            taskDef: { kind: "breakpoint", breakpoint: { confirmationRequired: true } },
+          },
+        ],
+      });
+
+      const exitCode = await cli.run(["run:continue", runDir, "--json"]);
+
+      expect(exitCode).toBe(0);
+      const payload = readLastJson(logSpy);
+      expect(payload.metadata).toMatchObject({
+        stateRebuilt: true,
+        stateRebuildReason: "cli_manual",
+      });
+      expect(payload.metadata.pendingEffectsByKind).toEqual({ breakpoint: 1, node: 1 });
+      expect(payload.metadata.stateVersion).toBeGreaterThanOrEqual(1);
+      const statusLine = findSingleLine(errorSpy, (line) => line.startsWith("[run:continue] status=waiting"));
+      expect(statusLine).toContain("journalHead=#");
+    });
     it("propagates failure metadata and errors", async () => {
       const runDir = await createRunSkeleton("run-failure");
       await stubRunMetadata(runDir);

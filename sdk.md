@@ -1024,6 +1024,8 @@ Human output is always a single line:
 
 `state` is derived from the latest `RUN_*` event plus the effect index: `waiting` is emitted while the index reports pending work, `completed` and `failed` reflect the final event type, and `created` is used when only `RUN_CREATED` exists. Terminal lifecycle events (`RUN_COMPLETED`/`RUN_FAILED`) always win even if pending effects remain, so operators can see that the run stopped progressing while still reviewing straggler counts. `last` echoes the event type, padded sequence number, and timestamp for the most recent journal entry (or `none` when a run has no events). `pending[total]` is always present and additional `pending[<kind>]` entries are printed in alphabetical order for every effect kind still waiting.
 
+Status lines also append deterministic metadata pairs emitted by the runtime: `stateVersion=<n>` tracks the derived state revision, `journalHead=<seq#ulid>` identifies the latest event applied to that state, `stateRebuilt=true` appears when the CLI regenerates the cache on the fly, and the existing `pending[...]` rollups summarize unresolved work. These fields mirror what JSON consumers see so humans can correlate consecutive invocations without switching formats.
+
 `--json` emits the machine-readable payload:
 
 ```json
@@ -1052,7 +1054,7 @@ Options:
 * `--reverse`: print events in newest-first order.
 * `--filter-type <TYPE>`: case-insensitive filter for a specific journal type such as `EFFECT_REQUESTED`, `RUN_FAILED`, etc.
 
-`--json` emits `{ "events": [ ... ] }` where each entry matches the run status payload (`seq`, `ulid`, `type`, `recordedAt`, `filename`, `path`, `data`). The limit, filter, and ordering flags apply before serialization so automation can replay slices deterministically.
+`--json` emits `{ "events": [ ... ], "metadata": { ... } }` where each entry matches the run status payload (`seq`, `ulid`, `type`, `recordedAt`, `filename`, `path`, `data`). The `metadata` block surfaces the same lifecycle pairs described above (`stateVersion`, `journalHead`, `stateRebuilt`, derived `pending[...]` counts) while the human-readable header continues to log the pagination info (`total`, `matching`, `showing`, filter/ordering hints). The limit, filter, and ordering flags apply before serialization so automation can replay slices deterministically.
 
 If `<runDir>` cannot be read the command exits with code `1` and logs `[run:events] unable to read run metadata at <path>: <reason>` to help identify typos or cleaned-up runs.
 
@@ -1075,7 +1077,7 @@ Human output mirrors the lifecycle status:
 * `waiting` - prints the header plus one `- <effectId> [<kind>] <label?>` line for every pending action (the same formatting used by `run:continue`) and exits `0`.
 * `failed` - prints the status line, dumps the error payload, and exits `1`.
 
-Status lines append deterministic metadata pairs (`stateVersion`, `pending[...]`, etc.) whenever the runtime reports them or they can be inferred from the pending list. If any pending action exposes `schedulerHints.sleepUntilEpochMs`, `run:step` logs `[run:step] sleep-until=<iso> effect=<effectId> ... pendingCount=<n?>` so operators know when to revisit the run.
+Status lines append deterministic metadata pairs (`stateVersion`, `journalHead`, `stateRebuilt`, `pending[...]`) whenever the runtime reports them or they can be inferred from the pending list. If any pending action exposes `schedulerHints.sleepUntilEpochMs`, `run:step` logs `[run:step] sleep-until=<iso> effect=<effectId> ... pendingCount=<n?>` so operators know when to revisit the run.
 
 Flags:
 
@@ -1084,7 +1086,7 @@ Flags:
 
 #### `babysitter run:continue <runDir>`
 
-Drive a run until it either completes, hits an error, or is waiting on manual intervention. Every iteration prints `[run:continue] status=<...>` (stderr) with `dryRun=true` when applicable, the cumulative `autoNode=<count>` tally, and metadata pairs such as `stateVersion` plus `pending[...]`. Waiting passes also list each pending action (`- <effectId> [<kind>] <label?>`) and surface scheduler hints as `[run:continue] sleep-until=<iso> effect=<effectId> pendingCount=<n?>`.
+Drive a run until it either completes, hits an error, or is waiting on manual intervention. Every iteration prints `[run:continue] status=<...>` (stderr) with `dryRun=true` when applicable, the cumulative `autoNode=<count>` tally, and metadata pairs such as `stateVersion`, `journalHead`, `stateRebuilt`, plus the `pending[...]` rollups. Waiting passes also list each pending action (`- <effectId> [<kind>] <label?>`) and surface scheduler hints as `[run:continue] sleep-until=<iso> effect=<effectId> pendingCount=<n?>`.
 
 Options:
 
@@ -1182,6 +1184,20 @@ These commands operate on pending/resolved **effects** (tasks).
   ```
   
   As with `task:list`, all refs in `effect` are POSIX-relative to `<runDir>`.
+  
+  ##### Redaction policy for task payloads
+  
+  To prevent accidental credential leakage, `task:*` commands never emit raw task/result blobs unless you explicitly opt in. The defaults are:
+  
+  * Human output (`task:show` without `--json`) prints `payloads: redacted (set BABYSITTER_ALLOW_SECRET_LOGS=true and rerun with --json --verbose to view task/result blobs)` plus the artifact refs so you can fetch the files manually.
+  * JSON output always sets `task` and `result` to `null` unless redaction is disabled.
+  
+  Payloads become visible only when **all** of the following are true:
+  
+  1. You invoke `task:show` with both `--json` and `--verbose` (the guard intentionally keeps human-mode output redacted).
+  2. `BABYSITTER_ALLOW_SECRET_LOGS` is set to a truthy value such as `true` or `1` in the CLI environment.
+  
+  When the guard is satisfied, the CLI returns the literal `task.json` and `result.json` contents inline so security reviewers or forensics tooling can reason about sensitive operations without re-reading the artifacts from disk. Any other combination falls back to redacted output.
 
 #### `babysitter task:run <runDir> <effectId>`
 

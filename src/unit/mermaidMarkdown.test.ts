@@ -48,4 +48,10 @@ suite('normalizeMermaidMarkdown', () => {
     const blocks = extractMermaidCodeBlocks(input);
     assert.strictEqual(blocks.length, 0);
   });
+
+  test('ignores unterminated mermaid fences', () => {
+    const input = ['```mermaid', 'A-->B'].join('\n'); // missing closing fence
+    const blocks = extractMermaidCodeBlocks(input);
+    assert.deepStrictEqual(blocks, []);
+  });
 });

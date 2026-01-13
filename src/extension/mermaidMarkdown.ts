@@ -75,9 +75,5 @@ export function extractMermaidCodeBlocks(
     }
   }
 
-  if (inCode && codeLang.toLowerCase() === 'mermaid') {
-    blocks.push({ blockIndex: blocks.length, code: mermaidLines.join('\n') });
-  }
-
   return blocks;
 }

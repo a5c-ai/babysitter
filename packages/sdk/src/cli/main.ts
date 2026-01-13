@@ -340,6 +340,18 @@ function formatVerboseValue(value: unknown): string {
   return JSON.stringify(value);
 }
 
+function allowSecretLogs(parsed: ParsedArgs): boolean {
+  if (!parsed.json || !parsed.verbose) {
+    return false;
+  }
+  const raw = process.env.BABYSITTER_ALLOW_SECRET_LOGS;
+  if (!raw) {
+    return false;
+  }
+  const normalized = raw.trim().toLowerCase();
+  return normalized === "1" || normalized === "true";
+}
+
 function logVerbose(command: string, parsed: ParsedArgs, details: Record<string, unknown>) {
   if (!parsed.verbose) return;
   const formatted = Object.entries(details)
@@ -562,18 +574,13 @@ async function handleRunStatus(parsed: ParsedArgs): Promise<number> {
   const pendingByKind = countPendingByKind(pendingRecords);
   const pendingTotal = pendingRecords.length;
   const stateSnapshot = await readStateCacheSafe(runDir, "run:status");
-  const iterationMetadata: IterationMetadata = {
-    pendingEffectsByKind: pendingByKind,
-  };
-  if (stateSnapshot) {
-    iterationMetadata.stateVersion = stateSnapshot.stateVersion;
-    iterationMetadata.journalHead = stateSnapshot.journalHead ?? null;
-    if (stateSnapshot.rebuildReason) {
-      iterationMetadata.stateRebuilt = true;
-      iterationMetadata.stateRebuildReason = stateSnapshot.rebuildReason;
-    }
-  }
-  const formattedMetadata = formatIterationMetadata(iterationMetadata);
+  const mergedMetadata = mergeMetadataSources(
+    {
+      pendingEffectsByKind: pendingByKind,
+    },
+    { snapshot: stateSnapshot, pendingByKind }
+  );
+  const formattedMetadata = formatIterationMetadata(mergedMetadata);
   const lastEvent = journal.at(-1);
   const lastLifecycleEvent = findLastLifecycleEvent(journal);
   const state = deriveRunState(lastLifecycleEvent?.type, pendingTotal);
@@ -608,6 +615,7 @@ async function handleRunEvents(parsed: ParsedArgs): Promise<number> {
     filterType: parsed.filterType,
   });
   if (!(await readRunMetadataSafe(runDir, "run:events"))) return 1;
+  const stateSnapshot = await readStateCacheSafe(runDir, "run:events");
   const journal = await loadJournalSafe(runDir, "run:events");
   if (!journal) return 1;
 
@@ -617,8 +625,15 @@ async function handleRunEvents(parsed: ParsedArgs): Promise<number> {
   const ordered = parsed.reverseOrder ? orderedBase.reverse() : orderedBase;
   const limited = parsed.limit !== undefined ? ordered.slice(0, parsed.limit) : ordered;
 
+  const metadata = mergeMetadataSources(undefined, { snapshot: stateSnapshot });
+  const formattedMetadata = formatIterationMetadata(metadata);
   if (parsed.json) {
-    console.log(JSON.stringify({ events: limited.map((event) => serializeJournalEvent(event, runDir)) }));
+    console.log(
+      JSON.stringify({
+        events: limited.map((event) => serializeJournalEvent(event, runDir)),
+        metadata: formattedMetadata.jsonMetadata ?? null,
+      })
+    );
     return 0;
   }
 
@@ -630,7 +645,8 @@ async function handleRunEvents(parsed: ParsedArgs): Promise<number> {
   if (filterType) headerParts.push(`filter=${filterType}`);
   if (parsed.limit) headerParts.push(`limit=${parsed.limit}`);
   if (parsed.reverseOrder) headerParts.push("order=desc");
-  console.log(`[run:events] ${headerParts.join(" ")}`);
+  const metadataSuffix = formattedMetadata.textParts.length ? ` ${formattedMetadata.textParts.join(" ")}` : "";
+  console.log(`[run:events] ${headerParts.join(" ")}${metadataSuffix}`);
   for (const event of limited) {
     console.log(`- ${formatEventLine(event)}`);
   }
@@ -682,12 +698,14 @@ async function handleTaskRun(parsed: ParsedArgs): Promise<number> {
     return 1;
   }
   const runDir = resolveRunDir(parsed.runsDir, parsed.runDirArg);
+  const secretLogsAllowed = allowSecretLogs(parsed);
   const streamers = buildTaskRunStreamers(parsed);
   logVerbose("task:run", parsed, {
     runDir,
     effectId: parsed.effectId,
     dryRun: parsed.dryRun,
     json: parsed.json,
+    secretLogsAllowed,
   });
   const index = await buildEffectIndexSafe(runDir, "task:run");
   if (!index) return 1;
@@ -815,6 +833,7 @@ async function handleRunContinue(parsed: ParsedArgs): Promise<number> {
     autoNodeLabel: parsed.autoNodeLabel ?? null,
   });
   if (!(await readRunMetadataSafe(runDir, "run:continue"))) return 1;
+  const stateSnapshot = await readStateCacheSafe(runDir, "run:continue");
   const executed: ActionSummary[] = [];
   const autoNodeLimit = parsed.autoNodeMax ?? Number.POSITIVE_INFINITY;
   let autoNodeRemaining = autoNodeLimit;
@@ -823,7 +842,12 @@ async function handleRunContinue(parsed: ParsedArgs): Promise<number> {
   while (true) {
     const iteration = await orchestrateIteration({ runDir });
     const pendingActions = iteration.status === "waiting" ? iteration.nextActions : undefined;
-    const metadata = enrichIterationMetadata(iteration.metadata, pendingActions);
+    const pendingCounts = pendingActions ? countActionsByKind(pendingActions) : undefined;
+    const enrichedMetadata = enrichIterationMetadata(iteration.metadata, pendingActions);
+    const metadata = mergeMetadataSources(enrichedMetadata, {
+      snapshot: stateSnapshot,
+      pendingByKind: pendingCounts,
+    });
     const formattedMetadata = formatIterationMetadata(metadata);
     logRunContinueStatus(iteration.status, executed.length, formattedMetadata.textParts, {
       dryRun: parsed.dryRun,
@@ -902,7 +926,7 @@ async function handleRunContinue(parsed: ParsedArgs): Promise<number> {
     if (iteration.status === "completed") {
       if (parsed.json) {
         emitJsonResult(
-          { status: "completed" },
+          { status: "completed", output: iteration.output },
           {
             executed,
             pending: [],
@@ -917,7 +941,7 @@ async function handleRunContinue(parsed: ParsedArgs): Promise<number> {
 
     if (parsed.json) {
       emitJsonResult(
-        { status: "failed" },
+        { status: "failed", error: iteration.error ?? null },
         {
           executed,
           pending: [],
@@ -1039,10 +1063,12 @@ async function handleTaskShow(parsed: ParsedArgs): Promise<number> {
     return 1;
   }
   const runDir = resolveRunDir(parsed.runsDir, parsed.runDirArg);
+  const secretLogsAllowed = allowSecretLogs(parsed);
   logVerbose("task:show", parsed, {
     runDir,
     effectId: parsed.effectId,
     json: parsed.json,
+    secretLogsAllowed,
   });
   const index = await buildEffectIndexSafe(runDir, "task:show");
   if (!index) return 1;
@@ -1060,14 +1086,16 @@ async function handleTaskShow(parsed: ParsedArgs): Promise<number> {
   }
   const preview = await loadTaskResultPreview(runDir, parsed.effectId, record);
   const entry = toTaskListEntry(record, runDir);
+  const inlineResult = preview.large ? null : preview.result ?? null;
+  const largeResultRef = preview.large ? entry.resultRef ?? defaultResultRef(record.effectId) : null;
 
   if (parsed.json) {
     console.log(
       JSON.stringify({
         effect: entry,
-        task: taskDef,
-        result: preview.large ? null : preview.result ?? null,
-        largeResult: preview.large ? entry.resultRef ?? defaultResultRef(record.effectId) : null,
+        task: secretLogsAllowed ? taskDef : null,
+        result: secretLogsAllowed ? inlineResult : null,
+        largeResult: largeResultRef,
       })
     );
     return 0;
@@ -1081,14 +1109,23 @@ async function handleTaskShow(parsed: ParsedArgs): Promise<number> {
   console.log(`  stepId=${entry.stepId} requestedAt=${entry.requestedAt ?? "n/a"} resolvedAt=${entry.resolvedAt ?? "n/a"}`);
   console.log(`  taskDefRef=${entry.taskDefRef ?? "n/a"}`);
   console.log(`  inputsRef=${entry.inputsRef ?? "n/a"}`);
-  if (entry.resultRef) console.log(`  resultRef=${entry.resultRef}`);
-  if (entry.stdoutRef) console.log(`  stdoutRef=${entry.stdoutRef}`);
-  if (entry.stderrRef) console.log(`  stderrRef=${entry.stderrRef}`);
+  console.log(`  resultRef=${entry.resultRef ?? "n/a"}`);
+  console.log(`  stdoutRef=${entry.stdoutRef ?? "n/a"}`);
+  console.log(`  stderrRef=${entry.stderrRef ?? "n/a"}`);
+  if (!secretLogsAllowed) {
+    console.log(
+      "  payloads: redacted (set BABYSITTER_ALLOW_SECRET_LOGS=true and rerun with --json --verbose to view task/result blobs)"
+    );
+    if (!inlineResult && !preview.large) {
+      console.log("  result: (not yet written)");
+    }
+    return 0;
+  }
   console.log("  taskDef:", JSON.stringify(taskDef, null, 2));
   if (preview.large) {
-    console.log(`  result: see ${entry.resultRef ?? defaultResultRef(record.effectId)}`);
-  } else if (preview.result) {
-    console.log("  result:", JSON.stringify(preview.result, null, 2));
+    console.log(`  result: see ${largeResultRef ?? entry.resultRef ?? defaultResultRef(record.effectId)}`);
+  } else if (inlineResult) {
+    console.log("  result:", JSON.stringify(inlineResult, null, 2));
   } else {
     console.log("  result: (not yet written)");
   }
@@ -1274,6 +1311,47 @@ function formatLastEventSummary(event?: JournalEvent): string {
   return `${event.type}#${formatSeq(event.seq)} ${event.recordedAt}`;
 }
 
+function mergeMetadataSources(
+  metadata: IterationMetadata | undefined,
+  options: { snapshot?: StateCacheSnapshot | null; pendingByKind?: Record<string, number> }
+): IterationMetadata | undefined {
+  const snapshot = options.snapshot ?? null;
+  const hasPendingOverride = options.pendingByKind !== undefined;
+  const snapshotHasInfo = Boolean(snapshot);
+  if (!metadata && !hasPendingOverride && !snapshotHasInfo) {
+    return undefined;
+  }
+  const next: IterationMetadata = { ...(metadata ?? {}) };
+  if (hasPendingOverride) {
+    next.pendingEffectsByKind = { ...(options.pendingByKind ?? {}) };
+  } else if (!next.pendingEffectsByKind && snapshot) {
+    next.pendingEffectsByKind = { ...snapshot.pendingEffectsByKind };
+  }
+  if (snapshot) {
+    if (next.stateVersion === undefined) {
+      next.stateVersion = snapshot.stateVersion;
+    }
+    if (next.journalHead === undefined) {
+      next.journalHead = snapshot.journalHead ?? null;
+    }
+    if (snapshot.rebuildReason) {
+      next.stateRebuilt = true;
+      if (!next.stateRebuildReason) {
+        next.stateRebuildReason = snapshot.rebuildReason;
+      }
+    }
+  }
+  if (
+    next.stateVersion === undefined &&
+    next.stateRebuilt === undefined &&
+    next.pendingEffectsByKind === undefined &&
+    next.journalHead === undefined
+  ) {
+    return undefined;
+  }
+  return next;
+}
+
 function formatIterationMetadata(
   metadata?: IterationMetadata
 ): { textParts: string[]; jsonMetadata?: IterationMetadata } {
@@ -1284,17 +1362,29 @@ function formatIterationMetadata(
   if (metadata.stateVersion !== undefined) {
     textParts.push(`stateVersion=${metadata.stateVersion}`);
   }
+  if (metadata.journalHead && typeof metadata.journalHead.seq === "number") {
+    const seq = formatSeq(metadata.journalHead.seq);
+    textParts.push(`journalHead=#${seq}`);
+    if (metadata.journalHead.ulid) {
+      textParts.push(`journalHead.ulid=${metadata.journalHead.ulid}`);
+    }
+    if (metadata.journalHead.checksum) {
+      textParts.push(`journalHead.checksum=${metadata.journalHead.checksum}`);
+    }
+  }
   if (metadata.stateRebuilt) {
     const reasonSuffix = metadata.stateRebuildReason ? `(${metadata.stateRebuildReason})` : "";
     textParts.push(`stateRebuilt=true${reasonSuffix}`);
   }
-  const pendingEntries = Object.entries(metadata.pendingEffectsByKind ?? {}).sort(([a], [b]) =>
-    a.localeCompare(b)
-  );
-  const pendingTotal = pendingEntries.reduce((sum, [, count]) => sum + count, 0);
-  textParts.push(`pending[total]=${pendingTotal}`);
-  for (const [kind, count] of pendingEntries) {
-    textParts.push(`pending[${kind}]=${count}`);
+  if (metadata.pendingEffectsByKind) {
+    const pendingEntries = Object.entries(metadata.pendingEffectsByKind).sort(([a], [b]) =>
+      a.localeCompare(b)
+    );
+    const pendingTotal = pendingEntries.reduce((sum, [, count]) => sum + count, 0);
+    textParts.push(`pending[total]=${pendingTotal}`);
+    for (const [kind, count] of pendingEntries) {
+      textParts.push(`pending[${kind}]=${count}`);
+    }
   }
   return { textParts, jsonMetadata: metadata };
 }

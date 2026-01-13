@@ -3,6 +3,7 @@ import { getStateDir, getStateFile } from "../../storage/paths";
 import { writeFileAtomic } from "../../storage/atomic";
 import { EffectIndex, buildEffectIndex } from "./effectIndex";
 import { EffectRecord, EffectStatus } from "../types";
+import { getClockIsoString } from "../../storage/clock";
 
 export const STATE_CACHE_SCHEMA_VERSION = "2026.01.state-cache";
 
@@ -86,7 +87,7 @@ export function createStateCacheSnapshot(
       : (journalHeadOrOptions as CreateStateCacheSnapshotOptions | undefined) ?? {};
   return {
     schemaVersion: options.schemaVersion ?? STATE_CACHE_SCHEMA_VERSION,
-    savedAt: options.savedAt ?? new Date().toISOString(),
+    savedAt: options.savedAt ?? getClockIsoString(),
     journalHead: options.journalHead ?? null,
     stateVersion: options.stateVersion ?? 0,
     effectsByInvocation: options.effectsByInvocation ?? {},
@@ -115,7 +116,7 @@ export function normalizeSnapshot(raw: unknown): StateCacheSnapshot {
     raw.journalHead === null ? null : normalizeJournalHead(raw.journalHead ?? undefined) ?? null;
   const effectsByInvocation = normalizeEffectSummaryMap(raw.effectsByInvocation);
   const pendingEffectsByKind = normalizePendingEffects(raw.pendingEffectsByKind);
-  const savedAt = typeof raw.savedAt === "string" ? raw.savedAt : new Date().toISOString();
+  const savedAt = typeof raw.savedAt === "string" ? raw.savedAt : getClockIsoString();
   const rebuildReason =
     raw.rebuildReason === null
       ? null

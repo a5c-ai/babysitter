@@ -2,10 +2,11 @@ import { promises as fs } from "fs";
 import path from "path";
 import { RunLockInfo } from "./types";
 import { getLockPath } from "./paths";
+import { getClockIsoString } from "./clock";
 
 export async function acquireRunLock(runDir: string, owner: string): Promise<RunLockInfo> {
   const lockPath = getLockPath(runDir);
-  const lockInfo: RunLockInfo = { pid: process.pid, owner, acquiredAt: new Date().toISOString() };
+  const lockInfo: RunLockInfo = { pid: process.pid, owner, acquiredAt: getClockIsoString() };
   try {
     await fs.writeFile(lockPath, JSON.stringify(lockInfo, null, 2) + "\n", { flag: "wx" });
     return lockInfo;

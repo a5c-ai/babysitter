@@ -17,9 +17,11 @@
     "clean": "rimraf dist",
     "lint": "eslint \"src/**/*.ts\" --max-warnings=0",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "smoke:cli": "node scripts/smoke-cli.js --runs-dir packages/sdk/test-fixtures/cli/runs/smoke"
   },
   "dependencies": {
+    "dev": "^0.1.3",
     "fs-extra": "^11.2.0",
     "ulid": "^2.3.0"
   },
