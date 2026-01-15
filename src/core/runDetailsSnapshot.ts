@@ -333,11 +333,9 @@ function discoverKeyFiles(params: { run: Run; maxRunFiles: number }): {
     params.run.paths.mainJs,
     path.join(runRoot, 'process.md'),
     path.join(runRoot, 'artifacts', 'process.md'),
-    path.join(runRoot, 'artifacts', 'process.mermaid.md'),
     path.join(runRoot, 'code', 'main.js'),
     path.join(runRoot, 'run', 'process.md'),
     path.join(runRoot, 'run', 'artifacts', 'process.md'),
-    path.join(runRoot, 'run', 'artifacts', 'process.mermaid.md'),
     path.join(runRoot, 'run', 'code', 'main.js'),
   ]
     .map((p) => path.resolve(p))

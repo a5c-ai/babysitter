@@ -94,6 +94,11 @@ suite('runDetailsSnapshot', () => {
       );
       fs.writeFileSync(path.join(runRoot, 'journal.jsonl'), '', 'utf8');
       fs.writeFileSync(path.join(runRoot, 'process.md'), '# process', 'utf8');
+      fs.writeFileSync(
+        path.join(runRoot, 'artifacts', 'process.md'),
+        '# process artifact',
+        'utf8',
+      );
       fs.writeFileSync(path.join(runRoot, 'code', 'main.js'), 'console.log(1)', 'utf8');
       fs.writeFileSync(path.join(runRoot, 'artifacts', 'other.txt'), 'artifact', 'utf8');
       fs.writeFileSync(path.join(runRoot, 'nested', 'x.txt'), 'nested', 'utf8');
@@ -148,8 +153,8 @@ suite('runDetailsSnapshot', () => {
       assert.ok(importantRels.includes('state.json'));
       assert.ok(importantRels.includes('journal.jsonl'));
       assert.ok(importantRels.includes('process.md'));
+      assert.ok(importantRels.includes('artifacts/process.md'));
       assert.ok(importantRels.includes('code/main.js'));
-      assert.equal(importantRels.includes('artifacts/process.mermaid.md'), false);
     } finally {
       fs.rmSync(tempDir, { recursive: true, force: true });
     }

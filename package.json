@@ -284,7 +284,6 @@
     "build:sdk": "npm run build --workspace=@a5c/babysitter-sdk"
   },
   "devDependencies": {
-    "@types/jsdom": "^27.0.0",
     "@types/mocha": "^10.0.6",
     "@types/node": "^20.11.30",
     "@types/vscode": "^1.90.0",
@@ -299,9 +298,6 @@
     "prettier": "^3.3.3"
   },
   "dependencies": {
-    "dompurify": "^3.3.1",
-    "jsdom": "^27.4.0",
-    "mermaid": "^10.9.1",
     "node-pty": "^1.1.0",
     "typescript": "^5.5.4"
   }

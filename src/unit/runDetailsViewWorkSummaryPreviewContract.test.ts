@@ -86,4 +86,25 @@ suite('Run Details webview template', () => {
       'expected work-summary preview to surface completion status',
     );
   });
+
+  test('renders a single process summary preview without Mermaid hooks', () => {
+    const source = readWorkspaceFile('src/extension/runDetailsView.ts');
+
+    assert.ok(
+      source.includes('id="processSummaryPill"'),
+      'expected process summary pill identifier',
+    );
+    assert.ok(
+      source.includes('id="processSummaryPreview"'),
+      'expected process summary preview container',
+    );
+    assert.ok(
+      !source.includes('processMermaid'),
+      'expected process.mermaid.md UI to be removed',
+    );
+    assert.ok(
+      !/process\\.mermaid\\.md/i.test(source),
+      'expected no references to process.mermaid.md',
+    );
+  });
 });

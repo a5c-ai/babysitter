@@ -76,3 +76,65 @@ jobs:
           name: vsix
           path: '*.vsix'
           if-no-files-found: ignore
+
+  packages-sdk:
+    name: SDK Matrix (os=${{ matrix.os }}, node=${{ matrix.node }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-13, windows-2022]
+        node: [18, 20]
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Prepare artifact directories
+        run: |
+          set -eo pipefail
+          mkdir -p "_ci_artifacts/cli/${{ matrix.os }}/node${{ matrix.node }}"
+          mkdir -p "_ci_artifacts/logs/${{ matrix.os }}/node${{ matrix.node }}"
+
+      - name: SDK Lint
+        run: |
+          set -o pipefail
+          npm run lint --workspace=@a5c-ai/babysitter-sdk 2>&1 | tee "_ci_artifacts/logs/${{ matrix.os }}/node${{ matrix.node }}/lint.log"
+
+      - name: SDK Build
+        run: |
+          set -o pipefail
+          npm run build --workspace=@a5c-ai/babysitter-sdk 2>&1 | tee "_ci_artifacts/logs/${{ matrix.os }}/node${{ matrix.node }}/build.log"
+
+      - name: SDK Tests
+        run: |
+          set -o pipefail
+          npm run test --workspace=@a5c-ai/babysitter-sdk 2>&1 | tee "_ci_artifacts/logs/${{ matrix.os }}/node${{ matrix.node }}/test.log"
+
+      - name: SDK Smoke CLI
+        run: |
+          set -o pipefail
+          npm run smoke:cli --workspace=@a5c-ai/babysitter-sdk -- --runs-dir "_ci_artifacts/cli/${{ matrix.os }}/node${{ matrix.node }}" --keep 2>&1 | tee "_ci_artifacts/logs/${{ matrix.os }}/node${{ matrix.node }}/smoke.log"
+
+      - name: Upload SDK artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sdk-artifacts-${{ matrix.os }}-node${{ matrix.node }}
+          if-no-files-found: warn
+          path: |
+            _ci_artifacts/cli/${{ matrix.os }}/node${{ matrix.node }}
+            _ci_artifacts/logs/${{ matrix.os }}/node${{ matrix.node }}
