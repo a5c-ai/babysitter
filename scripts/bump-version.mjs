@@ -20,9 +20,18 @@ const bumpVersion = (version, level) => {
   return `${major}.${minor}.${patch + 1}`;
 };
 
-const pkgPath = "package.json";
-const pkg = JSON.parse(readFileSync(pkgPath, "utf8"));
-const currentVersion = pkg.version;
+const packageManifests = [
+  { path: "package.json" },
+  { path: "packages/sdk/package.json" },
+];
+
+const manifests = packageManifests.map(({ path }) => ({
+  path,
+  data: JSON.parse(readFileSync(path, "utf8")),
+}));
+
+const rootManifest = manifests[0].data;
+const currentVersion = rootManifest.version;
 
 const lastTag = run("git describe --tags --abbrev=0");
 const logRange = lastTag ? `${lastTag}..HEAD` : "";
@@ -39,8 +48,11 @@ if (/#major\b/i.test(commits)) {
 }
 
 const newVersion = bumpVersion(currentVersion, bumpTarget);
-pkg.version = newVersion;
-writeFileSync(pkgPath, `${JSON.stringify(pkg, null, 2)}\n`);
+
+for (const manifest of manifests) {
+  manifest.data.version = newVersion;
+  writeFileSync(manifest.path, `${JSON.stringify(manifest.data, null, 2)}\n`);
+}
 
 const lockPath = "package-lock.json";
 if (existsSync(lockPath)) {
@@ -48,6 +60,20 @@ if (existsSync(lockPath)) {
   if (lock.version) lock.version = newVersion;
   if (lock.packages && lock.packages[""]) {
     lock.packages[""].version = newVersion;
+  }
+  const sdkWorkspaceKey = "packages/sdk";
+  if (lock.packages && lock.packages[sdkWorkspaceKey]) {
+    lock.packages[sdkWorkspaceKey].version = newVersion;
+  }
+  const sdkManifest = manifests.find(
+    (manifest) => manifest.path === "packages/sdk/package.json",
+  );
+  const sdkName = sdkManifest?.data?.name;
+  if (sdkName) {
+    const sdkNodeModulesKey = `node_modules/${sdkName}`;
+    if (lock.packages && lock.packages[sdkNodeModulesKey]) {
+      lock.packages[sdkNodeModulesKey].version = newVersion;
+    }
   }
   writeFileSync(lockPath, `${JSON.stringify(lock, null, 2)}\n`);
 }

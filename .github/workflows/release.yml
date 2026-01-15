@@ -114,6 +114,7 @@ jobs:
           node-version: 20
           cache: npm
           registry-url: https://registry.npmjs.org/
+          always-auth: true
 
       - name: Install dependencies
         run: npm ci
@@ -165,10 +166,13 @@ jobs:
       - name: Build npm package
         run: npm run build
 
-      # - name: Publish to npm
-      #   env:
-      #     NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-      #   run: npm publish --access public
+      - name: Build SDK package
+        run: npm run --workspace=@a5c-ai/babysitter-sdk build
+
+      - name: Publish SDK to npm
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish --workspace=@a5c-ai/babysitter-sdk --access public
 
       - name: Tag release
         run: |
