@@ -73,7 +73,7 @@ $CLI run:create \
   --run-id "run-$(date -u +%Y%m%d-%H%M%S)-dev-build"
 ```
 
-The CLI prints the new run id + directory. Immediately open `.a5c/runs/<runId>/code/main.js` to ensure it reflects the requested recipe; if you generate a custom `main.js`, still store it under `code/` and add process notes to `artifacts/process.md` + `.mermaid.md` like before.
+The CLI prints the new run id + directory. Immediately open `.a5c/runs/<runId>/code/main.js` to ensure it reflects the requested recipe; if you generate a custom `main.js`, still store it under `code/` and capture the narrative in `artifacts/process.md`. Mermaid diagrams are no longer required.
 
 ### 3.3 Driving iterations
 
@@ -136,7 +136,7 @@ Loop until `status` is `completed` or `failed`. Never edit `journal.jsonl` or `s
 ## 5. Artifacts & documentation
 
 - Store specs, summaries, and diagrams under `.a5c/runs/<runId>/artifacts/`. Reference them in CLI notes (e.g., `$CLI run:events … --note "uploaded part7_spec.md"` currently not supported; instead, add an `artifact` journal entry by running the documented helper script if needed, but prefer CLI notes once available).
-- Provide `process.md` + `process.mermaid.md` for every `main.js` you craft, as before.
+- Provide an updated `process.md` for every `main.js` you craft (Mermaid diagrams have been retired, so no additional `.mermaid.md` artifact is needed).
 
 ---
 
