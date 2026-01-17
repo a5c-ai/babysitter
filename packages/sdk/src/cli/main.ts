@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { promises as fs } from "node:fs";
 import * as path from "node:path";
+import * as os from "node:os";
 import { runNodeTaskFromCli } from "./nodeTaskRunner";
 import type { CliRunNodeTaskResult } from "./nodeTaskRunner";
 import { orchestrateIteration } from "../runtime/orchestrateIteration";
@@ -24,6 +25,7 @@ const USAGE = `Usage:
   babysitter run:continue <runDir> [--runs-dir <dir>] [--json] [--dry-run] [--auto-node-tasks] [--auto-node-max <n>] [--auto-node-label <text>]
   babysitter task:list <runDir> [--runs-dir <dir>] [--pending] [--kind <kind>] [--json]
   babysitter task:show <runDir> <effectId> [--runs-dir <dir>] [--json]
+  babysitter skill:install [--type <claude|codex|cursor>] [--scope <local|global>] [--skills-dir <dir>] [--force] [--json] [--dry-run]
 
 Global flags:
   --runs-dir <dir>   Override the runs directory (defaults to current working directory).
@@ -35,9 +37,13 @@ Global flags:
 interface ParsedArgs {
   command?: string;
   runsDir: string;
+  skillsDir?: string;
+  skillType: SkillTarget;
+  skillScope: SkillScope;
   json: boolean;
   dryRun: boolean;
   verbose: boolean;
+  force: boolean;
   helpRequested: boolean;
   autoNodeTasks: boolean;
   autoNodeMax?: number;
@@ -83,14 +89,24 @@ interface TaskListEntry {
 
 const LARGE_RESULT_PREVIEW_LIMIT = 1024 * 1024; // 1 MiB
 
+type SkillTarget = "claude" | "codex" | "cursor";
+type SkillScope = "local" | "global";
+
+const DEFAULT_SKILL_TARGET: SkillTarget = "codex";
+const DEFAULT_SKILL_SCOPE: SkillScope = "local";
+
 function parseArgs(argv: string[]): ParsedArgs {
   const [initialCommand, ...rest] = argv;
   const parsed: ParsedArgs = {
     command: initialCommand,
     runsDir: ".",
+    skillsDir: undefined,
+    skillType: DEFAULT_SKILL_TARGET,
+    skillScope: DEFAULT_SKILL_SCOPE,
     json: false,
     dryRun: false,
     verbose: false,
+    force: false,
     helpRequested: false,
     autoNodeTasks: false,
     pendingOnly: false,
@@ -111,12 +127,28 @@ function parseArgs(argv: string[]): ParsedArgs {
       parsed.runsDir = expectFlagValue(rest, ++i, "--runs-dir");
       continue;
     }
+    if (arg === "--skills-dir") {
+      parsed.skillsDir = expectFlagValue(rest, ++i, "--skills-dir");
+      continue;
+    }
+    if (arg === "--type") {
+      parsed.skillType = expectSkillTarget(expectFlagValue(rest, ++i, "--type"), "--type");
+      continue;
+    }
+    if (arg === "--scope") {
+      parsed.skillScope = expectSkillScope(expectFlagValue(rest, ++i, "--scope"), "--scope");
+      continue;
+    }
     if (arg === "--json") {
       parsed.json = true;
       continue;
     }
     if (arg === "--dry-run") {
       parsed.dryRun = true;
+      continue;
+    }
+    if (arg === "--force") {
+      parsed.force = true;
       continue;
     }
     if (arg === "--verbose") {
@@ -226,6 +258,33 @@ function parsePositiveInteger(raw: string, flag: string): number {
     throw new Error(`${flag} must be a positive integer`);
   }
   return Math.floor(parsed);
+}
+
+function expectSkillTarget(raw: string, flag: string): SkillTarget {
+  const normalized = raw.trim().toLowerCase();
+  if (normalized === "claude" || normalized === "codex" || normalized === "cursor") {
+    return normalized;
+  }
+  throw new Error(`${flag} must be one of: claude, codex, cursor`);
+}
+
+function expectSkillScope(raw: string, flag: string): SkillScope {
+  const normalized = raw.trim().toLowerCase();
+  if (normalized === "local" || normalized === "global") {
+    return normalized;
+  }
+  throw new Error(`${flag} must be one of: local, global`);
+}
+
+function resolveSkillsDir(parsed: ParsedArgs): string {
+  if (parsed.skillsDir) {
+    return path.resolve(parsed.skillsDir);
+  }
+  const scopeBase =
+    parsed.skillScope === "global"
+      ? path.join(os.homedir(), `.${parsed.skillType}`)
+      : path.resolve(`.${parsed.skillType}`);
+  return path.join(scopeBase, "skills");
 }
 
 function summarizeActions(actions: EffectAction[]): ActionSummary[] {
@@ -339,6 +398,100 @@ function formatVerboseValue(value: unknown): string {
   if (typeof value === "string") return value;
   if (typeof value === "number" || typeof value === "boolean") return String(value);
   return JSON.stringify(value);
+}
+
+type SkillInstallStatus = "installed" | "skipped" | "planned" | "error";
+
+type SkillInstallResult = {
+  name: string;
+  status: SkillInstallStatus;
+  destinationDir: string;
+  sourceDir: string;
+  message?: string;
+};
+
+function resolveBundledSkillsRoot(): string {
+  return path.resolve(__dirname, "..", "..", "skills");
+}
+
+async function listBundledSkillDirs(): Promise<string[]> {
+  const root = resolveBundledSkillsRoot();
+  const entries = await fs.readdir(root, { withFileTypes: true });
+  return entries.filter((entry) => entry.isDirectory()).map((entry) => entry.name).sort();
+}
+
+async function pathExists(filePath: string): Promise<boolean> {
+  try {
+    await fs.stat(filePath);
+    return true;
+  } catch (error) {
+    const err = error as NodeJS.ErrnoException;
+    if (err.code === "ENOENT") {
+      return false;
+    }
+    throw error;
+  }
+}
+
+function toPosixPath(value: string): string {
+  return value.replace(/\\/g, "/");
+}
+
+async function installBundledSkillDir(
+  skillName: string,
+  options: { skillsDir: string; dryRun: boolean; force: boolean }
+): Promise<SkillInstallResult> {
+  const sourceDir = path.join(resolveBundledSkillsRoot(), skillName);
+  const destinationDir = path.join(options.skillsDir, skillName);
+  try {
+    const sourceExists = await pathExists(sourceDir);
+    if (!sourceExists) {
+      return {
+        name: skillName,
+        status: "error",
+        sourceDir,
+        destinationDir,
+        message: "bundled skill missing",
+      };
+    }
+    const destinationExists = await pathExists(destinationDir);
+    if (destinationExists && !options.force) {
+      return {
+        name: skillName,
+        status: "skipped",
+        sourceDir,
+        destinationDir,
+        message: "already installed",
+      };
+    }
+    if (options.dryRun) {
+      return {
+        name: skillName,
+        status: "planned",
+        sourceDir,
+        destinationDir,
+      };
+    }
+    if (destinationExists && options.force) {
+      await fs.rm(destinationDir, { recursive: true, force: true });
+    }
+    await fs.mkdir(options.skillsDir, { recursive: true });
+    await fs.cp(sourceDir, destinationDir, { recursive: true });
+    return {
+      name: skillName,
+      status: "installed",
+      sourceDir,
+      destinationDir,
+    };
+  } catch (error) {
+    return {
+      name: skillName,
+      status: "error",
+      sourceDir,
+      destinationDir,
+      message: error instanceof Error ? error.message : String(error),
+    };
+  }
 }
 
 function allowSecretLogs(parsed: ParsedArgs): boolean {
@@ -1133,6 +1286,76 @@ async function handleTaskShow(parsed: ParsedArgs): Promise<number> {
   return 0;
 }
 
+async function handleSkillInstall(parsed: ParsedArgs): Promise<number> {
+  const skillsDir = resolveSkillsDir(parsed);
+  logVerbose("skill:install", parsed, {
+    skillsDir,
+    type: parsed.skillType,
+    scope: parsed.skillScope,
+    dryRun: parsed.dryRun,
+    force: parsed.force,
+    json: parsed.json,
+  });
+  const results: SkillInstallResult[] = [];
+  let skillNames: string[];
+  try {
+    skillNames = await listBundledSkillDirs();
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    if (parsed.json) {
+      console.log(JSON.stringify({ skillsDir, type: parsed.skillType, scope: parsed.skillScope, error: message, results: [] }));
+    } else {
+      console.error(`[skill:install] failed to read bundled skills: ${message}`);
+    }
+    return 1;
+  }
+  if (!skillNames.length) {
+    if (parsed.json) {
+      console.log(
+        JSON.stringify({ skillsDir, type: parsed.skillType, scope: parsed.skillScope, error: "no bundled skills found", results: [] })
+      );
+    } else {
+      console.error("[skill:install] no bundled skills found");
+    }
+    return 1;
+  }
+  for (const skillName of skillNames) {
+    results.push(await installBundledSkillDir(skillName, { skillsDir, dryRun: parsed.dryRun, force: parsed.force }));
+  }
+  const counts = { installed: 0, skipped: 0, planned: 0, error: 0 };
+  for (const result of results) {
+    if (result.status === "installed") counts.installed += 1;
+    else if (result.status === "skipped") counts.skipped += 1;
+    else if (result.status === "planned") counts.planned += 1;
+    else counts.error += 1;
+  }
+  if (parsed.json) {
+    console.log(JSON.stringify({ skillsDir, type: parsed.skillType, scope: parsed.skillScope, results }));
+    return counts.error > 0 ? 1 : 0;
+  }
+  const parts = [`[skill:install] dir=${skillsDir}`];
+  if (!parsed.skillsDir) {
+    parts.push(`type=${parsed.skillType}`);
+    parts.push(`scope=${parsed.skillScope}`);
+  }
+  if (parsed.dryRun) parts.push("dryRun=true");
+  if (parsed.force) parts.push("force=true");
+  if (counts.installed) parts.push(`installed=${counts.installed}`);
+  if (counts.skipped) parts.push(`skipped=${counts.skipped}`);
+  if (counts.planned) parts.push(`planned=${counts.planned}`);
+  if (counts.error) parts.push(`errors=${counts.error}`);
+  console.log(parts.join(" "));
+  for (const result of results) {
+    const relativeDest = toPosixPath(path.relative(skillsDir, result.destinationDir));
+    const relativeSource = toPosixPath(path.relative(skillsDir, result.sourceDir));
+    const destLabel = relativeDest.startsWith("..") ? toPosixPath(result.destinationDir) : relativeDest;
+    const sourceLabel = relativeSource.startsWith("..") ? toPosixPath(result.sourceDir) : relativeSource;
+    const messageSuffix = result.message ? ` message=${result.message}` : "";
+    console.log(`- ${result.name} status=${result.status} dest=${destLabel} src=${sourceLabel}${messageSuffix}`);
+  }
+  return counts.error > 0 ? 1 : 0;
+}
+
 function toTaskListEntry(record: EffectRecord, runDir: string): TaskListEntry {
   return {
     effectId: record.effectId,
@@ -1462,6 +1685,9 @@ export function createBabysitterCli() {
         }
         if (parsed.command === "task:show") {
           return await handleTaskShow(parsed);
+        }
+        if (parsed.command === "skill:install") {
+          return await handleSkillInstall(parsed);
         }
         console.error(USAGE);
         return 1;

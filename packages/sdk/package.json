@@ -10,7 +10,8 @@
     "babysitter": "dist/cli/main.js"
   },
   "files": [
-    "dist"
+    "dist",
+    "skills"
   ],
   "scripts": {
     "build": "tsc -p tsconfig.json",
