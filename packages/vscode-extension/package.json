@@ -10,12 +10,6 @@
   },
   "license": "UNLICENSED",
   "private": false,
-  "files": [
-    "dist/**",
-    "package.json",
-    "README.md",
-    "LICENSE.txt"
-  ],
   "engines": {
     "vscode": "^1.90.0"
   },
@@ -275,7 +269,7 @@
     "lint": "eslint . --ext .ts",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "package": "node ./scripts/run-vsce.cjs package --allow-missing-repository",
+    "package": "node ./scripts/run-vsce.cjs package --allow-missing-repository --out ./babysitter-vscode.vsix",
     "test:unit": "npm run build && npm run test:unit:compiled",
     "test:unit:compiled": "mocha --ui tdd \"dist/unit/**/*.test.js\"",
     "test:extension": "npm run build && npm run test:extension:compiled",
