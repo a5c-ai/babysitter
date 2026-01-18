@@ -127,7 +127,7 @@ jobs:
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add package.json packages/vscode-extension/package.json packages/breakpoints/package.json package-lock.json CHANGELOG.md
+          git add package.json packages/vscode-extension/package.json packages/breakpoints/package.json packages/sdk/package.json packages/babysitter/package.json package-lock.json CHANGELOG.md
           if git diff --cached --quiet; then
             echo "No version changes detected."
           else
@@ -163,6 +163,7 @@ jobs:
           set -euo pipefail
           npm pack --workspace=@a5c-ai/babysitter-sdk --pack-destination artifacts/release
           (cd packages/breakpoints && npm pack --pack-destination ../../artifacts/release)
+          (cd packages/babysitter && npm pack --pack-destination ../../artifacts/release)
 
       - name: Generate artifact checksums
         run: |
@@ -189,6 +190,14 @@ jobs:
           set -euo pipefail
           npm publish --access public
         working-directory: packages/breakpoints
+
+      - name: Publish babysitter metapackage to npm
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          set -euo pipefail
+          npm publish --access public
+        working-directory: packages/babysitter
 
       - name: Tag release
         run: |

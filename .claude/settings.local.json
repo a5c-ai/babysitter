@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install:*)",
+      "Bash(npm run build:sdk:*)",
+      "Bash(npm pack:*)",
+      "Bash(node scripts/check-package-metadata.cjs:*)"
+    ]
+  }
+}

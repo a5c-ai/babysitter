@@ -1,0 +1,29 @@
+{
+  "name": "@a5c-ai/babysitter",
+  "version": "0.0.28",
+  "description": "Metapackage for installing all babysitter npm packages",
+  "license": "UNLICENSED",
+  "type": "commonjs",
+  "bin": {
+    "babysitter": "bin/babysitter.js"
+  },
+  "files": [
+    "bin/",
+    "README.md"
+  ],
+  "dependencies": {
+    "@a5c-ai/babysitter-sdk": "^0.0.1",
+    "@a5c-ai/babysitter-breakpoints": "^0.0.28"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/a5c-ai/babysitter.git"
+  },
+  "keywords": [
+    "babysitter",
+    "a5c",
+    "o",
+    "orchestration",
+    "workflow"
+  ]
+}

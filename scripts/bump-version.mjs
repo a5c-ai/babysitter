@@ -25,6 +25,7 @@ const packageManifests = [
   { path: "packages/vscode-extension/package.json" },
   { path: "packages/sdk/package.json" },
   { path: "packages/breakpoints/package.json" },
+  { path: "packages/babysitter/package.json" },
 ];
 
 const manifests = packageManifests.map(({ path }) => ({
@@ -75,6 +76,10 @@ if (existsSync(lockPath)) {
   if (lock.packages && lock.packages[breakpointsWorkspaceKey]) {
     lock.packages[breakpointsWorkspaceKey].version = newVersion;
   }
+  const babysitterWorkspaceKey = "packages/babysitter";
+  if (lock.packages && lock.packages[babysitterWorkspaceKey]) {
+    lock.packages[babysitterWorkspaceKey].version = newVersion;
+  }
   const extensionManifest = manifests.find(
     (manifest) => manifest.path === "packages/vscode-extension/package.json",
   );
@@ -103,6 +108,16 @@ if (existsSync(lockPath)) {
     const breakpointsNodeModulesKey = `node_modules/${breakpointsName}`;
     if (lock.packages && lock.packages[breakpointsNodeModulesKey]) {
       lock.packages[breakpointsNodeModulesKey].version = newVersion;
+    }
+  }
+  const babysitterManifest = manifests.find(
+    (manifest) => manifest.path === "packages/babysitter/package.json",
+  );
+  const babysitterName = babysitterManifest?.data?.name;
+  if (babysitterName) {
+    const babysitterNodeModulesKey = `node_modules/${babysitterName}`;
+    if (lock.packages && lock.packages[babysitterNodeModulesKey]) {
+      lock.packages[babysitterNodeModulesKey].version = newVersion;
     }
   }
   writeFileSync(lockPath, `${JSON.stringify(lock, null, 2)}\n`);
