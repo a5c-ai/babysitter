@@ -275,7 +275,7 @@
     "lint": "eslint . --ext .ts",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "package": "node -r ./scripts/vsce-preload.cjs ../../node_modules/@vscode/vsce/out/vsce.js package --allow-missing-repository",
+    "package": "node ./scripts/run-vsce.cjs package --allow-missing-repository",
     "test:unit": "npm run build && npm run test:unit:compiled",
     "test:unit:compiled": "mocha --ui tdd \"dist/unit/**/*.test.js\"",
     "test:extension": "npm run build && npm run test:extension:compiled",
