@@ -1,0 +1,17 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01JGFJJZ00000000000000001A",
+  "taskId": "cli-smoke.node.echo",
+  "invocationKey": "cli-smoke/process:S000001:cli-smoke.node.echo",
+  "status": "ok",
+  "result": {
+    "effect": 1,
+    "ok": true
+  },
+  "startedAt": "2026-01-20T19:43:23.234Z",
+  "finishedAt": "2026-01-20T19:43:23.234Z",
+  "value": {
+    "effect": 1,
+    "ok": true
+  }
+}

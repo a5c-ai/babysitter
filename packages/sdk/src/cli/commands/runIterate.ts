@@ -15,6 +15,7 @@ import { readRunMetadata } from "../../storage/runFiles";
 import { callRuntimeHook } from "../../runtime/hooks/runtime";
 import { orchestrateIteration } from "../../runtime/orchestrateIteration";
 import type { EffectAction } from "../../runtime/types";
+import type { JsonRecord } from "../../storage/types";
 
 export interface RunIterateOptions {
   runDir: string;
@@ -55,83 +56,73 @@ export async function runIterate(options: RunIterateOptions): Promise<RunIterate
     console.error(`[run:iterate] Starting iteration ${iteration} for run ${runId}`);
   }
 
-  // === Call on-iteration-start hook ===
-  // Hook analyzes state and returns orchestration decisions
-  const iterationStartPayload = {
-    runId,
-    iteration,
-    timestamp: new Date().toISOString(),
-  };
+  // First, advance the runtime one step to request pending effects (if any).
+  // This is what creates EFFECT_REQUESTED entries that hooks can observe via task:list.
+  const iterationResult = await orchestrateIteration({ runDir });
 
-  const hookResult = await callRuntimeHook(
-    "on-iteration-start",
-    iterationStartPayload,
-    {
-      cwd: projectRoot,
-      logger: verbose ? ((msg: string) => console.error(msg)) : undefined,
-    }
-  );
-
-  // If no hooks executed, fall back to running one real orchestration step (runtime iteration).
-  // This ensures `run:iterate` works even without a plugin install / hooks configuration.
-  if (!hookResult.executedHooks?.length) {
-    const iterationResult = await orchestrateIteration({ runDir });
-    const status: RunIterateResult["status"] =
-      iterationResult.status === "waiting"
-        ? "waiting"
-        : iterationResult.status === "completed"
-          ? "completed"
-          : "failed";
-
-    // Still call on-iteration-end (will be a no-op if no hooks are installed).
+  if (iterationResult.status === "completed") {
     await callRuntimeHook(
       "on-iteration-end",
       {
         runId,
         iteration,
-        action: status === "waiting" ? "waiting" : "none",
-        status,
-        reason: "no-hooks-fallback",
-        count: iterationResult.status === "waiting" ? iterationResult.nextActions.length : undefined,
+        action: "none",
+        status: "completed",
+        reason: "completed",
         timestamp: new Date().toISOString(),
       },
-      {
-        cwd: projectRoot,
-        logger: verbose ? ((msg: string) => console.error(msg)) : undefined,
-      }
+      { cwd: projectRoot, logger: verbose ? ((msg: string) => console.error(msg)) : undefined }
     );
-
     return {
       iteration,
-      status,
-      action: status === "waiting" ? "waiting" : "none",
-      reason: "no-hooks-fallback",
-      count: iterationResult.status === "waiting" ? iterationResult.nextActions.length : undefined,
-      nextActions: iterationResult.status === "waiting" ? iterationResult.nextActions : undefined,
-      metadata: {
-        runId,
-        processId: metadata.processId,
-        hookStatus: "none",
-      },
+      status: "completed",
+      action: "none",
+      reason: "completed",
+      metadata: { runId, processId: metadata.processId, hookStatus: "executed" },
     };
   }
 
-  // Parse hook output
-  let hookDecision: any = {};
-  if (hookResult.output) {
-    try {
-      hookDecision = typeof hookResult.output === "string"
-        ? JSON.parse(hookResult.output)
-        : hookResult.output;
-    } catch (e) {
-      if (verbose) {
-        console.error(`[run:iterate] Warning: Could not parse hook output:`, hookResult.output);
-      }
-    }
+  if (iterationResult.status === "failed") {
+    await callRuntimeHook(
+      "on-iteration-end",
+      {
+        runId,
+        iteration,
+        action: "none",
+        status: "failed",
+        reason: "failed",
+        timestamp: new Date().toISOString(),
+      },
+      { cwd: projectRoot, logger: verbose ? ((msg: string) => console.error(msg)) : undefined }
+    );
+    return {
+      iteration,
+      status: "failed",
+      action: "none",
+      reason: "failed",
+      metadata: { runId, processId: metadata.processId, hookStatus: "executed" },
+    };
   }
 
-  const action = hookDecision.action || "none";
-  const reason = hookDecision.reason || "unknown";
+  // === Call on-iteration-start hook ===
+  // Hook may execute/post effects that were requested by orchestrateIteration().
+  const iterationStartPayload: JsonRecord = {
+    runId,
+    iteration,
+    status: iterationResult.status,
+    pending: iterationResult.status === "waiting" ? iterationResult.nextActions : [],
+    timestamp: new Date().toISOString(),
+  };
+
+  const hookResult = await callRuntimeHook("on-iteration-start", iterationStartPayload, {
+    cwd: projectRoot,
+    logger: verbose ? ((msg: string) => console.error(msg)) : undefined,
+  });
+
+  // Parse hook output
+  const hookDecision = parseHookDecision(hookResult.output);
+  const action = hookDecision.action ?? "none";
+  const reason = hookDecision.reason ?? "unknown";
   const count = hookDecision.count;
   const until = hookDecision.until;
 
@@ -142,17 +133,14 @@ export async function runIterate(options: RunIterateOptions): Promise<RunIterate
   // Determine result status based on hook action
   let status: RunIterateResult["status"];
 
-  // Check for terminal state first
-  if (reason === "terminal-state") {
-    status = hookDecision.status === "failed" ? "failed" : "completed";
-  } else if (action === "executed-tasks") {
+  if (action === "executed-tasks") {
     status = "executed";
   } else if (action === "waiting") {
     status = "waiting";
-  } else if (action === "none") {
-    status = "none";
+  } else if (iterationResult.status === "waiting") {
+    // If the hook didn't execute anything, surface runtime waiting details.
+    status = "waiting";
   } else {
-    // Default to none for unknown actions
     status = "none";
   }
 
@@ -184,6 +172,7 @@ export async function runIterate(options: RunIterateOptions): Promise<RunIterate
     reason,
     count,
     until,
+    nextActions: iterationResult.status === "waiting" ? iterationResult.nextActions : undefined,
     metadata: {
       runId,
       processId: metadata.processId,
@@ -192,4 +181,35 @@ export async function runIterate(options: RunIterateOptions): Promise<RunIterate
   };
 
   return result;
+}
+
+function parseHookDecision(output: unknown): {
+  action?: string;
+  reason?: string;
+  count?: number;
+  until?: number;
+  status?: string;
+} {
+  const record = parseMaybeJsonRecord(output);
+  if (!record) return {};
+  const action = typeof record.action === "string" ? record.action : undefined;
+  const reason = typeof record.reason === "string" ? record.reason : undefined;
+  const status = typeof record.status === "string" ? record.status : undefined;
+  const count = typeof record.count === "number" ? record.count : undefined;
+  const until = typeof record.until === "number" ? record.until : undefined;
+  return { action, reason, status, count, until };
+}
+
+function parseMaybeJsonRecord(output: unknown): JsonRecord | undefined {
+  if (!output) return undefined;
+  if (typeof output === "object" && !Array.isArray(output)) {
+    return output as JsonRecord;
+  }
+  if (typeof output !== "string") return undefined;
+  try {
+    const parsed = JSON.parse(output) as unknown;
+    return parsed && typeof parsed === "object" && !Array.isArray(parsed) ? (parsed as JsonRecord) : undefined;
+  } catch {
+    return undefined;
+  }
 }

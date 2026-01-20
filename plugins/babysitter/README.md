@@ -172,11 +172,8 @@ $CLI run:create \
 ### 3. Drive Orchestration
 
 ```bash
-# Run iterations automatically
-$CLI run:continue .a5c/runs/<runId> --auto-node-tasks --auto-node-max 10
-
-# Or step through manually
-$CLI run:step .a5c/runs/<runId> --json
+# Run a single iteration (repeat in a loop)
+$CLI run:iterate .a5c/runs/<runId> --json --iteration 1
 ```
 
 ### 4. Use with Claude Code
@@ -640,7 +637,7 @@ $CLI run:status <runId> --json
 $CLI run:events <runId> --limit 20 --reverse
 
 # Iterate once
-$CLI run:step <runId> --json
+$CLI run:iterate <runId> --json --iteration 1
 
 # List tasks
 $CLI task:list <runId> --pending --json

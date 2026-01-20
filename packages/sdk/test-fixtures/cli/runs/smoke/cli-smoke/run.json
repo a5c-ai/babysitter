@@ -1,0 +1,12 @@
+{
+  "runId": "cli-smoke",
+  "request": "cli-smoke/process",
+  "processId": "cli-smoke/process",
+  "entrypoint": {
+    "importPath": "../processes/smoke-process.mjs",
+    "exportName": "process"
+  },
+  "processPath": "../processes/smoke-process.mjs",
+  "layoutVersion": "2026.01-storage-preview",
+  "createdAt": "2025-01-01T00:00:00.000Z"
+}

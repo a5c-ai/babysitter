@@ -9,3 +9,65 @@
 [2026-01-20T19:08:22Z] ITERATION_END
   Hook: on-iteration-end
   Run ID: cli-smoke
+[2026-01-20T19:38:54Z] RUN_START
+  Hook: on-run-start
+  Run ID: cli-smoke
+  Process: cli-smoke/process
+  Entry: ../processes/smoke-process.mjs#process
+[2026-01-20T19:38:55Z] ITERATION_START
+  Hook: on-iteration-start
+  Run ID: cli-smoke
+[2026-01-20T19:38:58Z] ITERATION_END
+  Hook: on-iteration-end
+  Run ID: cli-smoke
+[2026-01-20T19:40:14Z] RUN_START
+  Hook: on-run-start
+  Run ID: cli-smoke
+  Process: cli-smoke/process
+  Entry: ../processes/smoke-process.mjs#process
+[2026-01-20T19:40:15Z] ITERATION_START
+  Hook: on-iteration-start
+  Run ID: cli-smoke
+[2026-01-20T19:40:18Z] ITERATION_END
+  Hook: on-iteration-end
+  Run ID: cli-smoke
+[2026-01-20T19:40:20Z] ITERATION_START
+  Hook: on-iteration-start
+  Run ID: cli-smoke
+[2026-01-20T19:40:24Z] ITERATION_END
+  Hook: on-iteration-end
+  Run ID: cli-smoke
+[2026-01-20T19:42:20Z] RUN_START
+  Hook: on-run-start
+  Run ID: cli-smoke
+  Process: cli-smoke/process
+  Entry: ../processes/smoke-process.mjs#process
+[2026-01-20T19:42:21Z] ITERATION_START
+  Hook: on-iteration-start
+  Run ID: cli-smoke
+[2026-01-20T19:42:24Z] ITERATION_END
+  Hook: on-iteration-end
+  Run ID: cli-smoke
+[2026-01-20T19:42:26Z] ITERATION_START
+  Hook: on-iteration-start
+  Run ID: cli-smoke
+[2026-01-20T19:42:30Z] ITERATION_END
+  Hook: on-iteration-end
+  Run ID: cli-smoke
+[2026-01-20T19:43:12Z] RUN_START
+  Hook: on-run-start
+  Run ID: cli-smoke
+  Process: cli-smoke/process
+  Entry: ../processes/smoke-process.mjs#process
+[2026-01-20T19:43:12Z] ITERATION_START
+  Hook: on-iteration-start
+  Run ID: cli-smoke
+[2026-01-20T19:43:15Z] ITERATION_END
+  Hook: on-iteration-end
+  Run ID: cli-smoke
+[2026-01-20T19:43:17Z] ITERATION_START
+  Hook: on-iteration-start
+  Run ID: cli-smoke
+[2026-01-20T19:43:20Z] ITERATION_END
+  Hook: on-iteration-end
+  Run ID: cli-smoke

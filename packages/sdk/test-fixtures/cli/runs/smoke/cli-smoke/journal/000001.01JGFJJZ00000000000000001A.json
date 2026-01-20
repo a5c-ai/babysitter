@@ -1,0 +1,14 @@
+{
+  "type": "RUN_CREATED",
+  "recordedAt": "2025-01-01T00:00:00.500Z",
+  "data": {
+    "runId": "cli-smoke",
+    "processId": "cli-smoke/process",
+    "entrypoint": {
+      "importPath": "../processes/smoke-process.mjs",
+      "exportName": "process"
+    },
+    "inputsRef": "inputs.json"
+  },
+  "checksum": "9665517cd700f57a7415bc9ae26af04ccca8d8e5264f689577e7ad0bfca5d75d"
+}

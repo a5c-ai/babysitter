@@ -2,15 +2,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { MockInstance } from "vitest";
 import path from "path";
 import { createBabysitterCli } from "../main";
-import { orchestrateIteration } from "../../runtime/orchestrateIteration";
 import { buildEffectIndex } from "../../runtime/replay/effectIndex";
 import { readRunMetadata } from "../../storage/runFiles";
 import { commitEffectResult } from "../../runtime/commitEffectResult";
 import type { EffectRecord } from "../../runtime/types";
-
-vi.mock("../../runtime/orchestrateIteration", () => ({
-  orchestrateIteration: vi.fn(),
-}));
 
 vi.mock("../../runtime/replay/effectIndex", () => ({
   buildEffectIndex: vi.fn(),
@@ -24,7 +19,6 @@ vi.mock("../../runtime/commitEffectResult", () => ({
   commitEffectResult: vi.fn(),
 }));
 
-const orchestrateIterationMock = orchestrateIteration as unknown as ReturnType<typeof vi.fn>;
 const buildEffectIndexMock = buildEffectIndex as unknown as ReturnType<typeof vi.fn>;
 const readRunMetadataMock = readRunMetadata as unknown as ReturnType<typeof vi.fn>;
 const commitEffectResultMock = commitEffectResult as unknown as ReturnType<typeof vi.fn>;
@@ -148,121 +142,6 @@ describe("CLI main entry", () => {
     );
   });
 
-
-  describe("run:step", () => {
-    it("runs one iteration and prints completion output", async () => {
-      orchestrateIterationMock.mockResolvedValue({
-        status: "completed",
-        output: { ok: true },
-      });
-
-    const cli = createBabysitterCli();
-    const exitCode = await cli.run(["run:step", "runs/demo"]);
-
-    expect(exitCode).toBe(0);
-    expect(orchestrateIterationMock).toHaveBeenCalledWith({
-      runDir: path.resolve("runs/demo"),
-      now: expect.any(Date),
-    });
-    expect(errorSpy).toHaveBeenCalledWith(expect.stringContaining('[run:step] status=completed output={"ok":true}'));
-  });
-
-    it("prints pending action summaries when waiting", async () => {
-      orchestrateIterationMock.mockResolvedValue({
-        status: "waiting",
-        nextActions: [
-          {
-            effectId: "ef-manual",
-            kind: "breakpoint",
-            label: "needs approval",
-          },
-        ],
-      });
-
-    const cli = createBabysitterCli();
-    const exitCode = await cli.run(["run:step", "runs/demo"]);
-
-    expect(exitCode).toBe(0);
-    expect(errorSpy).toHaveBeenCalledWith(expect.stringContaining("[run:step] status=waiting pending=1"));
-    expect(errorSpy).toHaveBeenCalledWith(expect.stringContaining("- ef-manual [breakpoint] needs approval"));
-  });
-
-    it("prints failures and exits with status 1", async () => {
-      const errorPayload = { message: "iteration failed" };
-      orchestrateIterationMock.mockResolvedValue({
-        status: "failed",
-        error: errorPayload,
-      });
-
-      const cli = createBabysitterCli();
-      const exitCode = await cli.run(["run:step", "runs/demo"]);
-
-      expect(exitCode).toBe(1);
-    expect(errorSpy).toHaveBeenCalledWith(expect.stringContaining("[run:step] status=failed"));
-      expect(errorSpy).toHaveBeenCalledWith(errorPayload);
-    });
-
-    it("emits the iteration payload with metadata in JSON mode", async () => {
-      const iterationPayload = {
-        status: "failed",
-        error: { message: "boom" },
-        metadata: {
-          stateVersion: 9,
-          pendingEffectsByKind: { node: 1 },
-        },
-      };
-      orchestrateIterationMock.mockResolvedValue(iterationPayload);
-
-      const cli = createBabysitterCli();
-      const exitCode = await cli.run(["run:step", "runs/demo", "--json"]);
-
-      expect(exitCode).toBe(1);
-      const raw = String(logSpy.mock.calls.at(-1)?.[0] ?? "{}");
-      expect(JSON.parse(raw)).toEqual(iterationPayload);
-    });
-
-    it("parses --now override into a Date", async () => {
-      orchestrateIterationMock.mockResolvedValue({
-        status: "completed",
-        output: null,
-      });
-      const nowIso = "2026-01-11T00:00:00.000Z";
-
-      const cli = createBabysitterCli();
-      const exitCode = await cli.run(["run:step", "runs/demo", "--now", nowIso]);
-
-      expect(exitCode).toBe(0);
-      expect(orchestrateIterationMock).toHaveBeenCalledWith({
-        runDir: path.resolve("runs/demo"),
-        now: new Date(nowIso),
-      });
-    });
-
-    it("prints usage when runDir is missing", async () => {
-      const cli = createBabysitterCli();
-      const exitCode = await cli.run(["run:step"]);
-
-      expect(exitCode).toBe(1);
-      expect(errorSpy).toHaveBeenCalledWith(expect.stringContaining("Usage:"));
-      expect(orchestrateIterationMock).not.toHaveBeenCalled();
-    });
-
-    it("emits verbose diagnostics when --verbose is provided", async () => {
-      orchestrateIterationMock.mockResolvedValue({
-        status: "completed",
-        output: { done: true },
-      });
-      const nowIso = "2026-01-12T08:00:00.000Z";
-
-      const cli = createBabysitterCli();
-      const exitCode = await cli.run(["run:step", "runs/demo", "--verbose", "--now", nowIso]);
-
-      expect(exitCode).toBe(0);
-      expect(errorSpy).toHaveBeenCalledWith(
-        `[run:step] verbose runDir=${path.resolve("runs/demo")} now=${nowIso} json=false`
-      );
-    });
-  });
 });
 
 function mockRunMetadata() {

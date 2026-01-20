@@ -141,7 +141,7 @@ Dry runs preview the mutation and exit `0` without changing on-disk state.
 
 ## 6. Drive a run without built-in auto-execution
 
-Instead of `run:continue` (removed), loop `run:iterate`/`run:step`, execute pending effects using your own runner (hook/worker/agent), then commit results with `task:post`.
+Instead of `run:continue` (removed), loop `run:iterate`, execute pending effects using your own runner (hook/worker/agent), then commit results with `task:post`.
 
 ---
 

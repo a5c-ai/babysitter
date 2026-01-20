@@ -1,0 +1,49 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01JGFJJZ00000000000000001A",
+  "taskId": "cli-smoke.node.echo",
+  "invocationKey": "cli-smoke/process:S000001:cli-smoke.node.echo",
+  "stepId": "S000001",
+  "kind": "node",
+  "title": "CLI smoke pending node",
+  "description": "Pending node task exercised by the babysitter CLI smoke harness.",
+  "labels": [
+    "cli-smoke",
+    "pending-node"
+  ],
+  "node": {
+    "args": [
+      "--payload",
+      "{\"correlationId\":\"cli-smoke-correlation\",\"attempt\":1}"
+    ],
+    "entry": "../processes/smoke-node-runner.mjs",
+    "env": {
+      "INTERNAL_API_KEY": "cli-smoke-internal-key",
+      "PUBLIC_FLAG": "cli-smoke-public",
+      "SECRET_TOKEN": "cli-smoke-secret-value"
+    },
+    "timeoutMs": 60000
+  },
+  "metadata": {
+    "payloadDigest": "018af15b137d07c4c79ce5b06702dd3e0f1601c7",
+    "redactedEnvKeys": [
+      "SECRET_TOKEN",
+      "INTERNAL_API_KEY"
+    ],
+    "requestId": "cli-smoke-request"
+  },
+  "inputs": {
+    "entry": "../processes/smoke-node-runner.mjs",
+    "payload": {
+      "attempt": 1,
+      "correlationId": "cli-smoke-correlation"
+    },
+    "publicFlag": "cli-smoke-public",
+    "requestId": "cli-smoke-request",
+    "secretEnv": {
+      "INTERNAL_API_KEY": "cli-smoke-internal-key",
+      "SECRET_TOKEN": "cli-smoke-secret-value"
+    },
+    "title": "CLI smoke pending node"
+  }
+}

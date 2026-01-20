@@ -1,0 +1,20 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2025-01-01T00:00:00.250Z",
+  "data": {
+    "effectId": "01JGFJJZ00000000000000001A",
+    "invocationKey": "cli-smoke/process:S000001:cli-smoke.node.echo",
+    "invocationHash": "64e311791063aa38dd8588c4e9f6afc5e6ed7a897e42f665115931015da26ad1",
+    "stepId": "S000001",
+    "taskId": "cli-smoke.node.echo",
+    "kind": "node",
+    "label": "cli-smoke-node-1",
+    "taskDefRef": "tasks/01JGFJJZ00000000000000001A/task.json",
+    "labels": [
+      "cli-smoke-node-1",
+      "cli-smoke",
+      "pending-node"
+    ]
+  },
+  "checksum": "c1529cd8f01dbf9b77d2b5e94e1482e66fa3263eec7d3411191c3d2c00b6619b"
+}

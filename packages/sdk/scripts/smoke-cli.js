@@ -291,10 +291,12 @@ async function runSmokeSequence(context) {
   const runStatus = await runCliJson(context, withRunsDir(context, ["run:status", context.runId, "--json"]));
   sequence.push({ command: "run:status", detail: runStatus.json });
 
-  const runStep = await runCliJson(context, withRunsDir(context, ["run:step", context.runId, "--json"]));
-  ensureWaiting(runStep.json);
-  const effectId = pickEffectId(runStep.json);
-  sequence.push({ command: "run:step", detail: runStep.json, effectId });
+  const runIterate = await runCliJson(
+    context,
+    withRunsDir(context, ["run:iterate", context.runId, "--iteration", "1", "--json"])
+  );
+  ensureWaiting(runIterate.json);
+  sequence.push({ command: "run:iterate", detail: runIterate.json, iteration: 1 });
 
   const runEvents = await runCliJson(context, withRunsDir(context, ["run:events", context.runId, "--json"]));
   validateEventPaths(runEvents.json, context.runDir);
@@ -307,12 +309,10 @@ async function runSmokeSequence(context) {
   ensureDryRunPlan(runRebuild.json, context.runDir);
   sequence.push({ command: "run:rebuild-state", detail: runRebuild.json });
 
-  const taskList = await runCliJson(
-    context,
-    withRunsDir(context, ["task:list", context.runId, "--pending", "--json"])
-  );
+  const taskList = await runCliJson(context, withRunsDir(context, ["task:list", context.runId, "--pending", "--json"]));
+  const effectId = pickEffectIdFromTaskList(taskList.json);
   validateTaskList(taskList.json, effectId);
-  sequence.push({ command: "task:list", detail: taskList.json });
+  sequence.push({ command: "task:list", detail: taskList.json, effectId });
 
   const taskShowRedacted = await runCliJson(
     context,
@@ -329,12 +329,43 @@ async function runSmokeSequence(context) {
   ensurePayloadVisible(taskShowUnredacted.json, context.secretToken, context.internalKey);
   sequence.push({ command: "task:show (allow secrets)", detail: taskShowUnredacted.json });
 
-  const taskPost = await runCliJson(
+  const firstValuePath = path.join(context.runsRoot, "inputs", "effect-1.json");
+  await fsp.writeFile(firstValuePath, JSON.stringify({ ok: true, effect: 1 }, null, 2));
+  const firstPost = await runCliJson(
     context,
-    withRunsDir(context, ["task:post", context.runId, effectId, "--status", "ok", "--dry-run", "--json"])
+    withRunsDir(context, ["task:post", context.runId, effectId, "--status", "ok", "--value", firstValuePath, "--json"])
   );
-  ensureDryRunStatus(taskPost.json);
-  sequence.push({ command: "task:post", detail: taskPost.json });
+  sequence.push({ command: "task:post", detail: firstPost.json, effectId });
+
+  const runIterate2 = await runCliJson(
+    context,
+    withRunsDir(context, ["run:iterate", context.runId, "--iteration", "2", "--json"])
+  );
+  ensureWaiting(runIterate2.json);
+  sequence.push({ command: "run:iterate", detail: runIterate2.json, iteration: 2 });
+
+  const taskList2 = await runCliJson(context, withRunsDir(context, ["task:list", context.runId, "--pending", "--json"]));
+  const effectId2 = pickEffectIdFromTaskList(taskList2.json);
+  if (effectId2 === effectId) {
+    throw new Error("run:iterate did not advance to the next effect (effectId unchanged after posting result)");
+  }
+  validateTaskList(taskList2.json, effectId2);
+  sequence.push({ command: "task:list", detail: taskList2.json, effectId: effectId2 });
+
+  const secondValuePath = path.join(context.runsRoot, "inputs", "effect-2.json");
+  await fsp.writeFile(secondValuePath, JSON.stringify({ ok: true, effect: 2 }, null, 2));
+  const secondPost = await runCliJson(
+    context,
+    withRunsDir(context, ["task:post", context.runId, effectId2, "--status", "ok", "--value", secondValuePath, "--json"])
+  );
+  sequence.push({ command: "task:post", detail: secondPost.json, effectId: effectId2 });
+
+  const runIterate3 = await runCliJson(
+    context,
+    withRunsDir(context, ["run:iterate", context.runId, "--iteration", "3", "--json"])
+  );
+  ensureCompleted(runIterate3.json);
+  sequence.push({ command: "run:iterate", detail: runIterate3.json, iteration: 3 });
 
   return sequence;
 }
@@ -354,15 +385,19 @@ function validateRunCreate(payload, context) {
 
 function ensureWaiting(payload) {
   if (payload.status !== "waiting") {
-    throw new Error(`run:step expected waiting status, received ${payload.status || "unknown"}`);
-  }
-  if (!Array.isArray(payload.nextActions) || payload.nextActions.length === 0) {
-    throw new Error("run:step did not report any pending actions");
+    throw new Error(`run:iterate expected waiting status, received ${payload.status || "unknown"}`);
   }
 }
 
-function pickEffectId(payload) {
-  const candidate = Array.isArray(payload.nextActions) ? payload.nextActions.find((entry) => entry.kind === "node") : undefined;
+function ensureCompleted(payload) {
+  if (payload.status !== "completed") {
+    throw new Error(`run:iterate expected completed status, received ${payload.status || "unknown"}`);
+  }
+}
+
+function pickEffectIdFromTaskList(payload) {
+  const tasks = Array.isArray(payload.tasks) ? payload.tasks : [];
+  const candidate = tasks.find((entry) => entry.kind === "node" && entry.status === "requested");
   if (!candidate?.effectId) {
     throw new Error("Unable to discover pending node effect id");
   }

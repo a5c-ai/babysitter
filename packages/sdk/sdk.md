@@ -1022,7 +1022,7 @@ This spec is the foundation for implementing `@a5c-ai/babysitter-sdk` as a small
 
 The CLI is the primary way to **interact with intrinsics** (tasks, breakpoints, sleep gates) and to drive runs without writing custom orchestration code.
 
-> Looking for a concrete walkthrough? See [`docs/cli-examples.md`](docs/cli-examples.md) for an end-to-end session that runs `run:create`, `task:list`, `run:step`, and `task:post` side-by-side with a deterministic harness.
+> Looking for a concrete walkthrough? See [`docs/cli-examples.md`](docs/cli-examples.md) for an end-to-end session that runs `run:create`, `run:iterate`, `task:list`, and `task:post` side-by-side with a deterministic harness.
 
 Binary name (placeholder): `babysitter`
 
@@ -1121,37 +1121,15 @@ Options:
 
 If `<runDir>` cannot be read the command exits with code `1` and logs `[run:events] unable to read run metadata at <path>: <reason>` to help identify typos or cleaned-up runs.
 
-#### `babysitter run:step <runDir>`
+#### `babysitter run:iterate <runDir>`
 
-Execute exactly one `orchestrateIteration` and report the result. The CLI resolves `<runDir>` (honoring `--runs-dir`), confirms that `run.json` is readable, then calls `orchestrateIteration({ runDir, now })`.
-
-Human output mirrors the lifecycle status:
-
-```
-[run:step] status=completed output={"ok":true}
-[run:step] status=waiting pending=2
-- ef-node [node] build workspace
-- ef-break [breakpoint] wait for review
-[run:step] status=failed
-{ "message": "boom" }
-```
-
-* `completed` - prints the serialized process output on the status line and exits `0`.
-* `waiting` - prints the header plus one `- <effectId> [<kind>] <label?>` line for every pending action (the same formatting used by `run:continue`) and exits `0`.
-* `failed` - prints the status line, dumps the error payload, and exits `1`.
-
-Status lines append deterministic metadata pairs (`stateVersion`, `journalHead`, `stateRebuilt`, `pending[...]`) whenever the runtime reports them or they can be inferred from the pending list. If any pending action exposes `schedulerHints.sleepUntilEpochMs`, `run:step` logs `[run:step] sleep-until=<iso> effect=<effectId> ... pendingCount=<n?>` so operators know when to revisit the run.
-
-Flags:
-
-* `--now <iso8601>`: override the wall clock passed to `orchestrateIteration`. The CLI validates the value as an ISO timestamp and surfaces a helpful error instead of running with an invalid date.
-* `--json`: print the raw `IterationResult` returned by `orchestrateIteration` (no wrapping). Exit codes still follow the status rules above so automation can rely on both the payload and the process status.
+Execute exactly one iteration through the hook-driven orchestration loop. The CLI calls `on-iteration-start`, and if no hooks are configured, falls back to a single `orchestrateIteration` step.
 
 #### `babysitter run:continue <runDir>`
 
 This command has been removed in favor of a simpler model:
 
-* loop `run:iterate`/`run:step` in your own orchestrator
+* loop `run:iterate` in your own orchestrator
 * execute effects externally (hook/worker/agent)
 * commit results back into the run with `task:post`
 
@@ -1286,7 +1264,7 @@ List sleep gates (effects of kind `sleep` / `SLEEP_UNTIL`), showing:
 
 #### `babysitter run:wake <runDir>`
 
-Force a `run:step` even if no scheduler exists.
+Force a `run:iterate` even if no scheduler exists.
 
 Options:
 

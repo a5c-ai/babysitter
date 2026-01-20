@@ -2,7 +2,6 @@
 import { promises as fs } from "node:fs";
 import * as path from "node:path";
 import { commitEffectResult } from "../runtime/commitEffectResult";
-import { orchestrateIteration } from "../runtime/orchestrateIteration";
 import { createRun } from "../runtime/createRun";
 import { buildEffectIndex } from "../runtime/replay/effectIndex";
 import { readStateCache, rebuildStateCache } from "../runtime/replay/stateCache";
@@ -22,7 +21,6 @@ const USAGE = `Usage:
   babysitter run:rebuild-state <runDir> [--runs-dir <dir>] [--json] [--dry-run]
   babysitter run:iterate <runDir> [--runs-dir <dir>] [--json] [--verbose] [--iteration <n>]
   babysitter task:post <runDir> <effectId> --status <ok|error> [--runs-dir <dir>] [--json] [--dry-run] [--value <file>] [--error <file>] [--stdout-ref <ref>] [--stderr-ref <ref>] [--stdout-file <file>] [--stderr-file <file>] [--started-at <iso8601>] [--finished-at <iso8601>] [--metadata <file>] [--invocation-key <key>]
-  babysitter run:step <runDir> [--runs-dir <dir>] [--json] [--now <iso8601>]
   babysitter task:list <runDir> [--runs-dir <dir>] [--pending] [--kind <kind>] [--json]
   babysitter task:show <runDir> <effectId> [--runs-dir <dir>] [--json]
 
@@ -64,7 +62,6 @@ interface ParsedArgs {
   runIdOverride?: string;
   processRevision?: string;
   requestId?: string;
-  nowOverride?: string;
   iteration?: number;
 }
 
@@ -231,10 +228,6 @@ function parseArgs(argv: string[]): ParsedArgs {
       parsed.requestId = expectFlagValue(rest, ++i, "--request");
       continue;
     }
-    if (arg === "--now") {
-      parsed.nowOverride = expectFlagValue(rest, ++i, "--now");
-      continue;
-    }
     positionals.push(arg);
   }
   if (parsed.command === "task:post") {
@@ -250,8 +243,6 @@ function parseArgs(argv: string[]): ParsedArgs {
   } else if (parsed.command === "run:events") {
     [parsed.runDirArg] = positionals;
   } else if (parsed.command === "run:rebuild-state") {
-    [parsed.runDirArg] = positionals;
-  } else if (parsed.command === "run:step") {
     [parsed.runDirArg] = positionals;
   }
   return parsed;
@@ -921,69 +912,6 @@ async function handleTaskPost(parsed: ParsedArgs): Promise<number> {
   return parsed.taskStatus === "ok" ? 0 : 1;
 }
 
-function parseNowOverride(nowOverride?: string): Date | null {
-  if (!nowOverride) return null;
-  const parsed = new Date(nowOverride);
-  if (Number.isNaN(parsed.getTime())) {
-    throw new Error(`--now must be a valid ISO 8601 timestamp (received: ${nowOverride})`);
-  }
-  return parsed;
-}
-
-async function handleRunStep(parsed: ParsedArgs): Promise<number> {
-  if (!parsed.runDirArg) {
-    console.error(USAGE);
-    return 1;
-  }
-  const runDir = resolveRunDir(parsed.runsDir, parsed.runDirArg);
-  logVerbose("run:step", parsed, {
-    runDir,
-    now: parsed.nowOverride ?? "auto",
-    json: parsed.json,
-  });
-  if (!(await readRunMetadataSafe(runDir, "run:step"))) return 1;
-
-  let now: Date;
-  try {
-    now = parseNowOverride(parsed.nowOverride) ?? new Date();
-  } catch (error) {
-    console.error(error instanceof Error ? error.message : String(error));
-    return 1;
-  }
-
-  const iteration = await orchestrateIteration({ runDir, now });
-  const pendingActions = iteration.status === "waiting" ? iteration.nextActions : undefined;
-  const metadata = enrichIterationMetadata(iteration.metadata, pendingActions);
-  const formattedMetadata = formatIterationMetadata(metadata);
-  if (parsed.json) {
-    console.log(JSON.stringify({ ...iteration, metadata: formattedMetadata.jsonMetadata ?? null }));
-    return iteration.status === "failed" ? 1 : 0;
-  }
-
-  if (iteration.status === "completed") {
-    const output = JSON.stringify(iteration.output ?? null);
-    const suffix = formattedMetadata.textParts.length ? ` ${formattedMetadata.textParts.join(" ")}` : "";
-    console.error(`[run:step] status=completed output=${output}${suffix}`);
-    return 0;
-  }
-
-  if (iteration.status === "waiting") {
-    logPendingActions(iteration.nextActions, {
-      command: "run:step",
-      metadataParts: formattedMetadata.textParts,
-    });
-    logSleepHints("run:step", iteration.nextActions);
-    return 0;
-  }
-
-  const suffix = formattedMetadata.textParts.length ? ` ${formattedMetadata.textParts.join(" ")}` : "";
-  console.error(`[run:step] status=failed${suffix}`);
-  if (iteration.error !== undefined) {
-    console.error(iteration.error);
-  }
-  return 1;
-}
-
 async function handleTaskList(parsed: ParsedArgs): Promise<number> {
   if (!parsed.runDirArg) {
     console.error(USAGE);
@@ -1379,9 +1307,6 @@ export function createBabysitterCli() {
         }
         if (parsed.command === "task:post") {
           return await handleTaskPost(parsed);
-        }
-        if (parsed.command === "run:step") {
-          return await handleRunStep(parsed);
         }
         if (parsed.command === "task:list") {
           return await handleTaskList(parsed);

@@ -1,0 +1,14 @@
+{
+  "taskEntry": "../processes/smoke-node-runner.mjs",
+  "publicFlag": "cli-smoke-public",
+  "requestId": "cli-smoke-request",
+  "title": "CLI smoke pending node",
+  "payload": {
+    "correlationId": "cli-smoke-correlation",
+    "attempt": 1
+  },
+  "secretEnv": {
+    "SECRET_TOKEN": "cli-smoke-secret-value",
+    "INTERNAL_API_KEY": "cli-smoke-internal-key"
+  }
+}

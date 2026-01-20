@@ -10,7 +10,7 @@ hide-from-slash-command-tool: "true"
 
 Before anything else, use the Babysitter Skill. (read "${CLAUDE_PLUGIN_ROOT}/skills/babysitter/SKILL.md" - the babysitter/SKILL.md file)
 
-Then execute the setup script to associate the babysitter session:
+Then you must execute the setup script to associate the babysitter session before you can resume the run:
 
 ```!
 "${CLAUDE_PLUGIN_ROOT}/scripts/setup-babysitter-run-resume.sh" $RUN_ID $COMMENTS

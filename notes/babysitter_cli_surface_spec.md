@@ -22,12 +22,7 @@ Behavior
    - `run:rebuild-state` (surface for `rebuildStateCache`) locks the run, replays the journal, writes `state/state.json`, and prints/returns the rebuild reason, event counts, and resulting `stateVersion`.
 
 3. **Orchestration control loops**
-   - `run:step` resolves `<runDir>`, validates `--now <iso8601>` (default `Date.now()`), calls `orchestrateIteration`, and prints one of:
-     - `completed` with JSON output blob reference.
-     - `waiting` with bullet list of pending actions `- <effectId> [<kind>] <label?>`.
-     - `failed` with normalized error payload; exits `1`.
-     `--json` streams the raw `IterationResult` value plus top-level `status`.
-   - `run:continue` was removed; callers should loop `run:iterate`/`run:step`, execute pending effects externally, and commit via `task:post`.
+   - `run:continue` was removed; callers should loop `run:iterate`, execute pending effects externally, and commit via `task:post`.
 
 4. **Task introspection and execution**
    - `task:list` reads the effect index and prints `- <effectId> [<kind> <status>] <label?> (taskId=<taskId>)`. Flags: `--pending`, `--kind`. JSON payload is `{ tasks: TaskListEntry[] }` where every entry includes refs for task/result/stdout/stderr with POSIX paths.
@@ -44,7 +39,7 @@ Behavior
 Acceptance Criteria
 -------------------
 1. **Flag & path consistency** – Every command honors `--runs-dir`, validates required positional args, and prints actionable errors with non-zero exit codes when resolution fails. Tests cover Windows-style and POSIX-style inputs.
-2. **Deterministic JSON contracts** – `run:create`, `run:status`, `run:events`, `run:step`, `run:iterate`, `task:list`, `task:show`, and `task:post` emit the schemas described above; snapshot tests guard against accidental drift.
+2. **Deterministic JSON contracts** – `run:create`, `run:status`, `run:events`, `run:iterate`, `task:list`, `task:show`, and `task:post` emit the schemas described above; snapshot tests guard against accidental drift.
 3. **Safe automation loops** – orchestration loops are owned by the caller (skill/hook/worker). The CLI provides deterministic primitives (`run:iterate`, `task:list`, `task:post`) and never embeds task-execution policy.
 4. **State repair tooling** – `run:rebuild-state` rebuilds derived state when `state/state.json` is missing or stale and reports the rebuild result in both human and JSON modes. Subsequent `run:status` reflects the rebuilt `stateVersion`.
 5. **Process integration** – CLI surfaces are thin wrappers over runtime APIs (`createRun`, `orchestrateIteration`, `commitEffectResult`, `rebuildStateCache`). Unit tests stub these APIs to ensure argument translation and error propagation are correct.
@@ -54,8 +49,6 @@ Edge Cases
 ----------
 - Missing or deleted run directories: commands fail fast with `[command] unable to read run metadata` and exit `1`.
 - Empty journals: `run:status` reports `created` with `last=none` and `pending[total]=0`; `run:events --json` returns an empty array.
-- Corrupted state cache: `run:step` detects divergence, triggers an in-process rebuild before calling the process function, and shows `stateRebuilt=true` metadata in JSON.
-- Invalid ISO timestamps passed to `--now`: CLI rejects them before calling `orchestrateIteration`, showing a validation error instead of running with bad data.
 - Task output blobs larger than 1 MiB: `task:list` and `task:show` print refs to blob files rather than dumping whole payloads; `task:post --json` points to `stdoutRef`, `stderrRef`, and `resultRef`.
 - Windows drive letters and UNC paths: `--runs-dir` and `<runDir>` may include drive prefixes; CLI resolves them but continues to emit POSIX-style refs in JSON/logs.
 
