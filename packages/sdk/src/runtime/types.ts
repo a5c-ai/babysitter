@@ -71,6 +71,7 @@ export interface CreateRunOptions {
   layoutVersion?: string;
   metadata?: JsonRecord;
   lockOwner?: string;
+  logger?: ProcessLogger;
 }
 
 export interface CreateRunResult {
@@ -97,6 +98,11 @@ export interface ProcessContext {
     payload: TArgs,
     options?: { label?: string }
   ): Promise<TResult>;
+  hook(
+    hookType: string,
+    payload: Record<string, unknown>,
+    options?: { label?: string; timeout?: number; throwOnFailure?: boolean }
+  ): Promise<import("../hooks/types").HookResult>;
   parallel: ParallelHelpers;
   log?: ProcessLogger;
 }

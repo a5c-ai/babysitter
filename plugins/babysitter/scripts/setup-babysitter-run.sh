@@ -5,23 +5,7 @@
 
 set -euo pipefail
 
-
-# Determine state directory (plugin-relative for session isolation)
-if [[ -n "${CLAUDE_PLUGIN_ROOT:-}" ]]; then
-  STATE_DIR="$CLAUDE_PLUGIN_ROOT/state"
-else
-  # Fallback: derive from script location
-  STATE_DIR="$(dirname "$(dirname "$0")")/state"
-fi
-
-# Get session ID (required for session isolation)
-if [[ -z "${CLAUDE_SESSION_ID:-}" ]]; then
-  echo "❌ Error: CLAUDE_SESSION_ID not available" >&2
-  echo "   Babysitter requires session isolation to work correctly." >&2
-  exit 1
-fi
-
-# Parse arguments
+# Parse arguments (check for --help early before requiring session ID)
 PROMPT_PARTS=()
 MAX_ITERATIONS=0
 COMPLETION_PROMISE="null"
@@ -138,6 +122,21 @@ if [[ -z "$PROMPT" ]]; then
   echo "" >&2
   echo "   For all options: /babysitter-run --help" >&2
   exit 1
+fi
+
+# Now check for session ID (after --help has been processed)
+if [[ -z "${CLAUDE_SESSION_ID:-}" ]]; then
+  echo "❌ Error: CLAUDE_SESSION_ID not available" >&2
+  echo "   Babysitter requires session isolation to work correctly." >&2
+  exit 1
+fi
+
+# Determine state directory (plugin-relative for session isolation)
+if [[ -n "${CLAUDE_PLUGIN_ROOT:-}" ]]; then
+  STATE_DIR="$CLAUDE_PLUGIN_ROOT/state"
+else
+  # Fallback: derive from script location
+  STATE_DIR="$(dirname "$(dirname "$0")")/state"
 fi
 
 # Create state file for stop hook (markdown with YAML frontmatter)

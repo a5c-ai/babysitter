@@ -9,7 +9,6 @@ function usage() {
   console.log(`Usage:
   breakpoints start
   breakpoints run
-  breakpoints install-skill [--source <path>] [--target codex|claude|cursor] [--scope local|global]
   breakpoints breakpoint create --question <text> [--run-id <id>] [--title <title>] [--agent-id <id>] [--tag <tag>] [--ttl <seconds>] [--file <path,format,language,label>]
   breakpoints breakpoint status <id>
   breakpoints breakpoint show <id>
@@ -169,61 +168,6 @@ function runSystem() {
   runCommand("node", [runner], { cwd: repoRoot, env });
 }
 
-function installSkill(sourcePath) {
-  const skillSource =
-    sourcePath ||
-    path.join(__dirname, "..", ".codex", "skills", "babysitter-breakpoint");
-  const homeDir = process.env.HOME || process.env.USERPROFILE;
-  if (!homeDir) {
-    console.error("HOME is not set.");
-    process.exitCode = 1;
-    return;
-  }
-  const dest = resolveSkillDest(skillSource);
-  if (fs.existsSync(dest)) {
-    console.error(`Destination already exists: ${dest}`);
-    process.exitCode = 1;
-    return;
-  }
-  fs.mkdirSync(path.dirname(dest), { recursive: true });
-  fs.cpSync(skillSource, dest, { recursive: true });
-  console.log("Installed babysitter-breakpoint skill.");
-}
-
-function resolveSkillDest(skillSource) {
-  const flags = parseFlags(process.argv.slice(2));
-  const target = String(flags.target || "codex");
-  const scope = String(flags.scope || "global");
-  const repoRoot = path.join(__dirname, "..");
-  const homeDir = process.env.HOME || process.env.USERPROFILE || "";
-  const skillName = path.basename(skillSource);
-
-  if (scope === "local") {
-    if (target === "codex") {
-      return path.join(repoRoot, ".codex", "skills", skillName);
-    }
-    if (target === "claude") {
-      return path.join(repoRoot, ".claude", "skills", skillName);
-    }
-    if (target === "cursor") {
-      return path.join(repoRoot, ".cursor", "skills", skillName);
-    }
-  }
-
-  if (target === "codex") {
-    const codexHome = process.env.CODEX_HOME || path.join(homeDir, ".codex");
-    return path.join(codexHome, "skills", skillName);
-  }
-  if (target === "claude") {
-    return path.join(homeDir, ".claude", "skills", skillName);
-  }
-  if (target === "cursor") {
-    return path.join(homeDir, ".cursor", "skills", skillName);
-  }
-
-  throw new Error(`Unknown target: ${target}`);
-}
-
 const args = process.argv.slice(2);
 const cmd = args[0];
 
@@ -234,13 +178,6 @@ if (!cmd || cmd === "--help" || cmd === "-h") {
 
 if (cmd === "start" || cmd === "run") {
   runSystem();
-  return;
-}
-
-if (cmd === "install-skill") {
-  const sourceIndex = args.indexOf("--source");
-  const sourcePath = sourceIndex >= 0 ? args[sourceIndex + 1] : undefined;
-  installSkill(sourcePath);
   return;
 }
 

@@ -3,6 +3,7 @@ import { runTaskIntrinsic, TaskIntrinsicContext } from "./intrinsics/task";
 import { runBreakpointIntrinsic } from "./intrinsics/breakpoint";
 import { runSleepIntrinsic } from "./intrinsics/sleep";
 import { runOrchestratorTaskIntrinsic } from "./intrinsics/orchestratorTask";
+import { runHookIntrinsic } from "./intrinsics/hook";
 import { runParallelAll, runParallelMap } from "./intrinsics/parallel";
 import { ProcessContext, ParallelHelpers } from "./types";
 import { MissingProcessContextError } from "./exceptions";
@@ -47,6 +48,7 @@ export function createProcessContext(init: ProcessContextInit): CreateProcessCon
     breakpoint: (payload, options) => runBreakpointIntrinsic(payload, internal, options),
     sleepUntil: (target, options) => runSleepIntrinsic(target, internal, options),
     orchestratorTask: (payload, options) => runOrchestratorTaskIntrinsic(payload, internal, options),
+    hook: (hookType, payload, options) => runHookIntrinsic(hookType, payload, internal, options),
     parallel: parallelHelpers,
     log: internal.logger,
   };

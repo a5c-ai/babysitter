@@ -13,7 +13,27 @@
       "Bash(breakpoints breakpoint wait:*)",
       "Bash(npm run build:*)",
       "Bash(echo:*)",
-      "Bash(test:*)"
+      "Bash(test:*)",
+      "Bash(node:*)",
+      "Bash(grep:*)",
+      "Bash(chmod:*)",
+      "Bash(/tmp/test-breakpoint.json <<'EOF'\n{\n  \"question\": \"Test breakpoint - approve?\",\n  \"runId\": \"test-run-123\",\n  \"title\": \"Hook System Test\",\n  \"reason\": \"Testing on-breakpoint hook dispatcher\",\n  \"context\": {\n    \"runId\": \"test-run-123\",\n    \"files\": []\n  }\n}\nEOF)",
+      "Bash(plugins/babysitter/hooks/on-breakpoint/logger.sh)",
+      "Bash(plugins/babysitter/hooks/on-breakpoint-dispatcher.sh)",
+      "Bash(pkill:*)",
+      "Bash(ls:*)",
+      "Bash(plugins/babysitter/hooks/hook-dispatcher.sh on-run-start)",
+      "Bash(plugins/babysitter/hooks/hook-dispatcher.sh on-task-complete)",
+      "Bash(plugins/babysitter/hooks/hook-dispatcher.sh:*)",
+      "Bash(CLI=\"npx -y @a5c-ai/babysitter-sdk\")",
+      "Bash($CLI run:step .a5c/runs/test-hooks-integration-1768841955)",
+      "Bash($CLI run:step .)",
+      "Bash(CLI=\"node packages/sdk/dist/cli/main.js\")",
+      "Bash(RUN_DIR=\".a5c/runs/run-20260119-plugin-consistency-v2\":*)",
+      "Bash($CLI run:status \"$RUN_DIR\" --json)",
+      "Bash(plugins/babysitter/hooks/on-iteration-start/native-orchestrator.sh)",
+      "Bash(npm test:*)",
+      "Bash(bash:*)"
     ]
   }
 }

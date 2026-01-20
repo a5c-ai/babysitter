@@ -19,6 +19,7 @@ import {
 } from "./types";
 import { serializeUnknownError } from "./errorUtils";
 import { emitRuntimeMetric } from "./instrumentation";
+import { callRuntimeHook } from "./hooks/runtime";
 
 type ProcessFunction = (inputs: unknown, ctx: any, extra?: unknown) => unknown | Promise<unknown>;
 // Use an indirect dynamic import so TypeScript does not downlevel to require() in CommonJS builds.
@@ -40,6 +41,24 @@ export async function orchestrateIteration(options: OrchestrateOptions): Promise
   let finalStatus: IterationResult["status"] = "failed";
   const logger = engine.internalContext.logger ?? options.logger;
 
+  // Compute project root for hook calls (parent of .a5c dir where plugins/ is located)
+  // runDir is like: /path/to/project/.a5c/runs/<runId>
+  // So we need 3 levels up: runs -> .a5c -> project
+  const projectRoot = path.dirname(path.dirname(path.dirname(options.runDir)));
+
+  // Call on-iteration-start hook
+  await callRuntimeHook(
+    "on-iteration-start",
+    {
+      runId: engine.runId,
+      iteration: engine.replayCursor.value,
+    },
+    {
+      cwd: projectRoot,
+      logger,
+    }
+  );
+
   try {
     const output = await withProcessContext(engine.internalContext, () =>
       processFn(inputs, engine.context, options.context)
@@ -52,6 +71,22 @@ export async function orchestrateIteration(options: OrchestrateOptions): Promise
         outputRef,
       },
     });
+
+    // Call on-run-complete hook
+    await callRuntimeHook(
+      "on-run-complete",
+      {
+        runId: engine.runId,
+        status: "completed",
+        output,
+        duration: Date.now() - iterationStartedAt,
+      },
+      {
+        cwd: projectRoot,
+        logger,
+      }
+    );
+
     const result: IterationResult = { status: "completed", output, metadata: createIterationMetadata(engine) };
     finalStatus = result.status;
     return result;
@@ -71,6 +106,22 @@ export async function orchestrateIteration(options: OrchestrateOptions): Promise
       eventType: "RUN_FAILED",
       event: { error: failure },
     });
+
+    // Call on-run-fail hook
+    await callRuntimeHook(
+      "on-run-fail",
+      {
+        runId: engine.runId,
+        status: "failed",
+        error: failure.message || "Unknown error",
+        duration: Date.now() - iterationStartedAt,
+      },
+      {
+        cwd: projectRoot,
+        logger,
+      }
+    );
+
     const result: IterationResult = {
       status: "failed",
       error: failure,
@@ -85,6 +136,20 @@ export async function orchestrateIteration(options: OrchestrateOptions): Promise
       runId: engine.runId,
       stepCount: engine.replayCursor.value,
     });
+
+    // Call on-iteration-end hook
+    await callRuntimeHook(
+      "on-iteration-end",
+      {
+        runId: engine.runId,
+        iteration: engine.replayCursor.value,
+        status: finalStatus,
+      },
+      {
+        cwd: projectRoot,
+        logger,
+      }
+    );
   }
 }
 

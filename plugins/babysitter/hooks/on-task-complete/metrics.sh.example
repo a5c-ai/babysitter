@@ -1,0 +1,44 @@
+#!/bin/bash
+# on-task-complete Metrics Hook Example
+# Demonstrates collecting task metrics
+
+set -euo pipefail
+
+PAYLOAD=$(cat)
+
+RUN_ID=$(echo "$PAYLOAD" | jq -r '.runId')
+TASK_ID=$(echo "$PAYLOAD" | jq -r '.taskId')
+EFFECT_ID=$(echo "$PAYLOAD" | jq -r '.effectId')
+STATUS=$(echo "$PAYLOAD" | jq -r '.status')
+DURATION=$(echo "$PAYLOAD" | jq -r '.duration')
+KIND=$(echo "$PAYLOAD" | jq -r '.kind // "unknown"')
+
+# Example: Send to metrics service (Datadog, Prometheus, etc.)
+# curl -X POST "https://api.datadoghq.com/api/v1/series" \
+#   -H "DD-API-KEY: ${DD_API_KEY}" \
+#   -d @- <<EOF
+# {
+#   "series": [{
+#     "metric": "babysitter.task.duration",
+#     "points": [[$(date +%s), $DURATION]],
+#     "tags": ["run:$RUN_ID", "task:$TASK_ID", "status:$STATUS", "kind:$KIND"]
+#   }]
+# }
+# EOF
+
+# Example: Append to CSV metrics file
+METRICS_FILE=".a5c/logs/task-metrics.csv"
+mkdir -p .a5c/logs
+
+if [[ ! -f "$METRICS_FILE" ]]; then
+  echo "timestamp,runId,taskId,effectId,kind,status,duration" > "$METRICS_FILE"
+fi
+
+echo "$(date -u +%Y-%m-%dT%H:%M:%SZ),$RUN_ID,$TASK_ID,$EFFECT_ID,$KIND,$STATUS,$DURATION" >> "$METRICS_FILE"
+
+# Example: Send to statsd
+# echo "babysitter.task.duration:$DURATION|ms|#run:$RUN_ID,status:$STATUS,kind:$KIND" | \
+#   nc -u -w1 localhost 8125
+
+echo "[on-task-complete/metrics] Metrics collected" >&2
+exit 0

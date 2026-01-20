@@ -24,7 +24,11 @@ async function dispatch(event, db, breakpoint) {
     if (!extension || typeof extension[event] !== "function") {
       continue;
     }
-    await extension[event](db, breakpoint, cfg.config);
+    try {
+      await extension[event](db, breakpoint, cfg.config);
+    } catch (err) {
+      console.error(`[extensions] error in ${cfg.name}.${event}:`, err.message);
+    }
   }
 }
 
@@ -35,7 +39,11 @@ async function poll(db) {
     if (!extension || typeof extension.poll !== "function") {
       continue;
     }
-    await extension.poll(db, cfg.config);
+    try {
+      await extension.poll(db, cfg.config);
+    } catch (err) {
+      console.error(`[extensions] error in ${cfg.name}.poll:`, err.message);
+    }
   }
 }
 

@@ -6,6 +6,7 @@ import { INPUTS_FILE, getRunDir } from "../storage/paths";
 import { RunEntrypointMetadata } from "../storage/types";
 import { nextUlid } from "../storage/ulids";
 import type { CreateRunOptions, CreateRunResult } from "./types";
+import { callRuntimeHook } from "./hooks/runtime";
 
 export async function createRun(options: CreateRunOptions): Promise<CreateRunResult> {
   const runId = options.runId ?? nextUlid();
@@ -51,6 +52,29 @@ export async function createRun(options: CreateRunOptions): Promise<CreateRunRes
       await releaseRunLock(runDir);
     }
   }
+
+  // Call on-run-start hook
+  const entryString = metadata.entrypoint.exportName
+    ? `${metadata.entrypoint.importPath}#${metadata.entrypoint.exportName}`
+    : metadata.entrypoint.importPath;
+
+  // Call hook from project root (parent of .a5c dir) where plugins/ is located
+  // runDir is like: /path/to/project/.a5c/runs/<runId>
+  // So we need 3 levels up: runs -> .a5c -> project
+  const projectRoot = path.dirname(path.dirname(path.dirname(runDir)));
+  await callRuntimeHook(
+    "on-run-start",
+    {
+      runId,
+      processId: metadata.processId,
+      entry: entryString,
+      inputs: options.inputs,
+    },
+    {
+      cwd: projectRoot,
+      logger: options.logger,
+    }
+  );
 
   return {
     runId,

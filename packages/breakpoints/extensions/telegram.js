@@ -9,10 +9,15 @@ function apiBase(token) {
   return `https://api.telegram.org/bot${token}`;
 }
 
-function callTelegram(url) {
+function callTelegram(url, options = {}) {
+  const { timeout = 15000, retries = 3, retryDelay = 1000 } = options;
+
   return new Promise((resolve, reject) => {
-    https
-      .get(url, (res) => {
+    let attempt = 0;
+
+    const makeRequest = () => {
+      attempt++;
+      const req = https.get(url, { timeout, family: 4 }, (res) => {
         let data = "";
         res.on("data", (chunk) => {
           data += chunk;
@@ -24,8 +29,40 @@ function callTelegram(url) {
             reject(err);
           }
         });
-      })
-      .on("error", reject);
+      });
+
+      req.on("timeout", () => {
+        req.destroy();
+        handleError(new Error(`Request timeout after ${timeout}ms`));
+      });
+
+      req.on("error", (err) => {
+        handleError(err);
+      });
+    };
+
+    const handleError = (err) => {
+      const isRetryable =
+        err.code === "ETIMEDOUT" ||
+        err.code === "ECONNRESET" ||
+        err.code === "ENOTFOUND" ||
+        err.code === "EAI_AGAIN";
+
+      if (isRetryable && attempt < retries) {
+        const delay = retryDelay * Math.pow(2, attempt - 1);
+        if (process.env.TELEGRAM_DEBUG === "1") {
+          console.log(`[telegram] retry ${attempt}/${retries} after ${delay}ms: ${err.message}`);
+        }
+        setTimeout(makeRequest, delay);
+      } else {
+        if (process.env.TELEGRAM_DEBUG === "1") {
+          console.log(`[telegram] request failed after ${attempt} attempts: ${err.message}`);
+        }
+        reject(err);
+      }
+    };
+
+    makeRequest();
   });
 }
 
@@ -37,7 +74,8 @@ async function sendMessage(token, chatId, text, parseMode) {
   return callTelegram(url);
 }
 
-async function sendDocument(token, chatId, filename, content) {
+async function sendDocument(token, chatId, filename, content, options = {}) {
+  const { timeout = 30000, retries = 3, retryDelay = 1000 } = options;
   const boundary = `----bp-${Date.now()}`;
   const payload = [
     `--${boundary}`,
@@ -53,30 +91,71 @@ async function sendDocument(token, chatId, filename, content) {
     "",
   ].join("\r\n");
   const url = `${apiBase(token)}/sendDocument`;
+
   return new Promise((resolve, reject) => {
-    const req = https.request(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": `multipart/form-data; boundary=${boundary}`,
-        "Content-Length": Buffer.byteLength(payload),
-      },
-    });
-    req.on("response", (res) => {
-      let data = "";
-      res.on("data", (chunk) => {
-        data += chunk;
+    let attempt = 0;
+
+    const makeRequest = () => {
+      attempt++;
+      const req = https.request(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": `multipart/form-data; boundary=${boundary}`,
+          "Content-Length": Buffer.byteLength(payload),
+        },
+        timeout,
+        family: 4,
       });
-      res.on("end", () => {
-        try {
-          resolve(JSON.parse(data));
-        } catch (err) {
-          reject(err);
+
+      req.on("response", (res) => {
+        let data = "";
+        res.on("data", (chunk) => {
+          data += chunk;
+        });
+        res.on("end", () => {
+          try {
+            resolve(JSON.parse(data));
+          } catch (err) {
+            reject(err);
+          }
+        });
+      });
+
+      req.on("timeout", () => {
+        req.destroy();
+        handleError(new Error(`Request timeout after ${timeout}ms`));
+      });
+
+      req.on("error", (err) => {
+        handleError(err);
+      });
+
+      req.write(payload);
+      req.end();
+    };
+
+    const handleError = (err) => {
+      const isRetryable =
+        err.code === "ETIMEDOUT" ||
+        err.code === "ECONNRESET" ||
+        err.code === "ENOTFOUND" ||
+        err.code === "EAI_AGAIN";
+
+      if (isRetryable && attempt < retries) {
+        const delay = retryDelay * Math.pow(2, attempt - 1);
+        if (process.env.TELEGRAM_DEBUG === "1") {
+          console.log(`[telegram] retry ${attempt}/${retries} after ${delay}ms: ${err.message}`);
         }
-      });
-    });
-    req.on("error", reject);
-    req.write(payload);
-    req.end();
+        setTimeout(makeRequest, delay);
+      } else {
+        if (process.env.TELEGRAM_DEBUG === "1") {
+          console.log(`[telegram] request failed after ${attempt} attempts: ${err.message}`);
+        }
+        reject(err);
+      }
+    };
+
+    makeRequest();
   });
 }
 
@@ -338,7 +417,15 @@ async function poll(db, config) {
   if (process.env.TELEGRAM_DEBUG === "1") {
     console.log(`[telegram] requesting updates offset=${offset}`);
   }
-  const response = await callTelegram(url);
+
+  let response;
+  try {
+    response = await callTelegram(url, { timeout: 15000, retries: 2 });
+  } catch (err) {
+    console.error(`[telegram] poll error: ${err.message}`);
+    return;
+  }
+
   if (!response.ok) {
     if (process.env.TELEGRAM_DEBUG === "1") {
       console.log(
@@ -391,6 +478,80 @@ async function poll(db, config) {
       await persistUser(db, config, message.chat.id, message.from.id);
     }
     const trimmed = message.text.trim();
+
+    // Handle list command to show waiting breakpoints
+    const listMatch = trimmed.match(/^(list|ls|waiting)$/i);
+    if (listMatch) {
+      const { all } = require("../api/db");
+      const waitingBreakpoints = await all(
+        db,
+        "SELECT id, title, created_at, run_id, payload FROM breakpoints WHERE status = ? ORDER BY created_at DESC",
+        ["waiting"]
+      );
+
+      if (waitingBreakpoints.length === 0) {
+        if (message.chat?.id) {
+          await sendMessage(
+            config.token,
+            message.chat.id,
+            "✅ No waiting breakpoints."
+          );
+        }
+        continue;
+      }
+
+      const messages = [
+        `🔔 ${waitingBreakpoints.length} waiting breakpoint${waitingBreakpoints.length === 1 ? '' : 's'}:`,
+        ""
+      ];
+
+      for (let i = 0; i < waitingBreakpoints.length; i++) {
+        const bp = waitingBreakpoints[i];
+        const title = bp.title || "Untitled";
+        const runId = bp.run_id || "unknown";
+        const age = Math.floor((Date.now() - new Date(bp.created_at).getTime()) / 1000 / 60);
+        const ageStr = age < 1 ? "just now" : age === 1 ? "1 min ago" : `${age} mins ago`;
+
+        messages.push(`${i + 1}. ${title}`);
+        messages.push(`   ID: ${bp.id}`);
+        messages.push(`   Run: ${runId}`);
+        messages.push(`   Created: ${ageStr}`);
+
+        // Extract question from payload if available
+        try {
+          const payload = JSON.parse(bp.payload);
+          if (payload?.question) {
+            const question = payload.question.length > 100
+              ? `${payload.question.substring(0, 100)}...`
+              : payload.question;
+            messages.push(`   Question: ${question}`);
+          }
+        } catch {
+          // Ignore JSON parse errors
+        }
+
+        if (i < waitingBreakpoints.length - 1) {
+          messages.push("");
+        }
+      }
+
+      messages.push("");
+      messages.push("━━━━━━━━━━━━━━━━━");
+      messages.push("Commands:");
+      messages.push("• preview <number> - View full details");
+      messages.push("• file <number> - View context file");
+      messages.push("• Reply or send ID/text to release");
+
+      if (message.chat?.id) {
+        await sendMessage(
+          config.token,
+          message.chat.id,
+          messages.join("\n")
+        );
+      }
+      continue;
+    }
+
     if (trimmed.startsWith("/")) {
       if (message.chat?.id && message.from?.id) {
         rememberUser(
@@ -401,10 +562,67 @@ async function poll(db, config) {
         );
         await persistUser(db, config, message.chat.id, message.from.id);
         if (config.token) {
+          // Query for existing waiting breakpoints
+          const { all } = require("../api/db");
+          const waitingBreakpoints = await all(
+            db,
+            "SELECT id, title, created_at, run_id, payload FROM breakpoints WHERE status = ? ORDER BY created_at DESC",
+            ["waiting"]
+          );
+
+          // Build connection message with waiting breakpoints
+          const messages = [
+            "Telegram connected. I will notify you about breakpoints here."
+          ];
+
+          if (waitingBreakpoints.length > 0) {
+            messages.push("");
+            messages.push(`🔔 You have ${waitingBreakpoints.length} waiting breakpoint${waitingBreakpoints.length === 1 ? '' : 's'}:`);
+            messages.push("");
+
+            for (let i = 0; i < waitingBreakpoints.length; i++) {
+              const bp = waitingBreakpoints[i];
+              const title = bp.title || "Untitled";
+              const runId = bp.run_id || "unknown";
+              const age = Math.floor((Date.now() - new Date(bp.created_at).getTime()) / 1000 / 60);
+              const ageStr = age < 1 ? "just now" : age === 1 ? "1 min ago" : `${age} mins ago`;
+
+              messages.push(`${i + 1}. ${title}`);
+              messages.push(`   ID: ${bp.id}`);
+              messages.push(`   Run: ${runId}`);
+              messages.push(`   Created: ${ageStr}`);
+
+              // Extract question from payload if available
+              try {
+                const payload = JSON.parse(bp.payload);
+                if (payload?.question) {
+                  const question = payload.question.length > 100
+                    ? `${payload.question.substring(0, 100)}...`
+                    : payload.question;
+                  messages.push(`   Question: ${question}`);
+                }
+              } catch {
+                // Ignore JSON parse errors
+              }
+
+              if (i < waitingBreakpoints.length - 1) {
+                messages.push("");
+              }
+            }
+
+            messages.push("");
+            messages.push("━━━━━━━━━━━━━━━━━");
+            messages.push("Commands:");
+            messages.push("• list - Show waiting breakpoints");
+            messages.push("• preview <number> - View full details");
+            messages.push("• file <number> - View context file");
+            messages.push("• Reply or send ID/text to release");
+          }
+
           await sendMessage(
             config.token,
             message.chat.id,
-            "Telegram connected. I will notify you about breakpoints here."
+            messages.join("\n")
           );
         }
       }
@@ -413,6 +631,79 @@ async function poll(db, config) {
       }
       continue;
     }
+    // Handle preview/show command to display full breakpoint details by list number
+    const previewMatch = trimmed.match(/^(preview|show)\s+(\d+)$/i);
+    if (previewMatch) {
+      const listNumber = parseInt(previewMatch[2], 10);
+      const { all } = require("../api/db");
+      const waitingBreakpoints = await all(
+        db,
+        "SELECT id, title, created_at, run_id, payload FROM breakpoints WHERE status = ? ORDER BY created_at DESC",
+        ["waiting"]
+      );
+
+      if (listNumber < 1 || listNumber > waitingBreakpoints.length) {
+        if (message.chat?.id) {
+          await sendMessage(
+            config.token,
+            message.chat.id,
+            `Invalid number. Please use a number between 1 and ${waitingBreakpoints.length}.`
+          );
+        }
+        continue;
+      }
+
+      const bp = waitingBreakpoints[listNumber - 1];
+      let payload;
+      try {
+        payload = JSON.parse(bp.payload);
+      } catch {
+        payload = {};
+      }
+
+      const title = bp.title || "Untitled";
+      const question = payload?.question || "No question provided.";
+      const files = payload?.context?.files || [];
+      const fileLines = files.length
+        ? files
+            .map((file, index) => {
+              const format = file.format || "code";
+              const label = file.label || file.path || "unknown";
+              return `${index + 1}. ${label} (${format})`;
+            })
+            .join("\n")
+        : "None";
+
+      const age = Math.floor((Date.now() - new Date(bp.created_at).getTime()) / 1000 / 60);
+      const ageStr = age < 1 ? "just now" : age === 1 ? "1 min ago" : `${age} mins ago`;
+
+      const previewText = [
+        `🟠 Breakpoint #${listNumber} Details`,
+        "",
+        `Title: ${title}`,
+        `ID: ${bp.id}`,
+        `Run: ${bp.run_id || "unknown"}`,
+        `Created: ${ageStr}`,
+        "",
+        "Question:",
+        question,
+        "",
+        "Context files:",
+        fileLines,
+        "",
+        "━━━━━━━━━━━━━━━━━",
+        "To interact:",
+        `• View file: file ${bp.id} <path>`,
+        "• View file by number: file 1, file 2, etc.",
+        `• Release: Reply to this message or send: ${bp.id}`,
+      ].join("\n");
+
+      if (message.chat?.id) {
+        await sendMessage(config.token, message.chat.id, previewText);
+      }
+      continue;
+    }
+
     const fileMatch = trimmed.match(/^(file|raw)\s+(.+)$/i);
     if (fileMatch) {
       const mode = fileMatch[1].toLowerCase();

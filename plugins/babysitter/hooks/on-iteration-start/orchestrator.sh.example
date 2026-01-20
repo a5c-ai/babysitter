@@ -1,0 +1,137 @@
+#!/bin/bash
+# Example: Custom Orchestration Override
+#
+# This hook demonstrates overriding the default orchestration behavior
+# by implementing custom iteration logic that bypasses the standard
+# SDK orchestration flow.
+#
+# To use: Copy to orchestrator.sh and make executable
+# cp orchestrator.sh.example orchestrator.sh
+# chmod +x orchestrator.sh
+
+set -euo pipefail
+
+# Read the iteration-start payload
+PAYLOAD=$(cat)
+RUN_ID=$(echo "$PAYLOAD" | jq -r '.runId')
+ITERATION=$(echo "$PAYLOAD" | jq -r '.iteration')
+TIMESTAMP=$(echo "$PAYLOAD" | jq -r '.timestamp')
+
+echo "[orchestrator] Custom orchestration for run $RUN_ID, iteration $ITERATION" >&2
+
+# Example 1: Simple sequential task executor
+# Instead of the full SDK orchestration, just run tasks in order
+function simple_orchestration() {
+  local run_dir=".a5c/runs/$RUN_ID"
+
+  echo "[orchestrator] Listing pending tasks..." >&2
+
+  # Get pending tasks using CLI
+  local pending_tasks=$(npx -y @a5c-ai/babysitter-sdk task:list "$run_dir" --pending --json 2>/dev/null)
+
+  if [ -z "$pending_tasks" ] || [ "$pending_tasks" = "[]" ]; then
+    echo "[orchestrator] No pending tasks - run is complete" >&2
+    return 0
+  fi
+
+  # Extract first task ID
+  local first_task=$(echo "$pending_tasks" | jq -r '.[0].effectId // empty')
+
+  if [ -n "$first_task" ]; then
+    echo "[orchestrator] Executing task: $first_task" >&2
+
+    # Execute the task
+    npx -y @a5c-ai/babysitter-sdk task:run "$run_dir" "$first_task" >&2
+
+    echo "[orchestrator] Task $first_task completed" >&2
+  fi
+}
+
+# Example 2: Parallel task executor
+# Run multiple tasks concurrently
+function parallel_orchestration() {
+  local run_dir=".a5c/runs/$RUN_ID"
+
+  echo "[orchestrator] Parallel orchestration mode" >&2
+
+  # Get all pending tasks
+  local pending_tasks=$(npx -y @a5c-ai/babysitter-sdk task:list "$run_dir" --pending --json 2>/dev/null)
+
+  if [ -z "$pending_tasks" ] || [ "$pending_tasks" = "[]" ]; then
+    echo "[orchestrator] No pending tasks" >&2
+    return 0
+  fi
+
+  # Extract task IDs
+  local task_ids=$(echo "$pending_tasks" | jq -r '.[].effectId')
+
+  # Run up to 3 tasks in parallel
+  local count=0
+  local pids=()
+
+  for task_id in $task_ids; do
+    if [ $count -ge 3 ]; then
+      break
+    fi
+
+    echo "[orchestrator] Starting task $task_id in background..." >&2
+    npx -y @a5c-ai/babysitter-sdk task:run "$run_dir" "$task_id" &
+    pids+=($!)
+    ((count++))
+  done
+
+  # Wait for all tasks to complete
+  for pid in "${pids[@]}"; do
+    wait "$pid"
+  done
+
+  echo "[orchestrator] Parallel batch complete" >&2
+}
+
+# Example 3: Priority-based orchestration
+# Execute tasks based on priority metadata
+function priority_orchestration() {
+  local run_dir=".a5c/runs/$RUN_ID"
+
+  echo "[orchestrator] Priority-based orchestration" >&2
+
+  # Get pending tasks and sort by priority
+  local pending_tasks=$(npx -y @a5c-ai/babysitter-sdk task:list "$run_dir" --pending --json 2>/dev/null)
+
+  if [ -z "$pending_tasks" ] || [ "$pending_tasks" = "[]" ]; then
+    return 0
+  fi
+
+  # Find highest priority task (priority field in task metadata)
+  local high_priority_task=$(echo "$pending_tasks" | jq -r 'sort_by(.priority // 0) | reverse | .[0].effectId')
+
+  if [ -n "$high_priority_task" ] && [ "$high_priority_task" != "null" ]; then
+    echo "[orchestrator] Executing high-priority task: $high_priority_task" >&2
+    npx -y @a5c-ai/babysitter-sdk task:run "$run_dir" "$high_priority_task" >&2
+  fi
+}
+
+# Choose orchestration strategy based on environment or run metadata
+# You can read run.json to determine strategy
+STRATEGY="${ORCHESTRATION_STRATEGY:-simple}"
+
+case "$STRATEGY" in
+  simple)
+    simple_orchestration
+    ;;
+  parallel)
+    parallel_orchestration
+    ;;
+  priority)
+    priority_orchestration
+    ;;
+  *)
+    echo "[orchestrator] Unknown strategy: $STRATEGY" >&2
+    exit 1
+    ;;
+esac
+
+# Output result
+echo '{"status":"orchestrated","iteration":'$ITERATION',"strategy":"'$STRATEGY'"}'
+
+exit 0

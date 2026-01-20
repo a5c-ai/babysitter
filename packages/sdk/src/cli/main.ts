@@ -1,6 +1,5 @@
 #!/usr/bin/env node
 import { promises as fs } from "node:fs";
-import { createRequire } from "node:module";
 import * as path from "node:path";
 import * as os from "node:os";
 import { runNodeTaskFromCli } from "./nodeTaskRunner";
@@ -15,18 +14,18 @@ import { readTaskDefinition, readTaskResult } from "../storage/tasks";
 import { loadJournal } from "../storage/journal";
 import { readRunMetadata } from "../storage/runFiles";
 import type { JournalEvent, RunMetadata, StoredTaskResult } from "../storage/types";
+import { runIterate } from "./commands/runIterate";
 
 const USAGE = `Usage:
   babysitter run:create --process-id <id> --entry <path#export> [--runs-dir <dir>] [--inputs <file>] [--run-id <id>] [--process-revision <rev>] [--request <id>] [--json] [--dry-run]
   babysitter run:status <runDir> [--runs-dir <dir>] [--json]
   babysitter run:events <runDir> [--runs-dir <dir>] [--json] [--limit <n>] [--reverse] [--filter-type <type>]
   babysitter run:rebuild-state <runDir> [--runs-dir <dir>] [--json] [--dry-run]
+  babysitter run:iterate <runDir> [--runs-dir <dir>] [--json] [--verbose] [--iteration <n>]
   babysitter task:run <runDir> <effectId> [--runs-dir <dir>] [--json] [--dry-run]
   babysitter run:step <runDir> [--runs-dir <dir>] [--json] [--now <iso8601>]
-  babysitter run:continue <runDir> [--runs-dir <dir>] [--json] [--dry-run] [--auto-node-tasks] [--auto-node-max <n>] [--auto-node-label <text>]
   babysitter task:list <runDir> [--runs-dir <dir>] [--pending] [--kind <kind>] [--json]
   babysitter task:show <runDir> <effectId> [--runs-dir <dir>] [--json]
-  babysitter skill:install [--type <claude|codex|cursor>] [--scope <local|global>] [--force] [--json] [--dry-run]
 
 Global flags:
   --runs-dir <dir>   Override the runs directory (defaults to .a5c/runs).
@@ -38,17 +37,10 @@ Global flags:
 interface ParsedArgs {
   command?: string;
   runsDir: string;
-  skillsDir?: string;
-  skillType: SkillTarget;
-  skillScope: SkillScope;
   json: boolean;
   dryRun: boolean;
   verbose: boolean;
-  force: boolean;
   helpRequested: boolean;
-  autoNodeTasks: boolean;
-  autoNodeMax?: number;
-  autoNodeLabel?: string;
   pendingOnly: boolean;
   kindFilter?: string;
   limit?: number;
@@ -63,6 +55,7 @@ interface ParsedArgs {
   processRevision?: string;
   requestId?: string;
   nowOverride?: string;
+  iteration?: number;
 }
 
 interface ActionSummary {
@@ -90,27 +83,15 @@ interface TaskListEntry {
 
 const LARGE_RESULT_PREVIEW_LIMIT = 1024 * 1024; // 1 MiB
 
-type SkillTarget = "claude" | "codex" | "cursor";
-type SkillScope = "local" | "global";
-
-const DEFAULT_SKILL_TARGET: SkillTarget = "codex";
-const DEFAULT_SKILL_SCOPE: SkillScope = "local";
-const breakpointsRequire = createRequire(__filename);
-
 function parseArgs(argv: string[]): ParsedArgs {
   const [initialCommand, ...rest] = argv;
   const parsed: ParsedArgs = {
     command: initialCommand,
     runsDir: ".a5c/runs",
-    skillsDir: undefined,
-    skillType: DEFAULT_SKILL_TARGET,
-    skillScope: DEFAULT_SKILL_SCOPE,
     json: false,
     dryRun: false,
     verbose: false,
-    force: false,
     helpRequested: false,
-    autoNodeTasks: false,
     pendingOnly: false,
     reverseOrder: false,
   };
@@ -129,18 +110,6 @@ function parseArgs(argv: string[]): ParsedArgs {
       parsed.runsDir = expectFlagValue(rest, ++i, "--runs-dir");
       continue;
     }
-    if (arg === "--skills-dir") {
-      parsed.skillsDir = expectFlagValue(rest, ++i, "--skills-dir");
-      continue;
-    }
-    if (arg === "--type") {
-      parsed.skillType = expectSkillTarget(expectFlagValue(rest, ++i, "--type"), "--type");
-      continue;
-    }
-    if (arg === "--scope") {
-      parsed.skillScope = expectSkillScope(expectFlagValue(rest, ++i, "--scope"), "--scope");
-      continue;
-    }
     if (arg === "--json") {
       parsed.json = true;
       continue;
@@ -149,16 +118,8 @@ function parseArgs(argv: string[]): ParsedArgs {
       parsed.dryRun = true;
       continue;
     }
-    if (arg === "--force") {
-      parsed.force = true;
-      continue;
-    }
     if (arg === "--verbose") {
       parsed.verbose = true;
-      continue;
-    }
-    if (arg === "--auto-node-tasks") {
-      parsed.autoNodeTasks = true;
       continue;
     }
     if (arg === "--pending") {
@@ -172,6 +133,11 @@ function parseArgs(argv: string[]): ParsedArgs {
     if (arg === "--limit") {
       const raw = expectFlagValue(rest, ++i, "--limit");
       parsed.limit = parsePositiveInteger(raw, "--limit");
+      continue;
+    }
+    if (arg === "--iteration") {
+      const raw = expectFlagValue(rest, ++i, "--iteration");
+      parsed.iteration = parsePositiveInteger(raw, "--iteration");
       continue;
     }
     if (arg === "--reverse") {
@@ -210,26 +176,17 @@ function parseArgs(argv: string[]): ParsedArgs {
       parsed.nowOverride = expectFlagValue(rest, ++i, "--now");
       continue;
     }
-    if (arg === "--auto-node-max") {
-      const raw = expectFlagValue(rest, ++i, "--auto-node-max");
-      parsed.autoNodeMax = parsePositiveInteger(raw, "--auto-node-max");
-      continue;
-    }
-    if (arg === "--auto-node-label") {
-      parsed.autoNodeLabel = expectFlagValue(rest, ++i, "--auto-node-label");
-      continue;
-    }
     positionals.push(arg);
   }
   if (parsed.command === "task:run") {
     [parsed.runDirArg, parsed.effectId] = positionals;
-  } else if (parsed.command === "run:continue") {
-    [parsed.runDirArg] = positionals;
   } else if (parsed.command === "task:list") {
     [parsed.runDirArg] = positionals;
   } else if (parsed.command === "task:show") {
     [parsed.runDirArg, parsed.effectId] = positionals;
   } else if (parsed.command === "run:status") {
+    [parsed.runDirArg] = positionals;
+  } else if (parsed.command === "run:iterate") {
     [parsed.runDirArg] = positionals;
   } else if (parsed.command === "run:events") {
     [parsed.runDirArg] = positionals;
@@ -262,33 +219,6 @@ function parsePositiveInteger(raw: string, flag: string): number {
   return Math.floor(parsed);
 }
 
-function expectSkillTarget(raw: string, flag: string): SkillTarget {
-  const normalized = raw.trim().toLowerCase();
-  if (normalized === "claude" || normalized === "codex" || normalized === "cursor") {
-    return normalized;
-  }
-  throw new Error(`${flag} must be one of: claude, codex, cursor`);
-}
-
-function expectSkillScope(raw: string, flag: string): SkillScope {
-  const normalized = raw.trim().toLowerCase();
-  if (normalized === "local" || normalized === "global") {
-    return normalized;
-  }
-  throw new Error(`${flag} must be one of: local, global`);
-}
-
-function resolveSkillsDir(parsed: ParsedArgs): string {
-  if (parsed.skillsDir) {
-    return path.resolve(parsed.skillsDir);
-  }
-  const scopeBase =
-    parsed.skillScope === "global"
-      ? path.join(os.homedir(), `.${parsed.skillType}`)
-      : path.resolve(`.${parsed.skillType}`);
-  return path.join(scopeBase, "skills");
-}
-
 function summarizeActions(actions: EffectAction[]): ActionSummary[] {
   return actions.map((action) => ({
     effectId: action.effectId,
@@ -297,12 +227,6 @@ function summarizeActions(actions: EffectAction[]): ActionSummary[] {
   }));
 }
 
-function matchesAutoNodeLabel(action: EffectAction, filter?: string): boolean {
-  if (!filter) return true;
-  const needle = filter.toLowerCase();
-  const haystacks = [action.label, ...(action.labels ?? []), action.effectId];
-  return haystacks.some((value) => (value ? value.toLowerCase().includes(needle) : false));
-}
 
 function logPendingActions(
   actions: EffectAction[],
@@ -362,33 +286,7 @@ function logSleepHints(command: string, actions: EffectAction[]) {
   }
 }
 
-function logRunContinueStatus(
-  iterationStatus: "completed" | "failed" | "waiting",
-  executedCount: number,
-  metadataParts: string[],
-  options: { dryRun: boolean }
-) {
-  const parts = [`[run:continue] status=${iterationStatus}`];
-  if (options.dryRun) {
-    parts.push("dryRun=true");
-  }
-  if (executedCount > 0) {
-    parts.push(`autoNode=${executedCount}`);
-  }
-  parts.push(...metadataParts);
-  console.error(parts.join(" "));
-}
 
-function logAutoRunPlan(nodeSummaries: ActionSummary[]) {
-  console.error(`[run:continue] dry-run auto-node tasks count=${nodeSummaries.length}`);
-  if (!nodeSummaries.length) {
-    return;
-  }
-  for (const summary of nodeSummaries) {
-    const label = summary.label ? ` ${summary.label}` : "";
-    console.error(`  - ${summary.effectId} [${summary.kind}]${label}`);
-  }
-}
 
 function formatResolvedEntrypoint(importPath: string, exportName?: string) {
   return `${importPath}${exportName ? `#${exportName}` : ""}`;
@@ -400,149 +298,6 @@ function formatVerboseValue(value: unknown): string {
   if (typeof value === "string") return value;
   if (typeof value === "number" || typeof value === "boolean") return String(value);
   return JSON.stringify(value);
-}
-
-type SkillInstallStatus = "installed" | "skipped" | "planned" | "error";
-
-type SkillInstallResult = {
-  name: string;
-  status: SkillInstallStatus;
-  destinationDir: string;
-  sourceDir: string;
-  message?: string;
-};
-
-type BreakpointsInstallSummary = {
-  status: SkillInstallStatus;
-  exitCode?: number;
-  message?: string;
-  stdout?: string;
-  stderr?: string;
-};
-
-function resolveBundledSkillsRoot(): string {
-  return path.resolve(__dirname, "..", "..", "skills");
-}
-
-async function listBundledSkillDirs(): Promise<string[]> {
-  const root = resolveBundledSkillsRoot();
-  const entries = await fs.readdir(root, { withFileTypes: true });
-  return entries.filter((entry) => entry.isDirectory()).map((entry) => entry.name).sort();
-}
-
-async function pathExists(filePath: string): Promise<boolean> {
-  try {
-    await fs.stat(filePath);
-    return true;
-  } catch (error) {
-    const err = error as NodeJS.ErrnoException;
-    if (err.code === "ENOENT") {
-      return false;
-    }
-    throw error;
-  }
-}
-
-function toPosixPath(value: string): string {
-  return value.replace(/\\/g, "/");
-}
-
-function resolveBreakpointsSkillSource(): { sourceDir: string; skillName: string } {
-  const pkgPath = breakpointsRequire.resolve("@a5c-ai/babysitter-breakpoints/package.json");
-  const pkgDir = path.dirname(pkgPath);
-  const sourceDir = path.join(pkgDir, ".codex", "skills", "babysitter-breakpoint");
-  return { sourceDir, skillName: path.basename(sourceDir) };
-}
-
-async function installBreakpointsSkill(parsed: ParsedArgs, skillsDir: string): Promise<BreakpointsInstallSummary> {
-  let sourceDir: string;
-  let skillName: string;
-  try {
-    ({ sourceDir, skillName } = resolveBreakpointsSkillSource());
-  } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    return { status: "error", message };
-  }
-  const destinationDir = path.join(skillsDir, skillName);
-  try {
-    const sourceExists = await pathExists(sourceDir);
-    if (!sourceExists) {
-      return { status: "error", message: "breakpoints skill source missing" };
-    }
-    const destinationExists = await pathExists(destinationDir);
-    if (destinationExists && !parsed.force) {
-      return { status: "skipped", message: "already installed" };
-    }
-    if (parsed.dryRun) {
-      return { status: "planned", message: "dry-run: skipped breakpoints install" };
-    }
-    if (destinationExists && parsed.force) {
-      await fs.rm(destinationDir, { recursive: true, force: true });
-    }
-    await fs.mkdir(skillsDir, { recursive: true });
-    await fs.cp(sourceDir, destinationDir, { recursive: true });
-    return { status: "installed" };
-  } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    return { status: "error", message };
-  }
-}
-
-async function installBundledSkillDir(
-  skillName: string,
-  options: { skillsDir: string; dryRun: boolean; force: boolean }
-): Promise<SkillInstallResult> {
-  const sourceDir = path.join(resolveBundledSkillsRoot(), skillName);
-  const destinationDir = path.join(options.skillsDir, skillName);
-  try {
-    const sourceExists = await pathExists(sourceDir);
-    if (!sourceExists) {
-      return {
-        name: skillName,
-        status: "error",
-        sourceDir,
-        destinationDir,
-        message: "bundled skill missing",
-      };
-    }
-    const destinationExists = await pathExists(destinationDir);
-    if (destinationExists && !options.force) {
-      return {
-        name: skillName,
-        status: "skipped",
-        sourceDir,
-        destinationDir,
-        message: "already installed",
-      };
-    }
-    if (options.dryRun) {
-      return {
-        name: skillName,
-        status: "planned",
-        sourceDir,
-        destinationDir,
-      };
-    }
-    if (destinationExists && options.force) {
-      await fs.rm(destinationDir, { recursive: true, force: true });
-    }
-    await fs.mkdir(options.skillsDir, { recursive: true });
-    await fs.cp(sourceDir, destinationDir, { recursive: true });
-    return {
-      name: skillName,
-      status: "installed",
-      sourceDir,
-      destinationDir,
-    };
-  } catch (error) {
-    return {
-      name: skillName,
-      status: "error",
-      sourceDir,
-      destinationDir,
-      message: error instanceof Error ? error.message : String(error),
-    };
-  }
 }
 
 function allowSecretLogs(parsed: ParsedArgs): boolean {
@@ -806,6 +561,46 @@ async function handleRunStatus(parsed: ParsedArgs): Promise<number> {
   return 0;
 }
 
+async function handleRunIterate(parsed: ParsedArgs): Promise<number> {
+  if (!parsed.runDirArg) {
+    console.error(USAGE);
+    return 1;
+  }
+  const runDir = resolveRunDir(parsed.runsDir, parsed.runDirArg);
+  logVerbose("run:iterate", parsed, {
+    runDir,
+    iteration: parsed.iteration,
+    json: parsed.json,
+    verbose: parsed.verbose,
+  });
+
+  try {
+    const result = await runIterate({
+      runDir,
+      iteration: parsed.iteration,
+      verbose: parsed.verbose,
+      json: parsed.json,
+    });
+
+    if (parsed.json) {
+      console.log(JSON.stringify(result, null, 2));
+    } else {
+      const countInfo = result.count ? ` count=${result.count}` : "";
+      const actionInfo = result.action ? ` action=${result.action}` : "";
+      console.log(`[run:iterate] iteration=${result.iteration} status=${result.status}${actionInfo}${countInfo} reason=${result.reason}`);
+
+      if (result.status === "waiting" && result.until) {
+        console.log(`[run:iterate] Waiting until: ${new Date(result.until).toISOString()}`);
+      }
+    }
+
+    return 0;
+  } catch (error) {
+    console.error(`[run:iterate] Error: ${error instanceof Error ? error.message : String(error)}`);
+    return 1;
+  }
+}
+
 async function handleRunEvents(parsed: ParsedArgs): Promise<number> {
   if (!parsed.runDirArg) {
     console.error(USAGE);
@@ -960,206 +755,6 @@ async function handleTaskRun(parsed: ParsedArgs): Promise<number> {
     console.log(parts.join(" "));
   }
   return status === "ok" || status === "skipped" ? 0 : 1;
-}
-
-async function autoRunNodeTasks(
-  runDir: string,
-  actions: EffectAction[],
-  executed: ActionSummary[]
-) {
-  for (const action of actions) {
-    const summary: ActionSummary = {
-      effectId: action.effectId,
-      kind: action.kind,
-      label: action.label,
-    };
-    executed.push(summary);
-    const label = summary.label ? ` ${summary.label}` : "";
-    console.error(`[auto-run] ${summary.effectId} [${summary.kind}]${label}`);
-    await runNodeTaskFromCli({
-      runDir,
-      effectId: action.effectId,
-      task: action.taskDef,
-      invocationKey: action.invocationKey,
-      dryRun: false,
-    });
-  }
-}
-
-function emitJsonResult(
-  iteration:
-    | { status: "completed"; output: unknown }
-    | { status: "failed"; error: unknown }
-    | { status: "waiting" },
-  context: {
-    executed: ActionSummary[];
-    pending: ActionSummary[];
-    autoPending: ActionSummary[];
-    metadata?: IterationMetadata | null;
-    error?: unknown;
-    output?: unknown;
-  }
-) {
-  const payload: Record<string, unknown> = {
-    status: iteration.status,
-    autoRun: { executed: context.executed, pending: context.autoPending },
-    metadata: context.metadata ?? null,
-  };
-  if (iteration.status === "completed") {
-    payload.output = context.output;
-  } else if (iteration.status === "failed") {
-    payload.error = context.error ?? null;
-  } else {
-    payload.pending = context.pending;
-  }
-  console.log(JSON.stringify(payload));
-}
-
-async function handleRunContinue(parsed: ParsedArgs): Promise<number> {
-  if (!parsed.runDirArg) {
-    console.error(USAGE);
-    return 1;
-  }
-  if (parsed.nowOverride) {
-    console.error("[run:continue] --now is not supported; use run:step for single iterations");
-    return 1;
-  }
-  if ((parsed.autoNodeMax !== undefined || parsed.autoNodeLabel) && !parsed.autoNodeTasks) {
-    console.error("[run:continue] --auto-node-max/--auto-node-label require --auto-node-tasks");
-    return 1;
-  }
-  const runDir = resolveRunDir(parsed.runsDir, parsed.runDirArg);
-  logVerbose("run:continue", parsed, {
-    runDir,
-    dryRun: parsed.dryRun,
-    json: parsed.json,
-    autoNodeTasks: parsed.autoNodeTasks,
-    autoNodeMax: parsed.autoNodeMax ?? null,
-    autoNodeLabel: parsed.autoNodeLabel ?? null,
-  });
-  if (!(await readRunMetadataSafe(runDir, "run:continue"))) return 1;
-  const stateSnapshot = await readStateCacheSafe(runDir, "run:continue");
-  const executed: ActionSummary[] = [];
-  const autoNodeLimit = parsed.autoNodeMax ?? Number.POSITIVE_INFINITY;
-  let autoNodeRemaining = autoNodeLimit;
-  let autoNodeLimitLogged = false;
-
-  while (true) {
-    const iteration = await orchestrateIteration({ runDir });
-    const pendingActions = iteration.status === "waiting" ? iteration.nextActions : undefined;
-    const pendingCounts = pendingActions ? countActionsByKind(pendingActions) : undefined;
-    const enrichedMetadata = enrichIterationMetadata(iteration.metadata, pendingActions);
-    const metadata = mergeMetadataSources(enrichedMetadata, {
-      snapshot: stateSnapshot,
-      pendingByKind: pendingCounts,
-    });
-    const formattedMetadata = formatIterationMetadata(metadata);
-    logRunContinueStatus(iteration.status, executed.length, formattedMetadata.textParts, {
-      dryRun: parsed.dryRun,
-    });
-
-    if (iteration.status === "waiting") {
-      const pending = logPendingActions(iteration.nextActions, {
-        command: "run:continue",
-        includeHeader: false,
-      });
-      logSleepHints("run:continue", iteration.nextActions);
-      const nodeActions = iteration.nextActions.filter((action) => action.kind === "node");
-      const eligibleAutoActions = parsed.autoNodeTasks
-        ? nodeActions.filter((action) => matchesAutoNodeLabel(action, parsed.autoNodeLabel))
-        : nodeActions;
-      const planCap = parsed.autoNodeTasks
-        ? Math.min(
-            eligibleAutoActions.length,
-            Number.isFinite(autoNodeRemaining) ? Math.max(0, Math.floor(autoNodeRemaining)) : eligibleAutoActions.length
-          )
-        : eligibleAutoActions.length;
-      const plannedAutoActions = eligibleAutoActions.slice(0, planCap);
-      const nodeSummaries = summarizeActions(nodeActions);
-      const autoPendingSummaries = parsed.autoNodeTasks ? summarizeActions(plannedAutoActions) : nodeSummaries;
-      if (parsed.autoNodeTasks && eligibleAutoActions.length > 0 && autoNodeRemaining <= 0 && Number.isFinite(autoNodeLimit)) {
-        if (!autoNodeLimitLogged) {
-          console.error(`[auto-run] reached --auto-node-max=${parsed.autoNodeMax}`);
-          autoNodeLimitLogged = true;
-        }
-      }
-      if (parsed.autoNodeTasks && parsed.autoNodeLabel && eligibleAutoActions.length === 0 && nodeActions.length > 0) {
-        console.error(
-          `[auto-run] no node tasks matched --auto-node-label=${parsed.autoNodeLabel}; ${nodeActions.length} pending`
-        );
-      }
-      if (parsed.autoNodeTasks && plannedAutoActions.length > 0) {
-        if (parsed.dryRun) {
-          logAutoRunPlan(autoPendingSummaries);
-          if (parsed.json) {
-            emitJsonResult(
-              { status: "waiting" },
-              {
-                executed,
-                pending,
-                autoPending: autoPendingSummaries,
-                metadata: formattedMetadata.jsonMetadata ?? null,
-              }
-            );
-          }
-          return 0;
-        }
-        await autoRunNodeTasks(runDir, plannedAutoActions, executed);
-        if (Number.isFinite(autoNodeRemaining)) {
-          autoNodeRemaining = Math.max(0, autoNodeRemaining - plannedAutoActions.length);
-          if (autoNodeRemaining <= 0 && !autoNodeLimitLogged && parsed.autoNodeMax !== undefined) {
-            console.error(`[auto-run] reached --auto-node-max=${parsed.autoNodeMax}`);
-            autoNodeLimitLogged = true;
-          }
-        }
-        continue;
-      }
-      if (parsed.json) {
-        emitJsonResult(
-          { status: "waiting" },
-          {
-            executed,
-            pending,
-            autoPending: autoPendingSummaries,
-            metadata: formattedMetadata.jsonMetadata ?? null,
-          }
-        );
-      }
-      return 0;
-    }
-
-    if (iteration.status === "completed") {
-      if (parsed.json) {
-        emitJsonResult(
-          { status: "completed", output: iteration.output },
-          {
-            executed,
-            pending: [],
-            autoPending: [],
-            metadata: formattedMetadata.jsonMetadata ?? null,
-            output: iteration.output,
-          }
-        );
-      }
-      return 0;
-    }
-
-    if (parsed.json) {
-      emitJsonResult(
-        { status: "failed", error: iteration.error ?? null },
-        {
-          executed,
-          pending: [],
-          autoPending: [],
-          metadata: formattedMetadata.jsonMetadata ?? null,
-          error: iteration.error ?? null,
-        }
-      );
-    } else if (iteration.error !== undefined) {
-      console.error(iteration.error);
-    }
-    return 1;
-  }
 }
 
 function parseNowOverride(nowOverride?: string): Date | null {
@@ -1335,84 +930,6 @@ async function handleTaskShow(parsed: ParsedArgs): Promise<number> {
     console.log("  result: (not yet written)");
   }
   return 0;
-}
-
-async function handleSkillInstall(parsed: ParsedArgs): Promise<number> {
-  const skillsDir = resolveSkillsDir(parsed);
-  logVerbose("skill:install", parsed, {
-    skillsDir,
-    type: parsed.skillType,
-    scope: parsed.skillScope,
-    dryRun: parsed.dryRun,
-    force: parsed.force,
-    json: parsed.json,
-  });
-  const results: SkillInstallResult[] = [];
-  let skillNames: string[];
-  try {
-    skillNames = await listBundledSkillDirs();
-  } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    if (parsed.json) {
-      console.log(JSON.stringify({ skillsDir, type: parsed.skillType, scope: parsed.skillScope, error: message, results: [] }));
-    } else {
-      console.error(`[skill:install] failed to read bundled skills: ${message}`);
-    }
-    return 1;
-  }
-  if (!skillNames.length) {
-    if (parsed.json) {
-      console.log(
-        JSON.stringify({ skillsDir, type: parsed.skillType, scope: parsed.skillScope, error: "no bundled skills found", results: [] })
-      );
-    } else {
-      console.error("[skill:install] no bundled skills found");
-    }
-    return 1;
-  }
-  for (const skillName of skillNames) {
-    results.push(await installBundledSkillDir(skillName, { skillsDir, dryRun: parsed.dryRun, force: parsed.force }));
-  }
-  const counts = { installed: 0, skipped: 0, planned: 0, error: 0 };
-  for (const result of results) {
-    if (result.status === "installed") counts.installed += 1;
-    else if (result.status === "skipped") counts.skipped += 1;
-    else if (result.status === "planned") counts.planned += 1;
-    else counts.error += 1;
-  }
-  const breakpointsSummary = await installBreakpointsSkill(parsed, skillsDir);
-  const breakpointsFailed = breakpointsSummary.status === "error";
-  if (parsed.json) {
-    console.log(
-      JSON.stringify({ skillsDir, type: parsed.skillType, scope: parsed.skillScope, results, breakpoints: breakpointsSummary })
-    );
-    return counts.error > 0 || breakpointsFailed ? 1 : 0;
-  }
-  const parts = [`[skill:install] dir=${skillsDir}`];
-  if (!parsed.skillsDir) {
-    parts.push(`type=${parsed.skillType}`);
-    parts.push(`scope=${parsed.skillScope}`);
-  }
-  if (parsed.dryRun) parts.push("dryRun=true");
-  if (parsed.force) parts.push("force=true");
-  parts.push(`breakpoints=${breakpointsSummary.status}`);
-  if (counts.installed) parts.push(`installed=${counts.installed}`);
-  if (counts.skipped) parts.push(`skipped=${counts.skipped}`);
-  if (counts.planned) parts.push(`planned=${counts.planned}`);
-  if (counts.error) parts.push(`errors=${counts.error}`);
-  console.log(parts.join(" "));
-  if (breakpointsSummary.status === "error") {
-    console.error(`[skill:install] breakpoints install failed: ${breakpointsSummary.message ?? "unknown error"}`);
-  }
-  for (const result of results) {
-    const relativeDest = toPosixPath(path.relative(skillsDir, result.destinationDir));
-    const relativeSource = toPosixPath(path.relative(skillsDir, result.sourceDir));
-    const destLabel = relativeDest.startsWith("..") ? toPosixPath(result.destinationDir) : relativeDest;
-    const sourceLabel = relativeSource.startsWith("..") ? toPosixPath(result.sourceDir) : relativeSource;
-    const messageSuffix = result.message ? ` message=${result.message}` : "";
-    console.log(`- ${result.name} status=${result.status} dest=${destLabel} src=${sourceLabel}${messageSuffix}`);
-  }
-  return counts.error > 0 || breakpointsFailed ? 1 : 0;
 }
 
 function toTaskListEntry(record: EffectRecord, runDir: string): TaskListEntry {
@@ -1727,6 +1244,9 @@ export function createBabysitterCli() {
         if (parsed.command === "run:status") {
           return await handleRunStatus(parsed);
         }
+        if (parsed.command === "run:iterate") {
+          return await handleRunIterate(parsed);
+        }
         if (parsed.command === "run:events") {
           return await handleRunEvents(parsed);
         }
@@ -1736,17 +1256,11 @@ export function createBabysitterCli() {
         if (parsed.command === "run:step") {
           return await handleRunStep(parsed);
         }
-        if (parsed.command === "run:continue") {
-          return await handleRunContinue(parsed);
-        }
         if (parsed.command === "task:list") {
           return await handleTaskList(parsed);
         }
         if (parsed.command === "task:show") {
           return await handleTaskShow(parsed);
-        }
-        if (parsed.command === "skill:install") {
-          return await handleSkillInstall(parsed);
         }
         console.error(USAGE);
         return 1;

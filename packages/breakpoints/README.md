@@ -52,11 +52,6 @@ Wait for release:
 breakpoints breakpoint wait <id> --interval 3
 ```
 
-Install the babysitter-breakpoint skill:
-```bash
-breakpoints install-skill --target codex --scope global
-```
-
 ## Configuration
 Environment variables:
 - `PORT` (default 3185)
@@ -115,22 +110,72 @@ breakpoint payload.
 ## Web UI
 Open `http://localhost:3184` and provide the human token in the UI.
 
-## Install the babysitter-breakpoint skill
-```bash
-breakpoints install-skill
-```
-Defaults to global Codex install. Options:
-```bash
-breakpoints install-skill --target codex --scope global
-breakpoints install-skill --target codex --scope local
-breakpoints install-skill --target claude --scope global
-breakpoints install-skill --target claude --scope local
-breakpoints install-skill --target cursor --scope global
-breakpoints install-skill --target cursor --scope local
-```
-Global targets use `CODEX_HOME` or `~/.codex` for Codex, and `~/.claude` or `~/.cursor` for Claude/Cursor. Local installs write to `.codex/skills`, `.claude/skills`, or `.cursor/skills` under the package root. Restart the app after install.
+## Telegram Extension
 
-When installed from npm, the skill is bundled at `.codex/skills/babysitter-breakpoint/` inside the package and copied to the target location by `breakpoints install-skill`.
+The Telegram extension allows you to receive breakpoint notifications and interact with them via Telegram.
+
+### Setup
+1. Create a Telegram bot via [@BotFather](https://t.me/botfather)
+2. Get your bot token
+3. Configure the extension:
+```bash
+breakpoints extension enable telegram --token <bot-token> --username <your-username>
+```
+
+### Features
+
+**Automatic Notifications:**
+- Receive notification when a new breakpoint is created
+- Get notified when a breakpoint is released
+
+**Connection:**
+Send any slash command (e.g., `/start`) to your bot to connect. The bot will:
+- Confirm connection
+- Show all waiting breakpoints with titles, IDs, run IDs, and questions
+- Provide instructions for interacting with breakpoints
+
+**Commands:**
+- `list` (or `ls`, `waiting`) - Show all waiting breakpoints
+- `preview <number>` (or `show <number>`) - View full details of a breakpoint
+- `file <number>` - Download a context file by its number
+- `file <path>` - Download a context file by its path
+- `raw <path>` - View file inline with syntax highlighting (if short enough)
+
+**Releasing Breakpoints:**
+- Reply to any breakpoint message to release it
+- Send the breakpoint ID to release it
+- Send any text message to release the most recent breakpoint
+
+**Example Workflow:**
+```
+You: /start
+Bot: Telegram connected. I will notify you about breakpoints here.
+
+     🔔 You have 2 waiting breakpoints:
+
+     1. Approve refactoring plan
+        ID: abc-123
+        Run: run-20260120-refactor
+        Created: 5 mins ago
+        Question: Should I proceed with this refactoring?
+
+     2. Review API changes
+        ID: def-456
+        Run: run-20260120-api
+        Created: 2 mins ago
+        Question: Are these API changes acceptable?
+
+You: preview 1
+Bot: [Shows full details including all context files]
+
+You: file 1
+Bot: [Sends the first context file as document]
+
+You: Looks good, proceed!
+Bot: ✅ Breakpoint released
+     ID: abc-123
+     Feedback: Looks good, proceed!
+```
 
 ## Breakpoint CLI (agent-friendly)
 Create a breakpoint:

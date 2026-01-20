@@ -37,14 +37,35 @@ async function loop() {
     // eslint-disable-next-line no-console
     console.log("[telegram] debug enabled");
   }
+
+  let consecutiveErrors = 0;
+  const MAX_CONSECUTIVE_ERRORS = 10;
+
   while (true) {
-    await runOnce();
+    try {
+      await runOnce();
+      consecutiveErrors = 0;
+    } catch (err) {
+      consecutiveErrors++;
+      // eslint-disable-next-line no-console
+      console.error(`[worker] error in runOnce (${consecutiveErrors}/${MAX_CONSECUTIVE_ERRORS}):`, err.message);
+
+      if (consecutiveErrors >= MAX_CONSECUTIVE_ERRORS) {
+        // eslint-disable-next-line no-console
+        console.error(`[worker] too many consecutive errors, exiting`);
+        process.exitCode = 1;
+        break;
+      }
+
+      const backoffDelay = Math.min(1000 * Math.pow(2, consecutiveErrors - 1), 30000);
+      // eslint-disable-next-line no-console
+      console.log(`[worker] backing off for ${backoffDelay}ms before retry`);
+      await new Promise((resolve) => setTimeout(resolve, backoffDelay));
+      continue;
+    }
+
     await new Promise((resolve) => setTimeout(resolve, POLL_INTERVAL_MS));
   }
 }
 
-loop().catch((err) => {
-  // eslint-disable-next-line no-console
-  console.error(err);
-  process.exitCode = 1;
-});
+loop();

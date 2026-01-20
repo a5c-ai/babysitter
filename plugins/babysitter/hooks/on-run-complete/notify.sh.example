@@ -1,0 +1,33 @@
+#!/bin/bash
+# on-run-complete Notification Hook Example
+# Demonstrates sending notifications when runs complete
+
+set -euo pipefail
+
+PAYLOAD=$(cat)
+
+RUN_ID=$(echo "$PAYLOAD" | jq -r '.runId')
+STATUS=$(echo "$PAYLOAD" | jq -r '.status')
+DURATION=$(echo "$PAYLOAD" | jq -r '.duration')
+
+# Example: Slack notification (uncomment and configure)
+# SLACK_WEBHOOK_URL="https://hooks.slack.com/services/YOUR/WEBHOOK/URL"
+# curl -X POST "$SLACK_WEBHOOK_URL" \
+#   -H 'Content-Type: application/json' \
+#   -d "{\"text\":\"✅ Run $RUN_ID completed in ${DURATION}ms\"}"
+
+# Example: Email notification (uncomment and configure)
+# echo "Run $RUN_ID completed with status: $STATUS (${DURATION}ms)" | \
+#   mail -s "Babysitter Run Complete" your@email.com
+
+# Example: Desktop notification (Linux)
+# notify-send "Babysitter" "Run $RUN_ID completed ($STATUS)"
+
+# Example: Desktop notification (macOS)
+# osascript -e "display notification \"Run $RUN_ID completed ($STATUS)\" with title \"Babysitter\""
+
+# Example: Write to custom log file
+# echo "[$(date)] Run $RUN_ID completed: $STATUS (${DURATION}ms)" >> ~/babysitter-completions.log
+
+echo "[on-run-complete/notify] Notification sent" >&2
+exit 0
