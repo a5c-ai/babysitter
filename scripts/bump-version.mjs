@@ -67,13 +67,15 @@ for (const manifest of manifests) {
   writeFileSync(manifest.path, `${JSON.stringify(manifest.data, null, 2)}\n`);
 }
 
-// Update plugin manifests
+// Update plugin manifests - bump from their current version
 for (const pluginManifest of pluginManifestData) {
-  pluginManifest.data.version = newVersion;
+  const currentPluginVersion = pluginManifest.data.version;
+  const newPluginVersion = bumpVersion(currentPluginVersion, bumpTarget);
+  pluginManifest.data.version = newPluginVersion;
   writeFileSync(pluginManifest.path, `${JSON.stringify(pluginManifest.data, null, 2)}\n`);
 }
 
-// Update marketplace.json plugin entry
+// Update marketplace.json plugin entry - bump from its current version
 const marketplacePath = ".claude-plugin/marketplace.json";
 if (existsSync(marketplacePath)) {
   const marketplaceData = JSON.parse(readFileSync(marketplacePath, "utf8"));
@@ -82,7 +84,9 @@ if (existsSync(marketplacePath)) {
       (plugin) => plugin.name === "babysitter"
     );
     if (babysitterPlugin) {
-      babysitterPlugin.version = newVersion;
+      const currentMarketplaceVersion = babysitterPlugin.version;
+      const newMarketplaceVersion = bumpVersion(currentMarketplaceVersion, bumpTarget);
+      babysitterPlugin.version = newMarketplaceVersion;
       writeFileSync(marketplacePath, `${JSON.stringify(marketplaceData, null, 2)}\n`);
     }
   }
