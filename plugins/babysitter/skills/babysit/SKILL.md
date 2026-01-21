@@ -191,7 +191,7 @@ $CLI task:post <runId> <effectId> --status ok --value tasks/<effectId>/output.js
 ### Agent Task Example
 
 Important: Check which subagents and agents are actually available before assigning the name. if none, pass the general-purpose subagent.
-when executing the agent task, use the Task tool.
+when executing the agent task, use the Task tool. never use the Babysitter skill or agent to execute the task.
 
 ```javascript
 export const agentTask = defineTask('agent-scorer', (args, taskCtx) => ({
@@ -221,7 +221,8 @@ export const agentTask = defineTask('agent-scorer', (args, taskCtx) => ({
 
 ### Skill Task Example
 
-Important: Check which skills are actually available before assigning the name.
+Important: Check which skills are actually available before assigning the name. 
+Never use the Babysitter skill or agent to execute the task.
 
 ```javascript
 export const skillTask = defineTask('analyzer-skill', (args, taskCtx) => ({
