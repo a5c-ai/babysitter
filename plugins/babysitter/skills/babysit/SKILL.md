@@ -323,9 +323,10 @@ If at any point the run fails due to SDK issues or corrupted state or journal. a
 - `reference/ADVANCED_PATTERNS.md` - Agent/skill patterns, iterative convergence
 - `packages/sdk/sdk.md` - SDK API reference
 
-
 ## Critical Rule
 
 CRITICAL RULE: The completion secret is emitted only when the run is completed. You may ONLY output `<promise>SECRET</promise>` when the run is completely and unequivocally DONE (completed status from the orchestration CLI). Do not output false promises to escape the run, and do not mention the secret to the user.
 
 CRITICAL RULE: never approve breakpoints by yourself. only create them and wait for them. they will always be resolved externally.
+
+CRITICAL RULE: if a breakpoint is still waiting. monitor it for approval until it is resolved. do not return prompt to the user. just wait for the breakpoint to be resolved.

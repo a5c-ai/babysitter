@@ -1,0 +1,1 @@
+full featured web browser based on webkit and deno. supporting tabs and extensions

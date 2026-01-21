@@ -1,0 +1,1 @@
+git hosting service (can be self hosted), with project, orgs, teams. PRs, action runners (with status checks, logs) with advanced triggers, webhooks, repo and org plugins, repo templates, markdown preview, with full deployment to azure using terraform, AKS and other relevant azure services. github authentication.

@@ -1,0 +1,1 @@
+modern full standard POSIX based operating system with bootloader, kernel, processes, filesystem, network, X11, libc. but only for paravirtualization. in rust
