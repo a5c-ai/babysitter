@@ -8,7 +8,7 @@ set -euo pipefail
 # Parse arguments (check for --help early before requiring session ID)
 RUN_ID=""
 MAX_ITERATIONS=0
-COMPLETION_PROMISE="null"
+COMPLETION_PROMISE="run_completed"
 
 # Parse options and positional arguments
 while [[ $# -gt 0 ]]; do
@@ -36,15 +36,31 @@ DESCRIPTION:
   until completion or iteration limit.
 
 EXAMPLES:
-  /babysitter-resume run-20260119-example
-  /babysitter-resume run-20260119-example --max-iterations 20
-  /babysitter-resume run-20260119-example --completion-promise 'DONE'
+  /babysitter-resume --claude-session-id "${CLAUDE_SESSION_ID}" --run-id run-20260119-example
+  /babysitter-resume --claude-session-id "${CLAUDE_SESSION_ID}" --run-id run-20260119-example --max-iterations 20
+  /babysitter-resume --claude-session-id "${CLAUDE_SESSION_ID}" --run-id run-20260119-example --completion-promise 'DONE'
 
 STOPPING:
   Only by reaching --max-iterations or detecting --completion-promise
   No manual stop - Babysitter runs infinitely by default!
 HELP_EOF
       exit 0
+      ;;
+    --claude-session-id)
+      if [[ -z "${2:-}" ]]; then
+        echo "❌ Error: --claude-session-id requires a session ID argument" >&2
+        exit 1
+      fi
+      CLAUDE_SESSION_ID="$2"
+      shift 2
+      ;;
+    --run-id)
+      if [[ -z "${2:-}" ]]; then
+        echo "❌ Error: --run-id requires a run ID argument" >&2
+        exit 1
+      fi
+      RUN_ID="$2"
+      shift 2
       ;;
     --max-iterations)
       if [[ -z "${2:-}" ]]; then
@@ -99,39 +115,6 @@ if [[ -z "${CLAUDE_SESSION_ID:-}" ]]; then
   echo "❌ Error: CLAUDE_SESSION_ID not available" >&2
   echo "   Babysitter requires session isolation to work correctly." >&2
   exit 1
-fi
-
-
-# Read hook input from stdin
-HOOK_INPUT=$(cat)
-
-# Extract session_id from hook input
-SESSION_ID=$(echo "$HOOK_INPUT" | jq -r '.session_id // empty')
-
-if [[ -z "$SESSION_ID" ]]; then
-  # No session ID available - this shouldn't happen but exit gracefully
-  exit 0
-fi
-
-# Detect project context
-PROJECT_ROOT=$(git rev-parse --show-toplevel 2>/dev/null || echo "$PWD")
-PROJECT_NAME=$(basename "$PROJECT_ROOT")
-PROJECT_BRANCH=$(git branch --show-current 2>/dev/null || echo "")
-
-# CLAUDE_ENV_FILE is provided by Claude Code for SessionStart hooks
-# Writing to this file persists environment variables for the session
-if [[ -n "${CLAUDE_ENV_FILE:-}" ]]; then
-  # Session identity
-  echo "export CLAUDE_SESSION_ID=\"$SESSION_ID\"" >> "$CLAUDE_ENV_FILE"
-
-  # Project context
-  echo "export PROJECT_ROOT=\"$PROJECT_ROOT\"" >> "$CLAUDE_ENV_FILE"
-  echo "export PROJECT_NAME=\"$PROJECT_NAME\"" >> "$CLAUDE_ENV_FILE"
-  [[ -n "$PROJECT_BRANCH" ]] && echo "export PROJECT_BRANCH=\"$PROJECT_BRANCH\"" >> "$CLAUDE_ENV_FILE"
-
-  # Inherit from wrapper if present (e.g., mycc wrapper)
-  [[ -n "${myccpid:-}" ]] && echo "export myccpid=\"$myccpid\"" >> "$CLAUDE_ENV_FILE"
-  [[ -n "${ai_model:-}" ]] && echo "export ai_model=\"$ai_model\"" >> "$CLAUDE_ENV_FILE"
 fi
 
 # Determine state directory (plugin-relative for session isolation)

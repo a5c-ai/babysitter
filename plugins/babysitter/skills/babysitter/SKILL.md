@@ -80,6 +80,12 @@ Run the effect externally (by you, your hook, or another worker). After executio
 - Appends an `EFFECT_RESOLVED` event to the journal
 - Updates the state cache
 
+if the effect is a breakpoint, you need to run the command:
+```bash
+npx @a5c-ai/babysitter-breakpoints breakpoint create --tag <tag> --question "<question>" --title "<title>" --run-id <runId> --file <file,format,language,label> --file <file,format,language,label> --file <file,format,language,label> ...
+```
+
+ to create the breakpoint and get the answer from the user
 
 ### 4. Results Posting
 

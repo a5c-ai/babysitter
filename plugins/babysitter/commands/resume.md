@@ -1,8 +1,7 @@
 ---
 description: "Start babysitter run in current session"
 argument-hint: "PROMPT [--max-iterations N] [--completion-promise TEXT]"
-allowed-tools: ["Bash(${CLAUDE_PLUGIN_ROOT}/scripts/setup-babysitter-run.sh:*)"]
-allowed-tools: ["Bash(${CLAUDE_PLUGIN_ROOT}/state/*:*)"]
+allowed-tools: ["Bash(${CLAUDE_PLUGIN_ROOT}/scripts/setup-babysitter-run-resume.sh:*)", "Bash(${CLAUDE_PLUGIN_ROOT}/state/*:*)"]
 hide-from-slash-command-tool: "true"
 ---
 
@@ -11,7 +10,7 @@ hide-from-slash-command-tool: "true"
 Before anything else, you must execute the setup script to associate the babysitter session before you can resume the run:
 
 ```!
-"${CLAUDE_PLUGIN_ROOT}/scripts/setup-babysitter-run.sh" --claude-session-id "${CLAUDE_SESSION_ID}" --run-id "${RUN_ID}" $ARGUMENTS
+bash "${CLAUDE_PLUGIN_ROOT}/scripts/setup-babysitter-run-resume.sh" --claude-session-id "${CLAUDE_SESSION_ID}" --run-id "${RUN_ID}" $ARGUMENTS
 ```
 
 ## Architecture Overview

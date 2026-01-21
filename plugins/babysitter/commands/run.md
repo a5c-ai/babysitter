@@ -10,7 +10,7 @@ hide-from-slash-command-tool: "true"
 Before anything else, you must execute the setup script to initialize the Babysitter session before you can start the run:
 
 ```!
-"${CLAUDE_PLUGIN_ROOT}/scripts/setup-babysitter-run.sh" --claude-session-id "${CLAUDE_SESSION_ID}" $ARGUMENTS
+bash "${CLAUDE_PLUGIN_ROOT}/scripts/setup-babysitter-run.sh" --claude-session-id "${CLAUDE_SESSION_ID}" $ARGUMENTS
 ```
 
 ## Architecture Overview
