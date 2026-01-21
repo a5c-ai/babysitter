@@ -41,6 +41,28 @@ rm -rf /tmp/babysitter
 
 In Claude Code, type `/skills` to verify "babysit" appears in the list.
 
+### 4. Run the babysitter breakpoints service
+
+In a new terminal, run the following command:
+
+```bash
+npx -y @a5c-ai/babysitter-breakpoints start
+```
+
+This will start the babysitter breakpoints service at http://localhost:3184
+
+You can either:
+
+1. use a tunneling service like ngrok to expose the service to the internet:
+
+```bash
+ngrok http 3184
+```
+
+OR
+
+2. configure the telegram extension of the breakpoints service. (from the breakpoints ui)
+
 ---
 
 ## Quick Start
