@@ -64,14 +64,13 @@ The in-session loop mechanism allows Claude to work on a task continuously withi
 │                    Claude Code Session                       │
 │                                                              │
 │  ┌────────────────────────────────────────────────────────┐ │
-│  │  User: /babysit Build a REST API                │ │
+│  │  User: /babysitter:babysit Build a REST API                │ │
 │  │         --max-iterations 20                             │ │
 │  │                                                         │ │
 │  └─────────────────────┬──────────────────────────────────┘ │
 │                        │                                     │
 │                        ▼                                     │
 │  ┌────────────────────────────────────────────────────────┐ │
-│  │  Command: babysitter-run.md                            │ │
 │  │  Executes: setup-babysitter-run.sh $ARGUMENTS          │ │
 │  └─────────────────────┬──────────────────────────────────┘ │
 │                        │                                     │
@@ -181,7 +180,7 @@ babysitter-stop-hook.sh → Reads state file
 
 **Available Commands:**
 
-#### /babysit
+#### /babysitter:babysit
 
 **File:** `run.md`
 
@@ -200,7 +199,7 @@ hide-from-slash-command-tool: "true"
 bash "${CLAUDE_PLUGIN_ROOT}/skills/babysit/scripts/setup-babysitter-run.sh" $ARGUMENTS
 ```
 
-#### /babysitter:resume
+#### /babysitter:babysit resume
 
 **File:** `resume.md`
 
@@ -381,7 +380,7 @@ fi
 ### 4.1 Initialization Flow
 
 ```
-User runs /babysit
+User runs /babysitter:babysit
          │
          ▼
 Command file parsed (run.md)
@@ -1029,7 +1028,7 @@ rm "$BABYSITTER_STATE_FILE"
 
 **Command:**
 ```bash
-/babysit Fix the authentication bug --max-iterations 10
+/babysitter:babysit Fix the authentication bug --max-iterations 10
 ```
 
 **Flow:**
@@ -1050,7 +1049,7 @@ rm "$BABYSITTER_STATE_FILE"
 
 **Command:**
 ```bash
-/babysit Build a REST API for todos \
+/babysitter:babysit Build a REST API for todos \
   --max-iterations 50
 ```
 
@@ -1073,7 +1072,7 @@ rm "$BABYSITTER_STATE_FILE"
 
 **Command:**
 ```bash
-/babysit Improve code quality
+/babysitter:babysit Improve code quality
 ```
 
 **Flow:**
@@ -1091,7 +1090,7 @@ rm "$BABYSITTER_STATE_FILE"
 
 **Command:**
 ```bash
-/babysit resume run-20260120-example --max-iterations 20
+/babysitter:babysit resume run-20260120-example --max-iterations 20
 ```
 
 **Flow:**

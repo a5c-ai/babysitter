@@ -11,8 +11,8 @@ create a UX for the system that will be used for:
 5. run management (create run, resume runs, delete, view, etc.) 
 
 can dispatch claude code slash commands (claude "/...")
-/babysit <PROMPT> [--max-iterations <n>]
-/babysit <run-id> [--max-iterations <n>] 
+/babysitter:babysit <PROMPT> [--max-iterations <n>]
+/babysitter:babysit resume <run-id> [--max-iterations <n>] 
 
 requirements:
   - should be a web app in nextjs without a database

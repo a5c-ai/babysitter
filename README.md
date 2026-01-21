@@ -119,26 +119,26 @@ This means you can **pause, resume, or recover** at any point.
 ### Start a New Run
 
 ```
-/babysit <prompt> [--max-iterations <n>]
+/babysitter:babysit <prompt> [--max-iterations <n>]
 ```
 
 **Examples:**
 ```
-/babysit Build a todo app with Next.js and SQLite
-/babysit Implement user authentication --max-iterations 20
-/babysit Refactor the payment module for better error handling
+/babysitter:babysit Build a todo app with Next.js and SQLite
+/babysitter:babysit Implement user authentication --max-iterations 20
+/babysitter:babysit Refactor the payment module for better error handling
 ```
 
 ### Resume an Existing Run
 
 ```
-/babysit resume --run-id <runId>
+/babysitter:babysit resume --run-id <runId>
 ```
 
 **Examples:**
 ```
-/babysit resume --run-id 01KFFTSF8TK8C9GT3YM9QYQ6WG
-/babysit resume --run-id todo-app-20260121-084244 --max-iterations 10
+/babysitter:babysit resume --run-id 01KFFTSF8TK8C9GT3YM9QYQ6WG
+/babysitter:babysit resume --run-id todo-app-20260121-084244 --max-iterations 10
 ```
 
 ### Natural Language (via Skill)

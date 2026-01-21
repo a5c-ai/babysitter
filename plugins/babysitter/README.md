@@ -200,10 +200,10 @@ Use Claude Code commands for specific actions:
 
 ```bash
 # Create a new babysitter run
-/babysit "Implement user authentication"
+/babysitter:babysit "Implement user authentication"
 
 # Resume an existing run
-/babysit resume run-20260120-auth
+/babysitter:babysit resume run-20260120-auth
 ```
 
 **Check Available Skills**
