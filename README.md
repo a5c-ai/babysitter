@@ -65,7 +65,7 @@ Babysitter works seamlessly with your prexisting subagents, skills and tools. It
 Before installing Babysitter, ensure you have:
 
 - **Node.js**: Version 20.0.0 or higher (recommend 22.x LTS) - ideally using nvm to manage node versions
-- **Claude Code**: Latest version installed and configured - see [Claude Code documentation](https://claude.ai/docs/cli/getting-started)
+- **Claude Code**: Latest version installed and configured - see [Claude Code documentation](https://code.claude.com/docs/en/quickstart)
 - **Git**: For cloning the repository (optional, for manual installation)
 
 ---
