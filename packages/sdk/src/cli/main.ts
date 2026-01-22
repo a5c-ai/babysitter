@@ -27,13 +27,15 @@ const USAGE = `Usage:
   babysitter task:post <runDir> <effectId> --status <ok|error> [--runs-dir <dir>] [--json] [--dry-run] [--value <file>] [--error <file>] [--stdout-ref <ref>] [--stderr-ref <ref>] [--stdout-file <file>] [--stderr-file <file>] [--started-at <iso8601>] [--finished-at <iso8601>] [--metadata <file>] [--invocation-key <key>]
   babysitter task:list <runDir> [--runs-dir <dir>] [--pending] [--kind <kind>] [--json]
   babysitter task:show <runDir> <effectId> [--runs-dir <dir>] [--json]
+  babysitter version
 
 Global flags:
   --runs-dir <dir>   Override the runs directory (defaults to .a5c/runs).
   --json             Emit JSON output when supported by the command.
   --dry-run          Describe planned mutations without changing on-disk state.
   --verbose          Log resolved paths and options to stderr for debugging.
-  --help, -h         Show this help text.`;
+  --help, -h         Show this help text.
+  --version, -v      Show CLI version.`;
 
 interface ParsedArgs {
   command?: string;
@@ -110,11 +112,18 @@ function parseArgs(argv: string[]): ParsedArgs {
     parsed.command = undefined;
     parsed.helpRequested = true;
   }
+  if (parsed.command === "--version" || parsed.command === "-v") {
+    parsed.command = "version";
+  }
   const positionals: string[] = [];
   for (let i = 0; i < rest.length; i += 1) {
     const arg = rest[i];
     if (arg === "--help" || arg === "-h") {
       parsed.helpRequested = true;
+      continue;
+    }
+    if (arg === "--version" || arg === "-v") {
+      parsed.command = "version";
       continue;
     }
     if (arg === "--runs-dir") {
@@ -1410,11 +1419,22 @@ function formatSeq(seq: number): string {
   return seq.toString().padStart(6, "0");
 }
 
+async function readCliVersion(): Promise<string> {
+  const packagePath = path.join(__dirname, "..", "..", "package.json");
+  const raw = await fs.readFile(packagePath, "utf8");
+  const parsed = JSON.parse(raw) as { version?: string };
+  return parsed.version ?? "unknown";
+}
+
 export function createBabysitterCli() {
   return {
     async run(argv: string[] = process.argv.slice(2)): Promise<number> {
       try {
         const parsed = parseArgs(argv);
+        if (parsed.command === "version") {
+          console.log(await readCliVersion());
+          return 0;
+        }
         if (!parsed.command || parsed.helpRequested) {
           console.log(USAGE);
           return 0;

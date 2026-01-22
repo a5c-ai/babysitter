@@ -13,6 +13,7 @@ function usage() {
   breakpoints breakpoint status <id>
   breakpoints breakpoint show <id>
   breakpoints breakpoint wait <id> [--interval <seconds>]
+  breakpoints version
 `);
 }
 
@@ -173,6 +174,13 @@ const cmd = args[0];
 
 if (!cmd || cmd === "--help" || cmd === "-h") {
   usage();
+  process.exit(0);
+}
+
+if (cmd === "version" || cmd === "--version" || cmd === "-v") {
+  const packagePath = path.join(__dirname, "..", "package.json");
+  const pkg = JSON.parse(fs.readFileSync(packagePath, "utf8"));
+  console.log(pkg.version || "unknown");
   process.exit(0);
 }
 
