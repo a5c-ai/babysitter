@@ -332,4 +332,6 @@ CRITICAL RULE: never approve breakpoints by yourself. only create them and wait 
 
 CRITICAL RULE: if a breakpoint is still waiting. monitor it for approval until it is resolved. do not return prompt to the user. just wait for the breakpoint to be resolved.
 
+CRITICAL RULE: if a run is broken/failed/at unknown state, when of the way to recover is to remove last bad entries in the journal and rebuild the state.
+
 CRITICAL RULE: when creating processes, search for available skills and subagents before thinking about the exact orchestration. prefer processes that close the widest loop in the quality gates (for example e2e tests with a full browser or emulator/vm if it a mobile or desktop app) AND gates that make sure the work is accurate against the user request (all the specs is covered and no extra stuff was added unless permitted by the intent of the user).
