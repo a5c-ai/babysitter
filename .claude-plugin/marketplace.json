@@ -9,7 +9,7 @@
       "name": "babysitter",
       "source": "./plugins/babysitter",
       "description": "Babysitter",
-      "version": "4.0.33",
+      "version": "4.0.34",
       "author": {
         "name": "a5c.ai"
       }
