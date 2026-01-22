@@ -75,7 +75,7 @@ Before installing Babysitter, ensure you have:
 ### 1. Install the SDK
 
 ```bash
-npm install -g @a5c-ai/babysitter-sdk @a5c-ai/babysitter-breakpoints
+npm install -g @a5c-ai/babysitter@latest @a5c-ai/babysitter-sdk@latest @a5c-ai/babysitter-breakpoints@latest
 ```
 
 ### 2. Install the Plugin
@@ -90,16 +90,7 @@ npm install -g @a5c-ai/babysitter-sdk @a5c-ai/babysitter-breakpoints
 /plugin install babysitter@a5c.ai
 ```
 
-Then restart Claude Code if prompted.
-
-**Manual Installation (Alternative):**
-
-```bash
-# Clone the repo and copy the plugin
-git clone https://github.com/a5c-ai/babysitter.git /tmp/babysitter
-cp -r /tmp/babysitter/plugins/babysitter ~/.claude/plugins/
-rm -rf /tmp/babysitter
-```
+Then restart Claude Code.
 
 ### 3. Verify Installation
 

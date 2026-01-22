@@ -1,7 +1,7 @@
 requirements:
 
 
-based on the SDKs  in this repo in the packages/sdk (npm @a5c-ai/babysitter-sdk) and the breakpoints SDK (npm @a5c-ai/babysitter-breakpoints) and claude plugin (REPO_ROOT/plugins/babysitter/commands/run.md and resume.md).
+based on the SDKs  in this repo in the packages/sdk (npm @a5c-ai/babysitter-sdk) and the breakpoints SDK (npm @a5c-ai/babysitter-breakpoints) and claude plugin (REPO_ROOT/plugins/babysitter).
 
 create a UX for the system that will be used for:
 1. observability of the runs, tasks, and breakpoints.
