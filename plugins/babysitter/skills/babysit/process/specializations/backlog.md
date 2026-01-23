@@ -28,10 +28,20 @@ Software and R&D Specializations (give a proper name to each specialization) - i
 [x] Documentation, Technical Writing, Technical Communication, Specifications, Standards
     # plugins/babysitter/skills/babysit/process/specializations/technical-documentation/
 
-Physical Sciences Specializations (give a proper name to each specialization):
+Engineering Specializations (give a proper name to each specialization):
 
 [ ] Embedded Systems, Hardware, Firmware, Device Drivers, Hardware-Software Integration
 [ ] Robotics and world simulation
+[ ] Game Product Development
+[ ] Web Product Development (frameworks, patterns, best practices, tools, sdk, libraries, etc.)
+[ ] Mobile Product Development
+[ ] Desktop Product Development
+[ ] AI Agents and Conversational AI Agents and Chatbots - Howtos, UX, Frameworks, Tools, SDKs, Libraries, Best Practices, Patterns, etc.
+[ ] Algorithms, Optimization, Microcoding, l33tcode, etc.
+
+Science Specializations (give a proper name to each specialization):
+
+[ ] General Purpose Scientific Discovery, Engineering, and Problem Solving - Methodical Creative Thinking. Thinking Patterns for Scientific Discovery, Engineering, and Problem Solving
 [ ] Quantum Computing, Quantum Algorithms, Quantum Hardware, Quantum Software
 [ ] Bioinformatics, Genomics, Proteomics
 [ ] Nanotechnology
@@ -48,7 +58,6 @@ Physical Sciences Specializations (give a proper name to each specialization):
 [ ] Computer Science
 [ ] Mathematics
 [ ] Physics
-[ ] General Purpose Scientific Discovery, Engineering, and Problem Solving - Methodical Creative Thinking. Thinking Patterns for Scientific Discovery, Engineering, and Problem Solving
 
 Business and Finance Specializations (give a proper name to each specialization):
 
