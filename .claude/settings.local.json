@@ -43,7 +43,9 @@
       "Bash(babysitter run:iterate:*)",
       "Bash(babysitter run:events:*)",
       "Skill(babysit)",
-      "Bash(tree:*)"
+      "Bash(tree:*)",
+      "Bash(babysitter task:list:*)",
+      "Skill(babysitter:babysit)"
     ]
   }
 }

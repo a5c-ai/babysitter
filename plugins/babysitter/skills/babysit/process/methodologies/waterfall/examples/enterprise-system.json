@@ -1,0 +1,35 @@
+{
+  "projectName": "Enterprise Customer Management System",
+  "projectDescription": "Comprehensive enterprise system for managing customer relationships, orders, support tickets, and analytics with multi-tenant architecture, role-based access control, and real-time reporting capabilities. System must integrate with existing ERP and CRM systems.",
+  "stakeholders": [
+    {
+      "name": "Sarah Johnson",
+      "role": "Product Owner",
+      "department": "Business Development",
+      "email": "sarah.johnson@example.com"
+    },
+    {
+      "name": "Michael Chen",
+      "role": "Technical Lead",
+      "department": "Engineering",
+      "email": "michael.chen@example.com"
+    },
+    {
+      "name": "Emily Rodriguez",
+      "role": "QA Manager",
+      "department": "Quality Assurance",
+      "email": "emily.rodriguez@example.com"
+    },
+    {
+      "name": "David Thompson",
+      "role": "Operations Manager",
+      "department": "IT Operations",
+      "email": "david.thompson@example.com"
+    }
+  ],
+  "requirementsSource": "stakeholder-interviews",
+  "testingStrategy": "comprehensive",
+  "deploymentTarget": "production",
+  "includeVModel": true,
+  "regulatoryCompliance": "ISO-9001"
+}

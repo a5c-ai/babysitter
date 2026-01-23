@@ -1,0 +1,117 @@
+{
+  "projectName": "Fitness Tracker Mobile App",
+  "productVision": "Mobile fitness tracking app that helps users log workouts, track nutrition, monitor progress with charts and goals, and connect with friends for motivation. Native iOS and Android apps with cloud sync.",
+  "sprintDuration": 3,
+  "sprintCount": 5,
+  "teamSize": 7,
+  "productOwner": "Alex Martinez",
+  "scrumMaster": "Lisa Wang",
+  "backlogItems": [
+    {
+      "id": "PBI-F01",
+      "title": "User Onboarding and Profile Setup",
+      "userStory": "As a new user, I want to create my profile with fitness goals, so that the app can personalize my experience",
+      "acceptanceCriteria": [
+        "Create account with email or social login",
+        "Enter basic info (age, height, weight, gender)",
+        "Select fitness goals (weight loss, muscle gain, maintenance)",
+        "Set weekly workout target",
+        "Choose preferred units (metric/imperial)"
+      ],
+      "storyPoints": 5,
+      "priority": "must-have",
+      "type": "feature",
+      "businessValue": 100
+    },
+    {
+      "id": "PBI-F02",
+      "title": "Workout Logging",
+      "userStory": "As a user, I want to log my workouts with exercises and reps, so that I can track my training over time",
+      "acceptanceCriteria": [
+        "Select workout type (strength, cardio, flexibility)",
+        "Add exercises from preset library",
+        "Log sets, reps, and weight for strength exercises",
+        "Log duration and distance for cardio",
+        "Save workout with date and time",
+        "Add notes to workouts",
+        "Quick-add from recent workouts"
+      ],
+      "storyPoints": 13,
+      "priority": "must-have",
+      "type": "feature",
+      "businessValue": 95
+    },
+    {
+      "id": "PBI-F03",
+      "title": "Nutrition Tracking",
+      "userStory": "As a user, I want to log my meals and track calories, so that I can manage my diet alongside fitness",
+      "acceptanceCriteria": [
+        "Search food database (USDA nutrition data)",
+        "Log meals with portions",
+        "Track calories, protein, carbs, fat",
+        "Set daily calorie goal",
+        "View remaining calories for day",
+        "Barcode scanner for packaged foods",
+        "Create custom foods and recipes"
+      ],
+      "storyPoints": 21,
+      "priority": "must-have",
+      "type": "feature",
+      "businessValue": 90
+    },
+    {
+      "id": "PBI-F04",
+      "title": "Progress Dashboard",
+      "userStory": "As a user, I want to see my progress with charts and statistics, so that I stay motivated",
+      "acceptanceCriteria": [
+        "Weight tracking with line chart",
+        "Workout frequency calendar heatmap",
+        "Total workouts and active minutes stats",
+        "Personal records (PRs) for exercises",
+        "Weekly and monthly summaries",
+        "Goal progress indicators"
+      ],
+      "storyPoints": 8,
+      "priority": "must-have",
+      "type": "feature",
+      "businessValue": 85,
+      "dependencies": ["PBI-F02"]
+    },
+    {
+      "id": "PBI-F05",
+      "title": "Social Features and Friends",
+      "userStory": "As a user, I want to connect with friends and share progress, so that we can motivate each other",
+      "acceptanceCriteria": [
+        "Find and add friends by username or email",
+        "View friends' workout feed",
+        "Like and comment on friends' workouts",
+        "Share workout achievements",
+        "Private messaging between friends",
+        "Leaderboards for challenges"
+      ],
+      "storyPoints": 13,
+      "priority": "should-have",
+      "type": "feature",
+      "businessValue": 70,
+      "dependencies": ["PBI-F01", "PBI-F02"]
+    },
+    {
+      "id": "PBI-F06",
+      "title": "Workout Templates and Plans",
+      "userStory": "As a user, I want to follow pre-built workout plans, so that I have structured training guidance",
+      "acceptanceCriteria": [
+        "Browse workout plan library (beginner, intermediate, advanced)",
+        "Start a multi-week workout plan",
+        "Mark workouts as complete",
+        "Track progress through plan",
+        "Customize plan to fit schedule",
+        "Create custom workout templates"
+      ],
+      "storyPoints": 13,
+      "priority": "should-have",
+      "type": "feature",
+      "businessValue": 75,
+      "dependencies": ["PBI-F02"]
+    }
+  ]
+}

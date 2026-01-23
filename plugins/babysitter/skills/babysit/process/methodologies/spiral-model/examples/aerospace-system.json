@@ -1,0 +1,35 @@
+{
+  "projectName": "Autonomous Flight Control System",
+  "projectDescription": "Safety-critical autonomous flight control system for commercial aircraft with redundancy, real-time decision-making, predictive maintenance, and full regulatory compliance (FAA DO-178C Level A). System must handle sensor fusion, navigation, obstacle avoidance, and emergency procedures.",
+  "maxSpirals": 8,
+  "convergenceCriteria": "all-risks-resolved",
+  "stakeholders": [
+    {
+      "name": "Dr. Robert Chen",
+      "role": "Chief Systems Engineer",
+      "department": "Engineering",
+      "email": "rchen@aerospace.example.com"
+    },
+    {
+      "name": "Maria Santos",
+      "role": "Safety Engineer",
+      "department": "Safety & Compliance",
+      "email": "msantos@aerospace.example.com"
+    },
+    {
+      "name": "James Wilson",
+      "role": "FAA Liaison",
+      "department": "Regulatory",
+      "email": "jwilson@aerospace.example.com"
+    },
+    {
+      "name": "Dr. Lisa Park",
+      "role": "AI/ML Lead",
+      "department": "Research",
+      "email": "lpark@aerospace.example.com"
+    }
+  ],
+  "riskTolerance": "low",
+  "initialRisks": "Safety certification requirements, real-time performance constraints, sensor reliability, redundancy complexity, AI decision explainability",
+  "generateVisualizations": true
+}

@@ -1,0 +1,38 @@
+{
+  "name": "Project Management Tool - Full JTBD Analysis",
+  "description": "Complete Jobs to Be Done analysis for a project management tool targeting distributed teams",
+  "inputs": {
+    "projectName": "Remote Team Project Manager",
+    "context": "B2B SaaS project management tool designed for distributed teams working across time zones. Current market dominated by feature-heavy tools that require extensive training. Target customers are growing startups (10-100 employees) struggling with coordination overhead.",
+    "researchData": "Conducted 25 customer interviews with project managers and team leads. Key findings: 1) Average team spends 8+ hours per week in status meetings, 2) 60% report information scattered across email, Slack, and spreadsheets, 3) Biggest struggle is maintaining alignment without constant meetings, 4) Most tried 3+ tools before finding current solution, 5) Primary switching trigger: New remote team members unable to get up to speed quickly.",
+    "phase": "full"
+  },
+  "expectedOutcomes": {
+    "mainJobs": [
+      "Keep distributed team aligned on project progress without constant meetings",
+      "Quickly communicate blockers to stakeholders before they cascade",
+      "Onboard new team members to project context without hand-holding"
+    ],
+    "jobClusters": [
+      "Async Coordination",
+      "Stakeholder Communication",
+      "Knowledge Transfer"
+    ],
+    "keyForces": {
+      "strongestPush": "Too many meetings eating up productive time",
+      "strongestPull": "Single source of truth for all project information",
+      "biggestAnxiety": "Team adoption and learning curve",
+      "strongestHabit": "Comfort with familiar email/meeting workflow"
+    },
+    "jobStories": [
+      "When project deadlines are approaching, I want to see all blockers across teams at a glance, so I can quickly intervene before delays cascade",
+      "When team members are in different time zones, I want to communicate updates asynchronously, so I can maintain momentum without scheduling meetings",
+      "When new team members join, I want them to understand project context quickly, so I don't spend hours explaining everything"
+    ],
+    "mustHaveFeatures": [
+      "Async status updates with @mentions",
+      "Visual project timeline with blockers highlighted",
+      "Self-service project context for new members"
+    ]
+  }
+}

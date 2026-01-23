@@ -1,0 +1,119 @@
+{
+  "examples": [
+    {
+      "name": "Customer Bulk Edit",
+      "file": "customer-bulk-edit.json",
+      "description": "Add bulk editing capability to CRM for updating multiple customer records at once",
+      "appetite": "big-batch",
+      "cycleWeeks": 6,
+      "complexity": "medium",
+      "highlights": [
+        "Complete 6-week cycle example",
+        "Typical SaaS feature development",
+        "Clear scope boundaries",
+        "Practical rabbit holes"
+      ]
+    },
+    {
+      "name": "Mobile Push Notifications",
+      "file": "mobile-push-notifications.json",
+      "description": "Add push notification system to mobile fitness app for daily goals and achievements",
+      "appetite": "big-batch",
+      "cycleWeeks": 6,
+      "complexity": "medium",
+      "highlights": [
+        "Mobile app feature",
+        "Infrastructure work",
+        "User engagement focus",
+        "Time zone challenges"
+      ]
+    },
+    {
+      "name": "PDF Export Fix",
+      "file": "pdf-export-fix.json",
+      "description": "Fix PDF export formatting issues with tables and images",
+      "appetite": "small-batch",
+      "cycleWeeks": 2,
+      "complexity": "simple",
+      "highlights": [
+        "Small batch (2 weeks)",
+        "Bug fix / improvement",
+        "Smaller team",
+        "Focused scope"
+      ]
+    },
+    {
+      "name": "Advanced Analytics Dashboard",
+      "file": "analytics-dashboard.json",
+      "description": "Build custom analytics dashboard with report builder",
+      "appetite": "big-batch",
+      "cycleWeeks": 6,
+      "complexity": "complex",
+      "highlights": [
+        "Shaping phase focus",
+        "Complex UI work",
+        "Multiple rabbit holes",
+        "Competing priorities"
+      ]
+    },
+    {
+      "name": "Search with Filters",
+      "file": "search-with-filters.json",
+      "description": "Add advanced search functionality with multiple filter types",
+      "appetite": "big-batch",
+      "cycleWeeks": 6,
+      "complexity": "medium",
+      "highlights": [
+        "User-facing feature",
+        "Performance considerations",
+        "Gradual rollout approach",
+        "Multiple user segments"
+      ]
+    }
+  ],
+  "usage": {
+    "basic": "Use these examples as templates for your own Shape Up cycles",
+    "modify": "Copy and modify the JSON files to match your project needs",
+    "run": "Pass the JSON file contents as inputs to the Shape Up process",
+    "phases": "Examples show full-cycle, shaping-only, and building-only patterns"
+  },
+  "appetiteGuide": {
+    "small-batch": {
+      "duration": "1-2 weeks",
+      "team": "One designer + one programmer",
+      "bestFor": [
+        "Bug fixes",
+        "Small improvements",
+        "Quick wins",
+        "Focused enhancements"
+      ]
+    },
+    "big-batch": {
+      "duration": "6 weeks",
+      "team": "One designer + two programmers",
+      "bestFor": [
+        "New features",
+        "Significant improvements",
+        "Complex workflows",
+        "Infrastructure work"
+      ]
+    }
+  },
+  "cycleStructure": {
+    "week1": "Get oriented, map scopes, begin uphill work",
+    "week2-3": "Move scopes uphill toward top of hill",
+    "week4": "Scopes should be reaching top or moving downhill",
+    "week5": "Most scopes downhill, building known solutions",
+    "week6": "Finish work, QA integration, circuit breaker decision"
+  },
+  "tips": [
+    "Set appetite first, then shape solution to fit",
+    "Call out rabbit holes explicitly during shaping",
+    "Define no-gos clearly to prevent scope creep",
+    "Map scopes as integrated slices, not technical layers",
+    "Update hill charts honestly - don't hide stuck work",
+    "Integrate QA throughout cycle, not just at end",
+    "Respect the circuit breaker - no automatic extensions",
+    "Use cool-down for rest and exploration, not structured work"
+  ]
+}

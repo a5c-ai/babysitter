@@ -1,0 +1,70 @@
+{
+  "name": "Social Proof Badges on Trending Items",
+  "description": "Test hypothesis that social proof indicators increase conversion for first-time visitors",
+  "inputs": {
+    "projectName": "social-proof-badges",
+    "featureIdea": "Display 'Popular', 'Trending', and 'X people viewing' badges on product listings for items with high engagement",
+    "targetAudience": "first-time visitors browsing product listings",
+    "context": {
+      "firstTimeVisitorConversionRate": 0.008,
+      "returningVisitorConversionRate": 0.032,
+      "monthlyFirstTimeVisitors": 1200000,
+      "averageProductsViewed": 8.5,
+      "averageOrderValue": 68.00
+    },
+    "experimentDuration": 14,
+    "significanceLevel": 0.05,
+    "skipImplementation": false
+  },
+  "expectedHypothesis": {
+    "statement": "We believe displaying social proof badges ('Popular', 'Trending', 'X viewing now') for first-time visitors will increase conversion rate from 0.8% to 1.1% (37% relative increase). We'll know we're right when first-time visitor purchase rate shows statistically significant improvement.",
+    "assumptions": [
+      "First-time visitors lack confidence/trust",
+      "Social proof reduces decision anxiety",
+      "Badges are not perceived as manipulative",
+      "Real-time viewer counts are credible"
+    ],
+    "risks": [
+      "Badges perceived as fake/manipulative (trust damage)",
+      "Non-badged items become less attractive (negative contrast)",
+      "Herding behavior reduces category diversity",
+      "Badge inflation (too many items marked 'popular')",
+      "Privacy concerns from 'X people viewing' tracking"
+    ]
+  },
+  "expectedMetrics": {
+    "primary": "First-time visitor conversion rate (purchases / visits)",
+    "secondary": [
+      "Badge click-through rate",
+      "Time to first purchase",
+      "Products viewed before purchase",
+      "Category diversity of purchases",
+      "Share of purchases on badged items"
+    ],
+    "counter": [
+      "Brand trust score (watch for manipulation perception)",
+      "Non-badged item conversion rate (watch for negative contrast)",
+      "Category concentration (watch for reduced diversity)",
+      "Returning visitor conversion (watch for cannibalization)"
+    ]
+  },
+  "experimentDesignNotes": {
+    "badgeThresholds": {
+      "popular": "Top 10% of items by 7-day sales",
+      "trending": "50%+ week-over-week growth in views/sales",
+      "viewingNow": "5+ concurrent viewers in last 15 minutes"
+    },
+    "controlGroup": "No badges shown (current experience)",
+    "treatmentGroups": [
+      {
+        "name": "Treatment A - Static badges only",
+        "description": "Popular and Trending badges only (no real-time)"
+      },
+      {
+        "name": "Treatment B - All badges",
+        "description": "Popular, Trending, and 'X viewing now' badges"
+      }
+    ],
+    "note": "Consider multi-arm test to isolate real-time vs. static social proof effects"
+  }
+}

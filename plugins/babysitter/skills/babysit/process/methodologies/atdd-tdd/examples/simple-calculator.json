@@ -1,0 +1,21 @@
+{
+  "description": "Simple calculator with basic operations - ATDD/TDD beginner example",
+  "feature": "Calculator with addition, subtraction, multiplication, and division",
+  "acceptanceCriteria": [
+    "Given two numbers, when added, then correct sum is returned",
+    "Given two numbers, when subtracted, then correct difference is returned",
+    "Given two numbers, when multiplied, then correct product is returned",
+    "Given two numbers, when divided, then correct quotient is returned",
+    "Given division by zero, when attempted, then error is thrown with appropriate message",
+    "Given non-numeric inputs, when operation attempted, then error is thrown"
+  ],
+  "testFramework": "jest",
+  "iterationCount": 8,
+  "includeIntegrationTests": false,
+  "notes": [
+    "Simple example to learn ATDD/TDD basics",
+    "Clear acceptance criteria for straightforward functionality",
+    "TDD cycle will be very explicit and easy to follow",
+    "Good starting point for TDD newcomers"
+  ]
+}

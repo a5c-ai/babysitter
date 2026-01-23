@@ -1,0 +1,119 @@
+{
+  "name": "Enterprise CRM System",
+  "description": "Large-scale customer relationship management system with complex architecture and regulatory requirements",
+  "inputs": {
+    "projectName": "Enterprise CRM System",
+    "projectVision": "Modern cloud-based CRM system to manage customer relationships, sales pipeline, marketing campaigns, support tickets, and advanced analytics with mobile access. Target 50,000+ concurrent users across multiple geographies with 99.9% uptime.",
+    "iterationsPerPhase": {
+      "inception": 1,
+      "elaboration": 2,
+      "construction": 5,
+      "transition": 2
+    },
+    "teamSize": 15,
+    "useCaseSource": "stakeholder-workshops",
+    "architectureStyle": "microservices",
+    "predefinedUseCases": [
+      {
+        "id": "UC-001",
+        "name": "Manage Customer Contacts",
+        "actors": ["Sales Representative", "Marketing Manager"],
+        "priority": "critical"
+      },
+      {
+        "id": "UC-002",
+        "name": "Track Sales Pipeline",
+        "actors": ["Sales Representative", "Sales Manager"],
+        "priority": "critical"
+      },
+      {
+        "id": "UC-003",
+        "name": "Create Marketing Campaign",
+        "actors": ["Marketing Manager"],
+        "priority": "high"
+      },
+      {
+        "id": "UC-004",
+        "name": "Manage Support Tickets",
+        "actors": ["Support Agent", "Customer"],
+        "priority": "high"
+      },
+      {
+        "id": "UC-005",
+        "name": "Generate Sales Reports",
+        "actors": ["Sales Manager", "Executive"],
+        "priority": "medium"
+      }
+    ],
+    "predefinedRisks": [
+      {
+        "id": "RISK-001",
+        "category": "technical",
+        "description": "Scalability to 50,000+ concurrent users",
+        "probability": "high",
+        "impact": "high"
+      },
+      {
+        "id": "RISK-002",
+        "category": "technical",
+        "description": "Integration with legacy ERP system",
+        "probability": "high",
+        "impact": "medium"
+      },
+      {
+        "id": "RISK-003",
+        "category": "schedule",
+        "description": "Complexity of microservices architecture",
+        "probability": "medium",
+        "impact": "high"
+      }
+    ]
+  },
+  "expectedPhases": [
+    {
+      "phase": "Inception",
+      "iterations": 1,
+      "keyDeliverables": [
+        "Vision document with 5 stakeholder groups",
+        "Business case with 2.5x ROI over 3 years",
+        "Initial use case model with 35+ use cases",
+        "Risk list with 15+ identified risks",
+        "Project plan estimating 10 total iterations"
+      ]
+    },
+    {
+      "phase": "Elaboration",
+      "iterations": 2,
+      "keyDeliverables": [
+        "Microservices architecture with 12+ services",
+        "Detailed use case specifications for all critical use cases",
+        "Executable architecture prototype validating scalability",
+        "Risk mitigation plan addressing top 5 technical risks",
+        "Refined project plan with detailed Construction roadmap"
+      ]
+    },
+    {
+      "phase": "Construction",
+      "iterations": 5,
+      "keyDeliverables": [
+        "5 incremental builds with progressively more features",
+        "48+ implemented microservices",
+        "Integration with legacy ERP system",
+        "1000+ automated tests (unit, integration, system)",
+        "Complete user documentation and API documentation"
+      ]
+    },
+    {
+      "phase": "Transition",
+      "iterations": 2,
+      "keyDeliverables": [
+        "Beta testing with 100+ users",
+        "Production deployment to cloud infrastructure",
+        "200+ users trained across all roles",
+        "System tuned to meet performance SLAs",
+        "12-month warranty support plan"
+      ]
+    }
+  ],
+  "rationale": "This example demonstrates RUP for a large, complex enterprise system. The microservices architecture requires solid architecture baseline in Elaboration. Multiple Construction iterations allow incremental delivery of features. Two Transition iterations handle extensive beta testing and training."
+}

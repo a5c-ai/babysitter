@@ -1,0 +1,240 @@
+{
+  "name": "Retail Store Checkout Redesign - Discovery Phase",
+  "description": "Discovery phase only for physical retail store checkout experience. Shows divergent exploration in familiar context",
+  "inputs": {
+    "projectName": "RetailMax Checkout Experience Redesign",
+    "context": "Large retail chain with 500+ stores. Customer satisfaction scores dropping, checkout identified as pain point. Goal: understand checkout problems before designing solutions",
+    "initialResearch": "In-store observations at 10 locations (50 hours), customer exit interviews (n=200), cashier interviews (n=30), checkout time analysis, competitive observation",
+    "phase": "discover"
+  },
+  "expectedOutcomes": {
+    "discovery": {
+      "userInsights": [
+        {
+          "insight": "Customers and staff have conflicting priorities: customers want speed, staff need thoroughness",
+          "source": "Observations, interviews with both groups",
+          "evidence": "Customers get frustrated when cashiers ask loyalty program questions. Cashiers stressed by rushing through required steps",
+          "userQuote": "Customer: 'Just let me pay and go!' Cashier: 'I have to ask about the rewards card - it's required'",
+          "significance": "high",
+          "theme": "Speed vs. Thoroughness Tension"
+        },
+        {
+          "insight": "Payment friction point: customers fumble with wallets, cards, phones while holding bags",
+          "source": "Observation (occurred in 78% of transactions)",
+          "evidence": "Average 45 seconds of fumbling with payment. Customers juggling items, putting down bags, searching for wallet",
+          "userQuote": "I'm trying to hold everything, get my card out, and the cashier is already scanning the next person's stuff",
+          "significance": "high",
+          "theme": "Physical Juggling"
+        },
+        {
+          "insight": "Loyalty program enrollment creates bottleneck but customers don't understand value",
+          "source": "Observations, exit interviews",
+          "evidence": "Avg 2.5 minutes to enroll in loyalty program. 60% of enrollees can't recall benefits when asked after",
+          "userQuote": "The cashier signed me up for something but I don't remember what it was or why I need it",
+          "significance": "high",
+          "theme": "Loyalty Confusion"
+        },
+        {
+          "insight": "Bag packing creates delay and awkwardness about customer vs. staff responsibility",
+          "source": "Observations, cashier interviews",
+          "evidence": "Unclear bag packing protocol. Some customers help, some don't. Creates social awkwardness and delay",
+          "userQuote": "I never know if I should bag my own stuff or if they'll get offended. So I just stand there awkwardly",
+          "significance": "medium",
+          "theme": "Role Ambiguity"
+        },
+        {
+          "insight": "Self-checkout creates anxiety about making mistakes and looking incompetent",
+          "source": "Customer interviews, observation",
+          "evidence": "42% avoid self-checkout entirely. Those who use it appear anxious, frequently look for help",
+          "userQuote": "I'm worried I'll scan something wrong and look like I'm stealing. Or it'll beep and everyone will stare",
+          "significance": "medium",
+          "theme": "Self-Checkout Anxiety"
+        },
+        {
+          "insight": "Price checks mid-transaction create embarrassing delays",
+          "source": "Observations (10% of transactions)",
+          "evidence": "When item doesn't have price, staff must leave to check. Customer and line wait awkwardly. Often customer declines item",
+          "userQuote": "When they had to do a price check, I felt so guilty about holding up the line. I just said forget it",
+          "significance": "medium",
+          "theme": "Embarrassing Delays"
+        }
+      ],
+      "marketInsights": [
+        {
+          "insight": "Amazon Go's 'Just Walk Out' technology shows checkout elimination is possible",
+          "competitorAnalysis": "Computer vision tracks items, charges automatically. Eliminates checkout entirely",
+          "opportunity": "Could RetailMax pilot checkout-free experience in select locations?",
+          "trend": "Movement toward invisible checkout experiences"
+        },
+        {
+          "insight": "Mobile payment adoption varies by demographic and store location",
+          "competitorAnalysis": "Apple Pay/Google Pay used in 15-40% of transactions depending on location",
+          "opportunity": "Optimize checkout for mobile payment as primary method in high-adoption stores",
+          "trend": "Shift from cash/card to mobile payments"
+        }
+      ],
+      "problemAreas": [
+        {
+          "area": "Speed vs. Thoroughness Trade-off",
+          "description": "Customers want fast checkout, company requires loyalty questions and accuracy checks, creating tension",
+          "userImpact": "Customer frustration, staff stress, perceived slow service",
+          "frequency": "constant",
+          "severity": "high",
+          "affectedUsers": ["all customers", "all cashiers", "customers in line"]
+        },
+        {
+          "area": "Payment Physical Logistics",
+          "description": "Customers juggle items and payment methods, creating friction and delays",
+          "userImpact": "45-second payment fumbling, dropped items, line delays",
+          "frequency": "frequent",
+          "severity": "medium",
+          "affectedUsers": ["customers with multiple items", "elderly customers", "customers using mobile pay"]
+        },
+        {
+          "area": "Loyalty Program Complexity",
+          "description": "Enrollment is slow and value is unclear, creating bottleneck without clear benefit",
+          "userImpact": "2.5-minute enrollment, customer confusion, low engagement with program",
+          "frequency": "occasional",
+          "severity": "medium",
+          "affectedUsers": ["first-time customers", "infrequent shoppers"]
+        },
+        {
+          "area": "Self-Checkout Adoption Barriers",
+          "description": "Anxiety about mistakes and theft appearance prevents adoption",
+          "userImpact": "42% avoid self-checkout, underutilized capacity, longer staffed lines",
+          "frequency": "frequent",
+          "severity": "medium",
+          "affectedUsers": ["elderly customers", "customers with complex purchases", "anxiety-prone customers"]
+        }
+      ],
+      "userBehaviors": [
+        {
+          "behavior": "Pre-sorting items on belt",
+          "context": "Customers organize items by category before scanning",
+          "motivation": "Make bagging easier and faster",
+          "workarounds": ["Using divider bars", "Grouping cold items together"]
+        },
+        {
+          "behavior": "Preparing payment while items being scanned",
+          "context": "Getting wallet/phone ready during scanning",
+          "motivation": "Minimize delay at payment step",
+          "workarounds": ["Holding wallet in teeth", "Putting bags on floor to free hands"]
+        },
+        {
+          "behavior": "Avoiding eye contact during loyalty question",
+          "context": "When cashier asks about rewards card",
+          "motivation": "Hoping to skip the question by not engaging",
+          "workarounds": ["Saying 'not today' quickly", "Pretending to be on phone"]
+        }
+      ],
+      "stakeholders": [
+        {
+          "stakeholder": "Customers",
+          "perspective": "Want fast, frictionless checkout without awkwardness or judgment",
+          "needsAndGoals": [
+            "Get through checkout quickly",
+            "Avoid fumbling with payment",
+            "Not hold up the line",
+            "Avoid uncomfortable interactions"
+          ]
+        },
+        {
+          "stakeholder": "Cashiers",
+          "perspective": "Trying to balance speed, accuracy, and required procedures while managing customer frustration",
+          "needsAndGoals": [
+            "Meet throughput targets",
+            "Follow required procedures (loyalty questions)",
+            "Avoid customer complaints",
+            "Maintain accuracy"
+          ]
+        },
+        {
+          "stakeholder": "Store Management",
+          "perspective": "Want to maximize loyalty enrollment while maintaining customer satisfaction and efficiency",
+          "needsAndGoals": [
+            "Increase loyalty program enrollment",
+            "Improve checkout speed",
+            "Reduce staffing costs",
+            "Maintain customer satisfaction scores"
+          ]
+        },
+        {
+          "stakeholder": "Corporate",
+          "perspective": "Want data-driven insights into customer behavior and loyalty program effectiveness",
+          "needsAndGoals": [
+            "Increase average transaction value",
+            "Improve loyalty program engagement",
+            "Reduce operational costs",
+            "Differentiate from online shopping"
+          ]
+        }
+      ],
+      "assumptions": [
+        {
+          "assumption": "Customers want to get through checkout as fast as possible",
+          "risk": "medium",
+          "validationMethod": "Some customers may value interaction and service over pure speed. Survey and observe different customer segments"
+        },
+        {
+          "assumption": "Self-checkout is inherently faster than staffed checkout",
+          "risk": "high",
+          "validationMethod": "Time both methods with equivalent transactions. Consider error rates and assistance needs"
+        },
+        {
+          "assumption": "Loyalty program enrollment delay is worth the lifetime value",
+          "risk": "high",
+          "validationMethod": "Calculate actual LTV of checkout-enrolled vs. other methods. Survey enrolled customers about engagement"
+        },
+        {
+          "assumption": "Mobile payment adoption will continue to increase",
+          "risk": "low",
+          "validationMethod": "Track adoption trends by demographic and location over time"
+        }
+      ],
+      "researchSynthesis": {
+        "keyThemes": [
+          "Speed vs. thoroughness tension",
+          "Physical logistics of payment",
+          "Social awkwardness and embarrassment",
+          "Technology anxiety (self-checkout)",
+          "Loyalty program confusion"
+        ],
+        "surprisingFindings": [
+          "Self-checkout anxiety is about looking like a thief, not technology complexity",
+          "Customers actively avoid engaging with cashiers about loyalty programs",
+          "Bag packing role ambiguity causes more friction than expected",
+          "Price checks create embarrassment, not just delay"
+        ],
+        "contradictions": [
+          "Store wants customer interaction (loyalty enrollment) but customers want speed",
+          "Self-checkout meant to improve speed but anxiety slows many customers",
+          "Cashiers want to be helpful but feel pressured to rush"
+        ],
+        "researchGaps": [
+          "Limited data on high-value customer preferences",
+          "Need to observe peak (holiday) vs. normal times",
+          "Competitive checkout observation needed",
+          "Longitudinal study of loyalty program engagement"
+        ]
+      }
+    },
+    "nextSteps": {
+      "rationale": "Discovery complete with clear problem areas identified. Ready for definition workshop to converge on specific problem statement and design principles",
+      "definitionWorkshop": {
+        "participants": ["Store managers", "Cashiers", "Customer representatives", "Loyalty program team", "Design team"],
+        "goals": [
+          "Synthesize discovery insights into problem statement",
+          "Define design principles balancing speed and business goals",
+          "Establish success criteria",
+          "Align stakeholders on problem to solve"
+        ],
+        "questions": [
+          "Is speed the right goal, or is 'frictionless' more accurate?",
+          "How important is loyalty enrollment vs. checkout satisfaction?",
+          "Should we optimize staffed checkout or push self-checkout adoption?",
+          "What role should cashiers play in future checkout experience?"
+        ]
+      }
+    }
+  }
+}

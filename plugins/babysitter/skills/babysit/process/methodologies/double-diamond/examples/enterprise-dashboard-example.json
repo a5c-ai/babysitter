@@ -1,0 +1,195 @@
+{
+  "name": "Enterprise Analytics Dashboard - Discovery & Definition",
+  "description": "Discovery and definition phases for enterprise analytics dashboard, stopping before solution development to validate problem with stakeholders",
+  "inputs": {
+    "projectName": "DataHub Analytics Dashboard",
+    "context": "B2B analytics platform used by data analysts and executives. Current dashboard has low adoption among analysts (who prefer SQL) and executives complain they can't find insights. Goal: understand core problem before designing solution",
+    "initialResearch": "Interviews with 20 analysts and 10 executives, observation of tool usage, analysis of dashboard usage patterns, competitive analysis",
+    "phase": "define"
+  },
+  "expectedOutcomes": {
+    "discovery": {
+      "userInsights": [
+        {
+          "insight": "Analysts bypass dashboard to write SQL because dashboard lacks flexibility for deep analysis",
+          "source": "Analyst interviews, usage logs",
+          "evidence": "85% of analysts use SQL directly. Dashboard usage: 15 min/week vs. SQL: 20 hours/week",
+          "userQuote": "The dashboard is too rigid. I can see surface metrics but can't dig deeper when I find something interesting. So I just write SQL",
+          "significance": "high",
+          "theme": "Depth vs. Simplicity Tension"
+        },
+        {
+          "insight": "Executives want answers, not tools - they hire analysts to interpret data",
+          "source": "Executive interviews",
+          "evidence": "Executives spend <5 min/month in dashboard. 90% of data requests go through analysts",
+          "userQuote": "I don't want to explore data, I want to know: Are we on track? What's the problem? What should we do? I hire analysts for that",
+          "significance": "high",
+          "theme": "Insight Discovery vs. Report Generation"
+        },
+        {
+          "insight": "Current dashboard tries to serve both audiences and satisfies neither",
+          "source": "Usage patterns, interviews",
+          "evidence": "Dashboard is 'too complex for executives, too simple for analysts'",
+          "userQuote": "It's in this awkward middle ground. Not powerful enough for real analysis, but too complicated for quick answers",
+          "significance": "high",
+          "theme": "Audience Mismatch"
+        }
+      ],
+      "problemAreas": [
+        {
+          "area": "Conflicting User Needs",
+          "description": "Analysts need depth and flexibility; executives need quick answers and insights",
+          "userImpact": "Low adoption from both groups, analysts create separate tools, executives rely on manual reports",
+          "frequency": "constant",
+          "severity": "critical",
+          "affectedUsers": ["analysts", "executives", "data team"]
+        },
+        {
+          "area": "Insight Discovery vs. Exploration",
+          "description": "Tool designed for exploration but executives want curated insights",
+          "userImpact": "Executives can't find insights in time-constrained schedules, analyst bottleneck",
+          "frequency": "frequent",
+          "severity": "high",
+          "affectedUsers": ["executives", "analysts (who field questions)"]
+        }
+      ],
+      "stakeholders": [
+        {
+          "stakeholder": "Data Analysts",
+          "perspective": "Need powerful, flexible tools for deep analysis. Want SQL-level control",
+          "needsAndGoals": [
+            "Flexible queries and custom analysis",
+            "Fast query performance",
+            "Export to other tools",
+            "Share analysis with team"
+          ]
+        },
+        {
+          "stakeholder": "Executives",
+          "perspective": "Need quick answers to business questions. Don't have time to explore",
+          "needsAndGoals": [
+            "Immediate answers to 'how are we doing?'",
+            "Alerts when metrics move",
+            "Understand why metrics changed",
+            "Action recommendations"
+          ]
+        },
+        {
+          "stakeholder": "Data Team Leadership",
+          "perspective": "Want to reduce analyst burden of manual reporting while maintaining quality",
+          "needsAndGoals": [
+            "Self-service for common questions",
+            "Reduce analyst interruptions",
+            "Maintain data quality and governance",
+            "Scale insights to more decision-makers"
+          ]
+        }
+      ]
+    },
+    "definition": {
+      "problemStatement": {
+        "statement": "Analytics dashboards struggle to serve both data analysts and executives because analysts need flexible exploration tools while executives need curated insights, resulting in low adoption from both groups, analyst bottlenecks, and decisions made without data",
+        "who": "Enterprise data teams serving both analyst and executive audiences",
+        "what": "Struggle to create analytics tools that satisfy both audience needs",
+        "why": "Fundamental tension between depth (analysts) and simplicity (executives)",
+        "where": "Data dashboards, analytics platforms, business intelligence tools",
+        "when": "Organizations try to build 'one dashboard for everyone'",
+        "impact": "85% analyst dashboard abandonment, <5 min/month executive usage, analyst bottleneck, decisions without data"
+      },
+      "designPrinciples": [
+        {
+          "principle": "Purpose Over Universality",
+          "rationale": "Better to excel at specific use case than be mediocre at everything. Accept that different users need different tools",
+          "examples": [
+            "Separate 'Insight View' for executives from 'Analysis View' for analysts",
+            "Each view optimized for its purpose, not compromised for both",
+            "Clear entry points based on user intent"
+          ],
+          "tradeoffs": "More complexity in product architecture, but better user satisfaction"
+        },
+        {
+          "principle": "Guide Executives, Empower Analysts",
+          "rationale": "Executives need opinionated guidance; analysts need flexible power tools",
+          "examples": [
+            "Executive view: Curated insights with clear narratives",
+            "Analyst view: SQL-level flexibility with visual builder",
+            "Bridge: Analysts can publish insights to executive view"
+          ],
+          "tradeoffs": "Two design systems to maintain, but each serves its audience well"
+        },
+        {
+          "principle": "Insights Are a Product, Not a Byproduct",
+          "rationale": "Insights don't emerge from exploration - they must be crafted, reviewed, and curated",
+          "examples": [
+            "Analysts craft insights with narrative and context",
+            "Review process for published insights",
+            "Insight library as primary product for executives"
+          ],
+          "tradeoffs": "Requires analyst time to craft insights, but scales their impact"
+        }
+      ],
+      "successCriteria": [
+        {
+          "criterion": "Executive engagement",
+          "measurement": "Weekly active executives using platform",
+          "target": "80% of executives, 30+ min/week (up from <5 min/month)",
+          "type": "behavioral"
+        },
+        {
+          "criterion": "Analyst adoption",
+          "measurement": "% of analysts using platform for deep analysis",
+          "target": "70% of analysts (up from 15%)",
+          "type": "behavioral"
+        },
+        {
+          "criterion": "Insight production",
+          "measurement": "Number of insights published per week",
+          "target": "20+ insights/week",
+          "type": "user-outcome"
+        },
+        {
+          "criterion": "Analyst time savings",
+          "measurement": "Reduction in ad-hoc reporting requests",
+          "target": "50% reduction in repetitive questions",
+          "type": "business-outcome"
+        }
+      ],
+      "constraints": {
+        "technical": [
+          "Must integrate with existing data warehouse",
+          "Query performance under 5 seconds for executive views",
+          "Support multiple data sources"
+        ],
+        "business": [
+          "Can't alienate current analyst users",
+          "Must show ROI within 6 months",
+          "Budget constraints limit AI/ML investment initially"
+        ],
+        "user": [
+          "Executives have limited time for training",
+          "Analysts resistant to abandoning SQL",
+          "Data governance and security requirements"
+        ]
+      },
+      "opportunitySpace": {
+        "description": "Opportunity to fundamentally rethink analytics tools by accepting that different users need different experiences. Instead of one compromised tool, create purpose-built views that excel at their specific use case",
+        "potentialValue": "Increase data-driven decisions by 3x, reduce analyst reporting burden by 50%, improve executive engagement 10x",
+        "risks": [
+          "Complexity of maintaining two experiences",
+          "Analysts may resist curating insights for executives",
+          "Risk of creating silos instead of collaboration"
+        ]
+      }
+    },
+    "nextSteps": {
+      "rationale": "Stopping at definition phase to validate problem statement and design principles with stakeholders before investing in solution development. Problem framing is novel ('insights as a product') and requires buy-in",
+      "stakeholderValidation": [
+        "Present problem statement and design principles to data team leadership",
+        "Workshop with analysts: Are they willing to craft insights?",
+        "Validate with executives: Would curated insights meet their needs?",
+        "Confirm constraints and success criteria with product team"
+      ],
+      "decisionPoint": "After stakeholder validation, decide whether to proceed with Develop phase or iterate on problem definition"
+    }
+  }
+}

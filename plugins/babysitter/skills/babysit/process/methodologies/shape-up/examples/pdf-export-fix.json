@@ -1,0 +1,79 @@
+{
+  "projectName": "DocGen Pro",
+  "workDescription": "Fix PDF export formatting issues with tables and images. Tables break across pages poorly, images get distorted. Users complain exports look unprofessional.",
+  "appetite": "small-batch",
+  "cycleWeeks": 2,
+  "teamSize": "one-designer-one-programmer",
+  "phase": "full-cycle",
+  "includeCoolDown": false,
+  "context": {
+    "userProblem": "Exported PDFs look broken. Tables split mid-row, images stretched or pixelated. Users embarrassed to send to clients.",
+    "businessValue": "Reduce support tickets (25% are about PDF exports). Improve user satisfaction. Prevent churn.",
+    "currentState": "Using standard PDF library with default settings. No custom pagination logic.",
+    "stakeholders": [
+      "Support team (handling complaints)",
+      "Power users (export frequently)",
+      "Sales team (PDFs in demos)"
+    ]
+  },
+  "scopeConsiderations": {
+    "inScope": [
+      "Improved table pagination (avoid mid-row breaks)",
+      "Better image scaling (maintain aspect ratio)",
+      "Handle common table/image combinations",
+      "Test with typical document sizes"
+    ],
+    "outOfScope": [
+      "Complete PDF engine replacement",
+      "New export formats (Excel, Word)",
+      "Custom page templates",
+      "Advanced table features (nested, merged cells)",
+      "SVG/vector image support",
+      "Font embedding improvements"
+    ],
+    "rabbitHoles": [
+      "Complex nested table structures",
+      "SVG rendering edge cases",
+      "Font rendering issues",
+      "Memory usage with large documents",
+      "Cross-browser PDF preview differences"
+    ],
+    "noGos": [
+      "Don't rebuild the entire export system",
+      "Don't add new export formats",
+      "Don't redesign the export dialog",
+      "Don't touch other export features (CSV, JSON)"
+    ]
+  },
+  "expectedScopes": [
+    "Table pagination improvements",
+    "Image scaling and positioning"
+  ],
+  "successCriteria": [
+    "Tables don't break mid-row across pages",
+    "Images maintain correct aspect ratio",
+    "Common document layouts export cleanly",
+    "No regression in export speed",
+    "80% reduction in PDF-related support tickets"
+  ],
+  "technicalConsiderations": {
+    "library": "Current PDF generation library",
+    "constraints": [
+      "Can't change underlying PDF library (too risky)",
+      "Must work with existing document structure",
+      "Performance can't degrade"
+    ],
+    "approach": [
+      "Improve pagination algorithm",
+      "Better image preprocessing",
+      "Test with real user documents"
+    ]
+  },
+  "notes": [
+    "This is a SMALL BATCH example (2 weeks, smaller team)",
+    "Demonstrates fixing quality issues within tight appetite",
+    "Shows how to scope bug fixes using Shape Up principles",
+    "Good example of clear boundaries for technical work",
+    "Note: no cool-down for small batch (optional)"
+  ]
+}

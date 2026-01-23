@@ -1,0 +1,98 @@
+{
+  "projectName": "Customer Support Operations",
+  "workflowStages": [
+    { "name": "Inbox", "type": "queue" },
+    { "name": "Triaged", "type": "queue" },
+    { "name": "Investigation", "type": "active" },
+    { "name": "Resolution", "type": "active" },
+    { "name": "Customer Validation", "type": "active" },
+    { "name": "Closed", "type": "complete" }
+  ],
+  "defaultWipLimits": {
+    "Investigation": 8,
+    "Resolution": 10,
+    "Customer Validation": 5
+  },
+  "initialBacklog": [
+    {
+      "id": "ticket-1001",
+      "title": "Cannot login to account",
+      "priority": "high",
+      "serviceClass": "Expedite",
+      "estimatedSize": "S"
+    },
+    {
+      "id": "ticket-1002",
+      "title": "How to export monthly reports",
+      "priority": "low",
+      "serviceClass": "Standard",
+      "estimatedSize": "S"
+    },
+    {
+      "id": "ticket-1003",
+      "title": "Billing error on last invoice",
+      "priority": "high",
+      "serviceClass": "Standard",
+      "estimatedSize": "M"
+    },
+    {
+      "id": "ticket-1004",
+      "title": "Feature request: bulk user import",
+      "priority": "medium",
+      "serviceClass": "Standard",
+      "estimatedSize": "L"
+    },
+    {
+      "id": "ticket-1005",
+      "title": "Data sync failing since yesterday",
+      "priority": "high",
+      "serviceClass": "Expedite",
+      "estimatedSize": "M"
+    },
+    {
+      "id": "ticket-1006",
+      "title": "Password reset email not received",
+      "priority": "medium",
+      "serviceClass": "Standard",
+      "estimatedSize": "S"
+    },
+    {
+      "id": "ticket-1007",
+      "title": "Mobile app crashing on iOS",
+      "priority": "high",
+      "serviceClass": "Expedite",
+      "estimatedSize": "L"
+    },
+    {
+      "id": "ticket-1008",
+      "title": "Request to update company information",
+      "priority": "low",
+      "serviceClass": "Standard",
+      "estimatedSize": "S"
+    },
+    {
+      "id": "ticket-1009",
+      "title": "Integration with Salesforce not working",
+      "priority": "medium",
+      "serviceClass": "Standard",
+      "estimatedSize": "M"
+    },
+    {
+      "id": "ticket-1010",
+      "title": "Question about API rate limits",
+      "priority": "low",
+      "serviceClass": "Standard",
+      "estimatedSize": "S"
+    }
+  ],
+  "cycles": 5,
+  "teamCapacity": {
+    "tier1": 5,
+    "tier2": 3,
+    "tier3": 2
+  },
+  "serviceClasses": [
+    "Expedite",
+    "Standard"
+  ]
+}

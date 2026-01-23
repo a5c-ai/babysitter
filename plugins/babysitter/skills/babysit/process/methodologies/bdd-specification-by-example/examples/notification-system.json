@@ -1,0 +1,30 @@
+{
+  "projectName": "Notification Service",
+  "feature": "Multi-channel notification delivery with preferences and retry logic",
+  "stakeholders": [
+    "Backend Developer",
+    "DevOps Engineer",
+    "QA Engineer",
+    "Product Manager"
+  ],
+  "testFramework": "behave",
+  "developmentPhase": "brownfield",
+  "generateTests": true,
+  "createDocumentation": true,
+  "existingFeatures": [
+    "user-preferences",
+    "email-service",
+    "sms-service"
+  ],
+  "existingScenarios": [
+    {
+      "id": "notify-001",
+      "title": "Send email notification"
+    }
+  ],
+  "existingSteps": [
+    "a notification is triggered",
+    "the notification should be sent",
+    "the user should receive a notification"
+  ]
+}

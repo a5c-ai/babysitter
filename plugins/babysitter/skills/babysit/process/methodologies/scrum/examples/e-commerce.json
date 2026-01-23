@@ -1,0 +1,185 @@
+{
+  "projectName": "Online Retail Platform",
+  "productVision": "Modern e-commerce platform with product catalog, shopping cart, secure payment processing, order management, and customer reviews. Goal is to launch MVP in 3 months with core shopping features.",
+  "sprintDuration": 2,
+  "sprintCount": 6,
+  "teamSize": 8,
+  "productOwner": "Sarah Johnson",
+  "scrumMaster": "Mike Chen",
+  "backlogItems": [
+    {
+      "id": "PBI-001",
+      "title": "User Registration and Login",
+      "userStory": "As a customer, I want to create an account and login, so that I can save my preferences and view order history",
+      "acceptanceCriteria": [
+        "User can register with email and password",
+        "Email validation and confirmation required",
+        "Password meets security requirements (8+ chars, mixed case, numbers)",
+        "User can login with credentials",
+        "User can reset forgotten password",
+        "Session persists across page refreshes"
+      ],
+      "storyPoints": 8,
+      "priority": "must-have",
+      "type": "feature",
+      "businessValue": 100
+    },
+    {
+      "id": "PBI-002",
+      "title": "Product Catalog Browsing",
+      "userStory": "As a customer, I want to browse products by category, so that I can find items I'm interested in",
+      "acceptanceCriteria": [
+        "Display products in grid layout",
+        "Show product image, name, price, rating",
+        "Filter by category and price range",
+        "Sort by price, popularity, rating",
+        "Pagination for large result sets",
+        "Search functionality across all products"
+      ],
+      "storyPoints": 13,
+      "priority": "must-have",
+      "type": "feature",
+      "businessValue": 95
+    },
+    {
+      "id": "PBI-003",
+      "title": "Shopping Cart Management",
+      "userStory": "As a customer, I want to add products to cart and modify quantities, so that I can purchase multiple items in one order",
+      "acceptanceCriteria": [
+        "Add product to cart from product page",
+        "View cart contents with images and prices",
+        "Update quantities for items in cart",
+        "Remove items from cart",
+        "Cart persists for logged-in users",
+        "Show running total with tax",
+        "Clear cart option"
+      ],
+      "storyPoints": 8,
+      "priority": "must-have",
+      "type": "feature",
+      "businessValue": 90,
+      "dependencies": ["PBI-001"]
+    },
+    {
+      "id": "PBI-004",
+      "title": "Checkout and Payment",
+      "userStory": "As a customer, I want to securely complete my purchase with credit card payment, so that I can receive my ordered products",
+      "acceptanceCriteria": [
+        "Enter shipping address",
+        "Select shipping method",
+        "Enter payment information (credit card)",
+        "Payment processing via Stripe integration",
+        "Order confirmation page",
+        "Confirmation email sent",
+        "PCI compliance for payment data"
+      ],
+      "storyPoints": 13,
+      "priority": "must-have",
+      "type": "feature",
+      "businessValue": 100,
+      "dependencies": ["PBI-003"]
+    },
+    {
+      "id": "PBI-005",
+      "title": "Order History and Tracking",
+      "userStory": "As a customer, I want to view my past orders and track current shipments, so that I know when to expect delivery",
+      "acceptanceCriteria": [
+        "View list of all past orders",
+        "See order details (items, prices, status)",
+        "Track shipment with tracking number",
+        "Reorder previous orders easily",
+        "Download invoice/receipt"
+      ],
+      "storyPoints": 5,
+      "priority": "should-have",
+      "type": "feature",
+      "businessValue": 70,
+      "dependencies": ["PBI-004"]
+    },
+    {
+      "id": "PBI-006",
+      "title": "Product Reviews and Ratings",
+      "userStory": "As a customer, I want to read reviews from other customers, so that I can make informed purchase decisions",
+      "acceptanceCriteria": [
+        "Display average rating on product page",
+        "Show individual reviews with text and rating",
+        "Sort reviews by date or helpfulness",
+        "Customers can leave reviews after purchase",
+        "Rate reviews as helpful/not helpful",
+        "Moderation for inappropriate content"
+      ],
+      "storyPoints": 8,
+      "priority": "should-have",
+      "type": "feature",
+      "businessValue": 60,
+      "dependencies": ["PBI-002", "PBI-004"]
+    },
+    {
+      "id": "PBI-007",
+      "title": "Wishlist Functionality",
+      "userStory": "As a customer, I want to save products to a wishlist, so that I can purchase them later",
+      "acceptanceCriteria": [
+        "Add product to wishlist",
+        "View all wishlist items",
+        "Remove items from wishlist",
+        "Move wishlist item to cart",
+        "Share wishlist with others"
+      ],
+      "storyPoints": 5,
+      "priority": "could-have",
+      "type": "feature",
+      "businessValue": 40,
+      "dependencies": ["PBI-001", "PBI-002"]
+    },
+    {
+      "id": "PBI-008",
+      "title": "Admin Product Management",
+      "userStory": "As an admin, I want to manage product catalog, so that I can add, update, and remove products",
+      "acceptanceCriteria": [
+        "Admin login separate from customer login",
+        "Add new products with details and images",
+        "Edit existing product information",
+        "Deactivate/delete products",
+        "Manage product categories",
+        "Bulk upload via CSV"
+      ],
+      "storyPoints": 13,
+      "priority": "must-have",
+      "type": "feature",
+      "businessValue": 85
+    },
+    {
+      "id": "PBI-009",
+      "title": "Performance Optimization",
+      "userStory": "As a customer, I want pages to load quickly, so that I have a smooth shopping experience",
+      "acceptanceCriteria": [
+        "Product pages load in under 2 seconds",
+        "Image optimization and lazy loading",
+        "Database query optimization",
+        "Caching strategy implemented",
+        "CDN for static assets",
+        "Lighthouse score > 90"
+      ],
+      "storyPoints": 8,
+      "priority": "should-have",
+      "type": "technical",
+      "businessValue": 50
+    },
+    {
+      "id": "PBI-010",
+      "title": "Mobile Responsive Design",
+      "userStory": "As a mobile customer, I want the site to work well on my phone, so that I can shop on the go",
+      "acceptanceCriteria": [
+        "Responsive layout for mobile, tablet, desktop",
+        "Touch-friendly buttons and navigation",
+        "Mobile menu with hamburger icon",
+        "Fast load times on 3G connection",
+        "Tested on iOS and Android devices"
+      ],
+      "storyPoints": 13,
+      "priority": "must-have",
+      "type": "technical",
+      "businessValue": 80
+    }
+  ]
+}

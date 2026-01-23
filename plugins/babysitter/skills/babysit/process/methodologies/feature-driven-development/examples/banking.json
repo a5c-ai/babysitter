@@ -1,0 +1,259 @@
+{
+  "projectName": "Core Banking System",
+  "domainDescription": "Comprehensive banking platform with customer accounts (checking, savings), transactions (deposits, withdrawals, transfers), loan management, interest calculation, and regulatory reporting. Supports multiple currencies and compliance requirements.",
+  "iterationWeeks": 2,
+  "teamSize": 15,
+  "chiefProgrammers": 4,
+  "features": [
+    {
+      "id": "f-001",
+      "title": "Create account of customer",
+      "action": "Create",
+      "result": "account",
+      "object": "customer",
+      "priority": "high",
+      "estimatedDays": 3,
+      "dependencies": []
+    },
+    {
+      "id": "f-002",
+      "title": "Validate identity of customer",
+      "action": "Validate",
+      "result": "identity",
+      "object": "customer",
+      "priority": "high",
+      "estimatedDays": 4,
+      "dependencies": ["f-001"]
+    },
+    {
+      "id": "f-003",
+      "title": "Open checking account",
+      "action": "Open",
+      "result": "checking account",
+      "object": "customer",
+      "priority": "high",
+      "estimatedDays": 3,
+      "dependencies": ["f-001", "f-002"]
+    },
+    {
+      "id": "f-004",
+      "title": "Open savings account",
+      "action": "Open",
+      "result": "savings account",
+      "object": "customer",
+      "priority": "high",
+      "estimatedDays": 3,
+      "dependencies": ["f-001", "f-002"]
+    },
+    {
+      "id": "f-005",
+      "title": "Deposit funds to account",
+      "action": "Deposit",
+      "result": "funds",
+      "object": "account",
+      "priority": "high",
+      "estimatedDays": 2,
+      "dependencies": ["f-003"]
+    },
+    {
+      "id": "f-006",
+      "title": "Withdraw funds from account",
+      "action": "Withdraw",
+      "result": "funds",
+      "object": "account",
+      "priority": "high",
+      "estimatedDays": 2,
+      "dependencies": ["f-003"]
+    },
+    {
+      "id": "f-007",
+      "title": "Validate balance of account",
+      "action": "Validate",
+      "result": "balance",
+      "object": "account",
+      "priority": "high",
+      "estimatedDays": 1,
+      "dependencies": ["f-005", "f-006"]
+    },
+    {
+      "id": "f-008",
+      "title": "Transfer funds between accounts",
+      "action": "Transfer",
+      "result": "funds",
+      "object": "accounts",
+      "priority": "high",
+      "estimatedDays": 4,
+      "dependencies": ["f-005", "f-006", "f-007"]
+    },
+    {
+      "id": "f-009",
+      "title": "Calculate interest of savings account",
+      "action": "Calculate",
+      "result": "interest",
+      "object": "savings account",
+      "priority": "high",
+      "estimatedDays": 3,
+      "dependencies": ["f-004"]
+    },
+    {
+      "id": "f-010",
+      "title": "Apply interest to savings account",
+      "action": "Apply",
+      "result": "interest",
+      "object": "savings account",
+      "priority": "high",
+      "estimatedDays": 2,
+      "dependencies": ["f-009"]
+    },
+    {
+      "id": "f-011",
+      "title": "Record transaction in ledger",
+      "action": "Record",
+      "result": "transaction",
+      "object": "ledger",
+      "priority": "high",
+      "estimatedDays": 3,
+      "dependencies": ["f-005", "f-006", "f-008"]
+    },
+    {
+      "id": "f-012",
+      "title": "Generate statement of account",
+      "action": "Generate",
+      "result": "statement",
+      "object": "account",
+      "priority": "high",
+      "estimatedDays": 4,
+      "dependencies": ["f-011"]
+    },
+    {
+      "id": "f-013",
+      "title": "Display history of transactions",
+      "action": "Display",
+      "result": "history",
+      "object": "transactions",
+      "priority": "high",
+      "estimatedDays": 2,
+      "dependencies": ["f-011"]
+    },
+    {
+      "id": "f-014",
+      "title": "Create loan of customer",
+      "action": "Create",
+      "result": "loan",
+      "object": "customer",
+      "priority": "high",
+      "estimatedDays": 5,
+      "dependencies": ["f-001", "f-002"]
+    },
+    {
+      "id": "f-015",
+      "title": "Calculate payment of loan",
+      "action": "Calculate",
+      "result": "payment",
+      "object": "loan",
+      "priority": "high",
+      "estimatedDays": 3,
+      "dependencies": ["f-014"]
+    },
+    {
+      "id": "f-016",
+      "title": "Process payment of loan",
+      "action": "Process",
+      "result": "payment",
+      "object": "loan",
+      "priority": "high",
+      "estimatedDays": 3,
+      "dependencies": ["f-015"]
+    },
+    {
+      "id": "f-017",
+      "title": "Calculate amortization of loan",
+      "action": "Calculate",
+      "result": "amortization",
+      "object": "loan",
+      "priority": "medium",
+      "estimatedDays": 4,
+      "dependencies": ["f-014"]
+    },
+    {
+      "id": "f-018",
+      "title": "Validate credit of customer",
+      "action": "Validate",
+      "result": "credit",
+      "object": "customer",
+      "priority": "high",
+      "estimatedDays": 5,
+      "dependencies": ["f-002"]
+    },
+    {
+      "id": "f-019",
+      "title": "Freeze account for fraud",
+      "action": "Freeze",
+      "result": "account",
+      "object": "fraud",
+      "priority": "high",
+      "estimatedDays": 2,
+      "dependencies": ["f-003"]
+    },
+    {
+      "id": "f-020",
+      "title": "Unfreeze account after review",
+      "action": "Unfreeze",
+      "result": "account",
+      "object": "review",
+      "priority": "high",
+      "estimatedDays": 1,
+      "dependencies": ["f-019"]
+    },
+    {
+      "id": "f-021",
+      "title": "Generate report of compliance",
+      "action": "Generate",
+      "result": "report",
+      "object": "compliance",
+      "priority": "high",
+      "estimatedDays": 6,
+      "dependencies": ["f-011"]
+    },
+    {
+      "id": "f-022",
+      "title": "Export transactions for audit",
+      "action": "Export",
+      "result": "transactions",
+      "object": "audit",
+      "priority": "medium",
+      "estimatedDays": 3,
+      "dependencies": ["f-011"]
+    },
+    {
+      "id": "f-023",
+      "title": "Convert currency of transaction",
+      "action": "Convert",
+      "result": "currency",
+      "object": "transaction",
+      "priority": "medium",
+      "estimatedDays": 4,
+      "dependencies": ["f-008"]
+    },
+    {
+      "id": "f-024",
+      "title": "Set limit of transaction",
+      "action": "Set",
+      "result": "limit",
+      "object": "transaction",
+      "priority": "medium",
+      "estimatedDays": 2,
+      "dependencies": ["f-003"]
+    },
+    {
+      "id": "f-025",
+      "title": "Alert customer of large transaction",
+      "action": "Alert",
+      "result": "customer",
+      "object": "large transaction",
+      "priority": "medium",
+      "estimatedDays": 2,
+      "dependencies": ["f-011"]
+    }
+  ]
+}

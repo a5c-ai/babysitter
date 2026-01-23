@@ -1,0 +1,39 @@
+{
+  "projectName": "Web Development Team",
+  "workflowStages": [
+    { "name": "Backlog", "type": "queue" },
+    { "name": "Ready", "type": "queue" },
+    { "name": "In Progress", "type": "active" },
+    { "name": "Review", "type": "active" },
+    { "name": "Done", "type": "complete" }
+  ],
+  "defaultWipLimits": {
+    "In Progress": 3,
+    "Review": 2
+  },
+  "initialBacklog": [
+    {
+      "id": "task-1",
+      "title": "Update homepage hero section",
+      "priority": "high",
+      "serviceClass": "Standard"
+    },
+    {
+      "id": "task-2",
+      "title": "Fix mobile navigation bug",
+      "priority": "high",
+      "serviceClass": "Expedite"
+    },
+    {
+      "id": "task-3",
+      "title": "Add user testimonials page",
+      "priority": "medium",
+      "serviceClass": "Standard"
+    }
+  ],
+  "cycles": 3,
+  "teamCapacity": {
+    "developers": 3,
+    "reviewers": 1
+  }
+}

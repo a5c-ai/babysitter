@@ -1,0 +1,228 @@
+{
+  "description": "Impact Mapping example for launching a new marketplace platform",
+  "inputs": {
+    "goal": "Launch successful two-sided marketplace with 1000 active buyers and 200 active sellers by Q4 2026",
+    "timeframe": "Q4 2026 (9 months)",
+    "successMetrics": [
+      {
+        "metric": "Active buyers",
+        "currentValue": "0",
+        "targetValue": "1000",
+        "measurement": "Users with at least 1 purchase in 30 days",
+        "priority": "critical"
+      },
+      {
+        "metric": "Active sellers",
+        "currentValue": "0",
+        "targetValue": "200",
+        "measurement": "Sellers with at least 1 sale in 30 days",
+        "priority": "critical"
+      },
+      {
+        "metric": "Gross Merchandise Value (GMV)",
+        "currentValue": "$0",
+        "targetValue": "$500,000",
+        "measurement": "Total transaction volume",
+        "priority": "important"
+      },
+      {
+        "metric": "Buyer-to-seller ratio",
+        "currentValue": "N/A",
+        "targetValue": "5:1",
+        "measurement": "Active users ratio",
+        "priority": "important"
+      },
+      {
+        "metric": "Repeat purchase rate",
+        "currentValue": "N/A",
+        "targetValue": "40%",
+        "measurement": "Buyers with 2+ purchases",
+        "priority": "nice-to-have"
+      }
+    ],
+    "constraints": {
+      "budget": "$500,000",
+      "team": "4 engineers, 2 designers, 1 product manager, 1 operations",
+      "technical": [
+        "Must support payment processing (Stripe)",
+        "Must handle seller verification",
+        "Must scale to 10x target users"
+      ],
+      "regulatory": [
+        "PCI DSS compliance for payments",
+        "Tax collection and reporting",
+        "Data privacy (GDPR, CCPA)"
+      ]
+    },
+    "context": {
+      "marketType": "Digital goods marketplace",
+      "competitiveAdvantage": "Lower fees, better discovery, niche focus",
+      "existingPlatforms": ["Etsy", "Gumroad", "Shopify"],
+      "targetNiche": "Digital creators and design assets"
+    },
+    "knownActors": [
+      "Digital creators (sellers)",
+      "Designers and developers (buyers)",
+      "Platform operators",
+      "Payment processors",
+      "Existing marketplace platforms (competitors)"
+    ]
+  },
+  "expectedOutputs": {
+    "actors": {
+      "primary": [
+        "Digital creators looking to sell",
+        "Designers/developers looking to buy",
+        "First-time sellers",
+        "Power sellers"
+      ],
+      "secondary": [
+        "Platform operations team",
+        "Content moderators",
+        "Marketing/growth team",
+        "Payment processor (Stripe)",
+        "Community managers"
+      ],
+      "negative": [
+        "Established marketplaces (Etsy, Gumroad)",
+        "Fraud attempts",
+        "Low-quality sellers",
+        "Buyer skepticism"
+      ]
+    },
+    "impacts": {
+      "digitalCreators": [
+        "Discover platform and sign up as sellers",
+        "List their first products",
+        "Make regular sales",
+        "Become platform advocates"
+      ],
+      "buyers": [
+        "Find high-quality assets easily",
+        "Complete first purchase",
+        "Return for repeat purchases",
+        "Recommend to colleagues"
+      ],
+      "platformTeam": [
+        "Efficiently onboard sellers",
+        "Moderate content at scale",
+        "Resolve disputes quickly"
+      ],
+      "competitors": [
+        "Lose sellers to lower fees",
+        "Lose buyers to better discovery"
+      ]
+    },
+    "deliverables": {
+      "sellerAcquisition": [
+        "Creator-focused landing pages",
+        "Seller onboarding wizard",
+        "Product upload bulk tools",
+        "Seller dashboard analytics",
+        "Commission calculator",
+        "Integration with existing tools (Figma, Adobe)"
+      ],
+      "buyerAcquisition": [
+        "Advanced product search and filters",
+        "Curated collections",
+        "Preview and demo features",
+        "One-click checkout",
+        "License management system",
+        "Review and rating system"
+      ],
+      "trustAndSafety": [
+        "Seller verification process",
+        "Payment escrow system",
+        "Dispute resolution workflow",
+        "Content moderation tools",
+        "Fraud detection system"
+      ],
+      "growth": [
+        "Referral program (buyer + seller)",
+        "Email marketing automation",
+        "Social proof widgets",
+        "Creator spotlight blog",
+        "Affiliate marketing program"
+      ],
+      "platformOps": [
+        "Admin dashboard",
+        "Transaction monitoring",
+        "Payout automation",
+        "Customer support ticketing",
+        "Analytics and reporting"
+      ]
+    },
+    "assumptions": [
+      "⚡ Creators are dissatisfied with existing platform fees (Validation: Creator interviews)",
+      "⚡ Lower fees (10% vs 15-20%) will attract sellers (Validation: Pricing survey)",
+      "⚡ Niche focus provides better discovery than general marketplaces (Validation: Search testing)",
+      "Buyers will trust a new platform (Validation: Trust signals research)",
+      "We can moderate content effectively (Validation: Moderation pilot)",
+      "Payment processing is reliable (Validation: Stripe integration testing)",
+      "Seller-to-buyer ratio can be maintained (Validation: Network effects modeling)",
+      "Organic growth through word-of-mouth (Validation: Early adopter tracking)"
+    ],
+    "roadmap": {
+      "phase1": {
+        "name": "MVP - Prove Core Value (Months 1-3)",
+        "goal": "100 sellers, 500 buyers, validate product-market fit",
+        "deliverables": [
+          "Basic seller onboarding",
+          "Product listing and search",
+          "Payment processing",
+          "Essential trust features"
+        ],
+        "experiments": [
+          "Test fee structure acceptance",
+          "Measure search effectiveness",
+          "Validate seller acquisition cost"
+        ]
+      },
+      "phase2": {
+        "name": "Growth - Scale Both Sides (Months 4-6)",
+        "goal": "200 sellers, 1000 buyers, optimize conversion",
+        "deliverables": [
+          "Advanced search and discovery",
+          "Referral programs",
+          "Analytics dashboards",
+          "Content moderation tools"
+        ],
+        "experiments": [
+          "A/B test onboarding flows",
+          "Optimize search algorithms",
+          "Test referral incentives"
+        ]
+      },
+      "phase3": {
+        "name": "Optimization - Improve Retention (Months 7-9)",
+        "goal": "Maintain ratios, increase GMV, reduce churn",
+        "deliverables": [
+          "Advanced seller tools",
+          "Buyer loyalty features",
+          "Platform integrations",
+          "Community features"
+        ],
+        "experiments": [
+          "Test retention tactics",
+          "Measure integration impact",
+          "Community engagement tracking"
+        ]
+      }
+    },
+    "chickenAndEgg": {
+      "strategy": "Prioritize sellers first (supply), then buyers (demand)",
+      "rationale": "Buyers need products to purchase, so seller acquisition is critical path",
+      "tactics": [
+        "Launch with curated set of high-quality sellers",
+        "Use content marketing to attract buyer traffic",
+        "Provide early seller incentives (reduced fees, featured placements)"
+      ]
+    }
+  },
+  "useCases": [
+    "Two-sided marketplace cold start problem",
+    "Platform launch strategic planning",
+    "Network effects goal mapping",
+    "Competitive positioning against established platforms"
+  ]
+}

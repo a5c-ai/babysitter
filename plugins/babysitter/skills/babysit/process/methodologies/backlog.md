@@ -52,7 +52,7 @@ methodologies/
 14. **RUP (Rational Unified Process)** - Iterative with 4 phases
 15. **Spiral Model** - Risk-driven iterative
 16. **V-Model** - Verification and validation
-17. **Cleanroom Software Engineering** - Formal methods with statistical testing
+17. **Cleanroom Software Engineering** ✅ - Formal methods with statistical testing
 18. **Event Storming** - Domain modeling workshop
 19. **Double Diamond** - Design thinking framework
 
@@ -63,7 +63,7 @@ methodologies/
 **Creator**: Basecamp (Ryan Singer)
 **Year**: Modern (2019)
 **Priority**: 🔥 High
-**Implementation Status**: 📝 Not Implemented
+**Implementation Status**: ✅ Implemented
 **Category**: Product Development / Project Management
 
 ### Overview
@@ -89,25 +89,27 @@ Shape Up is Basecamp's methodology for building products through 6-week cycles w
    - Building phase (scope mapping, hill chart tracking, QA integration)
    - Cool-down phase (cleanup, exploration)
 
-2. **`tasks/shaping-task.js`** - Shape work at right abstraction level
+### Tasks
+
+1. Shape work at right abstraction level
    - Capture appetite (1-day, 2-week, 6-week)
    - Create breadboard (flow and affordances without visual design)
    - Fat marker sketches (rough UI concepts)
    - Identify rabbit holes and no-gos
 
-3. **`tasks/pitch-writing-task.js`** - Write formal pitch
+2. Write formal pitch
    - Problem definition
    - Appetite statement
    - Solution sketch
    - Rabbit holes
    - No-gos
 
-4. **`tasks/scope-mapping-task.js`** - Break work into scopes
+3. Break work into scopes
    - Identify scopes (integrated slices of the project)
    - Map dependencies between scopes
    - Track on hill chart
 
-5. **`tasks/hill-chart-tracking-task.js`** - Track progress visually
+4. Track progress visually
    - Monitor uphill (unknown) vs downhill (known) progress
    - Identify stuck work
    - Trigger interventions
@@ -129,7 +131,7 @@ Shape Up is Basecamp's methodology for building products through 6-week cycles w
 **Creator**: Clayton Christensen (popularized by Intercom, Alan Klement)
 **Year**: Modern framework (2016-present)
 **Priority**: ⭐ Medium
-**Implementation Status**: 📝 Not Implemented
+**Implementation Status**: ✅ Implemented
 **Category**: Product Strategy / Requirements
 
 ### Overview
@@ -153,24 +155,24 @@ JTBD focuses on the progress customers are trying to make in their lives rather 
    - Job stories generation
    - Solution mapping
 
-2. **`tasks/job-discovery-task.js`** - Discover customer jobs
+2. Discover customer jobs
    - Interview analysis
    - Struggle identification
    - Progress definition
    - Job clustering
 
-3. **`tasks/forces-analysis-task.js`** - Analyze forces
+3. Analyze forces
    - Push forces (current problems)
    - Pull forces (new solution appeal)
    - Anxiety forces (concerns about new solution)
    - Habits forces (comfort with current solution)
 
-4. **`tasks/job-story-generation-task.js`** - Convert jobs to job stories
+4. Convert jobs to job stories
    - Format: "When [situation], I want to [motivation], so I can [outcome]"
    - Avoid personas and demographics
    - Focus on causality and context
 
-5. **`tasks/solution-mapping-task.js`** - Map solutions to jobs
+5. Map solutions to jobs
    - Feature-to-job mapping
    - Progress measurement
    - Success criteria
@@ -192,7 +194,7 @@ JTBD focuses on the progress customers are trying to make in their lives rather 
 **Creator**: Gojko Adzic
 **Year**: Modern (2012)
 **Priority**: ⭐ Medium
-**Implementation Status**: 📝 Not Implemented
+**Implementation Status**: ✅ Implemented
 **Category**: Strategic Planning / Requirements
 
 ### Overview
@@ -219,28 +221,30 @@ Impact Mapping is a strategic planning technique that prevents organizations fro
    - Deliverable generation
    - Map visualization
 
-2. **`tasks/goal-definition-task.js`** - Define measurable goal
+### Tasks
+
+1. Define measurable goal
    - Business objective
    - Success metrics
    - Timeline
    - Constraints
 
-3. **`tasks/actor-identification-task.js`** - Identify actors
+2. Identify actors
    - Primary actors (direct users)
    - Secondary actors (indirect beneficiaries)
    - Negative actors (opponents, competitors)
 
-4. **`tasks/impact-analysis-task.js`** - Define desired impacts
+3. Define desired impacts
    - Behavioral changes
    - Measurable outcomes
    - Assumption flagging
 
-5. **`tasks/deliverable-generation-task.js`** - Generate deliverables
+4. Generate deliverables
    - Feature ideas
    - Prioritization by impact
    - Milestone planning
 
-6. **`tasks/map-visualization-task.js`** - Create visual map
+5. Create visual map
    - Tree structure (Mermaid/Graphviz)
    - Assumption markers
    - Progress tracking
@@ -262,7 +266,7 @@ Impact Mapping is a strategic planning technique that prevents organizations fro
 **Creator**: Alberto Brandolini
 **Year**: Modern (2013)
 **Priority**: ⭐ Medium
-**Implementation Status**: 📝 Not Implemented
+**Implementation Status**: ✅ Implemented
 **Category**: Domain Modeling / System Design
 
 ### Overview
@@ -288,31 +292,33 @@ Event Storming is a workshop-based method for rapidly exploring complex business
    - Bounded Context identification
    - Aggregates definition
 
-2. **`tasks/big-picture-storming-task.js`** - Discover domain events
+### Tasks
+
+1. Discover domain events
    - Chaotic exploration (add all events)
    - Enforce timeline (sort chronologically)
    - Identify hot spots
    - People and systems
 
-3. **`tasks/process-modeling-task.js`** - Model key processes
+2. Model key processes
    - Commands that trigger events
    - Policies (when event X, then command Y)
    - Read models
    - External systems
 
-4. **`tasks/software-design-task.js`** - Design aggregates
+4. Design aggregates
    - Identify aggregates (clusters of events)
    - Define bounded contexts
    - Command handlers
    - Event handlers
 
-5. **`tasks/context-mapping-task.js`** - Map bounded contexts
+5. Map bounded contexts
    - Context relationships
    - Shared kernel
    - Customer-supplier
    - Anti-corruption layer
 
-6. **`tasks/visualization-task.js`** - Generate visual artifacts
+6. Generate visual artifacts
    - Event flow diagrams
    - Context maps
    - Aggregate diagrams
@@ -335,7 +341,7 @@ Event Storming is a workshop-based method for rapidly exploring complex business
 **Creator**: Popularized by Lean Startup, practiced at Microsoft, Amazon
 **Year**: Modern practice (2011-present)
 **Priority**: 🔥 High
-**Implementation Status**: 📝 Not Implemented
+**Implementation Status**: ✅ Implemented
 **Category**: Experimentation / Validation
 
 ### Overview
@@ -362,36 +368,36 @@ Hypothesis-Driven Development treats every feature as an experiment. Instead of 
    - Analyze and decide
    - Iteration loop
 
-2. **`tasks/hypothesis-formulation-task.js`** - Formulate testable hypothesis
+2. Formulate testable hypothesis
    - "We believe..." (feature description)
    - "...for..." (target audience)
    - "...will achieve..." (outcome)
    - "...we'll know when..." (success metric)
 
-3. **`tasks/experiment-design-task.js`** - Design experiment
+3. Design experiment
    - Control group definition
    - Treatment group definition
    - Sample size calculation
    - Duration estimate
    - Instrumentation plan
 
-4. **`tasks/mvp-specification-task.js`** - Specify minimum testable version
+4. Specify minimum testable version
    - Core hypothesis test
    - Cut all non-essential scope
    - Instrumentation requirements
 
-5. **`tasks/measurement-plan-task.js`** - Define measurement approach
+5. Define measurement approach
    - Primary metrics
    - Secondary metrics
    - Counter metrics (watch for negative side effects)
    - Statistical significance criteria
 
-6. **`tasks/analysis-task.js`** - Analyze results
+6. Analyze results
    - Statistical analysis
    - Qualitative feedback
    - Decision: Persevere, Pivot, or Stop
 
-7. **`tasks/learning-capture-task.js`** - Capture learnings
+7. Capture learnings
    - What we learned
    - Updated beliefs
    - Next hypothesis
@@ -415,7 +421,7 @@ Hypothesis-Driven Development treats every feature as an experiment. Instead of 
 **Creator**: British Design Council (2005)
 **Year**: Established design thinking framework
 **Priority**: ⭐ Medium
-**Implementation Status**: 📝 Not Implemented
+**Implementation Status**: ✅ Implemented
 **Category**: Design Thinking / Innovation
 
 ### Overview
@@ -445,33 +451,35 @@ Double Diamond represents the design thinking process through four phases: Disco
    - Deliver phase
    - Iteration support
 
-2. **`tasks/discover-task.js`** - Discover (diverge on problem)
+### Tasks
+
+1. Discover (diverge on problem)
    - User research
    - Stakeholder interviews
    - Market analysis
    - Context mapping
    - Problem space exploration
 
-3. **`tasks/define-task.js`** - Define (converge on problem)
+2. Define (converge on problem)
    - Synthesis of research
    - Problem statement
    - Design principles
    - Success criteria
    - Constraints
 
-4. **`tasks/develop-task.js`** - Develop (diverge on solutions)
+4. Develop (diverge on solutions)
    - Ideation sessions
    - Sketching and prototyping
    - Multiple concepts
    - Technical feasibility
 
-5. **`tasks/deliver-task.js`** - Deliver (converge on solution)
+5. Deliver (converge on solution)
    - Solution selection
    - Detailed specification
    - Implementation planning
    - Delivery execution
 
-6. **`tasks/iteration-decision-task.js`** - Decide if another diamond needed
+6. Decide if another diamond needed
    - Review outcomes
    - Identify new unknowns
    - Scope next diamond
@@ -494,7 +502,7 @@ Double Diamond represents the design thinking process through four phases: Disco
 **Creator**: Dan North (BDD), Gojko Adzic (Specification by Example)
 **Year**: Modern practice (2006-present)
 **Priority**: 🔥 High
-**Implementation Status**: 📝 Not Implemented
+**Implementation Status**: ✅ Implemented
 **Category**: Requirements / Testing / Executable Specifications
 
 ### Overview
@@ -522,33 +530,35 @@ Behavior-Driven Development (BDD), also known as Specification by Example, captu
    - Execution and reporting
    - Living documentation update
 
-2. **`tasks/discovery-workshop-task.js`** - Collaborative discovery
+### Tasks
+
+1. Collaborative discovery
    - Story analysis
    - Example generation with stakeholders
    - Rule identification
    - Question capture
    - Scope validation
 
-3. **`tasks/gherkin-formulation-task.js`** - Convert to Gherkin
+2. Convert to Gherkin
    - Given-When-Then scenarios
    - Scenario outlines (data-driven)
    - Background steps
    - Tags for organization
    - Step reusability analysis
 
-4. **`tasks/step-definition-task.js`** - Generate step definitions
+3. Generate step definitions
    - Parse Gherkin steps
    - Generate code stubs (Cucumber/SpecFlow/Behave)
    - Map to implementation
    - Identify reusable steps
 
-5. **`tasks/test-automation-task.js`** - Automate scenarios
+4. Automate scenarios
    - Implement step definitions
    - Page Object patterns
    - Test data management
    - Assertion strategies
 
-6. **`tasks/living-documentation-task.js`** - Generate documentation
+5. Generate documentation
    - Feature documentation from scenarios
    - Test result reporting
    - Coverage analysis
@@ -575,7 +585,7 @@ Behavior-Driven Development (BDD), also known as Specification by Example, captu
 **Creator**: Eric Evans
 **Year**: Established (2003), still highly relevant
 **Priority**: 🔥 High
-**Implementation Status**: 📝 Not Implemented
+**Implementation Status**: ✅ Implemented
 **Category**: Strategic Design / Tactical Design / Architecture
 
 ### Overview
@@ -608,32 +618,34 @@ Domain-Driven Design is an approach for building complex software systems that p
    - Implementation phase
    - Continuous refinement
 
-2. **`tasks/strategic-design-task.js`** - Strategic patterns
+### Tasks
+
+1. Strategic patterns
    - Subdomain identification (Core/Supporting/Generic)
    - Bounded context definition
    - Context mapping (relationships)
    - Ubiquitous language glossary
 
-3. **`tasks/tactical-design-task.js`** - Tactical patterns
+2. Tactical patterns
    - Entity identification
    - Value object design
    - Aggregate definition (boundaries, invariants)
    - Repository design
    - Domain service identification
 
-4. **`tasks/domain-event-modeling-task.js`** - Event modeling
+4. Event modeling
    - Event storming integration
    - Event identification
    - Event handlers
    - Eventual consistency patterns
 
-5. **`tasks/ubiquitous-language-task.js`** - Language development
+5. Language development
    - Term extraction from domain expert conversations
    - Glossary creation
    - Model/code alignment check
    - Evolution tracking
 
-6. **`tasks/bounded-context-implementation-task.js`** - Implement context
+6. Implement context
    - Module structure
    - API boundaries
    - Anti-corruption layers
@@ -659,7 +671,7 @@ Domain-Driven Design is an approach for building complex software systems that p
 **Creator**: Jeff De Luca and Peter Coad
 **Year**: Established Agile (1997)
 **Priority**: 🔥 High
-**Implementation Status**: 📝 Not Implemented
+**Implementation Status**: ✅ Implemented
 **Category**: Feature-Centric Agile / Progress Tracking
 
 ### Overview
@@ -691,39 +703,41 @@ FDD is an Agile methodology that organizes work around building small, client-va
    - Build by feature (iterations)
    - Parking lot reporting
 
-2. **`tasks/develop-overall-model-task.js`** - Initial domain modeling
+### Tasks
+
+1. Initial domain modeling
    - Domain walkthrough
    - Study documents
    - Build domain object model
    - Identify classes and relationships
    - Write class specifications
 
-3. **`tasks/build-features-list-task.js`** - Feature decomposition
+3. Feature decomposition
    - Identify major feature sets
    - Break into features (<action> <result> <object> format)
    - Feature prioritization
    - Organize into parking lot structure
 
-4. **`tasks/plan-by-feature-task.js`** - Sequence and assign
+4. Sequence and assign
    - Identify feature dependencies
    - Assign to Chief Programmers
    - Identify class owners
    - Schedule by 2-week iterations
 
-5. **`tasks/design-by-feature-task.js`** - Detailed design per feature
+5. Detailed design per feature
    - Refine object model
    - Sequence diagrams
    - Class and method design
    - Design inspection
 
-6. **`tasks/build-by-feature-task.js`** - Implement and test
+6. Implement and test
    - Code implementation (class ownership)
    - Unit testing
    - Code inspection
    - Integration
    - Promote to build
 
-7. **`tasks/parking-lot-diagram-task.js`** - Generate progress visualization
+7. Generate progress visualization
    - Feature set boxes with completion color
    - Percentage complete per set
    - Overall project status
@@ -749,7 +763,7 @@ FDD is an Agile methodology that organizes work around building small, client-va
 **Creator**: Matt Wynne (Cucumber Ltd)
 **Year**: Modern BDD practice (2015)
 **Priority**: 🔥 High
-**Implementation Status**: 📝 Not Implemented
+**Implementation Status**: ✅ Implemented
 **Category**: Requirements / BDD / Testing
 
 ### Overview
@@ -780,34 +794,34 @@ Example Mapping is a simple workshop technique for exploring and understanding r
    - Readiness assessment
    - Gherkin generation
 
-2. **`tasks/story-analysis-task.js`** - Analyze user story
+2. Analyze user story
    - Story parsing
    - Initial complexity assessment
    - Scope clarification
 
-3. **`tasks/rule-extraction-task.js`** - Extract business rules
+3. Extract business rules
    - Identify acceptance criteria
    - Business rule discovery
    - Edge case identification
 
-4. **`tasks/example-generation-task.js`** - Generate concrete examples
+4. Generate concrete examples
    - Happy path examples
    - Edge case examples
    - Error case examples
    - Rule coverage check
 
-5. **`tasks/question-identification-task.js`** - Identify questions
+5. Identify questions
    - Missing information
    - Assumptions to validate
    - Technical unknowns
    - Prioritize questions
 
-6. **`tasks/gherkin-generation-task.js`** - Generate Gherkin scenarios
+6. Generate Gherkin scenarios
    - Given-When-Then format
    - Scenario outlines for data-driven tests
    - Tags for organization
 
-7. **`tasks/readiness-assessment-task.js`** - Assess story readiness
+7. Assess story readiness
    - Questions resolved?
    - Examples cover all rules?
    - Complexity appropriate?
@@ -832,7 +846,7 @@ Example Mapping is a simple workshop technique for exploring and understanding r
 **Creator**: Kent Beck (TDD), Brian Marick (ATDD concepts)
 **Year**: Established practice (1999-present)
 **Priority**: 🔥 High
-**Implementation Status**: 📝 Not Implemented
+**Implementation Status**: ✅ Implemented
 **Category**: Testing / Development Process
 
 ### Overview
@@ -865,37 +879,39 @@ Test-Driven Development (TDD) and Acceptance Test-Driven Development (ATDD) are 
    - ATDD: Verify acceptance test passes
    - Integration and deployment
 
-2. **`tasks/acceptance-criteria-definition-task.js`** - Define criteria
+### Tasks
+
+1. Define criteria
    - Collaborate with customers/stakeholders
    - Identify acceptance scenarios
    - Define success criteria
    - Example generation
 
-3. **`tasks/acceptance-test-creation-task.js`** - Write acceptance tests
+3. Write acceptance tests
    - Generate test code from criteria
    - Setup test fixtures
    - Define assertions
    - Run (should fail initially)
 
-4. **`tasks/unit-test-creation-task.js`** - Write unit tests
+4. Write unit tests
    - Identify units to test
    - Write failing unit test
    - Minimal test for one aspect
    - Run test suite
 
-5. **`tasks/implement-code-task.js`** - Implement minimum code
+5. Implement minimum code
    - Write simplest code to pass test
    - No premature optimization
    - Focus on current test only
    - Run test (should pass)
 
-6. **`tasks/refactor-task.js`** - Refactor with confidence
+6. Refactor with confidence
    - Remove duplication
    - Improve design
    - Maintain passing tests
    - Run full test suite
 
-7. **`tasks/acceptance-verification-task.js`** - Verify acceptance
+7. Verify acceptance
    - Run acceptance test suite
    - Verify all criteria met
    - Integration testing
@@ -922,8 +938,13 @@ Test-Driven Development (TDD) and Acceptance Test-Driven Development (ATDD) are 
 **Creator**: Winston W. Royce (1970)
 **Year**: Classic SDLC
 **Priority**: 📋 Classic
-**Implementation Status**: 📝 Not Implemented
+**Implementation Status**: ✅ Implemented
 **Category**: Sequential SDLC
+
+**Implementation Files**:
+- `methodologies/waterfall/waterfall.js` - Main process with all inline task definitions
+- `methodologies/waterfall/README.md` - Comprehensive documentation
+- `methodologies/waterfall/examples/*.json` - 6 example input files
 
 ### Overview
 The Waterfall model is a linear and sequential approach to software development. Progress flows in one direction (like a waterfall) through phases: requirements, design, implementation, testing, deployment, and maintenance. Each phase must be completed before the next begins.
@@ -957,38 +978,40 @@ The Waterfall model is a linear and sequential approach to software development.
    - Deployment
    - Maintenance planning
 
-2. **`tasks/requirements-gathering-task.js`** - Comprehensive requirements
+### Tasks
+
+1. Comprehensive requirements
    - Stakeholder interviews
    - Requirements document (SRS)
    - Functional and non-functional requirements
    - Requirements review and approval
 
-3. **`tasks/system-design-task.js`** - Architecture and design
+2. Architecture and design
    - High-level architecture
    - Component design
    - Database design
    - Interface design
    - Design document (SDD)
 
-4. **`tasks/implementation-task.js`** - Sequential coding
+3. Sequential coding
    - Code per design specifications
    - Module-by-module implementation
    - Code reviews
    - Unit testing per module
 
-5. **`tasks/testing-phase-task.js`** - Comprehensive testing
+4. Comprehensive testing
    - Integration testing
    - System testing
    - User acceptance testing (UAT)
    - Test documentation
 
-6. **`tasks/deployment-task.js`** - Production release
+5. Production release
    - Deployment planning
    - Production environment setup
    - Release execution
    - Post-deployment verification
 
-7. **`tasks/maintenance-planning-task.js`** - Support planning
+6. Support planning
    - Maintenance procedures
    - Bug tracking process
    - Update management
@@ -1013,7 +1036,7 @@ The Waterfall model is a linear and sequential approach to software development.
 **Creator**: Rational Software (Grady Booch, Ivar Jacobson, James Rumbaugh)
 **Year**: Established iterative process (1990s)
 **Priority**: 📋 Classic
-**Implementation Status**: 📝 Not Implemented
+**Implementation Status**: ✅ Implemented
 **Category**: Iterative / Use-Case Driven / Architecture-Centric
 
 ### Overview
@@ -1045,41 +1068,43 @@ The Rational Unified Process is an iterative software development framework crea
    - Transition phase
    - Iteration management
 
-2. **`tasks/inception-phase-task.js`** - Project initiation
+### Tasks
+
+1. Project initiation
    - Vision document
    - Business case
    - Risk list
    - Project plan
    - Initial use-case model
 
-3. **`tasks/elaboration-phase-task.js`** - Architecture and planning
+2. Architecture and planning
    - Detailed use cases
    - Architecture baseline
    - Risk mitigation
    - Refined project plan
    - Executable architecture prototype
 
-4. **`tasks/construction-phase-task.js`** - Iterative build
+4. Iterative build
    - Multiple iterations
    - Incremental builds
    - Beta releases
    - Testing and integration
    - User documentation
 
-5. **`tasks/transition-phase-task.js`** - Deployment
+5. Deployment
    - Beta testing
    - Production deployment
    - User training
    - System tuning
    - Post-deployment support
 
-6. **`tasks/use-case-modeling-task.js`** - Use-case driven development
+6. Use-case driven development
    - Actor identification
    - Use case definition
    - Use case prioritization
    - Traceability to implementation
 
-7. **`tasks/iteration-planning-task.js`** - Plan iterations
+7. Plan iterations
    - Risk assessment
    - Iteration goals
    - Work allocation
@@ -1104,7 +1129,7 @@ The Rational Unified Process is an iterative software development framework crea
 **Creator**: Barry Boehm (1986)
 **Year**: Classic risk-driven (1988)
 **Priority**: 📋 Classic
-**Implementation Status**: 📝 Not Implemented
+**Implementation Status**: ✅ Implemented
 **Category**: Risk-Driven Iterative
 
 ### Overview
@@ -1138,33 +1163,35 @@ The Spiral Model is a risk-driven software development process model created by 
    - Evaluation phase
    - Convergence check
 
-2. **`tasks/planning-phase-task.js`** - Objectives and alternatives
+### Tasks
+
+1. Objectives and alternatives
    - Define iteration objectives
    - Identify alternatives
    - Document constraints
    - Resource estimation
 
-3. **`tasks/risk-analysis-task.js`** - Risk identification and mitigation
+3. Risk identification and mitigation
    - Identify risks
    - Assess risk severity
    - Build prototypes for high-risk areas
    - Develop mitigation strategies
    - Go/no-go decision
 
-4. **`tasks/engineering-phase-task.js`** - Development
+4. Development
    - Design iteration
    - Implementation
    - Testing
    - Integration
    - Iteration deliverable
 
-5. **`tasks/evaluation-phase-task.js`** - Customer feedback
+5. Customer feedback
    - Customer review
    - Stakeholder evaluation
    - Identify issues
    - Plan next spiral or conclude
 
-6. **`tasks/spiral-tracking-task.js`** - Visualize spiral progress
+6. Visualize spiral progress
    - Track radial distance (cost/effort)
    - Track angular progress (phase)
    - Generate spiral diagram
@@ -1189,7 +1216,7 @@ The Spiral Model is a risk-driven software development process model created by 
 **Creator**: Evolved from waterfall in the 1980s
 **Year**: Classic verification/validation
 **Priority**: 📋 Classic
-**Implementation Status**: 📝 Not Implemented
+**Implementation Status**: ✅ Implemented
 **Category**: Verification & Validation / Testing
 
 ### Overview
@@ -1225,44 +1252,46 @@ The V-Model is an SDLC model where execution happens in a sequential V-shape. It
    - Right side (integration/validation)
    - Traceability tracking
 
-2. **`tasks/requirements-with-acceptance-task.js`** - Requirements + Acceptance test design
+### Tasks
+
+1. Requirements + Acceptance test design
    - Requirements gathering
    - Design acceptance test cases
    - Define validation criteria
    - Requirements-to-test traceability
 
-3. **`tasks/system-design-with-system-test-task.js`** - System design + System test design
+3. System design + System test design
    - High-level system design
    - Design system test cases
    - Integration strategy
    - Design-to-test traceability
 
-4. **`tasks/architecture-with-integration-test-task.js`** - Architecture + Integration test design
+4. Architecture + Integration test design
    - Detailed architectural design
    - Design integration test cases
    - Interface specifications
    - Architecture-to-test traceability
 
-5. **`tasks/module-design-with-unit-test-task.js`** - Module design + Unit test design
+5. Module design + Unit test design
    - Detailed module design
    - Design unit test cases
    - Code-level specifications
    - Module-to-test traceability
 
-6. **`tasks/implementation-task.js`** - Coding phase
+6. Coding phase
    - Implement modules
    - Code reviews
    - Static analysis
    - Coding standards compliance
 
-7. **`tasks/execute-tests-task.js`** - Execute right side of V
+7. Execute right side of V
    - Unit tests
    - Integration tests
    - System tests
    - Acceptance tests
    - Defect tracking and resolution
 
-8. **`tasks/traceability-matrix-task.js`** - Generate traceability
+8. Generate traceability
    - Requirements-to-tests mapping
    - Coverage analysis
    - Gap identification
@@ -1287,7 +1316,7 @@ The V-Model is an SDLC model where execution happens in a sequential V-shape. It
 **Creator**: Harlan Mills and colleagues at IBM
 **Year**: Classic formal methods (1980s)
 **Priority**: 📋 Classic
-**Implementation Status**: 📝 Not Implemented
+**Implementation Status**: ✅ Implemented
 **Category**: Formal Methods / Statistical Testing
 
 ### Overview
@@ -1316,39 +1345,41 @@ Cleanroom Software Engineering is a process intended to produce software with ce
    - Statistical testing execution
    - Certification
 
-2. **`tasks/formal-specification-task.js`** - Mathematical specification
+### Tasks
+
+1. Mathematical specification
    - Black box specifications (external behavior)
    - State box specifications (state transitions)
    - Formal notation
    - Specification review
 
-3. **`tasks/incremental-planning-task.js`** - Plan increments
+3. Plan increments
    - Define increment boundaries
    - Sequence increments
    - Statistical quality objectives
    - Certification requirements
 
-4. **`tasks/design-verification-task.js`** - Design with correctness proof
+4. Design with correctness proof
    - Structured programming (no GOTOs)
    - Clear box design (procedure)
    - Correctness arguments
    - Formal verification
    - Design review
 
-5. **`tasks/usage-modeling-task.js`** - Model customer usage
+5. Model customer usage
    - Identify usage scenarios
    - Probability distribution of usage
    - Markov chain model
    - Test case generation from usage model
 
-6. **`tasks/statistical-testing-task.js`** - Execute statistical tests
+6. Execute statistical tests
    - Generate test cases from usage model
    - Execute tests
    - Track failures
    - Calculate MTTF (Mean Time To Failure)
    - Reliability growth modeling
 
-7. **`tasks/certification-task.js`** - Certify reliability
+7. Certify reliability
    - Statistical analysis
    - Reliability certification
    - Quality metrics
@@ -1374,7 +1405,7 @@ Cleanroom Software Engineering is a process intended to produce software with ce
 **Creator**: Adapted from Toyota Production System by David J. Anderson (2007)
 **Year**: Modern flow-based (2007-present)
 **Priority**: ⭐ Medium
-**Implementation Status**: 📝 Not Implemented
+**Implementation Status**: ✅ Implemented
 **Category**: Flow Management / Continuous Delivery
 
 ### Overview
@@ -1401,39 +1432,41 @@ Kanban is a visual workflow management method for defining, managing, and improv
    - Metrics tracking (cycle time, throughput, lead time)
    - Continuous improvement
 
-2. **`tasks/board-visualization-task.js`** - Setup Kanban board
+### Tasks
+
+1. Setup Kanban board
    - Define workflow stages (columns)
    - Set WIP limits per column
    - Define card structure
    - Swimlanes (if needed)
    - Board policies
 
-3. **`tasks/wip-limit-management-task.js`** - Manage WIP limits
+2. Manage WIP limits
    - Monitor WIP per column
    - Enforce limits
    - Identify bottlenecks
    - Signal pull availability
 
-4. **`tasks/pull-system-task.js`** - Implement pull
+3. Implement pull
    - Detect capacity available (WIP < limit)
    - Pull from upstream column
    - Respect dependencies
    - Flow-based prioritization
 
-5. **`tasks/flow-metrics-task.js`** - Track flow metrics
+5. Track flow metrics
    - Cycle time (how long work takes)
    - Lead time (customer perspective time)
    - Throughput (work items completed per period)
    - Cumulative flow diagram
    - Aging work identification
 
-6. **`tasks/replenishment-meeting-task.js`** - Prioritize new work
+6. Prioritize new work
    - Review backlog
    - Prioritize items
    - Pull into "Ready" column
    - Capacity-based commitment
 
-7. **`tasks/retrospective-task.js`** - Continuous improvement
+7. Continuous improvement
    - Review metrics
    - Identify impediments
    - Experiment with changes
@@ -1460,7 +1493,7 @@ Kanban is a visual workflow management method for defining, managing, and improv
 **Creator**: Kent Beck, Ward Cunningham, Ron Jeffries
 **Year**: Established Agile (1996-present)
 **Priority**: ⭐ Medium
-**Implementation Status**: 📝 Not Implemented
+**Implementation Status**: ✅ Implemented
 **Category**: Agile Engineering Practices
 
 ### Overview
@@ -1502,44 +1535,46 @@ Extreme Programming (XP) is an agile software development methodology that advoc
    - Release completion
    - Retrospective
 
-2. **`tasks/release-planning-task.js`** - Plan release
+### Tasks
+
+1. Plan release
    - User story creation
    - Story estimation (story points)
    - Release scope definition
    - Velocity planning
 
-3. **`tasks/iteration-planning-task.js`** - Plan iteration
+3. Plan iteration
    - Select stories for iteration
    - Break stories into tasks
    - Task estimation (hours)
    - Team commitment
 
-4. **`tasks/pair-programming-task.js`** - Pair programming facilitation
+4. Pair programming facilitation
    - Pair assignment
    - Driver/navigator rotation
    - Pairing session tracking
    - Knowledge sharing metrics
 
-5. **`tasks/tdd-practice-task.js`** - TDD enforcement
+5. TDD enforcement
    - Red-Green-Refactor cycle
    - Test coverage tracking
    - Fast test execution
    - Test quality metrics
 
-6. **`tasks/continuous-integration-task.js`** - CI pipeline
+6. CI pipeline
    - Frequent commits (multiple per day)
    - Automated build
    - Automated test execution
    - Immediate feedback
    - Fix broken builds immediately
 
-7. **`tasks/refactoring-task.js`** - Continuous refactoring
+7. Continuous refactoring
    - Code smell detection
    - Refactoring opportunities
    - Maintain test coverage during refactoring
    - Collective code ownership
 
-8. **`tasks/stand-up-meeting-task.js`** - Daily standup
+8. Daily standup
    - Yesterday's progress
    - Today's plan
    - Impediments
@@ -1566,7 +1601,7 @@ Extreme Programming (XP) is an agile software development methodology that advoc
 **Creator**: Ken Schwaber and Jeff Sutherland
 **Year**: Dominant Agile framework (1995-present)
 **Priority**: ⭐ Medium
-**Implementation Status**: 📝 Not Implemented
+**Implementation Status**: ✅ Implemented
 **Category**: Agile Sprint-Based Framework
 
 ### Overview
@@ -1607,46 +1642,48 @@ Scrum is an agile framework for developing, delivering, and sustaining complex p
    - Sprint retrospective
    - Increment delivery
 
-2. **`tasks/backlog-refinement-task.js`** - Groom Product Backlog
+### Tasks
+
+1. Groom Product Backlog
    - Add detail to Product Backlog Items (PBIs)
    - Estimate PBIs (story points, t-shirt sizes)
    - Order backlog by value
    - Acceptance criteria definition
 
-3. **`tasks/sprint-planning-task.js`** - Plan sprint
+3. Plan sprint
    - Define Sprint Goal
    - Select PBIs for sprint
    - Forecast capacity
    - Create Sprint Backlog (tasks)
    - Commitment
 
-4. **`tasks/daily-scrum-task.js`** - Daily standup
+4. Daily standup
    - What did I do yesterday?
    - What will I do today?
    - Any impediments?
    - Update burndown
    - Re-plan as needed
 
-5. **`tasks/sprint-review-task.js`** - Review increment
+5. Review increment
    - Demo completed work
    - Stakeholder feedback
    - Discuss what is Done
    - Update Product Backlog
    - Review timeline and budget
 
-6. **`tasks/sprint-retrospective-task.js`** - Improve process
+6. Improve process
    - What went well?
    - What could be improved?
    - What will we commit to improve?
    - Create improvement backlog items
 
-7. **`tasks/burndown-tracking-task.js`** - Track progress
+7. Track progress
    - Sprint burndown chart
    - Velocity tracking
    - Release burndown
    - Predictability metrics
 
-8. **`tasks/definition-of-done-task.js`** - Establish DoD
+8. Establish DoD
    - Code complete
    - Tests passing
    - Code reviewed

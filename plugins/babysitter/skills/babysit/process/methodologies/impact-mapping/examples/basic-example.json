@@ -1,0 +1,33 @@
+{
+  "description": "Basic Impact Mapping example for SaaS revenue growth",
+  "inputs": {
+    "goal": "Increase monthly recurring revenue by 30% in Q2 2026",
+    "timeframe": "Q2 2026 (6 months)",
+    "successMetrics": [
+      {
+        "metric": "Monthly Recurring Revenue (MRR)",
+        "currentValue": "$100,000",
+        "targetValue": "$130,000",
+        "measurement": "Billing system reports"
+      },
+      {
+        "metric": "Customer count",
+        "currentValue": "500",
+        "targetValue": "600",
+        "measurement": "User database"
+      }
+    ]
+  },
+  "expectedOutputs": {
+    "actorTypes": ["free tier users", "paid customers", "sales team", "competitors"],
+    "impactCategories": ["conversion", "retention", "engagement", "prevention"],
+    "deliverableTypes": ["feature", "enhancement", "content", "automation"],
+    "assumptionCount": "10-15 assumptions flagged",
+    "roadmapPhases": "3 milestones (MVP, Growth, Scale)"
+  },
+  "useCases": [
+    "Initial strategic planning for new product direction",
+    "Quarterly goal planning with stakeholders",
+    "Feature prioritization decisions"
+  ]
+}

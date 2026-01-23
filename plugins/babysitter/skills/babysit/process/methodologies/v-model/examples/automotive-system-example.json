@@ -1,0 +1,56 @@
+{
+  "description": "Automotive safety system V-Model example with ISO 26262 compliance",
+  "inputs": {
+    "projectRequirements": "Develop software for an Advanced Driver Assistance System (ADAS) - Lane Keeping Assist:\n\n1. Lane Detection\n   - Process camera feed to detect lane markings\n   - Detect left and right lane boundaries\n   - Lane detection confidence level calculation\n   - Update rate: 20 Hz (50ms)\n   - Detection range: 3-100 meters ahead\n   - Handle various road conditions (dry, wet, snow)\n\n2. Vehicle Position Calculation\n   - Calculate vehicle position within lane\n   - Measure lateral deviation from lane center\n   - Calculate heading angle relative to lane\n   - Precision: ±5cm lateral position\n\n3. Steering Intervention\n   - Calculate corrective steering torque\n   - Apply gentle steering corrections to keep vehicle centered\n   - Maximum torque: 3 Nm\n   - Smooth torque application (no sudden jerks)\n   - Driver can override at any time\n\n4. System Activation/Deactivation\n   - Activate when: speed > 60 km/h, lane markings detected, driver hands on wheel\n   - Deactivate when: speed < 55 km/h, lane markings lost, driver override detected\n   - Visual indicator of system status (off, standby, active)\n   - Audible alert on deactivation\n\n5. Safety Monitoring\n   - Camera health monitoring\n   - Sensor plausibility checks\n   - Steering actuator monitoring\n   - Watchdog monitoring of all critical functions\n   - Fail-operational mode: degrade gracefully\n\n6. Driver Monitoring\n   - Hands-on-wheel detection via steering torque sensor\n   - Alert driver if hands off wheel >15 seconds while system active\n   - Escalating warnings: visual → audible → system deactivation\n\n7. CAN Bus Communication\n   - Receive vehicle speed, steering angle, wheel speeds\n   - Send steering torque commands\n   - Send system status messages\n   - CAN message rate: 10ms for critical signals\n\n8. Diagnostic and Logging\n   - Log all system events and interventions\n   - Diagnostic Trouble Codes (DTCs) for faults\n   - Data recording for incident analysis\n   - Interface with vehicle diagnostic system (OBD-II)\n\n9. Safety Requirements (ISO 26262 ASIL B)\n   - Hazard analysis and risk assessment (HARA)\n   - Functional safety requirements\n   - Safety mechanisms: plausibility checks, redundancy, monitoring\n   - Fault detection and handling\n   - Fail-safe behavior on critical faults\n\n10. Non-Functional Requirements\n    - Latency (detection to steering): <100ms\n    - Availability: >99.9% when conditions allow\n    - Operating temperature: -40°C to +85°C\n    - Vibration resistance: per ISO 16750\n    - EMC compliance: per ISO 11452\n    - MISRA C compliance\n    - AUTOSAR architecture",
+    "safetyLevel": "critical",
+    "traceabilityRequired": true,
+    "testingRigor": "exhaustive",
+    "complianceStandards": ["ISO 26262", "MISRA C", "AUTOSAR"],
+    "existingArtifacts": {
+      "sensors": ["front_camera", "steering_torque_sensor"],
+      "actuators": ["electric_power_steering"],
+      "interfaces": ["CAN_bus", "vehicle_network"]
+    }
+  },
+  "expectedOutputs": {
+    "requirements": {
+      "functional": "35-45 functional requirements",
+      "nonFunctional": "20-25 non-functional requirements",
+      "safety": "15-20 safety requirements (ASIL B)"
+    },
+    "design": {
+      "components": "10-15 components with safety partitioning",
+      "modules": "30-40 modules (application + safety mechanisms)"
+    },
+    "testing": {
+      "unitTests": "250-350 test cases with >95% coverage",
+      "integrationTests": "100-120 test cases including HW/SW integration",
+      "systemTests": "80-100 test cases including fault injection",
+      "acceptanceTests": "50-60 test cases including vehicle testing"
+    },
+    "traceability": {
+      "coverage": "100% requirements coverage required",
+      "safetyGoals": "Complete traceability from hazards to safety mechanisms",
+      "compliance": "ISO 26262 work products and traceability matrix"
+    }
+  },
+  "learningPoints": [
+    "Automotive V-Model with ISO 26262 compliance",
+    "ASIL B safety requirements and decomposition",
+    "Hardware-software co-design and integration",
+    "Real-time constraints and timing analysis",
+    "Fault injection testing and fail-safe behavior",
+    "AUTOSAR architecture and MISRA C compliance",
+    "Vehicle-level integration and testing"
+  ],
+  "iso26262_artifacts": [
+    "Hazard Analysis and Risk Assessment (HARA)",
+    "Functional Safety Concept",
+    "Technical Safety Concept",
+    "Safety Requirements Specification",
+    "Safety Analysis (FMEA, FTA)",
+    "Dependent Failure Analysis",
+    "Traceability Matrix",
+    "Safety Validation Report"
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "description": "RESTful API endpoint for user management - ATDD/TDD example",
+  "feature": "RESTful API endpoint for user CRUD operations",
+  "acceptanceCriteria": [
+    "Given a valid POST request to /api/users with user data, when processed, then user is created and 201 response returned with user object",
+    "Given a POST request with invalid user data, when processed, then 400 response returned with validation errors",
+    "Given a GET request to /api/users/:id with valid ID, when processed, then 200 response returned with user object",
+    "Given a GET request to /api/users/:id with non-existent ID, when processed, then 404 response returned",
+    "Given a PUT request to /api/users/:id with valid updates, when processed, then user is updated and 200 response returned",
+    "Given a DELETE request to /api/users/:id, when processed, then user is deleted and 204 response returned",
+    "Given an unauthenticated request to protected endpoints, when processed, then 401 response returned",
+    "Given a request without proper permissions, when processed, then 403 response returned"
+  ],
+  "testFramework": "jest",
+  "iterationCount": 18,
+  "includeIntegrationTests": true,
+  "existingCode": {
+    "userModel": "./src/models/user.js",
+    "userRepository": "./src/repositories/user.js",
+    "authMiddleware": "./src/middleware/auth.js",
+    "validator": "./src/validators/user.js"
+  },
+  "notes": [
+    "Classic API development scenario",
+    "ATDD validates API contracts and status codes",
+    "TDD builds up request handling, validation, and business logic",
+    "Integration tests verify database operations and middleware"
+  ]
+}

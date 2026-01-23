@@ -1,0 +1,122 @@
+{
+  "description": "Example collection for Impact Mapping methodology",
+  "examples": [
+    {
+      "name": "SaaS Revenue Growth",
+      "file": "basic-example.json",
+      "complexity": "simple",
+      "industry": "SaaS/B2B",
+      "goalType": "Revenue increase",
+      "duration": "6 months",
+      "highlights": [
+        "Clear financial goal with specific MRR target",
+        "Multiple actor types (free users, paid customers, sales team)",
+        "Conversion and retention impacts",
+        "Straightforward deliverable prioritization"
+      ]
+    },
+    {
+      "name": "Customer Support Efficiency",
+      "file": "customer-support-example.json",
+      "complexity": "medium",
+      "industry": "SaaS/Operations",
+      "goalType": "Cost reduction + CX improvement",
+      "duration": "6 months",
+      "highlights": [
+        "Dual goal: reduce costs while maintaining satisfaction",
+        "Self-service and automation focus",
+        "Internal team actors (support agents, content team)",
+        "Balancing efficiency with customer experience"
+      ]
+    },
+    {
+      "name": "Marketplace Launch",
+      "file": "marketplace-example.json",
+      "complexity": "complex",
+      "industry": "Marketplace/Platform",
+      "goalType": "Two-sided network launch",
+      "duration": "9 months",
+      "highlights": [
+        "Two-sided marketplace cold-start problem",
+        "Dual actor focus (buyers and sellers)",
+        "Network effects and chicken-and-egg challenges",
+        "Complex trust, safety, and regulatory considerations",
+        "Competitive positioning strategy"
+      ]
+    },
+    {
+      "name": "Mobile App Engagement",
+      "file": "mobile-app-example.json",
+      "complexity": "medium",
+      "industry": "Mobile/Consumer",
+      "goalType": "User engagement + retention",
+      "duration": "3 months",
+      "highlights": [
+        "Mobile-specific constraints (offline, battery, app size)",
+        "Retention and engagement metrics focus",
+        "Viral growth and social features",
+        "Freemium to premium conversion",
+        "User lifecycle stages as actors (new, casual, active, power, lapsed)"
+      ]
+    }
+  ],
+  "usageGuidelines": {
+    "choosingAnExample": {
+      "startWithSimple": "Use basic-example.json to understand the methodology",
+      "matchIndustry": "Choose example closest to your industry or use case",
+      "adaptNotCopy": "Use examples as inspiration, not templates - your context is unique"
+    },
+    "commonPatterns": {
+      "actorTypes": {
+        "primary": "Direct users who interact with your product/service",
+        "secondary": "Influencers, internal teams, partners who indirectly impact goal",
+        "negative": "Competitors, obstacles, challenges to overcome"
+      },
+      "impactCategories": {
+        "acquisition": "Get new users/customers",
+        "activation": "Get them to first value",
+        "engagement": "Increase usage frequency/depth",
+        "retention": "Keep them using over time",
+        "revenue": "Monetization and upsells",
+        "referral": "Viral growth loops"
+      },
+      "prioritizationFramework": {
+        "mustHave": "Critical path to goal, highest impact",
+        "shouldHave": "Important but not blocking",
+        "couldHave": "Nice to have, lower priority",
+        "wontHaveNow": "Deprioritized, maybe later"
+      }
+    },
+    "adaptationTips": [
+      "Start with your specific, measurable goal",
+      "Identify all actors who can help or hinder the goal",
+      "For each actor, define 2-5 behavioral impacts",
+      "Brainstorm multiple deliverable options per impact",
+      "Flag assumptions early - they guide validation",
+      "Prioritize ruthlessly - can't build everything",
+      "Sequence into milestones with validation experiments"
+    ]
+  },
+  "integrationExamples": {
+    "withSpecDriven": {
+      "flow": "Impact Map → Prioritized Deliverables → Spec-Driven Development",
+      "example": "Use marketplace-example.json deliverables as input to spec-driven methodology",
+      "benefit": "Strategic alignment from goal to implementation"
+    },
+    "withExampleMapping": {
+      "flow": "Impact Map → Deliverable Selection → Example Mapping → BDD",
+      "example": "Take 'Advanced analytics dashboard' deliverable and run Example Mapping",
+      "benefit": "Feature-level clarity with strategic context"
+    },
+    "withHypothesisDriven": {
+      "flow": "Impact Map Assumptions → Hypothesis-Driven Development → Validation",
+      "example": "Test critical assumptions from mobile-app-example.json before building",
+      "benefit": "Validate before investing in full implementation"
+    },
+    "withGSD": {
+      "flow": "Impact Map Roadmap → GSD Phase Planning → Execution",
+      "example": "Use roadmap phases as input to GSD phase discussion and planning",
+      "benefit": "Strategic roadmap guides execution workflow"
+    }
+  }
+}

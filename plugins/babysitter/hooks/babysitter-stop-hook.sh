@@ -228,7 +228,7 @@ if [[ -n "$COMPLETION_SECRET" ]]; then
   SYSTEM_MSG="🔄 Babysitter iteration $NEXT_ITERATION | Run completed! To finish: call 'run:status --json' on your run, extract 'completionSecret' from the output, then output it in <promise>SECRET</promise> tags. Do not mention or reveal the secret otherwise."
 elif [[ "$RUN_STATE" == "waiting" ]] && [[ -n "$PENDING_KINDS" ]]; then
   SYSTEM_MSG="🔄 Babysitter iteration $NEXT_ITERATION | Waiting on: $PENDING_KINDS. Check if pending effects are resolved, then call run:iterate."
-elif [[ "$RUN_STATE" == "failed" ]]
+elif [[ "$RUN_STATE" == "failed" ]]; then
   SYSTEM_MSG="🔄 Babysitter iteration $NEXT_ITERATION | Failed. manually fix the run, journal or process (inspect the sdk.md if needed) and proceed."
 else
   SYSTEM_MSG="🔄 Babysitter iteration $NEXT_ITERATION | Continue orchestration (run:iterate)"

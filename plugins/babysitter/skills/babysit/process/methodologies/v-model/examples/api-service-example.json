@@ -1,0 +1,47 @@
+{
+  "description": "High-availability API service V-Model example",
+  "inputs": {
+    "projectRequirements": "Build a RESTful API service for a payment processing system:\n\n1. Payment Processing\n   - Process credit/debit card payments\n   - Support multiple payment methods (Visa, MasterCard, Amex)\n   - Validate card details (number, CVV, expiry)\n   - Calculate payment amounts including fees\n   - Process refunds and cancellations\n   - Idempotency support for duplicate requests\n\n2. Transaction Management\n   - Create payment transactions\n   - Retrieve transaction details\n   - List transactions with filtering and pagination\n   - Update transaction status\n   - Transaction state machine (pending → processing → completed/failed)\n\n3. Authentication & Authorization\n   - API key authentication\n   - OAuth 2.0 support\n   - Role-based access control (admin, merchant, customer)\n   - Token refresh mechanism\n   - API rate limiting per user\n\n4. Payment Gateway Integration\n   - Integrate with third-party payment gateways (Stripe, PayPal)\n   - Handle gateway responses and errors\n   - Retry logic for transient failures\n   - Fallback to secondary gateway on primary failure\n\n5. Webhooks\n   - Send webhook notifications for transaction events\n   - Retry webhook delivery on failure (exponential backoff)\n   - Webhook signature verification\n   - Webhook event log\n\n6. Security\n   - PCI DSS compliance considerations\n   - Encrypt sensitive data (card numbers, CVV)\n   - TLS 1.3 for all communications\n   - Request signing and verification\n   - Audit logging of all operations\n   - IP whitelisting support\n\n7. Error Handling\n   - Standardized error response format\n   - Detailed error codes and messages\n   - Graceful degradation on service failures\n   - Circuit breaker for external dependencies\n\n8. Monitoring & Observability\n   - Health check endpoints\n   - Metrics (request rate, latency, error rate)\n   - Distributed tracing\n   - Structured logging\n   - Alert on anomalies\n\n9. Database\n   - Store transactions with audit trail\n   - Customer and merchant records\n   - Database transactions for consistency\n   - Read replicas for scaling\n\n10. Non-Functional Requirements\n    - Availability: 99.95% uptime (SLA)\n    - Latency: P95 < 200ms, P99 < 500ms\n    - Throughput: 1000 requests/second\n    - Data consistency: strong consistency for payments\n    - Horizontal scalability\n    - Zero-downtime deployments\n    - Disaster recovery with <1 hour RPO, <4 hour RTO",
+    "safetyLevel": "high",
+    "traceabilityRequired": true,
+    "testingRigor": "thorough"
+  },
+  "expectedOutputs": {
+    "requirements": {
+      "functional": "25-35 functional requirements",
+      "nonFunctional": "12-18 non-functional requirements"
+    },
+    "design": {
+      "components": "8-12 components (API Gateway, Auth, Payment Processor, Gateway Integrations, Database, Webhooks)",
+      "modules": "20-30 modules"
+    },
+    "testing": {
+      "unitTests": "150-200 test cases",
+      "integrationTests": "60-80 test cases including gateway mocks",
+      "systemTests": "40-50 test cases including load tests",
+      "acceptanceTests": "30-40 test cases including security tests"
+    },
+    "traceability": {
+      "coverage": "95-100% requirements coverage",
+      "securityRequirements": "100% coverage for security requirements"
+    }
+  },
+  "learningPoints": [
+    "High-availability service design with V-Model",
+    "Security requirements and testing for payment systems",
+    "Performance testing (load, stress, latency)",
+    "Integration testing with external services",
+    "Fault tolerance and circuit breaker patterns",
+    "API design and contract testing",
+    "Observability and monitoring"
+  ],
+  "testingFocus": [
+    "Load testing: verify 1000 req/s throughput",
+    "Latency testing: verify P95 < 200ms",
+    "Security testing: penetration testing, OWASP Top 10",
+    "Integration testing: mock payment gateways",
+    "Chaos testing: simulate gateway failures",
+    "Idempotency testing: duplicate request handling",
+    "Webhook delivery testing: retry and failure scenarios"
+  ]
+}

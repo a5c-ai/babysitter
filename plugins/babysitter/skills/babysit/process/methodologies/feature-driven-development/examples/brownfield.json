@@ -1,0 +1,278 @@
+{
+  "projectName": "Legacy Order Management Modernization",
+  "domainDescription": "Modernize existing monolithic order management system. Current system is a Java application with Oracle database. Goal is to refactor into microservices while maintaining business continuity.",
+  "iterationWeeks": 2,
+  "teamSize": 8,
+  "chiefProgrammers": 2,
+  "existingCodebase": {
+    "structure": "Monolithic Java application",
+    "mainPackages": [
+      "com.company.orders",
+      "com.company.customers",
+      "com.company.inventory",
+      "com.company.shipping",
+      "com.company.billing"
+    ],
+    "database": "Oracle 11g",
+    "frameworks": ["Spring 4.3", "Hibernate 5.2"],
+    "linesOfCode": 250000,
+    "technicalDebt": "High - tight coupling, no tests, outdated dependencies",
+    "criticalPaths": [
+      "Order creation and fulfillment",
+      "Payment processing",
+      "Inventory management"
+    ]
+  },
+  "features": [
+    {
+      "id": "f-001",
+      "title": "Extract domain model from legacy code",
+      "action": "Extract",
+      "result": "domain model",
+      "object": "legacy code",
+      "priority": "high",
+      "estimatedDays": 5,
+      "dependencies": []
+    },
+    {
+      "id": "f-002",
+      "title": "Identify bounded contexts of system",
+      "action": "Identify",
+      "result": "bounded contexts",
+      "object": "system",
+      "priority": "high",
+      "estimatedDays": 3,
+      "dependencies": ["f-001"]
+    },
+    {
+      "id": "f-003",
+      "title": "Create abstraction layer over database",
+      "action": "Create",
+      "result": "abstraction layer",
+      "object": "database",
+      "priority": "high",
+      "estimatedDays": 5,
+      "dependencies": ["f-001"]
+    },
+    {
+      "id": "f-004",
+      "title": "Extract service interface for orders",
+      "action": "Extract",
+      "result": "service interface",
+      "object": "orders",
+      "priority": "high",
+      "estimatedDays": 4,
+      "dependencies": ["f-002"]
+    },
+    {
+      "id": "f-005",
+      "title": "Implement API for order creation",
+      "action": "Implement",
+      "result": "API",
+      "object": "order creation",
+      "priority": "high",
+      "estimatedDays": 5,
+      "dependencies": ["f-004"]
+    },
+    {
+      "id": "f-006",
+      "title": "Migrate order creation to new API",
+      "action": "Migrate",
+      "result": "order creation",
+      "object": "new API",
+      "priority": "high",
+      "estimatedDays": 6,
+      "dependencies": ["f-005"]
+    },
+    {
+      "id": "f-007",
+      "title": "Add tests for order creation",
+      "action": "Add",
+      "result": "tests",
+      "object": "order creation",
+      "priority": "high",
+      "estimatedDays": 4,
+      "dependencies": ["f-006"]
+    },
+    {
+      "id": "f-008",
+      "title": "Extract service interface for inventory",
+      "action": "Extract",
+      "result": "service interface",
+      "object": "inventory",
+      "priority": "high",
+      "estimatedDays": 4,
+      "dependencies": ["f-002"]
+    },
+    {
+      "id": "f-009",
+      "title": "Implement API for inventory check",
+      "action": "Implement",
+      "result": "API",
+      "object": "inventory check",
+      "priority": "high",
+      "estimatedDays": 4,
+      "dependencies": ["f-008"]
+    },
+    {
+      "id": "f-010",
+      "title": "Migrate inventory check to new API",
+      "action": "Migrate",
+      "result": "inventory check",
+      "object": "new API",
+      "priority": "high",
+      "estimatedDays": 5,
+      "dependencies": ["f-009"]
+    },
+    {
+      "id": "f-011",
+      "title": "Implement event bus for service communication",
+      "action": "Implement",
+      "result": "event bus",
+      "object": "service communication",
+      "priority": "high",
+      "estimatedDays": 5,
+      "dependencies": ["f-004", "f-008"]
+    },
+    {
+      "id": "f-012",
+      "title": "Publish events from order service",
+      "action": "Publish",
+      "result": "events",
+      "object": "order service",
+      "priority": "high",
+      "estimatedDays": 3,
+      "dependencies": ["f-011", "f-005"]
+    },
+    {
+      "id": "f-013",
+      "title": "Subscribe inventory service to order events",
+      "action": "Subscribe",
+      "result": "inventory service",
+      "object": "order events",
+      "priority": "high",
+      "estimatedDays": 3,
+      "dependencies": ["f-011", "f-009"]
+    },
+    {
+      "id": "f-014",
+      "title": "Extract customer data to separate schema",
+      "action": "Extract",
+      "result": "customer data",
+      "object": "separate schema",
+      "priority": "medium",
+      "estimatedDays": 6,
+      "dependencies": ["f-003"]
+    },
+    {
+      "id": "f-015",
+      "title": "Create API gateway for routing",
+      "action": "Create",
+      "result": "API gateway",
+      "object": "routing",
+      "priority": "high",
+      "estimatedDays": 4,
+      "dependencies": ["f-005", "f-009"]
+    },
+    {
+      "id": "f-016",
+      "title": "Implement circuit breaker for resilience",
+      "action": "Implement",
+      "result": "circuit breaker",
+      "object": "resilience",
+      "priority": "medium",
+      "estimatedDays": 3,
+      "dependencies": ["f-015"]
+    },
+    {
+      "id": "f-017",
+      "title": "Add monitoring for new services",
+      "action": "Add",
+      "result": "monitoring",
+      "object": "new services",
+      "priority": "high",
+      "estimatedDays": 4,
+      "dependencies": ["f-005", "f-009"]
+    },
+    {
+      "id": "f-018",
+      "title": "Implement logging aggregation",
+      "action": "Implement",
+      "result": "logging aggregation",
+      "object": "services",
+      "priority": "medium",
+      "estimatedDays": 3,
+      "dependencies": ["f-017"]
+    },
+    {
+      "id": "f-019",
+      "title": "Create deployment pipeline for services",
+      "action": "Create",
+      "result": "deployment pipeline",
+      "object": "services",
+      "priority": "high",
+      "estimatedDays": 5,
+      "dependencies": ["f-005"]
+    },
+    {
+      "id": "f-020",
+      "title": "Migrate payment processing to new service",
+      "action": "Migrate",
+      "result": "payment processing",
+      "object": "new service",
+      "priority": "high",
+      "estimatedDays": 7,
+      "dependencies": ["f-006"]
+    },
+    {
+      "id": "f-021",
+      "title": "Implement dual-write for data migration",
+      "action": "Implement",
+      "result": "dual-write",
+      "object": "data migration",
+      "priority": "high",
+      "estimatedDays": 5,
+      "dependencies": ["f-003"]
+    },
+    {
+      "id": "f-022",
+      "title": "Validate data consistency between systems",
+      "action": "Validate",
+      "result": "data consistency",
+      "object": "systems",
+      "priority": "high",
+      "estimatedDays": 4,
+      "dependencies": ["f-021"]
+    },
+    {
+      "id": "f-023",
+      "title": "Create rollback strategy for migrations",
+      "action": "Create",
+      "result": "rollback strategy",
+      "object": "migrations",
+      "priority": "high",
+      "estimatedDays": 3,
+      "dependencies": ["f-006", "f-010"]
+    },
+    {
+      "id": "f-024",
+      "title": "Document new architecture and APIs",
+      "action": "Document",
+      "result": "architecture and APIs",
+      "object": "new system",
+      "priority": "medium",
+      "estimatedDays": 4,
+      "dependencies": ["f-015"]
+    },
+    {
+      "id": "f-025",
+      "title": "Train team on microservices patterns",
+      "action": "Train",
+      "result": "team",
+      "object": "microservices patterns",
+      "priority": "medium",
+      "estimatedDays": 3,
+      "dependencies": ["f-002"]
+    }
+  ]
+}

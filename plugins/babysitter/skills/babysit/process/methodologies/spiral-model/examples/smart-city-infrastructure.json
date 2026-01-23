@@ -1,0 +1,35 @@
+{
+  "projectName": "Smart City Infrastructure Platform",
+  "projectDescription": "Large-scale IoT platform integrating traffic management, public safety, utilities, emergency response, environmental monitoring, and citizen services. Handles 10+ million IoT devices with real-time analytics, predictive maintenance, and AI-driven optimization.",
+  "maxSpirals": 6,
+  "convergenceCriteria": "all-risks-resolved",
+  "stakeholders": [
+    {
+      "name": "Mayor Elena Rodriguez",
+      "role": "City Mayor",
+      "department": "Executive",
+      "email": "erodriguez@smartcity.example.gov"
+    },
+    {
+      "name": "David Chen",
+      "role": "Chief Technology Officer",
+      "department": "Technology",
+      "email": "dchen@smartcity.example.gov"
+    },
+    {
+      "name": "Sarah Thompson",
+      "role": "Director of Public Safety",
+      "department": "Public Safety",
+      "email": "sthompson@smartcity.example.gov"
+    },
+    {
+      "name": "Dr. Marcus Johnson",
+      "role": "Smart Infrastructure Lead",
+      "department": "Infrastructure",
+      "email": "mjohnson@smartcity.example.gov"
+    }
+  ],
+  "riskTolerance": "medium",
+  "initialRisks": "Massive scale (10M+ devices), multi-vendor integration, data privacy concerns, real-time responsiveness, legacy infrastructure compatibility, cybersecurity threats, citizen adoption",
+  "generateVisualizations": true
+}

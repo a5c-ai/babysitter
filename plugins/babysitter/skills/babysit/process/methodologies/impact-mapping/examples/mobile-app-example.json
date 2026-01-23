@@ -1,0 +1,279 @@
+{
+  "description": "Impact Mapping example for mobile app user engagement improvement",
+  "inputs": {
+    "goal": "Increase daily active users (DAU) from 50,000 to 100,000 and improve 30-day retention from 20% to 40% within Q3 2026",
+    "timeframe": "Q3 2026 (3 months)",
+    "successMetrics": [
+      {
+        "metric": "Daily Active Users (DAU)",
+        "currentValue": "50,000",
+        "targetValue": "100,000",
+        "measurement": "Analytics platform (Firebase/Amplitude)",
+        "priority": "critical"
+      },
+      {
+        "metric": "30-day retention rate",
+        "currentValue": "20%",
+        "targetValue": "40%",
+        "measurement": "Cohort analysis",
+        "priority": "critical"
+      },
+      {
+        "metric": "Session frequency",
+        "currentValue": "2x per week",
+        "targetValue": "5x per week",
+        "measurement": "Session tracking",
+        "priority": "important"
+      },
+      {
+        "metric": "Session duration",
+        "currentValue": "3 minutes",
+        "targetValue": "7 minutes",
+        "measurement": "Time tracking",
+        "priority": "important"
+      },
+      {
+        "metric": "Viral coefficient (K-factor)",
+        "currentValue": "0.5",
+        "targetValue": "1.2",
+        "measurement": "Referral tracking",
+        "priority": "nice-to-have"
+      }
+    ],
+    "constraints": {
+      "budget": "$150,000",
+      "team": "3 mobile engineers (iOS/Android), 1 backend engineer, 1 designer",
+      "technical": [
+        "Must work offline",
+        "Battery efficient",
+        "App size < 50MB",
+        "Support iOS 14+ and Android 10+"
+      ],
+      "regulatory": ["App Store guidelines", "COPPA compliance (if under-13 users)"]
+    },
+    "context": {
+      "appType": "Fitness and habit tracking app",
+      "existingFeatures": [
+        "Daily habit tracking",
+        "Streak tracking",
+        "Basic statistics",
+        "Push notifications"
+      ],
+      "painPoints": [
+        "Users forget to log habits",
+        "No social motivation",
+        "Limited personalization",
+        "Boring UX after first week"
+      ],
+      "competitiveLandscape": [
+        "Habitica (gamification)",
+        "Streaks (simplicity)",
+        "Strides (goal tracking)",
+        "Way of Life (color coding)"
+      ]
+    },
+    "knownActors": [
+      "New users (first 7 days)",
+      "Active users (logging regularly)",
+      "Lapsed users (stopped using)",
+      "Power users (daily use, long streaks)",
+      "Social sharers"
+    ]
+  },
+  "expectedOutputs": {
+    "actors": {
+      "primary": [
+        "New users (first-time experience)",
+        "Casual users (2-3x per week)",
+        "Active users (daily loggers)",
+        "Power users (long streaks, multiple habits)",
+        "Lapsed users (haven't opened in 7+ days)"
+      ],
+      "secondary": [
+        "Social media followers",
+        "User's friends and family",
+        "Fitness influencers",
+        "Product team",
+        "Customer support"
+      ],
+      "negative": [
+        "Competing apps",
+        "User forgetfulness",
+        "Motivation decay",
+        "Initial complexity"
+      ]
+    },
+    "impacts": {
+      "newUsers": [
+        "Complete onboarding successfully",
+        "Log first habit within first session",
+        "Return day 2 and day 3",
+        "Establish habit tracking routine"
+      ],
+      "casualUsers": [
+        "Increase logging frequency from 2x to 5x per week",
+        "Explore additional features",
+        "Set up reminders and automation",
+        "Connect with friends"
+      ],
+      "activeUsers": [
+        "Maintain daily logging streak",
+        "Track more habits over time",
+        "Engage with community features",
+        "Share achievements"
+      ],
+      "powerUsers": [
+        "Achieve long-term goals",
+        "Become advocates and refer friends",
+        "Contribute to community content",
+        "Upgrade to premium tier"
+      ],
+      "lapsedUsers": [
+        "Re-engage with app via notifications",
+        "Resume habit tracking",
+        "Try new features that didn't exist before"
+      ],
+      "socialInfluencers": [
+        "Promote app to audiences",
+        "Create content about habit tracking"
+      ],
+      "productTeam": [
+        "Understand drop-off points",
+        "Identify high-value features",
+        "Optimize retention funnels"
+      ]
+    },
+    "deliverables": {
+      "onboarding": [
+        "Interactive habit selection wizard",
+        "Personalized habit recommendations (AI-powered)",
+        "Quick-start templates (fitness, productivity, wellness)",
+        "Progress preview (show future streak)",
+        "Social proof (user testimonials)"
+      ],
+      "engagement": [
+        "Smart reminder system (learns optimal times)",
+        "Habit streaks with visual rewards",
+        "Daily challenges and mini-goals",
+        "Progress insights and trends",
+        "Achievement badges and milestones",
+        "Widget for home screen quick logging",
+        "Siri/Google Assistant shortcuts"
+      ],
+      "social": [
+        "Friends and accountability partners",
+        "Shared challenges and competitions",
+        "Social feed of achievements",
+        "Referral program with rewards",
+        "Team/group habit tracking"
+      ],
+      "retention": [
+        "Re-engagement push notifications",
+        "Weekly progress reports (email)",
+        "Streak recovery (1 grace day)",
+        "Habit tracking tips and motivation",
+        "Personalized feature discovery"
+      ],
+      "premiumFeatures": [
+        "Unlimited habits (vs 3 free)",
+        "Custom habit icons and colors",
+        "Advanced analytics and insights",
+        "Export data",
+        "Remove ads",
+        "Premium themes"
+      ],
+      "analytics": [
+        "User journey tracking",
+        "Retention cohort analysis",
+        "Feature usage heatmaps",
+        "Drop-off point identification",
+        "A/B testing framework"
+      ]
+    },
+    "assumptions": [
+      "⚡ Users want social accountability features (Validation: User interviews + survey)",
+      "⚡ Smart reminders improve logging frequency (Validation: A/B test with 1000 users)",
+      "⚡ Gamification (badges, streaks) drives engagement (Validation: Beta test with power users)",
+      "Personalized habit recommendations are more effective than generic suggestions (Validation: ML model testing)",
+      "Home screen widget increases daily usage (Validation: iOS/Android widget beta)",
+      "Users will pay for premium tier (Validation: Pricing survey + conversion test)",
+      "Re-engagement notifications work without annoying users (Validation: Notification frequency test)",
+      "Social features don't compromise privacy concerns (Validation: Privacy-focused user research)"
+    ],
+    "roadmap": {
+      "phase1": {
+        "name": "Retention Foundation (Weeks 1-4)",
+        "goal": "Improve Day 1, Day 7, and Day 30 retention",
+        "focus": "Onboarding and core engagement loops",
+        "deliverables": [
+          "Improved onboarding wizard",
+          "Smart reminder system",
+          "Home screen widget",
+          "Streak recovery feature",
+          "Daily challenges"
+        ],
+        "kpis": [
+          "Day 1 retention: 40% → 60%",
+          "Day 7 retention: 15% → 25%",
+          "Day 30 retention: 20% → 30%"
+        ],
+        "experiments": [
+          "A/B test onboarding flows",
+          "Test reminder timing optimization",
+          "Measure widget impact on DAU"
+        ]
+      },
+      "phase2": {
+        "name": "Social Growth (Weeks 5-8)",
+        "goal": "Drive viral growth and social engagement",
+        "focus": "Social features and referrals",
+        "deliverables": [
+          "Friends and accountability partners",
+          "Shared challenges",
+          "Social feed",
+          "Referral program",
+          "Social sharing integrations"
+        ],
+        "kpis": [
+          "Viral coefficient: 0.5 → 1.0",
+          "Social feature adoption: 30% of active users",
+          "Referral-driven DAU: +10,000"
+        ],
+        "experiments": [
+          "Test referral incentives",
+          "Measure social vs. solo retention",
+          "A/B test social feed placement"
+        ]
+      },
+      "phase3": {
+        "name": "Optimization & Monetization (Weeks 9-12)",
+        "goal": "Reach 100K DAU, 40% retention, launch premium",
+        "focus": "Scale, optimize, monetize",
+        "deliverables": [
+          "Advanced analytics and insights",
+          "Premium tier launch",
+          "Personalized feature discovery",
+          "Weekly progress reports",
+          "Team/group habit tracking"
+        ],
+        "kpis": [
+          "DAU: 50K → 100K",
+          "Day 30 retention: 30% → 40%",
+          "Premium conversion: 5% of active users",
+          "Revenue: $50K MRR"
+        ],
+        "experiments": [
+          "Test premium pricing tiers",
+          "Optimize paywall placement",
+          "Measure group tracking engagement"
+        ]
+      }
+    }
+  },
+  "useCases": [
+    "Mobile app growth and retention strategy",
+    "Feature prioritization for engagement improvement",
+    "Viral growth loop design",
+    "Freemium to premium conversion optimization"
+  ]
+}

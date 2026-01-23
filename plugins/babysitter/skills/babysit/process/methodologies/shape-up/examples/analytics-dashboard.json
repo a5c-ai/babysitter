@@ -1,0 +1,125 @@
+{
+  "projectName": "TeamHub Analytics",
+  "workDescription": "Build custom analytics dashboard where users can create their own reports with drag-and-drop widgets, filters, and data visualizations.",
+  "appetite": "big-batch",
+  "cycleWeeks": 6,
+  "teamSize": "one-designer-two-programmers",
+  "phase": "shaping",
+  "context": {
+    "userProblem": "Power users want custom analytics views. Current dashboard is fixed layout. Users export to spreadsheets to create their own charts.",
+    "businessValue": "Differentiation feature for enterprise tier. Justify 2x price increase. Retain power users.",
+    "currentState": "Fixed dashboard with 6 pre-built reports. No customization.",
+    "stakeholders": [
+      "Enterprise customers",
+      "Product analytics team",
+      "Sales (competitive feature)",
+      "Engineering (complex technical work)"
+    ]
+  },
+  "scopeConsiderations": {
+    "inScope": [
+      "Drag-and-drop dashboard builder",
+      "5-6 widget types (chart, table, metric, etc.)",
+      "Basic filtering (date range, teams, projects)",
+      "Save custom dashboards",
+      "Share dashboards with team"
+    ],
+    "outOfScope": [
+      "Custom SQL queries",
+      "Advanced visualizations (heatmaps, sankey)",
+      "Real-time data updates",
+      "Dashboard templates marketplace",
+      "Scheduled report emails",
+      "Export to PowerPoint/PDF",
+      "Collaborative editing",
+      "Version history"
+    ],
+    "rabbitHoles": [
+      "Query performance with complex filters",
+      "Real-time preview while building",
+      "Responsive layout on different screen sizes",
+      "Data aggregation and caching strategy",
+      "Widget rendering performance",
+      "Permission system for shared dashboards",
+      "Undo/redo for dashboard editing"
+    ],
+    "noGos": [
+      "Don't build a full BI tool (stick to core metrics)",
+      "Don't add new data sources yet",
+      "Don't do advanced statistical analysis",
+      "Don't rebuild the entire analytics backend",
+      "Don't add AI/ML features"
+    ]
+  },
+  "shapingNotes": {
+    "whyShapingOnly": "This example focuses on the SHAPING phase. Shows how to shape complex UI work. May not get bet on first cycle - might need to simplify appetite.",
+    "keyShapingDecisions": [
+      "Which widgets to include in v1",
+      "How much customization to allow",
+      "Balance between power and simplicity",
+      "Technical approach for query performance"
+    ],
+    "breadboardElements": {
+      "places": [
+        "Dashboard list view",
+        "Dashboard builder/editor",
+        "Widget picker/library",
+        "Widget configuration panel",
+        "Preview mode",
+        "Share settings"
+      ],
+      "affordances": [
+        "Create new dashboard button",
+        "Drag widget from library to canvas",
+        "Configure widget (data, filters, styling)",
+        "Resize and position widgets",
+        "Save dashboard",
+        "Share with team members"
+      ]
+    },
+    "fatMarkerSketches": [
+      "Dashboard builder with canvas and widget library",
+      "Widget configuration modal",
+      "Share dialog with permission options"
+    ]
+  },
+  "competingPitches": [
+    {
+      "name": "Security audit compliance",
+      "priority": "high",
+      "reason": "Required for SOC 2 certification"
+    },
+    {
+      "name": "Mobile app offline mode",
+      "priority": "high",
+      "reason": "Top customer request"
+    },
+    {
+      "name": "Slack integration",
+      "priority": "medium",
+      "reason": "Competitive parity"
+    }
+  ],
+  "bettingConsiderations": {
+    "strengths": [
+      "Clear enterprise value",
+      "Competitive differentiator",
+      "Power users willing to pay more"
+    ],
+    "concerns": [
+      "Complex technical work",
+      "Many rabbit holes identified",
+      "Might need 2 cycles to do well",
+      "Competes with more urgent work"
+    ],
+    "likelyOutcome": "Needs more shaping or should be reshaped as graduated approach (basic customization first, advanced features later)"
+  },
+  "notes": [
+    "This example shows SHAPING PHASE in detail",
+    "Demonstrates complex UI feature with many rabbit holes",
+    "Good example of work that might not get bet on first try",
+    "Shows importance of calling out complexity during shaping",
+    "Illustrates competing priorities at betting table",
+    "Might be better as 2-3 smaller bets with graduated commitment"
+  ]
+}

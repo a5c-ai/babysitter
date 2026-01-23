@@ -1,0 +1,35 @@
+{
+  "projectName": "Cardiac Monitoring System Software",
+  "projectDescription": "FDA Class II medical device software for continuous cardiac monitoring with real-time ECG analysis, arrhythmia detection, and automated alert generation. Must comply with IEC 62304 and FDA 21 CFR Part 820 quality system regulations.",
+  "stakeholders": [
+    {
+      "name": "Dr. Rachel Martinez",
+      "role": "Clinical Lead",
+      "department": "Cardiology",
+      "email": "rachel.martinez@medcorp.com"
+    },
+    {
+      "name": "James Wilson",
+      "role": "Regulatory Affairs Manager",
+      "department": "Regulatory",
+      "email": "james.wilson@medcorp.com"
+    },
+    {
+      "name": "Lisa Anderson",
+      "role": "Software Architect",
+      "department": "Engineering",
+      "email": "lisa.anderson@medcorp.com"
+    },
+    {
+      "name": "Robert Kim",
+      "role": "Quality Assurance Director",
+      "department": "QA/RA",
+      "email": "robert.kim@medcorp.com"
+    }
+  ],
+  "requirementsSource": "clinical-requirements-and-risk-analysis",
+  "testingStrategy": "comprehensive",
+  "deploymentTarget": "medical-grade-hardware",
+  "includeVModel": true,
+  "regulatoryCompliance": "FDA-510k-IEC-62304"
+}

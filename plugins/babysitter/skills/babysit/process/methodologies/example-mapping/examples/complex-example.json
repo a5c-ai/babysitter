@@ -1,0 +1,25 @@
+{
+  "description": "Complex Example Mapping session that likely needs story splitting",
+  "inputs": {
+    "userStory": "As a user, I want to manage my account settings including profile, password, notifications, privacy, and billing, so that I can control my experience",
+    "timeboxMinutes": 25,
+    "sessionMode": "collaborative",
+    "existingContext": {
+      "existingFeatures": ["authentication", "user profiles", "email service"],
+      "securityPolicies": ["password complexity", "GDPR compliance"],
+      "integrations": ["payment gateway", "email service", "analytics"]
+    }
+  },
+  "expectedOutputs": {
+    "complexityScore": "9/10 - multiple distinct features",
+    "suggestSplit": true,
+    "splitStories": [
+      "As a user, I want to update my profile information",
+      "As a user, I want to change my password",
+      "As a user, I want to manage notification preferences",
+      "As a user, I want to control privacy settings",
+      "As a user, I want to update billing information"
+    ],
+    "readiness": "not ready - story too large, needs splitting"
+  }
+}

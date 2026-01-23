@@ -1,0 +1,47 @@
+{
+  "name": "CRM for Small Business - JTBD Analysis",
+  "description": "Jobs to Be Done analysis for a CRM targeting small businesses",
+  "inputs": {
+    "projectName": "SmallBiz CRM",
+    "context": "CRM designed for small businesses (5-50 employees) who find Salesforce too complex and expensive. Currently using spreadsheets or basic contact management. Primarily owner-operators who wear multiple hats.",
+    "researchData": "25 small business owner interviews. Findings: 1) Spreadsheets break down around 500 customers, 2) Losing track of follow-ups costs deals, 3) Can't remember customer history during calls, 4) Sales team not aligned on who's contacting whom, 5) Reporting for bank loans requires manual spreadsheet work, 6) Most hate 'sales-y' CRMs that feel like micromanagement.",
+    "phase": "full"
+  },
+  "expectedOutcomes": {
+    "mainJobs": [
+      "Never forget to follow up with a potential customer",
+      "Remember customer context before every interaction",
+      "Keep small sales team aligned without micromanagement"
+    ],
+    "struggles": [
+      "Spreadsheets don't remind me to follow up - I just forget",
+      "Looking up customer history mid-call makes me look unprepared",
+      "Team members contact same customer multiple times - looks unprofessional",
+      "Creating sales reports for investors takes hours of spreadsheet work"
+    ],
+    "switchingTriggers": [
+      "Lost a big deal because forgot to follow up for 2 weeks",
+      "Customer complained about being contacted by 3 different people",
+      "Bank required sales pipeline report for loan - took 8 hours to compile from spreadsheets"
+    ],
+    "keyForces": {
+      "strongestPush": "Forgetting follow-ups leads to lost revenue",
+      "strongestPull": "Automatic reminders prevent dropped balls",
+      "biggestAnxiety": "CRM will feel like micromanagement tool",
+      "strongestHabit": "Spreadsheet is simple, everyone knows how to use it"
+    },
+    "jobStories": [
+      "When a potential customer says 'call me next month', I want to be automatically reminded, so I don't lose deals due to forgetting",
+      "When a customer calls unexpectedly, I want to instantly see our last conversation, so I appear prepared and professional",
+      "When a team member is about to contact a customer, I want them to see who else has reached out recently, so we don't look disorganized",
+      "When investors ask for sales pipeline, I want to generate a report in 5 minutes, so I can focus on closing deals instead of spreadsheet work"
+    ],
+    "solutions": [
+      "Smart follow-up reminders based on customer conversation (addresses push: forgetting)",
+      "One-click customer history view (addresses push: appearing unprepared)",
+      "Shared customer contact log (addresses push: duplicate outreach)",
+      "One-click pipeline reports (addresses switching trigger: investor reporting)",
+      "Simple, non-micromanagement UI (addresses anxiety: feeling controlled)"
+    ]
+  }
+}

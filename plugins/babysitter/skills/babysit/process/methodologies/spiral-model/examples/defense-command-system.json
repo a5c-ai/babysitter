@@ -1,0 +1,35 @@
+{
+  "projectName": "Integrated Defense Command & Control System",
+  "projectDescription": "Multi-domain command and control system integrating air, sea, land, space, and cyber operations with real-time threat assessment, decision support, secure communications, and interoperability with allied systems. Must meet DoD security standards and operate in contested environments.",
+  "maxSpirals": 9,
+  "convergenceCriteria": "all-risks-resolved",
+  "stakeholders": [
+    {
+      "name": "General Robert Harrison",
+      "role": "Program Director",
+      "department": "Defense Systems",
+      "email": "rharrison@defense.example.mil"
+    },
+    {
+      "name": "Dr. Jennifer Park",
+      "role": "Chief Systems Architect",
+      "department": "Engineering",
+      "email": "jpark@defense.example.mil"
+    },
+    {
+      "name": "Colonel Michael Davis",
+      "role": "Cyber Security Lead",
+      "department": "Cybersecurity",
+      "email": "mdavis@defense.example.mil"
+    },
+    {
+      "name": "Dr. Samantha Reed",
+      "role": "AI/ML Director",
+      "department": "Research",
+      "email": "sreed@defense.example.mil"
+    }
+  ],
+  "riskTolerance": "low",
+  "initialRisks": "Multi-domain integration complexity, cybersecurity threats, real-time performance under attack, interoperability with 20+ systems, classified information handling, adversarial AI threats",
+  "generateVisualizations": true
+}

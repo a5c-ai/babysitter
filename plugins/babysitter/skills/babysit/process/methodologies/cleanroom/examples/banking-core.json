@@ -1,0 +1,27 @@
+{
+  "description": "High-reliability banking core system - Cleanroom for financial transaction processing",
+  "projectName": "Real-Time Banking Transaction Processor",
+  "systemDescription": "Core banking transaction processing system handling deposits, withdrawals, transfers, and balance inquiries. Processes transactions in real-time with ACID guarantees (Atomicity, Consistency, Isolation, Durability). Manages account balances, transaction logs, and audit trails. Implements fraud detection rules and regulatory compliance checks. Interfaces with ATM network, online banking, and inter-bank settlement systems. Must maintain data integrity under all conditions including system failures, network partitions, and concurrent access. Handles millions of transactions daily with zero data corruption tolerance.",
+  "reliabilityTarget": 25000,
+  "criticalComponents": [
+    "transaction-state-machine",
+    "balance-update-algorithm",
+    "concurrency-control",
+    "audit-logging",
+    "rollback-recovery"
+  ],
+  "usageProfile": "typical-user",
+  "incrementCount": 6,
+  "includeProofOfCorrectness": true,
+  "statisticalConfidence": 0.95,
+  "notes": [
+    "Financial regulations require audit trail and data integrity",
+    "ACID properties must be formally proven",
+    "Concurrency control algorithm requires mathematical correctness proof",
+    "Usage model based on typical banking transaction patterns",
+    "Balance updates must be proven to never violate consistency",
+    "Statistical testing includes high-volume concurrent transaction scenarios",
+    "Cleanroom provides confidence for financial liability protection",
+    "Incremental development allows proving correctness of each transaction type"
+  ]
+}

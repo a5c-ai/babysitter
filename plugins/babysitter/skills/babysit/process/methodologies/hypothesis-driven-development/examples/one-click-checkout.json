@@ -1,0 +1,49 @@
+{
+  "name": "One-Click Mobile Checkout",
+  "description": "Test hypothesis that one-click checkout increases mobile conversion",
+  "inputs": {
+    "projectName": "one-click-mobile-checkout",
+    "featureIdea": "Add one-click checkout button on mobile product pages that uses saved payment and shipping information",
+    "targetAudience": "mobile users with saved payment information browsing product pages",
+    "context": {
+      "currentMobileConversionRate": 0.025,
+      "currentDesktopConversionRate": 0.048,
+      "averageOrderValue": 75.50,
+      "monthlyMobileVisitors": 850000,
+      "percentageWithSavedPayment": 0.42
+    },
+    "experimentDuration": 14,
+    "significanceLevel": 0.05,
+    "skipImplementation": false
+  },
+  "expectedHypothesis": {
+    "statement": "We believe adding one-click checkout for mobile users with saved payment information will increase mobile conversion rate by 15%. We'll know we're right when mobile purchase completion increases from 2.5% to 2.9% (statistically significant at p<0.05).",
+    "assumptions": [
+      "Mobile users abandon checkout due to friction (form filling)",
+      "Users trust one-click purchases on mobile",
+      "Saved payment information is current and valid",
+      "Reducing steps from 5 to 1 will overcome abandonment"
+    ],
+    "risks": [
+      "Accidental purchases increase (user error)",
+      "Users don't trust one-click on mobile (security concerns)",
+      "Desktop conversion decreases (resource cannibalization)",
+      "Average order value decreases (less deliberation)"
+    ]
+  },
+  "expectedMetrics": {
+    "primary": "Mobile conversion rate (purchases / product page views)",
+    "secondary": [
+      "Average order value",
+      "Time to purchase",
+      "Cart abandonment rate",
+      "Payment method usage"
+    ],
+    "counter": [
+      "Return rate (watch for buyer's remorse)",
+      "Desktop conversion rate (watch for cannibalization)",
+      "Customer satisfaction score",
+      "Accidental purchase complaints"
+    ]
+  }
+}

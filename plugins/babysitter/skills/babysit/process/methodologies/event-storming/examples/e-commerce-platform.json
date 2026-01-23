@@ -1,0 +1,116 @@
+{
+  "name": "E-Commerce Platform Event Storm",
+  "description": "Full event storming session for an online retail platform covering orders, payments, inventory, and shipping",
+  "inputs": {
+    "projectName": "e-commerce-platform",
+    "domainDescription": "Online retail platform that allows customers to browse products, add items to cart, place orders, process payments, and track shipments. Includes inventory management, customer accounts, and order fulfillment.",
+    "sessionType": "full",
+    "skipVisualization": false
+  },
+  "expectedBigPicture": {
+    "keyEvents": [
+      "Customer Registered",
+      "Product Viewed",
+      "Product Added to Cart",
+      "Cart Updated",
+      "Checkout Initiated",
+      "Shipping Address Provided",
+      "Payment Method Selected",
+      "Order Placed",
+      "Payment Processed",
+      "Inventory Reserved",
+      "Order Confirmed",
+      "Shipment Created",
+      "Items Picked",
+      "Items Packed",
+      "Shipment Dispatched",
+      "Tracking Number Generated",
+      "Customer Notified",
+      "Delivery Attempted",
+      "Delivery Completed",
+      "Order Reviewed"
+    ],
+    "actors": [
+      "Customer",
+      "Guest User",
+      "Warehouse Staff",
+      "Customer Service Agent",
+      "System Administrator"
+    ],
+    "externalSystems": [
+      "Payment Gateway (Stripe)",
+      "Shipping Provider (FedEx/UPS)",
+      "Email Service (SendGrid)",
+      "Inventory Management System",
+      "Fraud Detection Service"
+    ],
+    "hotSpots": [
+      "Concurrent cart updates from multiple devices",
+      "Payment failure recovery",
+      "Inventory synchronization across warehouses",
+      "Partial shipment handling"
+    ]
+  },
+  "expectedAggregates": [
+    "Cart",
+    "Order",
+    "Payment",
+    "Shipment",
+    "Product",
+    "Customer",
+    "Inventory"
+  ],
+  "expectedBoundedContexts": [
+    {
+      "name": "Sales",
+      "aggregates": ["Cart", "Order"],
+      "responsibility": "Handle customer shopping and order placement"
+    },
+    {
+      "name": "Payment",
+      "aggregates": ["Payment"],
+      "responsibility": "Process and manage payment transactions"
+    },
+    {
+      "name": "Fulfillment",
+      "aggregates": ["Shipment"],
+      "responsibility": "Manage order picking, packing, and shipping"
+    },
+    {
+      "name": "Catalog",
+      "aggregates": ["Product"],
+      "responsibility": "Manage product information and availability"
+    },
+    {
+      "name": "Inventory",
+      "aggregates": ["Inventory"],
+      "responsibility": "Track and manage stock levels"
+    }
+  ],
+  "expectedContextRelationships": [
+    {
+      "upstream": "Sales",
+      "downstream": "Payment",
+      "pattern": "customer-supplier",
+      "integration": "events"
+    },
+    {
+      "upstream": "Sales",
+      "downstream": "Fulfillment",
+      "pattern": "customer-supplier",
+      "integration": "events"
+    },
+    {
+      "upstream": "Catalog",
+      "downstream": "Sales",
+      "pattern": "open-host-service",
+      "integration": "api"
+    },
+    {
+      "upstream": "Inventory",
+      "downstream": "Fulfillment",
+      "pattern": "customer-supplier",
+      "integration": "events"
+    }
+  ]
+}

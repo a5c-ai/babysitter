@@ -1,0 +1,60 @@
+{
+  "projectName": "SocialConnect Mobile",
+  "releaseGoal": "Enhanced social feed and messaging features",
+  "iterationLength": 2,
+  "teamSize": 5,
+  "velocity": null,
+  "practices": [
+    "pair-programming",
+    "planning-game",
+    "tdd",
+    "whole-team",
+    "continuous-integration",
+    "refactoring",
+    "small-releases",
+    "coding-standards",
+    "collective-ownership",
+    "simple-design",
+    "sustainable-pace"
+  ],
+  "userStories": null,
+  "enablePairProgramming": true,
+  "enableTDD": true,
+  "enableCI": true,
+  "enableRefactoring": true,
+  "context": {
+    "description": "Building enhanced social features for cross-platform mobile app (iOS and Android)",
+    "businessGoals": [
+      "Improve user engagement with enhanced feed algorithm",
+      "Add real-time messaging with read receipts",
+      "Implement stories/ephemeral content",
+      "Increase daily active users by 20%"
+    ],
+    "technicalContext": {
+      "stack": "React Native for cross-platform, Node.js backend, Firebase for real-time",
+      "existingCodebase": "Existing mobile app with moderate test coverage",
+      "teamExperience": "Team has mobile development experience, new to XP"
+    },
+    "expectedOutcomes": {
+      "iterations": 3,
+      "storiesEstimate": "12-15 stories",
+      "velocityEstimate": "12 story points per iteration",
+      "practiceAdherence": "Medium to high, adapting XP to mobile development"
+    },
+    "specialConsiderations": [
+      "Mobile CI/CD requires device testing and app store submissions",
+      "UI/UX work requires close collaboration with designers (whole team)",
+      "TDD adapted for UI components and user interactions",
+      "Small releases mean frequent TestFlight/beta releases",
+      "Pair programming especially valuable for complex UI work",
+      "Cross-platform testing requires careful CI setup"
+    ],
+    "mobileSpecificPractices": [
+      "Automated UI testing with Detox or similar",
+      "Device farm for testing across devices",
+      "Frequent beta releases to gather feedback",
+      "Feature flags for gradual rollouts",
+      "Performance testing for mobile constraints"
+    ]
+  }
+}

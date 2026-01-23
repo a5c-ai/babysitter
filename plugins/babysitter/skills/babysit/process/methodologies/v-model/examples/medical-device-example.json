@@ -1,0 +1,47 @@
+{
+  "description": "Safety-critical V-Model example for a medical device system",
+  "inputs": {
+    "projectRequirements": "Develop software for an Insulin Pump Controller with the following requirements:\n\n1. Insulin Delivery\n   - Calculate and deliver basal insulin rates based on patient profile\n   - Deliver bolus insulin on demand with dose calculation\n   - Maximum single dose safety limit: 25 units\n   - Delivery accuracy: ±5% of programmed dose\n   - Delivery rate range: 0.025 to 35 units per hour\n\n2. Glucose Monitoring Integration\n   - Receive continuous glucose readings from CGM sensor\n   - Update readings every 5 minutes\n   - Alert on sensor failure or out-of-range readings\n   - Glucose range: 40-400 mg/dL\n\n3. Safety Alarms\n   - High glucose alert (configurable threshold)\n   - Low glucose alert (configurable threshold)\n   - Occlusion detection (blocked infusion line)\n   - Low reservoir alert (<20 units remaining)\n   - Battery low alert (<20% charge)\n   - All critical alarms must have audible and visual indicators\n   - Alarm history log maintained\n\n4. User Interface\n   - Display current glucose reading\n   - Show active insulin (insulin on board)\n   - Bolus calculator with carb counting\n   - Basal rate programming\n   - Settings lockout with PIN protection\n   - Large, readable display\n\n5. Data Logging\n   - Log all insulin deliveries with timestamps\n   - Log glucose readings\n   - Log alarms and user actions\n   - Data retention: minimum 90 days\n   - Export data via USB or wireless\n\n6. Safety Requirements (IEC 62304 Class C)\n   - Fail-safe operation: stop delivery on critical errors\n   - Watchdog timer monitoring\n   - Self-test on startup\n   - Redundant safety checks for dose calculations\n   - Hardware-software interface validation\n\n7. Non-Functional Requirements\n   - Response time to critical alarms: <1 second\n   - System uptime: 99.99%\n   - Battery life: minimum 7 days\n   - Mean Time Between Failures (MTBF): >10,000 hours\n   - Compliance: IEC 62304, ISO 14971 (risk management), FDA 21 CFR Part 820",
+    "safetyLevel": "critical",
+    "traceabilityRequired": true,
+    "testingRigor": "exhaustive",
+    "complianceStandards": ["IEC 62304", "ISO 14971", "FDA 21 CFR Part 820"]
+  },
+  "expectedOutputs": {
+    "requirements": {
+      "functional": "30-40 functional requirements",
+      "nonFunctional": "15-20 non-functional requirements including safety"
+    },
+    "design": {
+      "components": "8-12 major components with safety partitioning",
+      "modules": "25-35 modules with clear safety criticality levels"
+    },
+    "testing": {
+      "unitTests": "200-300 test cases with >95% coverage",
+      "integrationTests": "80-100 test cases",
+      "systemTests": "60-80 test cases including safety scenarios",
+      "acceptanceTests": "40-50 test cases"
+    },
+    "traceability": {
+      "coverage": "100% requirements coverage required for compliance",
+      "gaps": "Must be zero for safety-critical requirements",
+      "compliance": "Complete mapping to IEC 62304 and ISO 14971"
+    }
+  },
+  "learningPoints": [
+    "Safety-critical V-Model with exhaustive testing",
+    "Compliance documentation and traceability",
+    "Risk management integration (ISO 14971)",
+    "Software safety classification (IEC 62304 Class C)",
+    "Fail-safe design and redundant safety checks",
+    "Formal verification and validation",
+    "Hardware-software interface testing"
+  ],
+  "notes": [
+    "This example demonstrates V-Model for highest safety level",
+    "Requires complete traceability for regulatory approval",
+    "All safety requirements must have multiple test cases",
+    "Independent verification and validation recommended",
+    "Design review and code inspection required at all phases"
+  ]
+}

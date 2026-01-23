@@ -1,0 +1,109 @@
+{
+  "description": "Impact Mapping example for reducing customer support costs",
+  "inputs": {
+    "goal": "Reduce customer support ticket volume by 40% within 6 months while maintaining 85%+ customer satisfaction",
+    "timeframe": "6 months",
+    "successMetrics": [
+      {
+        "metric": "Support tickets per month",
+        "currentValue": "5000",
+        "targetValue": "3000",
+        "measurement": "Zendesk analytics",
+        "priority": "critical"
+      },
+      {
+        "metric": "Customer satisfaction (CSAT)",
+        "currentValue": "75%",
+        "targetValue": "85%",
+        "measurement": "Post-interaction surveys",
+        "priority": "critical"
+      },
+      {
+        "metric": "Average resolution time",
+        "currentValue": "48 hours",
+        "targetValue": "24 hours",
+        "measurement": "Ticket system metrics",
+        "priority": "important"
+      },
+      {
+        "metric": "Self-service resolution rate",
+        "currentValue": "30%",
+        "targetValue": "60%",
+        "measurement": "Knowledge base analytics",
+        "priority": "important"
+      }
+    ],
+    "constraints": {
+      "budget": "$200,000",
+      "team": "2 engineers, 1 designer, 1 content writer",
+      "technical": ["Must integrate with existing Zendesk", "Must support mobile devices"],
+      "regulatory": ["Must maintain GDPR compliance"]
+    },
+    "context": {
+      "existingFeatures": ["Basic knowledge base", "Email support", "Live chat"],
+      "painPoints": [
+        "70% of tickets are repetitive questions",
+        "Knowledge base is hard to search",
+        "No way to track issue resolution",
+        "Support team overwhelmed"
+      ],
+      "teamCapabilities": ["React", "Node.js", "PostgreSQL", "Elasticsearch"]
+    },
+    "knownActors": [
+      "Customers with questions",
+      "Support agents",
+      "Product managers",
+      "Content team"
+    ]
+  },
+  "expectedOutputs": {
+    "actors": {
+      "primary": ["Customers needing help", "Support agents"],
+      "secondary": ["Product managers", "Content team", "Sales team"],
+      "negative": ["Complex product issues", "User confusion"]
+    },
+    "impacts": {
+      "customers": [
+        "Find answers without contacting support",
+        "Resolve issues faster with self-service",
+        "Feel more confident using product"
+      ],
+      "supportAgents": [
+        "Handle fewer repetitive questions",
+        "Focus on complex issues",
+        "Respond faster to urgent tickets"
+      ],
+      "productManagers": [
+        "Identify common pain points from ticket data",
+        "Prioritize product improvements"
+      ]
+    },
+    "deliverables": [
+      "AI-powered knowledge base search",
+      "Interactive troubleshooting guides",
+      "Contextual in-app help widgets",
+      "Automated ticket categorization",
+      "Self-service password reset",
+      "Video tutorial library",
+      "Community forum platform",
+      "Predictive support suggestions"
+    ],
+    "assumptions": [
+      "Customers prefer self-service over contacting support",
+      "AI search will be more effective than keyword search",
+      "Video tutorials will reduce ticket volume",
+      "Automated responses maintain customer satisfaction"
+    ],
+    "prioritization": {
+      "mustHave": ["AI search", "Interactive guides", "In-app help"],
+      "shouldHave": ["Automated categorization", "Video library"],
+      "couldHave": ["Community forum", "Predictive suggestions"]
+    }
+  },
+  "useCases": [
+    "Cost reduction initiatives",
+    "Customer experience improvement",
+    "Support team efficiency optimization",
+    "Scaling support without proportional headcount increase"
+  ]
+}

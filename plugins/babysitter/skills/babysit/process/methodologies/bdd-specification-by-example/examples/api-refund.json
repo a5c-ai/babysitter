@@ -1,0 +1,29 @@
+{
+  "projectName": "Payment API",
+  "feature": "Process refund with validation and idempotency",
+  "stakeholders": [
+    "API Developer",
+    "QA Engineer",
+    "Business Analyst",
+    "Finance Team"
+  ],
+  "testFramework": "cucumber",
+  "developmentPhase": "brownfield",
+  "generateTests": true,
+  "createDocumentation": true,
+  "existingFeatures": [
+    "payment-processing",
+    "transaction-management"
+  ],
+  "existingScenarios": [
+    {
+      "id": "payment-001",
+      "title": "Process successful payment"
+    }
+  ],
+  "existingSteps": [
+    "I send a POST request to {string}",
+    "the response status should be {int}",
+    "the response should contain {string}"
+  ]
+}

@@ -1,0 +1,89 @@
+{
+  "examples": [
+    {
+      "name": "E-commerce Checkout",
+      "file": "ecommerce-checkout.json",
+      "description": "Shopping cart checkout with multiple payment methods in a brownfield e-commerce platform",
+      "framework": "cucumber",
+      "complexity": "medium",
+      "highlights": [
+        "Multiple payment methods",
+        "Guest and registered user flows",
+        "Error handling scenarios",
+        "Integration with existing features"
+      ]
+    },
+    {
+      "name": "User Registration",
+      "file": "user-registration.json",
+      "description": "User registration with email verification and password validation for a greenfield social app",
+      "framework": "cypress",
+      "complexity": "simple",
+      "highlights": [
+        "Email verification flow",
+        "Password strength validation",
+        "Form validation examples",
+        "Greenfield project setup"
+      ]
+    },
+    {
+      "name": "API Refund Processing",
+      "file": "api-refund.json",
+      "description": "API endpoint for processing refunds with validation and idempotency",
+      "framework": "cucumber",
+      "complexity": "medium",
+      "highlights": [
+        "API testing scenarios",
+        "Idempotency requirements",
+        "Validation rules",
+        "Error response handling"
+      ]
+    },
+    {
+      "name": "Product Search and Filtering",
+      "file": "search-filtering.json",
+      "description": "Advanced product search with multiple filters and sorting options",
+      "framework": "cypress",
+      "complexity": "medium",
+      "highlights": [
+        "Multiple filter combinations",
+        "Sorting scenarios",
+        "Empty results handling",
+        "Performance considerations"
+      ]
+    },
+    {
+      "name": "Multi-channel Notifications",
+      "file": "notification-system.json",
+      "description": "Notification delivery across email, SMS, and push with user preferences and retry logic",
+      "framework": "behave",
+      "complexity": "complex",
+      "highlights": [
+        "Multi-channel delivery",
+        "User preference handling",
+        "Retry logic scenarios",
+        "Failure scenarios"
+      ]
+    }
+  ],
+  "usage": {
+    "basic": "Use these examples as templates for your own BDD projects",
+    "modify": "Copy and modify the JSON files to match your requirements",
+    "run": "Pass the JSON file contents as inputs to the BDD process"
+  },
+  "testFrameworks": {
+    "cucumber": "JavaScript/TypeScript - Node.js projects",
+    "specflow": ".NET/C# - .NET projects",
+    "behave": "Python - Python projects",
+    "cypress": "JavaScript - Frontend E2E testing"
+  },
+  "tips": [
+    "Start with simpler features for your first BDD implementation",
+    "Include diverse stakeholders in discovery workshops",
+    "Focus on concrete examples rather than abstract requirements",
+    "Keep scenarios independent and focused on one behavior",
+    "Reuse existing step definitions when possible",
+    "Tag scenarios appropriately for organization and selective execution",
+    "Generate living documentation to keep stakeholders aligned"
+  ]
+}

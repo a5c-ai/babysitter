@@ -1,0 +1,56 @@
+{
+  "projectName": "Inventory Management System",
+  "releaseGoal": "Modernize inventory tracking module",
+  "iterationLength": 2,
+  "teamSize": 4,
+  "velocity": null,
+  "practices": [
+    "pair-programming",
+    "tdd",
+    "continuous-integration",
+    "refactoring",
+    "collective-ownership",
+    "simple-design",
+    "sustainable-pace",
+    "coding-standards"
+  ],
+  "userStories": null,
+  "enablePairProgramming": true,
+  "enableTDD": true,
+  "enableCI": true,
+  "enableRefactoring": true,
+  "context": {
+    "description": "Refactoring and modernizing legacy inventory tracking module with XP practices",
+    "businessGoals": [
+      "Improve system performance and reliability",
+      "Add real-time inventory updates",
+      "Enable better reporting and analytics",
+      "Reduce maintenance costs"
+    ],
+    "technicalContext": {
+      "stack": "Legacy Java codebase, migrating to modern Spring Boot",
+      "existingCodebase": "Brownfield with significant technical debt and low test coverage",
+      "teamExperience": "Mixed - some experienced with XP, others new to practices"
+    },
+    "expectedOutcomes": {
+      "iterations": 4,
+      "storiesEstimate": "10-15 stories mixing new features and refactoring",
+      "velocityEstimate": "Start low (8-10), improve as tests added (12-15)",
+      "practiceAdherence": "Medium to high, focus on building practices gradually"
+    },
+    "specialConsiderations": [
+      "Adding test coverage to legacy code is primary focus",
+      "Refactoring must be continuous to reduce technical debt",
+      "Collective ownership critical - no one person knows all the code",
+      "Sustainable pace essential - legacy work can be draining",
+      "May need extra spike stories for understanding legacy code",
+      "Strangler fig pattern for gradual modernization"
+    ],
+    "challenges": [
+      "Low test coverage makes refactoring risky",
+      "Complex legacy code requires pair programming for knowledge transfer",
+      "Technical debt may slow initial velocity",
+      "Team needs to balance new features with refactoring"
+    ]
+  }
+}

@@ -1,0 +1,62 @@
+{
+  "name": "Healthcare System - Tactical Design",
+  "description": "Tactical design for a healthcare scheduling bounded context (entities, aggregates, events)",
+  "inputs": {
+    "projectName": "Healthcare Appointment System",
+    "domainDescription": "Healthcare appointment scheduling system for a hospital network. Patients can book appointments with doctors across multiple specialties and locations. The system manages doctor availability, appointment slots, patient medical records, prescription management, and billing. It coordinates with insurance verification, lab results integration, and follow-up scheduling.",
+    "complexity": "moderate",
+    "phase": "tactical",
+    "existingDomainModel": "./examples/healthcare-strategic-design.json"
+  },
+  "note": "This example assumes strategic design was completed in a previous run",
+  "expectedOutcomes": {
+    "entities": [
+      "Patient (identity: PatientId)",
+      "Doctor (identity: DoctorId)",
+      "Appointment (identity: AppointmentId)"
+    ],
+    "valueObjects": [
+      "TimeSlot (start, end, duration)",
+      "Address (street, city, state, zip)",
+      "MedicalRecordNumber (number, issuer)",
+      "AppointmentStatus (scheduled, confirmed, cancelled, completed)"
+    ],
+    "aggregates": [
+      {
+        "name": "Appointment",
+        "root": "Appointment",
+        "members": ["TimeSlot", "AppointmentStatus"],
+        "invariants": [
+          "Appointment must have valid time slot",
+          "Cannot double-book doctor",
+          "Patient can have max 3 pending appointments"
+        ]
+      },
+      {
+        "name": "Schedule",
+        "root": "Doctor",
+        "members": ["TimeSlot", "Availability"],
+        "invariants": [
+          "Time slots cannot overlap",
+          "Schedule must respect doctor working hours"
+        ]
+      }
+    ],
+    "repositories": [
+      "AppointmentRepository",
+      "DoctorRepository",
+      "PatientRepository"
+    ],
+    "domainServices": [
+      "AppointmentSchedulingService (checks availability, prevents double-booking)",
+      "InsuranceVerificationService (validates coverage)"
+    ],
+    "domainEvents": [
+      "AppointmentScheduled",
+      "AppointmentConfirmed",
+      "AppointmentCancelled",
+      "AppointmentCompleted",
+      "DoctorAvailabilityChanged"
+    ]
+  }
+}

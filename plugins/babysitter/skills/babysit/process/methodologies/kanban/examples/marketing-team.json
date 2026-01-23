@@ -1,0 +1,103 @@
+{
+  "projectName": "Marketing Content Production",
+  "workflowStages": [
+    { "name": "Ideas", "type": "queue" },
+    { "name": "Approved", "type": "queue" },
+    { "name": "Research", "type": "active" },
+    { "name": "Writing", "type": "active" },
+    { "name": "Design", "type": "active" },
+    { "name": "Review", "type": "active" },
+    { "name": "Publishing", "type": "active" },
+    { "name": "Published", "type": "complete" }
+  ],
+  "defaultWipLimits": {
+    "Research": 3,
+    "Writing": 4,
+    "Design": 3,
+    "Review": 2,
+    "Publishing": 2
+  },
+  "initialBacklog": [
+    {
+      "id": "content-401",
+      "title": "Blog post: 10 Tips for Product Marketing",
+      "priority": "high",
+      "serviceClass": "Fixed Date",
+      "estimatedSize": "M"
+    },
+    {
+      "id": "content-402",
+      "title": "Case study: Enterprise client success story",
+      "priority": "high",
+      "serviceClass": "Standard",
+      "estimatedSize": "L"
+    },
+    {
+      "id": "content-403",
+      "title": "Social media campaign for product launch",
+      "priority": "high",
+      "serviceClass": "Fixed Date",
+      "estimatedSize": "XL"
+    },
+    {
+      "id": "content-404",
+      "title": "Email newsletter: Monthly roundup",
+      "priority": "high",
+      "serviceClass": "Fixed Date",
+      "estimatedSize": "M"
+    },
+    {
+      "id": "content-405",
+      "title": "White paper: Industry trends 2026",
+      "priority": "medium",
+      "serviceClass": "Standard",
+      "estimatedSize": "XL"
+    },
+    {
+      "id": "content-406",
+      "title": "Product demo video script",
+      "priority": "medium",
+      "serviceClass": "Standard",
+      "estimatedSize": "L"
+    },
+    {
+      "id": "content-407",
+      "title": "Update website copy for new features",
+      "priority": "high",
+      "serviceClass": "Fixed Date",
+      "estimatedSize": "M"
+    },
+    {
+      "id": "content-408",
+      "title": "Infographic: Product comparison",
+      "priority": "medium",
+      "serviceClass": "Standard",
+      "estimatedSize": "M"
+    },
+    {
+      "id": "content-409",
+      "title": "Podcast episode outline",
+      "priority": "low",
+      "serviceClass": "Standard",
+      "estimatedSize": "S"
+    },
+    {
+      "id": "content-410",
+      "title": "LinkedIn articles series",
+      "priority": "medium",
+      "serviceClass": "Standard",
+      "estimatedSize": "L"
+    }
+  ],
+  "cycles": 6,
+  "teamCapacity": {
+    "contentWriters": 3,
+    "designers": 2,
+    "editors": 2,
+    "socialMedia": 1
+  },
+  "serviceClasses": [
+    "Fixed Date",
+    "Standard"
+  ]
+}

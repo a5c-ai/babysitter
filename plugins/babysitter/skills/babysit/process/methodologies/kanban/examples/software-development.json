@@ -1,0 +1,92 @@
+{
+  "projectName": "SaaS Product Development",
+  "workflowStages": [
+    { "name": "Backlog", "type": "queue" },
+    { "name": "Ready", "type": "queue" },
+    { "name": "Analysis", "type": "active" },
+    { "name": "Development", "type": "active" },
+    { "name": "Code Review", "type": "active" },
+    { "name": "Testing", "type": "active" },
+    { "name": "Deployment", "type": "active" },
+    { "name": "Done", "type": "complete" }
+  ],
+  "defaultWipLimits": {
+    "Analysis": 3,
+    "Development": 5,
+    "Code Review": 2,
+    "Testing": 3,
+    "Deployment": 2
+  },
+  "initialBacklog": [
+    {
+      "id": "feat-101",
+      "title": "User dashboard with analytics charts",
+      "priority": "high",
+      "serviceClass": "Standard",
+      "estimatedSize": "L"
+    },
+    {
+      "id": "bug-045",
+      "title": "Payment gateway timeout issue",
+      "priority": "high",
+      "serviceClass": "Expedite",
+      "estimatedSize": "M"
+    },
+    {
+      "id": "feat-102",
+      "title": "Export data to CSV feature",
+      "priority": "medium",
+      "serviceClass": "Standard",
+      "estimatedSize": "M"
+    },
+    {
+      "id": "tech-020",
+      "title": "Refactor authentication module",
+      "priority": "low",
+      "serviceClass": "Intangible",
+      "estimatedSize": "L"
+    },
+    {
+      "id": "feat-103",
+      "title": "Multi-factor authentication",
+      "priority": "high",
+      "serviceClass": "Fixed Date",
+      "estimatedSize": "L"
+    },
+    {
+      "id": "feat-104",
+      "title": "Dark mode theme support",
+      "priority": "medium",
+      "serviceClass": "Standard",
+      "estimatedSize": "M"
+    },
+    {
+      "id": "bug-046",
+      "title": "Email notifications not sending",
+      "priority": "medium",
+      "serviceClass": "Standard",
+      "estimatedSize": "S"
+    },
+    {
+      "id": "tech-021",
+      "title": "Upgrade to latest framework version",
+      "priority": "low",
+      "serviceClass": "Intangible",
+      "estimatedSize": "XL"
+    }
+  ],
+  "cycles": 8,
+  "teamCapacity": {
+    "developers": 5,
+    "reviewers": 2,
+    "analysts": 2,
+    "testers": 2,
+    "devops": 1
+  },
+  "serviceClasses": [
+    "Expedite",
+    "Fixed Date",
+    "Standard",
+    "Intangible"
+  ]
+}

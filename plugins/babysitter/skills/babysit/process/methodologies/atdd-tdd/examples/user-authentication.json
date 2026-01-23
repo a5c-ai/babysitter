@@ -1,0 +1,25 @@
+{
+  "description": "User authentication with JWT tokens - ATDD/TDD example",
+  "feature": "User authentication with JWT tokens",
+  "acceptanceCriteria": [
+    "Given a new user with valid email and password, when they register, then an account is created and they receive a confirmation",
+    "Given a registered user with correct credentials, when they login, then they receive a valid JWT token",
+    "Given a registered user with incorrect password, when they login, then authentication fails with appropriate error",
+    "Given a user with a valid JWT token, when they access protected resources, then access is granted",
+    "Given a user with an expired JWT token, when they access protected resources, then access is denied and token refresh is required",
+    "Given a JWT token, when validated, then user identity and permissions are correctly extracted"
+  ],
+  "testFramework": "jest",
+  "iterationCount": 15,
+  "includeIntegrationTests": true,
+  "existingCode": {
+    "database": "./src/database/users.js",
+    "config": "./src/config/auth.js"
+  },
+  "notes": [
+    "This example demonstrates ATDD/TDD for a common authentication feature",
+    "Acceptance criteria defined in Given-When-Then format",
+    "TDD will build up the implementation iteratively",
+    "Integration tests will verify database and token operations"
+  ]
+}

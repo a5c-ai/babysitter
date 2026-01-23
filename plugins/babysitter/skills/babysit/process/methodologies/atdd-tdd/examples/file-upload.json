@@ -1,0 +1,27 @@
+{
+  "description": "File upload with validation - ATDD/TDD example",
+  "feature": "Secure file upload with validation and virus scanning",
+  "acceptanceCriteria": [
+    "Given a valid file (PDF, JPEG, PNG) under 10MB, when user uploads, then file is accepted and stored",
+    "Given a file over 10MB, when user uploads, then upload is rejected with size limit error",
+    "Given an invalid file type (EXE, BAT, SH), when user uploads, then upload is rejected with file type error",
+    "Given a valid file, when uploaded, then file is scanned for viruses before storage",
+    "Given a file containing malware, when uploaded and scanned, then file is rejected and user is notified",
+    "Given a clean file after scanning, when stored, then unique filename is generated and original name preserved in metadata",
+    "Given an uploaded file, when user retrieves it, then correct content-type headers are set for download"
+  ],
+  "testFramework": "jest",
+  "iterationCount": 12,
+  "includeIntegrationTests": true,
+  "existingCode": {
+    "storageService": "./src/services/storage.js",
+    "virusScanner": "./src/services/virus-scanner.js",
+    "fileValidator": "./src/validators/file.js"
+  },
+  "notes": [
+    "Security-critical feature requiring thorough testing",
+    "Demonstrates validation logic and external service integration",
+    "TDD ensures all validation rules are implemented correctly",
+    "Integration tests verify virus scanning and storage operations"
+  ]
+}

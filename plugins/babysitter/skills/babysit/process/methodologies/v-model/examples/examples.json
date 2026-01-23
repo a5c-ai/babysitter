@@ -1,0 +1,55 @@
+{
+  "description": "Collection of V-Model inputs for various project types and safety levels",
+  "examples": [
+    {
+      "name": "basic-web-app",
+      "file": "./basic-web-app-example.json",
+      "difficulty": "simple",
+      "safetyLevel": "standard",
+      "expectedDuration": "60-90 minutes",
+      "learningFocus": "Basic V-Model flow for standard software"
+    },
+    {
+      "name": "medical-device",
+      "file": "./medical-device-example.json",
+      "difficulty": "complex",
+      "safetyLevel": "critical",
+      "expectedDuration": "180-240 minutes",
+      "learningFocus": "Safety-critical system with compliance requirements"
+    },
+    {
+      "name": "automotive-system",
+      "file": "./automotive-system-example.json",
+      "difficulty": "complex",
+      "safetyLevel": "critical",
+      "expectedDuration": "180-240 minutes",
+      "learningFocus": "ISO 26262 compliance and traceability"
+    },
+    {
+      "name": "api-service",
+      "file": "./api-service-example.json",
+      "difficulty": "medium",
+      "safetyLevel": "high",
+      "expectedDuration": "90-120 minutes",
+      "learningFocus": "High-availability service with thorough testing"
+    },
+    {
+      "name": "embedded-controller",
+      "file": "./embedded-controller-example.json",
+      "difficulty": "medium-complex",
+      "safetyLevel": "high",
+      "expectedDuration": "120-150 minutes",
+      "learningFocus": "Embedded system with hardware interfaces"
+    }
+  ],
+  "usage": {
+    "description": "Run these examples to learn V-Model methodology for different safety levels and project types",
+    "command": "await process(require('./examples/basic-web-app-example.json').inputs, ctx)",
+    "recommendation": "Start with basic-web-app for standard projects, then progress to safety-critical examples"
+  },
+  "safetyLevelGuide": {
+    "standard": "Regular software projects with standard testing practices",
+    "high": "Business-critical applications requiring enhanced testing and traceability",
+    "critical": "Safety-critical systems (medical, automotive, aerospace) requiring exhaustive testing and compliance"
+  }
+}

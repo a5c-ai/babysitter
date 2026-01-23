@@ -1,0 +1,7 @@
+{
+  "projectName": "Task Management App",
+  "domainDescription": "Simple task management application for personal productivity. Users can create tasks, organize them into projects, set deadlines, and track completion.",
+  "iterationWeeks": 1,
+  "teamSize": 4,
+  "chiefProgrammers": 1
+}

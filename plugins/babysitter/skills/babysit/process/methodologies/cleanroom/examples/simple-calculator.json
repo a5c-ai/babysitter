@@ -1,0 +1,25 @@
+{
+  "description": "Simple calculator - Cleanroom learning example with basic operations",
+  "projectName": "Scientific Calculator Library",
+  "systemDescription": "Scientific calculator library providing basic arithmetic operations (addition, subtraction, multiplication, division) and advanced functions (trigonometric, logarithmic, exponential, power). Handles floating-point arithmetic with proper rounding. Includes error handling for division by zero, domain errors (sqrt of negative), and overflow/underflow. Maintains calculation history. Designed as a reusable library component for multiple applications.",
+  "reliabilityTarget": 5000,
+  "criticalComponents": [
+    "floating-point-arithmetic",
+    "error-handling"
+  ],
+  "usageProfile": "typical-user",
+  "incrementCount": 4,
+  "includeProofOfCorrectness": false,
+  "statisticalConfidence": 0.90,
+  "notes": [
+    "Good introductory example for learning Cleanroom methodology",
+    "Small scope makes formal specifications manageable",
+    "Clear mathematical basis for correctness verification",
+    "Usage model straightforward - operation frequency distribution",
+    "Floating-point arithmetic provides interesting verification challenge",
+    "Can demonstrate Cleanroom benefits even on small systems",
+    "Moderate reliability target appropriate for library component",
+    "Proof of correctness optional for learning example",
+    "Increments: (1) basic ops, (2) advanced math, (3) error handling, (4) history"
+  ]
+}

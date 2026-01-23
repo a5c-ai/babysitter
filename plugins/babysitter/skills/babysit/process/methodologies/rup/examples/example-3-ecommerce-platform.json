@@ -1,0 +1,120 @@
+{
+  "name": "E-Commerce Platform",
+  "description": "Multi-tenant e-commerce platform for B2B and B2C sales with complex business rules",
+  "inputs": {
+    "projectName": "ShopFlow E-Commerce Platform",
+    "projectVision": "Comprehensive e-commerce platform supporting both B2B and B2C sales models. Multi-tenant architecture serving 1000+ merchant storefronts. Features include product catalog, shopping cart, payment processing, order fulfillment, inventory management, and analytics dashboard.",
+    "iterationsPerPhase": {
+      "inception": 1,
+      "elaboration": 2,
+      "construction": 6,
+      "transition": 1
+    },
+    "teamSize": 12,
+    "useCaseSource": "stakeholder-interviews",
+    "architectureStyle": "event-driven",
+    "predefinedUseCases": [
+      {
+        "id": "UC-001",
+        "name": "Browse Product Catalog",
+        "actors": ["Customer", "Search Engine"],
+        "priority": "critical"
+      },
+      {
+        "id": "UC-002",
+        "name": "Process Order Checkout",
+        "actors": ["Customer", "Payment Gateway"],
+        "priority": "critical"
+      },
+      {
+        "id": "UC-003",
+        "name": "Manage Inventory",
+        "actors": ["Merchant", "Warehouse System"],
+        "priority": "critical"
+      },
+      {
+        "id": "UC-004",
+        "name": "Configure Storefront",
+        "actors": ["Merchant"],
+        "priority": "high"
+      },
+      {
+        "id": "UC-005",
+        "name": "View Sales Analytics",
+        "actors": ["Merchant", "Platform Admin"],
+        "priority": "medium"
+      }
+    ],
+    "predefinedRisks": [
+      {
+        "id": "RISK-001",
+        "category": "technical",
+        "description": "Payment gateway integration complexity",
+        "probability": "high",
+        "impact": "high"
+      },
+      {
+        "id": "RISK-002",
+        "category": "technical",
+        "description": "Multi-tenancy isolation and performance",
+        "probability": "medium",
+        "impact": "high"
+      },
+      {
+        "id": "RISK-003",
+        "category": "business",
+        "description": "PCI DSS compliance for payment data",
+        "probability": "medium",
+        "impact": "high"
+      }
+    ]
+  },
+  "expectedPhases": [
+    {
+      "phase": "Inception",
+      "iterations": 1,
+      "keyDeliverables": [
+        "Vision supporting B2B and B2C business models",
+        "Business case with competitive analysis",
+        "Use case model covering all commerce workflows",
+        "Risk assessment including security and compliance",
+        "Project roadmap for 10 total iterations"
+      ]
+    },
+    {
+      "phase": "Elaboration",
+      "iterations": 2,
+      "keyDeliverables": [
+        "Event-driven architecture with message queuing",
+        "Multi-tenant database and application design",
+        "Payment processing architecture with PCI DSS considerations",
+        "Architecture prototype validating storefront isolation",
+        "Detailed use cases for checkout and payment flows"
+      ]
+    },
+    {
+      "phase": "Construction",
+      "iterations": 6,
+      "keyDeliverables": [
+        "Iteration 1-2: Core catalog and cart functionality",
+        "Iteration 3-4: Payment and order processing",
+        "Iteration 5: Merchant management and storefront configuration",
+        "Iteration 6: Analytics and reporting",
+        "800+ automated tests covering business logic",
+        "Merchant and customer documentation"
+      ]
+    },
+    {
+      "phase": "Transition",
+      "iterations": 1,
+      "keyDeliverables": [
+        "Beta testing with 50 pilot merchants",
+        "Production deployment on cloud infrastructure",
+        "Merchant onboarding program",
+        "24/7 operations monitoring",
+        "Go-to-market launch plan"
+      ]
+    }
+  ],
+  "rationale": "E-commerce platforms benefit from RUP's architecture-centric approach. Event-driven architecture requires validation in Elaboration. Six Construction iterations allow incremental feature delivery (catalog, payments, fulfillment, analytics). Complex business rules and multi-tenancy benefit from use-case driven development."
+}

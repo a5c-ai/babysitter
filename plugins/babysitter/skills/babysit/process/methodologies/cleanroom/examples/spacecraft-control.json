@@ -1,0 +1,28 @@
+{
+  "description": "Space mission-critical control software - Cleanroom for deep space probe",
+  "projectName": "Deep Space Probe Attitude Control System",
+  "systemDescription": "Attitude determination and control system (ADCS) for deep space probe mission. Controls spacecraft orientation using reaction wheels and thrusters based on star tracker and gyroscope inputs. Implements pointing algorithms for antenna communication with Earth, solar panel sun-pointing, and scientific instrument targeting. Operates autonomously for extended periods due to communication delays (up to 20 minutes). Includes fault detection, isolation, and recovery (FDIR) for sensor and actuator failures. Must maintain precise pointing (< 0.01 degrees) for antenna communication and science operations. Designed for 10+ year mission life with no maintenance possible.",
+  "reliabilityTarget": 200000,
+  "criticalComponents": [
+    "attitude-determination",
+    "pointing-control-algorithm",
+    "reaction-wheel-control",
+    "fault-detection-recovery",
+    "autonomous-mode-management"
+  ],
+  "usageProfile": "mixed",
+  "incrementCount": 7,
+  "includeProofOfCorrectness": true,
+  "statisticalConfidence": 0.98,
+  "notes": [
+    "NASA requires formal methods for mission-critical spacecraft software",
+    "No possibility of patching or repair once launched",
+    "Pointing algorithms must be mathematically proven for stability",
+    "FDIR must be proven to handle all credible failure scenarios",
+    "Mixed usage profile: typical operations + worst-case failures",
+    "Long mission life demands extremely high reliability",
+    "Autonomous operation requires verification of all decision logic",
+    "Statistical testing includes long-duration mission simulations",
+    "Cleanroom methodology proven in previous NASA missions"
+  ]
+}

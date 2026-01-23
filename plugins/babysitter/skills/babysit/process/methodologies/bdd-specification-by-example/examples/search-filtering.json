@@ -1,0 +1,19 @@
+{
+  "projectName": "Product Search",
+  "feature": "Advanced product search with multiple filters and sorting",
+  "stakeholders": [
+    "Product Owner",
+    "Search Engineer",
+    "Frontend Developer",
+    "QA Engineer"
+  ],
+  "testFramework": "cypress",
+  "developmentPhase": "greenfield",
+  "generateTests": true,
+  "createDocumentation": true,
+  "existingFeatures": [
+    "product-catalog"
+  ],
+  "existingScenarios": [],
+  "existingSteps": []
+}

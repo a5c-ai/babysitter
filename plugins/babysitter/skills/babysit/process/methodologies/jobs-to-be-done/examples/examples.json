@@ -1,0 +1,137 @@
+{
+  "examples": [
+    {
+      "name": "Project Management Tool",
+      "file": "project-management-example.json",
+      "description": "Full JTBD analysis for distributed team project management",
+      "useCase": "B2B SaaS targeting remote teams",
+      "phase": "full",
+      "highlights": [
+        "Forces analysis showing meeting fatigue as key push force",
+        "Job stories focused on async coordination",
+        "Solution mapping prioritizing features by job importance"
+      ]
+    },
+    {
+      "name": "Meal Kit Service",
+      "file": "meal-kit-example.json",
+      "description": "JTBD analysis for meal kit delivery service",
+      "useCase": "Consumer product in competitive market",
+      "phase": "full",
+      "highlights": [
+        "Three dimensions: functional, emotional, and social jobs",
+        "Decision fatigue as major push force",
+        "Anxiety about cooking skills as barrier to switching"
+      ]
+    },
+    {
+      "name": "CRM for Small Business",
+      "file": "crm-example.json",
+      "description": "JTBD for small business CRM",
+      "useCase": "B2B tool competing against spreadsheets",
+      "phase": "full",
+      "highlights": [
+        "Switching triggers: specific moments that force change",
+        "Anxiety about micromanagement as adoption barrier",
+        "Habit force: spreadsheet familiarity is powerful"
+      ]
+    },
+    {
+      "name": "Fitness App",
+      "file": "fitness-app-example.json",
+      "description": "Job discovery for fitness tracking app",
+      "useCase": "Mobile consumer app in crowded market",
+      "phase": "discovery",
+      "highlights": [
+        "Discovery phase identifying invisible progress as core struggle",
+        "Job clustering reveals three main themes",
+        "Switching triggers reveal why users abandon fitness apps"
+      ]
+    }
+  ],
+  "usagePatterns": {
+    "fullWorkflow": {
+      "description": "Complete JTBD analysis from discovery to solution mapping",
+      "exampleFiles": [
+        "project-management-example.json",
+        "meal-kit-example.json",
+        "crm-example.json"
+      ],
+      "phases": ["discovery", "forces", "stories", "solutions"]
+    },
+    "discoveryOnly": {
+      "description": "Focus on identifying customer jobs without solution mapping",
+      "exampleFiles": ["fitness-app-example.json"],
+      "phases": ["discovery"]
+    }
+  },
+  "learningPath": {
+    "beginner": {
+      "start": "fitness-app-example.json",
+      "reason": "Simplest example showing job discovery fundamentals",
+      "keyLearnings": [
+        "How to identify jobs vs features",
+        "Understanding struggles and switching triggers",
+        "Job clustering techniques"
+      ]
+    },
+    "intermediate": {
+      "start": "meal-kit-example.json",
+      "reason": "Introduces three job dimensions and forces analysis",
+      "keyLearnings": [
+        "Functional, emotional, and social dimensions",
+        "Forces diagram: push, pull, anxiety, habits",
+        "How job stories capture context and causality"
+      ]
+    },
+    "advanced": {
+      "start": "project-management-example.json",
+      "reason": "Complete workflow with solution mapping and prioritization",
+      "keyLearnings": [
+        "End-to-end JTBD process",
+        "Feature prioritization based on jobs",
+        "Integration with product strategy"
+      ]
+    }
+  },
+  "industryVariations": {
+    "b2b": {
+      "examples": ["project-management-example.json", "crm-example.json"],
+      "notes": "B2B jobs often focus on efficiency, coordination, and business outcomes. Emotional dimension relates to professional competence."
+    },
+    "consumer": {
+      "examples": ["meal-kit-example.json", "fitness-app-example.json"],
+      "notes": "Consumer jobs often have strong emotional and social dimensions. Habit forces are typically stronger."
+    }
+  },
+  "commonPatterns": {
+    "pushForces": [
+      "Time waste (meetings, searching, manual work)",
+      "Decision fatigue (too many choices)",
+      "Feeling unprepared or unprofessional",
+      "Invisible progress or results",
+      "Information scattered across tools"
+    ],
+    "pullForces": [
+      "Automation (saves time)",
+      "Single source of truth (reduces searching)",
+      "Visible progress (motivating)",
+      "Simplification (reduces decisions)",
+      "Instant access to context (appear prepared)"
+    ],
+    "anxietyForces": [
+      "Learning curve and adoption",
+      "Commitment and cost",
+      "Complexity ('yet another tool')",
+      "Judgment from others",
+      "Loss of control or flexibility"
+    ],
+    "habitForces": [
+      "Familiarity with current solution",
+      "Comfort with known limitations",
+      "Sunk cost in current process",
+      "Team alignment on current tools",
+      "Simplicity of current (even if inadequate) solution"
+    ]
+  }
+}

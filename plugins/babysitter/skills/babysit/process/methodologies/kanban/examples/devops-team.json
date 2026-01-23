@@ -1,0 +1,97 @@
+{
+  "projectName": "DevOps Operations Team",
+  "workflowStages": [
+    { "name": "Backlog", "type": "queue" },
+    { "name": "Triaged", "type": "queue" },
+    { "name": "Planning", "type": "active" },
+    { "name": "Implementation", "type": "active" },
+    { "name": "Testing", "type": "active" },
+    { "name": "Deployment", "type": "active" },
+    { "name": "Verification", "type": "active" },
+    { "name": "Completed", "type": "complete" }
+  ],
+  "defaultWipLimits": {
+    "Planning": 2,
+    "Implementation": 4,
+    "Testing": 3,
+    "Deployment": 2,
+    "Verification": 2
+  },
+  "initialBacklog": [
+    {
+      "id": "inc-501",
+      "title": "Database server high CPU usage",
+      "priority": "high",
+      "serviceClass": "Expedite",
+      "estimatedSize": "M"
+    },
+    {
+      "id": "req-201",
+      "title": "Setup monitoring for new microservices",
+      "priority": "high",
+      "serviceClass": "Standard",
+      "estimatedSize": "L"
+    },
+    {
+      "id": "req-202",
+      "title": "Implement automated backup rotation",
+      "priority": "medium",
+      "serviceClass": "Standard",
+      "estimatedSize": "M"
+    },
+    {
+      "id": "inc-502",
+      "title": "SSL certificate expiring in 7 days",
+      "priority": "high",
+      "serviceClass": "Fixed Date",
+      "estimatedSize": "S"
+    },
+    {
+      "id": "tech-301",
+      "title": "Upgrade Kubernetes cluster version",
+      "priority": "medium",
+      "serviceClass": "Intangible",
+      "estimatedSize": "XL"
+    },
+    {
+      "id": "req-203",
+      "title": "Configure CDN for static assets",
+      "priority": "medium",
+      "serviceClass": "Standard",
+      "estimatedSize": "M"
+    },
+    {
+      "id": "inc-503",
+      "title": "API gateway returning 502 errors",
+      "priority": "high",
+      "serviceClass": "Expedite",
+      "estimatedSize": "M"
+    },
+    {
+      "id": "tech-302",
+      "title": "Consolidate logging infrastructure",
+      "priority": "low",
+      "serviceClass": "Intangible",
+      "estimatedSize": "L"
+    },
+    {
+      "id": "req-204",
+      "title": "Implement disaster recovery runbook",
+      "priority": "high",
+      "serviceClass": "Fixed Date",
+      "estimatedSize": "L"
+    }
+  ],
+  "cycles": 6,
+  "teamCapacity": {
+    "sre": 3,
+    "devops": 2,
+    "platform": 2
+  },
+  "serviceClasses": [
+    "Expedite",
+    "Fixed Date",
+    "Standard",
+    "Intangible"
+  ]
+}

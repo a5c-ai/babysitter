@@ -1,0 +1,40 @@
+{
+  "name": "Meal Kit Service - JTBD Discovery",
+  "description": "Jobs to Be Done analysis for a meal kit delivery service",
+  "inputs": {
+    "projectName": "Home Chef Meal Kits",
+    "context": "Consumer meal kit delivery service competing with Blue Apron, HelloFresh. Market is crowded but churn is high (50%+ annually). Targeting busy professionals who want to cook but struggle with planning and shopping.",
+    "researchData": "Customer interviews revealed: 1) Cooking from scratch feels overwhelming after work, 2) Meal planning causes decision fatigue, 3) Grocery shopping wastes time with long lines, 4) Want to eat healthy but takeout is easier, 5) Feel guilty about not cooking 'real meals', 6) Want to impress partners/family with cooking skills, 7) Waste too much money on ingredients that spoil.",
+    "phase": "full"
+  },
+  "expectedOutcomes": {
+    "mainJobs": [
+      "Serve home-cooked meals to family without the planning and shopping burden",
+      "Feel like a capable cook without extensive culinary skills",
+      "Reduce food waste and grocery shopping stress"
+    ],
+    "jobDimensions": {
+      "functional": "Get dinner on the table quickly",
+      "emotional": "Feel accomplished and capable as a cook",
+      "social": "Be seen as someone who cooks 'real food' for their family"
+    },
+    "keyForces": {
+      "strongestPush": "Meal planning decision fatigue and grocery shopping time waste",
+      "strongestPull": "Pre-portioned ingredients eliminate waste and decisions",
+      "biggestAnxiety": "Recipes might be too complicated, meals might not taste good",
+      "strongestHabit": "Ordering takeout is instant, no thinking required"
+    },
+    "jobStories": [
+      "When I'm leaving work at 6pm, I want to know exactly what I'm making for dinner, so I can avoid the 'what should we eat' discussion",
+      "When I'm cooking a new recipe, I want foolproof instructions, so I can feel confident I won't mess it up",
+      "When I open my fridge, I want to see exactly what I need for tonight's meal, so I don't waste time searching for ingredients",
+      "When family asks 'who cooked this?', I want to proudly say 'I did', so I can feel accomplished"
+    ],
+    "solutions": [
+      "Pre-portioned ingredients (reduces waste anxiety)",
+      "Foolproof recipes with photos at each step (reduces cooking anxiety)",
+      "Flexible delivery schedule (overcomes commitment habit)",
+      "15-20 minute recipes (competes with takeout timing)"
+    ]
+  }
+}
