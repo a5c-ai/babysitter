@@ -10,6 +10,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - No unreleased changes.
 
 
+## [0.0.80] - 2026-01-23
+- No notable changes.
+
+
+
+- No unreleased changes.
+
+
 ## [0.0.79] - 2026-01-23
 - No notable changes.
 
