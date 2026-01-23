@@ -175,7 +175,8 @@ export type HookPayload =
   | PreBranchPayload
   | PostPlanningPayload
   | OnScorePayload
-  | { hookType: string; [key: string]: unknown };
+  | { hookType: string; [key: string]: unknown }
+  | string;
 
 export interface HookDispatcherOptions {
   /**

@@ -3,7 +3,7 @@ import { runTaskIntrinsic, TaskIntrinsicContext } from "./intrinsics/task";
 import { runBreakpointIntrinsic } from "./intrinsics/breakpoint";
 import { runSleepIntrinsic } from "./intrinsics/sleep";
 import { runOrchestratorTaskIntrinsic } from "./intrinsics/orchestratorTask";
-import { runHookIntrinsic } from "./intrinsics/hook";
+import { callHook } from "../hooks/dispatcher";
 import { runParallelAll, runParallelMap } from "./intrinsics/parallel";
 import { ProcessContext, ParallelHelpers } from "./types";
 import { MissingProcessContextError } from "./exceptions";
@@ -53,15 +53,16 @@ export function createProcessContext(init: ProcessContextInit): CreateProcessCon
     hook: (hookType, payload, options) => runHookIntrinsic(hookType, payload, internal, options),
     parallel: parallelHelpers,
     // Always provide a callable logger to processes so `ctx.log(...)` never throws.
-    // If no logger was configured, this becomes a no-op.
-    log: (...args: any[]) => {
-      const logger = internal.logger;
-      if (typeof logger !== "function") return;
-      try {
-        logger(...args);
-      } catch {
+    // Dispatches the babysitter-log hook with a single string payload.
+    log: (message: unknown) => {
+      if (typeof message !== "string" || !message) return;
+      void callHook({
+        hookType: "babysitter-log",
+        payload: message,
+        cwd: internal.runDir,
+      }).catch(() => {
         // Never let logging break an orchestration.
-      }
+      });
     },
   };
 

@@ -1,12 +1,14 @@
 For each specialization, ensure a directory under `specializations/[name]/` with the following structure:
 ```
 specializations/
-├── [name-slugified]/
-      ├── references.md - research for reference materials for processes and methodologies for this specialization. Make sure to include links to the references.
-      ├── README.md - roles and responsibilities for this specialization, goals and objectives, use cases, common flows, description of the specialization, and other relevant information.
+├── domains/
+    ├── [domain-name-slugified]/
+        ├── [specialization-name-slugified]/
+                ├── references.md - research for reference materials for processes and methodologies for this specialization. Make sure to include links to the references.
+                ├── README.md - roles and responsibilities for this specialization, goals and objectives, use cases, common flows, description of the specialization, and other relevant information.
 ```
 
-Software and R&D Specializations (give a proper name to each specialization):
+Software and R&D Specializations (give a proper name to each specialization) - in specialization directory without the domain directory: 
 [x] Data Science and Machine Learning - example for good reference: https://www.researchgate.net/publication/378735203_Principles_of_Rigorous_Development_and_of_Appraisal_of_ML_and_AI_Methods_and_Systems
     # plugins/babysitter/skills/babysit/process/specializations/data-science-and-machine-learning/
 [x] Product Management, Product Strategy
