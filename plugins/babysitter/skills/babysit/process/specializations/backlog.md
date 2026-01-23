@@ -28,7 +28,7 @@ Software and R&D Specializations (give a proper name to each specialization) - i
 [x] Documentation, Technical Writing, Technical Communication, Specifications, Standards
     # plugins/babysitter/skills/babysit/process/specializations/technical-documentation/
 
-Engineering Specializations (give a proper name to each specialization):
+Engineering Specializations (give a proper name to each specialization): (not under domains directory)
 
 [x] Embedded Systems, Hardware, Firmware, Device Drivers, Hardware-Software Integration
 [x] Robotics and world simulation
@@ -38,6 +38,9 @@ Engineering Specializations (give a proper name to each specialization):
 [x] Desktop Product Development
 [x] AI Agents and Conversational AI Agents and Chatbots - Howtos, UX, Frameworks, Tools, SDKs, Libraries, Best Practices, Patterns, etc.
 [x] Algorithms, Optimization, Microcoding, l33tcode, etc.
+[ ] SDKs Development, Platforms Development, Systems Development and Tools Development, Frameworks Development, Libraries Development, etc.
+[ ] GPU Programming, CUDA, OpenCL, etc.
+[ ] FPGA Programming, VHDL, Verilog, etc.
 
 Science Specializations (give a proper name to each specialization): each in process/specializations/domains/science/[specialization-name-slugified]/
 
@@ -71,15 +74,15 @@ Business and Finance Specializations (give a proper name to each specialization)
 [x] General Purpose Project Management, Leadership, etc.
 [x] Supply Chain Management
 [x] Logistics, Transportation, Shipping, Freight, Warehousing, Inventory Management
-[ ] VCs, investments and Due Diligence processes (processes for evaluating and selecting investments, due diligence, valuation, monitoring and tracking, allocation, risk management, portfolio management, deal flow management, deal structuring, etc.)
-[ ] Enterpreneurship and Startup Processes (presentations, pitch decks, business plans, market research, funding, investor relations, etc.)
-[ ] Business Strategy
-[ ] Operations
-[ ] Business Analysis and Consulting
-[ ] Intelligence, Decision Support and Decision Making
-[ ] Knowledge Management
-[ ] Advertising, Social Media, Content Marketing,  Influencer Marketing, etc.
-[ ] Public Relations, etc.
+[x] VCs, investments and Due Diligence processes (processes for evaluating and selecting investments, due diligence, valuation, monitoring and tracking, allocation, risk management, portfolio management, deal flow management, deal structuring, etc.)
+[x] Enterpreneurship and Startup Processes (presentations, pitch decks, business plans, market research, funding, investor relations, etc.)
+[x] Business Strategy
+[x] Operations
+[x] Business Analysis and Consulting
+[x] Intelligence, Decision Support and Decision Making
+[x] Knowledge Management
+[x] Advertising, Social Media, Content Marketing,  Influencer Marketing, etc.
+[x] Public Relations, etc.
 
 Social Sciences and Humanities Specializations (give a proper name to each specialization): each in process/specializations/domains/social-sciences-humanities/[specialization-name-slugified]/
 
