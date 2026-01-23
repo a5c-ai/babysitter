@@ -38,9 +38,9 @@ Engineering Specializations (give a proper name to each specialization): (not un
 [x] Desktop Product Development
 [x] AI Agents and Conversational AI Agents and Chatbots - Howtos, UX, Frameworks, Tools, SDKs, Libraries, Best Practices, Patterns, etc.
 [x] Algorithms, Optimization, Microcoding, l33tcode, etc.
-[ ] SDKs Development, Platforms Development, Systems Development and Tools Development, Frameworks Development, Libraries Development, etc.
-[ ] GPU Programming, CUDA, OpenCL, etc.
-[ ] FPGA Programming, VHDL, Verilog, etc.
+[x] SDKs Development, Platforms Development, Systems Development and Tools Development, Frameworks Development, Libraries Development, etc.
+[x] GPU Programming, CUDA, OpenCL, etc.
+[x] FPGA Programming, VHDL, Verilog, etc.
 
 Science Specializations (give a proper name to each specialization): each in process/specializations/domains/science/[specialization-name-slugified]/
 
