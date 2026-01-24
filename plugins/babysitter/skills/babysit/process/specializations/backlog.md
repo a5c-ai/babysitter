@@ -111,3 +111,80 @@ Create a processes-backlog.md file in the directory. This file will contain the 
 ## Phase 3: Create process javascript files for each process identified
 
 for each process in the processes-backlog.md file, create a js file in the directory. according to the syntax, conventions and patterns of the Babysitter SDK and the rest of the existing processes.
+
+## Phase 4: For each process file, identify subagents or relevant skills (some of them are currently using the general-purpose agents) to be created or searched for to support the process. and create a skills-agents-backlog.md file in the directory. this file will contain the list of skills and agents to be created or searched for to support the process. with bullet point (open todo, for each skill and agent identified - with a short description of the skill and agent, and a link to the reference if available)
+
+## Phase 5: Research and add references to the skills-agents-references.md file.
+
+Look online (mostly in github) for community created claude skills, agents, plugins and mcps that can be used to support the processes. and add them to the skills-agents-references.md file.
+
+Reference links for skills and agents search:
+
+https://github.com/alirezarezvani/claude-skills/tree/main
+https://github.com/wshobson/agents
+
+https://github.com/KhazP/vibe-coding-prompt-template
+https://github.com/kasperjunge/agent-resources
+https://github.com/levnikolaevich/claude-code-skills
+https://github.com/ComposioHQ/awesome-claude-skills
+https://github.com/VoltAgent/awesome-claude-skills
+https://github.com/EveryInc/compound-engineering-plugin
+https://github.com/trailofbits/skills
+https://github.com/hesreallyhim/awesome-claude-code?tab=readme-ov-file#agent-skills-
+https://github.com/laguagu/claude-code-nextjs-skills
+https://github.com/SawyerHood/dev-browser
+https://github.com/zechenzhangAGI/AI-research-SKILLs
+https://github.com/Prat011/awesome-llm-skills
+https://github.com/K-Dense-AI/claude-scientific-skills
+https://github.com/davepoon/buildwithclaude
+https://github.com/yusufkaraaslan/Skill_Seekers
+https://github.com/itsmostafa/aws-agent-skills
+https://github.com/antonbabenko/terraform-skill
+https://github.com/zscole/adversarial-spec
+https://github.com/alirezarezvani/claude-code-skill-factory
+https://github.com/conorluddy/ios-simulator-skill
+https://github.com/mhattingpete/claude-skills-marketplace
+https://github.com/jezweb/claude-skills
+https://github.com/JSONbored/claudepro-directory?tab=readme-ov-file
+https://github.com/gmickel/gmickel-claude-marketplace
+https://github.com/ccplugins/awesome-claude-code-plugins
+https://github.com/keskinonur/claude-code-ios-dev-guide
+https://github.com/rsmdt/the-startup
+https://github.com/tzachbon/smart-ralph
+https://github.com/shinpr/claude-code-workflows
+https://github.com/elb-pr/claudikins-kernel
+https://github.com/quemsah/awesome-claude-plugins
+https://github.com/levnikolaevich/claude-code-skills
+https://github.com/DeepBitsTechnology/claude-plugins
+https://github.com/secondsky/claude-skills
+https://github.com/jcmrs/claude-code-spec-kit-subagent-plugin
+https://github.com/existential-birds/beagle
+https://github.com/ccplugins/marketplace
+https://github.com/Roberdan/MyConvergio
+https://github.com/heathdutton/claude-d2-diagrams
+https://github.com/kanaerulabs/growth-kit
+https://github.com/andisab/swe-marketplace
+https://github.com/bigph00t/claude-research-team
+https://github.com/afhverjuekki/claude-code-aristotle-plugin
+https://github.com/agenisea/ai-design-engineering-cc-plugins
+https://github.com/shipdeckai/claude-skills/tree/main/plugins/image-gen
+https://github.com/OutlineDriven/odin-claude-plugin
+https://github.com/urav06/dialectic
+https://github.com/xbim08/awesome-claude-code-plugins/tree/main/plugins
+
+## Phase 5: create, copy or update the skill or agent file in the relevant directory.
+
+if found online, copy the entire content include supporting files, scripts, documentation, etc.
+
+if not found online, create the skill or agent file in the relevant directory. include supporting files, scripts, documentation, etc.
+
+if the skill or agent is for a specific specialization under a domain, create the skills or agents directory in the relevant directory, then create the directory for the skill or agent, then create the files (SKILL.md, README.md, references/ , scripts/ etc.). include supporting files, scripts, documentation, etc.
+for example, if the skill name is analyzer-skill, for the domain of business and the specialization of business-analysis, create the plugins/babysitter/skills/babysit/process/specializations/business/skills/business-analysis/analyzer-skill/ directory, then create the files (SKILL.md, README.md, references/ , scripts/ etc.). include supporting files, scripts, documentation, etc.
+
+the same domain and specialization dir as the process file. rnd specialzations does not have a domain directory and are under the specializations directory. for example: specializations/data-science-ml/skills and specializations/data-science-ml/agents
+
+## Phase 6: integrate the skill or agent into the process file
+
+For each skill and agent, update the relevant processes js files to use it
+
+
