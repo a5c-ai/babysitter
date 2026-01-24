@@ -8,63 +8,37 @@ allowed-tools:
   - Edit
   - Glob
   - Grep
-  - Task
 metadata:
-  version: "1.0"
+  specialization: physics
+  domain: science
   category: condensed-matter
-  domain: physics
-  tools:
-    - SpinW (MATLAB)
-    - magnopy
-  processes:
-    - spectroscopy-measurement-campaign
-    - phase-transition-investigation
-    - material-synthesis-and-characterization
+  phase: 6
 ---
 
-# SpinW Magnetic Simulator Skill
+# SpinW Magnetic Simulator
 
 ## Purpose
 
-Provides SpinW capabilities for spin wave calculations in magnetic materials, enabling analysis of magnon dispersions and neutron scattering cross sections.
+Provides expert guidance on SpinW spin wave calculations for magnetic materials, including magnon dispersions and neutron scattering cross-sections.
 
 ## Capabilities
 
-- **Magnetic Structure**: Define complex magnetic orderings and unit cells
-- **Exchange Couplings**: Parameterize exchange interactions and anisotropies
-- **Linear Spin Wave Theory**: Calculate magnon dispersions and eigenvectors
-- **Neutron Scattering**: Compute dynamical structure factor S(Q,w)
-- **Phase Diagrams**: Explore magnetic phase transitions
-- **Powder Averaging**: Calculate powder-averaged spectra for polycrystals
+- Magnetic structure definition
+- Exchange coupling parameterization
+- Linear spin wave theory calculations
+- Neutron scattering cross-section computation
+- Magnetic phase diagram exploration
+- Powder averaging
 
 ## Usage Guidelines
 
-1. **Structure Setup**
-   - Define crystal structure with magnetic ions
-   - Specify magnetic unit cell (may differ from chemical)
-   - Set magnetic moment directions
-   - Define propagation vector for incommensurate structures
+1. **Structure Definition**: Define magnetic crystal structures
+2. **Exchange Couplings**: Parameterize exchange interactions
+3. **Spin Wave Theory**: Calculate magnon dispersions
+4. **Neutron Scattering**: Compute cross-sections for comparison with experiments
+5. **Phase Diagrams**: Explore magnetic phase transitions
 
-2. **Exchange Parameters**
-   - Add isotropic exchange interactions
-   - Include Dzyaloshinskii-Moriya interactions
-   - Set single-ion anisotropy terms
-   - Define g-tensor if non-diagonal
+## Tools/Libraries
 
-3. **Spin Wave Calculation**
-   - Verify ground state stability
-   - Calculate magnon dispersion along Q-paths
-   - Compute spin wave intensities
-   - Check for imaginary frequencies (instabilities)
-
-4. **Comparison with Experiment**
-   - Simulate neutron scattering cross section
-   - Apply experimental resolution function
-   - Fit exchange parameters to data
-   - Calculate powder averages for polycrystalline samples
-
-5. **Best Practices**
-   - Validate structure with magnetic refinement
-   - Compare multiple exchange models
-   - Document symmetry-allowed interactions
-   - Archive all parameter sets
+- SpinW (MATLAB)
+- magnopy

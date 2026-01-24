@@ -8,64 +8,38 @@ allowed-tools:
   - Edit
   - Glob
   - Grep
-  - Task
 metadata:
-  version: "1.0"
+  specialization: physics
+  domain: science
   category: data-analysis
-  domain: physics
-  tools:
-    - PyMC
-    - arviz
-    - Theano/JAX
-  processes:
-    - statistical-analysis-pipeline
-    - machine-learning-for-physics
-    - uncertainty-propagation-and-quantification
+  phase: 6
 ---
 
-# PyMC Bayesian Modeler Skill
+# PyMC Bayesian Modeler
 
 ## Purpose
 
-Provides PyMC probabilistic programming capabilities for building hierarchical Bayesian models with advanced inference techniques for physics data analysis.
+Provides expert guidance on PyMC for Bayesian modeling in physics, including hierarchical models and advanced inference methods.
 
 ## Capabilities
 
-- **Model Construction**: Build probabilistic models with intuitive syntax
-- **NUTS Sampling**: No-U-Turn Sampler for efficient posterior exploration
-- **Variational Inference**: Fast approximate inference with ADVI
-- **Gaussian Processes**: GP regression for smooth functions
-- **Model Comparison**: WAIC and LOO cross-validation
-- **Prior Predictive**: Validate models with prior predictive checks
+- Probabilistic model construction
+- NUTS/HMC sampling
+- Variational inference
+- Gaussian processes
+- Model comparison (WAIC, LOO)
+- Prior predictive checks
 
 ## Usage Guidelines
 
-1. **Model Definition**
-   - Specify priors for parameters
-   - Define likelihood function
-   - Add hierarchical structure if needed
-   - Include measurement uncertainties
+1. **Model Building**: Construct probabilistic models
+2. **Priors**: Specify informative or weakly informative priors
+3. **Sampling**: Use NUTS for efficient sampling
+4. **Diagnostics**: Check convergence with trace plots and r-hat
+5. **Comparison**: Compare models with information criteria
 
-2. **Prior Specification**
-   - Choose weakly informative priors when possible
-   - Use domain knowledge to constrain priors
-   - Run prior predictive checks
-   - Document prior choices
+## Tools/Libraries
 
-3. **Sampling**
-   - Use NUTS for efficient sampling
-   - Set target acceptance rate
-   - Run multiple chains
-   - Check for divergences
-
-4. **Diagnostics**
-   - Examine trace plots
-   - Check R-hat for convergence
-   - Compute effective sample size
-   - Identify problematic parameters
-
-5. **Best Practices**
-   - Start with simple models
-   - Validate against simulated data
-   - Perform posterior predictive checks
-   - Document model assumptions
+- PyMC
+- arviz
+- Theano/JAX

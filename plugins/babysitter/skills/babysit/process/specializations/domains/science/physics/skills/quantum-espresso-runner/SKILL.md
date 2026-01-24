@@ -8,60 +8,38 @@ allowed-tools:
   - Edit
   - Glob
   - Grep
-  - Task
 metadata:
-  version: "1.0"
+  specialization: physics
+  domain: science
   category: numerical-simulation
-  domain: physics
-  tools:
-    - Quantum ESPRESSO
-    - Wannier90
-    - EPW
-  processes:
-    - density-functional-theory-calculations
-    - spectroscopy-measurement-campaign
+  phase: 6
 ---
 
-# Quantum ESPRESSO Runner Skill
+# Quantum ESPRESSO Runner
 
 ## Purpose
 
-Provides Quantum ESPRESSO plane-wave DFT calculation capabilities for electronic structure, materials properties, and advanced calculations including Wannier functions and electron-phonon coupling.
+Provides expert guidance on Quantum ESPRESSO DFT calculations, including input file management, pseudopotential selection, and advanced property calculations.
 
 ## Capabilities
 
-- **Input Generation**: Create input files for pw.x, ph.x, pp.x, and other QE executables
-- **Pseudopotential Management**: Select and configure pseudopotentials from standard libraries
-- **Convergence Automation**: Automated testing of cutoff energies and k-point grids
-- **Wannier90 Interface**: Generate maximally localized Wannier functions for tight-binding models
-- **Transport Properties**: Calculate conductivity and other transport coefficients
-- **Spin-Orbit Coupling**: Handle fully relativistic calculations with SOC
+- Input file generation (pw.x, ph.x, pp.x)
+- Pseudopotential library management
+- Convergence testing automation
+- Wannier90 interface for tight-binding
+- Transport property calculations
+- Spin-orbit coupling handling
 
 ## Usage Guidelines
 
-1. **Input Preparation**
-   - Select appropriate pseudopotential library (SSSP, PseudoDojo)
-   - Set ecutwfc and ecutrho based on pseudopotential recommendations
-   - Configure k-point mesh for desired accuracy
-   - Enable spin polarization if needed (nspin=2)
+1. **Input Generation**: Create proper QE input files for pw.x, ph.x, pp.x
+2. **Pseudopotentials**: Select appropriate pseudopotentials from libraries
+3. **Convergence**: Test cutoff and k-point convergence systematically
+4. **Wannier Functions**: Interface with Wannier90 for tight-binding models
+5. **Transport**: Calculate transport properties with BoltzTraP or EPW
 
-2. **Self-Consistent Calculations**
-   - Run SCF calculation (pw.x with calculation='scf')
-   - Check convergence of total energy and forces
-   - Save charge density for subsequent calculations
+## Tools/Libraries
 
-3. **Band Structure Workflow**
-   - Run NSCF calculation on k-path
-   - Use bands.x for band structure extraction
-   - Plot using plotband.x or custom scripts
-
-4. **Advanced Calculations**
-   - Phonons: Use ph.x with appropriate q-point grid
-   - Wannier: Generate Wannier functions with wannier90.x
-   - EPW: Calculate electron-phonon matrix elements
-
-5. **Best Practices**
-   - Document all input parameters
-   - Perform systematic convergence tests
-   - Validate against known results
-   - Use restart capabilities for long calculations
+- Quantum ESPRESSO
+- Wannier90
+- EPW

@@ -8,62 +8,37 @@ allowed-tools:
   - Edit
   - Glob
   - Grep
-  - Task
 metadata:
-  version: "1.0"
+  specialization: physics
+  domain: science
   category: optics-photonics
-  domain: physics
-  tools:
-    - Zemax OpticStudio
-    - Python ZOS-API
-  processes:
-    - experiment-design-and-planning
-    - detector-calibration-and-characterization
+  phase: 6
 ---
 
-# Zemax Optical Designer Skill
+# Zemax Optical Designer
 
 ## Purpose
 
-Provides Zemax OpticStudio capabilities for optical system design, analysis, and tolerancing of imaging systems, illumination, and photonic devices.
+Provides expert guidance on Zemax optical design, including sequential ray tracing, tolerance analysis, and optical system optimization.
 
 ## Capabilities
 
-- **Sequential Ray Tracing**: Design and analyze lens systems
-- **Non-Sequential Analysis**: Stray light and illumination modeling
-- **Tolerance Analysis**: Manufacturing sensitivity assessment
-- **MTF and PSF**: Calculate modulation transfer function and point spread function
-- **Coating Optimization**: Design and optimize optical coatings
-- **Stray Light Analysis**: Ghost and flare analysis
+- Sequential ray tracing
+- Non-sequential analysis
+- Tolerance analysis
+- MTF and PSF calculation
+- Coating optimization
+- Stray light analysis
 
 ## Usage Guidelines
 
-1. **System Setup**
-   - Define aperture and field specifications
-   - Select wavelengths and weights
-   - Enter lens data (radii, thicknesses, materials)
-   - Set up object and image planes
+1. **System Setup**: Define optical surfaces and materials
+2. **Ray Tracing**: Perform sequential and non-sequential analysis
+3. **Optimization**: Optimize lens systems for performance
+4. **Tolerancing**: Analyze manufacturing tolerances
+5. **Stray Light**: Evaluate stray light and ghost reflections
 
-2. **Optimization**
-   - Define merit function with operands
-   - Select optimization variables
-   - Run optimization algorithms
-   - Iterate between local and global optimization
+## Tools/Libraries
 
-3. **Analysis**
-   - Calculate spot diagrams for each field
-   - Evaluate MTF at specified frequencies
-   - Generate wavefront maps
-   - Analyze distortion and aberrations
-
-4. **Tolerancing**
-   - Set manufacturing tolerances
-   - Run sensitivity analysis
-   - Determine compensator adjustments
-   - Calculate yield predictions
-
-5. **Best Practices**
-   - Start with known design forms
-   - Use glass substitution for manufacturability
-   - Document design assumptions
-   - Archive optimization history
+- Zemax OpticStudio
+- Python ZOS-API

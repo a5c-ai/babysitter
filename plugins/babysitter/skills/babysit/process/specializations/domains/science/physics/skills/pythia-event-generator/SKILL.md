@@ -8,63 +8,38 @@ allowed-tools:
   - Edit
   - Glob
   - Grep
-  - Task
 metadata:
-  version: "1.0"
+  specialization: physics
+  domain: science
   category: particle-physics
-  domain: physics
-  tools:
-    - Pythia8
-    - HepMC
-    - LHAPDF
-  processes:
-    - monte-carlo-event-generation
-    - beyond-standard-model-search
-    - statistical-analysis-pipeline
+  phase: 6
 ---
 
-# Pythia Event Generator Skill
+# Pythia Event Generator
 
 ## Purpose
 
-Provides Pythia8 event generation capabilities for simulating high-energy particle collisions including hard processes, parton showers, hadronization, and underlying event.
+Provides expert guidance on Pythia event generation for high-energy physics, including process configuration, hadronization, and shower matching.
 
 ## Capabilities
 
-- **Process Selection**: Configure hard scattering processes for various physics studies
-- **PDF Management**: Interface with LHAPDF for parton distribution functions
-- **Hadronization**: Lund string fragmentation for jet formation
-- **Underlying Event**: Multiparton interactions and beam remnants
-- **HepMC Output**: Standard output format for detector simulation
-- **Shower Matching**: MLM and CKKW-L matching with matrix element generators
+- Process selection and configuration
+- Parton distribution function management
+- Hadronization and decay settings
+- Underlying event tuning
+- HepMC output generation
+- Shower matching (MLM, CKKW)
 
 ## Usage Guidelines
 
-1. **Process Configuration**
-   - Select processes via Pythia settings
-   - Configure phase space cuts for efficiency
-   - Set beam energies and types
-   - Enable/disable specific decay channels
+1. **Process Configuration**: Select physics processes for event generation
+2. **PDFs**: Configure parton distribution functions
+3. **Hadronization**: Set hadronization and decay parameters
+4. **Tuning**: Apply appropriate underlying event tunes
+5. **Output**: Generate HepMC format for downstream analysis
 
-2. **PDF Setup**
-   - Use LHAPDF6 for modern PDF sets
-   - Select appropriate PDF for the process
-   - Consider PDF uncertainties
+## Tools/Libraries
 
-3. **Tuning**
-   - Use official collaboration tunes
-   - Validate against minimum bias data
-   - Check jet substructure observables
-   - Adjust primordial kT if needed
-
-4. **Output Generation**
-   - Write events in HepMC format
-   - Store generator-level truth information
-   - Enable/disable specific particles in output
-   - Document random seeds for reproducibility
-
-5. **Best Practices**
-   - Validate against experimental data
-   - Compare with alternative generators
-   - Estimate theoretical uncertainties
-   - Document all settings used
+- Pythia8
+- HepMC
+- LHAPDF

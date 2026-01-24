@@ -8,66 +8,39 @@ allowed-tools:
   - Edit
   - Glob
   - Grep
-  - Task
 metadata:
-  version: "1.0"
+  specialization: physics
+  domain: science
   category: particle-physics
-  domain: physics
-  tools:
-    - ROOT
-    - RooFit
-    - RooStats
-    - uproot
-  processes:
-    - statistical-analysis-pipeline
-    - event-reconstruction
-    - monte-carlo-event-generation
-    - beyond-standard-model-search
+  phase: 6
 ---
 
-# ROOT Data Analyzer Skill
+# ROOT Data Analyzer
 
 ## Purpose
 
-Provides ROOT/CERN framework capabilities for high-energy physics data analysis including tree manipulation, histogram fitting, statistical modeling with RooFit, and publication-quality visualization.
+Provides expert guidance on ROOT data analysis for high-energy physics, including TTree manipulation, histogram fitting, and statistical modeling with RooFit.
 
 ## Capabilities
 
-- **TTree/TChain Manipulation**: Read, filter, and process large datasets stored in ROOT format
-- **Histogram Operations**: Create, fill, and manipulate histograms with proper error handling
-- **RooFit Modeling**: Build statistical models for signal extraction and fitting
-- **TCanvas Visualization**: Create publication-quality plots and figures
-- **ROOT Macro Development**: Write and debug ROOT macros in C++ and Python
-- **PyROOT Integration**: Seamless Python interface for analysis workflows
+- TTree/TChain manipulation
+- Histogram creation and fitting
+- RooFit statistical modeling
+- TCanvas visualization
+- ROOT macro development
+- PyROOT integration
 
 ## Usage Guidelines
 
-1. **Data Access**
-   - Use TChain for processing multiple files
-   - Apply selections using Draw() or explicit loops
-   - Enable branches selectively for performance
-   - Use uproot for Python-native access
+1. **Data Access**: Use TTree and TChain for efficient data access
+2. **Histogramming**: Create and fill histograms with proper binning
+3. **Fitting**: Use RooFit for advanced statistical modeling
+4. **Visualization**: Create publication-quality plots with TCanvas
+5. **Python Integration**: Use PyROOT for Python-based analysis
 
-2. **Histogram Analysis**
-   - Choose appropriate binning for physics
-   - Handle overflow/underflow correctly
-   - Propagate statistical uncertainties
-   - Use TEfficiency for efficiency calculations
+## Tools/Libraries
 
-3. **Statistical Fitting**
-   - Build RooFit models for signal and background
-   - Perform likelihood fits with proper error handling
-   - Use RooStats for limit setting and discovery
-   - Validate fits with pull distributions
-
-4. **Visualization**
-   - Follow collaboration style guidelines
-   - Include proper axis labels and units
-   - Add legends and annotations
-   - Export in vector formats for publication
-
-5. **Best Practices**
-   - Document analysis cuts and selections
-   - Implement blinding for sensitive analyses
-   - Use version control for analysis code
-   - Archive intermediate results
+- ROOT
+- RooFit
+- RooStats
+- uproot

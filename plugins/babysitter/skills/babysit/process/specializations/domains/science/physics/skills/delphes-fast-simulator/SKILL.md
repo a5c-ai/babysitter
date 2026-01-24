@@ -8,64 +8,38 @@ allowed-tools:
   - Edit
   - Glob
   - Grep
-  - Task
 metadata:
-  version: "1.0"
+  specialization: physics
+  domain: science
   category: particle-physics
-  domain: physics
-  tools:
-    - Delphes
-    - FastJet
-    - ROOT
-  processes:
-    - event-reconstruction
-    - beyond-standard-model-search
-    - experiment-design-and-planning
+  phase: 6
 ---
 
-# Delphes Fast Simulator Skill
+# Delphes Fast Simulator
 
 ## Purpose
 
-Provides Delphes fast detector simulation capabilities for rapid phenomenological studies, allowing realistic detector effects without full Geant4 simulation.
+Provides expert guidance on Delphes fast detector simulation for phenomenological studies, including detector card configuration and object reconstruction.
 
 ## Capabilities
 
-- **Detector Card Configuration**: Configure detector parameters for ATLAS, CMS, or custom detectors
-- **Jet Reconstruction**: Multiple jet algorithms via FastJet integration
-- **Object Efficiency**: Parameterize reconstruction efficiencies as function of pt and eta
-- **Pile-up Simulation**: Model multiple interactions per bunch crossing
-- **Trigger Emulation**: Implement trigger selections at analysis level
-- **ROOT Output**: Standard ROOT tree format compatible with analysis frameworks
+- Detector card configuration (ATLAS, CMS, custom)
+- Jet reconstruction algorithms
+- Object efficiency parameterization
+- Pile-up simulation
+- Trigger emulation
+- ROOT/Delphes tree output
 
 ## Usage Guidelines
 
-1. **Detector Configuration**
-   - Start with standard ATLAS or CMS card
-   - Customize resolutions and efficiencies
-   - Configure jet algorithm and parameters
-   - Set b-tagging working points
+1. **Detector Cards**: Configure or customize detector response cards
+2. **Jet Algorithms**: Select appropriate jet reconstruction algorithms
+3. **Efficiencies**: Model object reconstruction efficiencies
+4. **Pile-up**: Add pile-up simulation when needed
+5. **Output**: Generate ROOT trees for analysis
 
-2. **Input Processing**
-   - Read HepMC or LHE input files
-   - Configure particle propagation
-   - Set pile-up conditions
-   - Enable/disable specific modules
+## Tools/Libraries
 
-3. **Object Reconstruction**
-   - Electrons, muons with efficiency/fake rates
-   - Photons with isolation criteria
-   - Jets with flavor tagging
-   - Missing transverse energy
-
-4. **Output Analysis**
-   - Access reconstructed objects from ROOT tree
-   - Apply additional selection cuts
-   - Calculate kinematic variables
-   - Interface with analysis frameworks
-
-5. **Best Practices**
-   - Validate against full simulation when possible
-   - Document detector card modifications
-   - Use consistent pile-up conditions
-   - Compare with collaboration performance plots
+- Delphes
+- FastJet
+- ROOT

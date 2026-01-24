@@ -8,64 +8,38 @@ allowed-tools:
   - Edit
   - Glob
   - Grep
-  - Task
 metadata:
-  version: "1.0"
+  specialization: physics
+  domain: science
   category: cosmology
-  domain: physics
-  tools:
-    - CosmoSIS
-    - emcee
-    - GetDist
-  processes:
-    - statistical-analysis-pipeline
-    - uncertainty-propagation-and-quantification
-    - machine-learning-for-physics
+  phase: 6
 ---
 
-# CosmoSIS Parameter Estimator Skill
+# CosmoSIS Parameter Estimator
 
 ## Purpose
 
-Provides CosmoSIS cosmological parameter estimation capabilities using modular likelihood construction and MCMC sampling for constraining cosmological models.
+Provides expert guidance on CosmoSIS for cosmological parameter estimation, including modular likelihood construction and MCMC sampling.
 
 ## Capabilities
 
-- **Modular Likelihoods**: Construct likelihoods from independent modules
-- **Multiple Samplers**: Support for emcee, multinest, polychord
-- **Prior Specification**: Flexible prior definitions
-- **Chain Analysis**: Convergence diagnostics and chain processing
-- **Visualization**: Triangle plots and posterior visualization
-- **Pipeline Construction**: Build complex analysis pipelines
+- Modular likelihood construction
+- Multiple sampler support (emcee, multinest, polychord)
+- Prior specification
+- Chain analysis and diagnostics
+- Plotting and visualization
+- Pipeline construction
 
 ## Usage Guidelines
 
-1. **Pipeline Setup**
-   - Define modules for theory calculations
-   - Configure data likelihoods
-   - Set parameter priors
-   - Choose sampler settings
+1. **Pipeline Setup**: Configure modular analysis pipeline
+2. **Likelihoods**: Build likelihood functions from data
+3. **Priors**: Specify parameter priors
+4. **Sampling**: Run MCMC with appropriate sampler
+5. **Analysis**: Analyze chains and compute posteriors
 
-2. **Likelihood Configuration**
-   - Add CMB, BAO, SN likelihoods
-   - Configure covariance matrices
-   - Set nuisance parameters
-   - Define systematic uncertainties
+## Tools/Libraries
 
-3. **Sampling**
-   - Run MCMC with appropriate sampler
-   - Monitor convergence (Gelman-Rubin)
-   - Check acceptance rates
-   - Continue chains if needed
-
-4. **Post-Processing**
-   - Remove burn-in samples
-   - Thin chains for independence
-   - Compute marginalized constraints
-   - Generate publication plots
-
-5. **Best Practices**
-   - Validate pipeline against published results
-   - Run multiple independent chains
-   - Document all configuration choices
-   - Archive full chain outputs
+- CosmoSIS
+- emcee
+- GetDist

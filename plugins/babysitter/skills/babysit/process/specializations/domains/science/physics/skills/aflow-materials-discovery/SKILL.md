@@ -8,64 +8,38 @@ allowed-tools:
   - Edit
   - Glob
   - Grep
-  - Task
 metadata:
-  version: "1.0"
+  specialization: physics
+  domain: science
   category: condensed-matter
-  domain: physics
-  tools:
-    - AFLOW
-    - aflow.py
-    - Materials Project API
-  processes:
-    - density-functional-theory-calculations
-    - material-synthesis-and-characterization
-    - machine-learning-for-physics
+  phase: 6
 ---
 
-# AFLOW Materials Discovery Skill
+# AFLOW Materials Discovery
 
 ## Purpose
 
-Provides AFLOW high-throughput materials discovery capabilities for systematic DFT calculations, database queries, and machine learning-driven materials screening.
+Provides expert guidance on AFLOW for high-throughput materials discovery, including database queries, workflow generation, and machine learning integration.
 
 ## Capabilities
 
-- **Database Queries**: Access AFLOW database via REST API for computed properties
-- **Workflow Generation**: Create automatic calculation workflows for new materials
-- **Thermodynamic Stability**: Analyze convex hulls and formation energies
-- **Structure Generation**: Generate prototype structures from Pearson symbols
-- **Descriptor Calculation**: Compute materials descriptors for ML models
-- **ML Integration**: Interface with machine learning for property prediction
+- AFLOW database API queries
+- Automatic workflow generation
+- Thermodynamic stability analysis
+- Prototype structure generation
+- Descriptor calculation
+- Machine learning integration
 
 ## Usage Guidelines
 
-1. **Database Access**
-   - Use AFLOW API for property queries
-   - Search by composition, prototype, or properties
-   - Download structure files in various formats
-   - Access computed electronic and thermodynamic data
+1. **Database Queries**: Search AFLOW database for materials
+2. **Workflow Generation**: Create automatic DFT workflows
+3. **Stability Analysis**: Analyze thermodynamic stability
+4. **Prototypes**: Generate crystal structure prototypes
+5. **ML Integration**: Calculate descriptors for ML models
 
-2. **Workflow Setup**
-   - Configure AFLOW for systematic calculations
-   - Set standard calculation parameters
-   - Define convergence criteria
-   - Enable automatic error handling
+## Tools/Libraries
 
-3. **Stability Analysis**
-   - Construct compositional phase diagrams
-   - Calculate formation energies
-   - Identify stable and metastable phases
-   - Predict synthesizability
-
-4. **Machine Learning**
-   - Calculate AFLOW-ML descriptors
-   - Use pre-trained property predictors
-   - Screen large chemical spaces
-   - Validate predictions with DFT
-
-5. **Best Practices**
-   - Cite AFLOW database properly
-   - Verify computed properties against experiment
-   - Document search and filtering criteria
-   - Consider DFT method limitations
+- AFLOW
+- aflow.py
+- Materials Project API

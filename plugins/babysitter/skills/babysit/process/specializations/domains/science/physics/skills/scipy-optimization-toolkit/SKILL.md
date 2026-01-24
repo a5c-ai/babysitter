@@ -8,64 +8,38 @@ allowed-tools:
   - Edit
   - Glob
   - Grep
-  - Task
 metadata:
-  version: "1.0"
+  specialization: physics
+  domain: science
   category: data-analysis
-  domain: physics
-  tools:
-    - SciPy
-    - NumPy
-    - lmfit
-  processes:
-    - statistical-analysis-pipeline
-    - uncertainty-propagation-and-quantification
-    - systematic-uncertainty-evaluation
+  phase: 6
 ---
 
-# SciPy Optimization Toolkit Skill
+# SciPy Optimization Toolkit
 
 ## Purpose
 
-Provides SciPy numerical computing capabilities for optimization, integration, differential equations, and signal processing in physics data analysis applications.
+Provides expert guidance on SciPy for scientific computing in physics, including optimization, integration, and signal processing.
 
 ## Capabilities
 
-- **Nonlinear Fitting**: Least squares fitting with curve_fit and minimize
-- **Global Optimization**: Basin hopping, differential evolution, dual annealing
-- **Numerical Integration**: Quadrature methods for definite integrals
-- **ODE/PDE Solvers**: Solve initial and boundary value problems
-- **Signal Processing**: FFT, filtering, spectral analysis
-- **Sparse Matrices**: Efficient sparse linear algebra operations
+- Nonlinear least squares fitting
+- Global optimization methods
+- Numerical integration (quadrature)
+- ODE/PDE solvers
+- Signal processing (FFT, filtering)
+- Sparse matrix operations
 
 ## Usage Guidelines
 
-1. **Function Fitting**
-   - Define model function with parameters
-   - Provide initial parameter guesses
-   - Use curve_fit for simple cases
-   - Use lmfit for complex models with constraints
+1. **Optimization**: Use appropriate optimizer for the problem type
+2. **Fitting**: Apply nonlinear least squares for data fitting
+3. **Integration**: Choose proper quadrature methods
+4. **ODEs**: Solve differential equations with adaptive solvers
+5. **Signal Processing**: Apply FFT and filtering techniques
 
-2. **Global Optimization**
-   - Choose algorithm based on problem structure
-   - Set appropriate bounds and constraints
-   - Use multiple starting points
-   - Validate global minimum
+## Tools/Libraries
 
-3. **Integration**
-   - Choose quadrature method based on integrand
-   - Handle singularities appropriately
-   - Set tolerance requirements
-   - Verify convergence
-
-4. **Differential Equations**
-   - Select solver based on problem stiffness
-   - Provide Jacobian if available
-   - Handle events and discontinuities
-   - Validate against known solutions
-
-5. **Best Practices**
-   - Check condition numbers
-   - Propagate uncertainties correctly
-   - Document numerical parameters
-   - Validate against analytical solutions
+- SciPy
+- NumPy
+- lmfit

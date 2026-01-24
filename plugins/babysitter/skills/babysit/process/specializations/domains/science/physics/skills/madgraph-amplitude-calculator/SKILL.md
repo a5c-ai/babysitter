@@ -8,64 +8,38 @@ allowed-tools:
   - Edit
   - Glob
   - Grep
-  - Task
 metadata:
-  version: "1.0"
+  specialization: physics
+  domain: science
   category: particle-physics
-  domain: physics
-  tools:
-    - MadGraph5_aMC@NLO
-    - UFO models
-    - FeynRules
-  processes:
-    - quantum-field-theory-calculations
-    - beyond-standard-model-search
-    - monte-carlo-event-generation
+  phase: 6
 ---
 
-# MadGraph Amplitude Calculator Skill
+# MadGraph Amplitude Calculator
 
 ## Purpose
 
-Provides MadGraph5_aMC@NLO capabilities for automated matrix element calculation, cross-section computation, and parton-level event generation for Standard Model and BSM physics.
+Provides expert guidance on MadGraph matrix element calculations for BSM physics, including UFO model import, NLO calculations, and shower matching.
 
 ## Capabilities
 
-- **UFO Model Import**: Load and validate Universal FeynRules Output models
-- **Process Generation**: Generate Feynman diagrams and matrix elements automatically
-- **NLO Calculations**: Next-to-leading order QCD corrections with MC@NLO matching
-- **Event Generation**: Parton-level event generation with proper weights
-- **Shower Matching**: Interface with Pythia/Herwig for parton shower matching
-- **Cross Section Extraction**: Calculate cross sections with PDF and scale uncertainties
+- UFO model import and validation
+- Process generation and optimization
+- NLO calculation setup
+- Parton-level event generation
+- Shower matching with Pythia/Herwig
+- Cross-section extraction with uncertainties
 
 ## Usage Guidelines
 
-1. **Model Setup**
-   - Import UFO model for BSM studies
-   - Validate model parameters
-   - Check particle content and interactions
-   - Set model parameters (masses, couplings)
+1. **Model Import**: Import UFO models for BSM physics
+2. **Process Generation**: Generate matrix elements for desired processes
+3. **NLO Corrections**: Configure NLO calculations when needed
+4. **Matching**: Set up shower matching for hadronization
+5. **Uncertainties**: Evaluate scale and PDF uncertainties
 
-2. **Process Definition**
-   - Define process using MadGraph syntax
-   - Specify initial and final state particles
-   - Add decay chains if needed
-   - Apply generation-level cuts
+## Tools/Libraries
 
-3. **Calculation Settings**
-   - Choose LO or NLO calculation
-   - Configure PDF set and scale choices
-   - Set number of events to generate
-   - Enable/disable diagram classes
-
-4. **Running and Output**
-   - Launch calculations via command interface
-   - Monitor progress and convergence
-   - Save events in LHE format
-   - Extract cross sections with uncertainties
-
-5. **Best Practices**
-   - Validate against known results
-   - Check gauge invariance
-   - Estimate scale and PDF uncertainties
-   - Document all process definitions
+- MadGraph5_aMC@NLO
+- UFO models
+- FeynRules

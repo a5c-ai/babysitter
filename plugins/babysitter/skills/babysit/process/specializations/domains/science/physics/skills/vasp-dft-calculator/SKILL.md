@@ -2,65 +2,50 @@
 name: vasp-dft-calculator
 description: VASP DFT calculation skill for electronic structure, band structures, and materials property predictions
 allowed-tools:
-  - Bash
   - Read
   - Write
-  - Edit
   - Glob
   - Grep
-  - Task
+  - Edit
+  - WebFetch
+  - WebSearch
+  - Bash
 metadata:
   version: "1.0"
-  category: numerical-simulation
-  domain: physics
-  tools:
-    - VASP
-    - VASPKIT
-    - Phonopy
-    - pymatgen
-  processes:
-    - density-functional-theory-calculations
-    - material-synthesis-and-characterization
-    - phase-transition-investigation
+  category: physics
+  tags:
+    - dft
+    - electronic-structure
+    - materials-science
+    - band-structure
 ---
 
 # VASP DFT Calculator Skill
 
 ## Purpose
-
-Provides comprehensive VASP density functional theory calculation capabilities for electronic structure calculations, including band structures, density of states, geometry optimization, and materials property predictions.
+Provide comprehensive integration with VASP for density functional theory calculations, electronic structure analysis, and materials property predictions.
 
 ## Capabilities
-
-- **Input File Generation**: Create INCAR, POSCAR, POTCAR, and KPOINTS files with appropriate settings
-- **K-point Mesh Optimization**: Determine optimal k-point sampling for accuracy vs. computational cost
-- **SCF Convergence**: Manage self-consistent field convergence with appropriate mixing schemes
-- **Band Structure Calculation**: Compute and plot band structures along high-symmetry paths
-- **DOS Calculation**: Calculate total and projected density of states
-- **Geometry Optimization**: Perform ionic relaxation and cell optimization
-- **Phonon Calculations**: Interface with Phonopy for lattice dynamics
+- INCAR/POSCAR/POTCAR generation
+- k-point mesh optimization
+- Self-consistent field convergence management
+- Band structure and DOS calculation
+- Geometry optimization workflows
+- Phonon calculation setup (with Phonopy)
 
 ## Usage Guidelines
+- Select appropriate exchange-correlation functionals
+- Converge k-point mesh and energy cutoff systematically
+- Use appropriate smearing methods for metals vs insulators
+- Document pseudopotential versions for reproducibility
 
-1. **Calculation Setup**
-   - Choose appropriate exchange-correlation functional (PBE, PBE+U, HSE06)
-   - Set ENCUT based on POTCAR recommendations
-   - Configure k-point mesh appropriate for system size
-   - Set EDIFF and EDIFFG for convergence criteria
+## Dependencies
+- VASP
+- VASPKIT
+- Phonopy
+- pymatgen
 
-2. **Convergence Testing**
-   - Test ENCUT convergence (typically +30% above POTCAR recommendation)
-   - Test k-point convergence for total energy
-   - Check magnetic moment convergence for spin-polarized calculations
-
-3. **Workflow Best Practices**
-   - Start with rough optimization before fine calculations
-   - Use IBRION=2 for ionic relaxation
-   - Enable symmetry (ISYM=2) when appropriate
-   - Save WAVECAR and CHGCAR for restart capabilities
-
-4. **Post-Processing**
-   - Use VASPKIT for DOS and band structure extraction
-   - Use pymatgen for structure manipulation
-   - Validate results against experimental data
-   - Document all calculation parameters
+## Process Integration
+- Density Functional Theory Calculations
+- Material Synthesis and Characterization
+- Phase Transition Investigation
