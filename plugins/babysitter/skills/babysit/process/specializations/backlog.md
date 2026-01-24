@@ -196,7 +196,9 @@ the same domain and specialization dir as the process file. rnd specialzations d
 if the skill or agent is common or shared between specializations, create the skills or agents directory in common ancestors directories. for example, if the skill name is as generic as developer-skill, create the plugins/babysitter/skills/babysit/process/specializations/skills/developer-skill/ directory, then create the files (SKILL.md, README.md, references/ , scripts/ etc.). include supporting files, scripts, documentation, etc.
 
 do it for ALL the skills and agents in the skills-agents-backlog.md file. mark when done with a checkmark.
+iterate again and map gaps in the skills-agents-backlog.md file until all gaps are filled and all the skills and agents are created.
 
 ## Phase 7: integrate the skill or agent into the process file
 
 For each skill and agent, update the relevant processes js files to use it
+do it for ALL the skills and agents in the skills-agents-backlog.md file and in the processes js files. 
