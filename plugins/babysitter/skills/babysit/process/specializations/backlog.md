@@ -112,9 +112,15 @@ Create a processes-backlog.md file in the directory. This file will contain the 
 
 for each process in the processes-backlog.md file, create a js file in the directory. according to the syntax, conventions and patterns of the Babysitter SDK and the rest of the existing processes.
 
-## Phase 4: For each process file, identify subagents or relevant skills (some of them are currently using the general-purpose agents) to be created or searched for to support the process. and create a skills-agents-backlog.md file in the directory. this file will contain the list of skills and agents to be created or searched for to support the process. with bullet point (open todo, for each skill and agent identified - with a short description of the skill and agent, and a link to the reference if available)
+## Phase 4: Identify skills and agents to support the processes
 
-## Phase 5: Research and add references to the skills-agents-references.md file.
+For each process implemented as a js file, identify agents (subagents) or relevant skills (some of them are currently using the general-purpose agents) to be created or searched for to support the process. and create a skills-agents-backlog.md file in the directory. this file will contain the list of skills and agents to be created or searched for to support the process. with bullet point (open todo, for each skill and agent identified - with a short description of the skill and agent, and a link to the reference if available)
+
+if the skill or agent is common or shared between specializations, create the skills or agents directory in common ancestors directories. for example, if the skill name is as generic as developer-skill, put it in the skills-agents-backlog.md file in the common ancestors directories (could also be under a specific domain directory).
+
+## Phase 5: Research and add references to the skills-agents-references.md file
+
+from skills-agents-backlog.md (at any level of the directory structure)
 
 Look online (mostly in github) for community created claude skills, agents, plugins and mcps that can be used to support the processes. and add them to the skills-agents-references.md file.
 
@@ -122,7 +128,6 @@ Reference links for skills and agents search:
 
 https://github.com/alirezarezvani/claude-skills/tree/main
 https://github.com/wshobson/agents
-
 https://github.com/KhazP/vibe-coding-prompt-template
 https://github.com/kasperjunge/agent-resources
 https://github.com/levnikolaevich/claude-code-skills
@@ -172,6 +177,8 @@ https://github.com/OutlineDriven/odin-claude-plugin
 https://github.com/urav06/dialectic
 https://github.com/xbim08/awesome-claude-code-plugins/tree/main/plugins
 
+also the claude-skills tag on github: https://github.com/topics/claude-skills
+
 ## Phase 5: create, copy or update the skill or agent file in the relevant directory.
 
 if found online, copy the entire content include supporting files, scripts, documentation, etc.
@@ -183,8 +190,8 @@ for example, if the skill name is analyzer-skill, for the domain of business and
 
 the same domain and specialization dir as the process file. rnd specialzations does not have a domain directory and are under the specializations directory. for example: specializations/data-science-ml/skills and specializations/data-science-ml/agents
 
+if the skill or agent is common or shared between specializations, create the skills or agents directory in common ancestors directories. for example, if the skill name is as generic as developer-skill, create the plugins/babysitter/skills/babysit/process/specializations/skills/developer-skill/ directory, then create the files (SKILL.md, README.md, references/ , scripts/ etc.). include supporting files, scripts, documentation, etc.
+
 ## Phase 6: integrate the skill or agent into the process file
 
 For each skill and agent, update the relevant processes js files to use it
-
-
