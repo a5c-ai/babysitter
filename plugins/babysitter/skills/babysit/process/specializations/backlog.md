@@ -41,6 +41,13 @@ Engineering Specializations (give a proper name to each specialization): (not un
 [x] SDKs Development, Platforms Development, Systems Development and Tools Development, Frameworks Development, Libraries Development, etc.
 [x] GPU Programming, CUDA, OpenCL, etc.
 [x] FPGA Programming, VHDL, Verilog, etc.
+[x] Cryptography, Blockchain Development, Smart Contracts, Zero-Knowledge Proofs, etc.
+[x] CLI development. MCP development.
+[x] Programming Languages Development, Compilers Development, Interpreters Development, etc.
+[x] Network Programming, Network Protocols, Network Security, Network Management, Network Monitoring, Network Analysis, Network Troubleshooting, etc.
+[x] Porting, Refactoring, Modernization, Migration, etc.
+[x] Performance Optimization, Profiling, Benchmarking, Memory Management, Memory Leaks, Memory Leak Detection, Memory Leak Fixing, etc.
+[x] Security Research, Vulnerability Research, Vulnerability Detection, Vulnerability Fixing, etc.
 
 Science Specializations (give a proper name to each specialization): each in process/specializations/domains/science/[specialization-name-slugified]/
 
