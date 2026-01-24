@@ -1,6 +1,6 @@
 ---
 name: probabilistic-analysis-toolkit
-description: Analyze randomized algorithms using probability theory tools and concentration inequalities
+description: Analyze randomized algorithms with probability theory tools and concentration inequalities
 allowed-tools:
   - Bash
   - Read
@@ -8,53 +8,42 @@ allowed-tools:
   - Edit
   - Glob
   - Grep
-  - Task
 metadata:
-  version: "1.0"
-  category: complexity-theory
-  domain: computer-science
-  tools:
-    - Symbolic probability
-    - Statistical libraries
-    - Mathematical computation
-  processes:
-    - randomized-algorithm-analysis
-    - approximation-algorithm-design
+  specialization: computer-science
+  domain: science
+  category: randomized-algorithms
+  phase: 6
 ---
 
-# Probabilistic Analysis Toolkit Skill
+# Probabilistic Analysis Toolkit
 
 ## Purpose
 
-Provides probabilistic analysis capabilities for analyzing randomized algorithms using expected value calculations and concentration inequalities.
+Provides expert guidance on analyzing randomized algorithms using probability theory.
 
 ## Capabilities
 
-- **Expected Value**: Calculate expected values of random variables
-- **Chernoff Bounds**: Apply Chernoff and Hoeffding bounds
-- **Moment Analysis**: Use Markov and Chebyshev inequalities
-- **MGF Analysis**: Apply moment generating function techniques
-- **Inequality Selection**: Select appropriate concentration inequalities
+- Expected value calculations
+- Chernoff and Hoeffding bound applications
+- Markov and Chebyshev inequality analysis
+- Moment generating function analysis
+- Concentration inequality selection
+- Tail bound derivation
 
 ## Usage Guidelines
 
-1. **Random Variable Setup**
-   - Identify random variables in algorithm
-   - Determine distributions
-   - Check independence conditions
+1. **Algorithm Definition**: Specify randomized algorithm
+2. **Random Variable Identification**: Identify key quantities
+3. **Bound Selection**: Choose appropriate inequality
+4. **Analysis**: Derive probability bounds
+5. **Documentation**: Generate formal analysis
 
-2. **Expectation Analysis**
-   - Calculate expected running time
-   - Compute expected solution quality
-   - Use linearity of expectation
+## Dependencies
 
-3. **Concentration Bounds**
-   - Select appropriate concentration inequality
-   - Apply bounds to derive high-probability results
-   - Handle dependencies when present
+- Symbolic probability
+- Statistical computation
 
-4. **Best Practices**
-   - Verify independence assumptions
-   - Choose tightest applicable bounds
-   - Document probability calculations
-   - Consider derandomization potential
+## Process Integration
+
+- Randomized Algorithm Analysis
+- Approximation Algorithm Design workflows

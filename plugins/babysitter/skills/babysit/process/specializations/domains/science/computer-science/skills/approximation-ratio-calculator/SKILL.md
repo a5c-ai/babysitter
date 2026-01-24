@@ -8,53 +8,42 @@ allowed-tools:
   - Edit
   - Glob
   - Grep
-  - Task
 metadata:
-  version: "1.0"
-  category: complexity-theory
-  domain: computer-science
-  tools:
-    - LP/ILP solvers
-    - Symbolic computation
-    - Mathematical analysis
-  processes:
-    - approximation-algorithm-design
-    - algorithm-complexity-analysis
+  specialization: computer-science
+  domain: science
+  category: approximation-algorithms
+  phase: 6
 ---
 
-# Approximation Ratio Calculator Skill
+# Approximation Ratio Calculator
 
 ## Purpose
 
-Provides approximation analysis capabilities for determining and proving approximation ratios of algorithms for NP-hard optimization problems.
+Provides expert guidance on analyzing approximation algorithms and proving their performance guarantees.
 
 ## Capabilities
 
-- **LP Relaxation Analysis**: Analyze linear programming relaxations
-- **Integrality Gap**: Compute integrality gap for LP-based algorithms
-- **Randomized Rounding**: Analyze randomized rounding schemes
-- **Factor Derivation**: Derive approximation factors formally
-- **PTAS Assessment**: Assess PTAS/FPTAS feasibility
+- LP relaxation analysis
+- Integrality gap computation
+- Randomized rounding analysis
+- Approximation factor derivation
+- PTAS/FPTAS feasibility assessment
+- Inapproximability connection
 
 ## Usage Guidelines
 
-1. **Problem Setup**
-   - Formalize optimization problem
-   - Define approximation goal (minimize/maximize)
-   - Identify optimal solution bound
+1. **Algorithm Definition**: Specify approximation algorithm
+2. **Relaxation Analysis**: Analyze LP/SDP relaxation
+3. **Ratio Derivation**: Prove approximation guarantee
+4. **Gap Analysis**: Compute integrality gap
+5. **Documentation**: Generate formal proof
 
-2. **Analysis Method**
-   - Design LP relaxation if applicable
-   - Analyze algorithm output quality
-   - Compare to optimal bound
+## Dependencies
 
-3. **Ratio Proof**
-   - Establish worst-case ratio
-   - Consider tight examples
-   - Verify analysis correctness
+- LP/ILP solvers
+- Symbolic computation
 
-4. **Best Practices**
-   - Prove both upper and lower bounds when possible
-   - Document tight examples
-   - Consider inapproximability results
-   - Compare with known algorithms
+## Process Integration
+
+- Approximation Algorithm Design
+- Algorithm Complexity Analysis workflows

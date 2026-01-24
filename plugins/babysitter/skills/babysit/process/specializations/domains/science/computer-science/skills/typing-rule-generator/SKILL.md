@@ -1,6 +1,6 @@
 ---
 name: typing-rule-generator
-description: Generate and format typing rules in inference rule notation for programming language design
+description: Generate and format typing rules in inference rule notation for type system design
 allowed-tools:
   - Bash
   - Read
@@ -8,53 +8,42 @@ allowed-tools:
   - Edit
   - Glob
   - Grep
-  - Task
 metadata:
-  version: "1.0"
-  category: programming-language-theory
-  domain: computer-science
-  tools:
-    - LaTeX
-    - Ott specification language
-    - LNGen
-  processes:
-    - type-system-design
-    - operational-semantics-specification
+  specialization: computer-science
+  domain: science
+  category: programming-languages
+  phase: 6
 ---
 
-# Typing Rule Generator Skill
+# Typing Rule Generator
 
 ## Purpose
 
-Provides typing rule generation capabilities for creating publication-quality inference rule notation in programming language research.
+Provides expert guidance on generating and formatting typing rules for programming language design.
 
 ## Capabilities
 
-- **LaTeX Generation**: Generate LaTeX inference rule notation
-- **Syntax-Directed Rules**: Derive rules from language syntax
-- **Derivation Trees**: Construct typing derivation trees
-- **Dependency Analysis**: Analyze rule dependencies
-- **Ott Export**: Export to Ott/LNGen format for mechanization
+- LaTeX inference rule generation
+- Syntax-directed rule derivation
+- Typing derivation tree construction
+- Rule dependency analysis
+- Export to Ott/LNGen format
+- Consistency checking
 
 ## Usage Guidelines
 
-1. **Rule Design**
-   - Define typing judgment structure
-   - Identify contexts and environments
-   - Specify subtyping if present
+1. **Language Definition**: Specify syntax and types
+2. **Rule Derivation**: Generate typing rules
+3. **Formatting**: Produce LaTeX output
+4. **Derivation Trees**: Build example derivations
+5. **Export**: Generate tool input
 
-2. **Rule Generation**
-   - Generate rules for each syntactic form
-   - Handle variable binding correctly
-   - Include well-formedness conditions
+## Dependencies
 
-3. **Formatting**
-   - Generate publication-quality LaTeX
-   - Ensure consistent notation
-   - Include rule names and labels
+- LaTeX
+- Ott specification language
 
-4. **Best Practices**
-   - Follow established notation conventions
-   - Document rule intuitions
-   - Verify rule coverage of syntax
-   - Export to proof assistant format
+## Process Integration
+
+- Type System Design
+- Operational Semantics Specification workflows
