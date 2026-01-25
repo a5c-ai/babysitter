@@ -1,45 +1,59 @@
 ---
 name: network-visualizer
-description: Network and graph visualization for citation networks, causal diagrams, and system maps
+description: Skill for visualizing network and graph data
 allowed-tools:
   - Bash
   - Read
   - Write
-  - Edit
-  - Glob
-  - Grep
 metadata:
   specialization: scientific-discovery
   domain: science
-  category: data-visualization
-  phase: 6
+  category: Visualization
+  skill-id: SK-SCIDISC-022
 ---
 
-# Network Visualizer
+# Network Visualizer Skill
 
 ## Purpose
 
-Provides network and graph visualization capabilities for citation networks, causal diagrams, and system maps.
+Visualize network and graph data for exploring relationships, communities, and structural patterns in complex systems.
 
 ## Capabilities
 
-- Force-directed layouts
-- Hierarchical layouts
-- Community detection visualization
-- Interactive exploration
-- Edge bundling for large networks
-- Temporal network animation
+- Layout network graphs
+- Detect communities
+- Highlight node attributes
+- Calculate centrality
+- Animate dynamics
+- Export visualizations
 
 ## Usage Guidelines
 
-1. **Layout Selection**: Choose appropriate layout algorithm
-2. **Community Detection**: Highlight network structure
-3. **Interactivity**: Enable exploration for complex networks
-4. **Animation**: Show temporal evolution when relevant
+1. Import network data
+2. Select layout algorithm
+3. Configure styling
+4. Apply analysis overlays
+5. Refine visualization
+6. Export results
 
-## Tools/Libraries
+## Process Integration
 
-- NetworkX
-- pyvis
-- Gephi (via API)
-- D3.js
+Works within scientific discovery workflows for:
+- Citation network analysis
+- Social network visualization
+- Biological pathway display
+- Relationship exploration
+
+## Configuration
+
+- Layout algorithms
+- Node/edge styling
+- Analysis overlays
+- Export options
+
+## Output Artifacts
+
+- Network visualizations
+- Community maps
+- Centrality highlights
+- Interactive graphs

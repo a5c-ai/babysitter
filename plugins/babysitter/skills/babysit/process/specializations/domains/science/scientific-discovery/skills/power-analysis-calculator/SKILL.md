@@ -1,44 +1,59 @@
 ---
 name: power-analysis-calculator
-description: Statistical power analysis for sample size determination and sensitivity analysis
+description: Skill for statistical power analysis and sample size calculation
 allowed-tools:
   - Bash
   - Read
   - Write
-  - Edit
-  - Glob
-  - Grep
 metadata:
   specialization: scientific-discovery
   domain: science
-  category: experimental-design
-  phase: 6
+  category: Experimental Design
+  skill-id: SK-SCIDISC-013
 ---
 
-# Power Analysis Calculator
+# Power Analysis Calculator Skill
 
 ## Purpose
 
-Provides statistical power analysis capabilities for sample size determination, effect size estimation, and sensitivity analysis.
+Calculate statistical power and required sample sizes for experimental designs to ensure adequate study power.
 
 ## Capabilities
 
-- A priori power analysis
-- Post-hoc power calculation
-- Sensitivity analysis (effect size)
-- Multiple comparison adjustment
-- Complex design power (factorial, repeated measures)
-- Power curve visualization
+- Calculate required sample size
+- Compute statistical power
+- Estimate effect sizes
+- Handle multiple comparisons
+- Support various designs
+- Generate power curves
 
 ## Usage Guidelines
 
-1. **Effect Size**: Specify meaningful effect sizes
-2. **Alpha Level**: Set appropriate significance level
-3. **Power Target**: Typically aim for 0.80 or higher
-4. **Design Complexity**: Account for design factors
+1. Specify design type
+2. Define effect size
+3. Set alpha and power
+4. Calculate sample size
+5. Generate power curves
+6. Document analysis
 
-## Tools/Libraries
+## Process Integration
 
-- statsmodels
-- pingouin
-- GPower (via API)
+Works within scientific discovery workflows for:
+- Study planning
+- Grant proposals
+- Protocol development
+- Design optimization
+
+## Configuration
+
+- Statistical test selection
+- Effect size specifications
+- Power thresholds
+- Output formatting
+
+## Output Artifacts
+
+- Sample size calculations
+- Power analyses
+- Effect size estimates
+- Power curves

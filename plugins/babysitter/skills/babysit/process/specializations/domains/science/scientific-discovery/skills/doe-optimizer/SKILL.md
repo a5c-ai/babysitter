@@ -1,44 +1,59 @@
 ---
 name: doe-optimizer
-description: Design of Experiments optimization for factorial design and response surface methodology
+description: Skill for optimizing experimental designs using DOE principles
 allowed-tools:
   - Bash
   - Read
   - Write
-  - Edit
-  - Glob
-  - Grep
 metadata:
   specialization: scientific-discovery
   domain: science
-  category: experimental-design
-  phase: 6
+  category: Experimental Design
+  skill-id: SK-SCIDISC-016
 ---
 
-# DOE Optimizer
+# DOE Optimizer Skill
 
 ## Purpose
 
-Provides Design of Experiments optimization capabilities for factorial design, response surface methodology, and optimal design selection.
+Optimize experimental designs using Design of Experiments (DOE) principles for efficient factor screening and response optimization.
 
 ## Capabilities
 
-- Full/fractional factorial design
-- Response surface methodology (RSM)
-- D-optimal/I-optimal design generation
-- Taguchi orthogonal arrays
-- Design evaluation metrics
-- Confounding structure analysis
+- Create factorial designs
+- Generate fractional factorials
+- Build response surface designs
+- Optimize factor levels
+- Analyze design properties
+- Generate run orders
 
 ## Usage Guidelines
 
-1. **Design Selection**: Choose appropriate design type
-2. **Factor Levels**: Define factor levels appropriately
-3. **Confounding**: Understand confounding structure
-4. **Optimality**: Use optimal designs when appropriate
+1. Define factors and levels
+2. Select design type
+3. Generate design matrix
+4. Analyze properties
+5. Optimize if needed
+6. Plan execution order
 
-## Tools/Libraries
+## Process Integration
 
-- pyDOE2
-- statsmodels
-- scipy.optimize
+Works within scientific discovery workflows for:
+- Process optimization
+- Factor screening
+- Response modeling
+- Efficient experimentation
+
+## Configuration
+
+- Design type selection
+- Factor specifications
+- Resolution requirements
+- Optimization criteria
+
+## Output Artifacts
+
+- Design matrices
+- Run order lists
+- Property analyses
+- Optimization results

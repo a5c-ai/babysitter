@@ -1,44 +1,59 @@
 ---
 name: time-series-analyzer
-description: Time series analysis for trend detection, seasonality decomposition, and forecasting
+description: Skill for time series analysis and forecasting
 allowed-tools:
   - Bash
   - Read
   - Write
-  - Edit
-  - Glob
-  - Grep
 metadata:
   specialization: scientific-discovery
   domain: science
-  category: statistical-analysis
-  phase: 6
+  category: Data Analysis
+  skill-id: SK-SCIDISC-020
 ---
 
-# Time Series Analyzer
+# Time Series Analyzer Skill
 
 ## Purpose
 
-Provides time series analysis capabilities for trend detection, seasonality decomposition, and forecasting.
+Analyze time series data for trends, seasonality, and patterns, and generate forecasts using appropriate methods.
 
 ## Capabilities
 
-- Stationarity testing (ADF, KPSS)
-- Decomposition (STL, seasonal)
-- ARIMA/SARIMA modeling
-- Prophet/exponential smoothing
-- Change point detection
-- Forecast uncertainty quantification
+- Decompose time series
+- Identify patterns
+- Fit ARIMA models
+- Generate forecasts
+- Assess stationarity
+- Evaluate accuracy
 
 ## Usage Guidelines
 
-1. **Stationarity**: Test and achieve stationarity
-2. **Decomposition**: Separate trend, seasonal, and residual
-3. **Model Selection**: Choose appropriate forecasting model
-4. **Uncertainty**: Quantify forecast uncertainty
+1. Prepare time series
+2. Assess stationarity
+3. Identify patterns
+4. Select model
+5. Generate forecasts
+6. Evaluate accuracy
 
-## Tools/Libraries
+## Process Integration
 
-- statsmodels
-- Prophet
-- pmdarima
+Works within scientific discovery workflows for:
+- Trend analysis
+- Forecasting
+- Pattern detection
+- Temporal modeling
+
+## Configuration
+
+- Model selection
+- Forecast horizons
+- Decomposition methods
+- Accuracy metrics
+
+## Output Artifacts
+
+- Decomposition plots
+- Model diagnostics
+- Forecast results
+- Accuracy reports

@@ -1,44 +1,60 @@
 ---
 name: osf-workflow-integrator
-description: Open Science Framework integration for pre-registration and data/code sharing
+description: Skill for integrating with Open Science Framework workflows
 allowed-tools:
   - Bash
   - Read
   - Write
-  - Edit
-  - Glob
-  - Grep
   - WebFetch
 metadata:
   specialization: scientific-discovery
   domain: science
-  category: reproducibility
-  phase: 6
+  category: Reproducibility
+  skill-id: SK-SCIDISC-026
 ---
 
-# OSF Workflow Integrator
+# OSF Workflow Integrator Skill
 
 ## Purpose
 
-Provides Open Science Framework integration capabilities for pre-registration, data/code sharing, and project management.
+Integrate with Open Science Framework (OSF) for project management, preregistration, and open science workflows.
 
 ## Capabilities
 
-- Pre-registration submission
-- Project structure creation
-- File synchronization
-- DOI generation
-- Access control management
-- Collaboration coordination
+- Create OSF projects
+- Manage preregistrations
+- Upload materials
+- Link external services
+- Track contributions
+- Generate DOIs
 
 ## Usage Guidelines
 
-1. **Pre-registration**: Submit pre-registration before data collection
-2. **Project Structure**: Organize projects consistently
-3. **DOI Assignment**: Generate citable DOIs for outputs
-4. **Access Control**: Manage collaborator permissions
+1. Connect to OSF
+2. Create/select project
+3. Upload materials
+4. Set up integrations
+5. Manage access
+6. Register and publish
 
-## Tools/Libraries
+## Process Integration
 
-- osf-client
-- OSF API
+Works within scientific discovery workflows for:
+- Open science compliance
+- Preregistration submission
+- Material sharing
+- Project management
+
+## Configuration
+
+- OSF credentials
+- Project templates
+- Integration settings
+- Access controls
+
+## Output Artifacts
+
+- OSF projects
+- Preregistrations
+- Material archives
+- DOI references

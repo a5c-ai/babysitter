@@ -1,45 +1,59 @@
 ---
 name: interactive-dashboard-builder
-description: Research dashboard construction for data exploration and result communication
+description: Skill for building interactive data dashboards
 allowed-tools:
   - Bash
   - Read
   - Write
-  - Edit
-  - Glob
-  - Grep
 metadata:
   specialization: scientific-discovery
   domain: science
-  category: data-visualization
-  phase: 6
+  category: Visualization
+  skill-id: SK-SCIDISC-023
 ---
 
-# Interactive Dashboard Builder
+# Interactive Dashboard Builder Skill
 
 ## Purpose
 
-Provides research dashboard construction capabilities for data exploration, hypothesis testing, and result communication.
+Build interactive data dashboards for exploring datasets, communicating findings, and enabling stakeholder engagement.
 
 ## Capabilities
 
-- Widget-based filtering
-- Linked brushing across plots
-- Parameter sensitivity exploration
-- Real-time data updates
-- Sharing and embedding
-- Export to static reports
+- Create interactive plots
+- Build filter controls
+- Link visualizations
+- Enable data exploration
+- Support multiple views
+- Deploy dashboards
 
 ## Usage Guidelines
 
-1. **Widget Design**: Create intuitive filtering controls
-2. **Linked Views**: Connect related visualizations
-3. **Sensitivity**: Enable parameter exploration
-4. **Sharing**: Prepare dashboards for collaboration
+1. Define dashboard goals
+2. Select visualizations
+3. Add interactions
+4. Link components
+5. Test functionality
+6. Deploy dashboard
 
-## Tools/Libraries
+## Process Integration
 
-- Streamlit
-- Panel
-- Dash
-- Voila
+Works within scientific discovery workflows for:
+- Data exploration
+- Results communication
+- Stakeholder engagement
+- Real-time monitoring
+
+## Configuration
+
+- Dashboard frameworks
+- Interaction types
+- Deployment options
+- Data connections
+
+## Output Artifacts
+
+- Interactive dashboards
+- Deployed applications
+- Configuration files
+- Documentation

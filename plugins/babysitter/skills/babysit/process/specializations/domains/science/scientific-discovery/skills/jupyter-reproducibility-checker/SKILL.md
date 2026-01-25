@@ -1,45 +1,59 @@
 ---
 name: jupyter-reproducibility-checker
-description: Notebook reproducibility validation for dependency tracking and environment capture
+description: Skill for checking and ensuring Jupyter notebook reproducibility
 allowed-tools:
   - Bash
   - Read
   - Write
-  - Edit
-  - Glob
-  - Grep
 metadata:
   specialization: scientific-discovery
   domain: science
-  category: reproducibility
-  phase: 6
+  category: Reproducibility
+  skill-id: SK-SCIDISC-024
 ---
 
-# Jupyter Reproducibility Checker
+# Jupyter Reproducibility Checker Skill
 
 ## Purpose
 
-Provides notebook reproducibility validation capabilities for dependency tracking, execution order verification, and environment capture.
+Check and ensure reproducibility of Jupyter notebooks including cell execution order, environment dependencies, and output consistency.
 
 ## Capabilities
 
-- Cell execution order validation
-- Hidden state detection
-- Dependency extraction (pipreqs)
-- Environment capture (pip freeze, conda)
-- Notebook linting
-- Reproducibility scoring
+- Verify execution order
+- Check dependencies
+- Test reproducibility
+- Clear and rerun notebooks
+- Document environments
+- Generate requirements
 
 ## Usage Guidelines
 
-1. **Execution Order**: Verify cells run in order
-2. **Hidden State**: Detect and eliminate hidden state
-3. **Dependencies**: Extract and pin dependencies
-4. **Environment**: Capture complete environment
+1. Load notebook
+2. Check execution order
+3. Identify dependencies
+4. Test fresh execution
+5. Document environment
+6. Generate reports
 
-## Tools/Libraries
+## Process Integration
 
-- nbQA
-- papermill
-- pipreqs
-- nbstripout
+Works within scientific discovery workflows for:
+- Reproducibility audits
+- Notebook cleanup
+- Environment documentation
+- Quality assurance
+
+## Configuration
+
+- Check criteria
+- Execution settings
+- Environment capture
+- Report formatting
+
+## Output Artifacts
+
+- Reproducibility reports
+- Dependency lists
+- Environment files
+- Cleaned notebooks

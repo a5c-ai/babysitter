@@ -1,43 +1,59 @@
 ---
 name: protocol-builder
-description: Research protocol construction for SPIRIT-compliant protocol generation
+description: Skill for building standardized research protocols
 allowed-tools:
-  - Bash
   - Read
   - Write
-  - Edit
-  - Glob
-  - Grep
+  - Bash
 metadata:
   specialization: scientific-discovery
   domain: science
-  category: experimental-design
-  phase: 6
+  category: Experimental Design
+  skill-id: SK-SCIDISC-015
 ---
 
-# Protocol Builder
+# Protocol Builder Skill
 
 ## Purpose
 
-Provides research protocol construction capabilities for SPIRIT-compliant protocol generation and ethics submission preparation.
+Build standardized research protocols following best practices for reproducibility, clarity, and completeness.
 
 ## Capabilities
 
-- SPIRIT checklist compliance
-- Protocol section generation
-- Consent form templating
-- Ethics submission formatting
-- Protocol amendment tracking
-- Registration preparation (ClinicalTrials.gov, OSF)
+- Generate protocol templates
+- Structure methodology sections
+- Include required elements
+- Format for registration
+- Support multiple domains
+- Export in standard formats
 
 ## Usage Guidelines
 
-1. **SPIRIT Compliance**: Follow SPIRIT guidelines for protocols
-2. **Section Completeness**: Include all required sections
-3. **Consent Forms**: Use appropriate templates
-4. **Registration**: Prepare for pre-registration
+1. Select protocol type
+2. Define study parameters
+3. Structure methodology
+4. Include all elements
+5. Review completeness
+6. Export for registration
 
-## Tools/Libraries
+## Process Integration
 
-- Document templates
-- Regulatory databases
+Works within scientific discovery workflows for:
+- Study registration
+- Grant applications
+- Ethics submissions
+- Protocol publication
+
+## Configuration
+
+- Protocol templates
+- Required sections
+- Formatting standards
+- Export options
+
+## Output Artifacts
+
+- Study protocols
+- Registration documents
+- Methods sections
+- Protocol summaries

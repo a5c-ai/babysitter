@@ -1,44 +1,59 @@
 ---
 name: latex-document-compiler
-description: LaTeX document preparation for manuscript formatting and journal submission
+description: Skill for compiling and managing LaTeX documents
 allowed-tools:
   - Bash
   - Read
   - Write
-  - Edit
-  - Glob
-  - Grep
 metadata:
   specialization: scientific-discovery
   domain: science
-  category: scientific-writing
-  phase: 6
+  category: Communication
+  skill-id: SK-SCIDISC-028
 ---
 
-# LaTeX Document Compiler
+# LaTeX Document Compiler Skill
 
 ## Purpose
 
-Provides LaTeX document preparation capabilities for manuscript formatting, bibliography management, and journal submission.
+Compile and manage LaTeX documents including handling bibliographies, figures, and journal-specific templates.
 
 ## Capabilities
 
-- Journal template application
-- BibTeX/BibLaTeX integration
-- Figure/table formatting
-- Cross-reference management
-- PDF compilation
-- Submission package preparation
+- Compile LaTeX documents
+- Manage bibliographies
+- Handle cross-references
+- Apply journal templates
+- Debug compilation errors
+- Generate outputs
 
 ## Usage Guidelines
 
-1. **Templates**: Use journal-specific templates
-2. **Bibliography**: Manage citations with BibTeX
-3. **Cross-References**: Use labels and refs consistently
-4. **Submission**: Prepare complete submission packages
+1. Set up document
+2. Include dependencies
+3. Configure compilation
+4. Run compiler
+5. Debug if needed
+6. Generate output
 
-## Tools/Libraries
+## Process Integration
 
-- latexmk
-- biber
-- pandoc
+Works within scientific discovery workflows for:
+- Manuscript preparation
+- Thesis formatting
+- Report generation
+- Presentation creation
+
+## Configuration
+
+- Compiler selection
+- Template management
+- Bibliography style
+- Output formats
+
+## Output Artifacts
+
+- Compiled PDFs
+- Auxiliary files
+- Error logs
+- Output packages

@@ -1,43 +1,59 @@
 ---
 name: peer-review-simulator
-description: Pre-submission review simulation for methodology critique and clarity assessment
+description: Skill for simulating peer review feedback on manuscripts
 allowed-tools:
-  - Bash
   - Read
   - Write
-  - Edit
-  - Glob
-  - Grep
+  - Bash
 metadata:
   specialization: scientific-discovery
   domain: science
-  category: peer-review
-  phase: 6
+  category: Quality Assurance
+  skill-id: SK-SCIDISC-031
 ---
 
-# Peer Review Simulator
+# Peer Review Simulator Skill
 
 ## Purpose
 
-Provides pre-submission review simulation capabilities for methodology critique, statistical review, and clarity assessment.
+Simulate peer review feedback on manuscripts to identify potential issues and improve quality before submission.
 
 ## Capabilities
 
-- Methodology critique generation
-- Statistical analysis review
-- Clarity and readability assessment
-- Common reviewer concern identification
-- Strength/limitation analysis
-- Revision suggestion generation
+- Analyze manuscript quality
+- Identify methodological issues
+- Check statistical validity
+- Assess presentation clarity
+- Generate reviewer comments
+- Prioritize improvements
 
 ## Usage Guidelines
 
-1. **Methodology Review**: Assess methods critically
-2. **Statistical Review**: Check statistical approaches
-3. **Clarity Assessment**: Evaluate readability
-4. **Revision Guidance**: Generate actionable suggestions
+1. Load manuscript
+2. Analyze structure
+3. Review methodology
+4. Check statistics
+5. Generate feedback
+6. Prioritize issues
 
-## Tools/Libraries
+## Process Integration
 
-- LLM chains
-- Custom rubrics
+Works within scientific discovery workflows for:
+- Pre-submission review
+- Quality improvement
+- Manuscript refinement
+- Author preparation
+
+## Configuration
+
+- Review criteria
+- Strictness levels
+- Focus areas
+- Output formats
+
+## Output Artifacts
+
+- Review reports
+- Comment summaries
+- Issue prioritization
+- Improvement suggestions

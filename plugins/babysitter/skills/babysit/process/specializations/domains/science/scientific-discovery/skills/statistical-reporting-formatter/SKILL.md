@@ -1,44 +1,59 @@
 ---
 name: statistical-reporting-formatter
-description: APA/AMA-compliant statistical result formatting for tables and in-text reporting
+description: Skill for formatting statistical results according to reporting standards
 allowed-tools:
   - Bash
   - Read
   - Write
-  - Edit
-  - Glob
-  - Grep
 metadata:
   specialization: scientific-discovery
   domain: science
-  category: scientific-writing
-  phase: 6
+  category: Communication
+  skill-id: SK-SCIDISC-029
 ---
 
-# Statistical Reporting Formatter
+# Statistical Reporting Formatter Skill
 
 ## Purpose
 
-Provides APA/AMA-compliant statistical result formatting capabilities for tables, figures, and in-text reporting.
+Format statistical results according to APA, journal, and discipline-specific reporting standards for publication.
 
 ## Capabilities
 
-- APA 7th edition formatting
-- Statistical table generation
-- Effect size reporting
-- Confidence interval formatting
-- p-value formatting conventions
-- Automated result text generation
+- Format test results
+- Apply APA style
+- Generate tables
+- Report effect sizes
+- Include confidence intervals
+- Check completeness
 
 ## Usage Guidelines
 
-1. **Style Compliance**: Follow APA 7th or appropriate style
-2. **Tables**: Format statistical tables correctly
-3. **Effect Sizes**: Always report effect sizes
-4. **Confidence Intervals**: Include CIs appropriately
+1. Input statistical output
+2. Select reporting standard
+3. Format results
+4. Generate tables
+5. Review completeness
+6. Export formatted text
 
-## Tools/Libraries
+## Process Integration
 
-- pandas
-- statsmodels
-- Custom formatters
+Works within scientific discovery workflows for:
+- Results reporting
+- Manuscript preparation
+- Table generation
+- Compliance checking
+
+## Configuration
+
+- Reporting standards
+- Decimal precision
+- Table formats
+- Output styles
+
+## Output Artifacts
+
+- Formatted statistics
+- Publication tables
+- In-text citations
+- Compliance reports

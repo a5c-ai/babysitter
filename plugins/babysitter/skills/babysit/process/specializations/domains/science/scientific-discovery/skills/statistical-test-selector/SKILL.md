@@ -1,44 +1,59 @@
 ---
 name: statistical-test-selector
-description: Automated statistical test selection based on data characteristics and research question
+description: Skill for selecting appropriate statistical tests for analyses
 allowed-tools:
-  - Bash
   - Read
   - Write
-  - Edit
-  - Glob
-  - Grep
+  - Bash
 metadata:
   specialization: scientific-discovery
   domain: science
-  category: statistical-analysis
-  phase: 6
+  category: Data Analysis
+  skill-id: SK-SCIDISC-017
 ---
 
-# Statistical Test Selector
+# Statistical Test Selector Skill
 
 ## Purpose
 
-Provides automated statistical test selection based on data characteristics, research question, and assumption checking.
+Select appropriate statistical tests based on data characteristics, research questions, and study design assumptions.
 
 ## Capabilities
 
-- Data distribution assessment
-- Assumption testing (normality, homoscedasticity)
-- Test recommendation based on design
-- Non-parametric alternative suggestions
-- Multiple comparison correction guidance
-- Effect size calculator integration
+- Assess data characteristics
+- Match tests to questions
+- Check assumptions
+- Recommend alternatives
+- Justify selections
+- Document rationale
 
 ## Usage Guidelines
 
-1. **Data Assessment**: Profile data characteristics first
-2. **Assumption Checking**: Test assumptions before selecting tests
-3. **Alternatives**: Consider non-parametric alternatives
-4. **Multiple Testing**: Apply appropriate corrections
+1. Describe research question
+2. Characterize data
+3. Check assumptions
+4. Identify candidate tests
+5. Select optimal test
+6. Document rationale
 
-## Tools/Libraries
+## Process Integration
 
-- scipy.stats
-- pingouin
-- statsmodels
+Works within scientific discovery workflows for:
+- Analysis planning
+- Methods selection
+- Assumption checking
+- Statistical consulting
+
+## Configuration
+
+- Test database
+- Assumption checks
+- Decision trees
+- Output formatting
+
+## Output Artifacts
+
+- Test recommendations
+- Assumption reports
+- Selection rationale
+- Alternative suggestions

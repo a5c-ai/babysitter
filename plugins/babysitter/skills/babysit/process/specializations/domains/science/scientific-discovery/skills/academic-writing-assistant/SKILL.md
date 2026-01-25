@@ -1,44 +1,59 @@
 ---
 name: academic-writing-assistant
-description: Scientific writing support for structure guidance and discipline-specific conventions
+description: Skill for assisting with academic and scientific writing
 allowed-tools:
-  - Bash
   - Read
   - Write
-  - Edit
-  - Glob
-  - Grep
+  - Bash
 metadata:
   specialization: scientific-discovery
   domain: science
-  category: scientific-writing
-  phase: 6
+  category: Communication
+  skill-id: SK-SCIDISC-027
 ---
 
-# Academic Writing Assistant
+# Academic Writing Assistant Skill
 
 ## Purpose
 
-Provides scientific writing support capabilities for structure guidance, clarity improvement, and discipline-specific conventions.
+Assist with academic and scientific writing including structure, style, clarity, and adherence to publication standards.
 
 ## Capabilities
 
-- IMRaD structure enforcement
-- Hedging language suggestions
-- Discipline-specific terminology
-- Passive/active voice balance
-- Transition phrase suggestions
-- Abstract optimization
+- Structure manuscripts
+- Improve clarity
+- Check style consistency
+- Format references
+- Suggest improvements
+- Review grammar
 
 ## Usage Guidelines
 
-1. **Structure**: Follow IMRaD or appropriate format
-2. **Hedging**: Use appropriate hedging language
-3. **Terminology**: Apply discipline conventions
-4. **Clarity**: Prioritize clear communication
+1. Input draft text
+2. Analyze structure
+3. Check style
+4. Suggest improvements
+5. Review changes
+6. Finalize document
 
-## Tools/Libraries
+## Process Integration
 
-- LanguageTool
-- Custom NLP models
+Works within scientific discovery workflows for:
+- Manuscript preparation
+- Grant writing
+- Report creation
+- Thesis development
+
+## Configuration
+
 - Style guides
+- Journal requirements
+- Language preferences
+- Review depth
+
+## Output Artifacts
+
+- Edited manuscripts
+- Style suggestions
+- Structural feedback
+- Improvement reports

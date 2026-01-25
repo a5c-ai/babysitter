@@ -1,44 +1,59 @@
 ---
 name: regression-analyzer
-description: Comprehensive regression analysis for model fitting, diagnostics, and interpretation
+description: Skill for comprehensive regression analysis and modeling
 allowed-tools:
   - Bash
   - Read
   - Write
-  - Edit
-  - Glob
-  - Grep
 metadata:
   specialization: scientific-discovery
   domain: science
-  category: statistical-analysis
-  phase: 6
+  category: Data Analysis
+  skill-id: SK-SCIDISC-019
 ---
 
-# Regression Analyzer
+# Regression Analyzer Skill
 
 ## Purpose
 
-Provides comprehensive regression analysis capabilities for model fitting, diagnostics, and interpretation support.
+Perform comprehensive regression analyses including model fitting, diagnostics, and interpretation for scientific data.
 
 ## Capabilities
 
-- Linear/logistic/Poisson regression
-- Mixed effects models
-- Assumption diagnostics
-- Multicollinearity detection (VIF)
-- Residual analysis
-- Coefficient interpretation support
+- Fit linear models
+- Build generalized models
+- Perform diagnostics
+- Handle multicollinearity
+- Generate predictions
+- Interpret coefficients
 
 ## Usage Guidelines
 
-1. **Model Specification**: Choose appropriate regression model
-2. **Diagnostics**: Check assumptions systematically
-3. **Multicollinearity**: Assess and address if needed
-4. **Interpretation**: Interpret coefficients correctly
+1. Prepare data
+2. Specify model
+3. Fit regression
+4. Run diagnostics
+5. Refine if needed
+6. Interpret results
 
-## Tools/Libraries
+## Process Integration
 
-- statsmodels
-- scikit-learn
-- linearmodels
+Works within scientific discovery workflows for:
+- Relationship modeling
+- Prediction generation
+- Effect estimation
+- Variable selection
+
+## Configuration
+
+- Model specifications
+- Diagnostic tests
+- Variable selection
+- Output formatting
+
+## Output Artifacts
+
+- Model summaries
+- Diagnostic plots
+- Coefficient tables
+- Prediction outputs

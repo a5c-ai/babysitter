@@ -1,44 +1,59 @@
 ---
 name: data-versioning-manager
-description: Research data versioning for dataset tracking and provenance documentation
+description: Skill for managing data versions and provenance
 allowed-tools:
   - Bash
   - Read
   - Write
-  - Edit
-  - Glob
-  - Grep
 metadata:
   specialization: scientific-discovery
   domain: science
-  category: reproducibility
-  phase: 6
+  category: Reproducibility
+  skill-id: SK-SCIDISC-025
 ---
 
-# Data Versioning Manager
+# Data Versioning Manager Skill
 
 ## Purpose
 
-Provides research data versioning capabilities for dataset tracking, provenance documentation, and sharing preparation.
+Manage data versions, track provenance, and ensure data lineage for reproducible scientific research.
 
 ## Capabilities
 
-- Dataset version control
-- Data provenance tracking
-- Metadata schema enforcement
-- Data citation generation
-- Repository preparation (Zenodo, Figshare)
-- FAIR compliance checking
+- Version datasets
+- Track data lineage
+- Document transformations
+- Enable rollback
+- Support collaboration
+- Generate provenance
 
 ## Usage Guidelines
 
-1. **Version Control**: Track all dataset versions
-2. **Provenance**: Document data lineage
-3. **Metadata**: Enforce schema compliance
-4. **FAIR Principles**: Ensure data is findable, accessible, interoperable, reusable
+1. Initialize versioning
+2. Track data changes
+3. Document transformations
+4. Create snapshots
+5. Manage branches
+6. Export provenance
 
-## Tools/Libraries
+## Process Integration
 
-- DVC
-- Git LFS
-- datacite
+Works within scientific discovery workflows for:
+- Data management
+- Reproducibility support
+- Collaboration enabling
+- Audit compliance
+
+## Configuration
+
+- Version control system
+- Storage backends
+- Metadata schemas
+- Access controls
+
+## Output Artifacts
+
+- Version histories
+- Provenance records
+- Transformation logs
+- Data snapshots

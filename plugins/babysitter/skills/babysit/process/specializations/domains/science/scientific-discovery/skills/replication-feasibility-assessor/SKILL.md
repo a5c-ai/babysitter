@@ -1,43 +1,59 @@
 ---
 name: replication-feasibility-assessor
-description: Replication study feasibility for protocol completeness and resource estimation
+description: Skill for assessing feasibility of study replication
 allowed-tools:
-  - Bash
   - Read
   - Write
-  - Edit
-  - Glob
-  - Grep
+  - Bash
 metadata:
   specialization: scientific-discovery
   domain: science
-  category: peer-review
-  phase: 6
+  category: Quality Assurance
+  skill-id: SK-SCIDISC-032
 ---
 
-# Replication Feasibility Assessor
+# Replication Feasibility Assessor Skill
 
 ## Purpose
 
-Provides replication study feasibility capabilities for protocol completeness, resource estimation, and deviation impact analysis.
+Assess the feasibility of replicating published studies by evaluating method clarity, resource requirements, and material availability.
 
 ## Capabilities
 
-- Protocol completeness scoring
-- Resource requirement estimation
-- Critical detail identification
-- Deviation impact analysis
-- Replication difficulty rating
-- Missing information flagging
+- Evaluate method clarity
+- Estimate resource needs
+- Check material availability
+- Assess expertise requirements
+- Identify barriers
+- Generate feasibility reports
 
 ## Usage Guidelines
 
-1. **Completeness Assessment**: Score protocol detail level
-2. **Resource Estimation**: Estimate required resources
-3. **Critical Details**: Identify must-have information
-4. **Deviation Analysis**: Assess impact of protocol deviations
+1. Review study methods
+2. Assess clarity
+3. Estimate resources
+4. Check availability
+5. Identify barriers
+6. Generate report
 
-## Tools/Libraries
+## Process Integration
 
-- Custom assessment frameworks
-- NLP extractors
+Works within scientific discovery workflows for:
+- Replication planning
+- Study selection
+- Resource estimation
+- Feasibility analysis
+
+## Configuration
+
+- Assessment criteria
+- Resource databases
+- Barrier categories
+- Report templates
+
+## Output Artifacts
+
+- Feasibility assessments
+- Resource estimates
+- Barrier analyses
+- Replication plans

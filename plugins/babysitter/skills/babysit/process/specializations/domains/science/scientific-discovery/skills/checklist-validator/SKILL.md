@@ -1,43 +1,59 @@
 ---
 name: checklist-validator
-description: Reporting guideline compliance for CONSORT, PRISMA, STROBE validation
+description: Skill for validating research against reporting checklists
 allowed-tools:
-  - Bash
   - Read
   - Write
-  - Edit
-  - Glob
-  - Grep
+  - Bash
 metadata:
   specialization: scientific-discovery
   domain: science
-  category: peer-review
-  phase: 6
+  category: Quality Assurance
+  skill-id: SK-SCIDISC-030
 ---
 
-# Checklist Validator
+# Checklist Validator Skill
 
 ## Purpose
 
-Provides reporting guideline compliance capabilities for CONSORT, PRISMA, STROBE, and other checklist validation.
+Validate research manuscripts against reporting checklists such as CONSORT, PRISMA, STROBE, and other guidelines.
 
 ## Capabilities
 
-- CONSORT checklist validation
-- PRISMA compliance checking
-- STROBE item verification
-- ARRIVE guidelines (animal research)
-- Checklist item location tracking
-- Compliance gap reporting
+- Apply reporting checklists
+- Identify missing elements
+- Suggest improvements
+- Track compliance
+- Generate reports
+- Support multiple guidelines
 
 ## Usage Guidelines
 
-1. **Checklist Selection**: Choose appropriate reporting guideline
-2. **Item Verification**: Check each item systematically
-3. **Location Tracking**: Document where items are addressed
-4. **Gap Reporting**: Identify and address gaps
+1. Select checklist type
+2. Load manuscript
+3. Assess each item
+4. Identify gaps
+5. Generate report
+6. Track completion
 
-## Tools/Libraries
+## Process Integration
 
-- Custom rule engines
-- NLP extractors
+Works within scientific discovery workflows for:
+- Manuscript review
+- Submission preparation
+- Quality assurance
+- Compliance checking
+
+## Configuration
+
+- Checklist library
+- Assessment criteria
+- Report templates
+- Tracking options
+
+## Output Artifacts
+
+- Compliance reports
+- Gap analyses
+- Checklist completions
+- Improvement suggestions

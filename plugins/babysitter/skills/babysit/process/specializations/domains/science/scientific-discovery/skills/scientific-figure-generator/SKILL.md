@@ -1,45 +1,59 @@
 ---
 name: scientific-figure-generator
-description: Publication-quality figure generation with journal style compliance and accessibility
+description: Skill for generating publication-quality scientific figures
 allowed-tools:
   - Bash
   - Read
   - Write
-  - Edit
-  - Glob
-  - Grep
 metadata:
   specialization: scientific-discovery
   domain: science
-  category: data-visualization
-  phase: 6
+  category: Visualization
+  skill-id: SK-SCIDISC-021
 ---
 
-# Scientific Figure Generator
+# Scientific Figure Generator Skill
 
 ## Purpose
 
-Provides publication-quality figure generation capabilities with journal style compliance and accessibility considerations.
+Generate publication-quality scientific figures following journal standards and best practices for data visualization.
 
 ## Capabilities
 
-- Journal style template application
-- Multi-panel figure composition
-- Statistical annotation (significance stars)
-- Color-blind friendly palettes
-- Vector format export (SVG, PDF)
-- Figure legend generation
+- Create statistical plots
+- Generate multi-panel figures
+- Apply journal formatting
+- Export in multiple formats
+- Ensure accessibility
+- Add annotations
 
 ## Usage Guidelines
 
-1. **Style Templates**: Apply journal-specific styles
-2. **Multi-Panel Layout**: Compose complex figures effectively
-3. **Accessibility**: Use color-blind friendly palettes
-4. **Vector Output**: Export in vector formats for quality
+1. Prepare data
+2. Select visualization type
+3. Apply styling
+4. Add annotations
+5. Check accessibility
+6. Export figure
 
-## Tools/Libraries
+## Process Integration
 
-- matplotlib
-- seaborn
-- plotly
-- altair
+Works within scientific discovery workflows for:
+- Manuscript preparation
+- Presentation creation
+- Data communication
+- Results visualization
+
+## Configuration
+
+- Journal style guides
+- Color schemes
+- Resolution settings
+- Export formats
+
+## Output Artifacts
+
+- Publication figures
+- Multi-panel layouts
+- Vector graphics
+- Figure legends

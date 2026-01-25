@@ -1,44 +1,59 @@
 ---
 name: meta-analysis-engine
-description: Meta-analysis for effect size pooling, heterogeneity assessment, and publication bias detection
+description: Skill for conducting meta-analyses of research findings
 allowed-tools:
   - Bash
   - Read
   - Write
-  - Edit
-  - Glob
-  - Grep
 metadata:
   specialization: scientific-discovery
   domain: science
-  category: statistical-analysis
-  phase: 6
+  category: Data Analysis
+  skill-id: SK-SCIDISC-018
 ---
 
-# Meta-Analysis Engine
+# Meta-Analysis Engine Skill
 
 ## Purpose
 
-Provides meta-analysis capabilities for effect size pooling, heterogeneity assessment, and publication bias detection.
+Conduct meta-analyses to synthesize effect sizes across studies and estimate pooled effects with heterogeneity assessment.
 
 ## Capabilities
 
-- Fixed/random effects meta-analysis
-- Heterogeneity metrics (I-squared, tau-squared)
-- Funnel plot generation
-- Trim-and-fill analysis
-- Subgroup analysis
-- Meta-regression
+- Extract effect sizes
+- Calculate pooled estimates
+- Assess heterogeneity
+- Perform subgroup analyses
+- Generate forest plots
+- Evaluate publication bias
 
 ## Usage Guidelines
 
-1. **Effect Size Extraction**: Extract standardized effect sizes
-2. **Heterogeneity Assessment**: Evaluate between-study variance
-3. **Publication Bias**: Test and adjust for bias
-4. **Sensitivity Analysis**: Check robustness of findings
+1. Extract study data
+2. Calculate effect sizes
+3. Pool estimates
+4. Assess heterogeneity
+5. Perform subgroup analyses
+6. Evaluate bias
 
-## Tools/Libraries
+## Process Integration
 
-- metafor (R via rpy2)
-- PythonMeta
-- forestplot
+Works within scientific discovery workflows for:
+- Systematic reviews
+- Evidence synthesis
+- Research summarization
+- Effect estimation
+
+## Configuration
+
+- Effect size metrics
+- Pooling methods
+- Heterogeneity tests
+- Visualization options
+
+## Output Artifacts
+
+- Pooled estimates
+- Forest plots
+- Heterogeneity statistics
+- Bias assessments

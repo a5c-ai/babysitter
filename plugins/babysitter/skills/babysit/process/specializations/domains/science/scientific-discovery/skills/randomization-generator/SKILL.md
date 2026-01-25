@@ -1,44 +1,59 @@
 ---
 name: randomization-generator
-description: Randomization protocol for allocation sequence generation and block randomization
+description: Skill for generating randomization schemes for experiments
 allowed-tools:
   - Bash
   - Read
   - Write
-  - Edit
-  - Glob
-  - Grep
 metadata:
   specialization: scientific-discovery
   domain: science
-  category: experimental-design
-  phase: 6
+  category: Experimental Design
+  skill-id: SK-SCIDISC-014
 ---
 
-# Randomization Generator
+# Randomization Generator Skill
 
 ## Purpose
 
-Provides randomization protocol capabilities for allocation sequence generation, stratified randomization, and audit trail creation.
+Generate randomization schemes for experimental designs including simple, stratified, and adaptive randomization methods.
 
 ## Capabilities
 
-- Simple randomization
-- Block randomization (fixed/permuted)
-- Stratified randomization
-- Minimization/adaptive randomization
-- Allocation concealment verification
-- Randomization audit trail
+- Generate random assignments
+- Create stratified randomization
+- Implement block randomization
+- Support adaptive designs
+- Ensure allocation concealment
+- Document randomization
 
 ## Usage Guidelines
 
-1. **Method Selection**: Choose appropriate randomization method
-2. **Block Size**: Consider practical and statistical factors
-3. **Stratification**: Stratify on key prognostic factors
-4. **Concealment**: Ensure proper allocation concealment
+1. Define design requirements
+2. Select randomization method
+3. Configure parameters
+4. Generate assignments
+5. Verify balance
+6. Document scheme
 
-## Tools/Libraries
+## Process Integration
 
-- scipy
-- random
-- Custom protocols
+Works within scientific discovery workflows for:
+- Clinical trial design
+- Laboratory experiments
+- Field studies
+- A/B testing
+
+## Configuration
+
+- Randomization method
+- Stratification factors
+- Block sizes
+- Seed management
+
+## Output Artifacts
+
+- Randomization lists
+- Allocation sequences
+- Balance checks
+- Scheme documentation
