@@ -19,8 +19,10 @@ import { defineTask } from '@a5c-ai/babysitter-sdk';
 const analyzeSearchSpaceTask = defineTask('search-analyze-space', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Search Space Analysis',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'search-algorithm-analyst',
+    skills: ['hypothesis-generator', 'formal-logic-reasoner'],
     prompt: {
       role: 'Search space analysis and problem formulation specialist',
       task: 'Analyze the search space structure and define the problem formally',
@@ -92,8 +94,10 @@ const analyzeSearchSpaceTask = defineTask('search-analyze-space', (args, taskCtx
 const designHeuristicFunctionTask = defineTask('search-design-heuristic', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Heuristic Function Design',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'search-algorithm-analyst',
+    skills: ['hypothesis-generator', 'formal-logic-reasoner'],
     prompt: {
       role: 'Heuristic function design and admissibility specialist',
       task: 'Design effective heuristic functions for guiding the search',
@@ -158,8 +162,10 @@ const designHeuristicFunctionTask = defineTask('search-design-heuristic', (args,
 const selectSearchAlgorithmTask = defineTask('search-select-algorithm', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Search Algorithm Selection',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'search-algorithm-analyst',
+    skills: ['hypothesis-generator', 'formal-logic-reasoner'],
     prompt: {
       role: 'Search algorithm selection and configuration specialist',
       task: 'Select and configure the most appropriate search algorithm',
@@ -226,8 +232,10 @@ const selectSearchAlgorithmTask = defineTask('search-select-algorithm', (args, t
 const executeSearchTask = defineTask('search-execute', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Search Execution',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'search-algorithm-analyst',
+    skills: ['hypothesis-generator', 'formal-logic-reasoner'],
     prompt: {
       role: 'Search execution and monitoring specialist',
       task: 'Execute the search algorithm and track progress',
@@ -292,8 +300,10 @@ const executeSearchTask = defineTask('search-execute', (args, taskCtx) => ({
 const extractSolutionPathTask = defineTask('search-extract-solution', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Solution Path Extraction',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'search-algorithm-analyst',
+    skills: ['hypothesis-generator', 'formal-logic-reasoner'],
     prompt: {
       role: 'Solution extraction and path reconstruction specialist',
       task: 'Extract and reconstruct the solution path from search results',
@@ -362,8 +372,10 @@ const extractSolutionPathTask = defineTask('search-extract-solution', (args, tas
 const analyzeSearchPerformanceTask = defineTask('search-analyze-performance', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Search Performance Analysis',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'search-algorithm-analyst',
+    skills: ['hypothesis-generator', 'formal-logic-reasoner'],
     prompt: {
       role: 'Search performance analysis and optimization specialist',
       task: 'Analyze the search performance and identify improvement opportunities',
@@ -427,8 +439,10 @@ const analyzeSearchPerformanceTask = defineTask('search-analyze-performance', (a
 const exploreAlternativeSolutionsTask = defineTask('search-explore-alternatives', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Alternative Solution Exploration',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'search-algorithm-analyst',
+    skills: ['hypothesis-generator', 'formal-logic-reasoner'],
     prompt: {
       role: 'Alternative solution discovery and diversity specialist',
       task: 'Explore alternative solutions and assess solution diversity',
@@ -491,8 +505,10 @@ const exploreAlternativeSolutionsTask = defineTask('search-explore-alternatives'
 const analyzeRobustnessTask = defineTask('search-robustness-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Solution Robustness Analysis',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'search-algorithm-analyst',
+    skills: ['hypothesis-generator', 'formal-logic-reasoner'],
     prompt: {
       role: 'Solution robustness and sensitivity analysis specialist',
       task: 'Analyze the robustness of the solution to perturbations',
@@ -558,8 +574,10 @@ const analyzeRobustnessTask = defineTask('search-robustness-analysis', (args, ta
 const synthesizeResultsTask = defineTask('search-synthesize', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Search-Based Reasoning Synthesis',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'search-algorithm-analyst',
+    skills: ['hypothesis-generator', 'formal-logic-reasoner'],
     prompt: {
       role: 'Search-based reasoning synthesis specialist',
       task: 'Synthesize all search results into comprehensive conclusions and recommendations',

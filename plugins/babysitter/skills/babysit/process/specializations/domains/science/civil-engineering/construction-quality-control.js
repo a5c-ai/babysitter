@@ -167,7 +167,6 @@ export async function process(inputs, ctx) {
 export const requirementsAnalysisTask = defineTask('requirements-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Analyze quality requirements',
-  skill: { name: 'inspection-tracking-system' },
   agent: {
     name: 'quality-control-specialist',
     prompt: {
@@ -211,7 +210,6 @@ export const requirementsAnalysisTask = defineTask('requirements-analysis', (arg
 export const qcPlanDevelopmentTask = defineTask('qc-plan', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Develop QC plan',
-  skill: { name: 'inspection-tracking-system' },
   agent: {
     name: 'quality-control-specialist',
     prompt: {
@@ -255,7 +253,6 @@ export const qcPlanDevelopmentTask = defineTask('qc-plan', (args, taskCtx) => ({
 export const inspectionProtocolsTask = defineTask('inspection-protocols', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Develop inspection protocols',
-  skill: { name: 'inspection-tracking-system' },
   agent: {
     name: 'quality-control-specialist',
     prompt: {
@@ -299,7 +296,6 @@ export const inspectionProtocolsTask = defineTask('inspection-protocols', (args,
 export const testingRequirementsTask = defineTask('testing-requirements', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Define testing requirements',
-  skill: { name: 'inspection-tracking-system' },
   agent: {
     name: 'quality-control-specialist',
     prompt: {
@@ -343,7 +339,6 @@ export const testingRequirementsTask = defineTask('testing-requirements', (args,
 export const acceptanceCriteriaTask = defineTask('acceptance-criteria', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Establish acceptance criteria',
-  skill: { name: 'inspection-tracking-system' },
   agent: {
     name: 'quality-control-specialist',
     prompt: {
@@ -387,7 +382,6 @@ export const acceptanceCriteriaTask = defineTask('acceptance-criteria', (args, t
 export const inspectionChecklistsTask = defineTask('inspection-checklists', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Create inspection checklists',
-  skill: { name: 'inspection-tracking-system' },
   agent: {
     name: 'quality-control-specialist',
     prompt: {
@@ -437,7 +431,6 @@ export const inspectionChecklistsTask = defineTask('inspection-checklists', (arg
 export const nonConformanceProceduresTask = defineTask('non-conformance', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Develop non-conformance procedures',
-  skill: { name: 'inspection-tracking-system' },
   agent: {
     name: 'quality-control-specialist',
     prompt: {
@@ -481,7 +474,6 @@ export const nonConformanceProceduresTask = defineTask('non-conformance', (args,
 export const qcDocumentationTask = defineTask('qc-documentation', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Generate QC documentation package',
-  skill: { name: 'engineering-report-generator' },
   agent: {
     name: 'technical-report-writer',
     prompt: {

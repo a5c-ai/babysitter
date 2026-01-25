@@ -11,8 +11,10 @@ import { defineTask } from '@a5c-ai/babysitter-sdk';
 const analyzeTask = defineTask('reference-class-reasoning-analyze', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Reference Class Reasoning Analysis',
+  skill: { name: 'bayesian-inference-engine' },
   agent: {
-    name: 'general-purpose',
+    name: 'reference-class-analyst',
+    skills: ['bayesian-inference-engine', 'statistical-test-selector'],
     prompt: {
       role: 'Scientific reasoning specialist in reference class forecasting and base-rate reasoning',
       task: 'Apply reference class reasoning to make predictions using base-rate distributions from similar past cases or projects',

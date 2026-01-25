@@ -194,7 +194,6 @@ export async function process(inputs, ctx) {
 export const testPlanDefinitionTask = defineTask('test-plan-definition', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 1: Test Plan Definition - ${args.projectName}`,
-  skill: { name: 'test-automation' },
   agent: {
     name: 'hardware-test-engineer',
     prompt: {
@@ -233,7 +232,6 @@ export const testPlanDefinitionTask = defineTask('test-plan-definition', (args, 
 export const thermalTestingTask = defineTask('thermal-testing', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 2: Thermal Testing - ${args.projectName}`,
-  skill: { name: 'test-automation' },
   agent: {
     name: 'hardware-test-engineer',
     prompt: {
@@ -271,7 +269,6 @@ export const thermalTestingTask = defineTask('thermal-testing', (args, taskCtx) 
 export const mechanicalTestingTask = defineTask('mechanical-testing', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 3: Mechanical Testing - ${args.projectName}`,
-  skill: { name: 'test-automation' },
   agent: {
     name: 'hardware-test-engineer',
     prompt: {
@@ -309,7 +306,6 @@ export const mechanicalTestingTask = defineTask('mechanical-testing', (args, tas
 export const essTask = defineTask('ess-testing', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 4: Environmental Stress Screening - ${args.projectName}`,
-  skill: { name: 'test-automation' },
   agent: {
     name: 'hardware-test-engineer',
     prompt: {
@@ -347,7 +343,6 @@ export const essTask = defineTask('ess-testing', (args, taskCtx) => ({
 export const emcTestingTask = defineTask('emc-testing', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 5: EMC Testing - ${args.projectName}`,
-  skill: { name: 'test-automation' },
   agent: {
     name: 'hardware-test-engineer',
     prompt: {
@@ -385,7 +380,6 @@ export const emcTestingTask = defineTask('emc-testing', (args, taskCtx) => ({
 export const acceleratedLifeTestingTask = defineTask('accelerated-life-testing', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 6: Accelerated Life Testing - ${args.projectName}`,
-  skill: { name: 'test-automation' },
   agent: {
     name: 'hardware-test-engineer',
     prompt: {
@@ -424,7 +418,6 @@ export const acceleratedLifeTestingTask = defineTask('accelerated-life-testing',
 export const failureAnalysisTask = defineTask('failure-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 7: Failure Analysis - ${args.projectName}`,
-  skill: { name: 'test-automation' },
   agent: {
     name: 'hardware-test-engineer',
     prompt: {
@@ -462,7 +455,6 @@ export const failureAnalysisTask = defineTask('failure-analysis', (args, taskCtx
 export const testReportTask = defineTask('test-report', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 8: Environmental Test Report - ${args.projectName}`,
-  skill: { name: 'test-automation' },
   agent: {
     name: 'hardware-test-engineer',
     prompt: {

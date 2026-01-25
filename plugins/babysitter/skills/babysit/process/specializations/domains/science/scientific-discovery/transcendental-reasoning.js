@@ -139,8 +139,10 @@ export async function process(inputs, ctx) {
 export const characterizePhenomenonTask = defineTask('transcendental-phenomenon-characterization', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 1: Phenomenon Characterization',
+  skill: { name: 'formal-logic-reasoner' },
   agent: {
-    name: 'general-purpose',
+    name: 'transcendental-analyst',
+    skills: ['formal-logic-reasoner', 'hypothesis-generator'],
     prompt: {
       role: 'Transcendental philosophy specialist',
       task: 'Characterize the phenomenon for transcendental analysis',
@@ -176,8 +178,10 @@ export const characterizePhenomenonTask = defineTask('transcendental-phenomenon-
 export const identifyPresuppositionsTask = defineTask('transcendental-presupposition-identification', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 2: Presupposition Identification',
+  skill: { name: 'formal-logic-reasoner' },
   agent: {
-    name: 'general-purpose',
+    name: 'transcendental-analyst',
+    skills: ['formal-logic-reasoner', 'hypothesis-generator'],
     prompt: {
       role: 'Presuppositional analysis specialist',
       task: 'Identify presuppositions underlying the phenomenon',
@@ -214,8 +218,10 @@ export const identifyPresuppositionsTask = defineTask('transcendental-presupposi
 export const analyzeNecessaryConditionsTask = defineTask('transcendental-necessary-conditions', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 3: Necessary Conditions Analysis',
+  skill: { name: 'formal-logic-reasoner' },
   agent: {
-    name: 'general-purpose',
+    name: 'transcendental-analyst',
+    skills: ['formal-logic-reasoner', 'hypothesis-generator'],
     prompt: {
       role: 'Modal and necessity analysis specialist',
       task: 'Analyze necessary conditions for the phenomenon',
@@ -252,8 +258,10 @@ export const analyzeNecessaryConditionsTask = defineTask('transcendental-necessa
 export const performTranscendentalDeductionTask = defineTask('transcendental-deduction', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 4: Transcendental Deduction',
+  skill: { name: 'formal-logic-reasoner' },
   agent: {
-    name: 'general-purpose',
+    name: 'transcendental-analyst',
+    skills: ['formal-logic-reasoner', 'hypothesis-generator'],
     prompt: {
       role: 'Transcendental deduction specialist',
       task: 'Perform transcendental deduction of preconditions',
@@ -289,8 +297,10 @@ export const performTranscendentalDeductionTask = defineTask('transcendental-ded
 export const analyzeConstitutiveStructuresTask = defineTask('transcendental-constitutive-structures', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 5: Constitutive Structure Analysis',
+  skill: { name: 'formal-logic-reasoner' },
   agent: {
-    name: 'general-purpose',
+    name: 'transcendental-analyst',
+    skills: ['formal-logic-reasoner', 'hypothesis-generator'],
     prompt: {
       role: 'Constitutive structure analyst',
       task: 'Analyze constitutive structures enabling the phenomenon',
@@ -327,8 +337,10 @@ export const analyzeConstitutiveStructuresTask = defineTask('transcendental-cons
 export const identifyRegulativePrinciplesTask = defineTask('transcendental-regulative-principles', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 6: Regulative Principles',
+  skill: { name: 'formal-logic-reasoner' },
   agent: {
-    name: 'general-purpose',
+    name: 'transcendental-analyst',
+    skills: ['formal-logic-reasoner', 'hypothesis-generator'],
     prompt: {
       role: 'Regulative principle analyst',
       task: 'Identify regulative principles guiding the phenomenon',
@@ -365,8 +377,10 @@ export const identifyRegulativePrinciplesTask = defineTask('transcendental-regul
 export const checkTranscendentalValidityTask = defineTask('transcendental-validity-check', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 7: Validity Check',
+  skill: { name: 'formal-logic-reasoner' },
   agent: {
-    name: 'general-purpose',
+    name: 'transcendental-analyst',
+    skills: ['formal-logic-reasoner', 'hypothesis-generator'],
     prompt: {
       role: 'Transcendental argument validity specialist',
       task: 'Check validity of transcendental argument',
@@ -403,8 +417,10 @@ export const checkTranscendentalValidityTask = defineTask('transcendental-validi
 export const assessModalStatusTask = defineTask('transcendental-modal-status', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 8: Modal Status Assessment',
+  skill: { name: 'formal-logic-reasoner' },
   agent: {
-    name: 'general-purpose',
+    name: 'transcendental-analyst',
+    skills: ['formal-logic-reasoner', 'hypothesis-generator'],
     prompt: {
       role: 'Modal status assessment specialist',
       task: 'Assess modal status of derived preconditions',
@@ -441,8 +457,10 @@ export const assessModalStatusTask = defineTask('transcendental-modal-status', (
 export const analyzeScopeAndLimitsTask = defineTask('transcendental-scope-limits', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 9: Scope and Limits Analysis',
+  skill: { name: 'formal-logic-reasoner' },
   agent: {
-    name: 'general-purpose',
+    name: 'transcendental-analyst',
+    skills: ['formal-logic-reasoner', 'hypothesis-generator'],
     prompt: {
       role: 'Transcendental scope analyst',
       task: 'Analyze scope and limits of transcendental conclusions',
@@ -479,8 +497,10 @@ export const analyzeScopeAndLimitsTask = defineTask('transcendental-scope-limits
 export const deriveImplicationsTask = defineTask('transcendental-implications', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 10: Implications Derivation',
+  skill: { name: 'formal-logic-reasoner' },
   agent: {
-    name: 'general-purpose',
+    name: 'transcendental-analyst',
+    skills: ['formal-logic-reasoner', 'hypothesis-generator'],
     prompt: {
       role: 'Transcendental implication specialist',
       task: 'Derive implications from transcendental analysis',
@@ -517,8 +537,10 @@ export const deriveImplicationsTask = defineTask('transcendental-implications', 
 export const synthesizeTranscendentalAnalysisTask = defineTask('transcendental-synthesis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 11: Synthesis',
+  skill: { name: 'formal-logic-reasoner' },
   agent: {
-    name: 'general-purpose',
+    name: 'transcendental-analyst',
+    skills: ['formal-logic-reasoner', 'hypothesis-generator'],
     prompt: {
       role: 'Transcendental analysis synthesis specialist',
       task: 'Synthesize transcendental analysis and provide recommendations',

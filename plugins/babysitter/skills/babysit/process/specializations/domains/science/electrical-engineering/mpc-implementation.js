@@ -191,7 +191,6 @@ export async function process(inputs, ctx) {
 export const modelDevelopmentTask = defineTask('model-development', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 1: Model Development - ${args.systemName}`,
-  skill: { name: 'mpc-algorithm' },
   agent: {
     name: 'control-systems-engineer',
     prompt: {
@@ -252,7 +251,6 @@ export const modelDevelopmentTask = defineTask('model-development', (args, taskC
 export const objectivesConstraintsTask = defineTask('objectives-constraints', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 2: Objectives and Constraints - ${args.systemName}`,
-  skill: { name: 'mpc-algorithm' },
   agent: {
     name: 'control-systems-engineer',
     prompt: {
@@ -313,7 +311,6 @@ export const objectivesConstraintsTask = defineTask('objectives-constraints', (a
 export const mpcDesignTask = defineTask('mpc-design', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 3: MPC Design - ${args.systemName}`,
-  skill: { name: 'mpc-algorithm' },
   agent: {
     name: 'control-systems-engineer',
     prompt: {
@@ -368,7 +365,6 @@ export const mpcDesignTask = defineTask('mpc-design', (args, taskCtx) => ({
 export const mpcSimulationTask = defineTask('mpc-simulation', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 4: MPC Simulation - ${args.systemName}`,
-  skill: { name: 'mpc-algorithm' },
   agent: {
     name: 'control-systems-engineer',
     prompt: {
@@ -422,7 +418,6 @@ export const mpcSimulationTask = defineTask('mpc-simulation', (args, taskCtx) =>
 export const constraintTestingTask = defineTask('constraint-testing', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 5: Constraint Testing - ${args.systemName}`,
-  skill: { name: 'mpc-algorithm' },
   agent: {
     name: 'control-systems-engineer',
     prompt: {
@@ -475,7 +470,6 @@ export const constraintTestingTask = defineTask('constraint-testing', (args, tas
 export const platformImplementationTask = defineTask('platform-implementation', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 6: Platform Implementation - ${args.systemName}`,
-  skill: { name: 'mpc-algorithm' },
   agent: {
     name: 'control-systems-engineer',
     prompt: {
@@ -522,7 +516,6 @@ export const platformImplementationTask = defineTask('platform-implementation', 
 export const commissioningTask = defineTask('commissioning', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 7: Commissioning - ${args.systemName}`,
-  skill: { name: 'mpc-algorithm' },
   agent: {
     name: 'control-systems-engineer',
     prompt: {
@@ -575,7 +568,6 @@ export const commissioningTask = defineTask('commissioning', (args, taskCtx) => 
 export const performanceMonitoringTask = defineTask('performance-monitoring', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 8: Performance Monitoring - ${args.systemName}`,
-  skill: { name: 'mpc-algorithm' },
   agent: {
     name: 'control-systems-engineer',
     prompt: {

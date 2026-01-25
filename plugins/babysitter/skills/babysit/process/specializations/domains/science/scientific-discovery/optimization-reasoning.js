@@ -166,8 +166,10 @@ export async function process(inputs, ctx) {
 export const problemClassificationTask = defineTask('problem-classification', (args, taskCtx) => ({
   kind: 'agent',
   title: `Optimization Problem Classification - ${args.domain}`,
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'optimization-analyst',
+    skills: ['hypothesis-generator', 'bayesian-inference-engine'],
     prompt: {
       role: 'Expert in mathematical optimization and problem classification',
       task: 'Classify the optimization problem type',
@@ -243,8 +245,10 @@ export const problemClassificationTask = defineTask('problem-classification', (a
 export const modelFormulationTask = defineTask('model-formulation', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Optimization Model Formulation',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'optimization-analyst',
+    skills: ['hypothesis-generator', 'bayesian-inference-engine'],
     prompt: {
       role: 'Expert in mathematical modeling and optimization',
       task: 'Formulate the optimization model mathematically',
@@ -328,8 +332,10 @@ export const modelFormulationTask = defineTask('model-formulation', (args, taskC
 export const feasibilityAnalysisTask = defineTask('feasibility-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Feasibility Analysis',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'optimization-analyst',
+    skills: ['hypothesis-generator', 'bayesian-inference-engine'],
     prompt: {
       role: 'Expert in constraint analysis and feasibility',
       task: 'Analyze feasibility of the optimization problem',
@@ -388,8 +394,10 @@ export const feasibilityAnalysisTask = defineTask('feasibility-analysis', (args,
 export const methodSelectionTask = defineTask('method-selection', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Optimization Method Selection',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'optimization-analyst',
+    skills: ['hypothesis-generator', 'bayesian-inference-engine'],
     prompt: {
       role: 'Expert in optimization algorithms and solver selection',
       task: 'Select appropriate optimization methods',
@@ -451,8 +459,10 @@ export const methodSelectionTask = defineTask('method-selection', (args, taskCtx
 export const exactOptimizationTask = defineTask('exact-optimization', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Exact Optimization',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'optimization-analyst',
+    skills: ['hypothesis-generator', 'bayesian-inference-engine'],
     prompt: {
       role: 'Expert in exact optimization algorithms',
       task: 'Apply exact optimization methods',
@@ -520,8 +530,10 @@ export const exactOptimizationTask = defineTask('exact-optimization', (args, tas
 export const heuristicOptimizationTask = defineTask('heuristic-optimization', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Heuristic Optimization',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'optimization-analyst',
+    skills: ['hypothesis-generator', 'bayesian-inference-engine'],
     prompt: {
       role: 'Expert in metaheuristics and heuristic optimization',
       task: 'Apply heuristic/metaheuristic optimization methods',
@@ -598,8 +610,10 @@ export const heuristicOptimizationTask = defineTask('heuristic-optimization', (a
 export const solutionComparisonTask = defineTask('solution-comparison', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Solution Comparison',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'optimization-analyst',
+    skills: ['hypothesis-generator', 'bayesian-inference-engine'],
     prompt: {
       role: 'Expert in solution analysis and comparison',
       task: 'Compare and select the best solution',
@@ -672,8 +686,10 @@ export const solutionComparisonTask = defineTask('solution-comparison', (args, t
 export const optimizationSensitivityTask = defineTask('optimization-sensitivity', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Optimization Sensitivity Analysis',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'optimization-analyst',
+    skills: ['hypothesis-generator', 'bayesian-inference-engine'],
     prompt: {
       role: 'Expert in sensitivity analysis for optimization',
       task: 'Analyze sensitivity of optimal solution',
@@ -755,8 +771,10 @@ export const optimizationSensitivityTask = defineTask('optimization-sensitivity'
 export const boundAnalysisTask = defineTask('bound-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Optimality Bound Analysis',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'optimization-analyst',
+    skills: ['hypothesis-generator', 'bayesian-inference-engine'],
     prompt: {
       role: 'Expert in optimization bounds and certificates',
       task: 'Analyze optimality bounds and gaps',
@@ -827,8 +845,10 @@ export const boundAnalysisTask = defineTask('bound-analysis', (args, taskCtx) =>
 export const solutionValidationTask = defineTask('solution-validation', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Solution Validation',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'optimization-analyst',
+    skills: ['hypothesis-generator', 'bayesian-inference-engine'],
     prompt: {
       role: 'Expert in solution verification and validation',
       task: 'Validate the optimal solution',

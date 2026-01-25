@@ -150,8 +150,10 @@ export async function process(inputs, ctx) {
 export const analyzeDilemmaTask = defineTask('ethical-dilemma-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 1: Dilemma Clarification',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'ethics-analyst',
+    skills: ['hypothesis-generator', 'formal-logic-reasoner'],
     prompt: {
       role: 'Ethics analyst specializing in moral dilemma clarification',
       task: 'Clarify and structure the ethical dilemma',
@@ -188,8 +190,10 @@ export const analyzeDilemmaTask = defineTask('ethical-dilemma-analysis', (args, 
 export const analyzeStakeholdersTask = defineTask('ethical-stakeholder-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 2: Stakeholder Analysis',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'ethics-analyst',
+    skills: ['hypothesis-generator', 'formal-logic-reasoner'],
     prompt: {
       role: 'Stakeholder ethics specialist',
       task: 'Analyze stakeholders, their interests, rights, and vulnerabilities',
@@ -226,8 +230,10 @@ export const analyzeStakeholdersTask = defineTask('ethical-stakeholder-analysis'
 export const applyConsequentialismTask = defineTask('ethical-consequentialism', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 3: Consequentialist Analysis',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'ethics-analyst',
+    skills: ['hypothesis-generator', 'formal-logic-reasoner'],
     prompt: {
       role: 'Utilitarian ethics specialist',
       task: 'Analyze options using consequentialist/utilitarian framework',
@@ -265,8 +271,10 @@ export const applyConsequentialismTask = defineTask('ethical-consequentialism', 
 export const applyDeontologyTask = defineTask('ethical-deontology', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 4: Deontological Analysis',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'ethics-analyst',
+    skills: ['hypothesis-generator', 'formal-logic-reasoner'],
     prompt: {
       role: 'Kantian ethics specialist',
       task: 'Analyze options using deontological/duty-based framework',
@@ -304,8 +312,10 @@ export const applyDeontologyTask = defineTask('ethical-deontology', (args, taskC
 export const applyVirtueEthicsTask = defineTask('ethical-virtue-ethics', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 5: Virtue Ethics Analysis',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'ethics-analyst',
+    skills: ['hypothesis-generator', 'formal-logic-reasoner'],
     prompt: {
       role: 'Virtue ethics specialist',
       task: 'Analyze options using virtue ethics framework',
@@ -343,8 +353,10 @@ export const applyVirtueEthicsTask = defineTask('ethical-virtue-ethics', (args, 
 export const applyCareEthicsTask = defineTask('ethical-care-ethics', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 6: Care Ethics Analysis',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'ethics-analyst',
+    skills: ['hypothesis-generator', 'formal-logic-reasoner'],
     prompt: {
       role: 'Care ethics specialist',
       task: 'Analyze options using care ethics framework',
@@ -382,8 +394,10 @@ export const applyCareEthicsTask = defineTask('ethical-care-ethics', (args, task
 export const applyJusticeFrameworkTask = defineTask('ethical-justice-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 7: Justice and Fairness Analysis',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'ethics-analyst',
+    skills: ['hypothesis-generator', 'formal-logic-reasoner'],
     prompt: {
       role: 'Justice theory specialist',
       task: 'Analyze options using theories of justice',
@@ -421,8 +435,10 @@ export const applyJusticeFrameworkTask = defineTask('ethical-justice-analysis', 
 export const analyzeConvergenceTask = defineTask('ethical-convergence-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 8: Framework Convergence Analysis',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'ethics-analyst',
+    skills: ['hypothesis-generator', 'formal-logic-reasoner'],
     prompt: {
       role: 'Ethical framework integration specialist',
       task: 'Analyze convergence and conflicts between framework recommendations',
@@ -459,8 +475,10 @@ export const analyzeConvergenceTask = defineTask('ethical-convergence-analysis',
 export const checkMoralIntuitionsTask = defineTask('ethical-intuition-check', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 9: Moral Intuition Check',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'ethics-analyst',
+    skills: ['hypothesis-generator', 'formal-logic-reasoner'],
     prompt: {
       role: 'Moral psychology specialist',
       task: 'Check analysis against common moral intuitions',
@@ -497,8 +515,10 @@ export const checkMoralIntuitionsTask = defineTask('ethical-intuition-check', (a
 export const synthesizeEthicalAnalysisTask = defineTask('ethical-synthesis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 10: Synthesis and Recommendation',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'ethics-analyst',
+    skills: ['hypothesis-generator', 'formal-logic-reasoner'],
     prompt: {
       role: 'Ethical decision synthesis specialist',
       task: 'Synthesize analysis into actionable recommendations',
@@ -536,8 +556,10 @@ export const synthesizeEthicalAnalysisTask = defineTask('ethical-synthesis', (ar
 export const developJustificationTask = defineTask('ethical-justification', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 11: Justification Development',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'ethics-analyst',
+    skills: ['hypothesis-generator', 'formal-logic-reasoner'],
     prompt: {
       role: 'Ethical argumentation specialist',
       task: 'Develop comprehensive justification for recommendation',

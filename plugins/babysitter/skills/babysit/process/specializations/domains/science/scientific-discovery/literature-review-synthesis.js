@@ -301,8 +301,10 @@ export async function process(inputs, ctx) {
 export const reviewProtocolTask = defineTask('review-protocol', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Develop review protocol',
+  skill: { name: 'statistical-test-selector' },
   agent: {
-    name: 'general-purpose',
+    name: 'research-analyst',
+    skills: ['statistical-test-selector', 'hypothesis-generator'],
     prompt: {
       role: 'Systematic review methodologist',
       task: 'Develop a comprehensive review protocol following PRISMA-P guidelines',
@@ -362,8 +364,10 @@ export const reviewProtocolTask = defineTask('review-protocol', (args, taskCtx) 
 export const searchStrategyTask = defineTask('search-strategy', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Develop comprehensive search strategy',
+  skill: { name: 'statistical-test-selector' },
   agent: {
-    name: 'general-purpose',
+    name: 'research-analyst',
+    skills: ['statistical-test-selector', 'hypothesis-generator'],
     prompt: {
       role: 'Information specialist and librarian',
       task: 'Develop comprehensive, reproducible search strategies for each database',
@@ -425,8 +429,10 @@ export const searchStrategyTask = defineTask('search-strategy', (args, taskCtx) 
 export const titleAbstractScreeningTask = defineTask('title-abstract-screening', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Conduct title and abstract screening',
+  skill: { name: 'statistical-test-selector' },
   agent: {
-    name: 'general-purpose',
+    name: 'research-analyst',
+    skills: ['statistical-test-selector', 'hypothesis-generator'],
     prompt: {
       role: 'Systematic reviewer',
       task: 'Screen titles and abstracts against eligibility criteria',
@@ -471,8 +477,10 @@ export const titleAbstractScreeningTask = defineTask('title-abstract-screening',
 export const fullTextScreeningTask = defineTask('full-text-screening', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Conduct full-text screening',
+  skill: { name: 'statistical-test-selector' },
   agent: {
-    name: 'general-purpose',
+    name: 'research-analyst',
+    skills: ['statistical-test-selector', 'hypothesis-generator'],
     prompt: {
       role: 'Systematic reviewer',
       task: 'Screen full-text articles against eligibility criteria',
@@ -535,8 +543,10 @@ export const fullTextScreeningTask = defineTask('full-text-screening', (args, ta
 export const studyQualityAssessmentTask = defineTask('study-quality-assessment', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Assess study quality',
+  skill: { name: 'statistical-test-selector' },
   agent: {
-    name: 'general-purpose',
+    name: 'research-analyst',
+    skills: ['statistical-test-selector', 'hypothesis-generator'],
     prompt: {
       role: 'Methodological quality assessor',
       task: 'Assess the quality and risk of bias of included studies',
@@ -587,8 +597,10 @@ export const studyQualityAssessmentTask = defineTask('study-quality-assessment',
 export const dataExtractionTask = defineTask('data-extraction', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Extract data from included studies',
+  skill: { name: 'statistical-test-selector' },
   agent: {
-    name: 'general-purpose',
+    name: 'research-analyst',
+    skills: ['statistical-test-selector', 'hypothesis-generator'],
     prompt: {
       role: 'Data extraction specialist',
       task: 'Systematically extract relevant data from included studies',
@@ -638,8 +650,10 @@ export const dataExtractionTask = defineTask('data-extraction', (args, taskCtx) 
 export const synthesisFindingsTask = defineTask('synthesis-findings', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Synthesize findings',
+  skill: { name: 'statistical-test-selector' },
   agent: {
-    name: 'general-purpose',
+    name: 'research-analyst',
+    skills: ['statistical-test-selector', 'hypothesis-generator'],
     prompt: {
       role: 'Evidence synthesis specialist',
       task: 'Synthesize extracted data to answer the research question',
@@ -701,8 +715,10 @@ export const synthesisFindingsTask = defineTask('synthesis-findings', (args, tas
 export const gapIdentificationTask = defineTask('gap-identification', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Identify research gaps',
+  skill: { name: 'statistical-test-selector' },
   agent: {
-    name: 'general-purpose',
+    name: 'research-analyst',
+    skills: ['statistical-test-selector', 'hypothesis-generator'],
     prompt: {
       role: 'Research strategist',
       task: 'Identify gaps in the literature and directions for future research',
@@ -764,8 +780,10 @@ export const gapIdentificationTask = defineTask('gap-identification', (args, tas
 export const prismaReportingTask = defineTask('prisma-reporting', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Generate PRISMA-compliant report',
+  skill: { name: 'statistical-test-selector' },
   agent: {
-    name: 'general-purpose',
+    name: 'research-analyst',
+    skills: ['statistical-test-selector', 'hypothesis-generator'],
     prompt: {
       role: 'Systematic review reporting specialist',
       task: 'Generate comprehensive PRISMA-compliant systematic review report',
@@ -816,8 +834,10 @@ export const prismaReportingTask = defineTask('prisma-reporting', (args, taskCtx
 export const reviewQualityScoringTask = defineTask('review-quality-scoring', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Score review quality',
+  skill: { name: 'statistical-test-selector' },
   agent: {
-    name: 'general-purpose',
+    name: 'research-analyst',
+    skills: ['statistical-test-selector', 'hypothesis-generator'],
     prompt: {
       role: 'Systematic review methodologist and auditor',
       task: 'Assess the methodological quality of the systematic review',

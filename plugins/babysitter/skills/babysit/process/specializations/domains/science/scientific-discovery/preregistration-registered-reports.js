@@ -283,8 +283,10 @@ export async function process(inputs, ctx) {
 export const studyInformationTask = defineTask('study-information', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Document study information',
+  skill: { name: 'statistical-test-selector' },
   agent: {
-    name: 'general-purpose',
+    name: 'research-methodologist',
+    skills: ['statistical-test-selector', 'hypothesis-generator'],
     prompt: {
       role: 'Research documentation specialist',
       task: 'Document comprehensive study information for preregistration',
@@ -331,8 +333,10 @@ export const studyInformationTask = defineTask('study-information', (args, taskC
 export const hypothesesSpecificationTask = defineTask('hypotheses-specification', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Specify hypotheses in detail',
+  skill: { name: 'statistical-test-selector' },
   agent: {
-    name: 'general-purpose',
+    name: 'research-methodologist',
+    skills: ['statistical-test-selector', 'hypothesis-generator'],
     prompt: {
       role: 'Research hypothesis specialist',
       task: 'Specify all hypotheses in precise, testable format for preregistration',
@@ -389,8 +393,10 @@ export const hypothesesSpecificationTask = defineTask('hypotheses-specification'
 export const designPlanTask = defineTask('design-plan', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Document design plan',
+  skill: { name: 'statistical-test-selector' },
   agent: {
-    name: 'general-purpose',
+    name: 'research-methodologist',
+    skills: ['statistical-test-selector', 'hypothesis-generator'],
     prompt: {
       role: 'Research design methodologist',
       task: 'Document the complete study design plan for preregistration',
@@ -438,8 +444,10 @@ export const designPlanTask = defineTask('design-plan', (args, taskCtx) => ({
 export const samplingPlanTask = defineTask('sampling-plan', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Specify sampling plan',
+  skill: { name: 'statistical-test-selector' },
   agent: {
-    name: 'general-purpose',
+    name: 'research-methodologist',
+    skills: ['statistical-test-selector', 'hypothesis-generator'],
     prompt: {
       role: 'Sampling and power analysis specialist',
       task: 'Document the complete sampling plan including sample size justification',
@@ -495,8 +503,10 @@ export const samplingPlanTask = defineTask('sampling-plan', (args, taskCtx) => (
 export const variablesSpecificationTask = defineTask('variables-specification', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Specify variables',
+  skill: { name: 'statistical-test-selector' },
   agent: {
-    name: 'general-purpose',
+    name: 'research-methodologist',
+    skills: ['statistical-test-selector', 'hypothesis-generator'],
     prompt: {
       role: 'Measurement and operationalization specialist',
       task: 'Document all variables with their operationalizations',
@@ -563,8 +573,10 @@ export const variablesSpecificationTask = defineTask('variables-specification', 
 export const analysisPlanTask = defineTask('analysis-plan', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Develop detailed analysis plan',
+  skill: { name: 'statistical-test-selector' },
   agent: {
-    name: 'general-purpose',
+    name: 'research-methodologist',
+    skills: ['statistical-test-selector', 'hypothesis-generator'],
     prompt: {
       role: 'Statistical analysis planner',
       task: 'Document the complete statistical analysis plan',
@@ -621,8 +633,10 @@ export const analysisPlanTask = defineTask('analysis-plan', (args, taskCtx) => (
 export const inferenceCriteriaTask = defineTask('inference-criteria', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Specify inference criteria',
+  skill: { name: 'statistical-test-selector' },
   agent: {
-    name: 'general-purpose',
+    name: 'research-methodologist',
+    skills: ['statistical-test-selector', 'hypothesis-generator'],
     prompt: {
       role: 'Statistical inference specialist',
       task: 'Document the criteria for making inferences from the data',
@@ -669,8 +683,10 @@ export const inferenceCriteriaTask = defineTask('inference-criteria', (args, tas
 export const exclusionCriteriaTask = defineTask('exclusion-criteria', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Define data exclusion criteria',
+  skill: { name: 'statistical-test-selector' },
   agent: {
-    name: 'general-purpose',
+    name: 'research-methodologist',
+    skills: ['statistical-test-selector', 'hypothesis-generator'],
     prompt: {
       role: 'Data quality specialist',
       task: 'Document all criteria for excluding data from analysis',
@@ -722,8 +738,10 @@ export const exclusionCriteriaTask = defineTask('exclusion-criteria', (args, tas
 export const preregistrationAssemblyTask = defineTask('preregistration-assembly', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Assemble preregistration document',
+  skill: { name: 'statistical-test-selector' },
   agent: {
-    name: 'general-purpose',
+    name: 'research-methodologist',
+    skills: ['statistical-test-selector', 'hypothesis-generator'],
     prompt: {
       role: 'Preregistration document specialist',
       task: 'Assemble all components into a complete preregistration document',
@@ -767,8 +785,10 @@ export const preregistrationAssemblyTask = defineTask('preregistration-assembly'
 export const completenessScoringTask = defineTask('completeness-scoring', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Score preregistration completeness',
+  skill: { name: 'statistical-test-selector' },
   agent: {
-    name: 'general-purpose',
+    name: 'research-methodologist',
+    skills: ['statistical-test-selector', 'hypothesis-generator'],
     prompt: {
       role: 'Preregistration quality auditor',
       task: 'Score the completeness and quality of the preregistration',

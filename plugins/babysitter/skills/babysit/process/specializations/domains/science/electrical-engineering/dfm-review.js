@@ -197,7 +197,6 @@ export async function process(inputs, ctx) {
 export const componentReviewTask = defineTask('component-review', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 1: Component Selection Review - ${args.projectName}`,
-  skill: { name: 'dfm-analysis' },
   agent: {
     name: 'pcb-layout-engineer',
     prompt: {
@@ -235,7 +234,6 @@ export const componentReviewTask = defineTask('component-review', (args, taskCtx
 export const fabricationReviewTask = defineTask('fabrication-review', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 2: PCB Fabrication Review - ${args.projectName}`,
-  skill: { name: 'dfm-analysis' },
   agent: {
     name: 'pcb-layout-engineer',
     prompt: {
@@ -272,7 +270,6 @@ export const fabricationReviewTask = defineTask('fabrication-review', (args, tas
 export const assemblyReviewTask = defineTask('assembly-review', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 3: Assembly Process Review - ${args.projectName}`,
-  skill: { name: 'dfm-analysis' },
   agent: {
     name: 'pcb-layout-engineer',
     prompt: {
@@ -309,7 +306,6 @@ export const assemblyReviewTask = defineTask('assembly-review', (args, taskCtx) 
 export const solderThermalReviewTask = defineTask('solder-thermal-review', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 4: Solder and Thermal Review - ${args.projectName}`,
-  skill: { name: 'dfm-analysis' },
   agent: {
     name: 'pcb-layout-engineer',
     prompt: {
@@ -346,7 +342,6 @@ export const solderThermalReviewTask = defineTask('solder-thermal-review', (args
 export const testCoverageAnalysisTask = defineTask('test-coverage-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 5: Test Coverage Analysis - ${args.projectName}`,
-  skill: { name: 'dfm-analysis' },
   agent: {
     name: 'pcb-layout-engineer',
     prompt: {
@@ -384,7 +379,6 @@ export const testCoverageAnalysisTask = defineTask('test-coverage-analysis', (ar
 export const costOptimizationTask = defineTask('cost-optimization', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 6: Cost Optimization Analysis - ${args.projectName}`,
-  skill: { name: 'dfm-analysis' },
   agent: {
     name: 'pcb-layout-engineer',
     prompt: {
@@ -421,7 +415,6 @@ export const costOptimizationTask = defineTask('cost-optimization', (args, taskC
 export const riskAssessmentTask = defineTask('risk-assessment', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 7: Manufacturing Risk Assessment - ${args.projectName}`,
-  skill: { name: 'dfm-analysis' },
   agent: {
     name: 'pcb-layout-engineer',
     prompt: {
@@ -459,7 +452,6 @@ export const riskAssessmentTask = defineTask('risk-assessment', (args, taskCtx) 
 export const dfmReportTask = defineTask('dfm-report', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 8: DFM Report Generation - ${args.projectName}`,
-  skill: { name: 'dfm-analysis' },
   agent: {
     name: 'pcb-layout-engineer',
     prompt: {

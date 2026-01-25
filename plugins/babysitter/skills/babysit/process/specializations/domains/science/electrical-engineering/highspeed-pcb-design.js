@@ -177,7 +177,6 @@ export async function process(inputs, ctx) {
 export const requirementsDefinitionTask = defineTask('requirements-definition', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 1: Requirements Definition - ${args.boardName}`,
-  skill: { name: 'pcb-si-analysis' },
   agent: {
     name: 'signal-integrity-engineer',
     prompt: {
@@ -230,7 +229,6 @@ export const requirementsDefinitionTask = defineTask('requirements-definition', 
 export const stackupDesignTask = defineTask('stackup-design', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 2: Stack-Up Design - ${args.boardName}`,
-  skill: { name: 'pcb-si-analysis' },
   agent: {
     name: 'signal-integrity-engineer',
     prompt: {
@@ -288,7 +286,6 @@ export const stackupDesignTask = defineTask('stackup-design', (args, taskCtx) =>
 export const routingPlanningTask = defineTask('routing-planning', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 3: Routing Planning - ${args.boardName}`,
-  skill: { name: 'pcb-si-analysis' },
   agent: {
     name: 'signal-integrity-engineer',
     prompt: {
@@ -340,7 +337,6 @@ export const routingPlanningTask = defineTask('routing-planning', (args, taskCtx
 export const lengthMatchingTask = defineTask('length-matching', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 4: Length Matching - ${args.boardName}`,
-  skill: { name: 'pcb-si-analysis' },
   agent: {
     name: 'signal-integrity-engineer',
     prompt: {
@@ -395,7 +391,6 @@ export const lengthMatchingTask = defineTask('length-matching', (args, taskCtx) 
 export const pdnDesignTask = defineTask('pdn-design', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 5: PDN Design - ${args.boardName}`,
-  skill: { name: 'pcb-si-analysis' },
   agent: {
     name: 'signal-integrity-engineer',
     prompt: {
@@ -448,7 +443,6 @@ export const pdnDesignTask = defineTask('pdn-design', (args, taskCtx) => ({
 export const emiMitigationTask = defineTask('emi-mitigation', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 6: EMI Mitigation - ${args.boardName}`,
-  skill: { name: 'pcb-si-analysis' },
   agent: {
     name: 'signal-integrity-engineer',
     prompt: {
@@ -504,7 +498,6 @@ export const emiMitigationTask = defineTask('emi-mitigation', (args, taskCtx) =>
 export const siSimulationTask = defineTask('si-simulation', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 7: SI Simulation - ${args.boardName}`,
-  skill: { name: 'pcb-si-analysis' },
   agent: {
     name: 'signal-integrity-engineer',
     prompt: {
@@ -560,7 +553,6 @@ export const siSimulationTask = defineTask('si-simulation', (args, taskCtx) => (
 export const manufacturingOutputsTask = defineTask('manufacturing-outputs', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 8: Manufacturing Outputs - ${args.boardName}`,
-  skill: { name: 'pcb-si-analysis' },
   agent: {
     name: 'signal-integrity-engineer',
     prompt: {

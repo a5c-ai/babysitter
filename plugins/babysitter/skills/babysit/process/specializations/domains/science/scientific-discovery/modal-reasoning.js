@@ -181,8 +181,10 @@ export async function process(inputs, ctx) {
 export const propositionAnalysisTask = defineTask('proposition-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 1: Proposition Analysis',
+  skill: { name: 'formal-logic-reasoner' },
   agent: {
-    name: 'general-purpose',
+    name: 'modal-logic-analyst',
+    skills: ['formal-logic-reasoner', 'hypothesis-generator'],
     prompt: {
       role: 'Modal Logic Expert',
       task: 'Analyze proposition for modal reasoning',
@@ -236,8 +238,10 @@ export const propositionAnalysisTask = defineTask('proposition-analysis', (args,
 export const modalOperatorTask = defineTask('modal-operator', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 2: Modal Operator Identification',
+  skill: { name: 'formal-logic-reasoner' },
   agent: {
-    name: 'general-purpose',
+    name: 'modal-logic-analyst',
+    skills: ['formal-logic-reasoner', 'hypothesis-generator'],
     prompt: {
       role: 'Modal Operator Analyst',
       task: 'Identify and analyze modal operators',
@@ -291,8 +295,10 @@ export const modalOperatorTask = defineTask('modal-operator', (args, taskCtx) =>
 export const possibleWorldsTask = defineTask('possible-worlds', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 3: Possible Worlds Framework',
+  skill: { name: 'formal-logic-reasoner' },
   agent: {
-    name: 'general-purpose',
+    name: 'modal-logic-analyst',
+    skills: ['formal-logic-reasoner', 'hypothesis-generator'],
     prompt: {
       role: 'Possible Worlds Theorist',
       task: 'Construct possible worlds framework for modal analysis',
@@ -350,8 +356,10 @@ export const possibleWorldsTask = defineTask('possible-worlds', (args, taskCtx) 
 export const necessityAnalysisTask = defineTask('necessity-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 4: Necessity Analysis',
+  skill: { name: 'formal-logic-reasoner' },
   agent: {
-    name: 'general-purpose',
+    name: 'modal-logic-analyst',
+    skills: ['formal-logic-reasoner', 'hypothesis-generator'],
     prompt: {
       role: 'Necessity Analysis Expert',
       task: 'Analyze necessity of the proposition',
@@ -405,8 +413,10 @@ export const necessityAnalysisTask = defineTask('necessity-analysis', (args, tas
 export const possibilityAnalysisTask = defineTask('possibility-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 5: Possibility Analysis',
+  skill: { name: 'formal-logic-reasoner' },
   agent: {
-    name: 'general-purpose',
+    name: 'modal-logic-analyst',
+    skills: ['formal-logic-reasoner', 'hypothesis-generator'],
     prompt: {
       role: 'Possibility Analysis Expert',
       task: 'Analyze possibility of the proposition',
@@ -460,8 +470,10 @@ export const possibilityAnalysisTask = defineTask('possibility-analysis', (args,
 export const epistemicModalTask = defineTask('epistemic-modal', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 6: Epistemic Modal Analysis',
+  skill: { name: 'formal-logic-reasoner' },
   agent: {
-    name: 'general-purpose',
+    name: 'modal-logic-analyst',
+    skills: ['formal-logic-reasoner', 'hypothesis-generator'],
     prompt: {
       role: 'Epistemic Logic Expert',
       task: 'Analyze epistemic modality of the proposition',
@@ -515,8 +527,10 @@ export const epistemicModalTask = defineTask('epistemic-modal', (args, taskCtx) 
 export const dynamicModalTask = defineTask('dynamic-modal', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 7: Dynamic Modal Analysis',
+  skill: { name: 'formal-logic-reasoner' },
   agent: {
-    name: 'general-purpose',
+    name: 'modal-logic-analyst',
+    skills: ['formal-logic-reasoner', 'hypothesis-generator'],
     prompt: {
       role: 'Dynamic Logic Expert',
       task: 'Analyze dynamic modality and state changes',
@@ -569,8 +583,10 @@ export const dynamicModalTask = defineTask('dynamic-modal', (args, taskCtx) => (
 export const counterfactualModalTask = defineTask('counterfactual-modal', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 8: Counterfactual Analysis',
+  skill: { name: 'formal-logic-reasoner' },
   agent: {
-    name: 'general-purpose',
+    name: 'modal-logic-analyst',
+    skills: ['formal-logic-reasoner', 'hypothesis-generator'],
     prompt: {
       role: 'Counterfactual Reasoning Expert',
       task: 'Analyze counterfactuals related to the proposition',
@@ -626,8 +642,10 @@ export const counterfactualModalTask = defineTask('counterfactual-modal', (args,
 export const modalInferenceTask = defineTask('modal-inference', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 9: Modal Inference Generation',
+  skill: { name: 'formal-logic-reasoner' },
   agent: {
-    name: 'general-purpose',
+    name: 'modal-logic-analyst',
+    skills: ['formal-logic-reasoner', 'hypothesis-generator'],
     prompt: {
       role: 'Modal Inference Generator',
       task: 'Generate inferences from modal analysis',
@@ -685,8 +703,10 @@ export const modalInferenceTask = defineTask('modal-inference', (args, taskCtx) 
 export const modalSynthesisTask = defineTask('modal-synthesis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 10: Modal Analysis Synthesis',
+  skill: { name: 'formal-logic-reasoner' },
   agent: {
-    name: 'general-purpose',
+    name: 'modal-logic-analyst',
+    skills: ['formal-logic-reasoner', 'hypothesis-generator'],
     prompt: {
       role: 'Modal Analysis Synthesist',
       task: 'Synthesize modal analysis into comprehensive conclusions',

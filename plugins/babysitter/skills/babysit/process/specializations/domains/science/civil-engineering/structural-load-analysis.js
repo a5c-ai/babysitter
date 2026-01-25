@@ -199,7 +199,6 @@ export async function process(inputs, ctx) {
 export const projectSetupTask = defineTask('project-setup', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Setup project and determine code requirements',
-  skill: { name: 'building-code-checker' },
   agent: {
     name: 'structural-load-analyst',
     prompt: {
@@ -248,7 +247,6 @@ export const projectSetupTask = defineTask('project-setup', (args, taskCtx) => (
 export const deadLoadAnalysisTask = defineTask('dead-load-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Calculate dead loads',
-  skill: { name: 'fea-structural-engine' },
   agent: {
     name: 'structural-load-analyst',
     prompt: {
@@ -297,7 +295,6 @@ export const deadLoadAnalysisTask = defineTask('dead-load-analysis', (args, task
 export const liveLoadAnalysisTask = defineTask('live-load-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Calculate live loads',
-  skill: { name: 'load-combination-generator' },
   agent: {
     name: 'structural-load-analyst',
     prompt: {
@@ -345,7 +342,6 @@ export const liveLoadAnalysisTask = defineTask('live-load-analysis', (args, task
 export const windLoadAnalysisTask = defineTask('wind-load-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Calculate wind loads per ASCE 7',
-  skill: { name: 'wind-load-calculator' },
   agent: {
     name: 'structural-load-analyst',
     prompt: {
@@ -397,7 +393,6 @@ export const windLoadAnalysisTask = defineTask('wind-load-analysis', (args, task
 export const seismicLoadAnalysisTask = defineTask('seismic-load-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Calculate seismic loads per ASCE 7',
-  skill: { name: 'seismic-hazard-analyzer' },
   agent: {
     name: 'seismic-design-specialist',
     prompt: {
@@ -452,7 +447,6 @@ export const seismicLoadAnalysisTask = defineTask('seismic-load-analysis', (args
 export const snowRainLoadAnalysisTask = defineTask('snow-rain-load-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Calculate snow and rain loads',
-  skill: { name: 'load-combination-generator' },
   agent: {
     name: 'structural-load-analyst',
     prompt: {
@@ -504,7 +498,6 @@ export const snowRainLoadAnalysisTask = defineTask('snow-rain-load-analysis', (a
 export const loadCombinationsTask = defineTask('load-combinations', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Develop load combinations per ASCE 7',
-  skill: { name: 'load-combination-generator' },
   agent: {
     name: 'building-code-analyst',
     prompt: {
@@ -557,7 +550,6 @@ export const loadCombinationsTask = defineTask('load-combinations', (args, taskC
 export const loadPathAnalysisTask = defineTask('load-path-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Analyze load paths',
-  skill: { name: 'fea-structural-engine' },
   agent: {
     name: 'structural-load-analyst',
     prompt: {
@@ -610,7 +602,6 @@ export const loadPathAnalysisTask = defineTask('load-path-analysis', (args, task
 export const loadReportTask = defineTask('load-report', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Generate comprehensive load summary report',
-  skill: { name: 'engineering-report-generator' },
   agent: {
     name: 'technical-report-writer',
     prompt: {

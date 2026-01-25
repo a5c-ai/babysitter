@@ -191,7 +191,6 @@ export async function process(inputs, ctx) {
 export const hydrologicAnalysisTask = defineTask('hydrologic-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Perform hydrologic analysis',
-  skill: { name: 'hydrologic-modeling-engine' },
   agent: {
     name: 'hydrology-analyst',
     prompt: {
@@ -237,7 +236,6 @@ export const hydrologicAnalysisTask = defineTask('hydrologic-analysis', (args, t
 export const prePostComparisonTask = defineTask('pre-post-comparison', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Compare pre and post development conditions',
-  skill: { name: 'hydrologic-modeling-engine' },
   agent: {
     name: 'hydrology-analyst',
     prompt: {
@@ -282,7 +280,6 @@ export const prePostComparisonTask = defineTask('pre-post-comparison', (args, ta
 export const waterQualityTask = defineTask('water-quality', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Analyze water quality requirements',
-  skill: { name: 'hydrologic-modeling-engine' },
   agent: {
     name: 'stormwater-management-specialist',
     prompt: {
@@ -326,7 +323,6 @@ export const waterQualityTask = defineTask('water-quality', (args, taskCtx) => (
 export const lidDesignTask = defineTask('lid-design', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Design LID and green infrastructure',
-  skill: { name: 'detention-pond-designer' },
   agent: {
     name: 'stormwater-management-specialist',
     prompt: {
@@ -370,7 +366,6 @@ export const lidDesignTask = defineTask('lid-design', (args, taskCtx) => ({
 export const detentionDesignTask = defineTask('detention-design', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Design detention/retention facilities',
-  skill: { name: 'detention-pond-designer' },
   agent: {
     name: 'stormwater-management-specialist',
     prompt: {
@@ -415,7 +410,6 @@ export const detentionDesignTask = defineTask('detention-design', (args, taskCtx
 export const conveyanceDesignTask = defineTask('conveyance-design', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Design conveyance systems',
-  skill: { name: 'hydraulic-analysis-engine' },
   agent: {
     name: 'hydraulic-engineer',
     prompt: {
@@ -460,7 +454,6 @@ export const conveyanceDesignTask = defineTask('conveyance-design', (args, taskC
 export const escDesignTask = defineTask('esc-design', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Design erosion and sediment control',
-  skill: { name: 'environmental-impact-analyzer' },
   agent: {
     name: 'environmental-compliance-specialist',
     prompt: {
@@ -505,7 +498,6 @@ export const escDesignTask = defineTask('esc-design', (args, taskCtx) => ({
 export const drainagePlansTask = defineTask('drainage-plans', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Generate drainage plans',
-  skill: { name: 'civil3d-surface-analyzer' },
   agent: {
     name: 'highway-design-engineer',
     prompt: {
@@ -555,7 +547,6 @@ export const drainagePlansTask = defineTask('drainage-plans', (args, taskCtx) =>
 export const stormwaterReportTask = defineTask('stormwater-report', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Generate stormwater management report',
-  skill: { name: 'engineering-report-generator' },
   agent: {
     name: 'technical-report-writer',
     prompt: {

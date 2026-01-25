@@ -232,7 +232,6 @@ export async function process(inputs, ctx) {
 export const feasibilityAssessmentTask = defineTask('feasibility-assessment', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Feasibility Assessment',
-  skill: { name: 'water-reuse-assessment' },
   agent: {
     name: 'water-treatment-specialist',
     prompt: {
@@ -277,7 +276,6 @@ export const feasibilityAssessmentTask = defineTask('feasibility-assessment', (a
 export const reuseRegulatoryTask = defineTask('reuse-regulatory', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Regulatory Requirements Analysis',
-  skill: { name: 'regulatory-compliance' },
   agent: {
     name: 'environmental-compliance-specialist',
     prompt: {
@@ -322,7 +320,6 @@ export const reuseRegulatoryTask = defineTask('reuse-regulatory', (args, taskCtx
 export const reuseRiskAssessmentTask = defineTask('reuse-risk-assessment', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Public Health Risk Assessment',
-  skill: { name: 'health-risk-assessment' },
   agent: {
     name: 'risk-assessment-specialist',
     prompt: {
@@ -368,7 +365,6 @@ export const reuseRiskAssessmentTask = defineTask('reuse-risk-assessment', (args
 export const reuseTreatmentDesignTask = defineTask('reuse-treatment-design', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Treatment System Design',
-  skill: { name: 'membrane-system-design' },
   agent: {
     name: 'water-treatment-specialist',
     prompt: {
@@ -414,7 +410,6 @@ export const reuseTreatmentDesignTask = defineTask('reuse-treatment-design', (ar
 export const distributionSystemTask = defineTask('distribution-system', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Distribution System Design',
-  skill: { name: 'water-reuse-assessment' },
   agent: {
     name: 'water-treatment-specialist',
     prompt: {
@@ -460,7 +455,6 @@ export const distributionSystemTask = defineTask('distribution-system', (args, t
 export const reuseMonitoringTask = defineTask('reuse-monitoring', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Monitoring Program Development',
-  skill: { name: 'water-reuse-assessment' },
   agent: {
     name: 'water-treatment-specialist',
     prompt: {
@@ -506,7 +500,6 @@ export const reuseMonitoringTask = defineTask('reuse-monitoring', (args, taskCtx
 export const publicOutreachTask = defineTask('public-outreach', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Public Outreach and Education',
-  skill: { name: 'water-reuse-assessment' },
   agent: {
     name: 'water-treatment-specialist',
     prompt: {
@@ -551,7 +544,6 @@ export const publicOutreachTask = defineTask('public-outreach', (args, taskCtx) 
 export const implementationDocsTask = defineTask('implementation-docs', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Implementation Documentation',
-  skill: { name: 'water-reuse-assessment' },
   agent: {
     name: 'water-treatment-specialist',
     prompt: {

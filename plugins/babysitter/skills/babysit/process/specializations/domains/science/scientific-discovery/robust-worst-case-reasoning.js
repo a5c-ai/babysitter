@@ -161,8 +161,10 @@ export async function process(inputs, ctx) {
 export const robustProblemStructuringTask = defineTask('robust-problem-structuring', (args, taskCtx) => ({
   kind: 'agent',
   title: `Robust Problem Structuring - ${args.domain}`,
+  skill: { name: 'bayesian-inference-engine' },
   agent: {
-    name: 'general-purpose',
+    name: 'robust-decision-analyst',
+    skills: ['bayesian-inference-engine', 'hypothesis-generator'],
     prompt: {
       role: 'Expert in robust decision making and worst-case analysis',
       task: 'Structure the robust decision problem',
@@ -239,8 +241,10 @@ export const robustProblemStructuringTask = defineTask('robust-problem-structuri
 export const uncertaintyCharacterizationTask = defineTask('uncertainty-characterization', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Uncertainty Characterization',
+  skill: { name: 'bayesian-inference-engine' },
   agent: {
-    name: 'general-purpose',
+    name: 'robust-decision-analyst',
+    skills: ['bayesian-inference-engine', 'hypothesis-generator'],
     prompt: {
       role: 'Expert in uncertainty modeling and robust optimization',
       task: 'Characterize uncertainties for worst-case analysis',
@@ -312,8 +316,10 @@ export const uncertaintyCharacterizationTask = defineTask('uncertainty-character
 export const performanceEvaluationTask = defineTask('performance-evaluation', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Performance Evaluation Under Uncertainty',
+  skill: { name: 'bayesian-inference-engine' },
   agent: {
-    name: 'general-purpose',
+    name: 'robust-decision-analyst',
+    skills: ['bayesian-inference-engine', 'hypothesis-generator'],
     prompt: {
       role: 'Expert in performance analysis under uncertainty',
       task: 'Evaluate alternative performance across uncertainty scenarios',
@@ -398,8 +404,10 @@ export const performanceEvaluationTask = defineTask('performance-evaluation', (a
 export const worstCaseIdentificationTask = defineTask('worst-case-identification', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Worst-Case Scenario Identification',
+  skill: { name: 'bayesian-inference-engine' },
   agent: {
-    name: 'general-purpose',
+    name: 'robust-decision-analyst',
+    skills: ['bayesian-inference-engine', 'hypothesis-generator'],
     prompt: {
       role: 'Expert in worst-case analysis and scenario identification',
       task: 'Identify worst-case scenarios for each alternative',
@@ -481,8 +489,10 @@ export const worstCaseIdentificationTask = defineTask('worst-case-identification
 export const maximinAnalysisTask = defineTask('maximin-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Maximin Analysis',
+  skill: { name: 'bayesian-inference-engine' },
   agent: {
-    name: 'general-purpose',
+    name: 'robust-decision-analyst',
+    skills: ['bayesian-inference-engine', 'hypothesis-generator'],
     prompt: {
       role: 'Expert in maximin decision criteria and Wald criterion',
       task: 'Apply maximin criterion to select robust alternative',
@@ -550,8 +560,10 @@ export const maximinAnalysisTask = defineTask('maximin-analysis', (args, taskCtx
 export const robustOptimizationTask = defineTask('robust-optimization', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Robust Optimization',
+  skill: { name: 'bayesian-inference-engine' },
   agent: {
-    name: 'general-purpose',
+    name: 'robust-decision-analyst',
+    skills: ['bayesian-inference-engine', 'hypothesis-generator'],
     prompt: {
       role: 'Expert in robust optimization theory',
       task: 'Apply robust optimization approaches',
@@ -625,8 +637,10 @@ export const robustOptimizationTask = defineTask('robust-optimization', (args, t
 export const adversarialAnalysisTask = defineTask('adversarial-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Adversarial Analysis',
+  skill: { name: 'bayesian-inference-engine' },
   agent: {
-    name: 'general-purpose',
+    name: 'robust-decision-analyst',
+    skills: ['bayesian-inference-engine', 'hypothesis-generator'],
     prompt: {
       role: 'Expert in adversarial reasoning and game theory',
       task: 'Analyze decisions from adversarial perspective',
@@ -701,8 +715,10 @@ export const adversarialAnalysisTask = defineTask('adversarial-analysis', (args,
 export const acceptabilityAnalysisTask = defineTask('acceptability-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Acceptability Analysis',
+  skill: { name: 'bayesian-inference-engine' },
   agent: {
-    name: 'general-purpose',
+    name: 'robust-decision-analyst',
+    skills: ['bayesian-inference-engine', 'hypothesis-generator'],
     prompt: {
       role: 'Expert in decision acceptability and threshold analysis',
       task: 'Analyze which alternatives meet acceptability criteria',
@@ -788,8 +804,10 @@ export const acceptabilityAnalysisTask = defineTask('acceptability-analysis', (a
 export const robustnessMetricsTask = defineTask('robustness-metrics', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Robustness Metrics Computation',
+  skill: { name: 'bayesian-inference-engine' },
   agent: {
-    name: 'general-purpose',
+    name: 'robust-decision-analyst',
+    skills: ['bayesian-inference-engine', 'hypothesis-generator'],
     prompt: {
       role: 'Expert in robustness measurement and metrics',
       task: 'Compute comprehensive robustness metrics',
@@ -868,8 +886,10 @@ export const robustnessMetricsTask = defineTask('robustness-metrics', (args, tas
 export const robustRecommendationTask = defineTask('robust-recommendation', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Robust Decision Recommendation',
+  skill: { name: 'bayesian-inference-engine' },
   agent: {
-    name: 'general-purpose',
+    name: 'robust-decision-analyst',
+    skills: ['bayesian-inference-engine', 'hypothesis-generator'],
     prompt: {
       role: 'Expert in robust decision making and advisory',
       task: 'Synthesize robust analysis into recommendation',

@@ -216,7 +216,6 @@ export async function process(inputs, ctx) {
 export const resourceCharacterizationTask = defineTask('resource-characterization', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 1: Resource Characterization - ${args.projectName}`,
-  skill: { name: 'renewable-modeling' },
   agent: {
     name: 'renewable-integration-expert',
     prompt: {
@@ -272,7 +271,6 @@ export const resourceCharacterizationTask = defineTask('resource-characterizatio
 export const inverterModelingTask = defineTask('inverter-modeling', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 2: Inverter Modeling - ${args.projectName}`,
-  skill: { name: 'renewable-modeling' },
   agent: {
     name: 'renewable-integration-expert',
     prompt: {
@@ -329,7 +327,6 @@ export const inverterModelingTask = defineTask('inverter-modeling', (args, taskC
 export const steadyStateAnalysisTask = defineTask('steady-state-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 3: Steady-State Impact Analysis - ${args.projectName}`,
-  skill: { name: 'renewable-modeling' },
   agent: {
     name: 'renewable-integration-expert',
     prompt: {
@@ -396,7 +393,6 @@ export const steadyStateAnalysisTask = defineTask('steady-state-analysis', (args
 export const powerQualityAnalysisTask = defineTask('power-quality-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 4: Power Quality Analysis - ${args.projectName}`,
-  skill: { name: 'renewable-modeling' },
   agent: {
     name: 'renewable-integration-expert',
     prompt: {
@@ -450,7 +446,6 @@ export const powerQualityAnalysisTask = defineTask('power-quality-analysis', (ar
 export const faultRideThroughStudyTask = defineTask('fault-ride-through', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 5: Fault Ride-Through Study - ${args.projectName}`,
-  skill: { name: 'renewable-modeling' },
   agent: {
     name: 'renewable-integration-expert',
     prompt: {
@@ -516,7 +511,6 @@ export const faultRideThroughStudyTask = defineTask('fault-ride-through', (args,
 export const stabilityAssessmentTask = defineTask('stability-assessment', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 6: Stability Assessment - ${args.projectName}`,
-  skill: { name: 'renewable-modeling' },
   agent: {
     name: 'renewable-integration-expert',
     prompt: {
@@ -580,7 +574,6 @@ export const stabilityAssessmentTask = defineTask('stability-assessment', (args,
 export const protectionControlDesignTask = defineTask('protection-control-design', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 7: Protection and Control Design - ${args.projectName}`,
-  skill: { name: 'renewable-modeling' },
   agent: {
     name: 'renewable-integration-expert',
     prompt: {
@@ -648,7 +641,6 @@ export const protectionControlDesignTask = defineTask('protection-control-design
 export const complianceDocumentationTask = defineTask('compliance-documentation', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 8: Compliance Documentation - ${args.projectName}`,
-  skill: { name: 'renewable-modeling' },
   agent: {
     name: 'renewable-integration-expert',
     prompt: {

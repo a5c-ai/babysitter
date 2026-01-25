@@ -19,8 +19,10 @@ import { defineTask } from '@a5c-ai/babysitter-sdk';
 const analyzeEnvironmentTask = defineTask('heuristic-analyze-environment', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Environment and Constraint Analysis',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'heuristic-analyst',
+    skills: ['hypothesis-generator', 'bayesian-inference-engine'],
     prompt: {
       role: 'Ecological rationality and decision environment specialist',
       task: 'Analyze the decision environment to determine heuristic applicability',
@@ -81,8 +83,10 @@ const analyzeEnvironmentTask = defineTask('heuristic-analyze-environment', (args
 const identifyHeuristicRepertoireTask = defineTask('heuristic-identify-repertoire', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Heuristic Repertoire Identification',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'heuristic-analyst',
+    skills: ['hypothesis-generator', 'bayesian-inference-engine'],
     prompt: {
       role: 'Heuristic taxonomy and selection specialist',
       task: 'Identify applicable heuristics from the adaptive toolbox',
@@ -153,8 +157,10 @@ const identifyHeuristicRepertoireTask = defineTask('heuristic-identify-repertoir
 const assessEcologicalRationalityTask = defineTask('heuristic-ecological-rationality', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Ecological Rationality Assessment',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'heuristic-analyst',
+    skills: ['hypothesis-generator', 'bayesian-inference-engine'],
     prompt: {
       role: 'Ecological rationality and environment-heuristic fit specialist',
       task: 'Assess the match between heuristics and environmental structure',
@@ -218,8 +224,10 @@ const assessEcologicalRationalityTask = defineTask('heuristic-ecological-rationa
 const selectHeuristicTask = defineTask('heuristic-select', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Heuristic Selection',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'heuristic-analyst',
+    skills: ['hypothesis-generator', 'bayesian-inference-engine'],
     prompt: {
       role: 'Heuristic selection and adaptation specialist',
       task: 'Select the most appropriate heuristic(s) for the decision context',
@@ -283,8 +291,10 @@ const selectHeuristicTask = defineTask('heuristic-select', (args, taskCtx) => ({
 const applyHeuristicTask = defineTask('heuristic-apply', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Heuristic Application',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'heuristic-analyst',
+    skills: ['hypothesis-generator', 'bayesian-inference-engine'],
     prompt: {
       role: 'Heuristic implementation and execution specialist',
       task: 'Apply the selected heuristic to the problem',
@@ -346,8 +356,10 @@ const applyHeuristicTask = defineTask('heuristic-apply', (args, taskCtx) => ({
 const analyzeBiasErrorTask = defineTask('heuristic-bias-error', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Bias and Error Analysis',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'heuristic-analyst',
+    skills: ['hypothesis-generator', 'bayesian-inference-engine'],
     prompt: {
       role: 'Cognitive bias and heuristic error specialist',
       task: 'Analyze potential biases and errors from heuristic use',
@@ -411,8 +423,10 @@ const analyzeBiasErrorTask = defineTask('heuristic-bias-error', (args, taskCtx) 
 const analyzeSpeedAccuracyTask = defineTask('heuristic-speed-accuracy', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Speed-Accuracy Trade-off Analysis',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'heuristic-analyst',
+    skills: ['hypothesis-generator', 'bayesian-inference-engine'],
     prompt: {
       role: 'Speed-accuracy trade-off and decision efficiency specialist',
       task: 'Analyze the speed-accuracy trade-off of the heuristic approach',
@@ -474,8 +488,10 @@ const analyzeSpeedAccuracyTask = defineTask('heuristic-speed-accuracy', (args, t
 const calibrateHeuristicTask = defineTask('heuristic-calibrate', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Heuristic Calibration and Learning',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'heuristic-analyst',
+    skills: ['hypothesis-generator', 'bayesian-inference-engine'],
     prompt: {
       role: 'Heuristic calibration and adaptive learning specialist',
       task: 'Calibrate the heuristic based on feedback and design learning mechanisms',
@@ -534,8 +550,10 @@ const calibrateHeuristicTask = defineTask('heuristic-calibrate', (args, taskCtx)
 const synthesizeResultsTask = defineTask('heuristic-synthesize', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Heuristic Reasoning Synthesis',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'heuristic-analyst',
+    skills: ['hypothesis-generator', 'bayesian-inference-engine'],
     prompt: {
       role: 'Heuristic reasoning synthesis specialist',
       task: 'Synthesize all heuristic reasoning results into comprehensive conclusions',

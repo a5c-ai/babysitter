@@ -329,8 +329,10 @@ export async function process(inputs, ctx) {
 export const systemDefinitionTask = defineTask('system-definition', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Define system and scope',
+  skill: { name: 'root-cause-analyzer' },
   agent: {
-    name: 'general-purpose',
+    name: 'reliability-engineer',
+    skills: ['root-cause-analyzer', 'causal-inference-engine', 'hypothesis-generator'],
     prompt: {
       role: 'Systems engineer specializing in FMEA',
       task: 'Define the system scope and boundaries for FMEA',
@@ -381,8 +383,10 @@ export const systemDefinitionTask = defineTask('system-definition', (args, taskC
 export const functionAnalysisTask = defineTask('function-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Analyze system functions',
+  skill: { name: 'root-cause-analyzer' },
   agent: {
-    name: 'general-purpose',
+    name: 'reliability-engineer',
+    skills: ['root-cause-analyzer', 'causal-inference-engine'],
     prompt: {
       role: 'Functional analysis specialist',
       task: 'Identify and analyze all system and component functions',
@@ -428,8 +432,10 @@ export const functionAnalysisTask = defineTask('function-analysis', (args, taskC
 export const failureModeIdentificationTask = defineTask('failure-mode-identification', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Identify failure modes',
+  skill: { name: 'root-cause-analyzer' },
   agent: {
-    name: 'general-purpose',
+    name: 'reliability-engineer',
+    skills: ['root-cause-analyzer', 'causal-inference-engine', 'hypothesis-generator'],
     prompt: {
       role: 'Failure analysis expert',
       task: 'Identify all potential failure modes for each function',
@@ -483,8 +489,10 @@ export const failureModeIdentificationTask = defineTask('failure-mode-identifica
 export const failureEffectsAnalysisTask = defineTask('failure-effects-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Analyze failure effects',
+  skill: { name: 'causal-inference-engine' },
   agent: {
-    name: 'general-purpose',
+    name: 'reliability-engineer',
+    skills: ['causal-inference-engine', 'root-cause-analyzer', 'hypothesis-generator'],
     prompt: {
       role: 'Failure effects analyst',
       task: 'Analyze the effects of each failure mode at multiple levels',
@@ -539,8 +547,10 @@ export const failureEffectsAnalysisTask = defineTask('failure-effects-analysis',
 export const severityAssessmentTask = defineTask('severity-assessment', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Assess severity',
+  skill: { name: 'bayesian-inference-engine' },
   agent: {
-    name: 'general-purpose',
+    name: 'reliability-engineer',
+    skills: ['bayesian-inference-engine', 'root-cause-analyzer'],
     prompt: {
       role: 'Severity rating specialist',
       task: 'Assess the severity of each failure effect using standard FMEA severity scale',
@@ -595,8 +605,10 @@ export const severityAssessmentTask = defineTask('severity-assessment', (args, t
 export const fmeaCauseAnalysisTask = defineTask('fmea-cause-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Analyze failure causes',
+  skill: { name: 'root-cause-analyzer' },
   agent: {
-    name: 'general-purpose',
+    name: 'reliability-engineer',
+    skills: ['root-cause-analyzer', 'causal-inference-engine', 'hypothesis-generator'],
     prompt: {
       role: 'Root cause analyst',
       task: 'Identify potential causes for each failure mode',
@@ -647,8 +659,10 @@ export const fmeaCauseAnalysisTask = defineTask('fmea-cause-analysis', (args, ta
 export const occurrenceAssessmentTask = defineTask('occurrence-assessment', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Assess occurrence likelihood',
+  skill: { name: 'bayesian-inference-engine' },
   agent: {
-    name: 'general-purpose',
+    name: 'reliability-engineer',
+    skills: ['bayesian-inference-engine', 'statistical-test-selector'],
     prompt: {
       role: 'Occurrence rating specialist',
       task: 'Assess the likelihood of each cause occurring using standard FMEA occurrence scale',
@@ -705,8 +719,10 @@ export const occurrenceAssessmentTask = defineTask('occurrence-assessment', (arg
 export const currentControlsAnalysisTask = defineTask('current-controls-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Analyze current controls',
+  skill: { name: 'root-cause-analyzer' },
   agent: {
-    name: 'general-purpose',
+    name: 'reliability-engineer',
+    skills: ['root-cause-analyzer', 'causal-inference-engine'],
     prompt: {
       role: 'Controls analyst',
       task: 'Identify and document current controls that prevent or detect failures',
@@ -759,8 +775,10 @@ export const currentControlsAnalysisTask = defineTask('current-controls-analysis
 export const detectionAssessmentTask = defineTask('detection-assessment', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Assess detection capability',
+  skill: { name: 'bayesian-inference-engine' },
   agent: {
-    name: 'general-purpose',
+    name: 'reliability-engineer',
+    skills: ['bayesian-inference-engine', 'root-cause-analyzer'],
     prompt: {
       role: 'Detection rating specialist',
       task: 'Assess detection capability using standard FMEA detection scale',
@@ -816,8 +834,10 @@ export const detectionAssessmentTask = defineTask('detection-assessment', (args,
 export const rpnCalculationTask = defineTask('rpn-calculation', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Calculate Risk Priority Numbers',
+  skill: { name: 'bayesian-inference-engine' },
   agent: {
-    name: 'general-purpose',
+    name: 'reliability-engineer',
+    skills: ['bayesian-inference-engine', 'statistical-test-selector', 'root-cause-analyzer'],
     prompt: {
       role: 'Risk calculation specialist',
       task: 'Calculate RPN for each failure mode and categorize by risk level',
@@ -875,8 +895,10 @@ export const rpnCalculationTask = defineTask('rpn-calculation', (args, taskCtx) 
 export const actionPrioritizationTask = defineTask('action-prioritization', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Prioritize recommended actions',
+  skill: { name: 'root-cause-analyzer' },
   agent: {
-    name: 'general-purpose',
+    name: 'reliability-engineer',
+    skills: ['root-cause-analyzer', 'bayesian-inference-engine'],
     prompt: {
       role: 'Action prioritization specialist',
       task: 'Prioritize actions based on RPN and severity',
@@ -929,8 +951,10 @@ export const actionPrioritizationTask = defineTask('action-prioritization', (arg
 export const mitigationDevelopmentTask = defineTask('mitigation-development', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Develop mitigation strategies',
+  skill: { name: 'root-cause-analyzer' },
   agent: {
-    name: 'general-purpose',
+    name: 'reliability-engineer',
+    skills: ['root-cause-analyzer', 'hypothesis-generator', 'triz-inventive-solver'],
     prompt: {
       role: 'Mitigation strategy developer',
       task: 'Develop recommended actions to reduce risk',
@@ -986,8 +1010,10 @@ export const mitigationDevelopmentTask = defineTask('mitigation-development', (a
 export const fmeaTableGenerationTask = defineTask('fmea-table-generation', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Generate FMEA table',
+  skill: { name: 'root-cause-analyzer' },
   agent: {
-    name: 'general-purpose',
+    name: 'reliability-engineer',
+    skills: ['root-cause-analyzer', 'hypothesis-generator'],
     prompt: {
       role: 'FMEA documentation specialist',
       task: 'Generate complete FMEA table/worksheet',
@@ -1036,8 +1062,10 @@ export const fmeaTableGenerationTask = defineTask('fmea-table-generation', (args
 export const fmeaQualityScoringTask = defineTask('fmea-quality-scoring', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Score FMEA quality',
+  skill: { name: 'root-cause-analyzer' },
   agent: {
-    name: 'general-purpose',
+    name: 'reliability-engineer',
+    skills: ['root-cause-analyzer', 'bayesian-inference-engine', 'hypothesis-generator'],
     prompt: {
       role: 'FMEA quality auditor',
       task: 'Assess the quality and completeness of the FMEA',

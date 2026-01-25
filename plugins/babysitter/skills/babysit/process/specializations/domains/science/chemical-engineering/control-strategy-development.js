@@ -149,7 +149,6 @@ export async function process(inputs, ctx) {
 export const controlObjectivesTask = defineTask('control-objectives', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Define control objectives',
-  skill: { name: 'control-strategy-designer' },
   agent: {
     name: 'control-systems-engineer',
     prompt: {
@@ -201,7 +200,6 @@ export const controlObjectivesTask = defineTask('control-objectives', (args, tas
 export const variableIdentificationTask = defineTask('variable-identification', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Identify controlled and manipulated variables',
-  skill: { name: 'control-strategy-designer' },
   agent: {
     name: 'control-systems-engineer',
     prompt: {
@@ -264,7 +262,6 @@ export const variableIdentificationTask = defineTask('variable-identification', 
 export const controlStructureSelectionTask = defineTask('control-structure-selection', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Select control structure',
-  skill: { name: 'control-strategy-designer' },
   agent: {
     name: 'control-systems-engineer',
     prompt: {
@@ -314,7 +311,6 @@ export const controlStructureSelectionTask = defineTask('control-structure-selec
 export const controlLoopDesignTask = defineTask('control-loop-design', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Design control loops for unit operations',
-  skill: { name: 'pid-tuning-optimizer' },
   agent: {
     name: 'control-systems-engineer',
     prompt: {
@@ -368,7 +364,6 @@ export const controlLoopDesignTask = defineTask('control-loop-design', (args, ta
 export const processInteractionsTask = defineTask('process-interactions', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Address process interactions and constraints',
-  skill: { name: 'control-strategy-designer' },
   agent: {
     name: 'control-systems-engineer',
     prompt: {
@@ -416,7 +411,6 @@ export const processInteractionsTask = defineTask('process-interactions', (args,
 export const controlPhilosophyTask = defineTask('control-philosophy', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Document control philosophy',
-  skill: { name: 'alarm-rationalizer' },
   agent: {
     name: 'control-systems-engineer',
     prompt: {
@@ -465,7 +459,6 @@ export const controlPhilosophyTask = defineTask('control-philosophy', (args, tas
 export const dcsConfigurationTask = defineTask('dcs-configuration', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Generate DCS configuration specification',
-  skill: { name: 'control-strategy-designer' },
   agent: {
     name: 'control-systems-engineer',
     prompt: {

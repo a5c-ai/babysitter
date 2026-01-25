@@ -184,7 +184,6 @@ export async function process(inputs, ctx) {
 export const hhAnalysisTask = defineTask('hh-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Perform hydrologic and hydraulic analysis',
-  skill: { name: 'hydraulic-analysis-engine' },
   agent: {
     name: 'hydraulic-engineer',
     prompt: {
@@ -230,7 +229,6 @@ export const hhAnalysisTask = defineTask('hh-analysis', (args, taskCtx) => ({
 export const structureSizingTask = defineTask('structure-sizing', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Size hydraulic structure',
-  skill: { name: 'hydraulic-analysis-engine' },
   agent: {
     name: 'hydraulic-engineer',
     prompt: {
@@ -275,7 +273,6 @@ export const structureSizingTask = defineTask('structure-sizing', (args, taskCtx
 export const inletDesignTask = defineTask('inlet-design', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Design inlet conditions',
-  skill: { name: 'hydraulic-analysis-engine' },
   agent: {
     name: 'hydraulic-engineer',
     prompt: {
@@ -320,7 +317,6 @@ export const inletDesignTask = defineTask('inlet-design', (args, taskCtx) => ({
 export const outletDesignTask = defineTask('outlet-design', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Design outlet and energy dissipation',
-  skill: { name: 'hydraulic-analysis-engine' },
   agent: {
     name: 'hydraulic-engineer',
     prompt: {
@@ -365,7 +361,6 @@ export const outletDesignTask = defineTask('outlet-design', (args, taskCtx) => (
 export const structuralDesignTask = defineTask('structural-design', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Perform structural design',
-  skill: { name: 'fea-structural-engine' },
   agent: {
     name: 'structural-load-analyst',
     prompt: {
@@ -410,7 +405,6 @@ export const structuralDesignTask = defineTask('structural-design', (args, taskC
 export const scourAnalysisTask = defineTask('scour-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Perform scour analysis',
-  skill: { name: 'hydraulic-analysis-engine' },
   agent: {
     name: 'hydraulic-engineer',
     prompt: {
@@ -455,7 +449,6 @@ export const scourAnalysisTask = defineTask('scour-analysis', (args, taskCtx) =>
 export const structureDrawingsTask = defineTask('structure-drawings', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Generate hydraulic structure drawings',
-  skill: { name: 'civil3d-surface-analyzer' },
   agent: {
     name: 'highway-design-engineer',
     prompt: {
@@ -505,7 +498,6 @@ export const structureDrawingsTask = defineTask('structure-drawings', (args, tas
 export const hydraulicReportTask = defineTask('hydraulic-report', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Generate hydraulic design report',
-  skill: { name: 'engineering-report-generator' },
   agent: {
     name: 'technical-report-writer',
     prompt: {

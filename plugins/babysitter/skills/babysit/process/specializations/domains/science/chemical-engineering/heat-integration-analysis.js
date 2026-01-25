@@ -191,7 +191,6 @@ export async function process(inputs, ctx) {
 export const streamDataExtractionTask = defineTask('stream-data-extraction', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Extract and validate stream data for pinch analysis',
-  skill: { name: 'pinch-analyzer' },
   agent: {
     name: 'heat-integration-specialist',
     prompt: {
@@ -256,7 +255,6 @@ export const streamDataExtractionTask = defineTask('stream-data-extraction', (ar
 export const compositeCurveTask = defineTask('composite-curve', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Construct composite curves',
-  skill: { name: 'pinch-analyzer' },
   agent: {
     name: 'heat-integration-specialist',
     prompt: {
@@ -304,7 +302,6 @@ export const compositeCurveTask = defineTask('composite-curve', (args, taskCtx) 
 export const pinchAnalysisTask = defineTask('pinch-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Determine pinch point and minimum utilities',
-  skill: { name: 'pinch-analyzer' },
   agent: {
     name: 'heat-integration-specialist',
     prompt: {
@@ -350,7 +347,6 @@ export const pinchAnalysisTask = defineTask('pinch-analysis', (args, taskCtx) =>
 export const grandCompositeCurveTask = defineTask('grand-composite-curve', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Construct grand composite curve',
-  skill: { name: 'pinch-analyzer' },
   agent: {
     name: 'heat-integration-specialist',
     prompt: {
@@ -394,7 +390,6 @@ export const grandCompositeCurveTask = defineTask('grand-composite-curve', (args
 export const henDesignAbovePinchTask = defineTask('hen-design-above-pinch', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Design heat exchanger network above pinch',
-  skill: { name: 'pinch-analyzer' },
   agent: {
     name: 'heat-integration-specialist',
     prompt: {
@@ -443,7 +438,6 @@ export const henDesignAbovePinchTask = defineTask('hen-design-above-pinch', (arg
 export const henDesignBelowPinchTask = defineTask('hen-design-below-pinch', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Design heat exchanger network below pinch',
-  skill: { name: 'pinch-analyzer' },
   agent: {
     name: 'heat-integration-specialist',
     prompt: {
@@ -492,7 +486,6 @@ export const henDesignBelowPinchTask = defineTask('hen-design-below-pinch', (arg
 export const operabilityAnalysisTask = defineTask('operability-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Evaluate heat integration vs. operability trade-offs',
-  skill: { name: 'energy-auditor' },
   agent: {
     name: 'energy-efficiency-engineer',
     prompt: {
@@ -541,7 +534,6 @@ export const operabilityAnalysisTask = defineTask('operability-analysis', (args,
 export const processModificationTask = defineTask('process-modification', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Identify process modification opportunities',
-  skill: { name: 'pinch-analyzer' },
   agent: {
     name: 'heat-integration-specialist',
     prompt: {
@@ -593,7 +585,6 @@ export const processModificationTask = defineTask('process-modification', (args,
 export const economicAnalysisTask = defineTask('economic-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Perform economic analysis of heat integration',
-  skill: { name: 'process-economics-estimator' },
   agent: {
     name: 'heat-integration-specialist',
     prompt: {

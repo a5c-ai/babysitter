@@ -152,8 +152,10 @@ export async function process(inputs, ctx) {
 export const characterizeProblemTask = defineTask('meta-problem-characterization', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 1: Problem Characterization',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'meta-reasoning-analyst',
+    skills: ['hypothesis-generator', 'bayesian-inference-engine'],
     prompt: {
       role: 'Meta-cognitive problem analysis specialist',
       task: 'Characterize the problem for meta-reasoning strategy selection',
@@ -191,8 +193,10 @@ export const characterizeProblemTask = defineTask('meta-problem-characterization
 export const assessStrategiesTask = defineTask('meta-strategy-assessment', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 2: Strategy Assessment',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'meta-reasoning-analyst',
+    skills: ['hypothesis-generator', 'bayesian-inference-engine'],
     prompt: {
       role: 'Reasoning strategy assessment specialist',
       task: 'Assess available reasoning strategies for the problem',
@@ -228,8 +232,10 @@ export const assessStrategiesTask = defineTask('meta-strategy-assessment', (args
 export const selectStrategyTask = defineTask('meta-strategy-selection', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 3: Strategy Selection',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'meta-reasoning-analyst',
+    skills: ['hypothesis-generator', 'bayesian-inference-engine'],
     prompt: {
       role: 'Meta-reasoning strategy selection specialist',
       task: 'Select optimal reasoning strategy and fallbacks',
@@ -266,8 +272,10 @@ export const selectStrategyTask = defineTask('meta-strategy-selection', (args, t
 export const allocateResourcesTask = defineTask('meta-resource-allocation', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 4: Resource Allocation',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'meta-reasoning-analyst',
+    skills: ['hypothesis-generator', 'bayesian-inference-engine'],
     prompt: {
       role: 'Cognitive resource allocation specialist',
       task: 'Allocate resources across reasoning phases',
@@ -304,8 +312,10 @@ export const allocateResourcesTask = defineTask('meta-resource-allocation', (arg
 export const defineStoppingCriteriaTask = defineTask('meta-stopping-criteria', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 5: Stopping Criteria Definition',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'meta-reasoning-analyst',
+    skills: ['hypothesis-generator', 'bayesian-inference-engine'],
     prompt: {
       role: 'Satisficing and stopping criteria specialist',
       task: 'Define when to stop deliberating and commit to a solution',
@@ -342,8 +352,10 @@ export const defineStoppingCriteriaTask = defineTask('meta-stopping-criteria', (
 export const designMonitoringTask = defineTask('meta-monitoring-design', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 6: Monitoring Framework Design',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'meta-reasoning-analyst',
+    skills: ['hypothesis-generator', 'bayesian-inference-engine'],
     prompt: {
       role: 'Reasoning process monitoring specialist',
       task: 'Design monitoring framework for the reasoning process',
@@ -380,8 +392,10 @@ export const designMonitoringTask = defineTask('meta-monitoring-design', (args, 
 export const defineAdaptationTriggersTask = defineTask('meta-adaptation-triggers', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 7: Adaptation Triggers',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'meta-reasoning-analyst',
+    skills: ['hypothesis-generator', 'bayesian-inference-engine'],
     prompt: {
       role: 'Adaptive reasoning specialist',
       task: 'Define triggers for strategy adaptation during reasoning',
@@ -418,8 +432,10 @@ export const defineAdaptationTriggersTask = defineTask('meta-adaptation-triggers
 export const checkCoherenceTask = defineTask('meta-coherence-check', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 8: Coherence Check',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'meta-reasoning-analyst',
+    skills: ['hypothesis-generator', 'bayesian-inference-engine'],
     prompt: {
       role: 'Meta-reasoning coherence specialist',
       task: 'Check coherence of the meta-reasoning plan',
@@ -455,8 +471,10 @@ export const checkCoherenceTask = defineTask('meta-coherence-check', (args, task
 export const simulateReasoningProcessTask = defineTask('meta-process-simulation', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 9: Process Simulation',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'meta-reasoning-analyst',
+    skills: ['hypothesis-generator', 'bayesian-inference-engine'],
     prompt: {
       role: 'Reasoning process simulation specialist',
       task: 'Simulate the reasoning process to identify issues',
@@ -493,8 +511,10 @@ export const simulateReasoningProcessTask = defineTask('meta-process-simulation'
 export const analyzeMetaRisksTask = defineTask('meta-risk-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 10: Risk Analysis',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'meta-reasoning-analyst',
+    skills: ['hypothesis-generator', 'bayesian-inference-engine'],
     prompt: {
       role: 'Meta-reasoning risk analyst',
       task: 'Analyze risks in the meta-reasoning plan',
@@ -530,8 +550,10 @@ export const analyzeMetaRisksTask = defineTask('meta-risk-analysis', (args, task
 export const synthesizeMetaPlanTask = defineTask('meta-plan-synthesis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 11: Plan Synthesis',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'meta-reasoning-analyst',
+    skills: ['hypothesis-generator', 'bayesian-inference-engine'],
     prompt: {
       role: 'Meta-reasoning plan synthesis specialist',
       task: 'Synthesize final meta-reasoning plan',

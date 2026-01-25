@@ -153,7 +153,6 @@ export async function process(inputs, ctx) {
 export const releaseScenarioDefinitionTask = defineTask('release-scenario-definition', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Define release scenarios',
-  skill: { name: 'consequence-modeler' },
   agent: {
     name: 'risk-analyst',
     prompt: {
@@ -205,7 +204,6 @@ export const releaseScenarioDefinitionTask = defineTask('release-scenario-defini
 export const sourceTermModelingTask = defineTask('source-term-modeling', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Model source term (release rate, duration)',
-  skill: { name: 'consequence-modeler' },
   agent: {
     name: 'risk-analyst',
     prompt: {
@@ -258,7 +256,6 @@ export const sourceTermModelingTask = defineTask('source-term-modeling', (args, 
 export const dispersionModelingTask = defineTask('dispersion-modeling', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Perform dispersion modeling',
-  skill: { name: 'consequence-modeler' },
   agent: {
     name: 'risk-analyst',
     prompt: {
@@ -311,7 +308,6 @@ export const dispersionModelingTask = defineTask('dispersion-modeling', (args, t
 export const fireModelingTask = defineTask('fire-modeling', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Model fire effects',
-  skill: { name: 'consequence-modeler' },
   agent: {
     name: 'risk-analyst',
     prompt: {
@@ -364,7 +360,6 @@ export const fireModelingTask = defineTask('fire-modeling', (args, taskCtx) => (
 export const explosionModelingTask = defineTask('explosion-modeling', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Model explosion effects',
-  skill: { name: 'consequence-modeler' },
   agent: {
     name: 'risk-analyst',
     prompt: {
@@ -417,7 +412,6 @@ export const explosionModelingTask = defineTask('explosion-modeling', (args, tas
 export const impactZoneDeterminationTask = defineTask('impact-zone-determination', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Determine impact zones',
-  skill: { name: 'consequence-modeler' },
   agent: {
     name: 'risk-analyst',
     prompt: {
@@ -467,7 +461,6 @@ export const impactZoneDeterminationTask = defineTask('impact-zone-determination
 export const emergencyZoneDefinitionTask = defineTask('emergency-zone-definition', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Develop emergency response zones',
-  skill: { name: 'consequence-modeler' },
   agent: {
     name: 'risk-analyst',
     prompt: {

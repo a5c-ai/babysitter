@@ -185,7 +185,6 @@ export async function process(inputs, ctx) {
 export const requirementsDefinitionTask = defineTask('requirements-definition', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 1: Requirements Definition - ${args.systemName}`,
-  skill: { name: 'wireless-link-budget' },
   agent: {
     name: 'communications-engineer',
     prompt: {
@@ -242,7 +241,6 @@ export const requirementsDefinitionTask = defineTask('requirements-definition', 
 export const modulationSelectionTask = defineTask('modulation-selection', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 2: Modulation Selection - ${args.systemName}`,
-  skill: { name: 'wireless-link-budget' },
   agent: {
     name: 'communications-engineer',
     prompt: {
@@ -298,7 +296,6 @@ export const modulationSelectionTask = defineTask('modulation-selection', (args,
 export const transmitterDesignTask = defineTask('transmitter-design', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 3: Transmitter Design - ${args.systemName}`,
-  skill: { name: 'wireless-link-budget' },
   agent: {
     name: 'communications-engineer',
     prompt: {
@@ -365,7 +362,6 @@ export const transmitterDesignTask = defineTask('transmitter-design', (args, tas
 export const receiverDesignTask = defineTask('receiver-design', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 4: Receiver Design - ${args.systemName}`,
-  skill: { name: 'wireless-link-budget' },
   agent: {
     name: 'communications-engineer',
     prompt: {
@@ -436,7 +432,6 @@ export const receiverDesignTask = defineTask('receiver-design', (args, taskCtx) 
 export const systemSimulationTask = defineTask('system-simulation', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 5: System Simulation - ${args.systemName}`,
-  skill: { name: 'wireless-link-budget' },
   agent: {
     name: 'communications-engineer',
     prompt: {
@@ -492,7 +487,6 @@ export const systemSimulationTask = defineTask('system-simulation', (args, taskC
 export const performanceAnalysisTask = defineTask('performance-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 6: Performance Analysis - ${args.systemName}`,
-  skill: { name: 'wireless-link-budget' },
   agent: {
     name: 'communications-engineer',
     prompt: {
@@ -552,7 +546,6 @@ export const performanceAnalysisTask = defineTask('performance-analysis', (args,
 export const platformImplementationTask = defineTask('platform-implementation', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 7: Platform Implementation - ${args.systemName}`,
-  skill: { name: 'wireless-link-budget' },
   agent: {
     name: 'communications-engineer',
     prompt: {
@@ -606,7 +599,6 @@ export const platformImplementationTask = defineTask('platform-implementation', 
 export const otaValidationTask = defineTask('ota-validation', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 8: OTA Validation - ${args.systemName}`,
-  skill: { name: 'wireless-link-budget' },
   agent: {
     name: 'communications-engineer',
     prompt: {

@@ -181,8 +181,10 @@ export async function process(inputs, ctx) {
 export const elementCharacterizationTask = defineTask('element-characterization', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 1: Spatial Element Characterization',
+  skill: { name: 'formal-logic-reasoner' },
   agent: {
-    name: 'general-purpose',
+    name: 'spatial-reasoning-analyst',
+    skills: ['formal-logic-reasoner', 'analogy-mapper'],
     prompt: {
       role: 'Spatial Element Analyst',
       task: 'Characterize spatial elements and their properties',
@@ -239,8 +241,10 @@ export const elementCharacterizationTask = defineTask('element-characterization'
 export const topologicalRelationTask = defineTask('topological-relation', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 2: Topological Relation Extraction',
+  skill: { name: 'formal-logic-reasoner' },
   agent: {
-    name: 'general-purpose',
+    name: 'spatial-reasoning-analyst',
+    skills: ['formal-logic-reasoner', 'analogy-mapper'],
     prompt: {
       role: 'Topological Relation Expert',
       task: 'Extract topological relations using RCC8 and other calculi',
@@ -294,8 +298,10 @@ export const topologicalRelationTask = defineTask('topological-relation', (args,
 export const geometricAnalysisTask = defineTask('geometric-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 3: Geometric Property Analysis',
+  skill: { name: 'formal-logic-reasoner' },
   agent: {
-    name: 'general-purpose',
+    name: 'spatial-reasoning-analyst',
+    skills: ['formal-logic-reasoner', 'analogy-mapper'],
     prompt: {
       role: 'Geometric Analysis Expert',
       task: 'Analyze geometric properties of spatial elements',
@@ -351,8 +357,10 @@ export const geometricAnalysisTask = defineTask('geometric-analysis', (args, tas
 export const configurationAnalysisTask = defineTask('configuration-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 4: Spatial Configuration Analysis',
+  skill: { name: 'formal-logic-reasoner' },
   agent: {
-    name: 'general-purpose',
+    name: 'spatial-reasoning-analyst',
+    skills: ['formal-logic-reasoner', 'analogy-mapper'],
     prompt: {
       role: 'Configuration Analysis Expert',
       task: 'Analyze spatial configurations and arrangements',
@@ -405,8 +413,10 @@ export const configurationAnalysisTask = defineTask('configuration-analysis', (a
 export const diagramInterpretationTask = defineTask('diagram-interpretation', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 5: Diagram Interpretation',
+  skill: { name: 'formal-logic-reasoner' },
   agent: {
-    name: 'general-purpose',
+    name: 'spatial-reasoning-analyst',
+    skills: ['formal-logic-reasoner', 'analogy-mapper'],
     prompt: {
       role: 'Diagram Interpretation Expert',
       task: 'Interpret diagrams and extract spatial information',
@@ -471,8 +481,10 @@ export const diagramInterpretationTask = defineTask('diagram-interpretation', (a
 export const spatialConstraintTask = defineTask('spatial-constraint', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 6: Spatial Constraint Analysis',
+  skill: { name: 'formal-logic-reasoner' },
   agent: {
-    name: 'general-purpose',
+    name: 'spatial-reasoning-analyst',
+    skills: ['formal-logic-reasoner', 'analogy-mapper'],
     prompt: {
       role: 'Spatial Constraint Expert',
       task: 'Analyze spatial constraints and their satisfaction',
@@ -529,8 +541,10 @@ export const spatialConstraintTask = defineTask('spatial-constraint', (args, tas
 export const spatialTransformationTask = defineTask('spatial-transformation', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 7: Spatial Transformation Analysis',
+  skill: { name: 'formal-logic-reasoner' },
   agent: {
-    name: 'general-purpose',
+    name: 'spatial-reasoning-analyst',
+    skills: ['formal-logic-reasoner', 'analogy-mapper'],
     prompt: {
       role: 'Spatial Transformation Expert',
       task: 'Analyze possible spatial transformations',
@@ -584,8 +598,10 @@ export const spatialTransformationTask = defineTask('spatial-transformation', (a
 export const spatialQueryTask = defineTask('spatial-query', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 8: Spatial Query Resolution',
+  skill: { name: 'formal-logic-reasoner' },
   agent: {
-    name: 'general-purpose',
+    name: 'spatial-reasoning-analyst',
+    skills: ['formal-logic-reasoner', 'analogy-mapper'],
     prompt: {
       role: 'Spatial Query Expert',
       task: 'Resolve spatial queries using analysis results',
@@ -643,8 +659,10 @@ export const spatialQueryTask = defineTask('spatial-query', (args, taskCtx) => (
 export const spatialInferenceTask = defineTask('spatial-inference', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 9: Spatial Inference Generation',
+  skill: { name: 'formal-logic-reasoner' },
   agent: {
-    name: 'general-purpose',
+    name: 'spatial-reasoning-analyst',
+    skills: ['formal-logic-reasoner', 'analogy-mapper'],
     prompt: {
       role: 'Spatial Inference Expert',
       task: 'Generate inferences from spatial analysis',
@@ -702,8 +720,10 @@ export const spatialInferenceTask = defineTask('spatial-inference', (args, taskC
 export const spatialSynthesisTask = defineTask('spatial-synthesis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 10: Spatial Synthesis',
+  skill: { name: 'formal-logic-reasoner' },
   agent: {
-    name: 'general-purpose',
+    name: 'spatial-reasoning-analyst',
+    skills: ['formal-logic-reasoner', 'analogy-mapper'],
     prompt: {
       role: 'Spatial Analysis Synthesist',
       task: 'Synthesize spatial analysis into comprehensive conclusions',

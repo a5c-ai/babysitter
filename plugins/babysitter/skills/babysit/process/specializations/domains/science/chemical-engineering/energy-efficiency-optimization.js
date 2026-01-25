@@ -153,7 +153,6 @@ export async function process(inputs, ctx) {
 export const energyAuditTask = defineTask('energy-audit', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Conduct energy audit',
-  skill: { name: 'energy-auditor' },
   agent: {
     name: 'energy-efficiency-engineer',
     prompt: {
@@ -202,7 +201,6 @@ export const energyAuditTask = defineTask('energy-audit', (args, taskCtx) => ({
 export const energyConsumptionAnalysisTask = defineTask('energy-consumption-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Identify energy consumption by unit operation',
-  skill: { name: 'energy-auditor' },
   agent: {
     name: 'energy-efficiency-engineer',
     prompt: {
@@ -251,7 +249,6 @@ export const energyConsumptionAnalysisTask = defineTask('energy-consumption-anal
 export const pinchAnalysisTask = defineTask('pinch-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Apply pinch analysis and heat integration',
-  skill: { name: 'pinch-analyzer' },
   agent: {
     name: 'energy-efficiency-engineer',
     prompt: {
@@ -301,7 +298,6 @@ export const pinchAnalysisTask = defineTask('pinch-analysis', (args, taskCtx) =>
 export const efficiencyImprovementsTask = defineTask('efficiency-improvements', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Evaluate efficiency improvements',
-  skill: { name: 'energy-auditor' },
   agent: {
     name: 'energy-efficiency-engineer',
     prompt: {
@@ -354,7 +350,6 @@ export const efficiencyImprovementsTask = defineTask('efficiency-improvements', 
 export const renewableIntegrationTask = defineTask('renewable-integration', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Assess renewable energy integration',
-  skill: { name: 'energy-auditor' },
   agent: {
     name: 'energy-efficiency-engineer',
     prompt: {
@@ -407,7 +402,6 @@ export const renewableIntegrationTask = defineTask('renewable-integration', (arg
 export const energyManagementPlanTask = defineTask('energy-management-plan', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Develop energy management plan',
-  skill: { name: 'process-economics-estimator' },
   agent: {
     name: 'energy-efficiency-engineer',
     prompt: {
@@ -456,7 +450,6 @@ export const energyManagementPlanTask = defineTask('energy-management-plan', (ar
 export const energyKpiTask = defineTask('energy-kpi', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Define energy management KPIs',
-  skill: { name: 'energy-auditor' },
   agent: {
     name: 'energy-efficiency-engineer',
     prompt: {

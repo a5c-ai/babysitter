@@ -216,7 +216,6 @@ export async function process(inputs, ctx) {
 export const siteEvaluationTask = defineTask('site-evaluation', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Site Conditions Evaluation',
-  skill: { name: 'remediation-technology' },
   agent: {
     name: 'remediation-specialist',
     prompt: {
@@ -261,7 +260,6 @@ export const siteEvaluationTask = defineTask('site-evaluation', (args, taskCtx) 
 export const techScreeningTask = defineTask('tech-screening', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Technology Screening',
-  skill: { name: 'remediation-technology' },
   agent: {
     name: 'remediation-specialist',
     prompt: {
@@ -306,7 +304,6 @@ export const techScreeningTask = defineTask('tech-screening', (args, taskCtx) =>
 export const detailedEvaluationTask = defineTask('detailed-evaluation', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Detailed Technology Evaluation',
-  skill: { name: 'remediation-technology' },
   agent: {
     name: 'remediation-specialist',
     prompt: {
@@ -351,7 +348,6 @@ export const detailedEvaluationTask = defineTask('detailed-evaluation', (args, t
 export const treatabilityTask = defineTask('treatability', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Treatability Assessment',
-  skill: { name: 'remediation-technology' },
   agent: {
     name: 'remediation-specialist',
     prompt: {
@@ -396,7 +392,6 @@ export const treatabilityTask = defineTask('treatability', (args, taskCtx) => ({
 export const costBenefitTask = defineTask('cost-benefit', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Cost-Benefit Analysis',
-  skill: { name: 'remediation-technology' },
   agent: {
     name: 'remediation-specialist',
     prompt: {
@@ -442,7 +437,6 @@ export const costBenefitTask = defineTask('cost-benefit', (args, taskCtx) => ({
 export const selectionTask = defineTask('selection', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Technology Selection',
-  skill: { name: 'remediation-technology' },
   agent: {
     name: 'remediation-specialist',
     prompt: {
@@ -486,7 +480,6 @@ export const selectionTask = defineTask('selection', (args, taskCtx) => ({
 export const implementationPlanTask = defineTask('implementation-plan', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Implementation Planning',
-  skill: { name: 'remediation-technology' },
   agent: {
     name: 'remediation-specialist',
     prompt: {
@@ -532,7 +525,6 @@ export const implementationPlanTask = defineTask('implementation-plan', (args, t
 export const selectionReportTask = defineTask('selection-report', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Selection Report',
-  skill: { name: 'remediation-technology' },
   agent: {
     name: 'remediation-specialist',
     prompt: {

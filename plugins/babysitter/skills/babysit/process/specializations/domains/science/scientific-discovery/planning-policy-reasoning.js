@@ -177,8 +177,10 @@ export async function process(inputs, ctx) {
 export const planningProblemFormalizationTask = defineTask('planning-problem-formalization', (args, taskCtx) => ({
   kind: 'agent',
   title: `Planning Problem Formalization - ${args.domain}`,
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'planning-analyst',
+    skills: ['hypothesis-generator', 'causal-inference-engine', 'formal-logic-reasoner'],
     prompt: {
       role: 'Expert in AI planning and problem formalization',
       task: 'Formalize the planning problem in PDDL-like representation',
@@ -275,8 +277,10 @@ export const planningProblemFormalizationTask = defineTask('planning-problem-for
 export const stateSpaceAnalysisTask = defineTask('state-space-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'State Space Analysis',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'planning-analyst',
+    skills: ['hypothesis-generator', 'causal-inference-engine', 'formal-logic-reasoner'],
     prompt: {
       role: 'Expert in state space search and complexity analysis',
       task: 'Analyze the state space of the planning problem',
@@ -358,8 +362,10 @@ export const stateSpaceAnalysisTask = defineTask('state-space-analysis', (args, 
 export const actionModelValidationTask = defineTask('action-model-validation', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Action Model Validation',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'planning-analyst',
+    skills: ['hypothesis-generator', 'causal-inference-engine', 'formal-logic-reasoner'],
     prompt: {
       role: 'Expert in action theory and plan validation',
       task: 'Validate action model for goal reachability',
@@ -429,8 +435,10 @@ export const actionModelValidationTask = defineTask('action-model-validation', (
 export const forwardSearchPlanningTask = defineTask('forward-search-planning', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Forward Search Planning',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'planning-analyst',
+    skills: ['hypothesis-generator', 'causal-inference-engine', 'formal-logic-reasoner'],
     prompt: {
       role: 'Expert in forward state-space planning algorithms',
       task: 'Perform forward search to find a plan',
@@ -495,8 +503,10 @@ export const forwardSearchPlanningTask = defineTask('forward-search-planning', (
 export const backwardSearchPlanningTask = defineTask('backward-search-planning', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Backward Search Planning',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'planning-analyst',
+    skills: ['hypothesis-generator', 'causal-inference-engine', 'formal-logic-reasoner'],
     prompt: {
       role: 'Expert in regression planning and backward search',
       task: 'Perform backward search (regression) to find a plan',
@@ -558,8 +568,10 @@ export const backwardSearchPlanningTask = defineTask('backward-search-planning',
 export const graphBasedPlanningTask = defineTask('graph-based-planning', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Graph-Based Planning',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'planning-analyst',
+    skills: ['hypothesis-generator', 'causal-inference-engine', 'formal-logic-reasoner'],
     prompt: {
       role: 'Expert in GraphPlan and planning graphs',
       task: 'Apply graph-based planning approach',
@@ -622,8 +634,10 @@ export const graphBasedPlanningTask = defineTask('graph-based-planning', (args, 
 export const planOptimizationTask = defineTask('plan-optimization', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Plan Selection and Optimization',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'planning-analyst',
+    skills: ['hypothesis-generator', 'causal-inference-engine', 'formal-logic-reasoner'],
     prompt: {
       role: 'Expert in plan optimization and selection',
       task: 'Select and optimize the best plan from search results',
@@ -690,8 +704,10 @@ export const planOptimizationTask = defineTask('plan-optimization', (args, taskC
 export const temporalPlanningTask = defineTask('temporal-planning', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Temporal Planning',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'planning-analyst',
+    skills: ['hypothesis-generator', 'causal-inference-engine', 'formal-logic-reasoner'],
     prompt: {
       role: 'Expert in temporal planning and scheduling',
       task: 'Add temporal constraints and create schedule',
@@ -766,8 +782,10 @@ export const temporalPlanningTask = defineTask('temporal-planning', (args, taskC
 export const planValidationTask = defineTask('plan-validation', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Plan Validation',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'planning-analyst',
+    skills: ['hypothesis-generator', 'causal-inference-engine', 'formal-logic-reasoner'],
     prompt: {
       role: 'Expert in plan verification and validation',
       task: 'Validate the plan achieves the goal from initial state',
@@ -837,8 +855,10 @@ export const planValidationTask = defineTask('plan-validation', (args, taskCtx) 
 export const policySynthesisTask = defineTask('policy-synthesis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Policy Synthesis',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'planning-analyst',
+    skills: ['hypothesis-generator', 'causal-inference-engine', 'formal-logic-reasoner'],
     prompt: {
       role: 'Expert in policy synthesis and contingent planning',
       task: 'Synthesize a policy for handling non-determinism',
@@ -908,8 +928,10 @@ export const policySynthesisTask = defineTask('policy-synthesis', (args, taskCtx
 export const planRobustnessTask = defineTask('plan-robustness', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Plan Robustness Analysis',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'planning-analyst',
+    skills: ['hypothesis-generator', 'causal-inference-engine', 'formal-logic-reasoner'],
     prompt: {
       role: 'Expert in plan robustness and failure analysis',
       task: 'Analyze plan robustness to failures and perturbations',

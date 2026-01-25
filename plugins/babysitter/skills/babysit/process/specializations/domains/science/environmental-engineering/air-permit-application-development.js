@@ -208,7 +208,6 @@ export async function process(inputs, ctx) {
 export const regulatoryApplicabilityTask = defineTask('regulatory-applicability', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Regulatory Applicability Determination',
-  skill: { name: 'regulatory-compliance' },
   agent: {
     name: 'air-quality-specialist',
     prompt: {
@@ -253,7 +252,6 @@ export const regulatoryApplicabilityTask = defineTask('regulatory-applicability'
 export const emissionInventoryTask = defineTask('emission-inventory', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Emission Inventory Development',
-  skill: { name: 'emission-inventory' },
   agent: {
     name: 'air-quality-specialist',
     prompt: {
@@ -298,7 +296,6 @@ export const emissionInventoryTask = defineTask('emission-inventory', (args, tas
 export const controlTechAnalysisTask = defineTask('control-tech-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Control Technology Analysis',
-  skill: { name: 'air-pollution-control' },
   agent: {
     name: 'air-quality-specialist',
     prompt: {
@@ -343,7 +340,6 @@ export const controlTechAnalysisTask = defineTask('control-tech-analysis', (args
 export const dispersionModelingTask = defineTask('dispersion-modeling', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Air Dispersion Modeling',
-  skill: { name: 'air-dispersion-modeling' },
   agent: {
     name: 'air-quality-specialist',
     prompt: {
@@ -389,7 +385,6 @@ export const dispersionModelingTask = defineTask('dispersion-modeling', (args, t
 export const complianceDemoTask = defineTask('compliance-demo', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Compliance Demonstration',
-  skill: { name: 'regulatory-compliance' },
   agent: {
     name: 'environmental-compliance-specialist',
     prompt: {
@@ -435,7 +430,6 @@ export const complianceDemoTask = defineTask('compliance-demo', (args, taskCtx) 
 export const permitApplicationTask = defineTask('permit-application', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Permit Application Preparation',
-  skill: { name: 'regulatory-compliance' },
   agent: {
     name: 'air-quality-specialist',
     prompt: {

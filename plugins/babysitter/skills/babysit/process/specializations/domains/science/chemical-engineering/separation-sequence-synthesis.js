@@ -156,7 +156,6 @@ export async function process(inputs, ctx) {
 export const mixtureCharacterizationTask = defineTask('mixture-characterization', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Characterize mixture components and properties',
-  skill: { name: 'separation-sequence-synthesizer' },
   agent: {
     name: 'separation-process-engineer',
     prompt: {
@@ -209,7 +208,6 @@ export const mixtureCharacterizationTask = defineTask('mixture-characterization'
 export const separationMethodsTask = defineTask('separation-methods', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Identify potential separation methods',
-  skill: { name: 'separation-sequence-synthesizer' },
   agent: {
     name: 'separation-process-engineer',
     prompt: {
@@ -260,7 +258,6 @@ export const separationMethodsTask = defineTask('separation-methods', (args, tas
 export const sequenceGenerationTask = defineTask('sequence-generation', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Generate alternative separation sequences',
-  skill: { name: 'separation-sequence-synthesizer' },
   agent: {
     name: 'distillation-specialist',
     prompt: {
@@ -312,7 +309,6 @@ export const sequenceGenerationTask = defineTask('sequence-generation', (args, t
 export const heuristicScreeningTask = defineTask('heuristic-screening', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Screen alternatives using heuristics',
-  skill: { name: 'separation-sequence-synthesizer' },
   agent: {
     name: 'separation-process-engineer',
     prompt: {
@@ -355,7 +351,6 @@ export const heuristicScreeningTask = defineTask('heuristic-screening', (args, t
 export const sequenceOptimizationTask = defineTask('sequence-optimization', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Optimize promising sequences',
-  skill: { name: 'distillation-designer' },
   agent: {
     name: 'distillation-specialist',
     prompt: {
@@ -406,7 +401,6 @@ export const sequenceOptimizationTask = defineTask('sequence-optimization', (arg
 export const heatIntegrationOpportunitiesTask = defineTask('heat-integration-opportunities', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Analyze heat integration opportunities',
-  skill: { name: 'distillation-designer' },
   agent: {
     name: 'distillation-specialist',
     prompt: {
@@ -450,7 +444,6 @@ export const heatIntegrationOpportunitiesTask = defineTask('heat-integration-opp
 export const finalRecommendationTask = defineTask('final-recommendation', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Generate final sequence recommendation',
-  skill: { name: 'separation-sequence-synthesizer' },
   agent: {
     name: 'separation-process-engineer',
     prompt: {

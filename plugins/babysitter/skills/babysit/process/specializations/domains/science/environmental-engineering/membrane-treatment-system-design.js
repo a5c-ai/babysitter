@@ -223,7 +223,6 @@ export async function process(inputs, ctx) {
 export const feedCharacterizationTask = defineTask('feed-characterization', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Feed Water Characterization',
-  skill: { name: 'membrane-system-design' },
   agent: {
     name: 'water-treatment-specialist',
     prompt: {
@@ -268,7 +267,6 @@ export const feedCharacterizationTask = defineTask('feed-characterization', (arg
 export const membraneSelectionTask = defineTask('membrane-selection', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Membrane Selection',
-  skill: { name: 'membrane-system-design' },
   agent: {
     name: 'water-treatment-specialist',
     prompt: {
@@ -312,7 +310,6 @@ export const membraneSelectionTask = defineTask('membrane-selection', (args, tas
 export const pretreatmentDesignTask = defineTask('pretreatment-design', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Pretreatment System Design',
-  skill: { name: 'membrane-system-design' },
   agent: {
     name: 'water-treatment-specialist',
     prompt: {
@@ -358,7 +355,6 @@ export const pretreatmentDesignTask = defineTask('pretreatment-design', (args, t
 export const systemDesignTask = defineTask('system-design', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Membrane System Design',
-  skill: { name: 'membrane-system-design' },
   agent: {
     name: 'water-treatment-specialist',
     prompt: {
@@ -407,7 +403,6 @@ export const systemDesignTask = defineTask('system-design', (args, taskCtx) => (
 export const concentrateManagementTask = defineTask('concentrate-management', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Concentrate Management Design',
-  skill: { name: 'membrane-system-design' },
   agent: {
     name: 'water-treatment-specialist',
     prompt: {
@@ -453,7 +448,6 @@ export const concentrateManagementTask = defineTask('concentrate-management', (a
 export const chemicalSystemsTask = defineTask('chemical-systems', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Chemical Feed Systems Design',
-  skill: { name: 'membrane-system-design' },
   agent: {
     name: 'water-treatment-specialist',
     prompt: {
@@ -499,7 +493,6 @@ export const chemicalSystemsTask = defineTask('chemical-systems', (args, taskCtx
 export const instrumentationControlsTask = defineTask('instrumentation-controls', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Instrumentation and Controls Design',
-  skill: { name: 'membrane-system-design' },
   agent: {
     name: 'water-treatment-specialist',
     prompt: {
@@ -543,7 +536,6 @@ export const instrumentationControlsTask = defineTask('instrumentation-controls'
 export const designDocumentationTask = defineTask('design-documentation', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Design Documentation',
-  skill: { name: 'membrane-system-design' },
   agent: {
     name: 'water-treatment-specialist',
     prompt: {

@@ -182,8 +182,10 @@ export async function process(inputs, ctx) {
 export const phenomenonCharacterizationTask = defineTask('phenomenon-characterization', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 1: Phenomenon Characterization',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'scientific-method-analyst',
+    skills: ['hypothesis-generator', 'statistical-test-selector', 'causal-inference-engine'],
     prompt: {
       role: 'Scientific Phenomenon Analyst',
       task: 'Characterize the phenomenon to be explained',
@@ -232,8 +234,10 @@ export const phenomenonCharacterizationTask = defineTask('phenomenon-characteriz
 export const observationAnalysisTask = defineTask('observation-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 2: Observation Analysis and Systematization',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'scientific-method-analyst',
+    skills: ['hypothesis-generator', 'statistical-test-selector', 'causal-inference-engine'],
     prompt: {
       role: 'Scientific Observation Analyst',
       task: 'Analyze and systematize observations',
@@ -291,8 +295,10 @@ export const observationAnalysisTask = defineTask('observation-analysis', (args,
 export const abductiveHypothesisTask = defineTask('abductive-hypothesis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 3: Abductive Hypothesis Generation',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'scientific-method-analyst',
+    skills: ['hypothesis-generator', 'statistical-test-selector', 'causal-inference-engine'],
     prompt: {
       role: 'Hypothesis Generation Expert (Abductive Reasoning)',
       task: 'Generate hypotheses that would explain the phenomenon',
@@ -349,8 +355,10 @@ export const abductiveHypothesisTask = defineTask('abductive-hypothesis', (args,
 export const hypothesisEvaluationTask = defineTask('hypothesis-evaluation', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 4: Hypothesis Evaluation and Ranking',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'scientific-method-analyst',
+    skills: ['hypothesis-generator', 'statistical-test-selector', 'causal-inference-engine'],
     prompt: {
       role: 'Hypothesis Evaluation Expert',
       task: 'Evaluate and rank hypotheses by scientific merit',
@@ -409,8 +417,10 @@ export const hypothesisEvaluationTask = defineTask('hypothesis-evaluation', (arg
 export const deductivePredictionTask = defineTask('deductive-prediction', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 5: Deductive Prediction Derivation',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'scientific-method-analyst',
+    skills: ['hypothesis-generator', 'statistical-test-selector', 'causal-inference-engine'],
     prompt: {
       role: 'Prediction Derivation Expert (Deductive Reasoning)',
       task: 'Derive testable predictions from hypotheses',
@@ -468,8 +478,10 @@ export const deductivePredictionTask = defineTask('deductive-prediction', (args,
 export const testDesignTask = defineTask('test-design', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 6: Test Design',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'scientific-method-analyst',
+    skills: ['hypothesis-generator', 'statistical-test-selector', 'causal-inference-engine'],
     prompt: {
       role: 'Scientific Test Design Expert',
       task: 'Design tests for predictions',
@@ -527,8 +539,10 @@ export const testDesignTask = defineTask('test-design', (args, taskCtx) => ({
 export const inductiveEvaluationTask = defineTask('inductive-evaluation', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 7: Evidence Evaluation (Induction)',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'scientific-method-analyst',
+    skills: ['hypothesis-generator', 'statistical-test-selector', 'causal-inference-engine'],
     prompt: {
       role: 'Evidence Evaluation Expert (Inductive Reasoning)',
       task: 'Evaluate evidence against predictions',
@@ -585,8 +599,10 @@ export const inductiveEvaluationTask = defineTask('inductive-evaluation', (args,
 export const confirmationAnalysisTask = defineTask('confirmation-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 8: Confirmation and Disconfirmation Analysis',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'scientific-method-analyst',
+    skills: ['hypothesis-generator', 'statistical-test-selector', 'causal-inference-engine'],
     prompt: {
       role: 'Confirmation Theory Expert',
       task: 'Analyze confirmation/disconfirmation status of hypotheses',
@@ -643,8 +659,10 @@ export const confirmationAnalysisTask = defineTask('confirmation-analysis', (arg
 export const theoryRefinementTask = defineTask('theory-refinement', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 9: Theory Refinement',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'scientific-method-analyst',
+    skills: ['hypothesis-generator', 'statistical-test-selector', 'causal-inference-engine'],
     prompt: {
       role: 'Theory Refinement Expert',
       task: 'Refine theories based on confirmation analysis',
@@ -698,8 +716,10 @@ export const theoryRefinementTask = defineTask('theory-refinement', (args, taskC
 export const scientificConclusionsTask = defineTask('scientific-conclusions', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 10: Scientific Conclusions Synthesis',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'scientific-method-analyst',
+    skills: ['hypothesis-generator', 'statistical-test-selector', 'causal-inference-engine'],
     prompt: {
       role: 'Scientific Conclusions Synthesist',
       task: 'Synthesize scientific reasoning into conclusions',

@@ -220,7 +220,6 @@ export async function process(inputs, ctx) {
 export const specificationAnalysisTask = defineTask('specification-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 1: Specification Analysis - ${args.circuitName}`,
-  skill: { name: 'spice-simulation' },
   agent: {
     name: 'analog-circuit-expert',
     prompt: {
@@ -287,7 +286,6 @@ export const specificationAnalysisTask = defineTask('specification-analysis', (a
 export const topologySelectionTask = defineTask('topology-selection', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 2: Topology Selection - ${args.circuitName}`,
-  skill: { name: 'spice-simulation' },
   agent: {
     name: 'analog-circuit-expert',
     prompt: {
@@ -359,7 +357,6 @@ export const topologySelectionTask = defineTask('topology-selection', (args, tas
 export const componentCalculationTask = defineTask('component-calculation', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 3: Component Calculation - ${args.circuitName}`,
-  skill: { name: 'spice-simulation' },
   agent: {
     name: 'analog-circuit-expert',
     prompt: {
@@ -448,7 +445,6 @@ export const componentCalculationTask = defineTask('component-calculation', (arg
 export const schematicCreationTask = defineTask('schematic-creation', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 4: Schematic and SPICE Model - ${args.circuitName}`,
-  skill: { name: 'spice-simulation' },
   agent: {
     name: 'analog-circuit-expert',
     prompt: {
@@ -509,7 +505,6 @@ export const schematicCreationTask = defineTask('schematic-creation', (args, tas
 export const cornerSimulationTask = defineTask('corner-simulation', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 5: Corner Simulation - ${args.circuitName}`,
-  skill: { name: 'spice-simulation' },
   agent: {
     name: 'analog-circuit-expert',
     prompt: {
@@ -588,7 +583,6 @@ export const cornerSimulationTask = defineTask('corner-simulation', (args, taskC
 export const performanceOptimizationTask = defineTask('performance-optimization', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 6: Performance Optimization - ${args.circuitName}`,
-  skill: { name: 'spice-simulation' },
   agent: {
     name: 'analog-circuit-expert',
     prompt: {
@@ -664,7 +658,6 @@ export const performanceOptimizationTask = defineTask('performance-optimization'
 export const designValidationTask = defineTask('design-validation', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 7: Design Validation - ${args.circuitName}`,
-  skill: { name: 'spice-simulation' },
   agent: {
     name: 'analog-circuit-expert',
     prompt: {
@@ -736,7 +729,6 @@ export const designValidationTask = defineTask('design-validation', (args, taskC
 export const designDocumentationTask = defineTask('design-documentation', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 8: Design Documentation - ${args.circuitName}`,
-  skill: { name: 'spice-simulation' },
   agent: {
     name: 'analog-circuit-expert',
     prompt: {

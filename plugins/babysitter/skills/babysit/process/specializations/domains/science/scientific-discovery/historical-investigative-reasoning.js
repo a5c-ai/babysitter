@@ -133,8 +133,10 @@ export async function process(inputs, ctx) {
 export const analyzeInvestigativeQuestionTask = defineTask('historical-question-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 1: Question Formulation',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'investigative-analyst',
+    skills: ['hypothesis-generator', 'causal-inference-engine', 'root-cause-analyzer'],
     prompt: {
       role: 'Historical investigation specialist',
       task: 'Clarify and structure the investigative question',
@@ -171,8 +173,10 @@ export const analyzeInvestigativeQuestionTask = defineTask('historical-question-
 export const inventoryEvidenceTask = defineTask('historical-evidence-inventory', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 2: Evidence Inventory',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'investigative-analyst',
+    skills: ['hypothesis-generator', 'causal-inference-engine', 'root-cause-analyzer'],
     prompt: {
       role: 'Evidence cataloging specialist',
       task: 'Systematically catalog and categorize available evidence',
@@ -210,8 +214,10 @@ export const inventoryEvidenceTask = defineTask('historical-evidence-inventory',
 export const criticizeSourcesTask = defineTask('historical-source-criticism', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 3: Source Criticism',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'investigative-analyst',
+    skills: ['hypothesis-generator', 'causal-inference-engine', 'root-cause-analyzer'],
     prompt: {
       role: 'Historical source criticism specialist',
       task: 'Apply rigorous source criticism to assess evidence reliability',
@@ -248,8 +254,10 @@ export const criticizeSourcesTask = defineTask('historical-source-criticism', (a
 export const corroborateEvidenceTask = defineTask('historical-corroboration', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 4: Evidence Corroboration',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'investigative-analyst',
+    skills: ['hypothesis-generator', 'causal-inference-engine', 'root-cause-analyzer'],
     prompt: {
       role: 'Evidence corroboration specialist',
       task: 'Assess corroboration between independent evidence sources',
@@ -285,8 +293,10 @@ export const corroborateEvidenceTask = defineTask('historical-corroboration', (a
 export const generateHypothesesTask = defineTask('historical-hypothesis-generation', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 5: Hypothesis Generation',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'investigative-analyst',
+    skills: ['hypothesis-generator', 'causal-inference-engine', 'root-cause-analyzer'],
     prompt: {
       role: 'Historical hypothesis generation specialist',
       task: 'Generate plausible hypotheses explaining the evidence',
@@ -321,8 +331,10 @@ export const generateHypothesesTask = defineTask('historical-hypothesis-generati
 export const reconstructTimelineTask = defineTask('historical-timeline-reconstruction', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 6: Timeline Reconstruction',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'investigative-analyst',
+    skills: ['hypothesis-generator', 'causal-inference-engine', 'root-cause-analyzer'],
     prompt: {
       role: 'Chronological reconstruction specialist',
       task: 'Reconstruct timeline of events from evidence',
@@ -360,8 +372,10 @@ export const reconstructTimelineTask = defineTask('historical-timeline-reconstru
 export const reconstructCausalChainTask = defineTask('historical-causal-reconstruction', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 7: Causal Reconstruction',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'investigative-analyst',
+    skills: ['hypothesis-generator', 'causal-inference-engine', 'root-cause-analyzer'],
     prompt: {
       role: 'Causal chain reconstruction specialist',
       task: 'Reconstruct causal chains explaining how events unfolded',
@@ -399,8 +413,10 @@ export const reconstructCausalChainTask = defineTask('historical-causal-reconstr
 export const evaluateHypothesesTask = defineTask('historical-hypothesis-evaluation', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 8: Hypothesis Evaluation',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'investigative-analyst',
+    skills: ['hypothesis-generator', 'causal-inference-engine', 'root-cause-analyzer'],
     prompt: {
       role: 'Historical hypothesis evaluation specialist',
       task: 'Evaluate hypotheses against evidence and criteria',
@@ -436,8 +452,10 @@ export const evaluateHypothesesTask = defineTask('historical-hypothesis-evaluati
 export const analyzeAlternativesTask = defineTask('historical-alternatives-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 9: Alternative Explanation Analysis',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'investigative-analyst',
+    skills: ['hypothesis-generator', 'causal-inference-engine', 'root-cause-analyzer'],
     prompt: {
       role: 'Alternative hypothesis analysis specialist',
       task: 'Analyze why alternative explanations are less likely',
@@ -474,8 +492,10 @@ export const analyzeAlternativesTask = defineTask('historical-alternatives-analy
 export const synthesizeConclusionsTask = defineTask('historical-conclusions', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 10: Conclusion Synthesis',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'investigative-analyst',
+    skills: ['hypothesis-generator', 'causal-inference-engine', 'root-cause-analyzer'],
     prompt: {
       role: 'Historical conclusion synthesis specialist',
       task: 'Synthesize findings into justified conclusions',

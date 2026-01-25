@@ -165,7 +165,6 @@ export async function process(inputs, ctx) {
 export const specScopeDefinitionTask = defineTask('spec-scope-definition', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Define specifications scope',
-  skill: { name: 'csi-specification-writer' },
   agent: {
     name: 'specifications-writer',
     prompt: {
@@ -208,7 +207,6 @@ export const specScopeDefinitionTask = defineTask('spec-scope-definition', (args
 export const generalRequirementsTask = defineTask('general-requirements', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Develop Division 01 General Requirements',
-  skill: { name: 'csi-specification-writer' },
   agent: {
     name: 'specifications-writer',
     prompt: {
@@ -251,7 +249,6 @@ export const generalRequirementsTask = defineTask('general-requirements', (args,
 export const technicalSpecsTask = defineTask('technical-specs', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Develop technical specifications',
-  skill: { name: 'csi-specification-writer' },
   agent: {
     name: 'specifications-writer',
     prompt: {
@@ -295,7 +292,6 @@ export const technicalSpecsTask = defineTask('technical-specs', (args, taskCtx) 
 export const materialSpecsTask = defineTask('material-specs', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Develop material specifications',
-  skill: { name: 'csi-specification-writer' },
   agent: {
     name: 'specifications-writer',
     prompt: {
@@ -339,7 +335,6 @@ export const materialSpecsTask = defineTask('material-specs', (args, taskCtx) =>
 export const executionProceduresTask = defineTask('execution-procedures', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Develop execution procedures',
-  skill: { name: 'csi-specification-writer' },
   agent: {
     name: 'specifications-writer',
     prompt: {
@@ -383,7 +378,6 @@ export const executionProceduresTask = defineTask('execution-procedures', (args,
 export const qaSpecsTask = defineTask('qa-specs', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Develop QA specifications',
-  skill: { name: 'inspection-tracking-system' },
   agent: {
     name: 'quality-control-specialist',
     prompt: {
@@ -426,7 +420,6 @@ export const qaSpecsTask = defineTask('qa-specs', (args, taskCtx) => ({
 export const referenceCompilationTask = defineTask('reference-compilation', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Compile reference standards',
-  skill: { name: 'csi-specification-writer' },
   agent: {
     name: 'specifications-writer',
     prompt: {
@@ -470,7 +463,6 @@ export const referenceCompilationTask = defineTask('reference-compilation', (arg
 export const specsAssemblyTask = defineTask('specs-assembly', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Assemble specifications manual',
-  skill: { name: 'engineering-report-generator' },
   agent: {
     name: 'technical-report-writer',
     prompt: {

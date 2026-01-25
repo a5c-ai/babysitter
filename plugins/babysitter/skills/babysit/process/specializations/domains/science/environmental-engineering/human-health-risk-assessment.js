@@ -205,7 +205,6 @@ export async function process(inputs, ctx) {
 export const hazardIdentificationTask = defineTask('hazard-identification', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Hazard Identification',
-  skill: { name: 'health-risk-assessment' },
   agent: {
     name: 'risk-assessment-specialist',
     prompt: {
@@ -250,7 +249,6 @@ export const hazardIdentificationTask = defineTask('hazard-identification', (arg
 export const exposureAssessmentTask = defineTask('exposure-assessment', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Exposure Assessment',
-  skill: { name: 'health-risk-assessment' },
   agent: {
     name: 'risk-assessment-specialist',
     prompt: {
@@ -295,7 +293,6 @@ export const exposureAssessmentTask = defineTask('exposure-assessment', (args, t
 export const toxicityAssessmentTask = defineTask('toxicity-assessment', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Toxicity Assessment',
-  skill: { name: 'health-risk-assessment' },
   agent: {
     name: 'risk-assessment-specialist',
     prompt: {
@@ -340,7 +337,6 @@ export const toxicityAssessmentTask = defineTask('toxicity-assessment', (args, t
 export const riskCharacterizationTask = defineTask('risk-characterization', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Risk Characterization',
-  skill: { name: 'health-risk-assessment' },
   agent: {
     name: 'risk-assessment-specialist',
     prompt: {
@@ -387,7 +383,6 @@ export const riskCharacterizationTask = defineTask('risk-characterization', (arg
 export const uncertaintyAnalysisTask = defineTask('uncertainty-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Uncertainty Analysis',
-  skill: { name: 'health-risk-assessment' },
   agent: {
     name: 'risk-assessment-specialist',
     prompt: {
@@ -433,7 +428,6 @@ export const uncertaintyAnalysisTask = defineTask('uncertainty-analysis', (args,
 export const remedialGoalsTask = defineTask('remedial-goals', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Risk-Based Remedial Goals',
-  skill: { name: 'health-risk-assessment' },
   agent: {
     name: 'risk-assessment-specialist',
     prompt: {
@@ -478,7 +472,6 @@ export const remedialGoalsTask = defineTask('remedial-goals', (args, taskCtx) =>
 export const riskReportTask = defineTask('risk-report', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Risk Assessment Report',
-  skill: { name: 'health-risk-assessment' },
   agent: {
     name: 'risk-assessment-specialist',
     prompt: {

@@ -171,7 +171,6 @@ export async function process(inputs, ctx) {
 export const wasteCharacterizationTask = defineTask('waste-characterization', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Characterize waste streams',
-  skill: { name: 'waste-minimization-analyzer' },
   agent: {
     name: 'waste-minimization-specialist',
     prompt: {
@@ -220,7 +219,6 @@ export const wasteCharacterizationTask = defineTask('waste-characterization', (a
 export const wasteHierarchyAnalysisTask = defineTask('waste-hierarchy-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Apply waste minimization hierarchy',
-  skill: { name: 'waste-minimization-analyzer' },
   agent: {
     name: 'waste-minimization-specialist',
     prompt: {
@@ -266,7 +264,6 @@ export const wasteHierarchyAnalysisTask = defineTask('waste-hierarchy-analysis',
 export const sourceReductionTask = defineTask('source-reduction', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Identify source reduction opportunities',
-  skill: { name: 'green-chemistry-metrics' },
   agent: {
     name: 'waste-minimization-specialist',
     prompt: {
@@ -318,7 +315,6 @@ export const sourceReductionTask = defineTask('source-reduction', (args, taskCtx
 export const recyclingRecoveryTask = defineTask('recycling-recovery', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Evaluate recycling and recovery options',
-  skill: { name: 'waste-minimization-analyzer' },
   agent: {
     name: 'waste-minimization-specialist',
     prompt: {
@@ -371,7 +367,6 @@ export const recyclingRecoveryTask = defineTask('recycling-recovery', (args, tas
 export const treatmentAssessmentTask = defineTask('treatment-assessment', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Assess treatment requirements',
-  skill: { name: 'waste-minimization-analyzer' },
   agent: {
     name: 'waste-minimization-specialist',
     prompt: {
@@ -423,7 +418,6 @@ export const treatmentAssessmentTask = defineTask('treatment-assessment', (args,
 export const economicAnalysisTask = defineTask('economic-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Perform economic analysis',
-  skill: { name: 'process-economics-estimator' },
   agent: {
     name: 'waste-minimization-specialist',
     prompt: {
@@ -473,7 +467,6 @@ export const economicAnalysisTask = defineTask('economic-analysis', (args, taskC
 export const complianceReviewTask = defineTask('compliance-review', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Review regulatory compliance',
-  skill: { name: 'waste-minimization-analyzer' },
   agent: {
     name: 'waste-minimization-specialist',
     prompt: {
@@ -521,7 +514,6 @@ export const complianceReviewTask = defineTask('compliance-review', (args, taskC
 export const implementationPlanTask = defineTask('implementation-plan', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Develop implementation plan',
-  skill: { name: 'waste-minimization-analyzer' },
   agent: {
     name: 'waste-minimization-specialist',
     prompt: {

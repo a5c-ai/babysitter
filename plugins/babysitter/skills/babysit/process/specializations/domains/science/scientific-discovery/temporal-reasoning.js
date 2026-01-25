@@ -178,8 +178,10 @@ export async function process(inputs, ctx) {
 export const eventAnnotationTask = defineTask('event-annotation', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 1: Event Temporal Annotation',
+  skill: { name: 'formal-logic-reasoner' },
   agent: {
-    name: 'general-purpose',
+    name: 'temporal-logic-analyst',
+    skills: ['formal-logic-reasoner', 'causal-inference-engine'],
     prompt: {
       role: 'Temporal Annotation Expert',
       task: 'Annotate events with temporal information',
@@ -237,8 +239,10 @@ export const eventAnnotationTask = defineTask('event-annotation', (args, taskCtx
 export const temporalRelationTask = defineTask('temporal-relation', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 2: Temporal Relation Extraction',
+  skill: { name: 'formal-logic-reasoner' },
   agent: {
-    name: 'general-purpose',
+    name: 'temporal-logic-analyst',
+    skills: ['formal-logic-reasoner', 'causal-inference-engine'],
     prompt: {
       role: 'Temporal Relation Expert',
       task: 'Extract temporal relations between events using Allen\'s interval algebra',
@@ -292,8 +296,10 @@ export const temporalRelationTask = defineTask('temporal-relation', (args, taskC
 export const intervalAnalysisTask = defineTask('interval-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 3: Interval Analysis',
+  skill: { name: 'formal-logic-reasoner' },
   agent: {
-    name: 'general-purpose',
+    name: 'temporal-logic-analyst',
+    skills: ['formal-logic-reasoner', 'causal-inference-engine'],
     prompt: {
       role: 'Interval Analysis Expert',
       task: 'Analyze temporal intervals and their properties',
@@ -349,8 +355,10 @@ export const intervalAnalysisTask = defineTask('interval-analysis', (args, taskC
 export const orderingAnalysisTask = defineTask('ordering-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 4: Ordering and Precedence Analysis',
+  skill: { name: 'formal-logic-reasoner' },
   agent: {
-    name: 'general-purpose',
+    name: 'temporal-logic-analyst',
+    skills: ['formal-logic-reasoner', 'causal-inference-engine'],
     prompt: {
       role: 'Temporal Ordering Expert',
       task: 'Analyze temporal ordering and precedence',
@@ -402,8 +410,10 @@ export const orderingAnalysisTask = defineTask('ordering-analysis', (args, taskC
 export const durationPersistenceTask = defineTask('duration-persistence', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 5: Duration and Persistence Analysis',
+  skill: { name: 'formal-logic-reasoner' },
   agent: {
-    name: 'general-purpose',
+    name: 'temporal-logic-analyst',
+    skills: ['formal-logic-reasoner', 'causal-inference-engine'],
     prompt: {
       role: 'Duration and Persistence Expert',
       task: 'Analyze durations and persistence of states/events',
@@ -460,8 +470,10 @@ export const durationPersistenceTask = defineTask('duration-persistence', (args,
 export const temporalCausationTask = defineTask('temporal-causation', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 6: Temporal Causation Analysis',
+  skill: { name: 'formal-logic-reasoner' },
   agent: {
-    name: 'general-purpose',
+    name: 'temporal-logic-analyst',
+    skills: ['formal-logic-reasoner', 'causal-inference-engine'],
     prompt: {
       role: 'Temporal Causation Expert',
       task: 'Analyze causal relationships across time',
@@ -517,8 +529,10 @@ export const temporalCausationTask = defineTask('temporal-causation', (args, tas
 export const changeTransitionTask = defineTask('change-transition', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 7: Change and State Transition Analysis',
+  skill: { name: 'formal-logic-reasoner' },
   agent: {
-    name: 'general-purpose',
+    name: 'temporal-logic-analyst',
+    skills: ['formal-logic-reasoner', 'causal-inference-engine'],
     prompt: {
       role: 'Change Analysis Expert',
       task: 'Analyze changes and state transitions over time',
@@ -574,8 +588,10 @@ export const changeTransitionTask = defineTask('change-transition', (args, taskC
 export const temporalQueryTask = defineTask('temporal-query', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 8: Temporal Query Resolution',
+  skill: { name: 'formal-logic-reasoner' },
   agent: {
-    name: 'general-purpose',
+    name: 'temporal-logic-analyst',
+    skills: ['formal-logic-reasoner', 'causal-inference-engine'],
     prompt: {
       role: 'Temporal Query Expert',
       task: 'Resolve temporal queries using analysis results',
@@ -633,8 +649,10 @@ export const temporalQueryTask = defineTask('temporal-query', (args, taskCtx) =>
 export const timelineConstructionTask = defineTask('timeline-construction', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 9: Timeline Construction',
+  skill: { name: 'formal-logic-reasoner' },
   agent: {
-    name: 'general-purpose',
+    name: 'temporal-logic-analyst',
+    skills: ['formal-logic-reasoner', 'causal-inference-engine'],
     prompt: {
       role: 'Timeline Construction Expert',
       task: 'Construct comprehensive timeline from temporal analysis',
@@ -689,8 +707,10 @@ export const timelineConstructionTask = defineTask('timeline-construction', (arg
 export const temporalSynthesisTask = defineTask('temporal-synthesis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 10: Temporal Synthesis',
+  skill: { name: 'formal-logic-reasoner' },
   agent: {
-    name: 'general-purpose',
+    name: 'temporal-logic-analyst',
+    skills: ['formal-logic-reasoner', 'causal-inference-engine'],
     prompt: {
       role: 'Temporal Analysis Synthesist',
       task: 'Synthesize temporal analysis into comprehensive conclusions',

@@ -187,8 +187,10 @@ export async function process(inputs, ctx) {
 export const preUnderstandingTask = defineTask('pre-understanding', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 1: Pre-Understanding Articulation',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'interpretive-analyst',
+    skills: ['hypothesis-generator', 'analogy-mapper'],
     prompt: {
       role: 'Hermeneutic Philosopher specializing in pre-understanding',
       task: 'Articulate the pre-understanding brought to interpretation',
@@ -243,8 +245,10 @@ export const preUnderstandingTask = defineTask('pre-understanding', (args, taskC
 export const structuralAnalysisTask = defineTask('structural-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 2: Artifact Structural Analysis',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'interpretive-analyst',
+    skills: ['hypothesis-generator', 'analogy-mapper'],
     prompt: {
       role: 'Structural Analyst specializing in artifact decomposition',
       task: 'Analyze the structure and components of the artifact',
@@ -301,8 +305,10 @@ export const structuralAnalysisTask = defineTask('structural-analysis', (args, t
 export const contextualHorizonTask = defineTask('contextual-horizon', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 3: Contextual Horizon Mapping',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'interpretive-analyst',
+    skills: ['hypothesis-generator', 'analogy-mapper'],
     prompt: {
       role: 'Contextual Analyst specializing in horizon identification',
       task: 'Map the contextual horizons relevant to interpretation',
@@ -357,8 +363,10 @@ export const contextualHorizonTask = defineTask('contextual-horizon', (args, tas
 export const partWholeDialecticTask = defineTask('part-whole-dialectic', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 4: Part-Whole Dialectic (Hermeneutic Circle)',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'interpretive-analyst',
+    skills: ['hypothesis-generator', 'analogy-mapper'],
     prompt: {
       role: 'Hermeneutic Circle Analyst',
       task: 'Engage the hermeneutic circle between parts and whole',
@@ -406,8 +414,10 @@ export const partWholeDialecticTask = defineTask('part-whole-dialectic', (args, 
 export const authorialIntentTask = defineTask('authorial-intent', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 5: Authorial Intent Analysis',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'interpretive-analyst',
+    skills: ['hypothesis-generator', 'analogy-mapper'],
     prompt: {
       role: 'Intentionalist Interpreter',
       task: 'Analyze and infer authorial intent',
@@ -460,8 +470,10 @@ export const authorialIntentTask = defineTask('authorial-intent', (args, taskCtx
 export const historicalSituatednessTask = defineTask('historical-situatedness', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 6: Historical-Cultural Situatedness',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'interpretive-analyst',
+    skills: ['hypothesis-generator', 'analogy-mapper'],
     prompt: {
       role: 'Historical Context Expert',
       task: 'Analyze how historical-cultural context shapes meaning',
@@ -515,8 +527,10 @@ export const historicalSituatednessTask = defineTask('historical-situatedness', 
 export const fusionOfHorizonsTask = defineTask('fusion-of-horizons', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 7: Fusion of Horizons',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'interpretive-analyst',
+    skills: ['hypothesis-generator', 'analogy-mapper'],
     prompt: {
       role: 'Gadamerian Interpreter specializing in horizon fusion',
       task: 'Achieve fusion of horizons between interpreter and artifact',
@@ -567,8 +581,10 @@ export const fusionOfHorizonsTask = defineTask('fusion-of-horizons', (args, task
 export const multipleInterpretationsTask = defineTask('multiple-interpretations', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 8: Multiple Interpretation Generation',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'interpretive-analyst',
+    skills: ['hypothesis-generator', 'analogy-mapper'],
     prompt: {
       role: 'Interpretive Pluralist',
       task: 'Generate multiple valid interpretations of the artifact',
@@ -627,8 +643,10 @@ export const multipleInterpretationsTask = defineTask('multiple-interpretations'
 export const interpretationValidationTask = defineTask('interpretation-validation', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 9: Interpretation Validation',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'interpretive-analyst',
+    skills: ['hypothesis-generator', 'analogy-mapper'],
     prompt: {
       role: 'Interpretation Validator',
       task: 'Validate interpretations against evidence and criteria',
@@ -687,8 +705,10 @@ export const interpretationValidationTask = defineTask('interpretation-validatio
 export const understandingSynthesisTask = defineTask('understanding-synthesis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 10: Understanding Synthesis',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'interpretive-analyst',
+    skills: ['hypothesis-generator', 'analogy-mapper'],
     prompt: {
       role: 'Hermeneutic Synthesist',
       task: 'Synthesize interpretive work into comprehensive understanding',

@@ -174,7 +174,6 @@ export async function process(inputs, ctx) {
 export const wbsDevelopmentTask = defineTask('wbs-development', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Develop work breakdown structure',
-  skill: { name: 'scheduling-engine' },
   agent: {
     name: 'construction-manager',
     prompt: {
@@ -217,7 +216,6 @@ export const wbsDevelopmentTask = defineTask('wbs-development', (args, taskCtx) 
 export const activityDefinitionTask = defineTask('activity-definition', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Define schedule activities',
-  skill: { name: 'scheduling-engine' },
   agent: {
     name: 'construction-manager',
     prompt: {
@@ -260,7 +258,6 @@ export const activityDefinitionTask = defineTask('activity-definition', (args, t
 export const durationEstimationTask = defineTask('duration-estimation', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Estimate activity durations',
-  skill: { name: 'scheduling-engine' },
   agent: {
     name: 'construction-manager',
     prompt: {
@@ -302,7 +299,6 @@ export const durationEstimationTask = defineTask('duration-estimation', (args, t
 export const activitySequencingTask = defineTask('activity-sequencing', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Sequence activities',
-  skill: { name: 'scheduling-engine' },
   agent: {
     name: 'construction-manager',
     prompt: {
@@ -346,7 +342,6 @@ export const activitySequencingTask = defineTask('activity-sequencing', (args, t
 export const criticalPathTask = defineTask('critical-path', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Perform critical path analysis',
-  skill: { name: 'scheduling-engine' },
   agent: {
     name: 'construction-manager',
     prompt: {
@@ -390,7 +385,6 @@ export const criticalPathTask = defineTask('critical-path', (args, taskCtx) => (
 export const resourceLoadingTask = defineTask('resource-loading', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Load resources',
-  skill: { name: 'scheduling-engine' },
   agent: {
     name: 'construction-manager',
     prompt: {
@@ -434,7 +428,6 @@ export const resourceLoadingTask = defineTask('resource-loading', (args, taskCtx
 export const scheduleOptimizationTask = defineTask('schedule-optimization', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Optimize schedule',
-  skill: { name: 'scheduling-engine' },
   agent: {
     name: 'construction-manager',
     prompt: {
@@ -478,7 +471,6 @@ export const scheduleOptimizationTask = defineTask('schedule-optimization', (arg
 export const scheduleDocumentationTask = defineTask('schedule-documentation', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Generate schedule documentation',
-  skill: { name: 'engineering-report-generator' },
   agent: {
     name: 'technical-report-writer',
     prompt: {

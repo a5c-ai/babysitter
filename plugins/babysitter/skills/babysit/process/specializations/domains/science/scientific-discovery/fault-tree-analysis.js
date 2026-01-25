@@ -292,8 +292,10 @@ export async function process(inputs, ctx) {
 export const topEventDefinitionTask = defineTask('top-event-definition', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Define top event',
+  skill: { name: 'root-cause-analyzer' },
   agent: {
-    name: 'general-purpose',
+    name: 'reliability-engineer',
+    skills: ['root-cause-analyzer', 'causal-inference-engine', 'formal-logic-reasoner'],
     prompt: {
       role: 'Fault tree analyst',
       task: 'Define and clarify the top event for fault tree analysis',
@@ -337,8 +339,10 @@ export const topEventDefinitionTask = defineTask('top-event-definition', (args, 
 export const boundaryDefinitionTask = defineTask('boundary-definition', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Define system boundaries',
+  skill: { name: 'root-cause-analyzer' },
   agent: {
-    name: 'general-purpose',
+    name: 'reliability-engineer',
+    skills: ['root-cause-analyzer', 'causal-inference-engine'],
     prompt: {
       role: 'Systems analyst',
       task: 'Define system boundaries and scope for fault tree analysis',
@@ -383,8 +387,10 @@ export const boundaryDefinitionTask = defineTask('boundary-definition', (args, t
 export const faultTreeConstructionTask = defineTask('fault-tree-construction', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Construct fault tree',
+  skill: { name: 'formal-logic-reasoner' },
   agent: {
-    name: 'general-purpose',
+    name: 'reliability-engineer',
+    skills: ['formal-logic-reasoner', 'root-cause-analyzer', 'causal-inference-engine'],
     prompt: {
       role: 'Fault tree construction specialist',
       task: 'Construct the fault tree from top event to basic events',
@@ -441,8 +447,10 @@ export const faultTreeConstructionTask = defineTask('fault-tree-construction', (
 export const cutSetAnalysisTask = defineTask('cut-set-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Identify minimal cut sets',
+  skill: { name: 'formal-logic-reasoner' },
   agent: {
-    name: 'general-purpose',
+    name: 'reliability-engineer',
+    skills: ['formal-logic-reasoner', 'root-cause-analyzer', 'bayesian-inference-engine'],
     prompt: {
       role: 'Cut set analyst',
       task: 'Identify all minimal cut sets from the fault tree',
@@ -495,8 +503,10 @@ export const cutSetAnalysisTask = defineTask('cut-set-analysis', (args, taskCtx)
 export const qualitativeAnalysisTask = defineTask('qualitative-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Perform qualitative analysis',
+  skill: { name: 'root-cause-analyzer' },
   agent: {
-    name: 'general-purpose',
+    name: 'reliability-engineer',
+    skills: ['root-cause-analyzer', 'causal-inference-engine', 'hypothesis-generator'],
     prompt: {
       role: 'Qualitative analysis specialist',
       task: 'Perform qualitative analysis of the fault tree and cut sets',
@@ -541,8 +551,10 @@ export const qualitativeAnalysisTask = defineTask('qualitative-analysis', (args,
 export const quantitativeAnalysisTask = defineTask('quantitative-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Perform quantitative analysis',
+  skill: { name: 'bayesian-inference-engine' },
   agent: {
-    name: 'general-purpose',
+    name: 'reliability-engineer',
+    skills: ['bayesian-inference-engine', 'statistical-test-selector', 'root-cause-analyzer'],
     prompt: {
       role: 'Quantitative risk analyst',
       task: 'Calculate probabilities for the fault tree',
@@ -595,8 +607,10 @@ export const quantitativeAnalysisTask = defineTask('quantitative-analysis', (arg
 export const importanceAnalysisTask = defineTask('importance-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Analyze event importance',
+  skill: { name: 'bayesian-inference-engine' },
   agent: {
-    name: 'general-purpose',
+    name: 'reliability-engineer',
+    skills: ['bayesian-inference-engine', 'root-cause-analyzer', 'statistical-test-selector'],
     prompt: {
       role: 'Importance analysis specialist',
       task: 'Calculate and rank importance measures for basic events',
@@ -652,8 +666,10 @@ export const importanceAnalysisTask = defineTask('importance-analysis', (args, t
 export const commonCauseFailureAnalysisTask = defineTask('ccf-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Analyze common cause failures',
+  skill: { name: 'root-cause-analyzer' },
   agent: {
-    name: 'general-purpose',
+    name: 'reliability-engineer',
+    skills: ['root-cause-analyzer', 'causal-inference-engine', 'hypothesis-generator'],
     prompt: {
       role: 'Common cause failure analyst',
       task: 'Identify and analyze common cause failures',
@@ -715,8 +731,10 @@ export const commonCauseFailureAnalysisTask = defineTask('ccf-analysis', (args, 
 export const ftaRecommendationsTask = defineTask('fta-recommendations', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Develop recommendations',
+  skill: { name: 'root-cause-analyzer' },
   agent: {
-    name: 'general-purpose',
+    name: 'reliability-engineer',
+    skills: ['root-cause-analyzer', 'hypothesis-generator', 'triz-inventive-solver'],
     prompt: {
       role: 'Safety improvement specialist',
       task: 'Develop recommendations based on FTA findings',
@@ -771,8 +789,10 @@ export const ftaRecommendationsTask = defineTask('fta-recommendations', (args, t
 export const ftaReportGenerationTask = defineTask('fta-report-generation', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Generate FTA report',
+  skill: { name: 'root-cause-analyzer' },
   agent: {
-    name: 'general-purpose',
+    name: 'reliability-engineer',
+    skills: ['root-cause-analyzer', 'formal-logic-reasoner'],
     prompt: {
       role: 'FTA documentation specialist',
       task: 'Generate comprehensive FTA report',
@@ -814,8 +834,10 @@ export const ftaReportGenerationTask = defineTask('fta-report-generation', (args
 export const ftaQualityScoringTask = defineTask('fta-quality-scoring', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Score FTA quality',
+  skill: { name: 'root-cause-analyzer' },
   agent: {
-    name: 'general-purpose',
+    name: 'reliability-engineer',
+    skills: ['root-cause-analyzer', 'bayesian-inference-engine', 'formal-logic-reasoner'],
     prompt: {
       role: 'FTA quality auditor',
       task: 'Assess the quality and completeness of the FTA',

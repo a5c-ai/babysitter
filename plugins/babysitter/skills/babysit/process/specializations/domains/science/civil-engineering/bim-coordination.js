@@ -164,7 +164,6 @@ export async function process(inputs, ctx) {
 export const standardsVerificationTask = defineTask('standards-verification', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Verify BIM standards compliance',
-  skill: { name: 'bim-model-analyzer' },
   agent: {
     name: 'bim-coordinator',
     prompt: {
@@ -209,7 +208,6 @@ export const standardsVerificationTask = defineTask('standards-verification', (a
 export const modelAggregationTask = defineTask('model-aggregation', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Aggregate discipline models',
-  skill: { name: 'bim-model-analyzer' },
   agent: {
     name: 'bim-coordinator',
     prompt: {
@@ -252,7 +250,6 @@ export const modelAggregationTask = defineTask('model-aggregation', (args, taskC
 export const clashDetectionTask = defineTask('clash-detection', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Run clash detection',
-  skill: { name: 'bim-model-analyzer' },
   agent: {
     name: 'bim-coordinator',
     prompt: {
@@ -295,7 +292,6 @@ export const clashDetectionTask = defineTask('clash-detection', (args, taskCtx) 
 export const clashAnalysisTask = defineTask('clash-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Analyze and prioritize clashes',
-  skill: { name: 'bim-model-analyzer' },
   agent: {
     name: 'bim-coordinator',
     prompt: {
@@ -340,7 +336,6 @@ export const clashAnalysisTask = defineTask('clash-analysis', (args, taskCtx) =>
 export const clashResolutionTask = defineTask('clash-resolution', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Coordinate clash resolution',
-  skill: { name: 'bim-model-analyzer' },
   agent: {
     name: 'bim-coordinator',
     prompt: {
@@ -384,7 +379,6 @@ export const clashResolutionTask = defineTask('clash-resolution', (args, taskCtx
 export const updateVerificationTask = defineTask('update-verification', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Verify model updates',
-  skill: { name: 'bim-model-analyzer' },
   agent: {
     name: 'bim-coordinator',
     prompt: {
@@ -427,7 +421,6 @@ export const updateVerificationTask = defineTask('update-verification', (args, t
 export const coordinationDrawingsTask = defineTask('coordination-drawings', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Generate coordination drawings',
-  skill: { name: 'civil3d-surface-analyzer' },
   agent: {
     name: 'bim-coordinator',
     prompt: {
@@ -479,7 +472,6 @@ export const coordinationDrawingsTask = defineTask('coordination-drawings', (arg
 export const coordinationReportTask = defineTask('coordination-report', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Generate BIM coordination report',
-  skill: { name: 'engineering-report-generator' },
   agent: {
     name: 'technical-report-writer',
     prompt: {

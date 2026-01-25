@@ -193,7 +193,6 @@ export async function process(inputs, ctx) {
 export const scopeDefinitionTask = defineTask('scope-definition', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Define peer review scope',
-  skill: { name: 'structural-analysis-engine' },
   agent: {
     name: 'structural-design-engineer',
     prompt: {
@@ -237,7 +236,6 @@ export const scopeDefinitionTask = defineTask('scope-definition', (args, taskCtx
 export const codeComplianceTask = defineTask('code-compliance', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Review code compliance',
-  skill: { name: 'structural-analysis-engine' },
   agent: {
     name: 'structural-design-engineer',
     prompt: {
@@ -280,7 +278,6 @@ export const codeComplianceTask = defineTask('code-compliance', (args, taskCtx) 
 export const loadReviewTask = defineTask('load-review', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Review load analysis',
-  skill: { name: 'structural-analysis-engine' },
   agent: {
     name: 'structural-load-analyst',
     prompt: {
@@ -324,7 +321,6 @@ export const loadReviewTask = defineTask('load-review', (args, taskCtx) => ({
 export const analysisReviewTask = defineTask('analysis-review', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Review structural analysis',
-  skill: { name: 'fea-structural-engine' },
   agent: {
     name: 'structural-load-analyst',
     prompt: {
@@ -368,7 +364,6 @@ export const analysisReviewTask = defineTask('analysis-review', (args, taskCtx) 
 export const memberReviewTask = defineTask('member-review', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Review member designs',
-  skill: { name: 'fea-structural-engine' },
   agent: {
     name: 'structural-design-engineer',
     prompt: {
@@ -412,7 +407,6 @@ export const memberReviewTask = defineTask('member-review', (args, taskCtx) => (
 export const connectionReviewTask = defineTask('connection-review', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Review connections',
-  skill: { name: 'fea-structural-engine' },
   agent: {
     name: 'structural-design-engineer',
     prompt: {
@@ -455,7 +449,6 @@ export const connectionReviewTask = defineTask('connection-review', (args, taskC
 export const constructabilityReviewTask = defineTask('constructability-review', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Review constructability',
-  skill: { name: 'bim-model-analyzer' },
   agent: {
     name: 'construction-manager',
     prompt: {
@@ -499,7 +492,6 @@ export const constructabilityReviewTask = defineTask('constructability-review', 
 export const commentResolutionTask = defineTask('comment-resolution', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Track comment resolution',
-  skill: { name: 'inspection-tracking-system' },
   agent: {
     name: 'quality-control-specialist',
     prompt: {
@@ -542,7 +534,6 @@ export const commentResolutionTask = defineTask('comment-resolution', (args, tas
 export const peerReviewReportTask = defineTask('peer-review-report', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Generate peer review report',
-  skill: { name: 'engineering-report-generator' },
   agent: {
     name: 'technical-report-writer',
     prompt: {

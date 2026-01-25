@@ -185,7 +185,6 @@ export async function process(inputs, ctx) {
 export const specificationDefinitionTask = defineTask('specification-definition', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 1: Specification Definition - ${args.supplyName}`,
-  skill: { name: 'power-electronics-sim' },
   agent: {
     name: 'power-electronics-engineer',
     prompt: {
@@ -240,7 +239,6 @@ export const specificationDefinitionTask = defineTask('specification-definition'
 export const topologySelectionTask = defineTask('topology-selection', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 2: Topology Selection - ${args.supplyName}`,
-  skill: { name: 'power-electronics-sim' },
   agent: {
     name: 'power-electronics-engineer',
     prompt: {
@@ -287,7 +285,6 @@ export const topologySelectionTask = defineTask('topology-selection', (args, tas
 export const magneticsDesignTask = defineTask('magnetics-design', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 3: Magnetics Design - ${args.supplyName}`,
-  skill: { name: 'power-electronics-sim' },
   agent: {
     name: 'power-electronics-engineer',
     prompt: {
@@ -350,7 +347,6 @@ export const magneticsDesignTask = defineTask('magnetics-design', (args, taskCtx
 export const semiconductorSelectionTask = defineTask('semiconductor-selection', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 4: Semiconductor Selection - ${args.supplyName}`,
-  skill: { name: 'power-electronics-sim' },
   agent: {
     name: 'power-electronics-engineer',
     prompt: {
@@ -420,7 +416,6 @@ export const semiconductorSelectionTask = defineTask('semiconductor-selection', 
 export const controlLoopDesignTask = defineTask('control-loop-design', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 5: Control Loop Design - ${args.supplyName}`,
-  skill: { name: 'power-electronics-sim' },
   agent: {
     name: 'power-electronics-engineer',
     prompt: {
@@ -477,7 +472,6 @@ export const controlLoopDesignTask = defineTask('control-loop-design', (args, ta
 export const performanceSimulationTask = defineTask('performance-simulation', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 6: Performance Simulation - ${args.supplyName}`,
-  skill: { name: 'power-electronics-sim' },
   agent: {
     name: 'power-electronics-engineer',
     prompt: {
@@ -535,7 +529,6 @@ export const performanceSimulationTask = defineTask('performance-simulation', (a
 export const pcbLayoutGuidelinesTask = defineTask('pcb-layout-guidelines', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 7: PCB Layout Guidelines - ${args.supplyName}`,
-  skill: { name: 'power-electronics-sim' },
   agent: {
     name: 'power-electronics-engineer',
     prompt: {
@@ -589,7 +582,6 @@ export const pcbLayoutGuidelinesTask = defineTask('pcb-layout-guidelines', (args
 export const testValidationTask = defineTask('test-validation', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 8: Test and Validation - ${args.supplyName}`,
-  skill: { name: 'power-electronics-sim' },
   agent: {
     name: 'power-electronics-engineer',
     prompt: {

@@ -135,7 +135,6 @@ export async function process(inputs, ctx) {
 export const mpcCandidateIdentificationTask = defineTask('mpc-candidate-identification', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Identify MPC candidates and benefits',
-  skill: { name: 'mpc-designer' },
   agent: {
     name: 'advanced-control-engineer',
     prompt: {
@@ -184,7 +183,6 @@ export const mpcCandidateIdentificationTask = defineTask('mpc-candidate-identifi
 export const dynamicModelDevelopmentTask = defineTask('dynamic-model-development', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Develop process dynamic models',
-  skill: { name: 'hysys-dynamic-simulator' },
   agent: {
     name: 'advanced-control-engineer',
     prompt: {
@@ -234,7 +232,6 @@ export const dynamicModelDevelopmentTask = defineTask('dynamic-model-development
 export const mpcConfigurationTask = defineTask('mpc-configuration', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Configure MPC controller',
-  skill: { name: 'mpc-designer' },
   agent: {
     name: 'advanced-control-engineer',
     prompt: {
@@ -285,7 +282,6 @@ export const mpcConfigurationTask = defineTask('mpc-configuration', (args, taskC
 export const horizonTuningTask = defineTask('horizon-tuning', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Tune prediction and control horizons',
-  skill: { name: 'mpc-designer' },
   agent: {
     name: 'advanced-control-engineer',
     prompt: {
@@ -330,7 +326,6 @@ export const horizonTuningTask = defineTask('horizon-tuning', (args, taskCtx) =>
 export const mpcCommissioningTask = defineTask('mpc-commissioning', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Commission and validate MPC performance',
-  skill: { name: 'hysys-dynamic-simulator' },
   agent: {
     name: 'advanced-control-engineer',
     prompt: {
@@ -379,7 +374,6 @@ export const mpcCommissioningTask = defineTask('mpc-commissioning', (args, taskC
 export const operatorTrainingTask = defineTask('operator-training', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Develop operator training materials',
-  skill: { name: 'mpc-designer' },
   agent: {
     name: 'advanced-control-engineer',
     prompt: {

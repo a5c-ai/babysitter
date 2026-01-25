@@ -148,7 +148,6 @@ export async function process(inputs, ctx) {
 export const testObjectivesTask = defineTask('test-objectives', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Define performance test objectives',
-  skill: { name: 'performance-test-designer' },
   agent: {
     name: 'performance-test-engineer',
     prompt: {
@@ -196,7 +195,6 @@ export const testObjectivesTask = defineTask('test-objectives', (args, taskCtx) 
 export const testProtocolTask = defineTask('test-protocol', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Develop test protocol',
-  skill: { name: 'performance-test-designer' },
   agent: {
     name: 'performance-test-engineer',
     prompt: {
@@ -246,7 +244,6 @@ export const testProtocolTask = defineTask('test-protocol', (args, taskCtx) => (
 export const instrumentationPreparationTask = defineTask('instrumentation-preparation', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Prepare instrumentation and data collection',
-  skill: { name: 'material-balance-calculator' },
   agent: {
     name: 'performance-test-engineer',
     prompt: {
@@ -294,7 +291,6 @@ export const instrumentationPreparationTask = defineTask('instrumentation-prepar
 export const testExecutionTask = defineTask('test-execution', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Execute performance tests',
-  skill: { name: 'aspen-plus-simulator' },
   agent: {
     name: 'performance-test-engineer',
     prompt: {
@@ -343,7 +339,6 @@ export const testExecutionTask = defineTask('test-execution', (args, taskCtx) =>
 export const resultsAnalysisTask = defineTask('results-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Analyze results vs. specifications',
-  skill: { name: 'material-balance-calculator' },
   agent: {
     name: 'performance-test-engineer',
     prompt: {
@@ -393,7 +388,6 @@ export const resultsAnalysisTask = defineTask('results-analysis', (args, taskCtx
 export const performanceCertificateTask = defineTask('performance-certificate', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Document performance guarantees',
-  skill: { name: 'performance-test-designer' },
   agent: {
     name: 'performance-test-engineer',
     prompt: {
@@ -443,7 +437,6 @@ export const performanceCertificateTask = defineTask('performance-certificate', 
 export const optimizationRecommendationsTask = defineTask('optimization-recommendations', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Generate optimization recommendations',
-  skill: { name: 'aspen-plus-simulator' },
   agent: {
     name: 'performance-test-engineer',
     prompt: {

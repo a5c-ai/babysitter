@@ -11,8 +11,10 @@ import { defineTask } from '@a5c-ai/babysitter-sdk';
 const analyzeTask = defineTask('simplicity-compression-reasoning-analyze', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Simplicity Compression Reasoning Analysis',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'complexity-analyst',
+    skills: ['hypothesis-generator', 'bayesian-inference-engine'],
     prompt: {
       role: 'Scientific reasoning specialist in Occams razor, minimum description length, and complexity theory',
       task: 'Apply simplicity and compression-based reasoning to prefer simpler hypotheses while balancing goodness of fit against model complexity',

@@ -190,8 +190,10 @@ export async function process(inputs, ctx) {
 export const claimAnalysisTask = defineTask('claim-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 1: Claim Analysis',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'rhetorical-analyst',
+    skills: ['hypothesis-generator', 'analogy-mapper'],
     prompt: {
       role: 'Rhetorical Analyst specializing in claim assessment',
       task: 'Analyze the claim for rhetorical presentation',
@@ -239,8 +241,10 @@ export const claimAnalysisTask = defineTask('claim-analysis', (args, taskCtx) =>
 export const audienceAnalysisTask = defineTask('audience-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 2: Audience Analysis',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'rhetorical-analyst',
+    skills: ['hypothesis-generator', 'analogy-mapper'],
     prompt: {
       role: 'Audience Research Expert',
       task: 'Analyze audience characteristics for persuasion strategy',
@@ -306,8 +310,10 @@ export const audienceAnalysisTask = defineTask('audience-analysis', (args, taskC
 export const rhetoricalSituationTask = defineTask('rhetorical-situation', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 3: Rhetorical Situation Analysis',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'rhetorical-analyst',
+    skills: ['hypothesis-generator', 'analogy-mapper'],
     prompt: {
       role: 'Rhetorical Situation Analyst',
       task: 'Analyze the rhetorical situation (exigence, constraints, kairos)',
@@ -381,8 +387,10 @@ export const rhetoricalSituationTask = defineTask('rhetorical-situation', (args,
 export const ethosStrategyTask = defineTask('ethos-strategy', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 4: Ethos Development',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'rhetorical-analyst',
+    skills: ['hypothesis-generator', 'analogy-mapper'],
     prompt: {
       role: 'Ethos Strategy Expert',
       task: 'Develop credibility and character-based persuasion strategies',
@@ -438,8 +446,10 @@ export const ethosStrategyTask = defineTask('ethos-strategy', (args, taskCtx) =>
 export const logosStrategyTask = defineTask('logos-strategy', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 5: Logos Development',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'rhetorical-analyst',
+    skills: ['hypothesis-generator', 'analogy-mapper'],
     prompt: {
       role: 'Logical Argumentation Expert',
       task: 'Develop logic and evidence-based persuasion strategies',
@@ -497,8 +507,10 @@ export const logosStrategyTask = defineTask('logos-strategy', (args, taskCtx) =>
 export const pathosStrategyTask = defineTask('pathos-strategy', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 6: Pathos Development',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'rhetorical-analyst',
+    skills: ['hypothesis-generator', 'analogy-mapper'],
     prompt: {
       role: 'Emotional Persuasion Expert',
       task: 'Develop emotion-based persuasion strategies',
@@ -557,8 +569,10 @@ export const pathosStrategyTask = defineTask('pathos-strategy', (args, taskCtx) 
 export const framingStrategyTask = defineTask('framing-strategy', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 7: Framing Strategy Development',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'rhetorical-analyst',
+    skills: ['hypothesis-generator', 'analogy-mapper'],
     prompt: {
       role: 'Strategic Framing Expert',
       task: 'Develop framing strategies for effective persuasion',
@@ -617,8 +631,10 @@ export const framingStrategyTask = defineTask('framing-strategy', (args, taskCtx
 export const argumentConstructionTask = defineTask('argument-construction', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 8: Argument Construction',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'rhetorical-analyst',
+    skills: ['hypothesis-generator', 'analogy-mapper'],
     prompt: {
       role: 'Argument Construction Expert',
       task: 'Construct complete arguments integrating ethos, logos, and pathos',
@@ -680,8 +696,10 @@ export const argumentConstructionTask = defineTask('argument-construction', (arg
 export const counterargumentStrategyTask = defineTask('counterargument-strategy', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 9: Counterargument Anticipation',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'rhetorical-analyst',
+    skills: ['hypothesis-generator', 'analogy-mapper'],
     prompt: {
       role: 'Counterargument Defense Expert',
       task: 'Anticipate and develop responses to counterarguments',
@@ -748,8 +766,10 @@ export const counterargumentStrategyTask = defineTask('counterargument-strategy'
 export const rhetoricalStrategySynthesisTask = defineTask('rhetorical-strategy-synthesis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 10: Rhetorical Strategy Synthesis',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'rhetorical-analyst',
+    skills: ['hypothesis-generator', 'analogy-mapper'],
     prompt: {
       role: 'Rhetorical Strategy Synthesizer',
       task: 'Synthesize all elements into cohesive rhetorical strategy',

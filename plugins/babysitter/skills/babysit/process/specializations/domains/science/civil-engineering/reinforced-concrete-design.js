@@ -202,7 +202,6 @@ export async function process(inputs, ctx) {
 export const designCriteriaTask = defineTask('design-criteria', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Establish design criteria and material properties',
-  skill: { name: 'concrete-design-calculator' },
   agent: {
     name: 'reinforced-concrete-designer',
     prompt: {
@@ -254,7 +253,6 @@ export const designCriteriaTask = defineTask('design-criteria', (args, taskCtx) 
 export const beamDesignTask = defineTask('beam-design', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Design reinforced concrete beams',
-  skill: { name: 'fea-structural-engine' },
   agent: {
     name: 'reinforced-concrete-designer',
     prompt: {
@@ -298,7 +296,6 @@ export const beamDesignTask = defineTask('beam-design', (args, taskCtx) => ({
 export const columnDesignTask = defineTask('column-design', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Design reinforced concrete columns',
-  skill: { name: 'fea-structural-engine' },
   agent: {
     name: 'reinforced-concrete-designer',
     prompt: {
@@ -343,7 +340,6 @@ export const columnDesignTask = defineTask('column-design', (args, taskCtx) => (
 export const slabDesignTask = defineTask('slab-design', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Design reinforced concrete slabs',
-  skill: { name: 'concrete-design-calculator' },
   agent: {
     name: 'reinforced-concrete-designer',
     prompt: {
@@ -389,7 +385,6 @@ export const slabDesignTask = defineTask('slab-design', (args, taskCtx) => ({
 export const shearWallDesignTask = defineTask('shear-wall-design', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Design reinforced concrete shear walls',
-  skill: { name: 'fea-structural-engine' },
   agent: {
     name: 'seismic-design-specialist',
     prompt: {
@@ -434,7 +429,6 @@ export const shearWallDesignTask = defineTask('shear-wall-design', (args, taskCt
 export const foundationDesignTask = defineTask('foundation-design', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Design reinforced concrete foundations',
-  skill: { name: 'bearing-capacity-calculator' },
   agent: {
     name: 'foundation-engineer',
     prompt: {
@@ -479,7 +473,6 @@ export const foundationDesignTask = defineTask('foundation-design', (args, taskC
 export const detailingTask = defineTask('detailing', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Develop reinforcement details',
-  skill: { name: 'section-property-calculator' },
   agent: {
     name: 'reinforced-concrete-designer',
     prompt: {
@@ -523,7 +516,6 @@ export const detailingTask = defineTask('detailing', (args, taskCtx) => ({
 export const reinforcementSchedulesTask = defineTask('reinforcement-schedules', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Generate reinforcement schedules',
-  skill: { name: 'quantity-takeoff-calculator' },
   agent: {
     name: 'reinforced-concrete-designer',
     prompt: {
@@ -575,7 +567,6 @@ export const reinforcementSchedulesTask = defineTask('reinforcement-schedules', 
 export const structuralDrawingsTask = defineTask('structural-drawings', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Generate structural drawings',
-  skill: { name: 'engineering-report-generator' },
   agent: {
     name: 'technical-report-writer',
     prompt: {

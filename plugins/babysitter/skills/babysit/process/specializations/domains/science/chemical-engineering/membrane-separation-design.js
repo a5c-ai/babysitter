@@ -163,7 +163,6 @@ export async function process(inputs, ctx) {
 export const membraneApplicabilityTask = defineTask('membrane-applicability', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Evaluate membrane applicability for separation',
-  skill: { name: 'membrane-system-designer' },
   agent: {
     name: 'separation-process-engineer',
     prompt: {
@@ -212,7 +211,6 @@ export const membraneApplicabilityTask = defineTask('membrane-applicability', (a
 export const membraneSelectionTask = defineTask('membrane-selection', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Select membrane type and material',
-  skill: { name: 'membrane-system-designer' },
   agent: {
     name: 'separation-process-engineer',
     prompt: {
@@ -264,7 +262,6 @@ export const membraneSelectionTask = defineTask('membrane-selection', (args, tas
 export const moduleConfigurationTask = defineTask('module-configuration', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Design module configuration',
-  skill: { name: 'membrane-system-designer' },
   agent: {
     name: 'separation-process-engineer',
     prompt: {
@@ -312,7 +309,6 @@ export const moduleConfigurationTask = defineTask('module-configuration', (args,
 export const areaStagingTask = defineTask('area-staging', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Calculate membrane area and staging',
-  skill: { name: 'equipment-sizing-calculator' },
   agent: {
     name: 'separation-process-engineer',
     prompt: {
@@ -363,7 +359,6 @@ export const areaStagingTask = defineTask('area-staging', (args, taskCtx) => ({
 export const operatingConditionsTask = defineTask('operating-conditions', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Specify operating conditions and pretreatment',
-  skill: { name: 'membrane-system-designer' },
   agent: {
     name: 'separation-process-engineer',
     prompt: {
@@ -413,7 +408,6 @@ export const operatingConditionsTask = defineTask('operating-conditions', (args,
 export const foulingManagementTask = defineTask('fouling-management', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Plan membrane fouling management',
-  skill: { name: 'membrane-system-designer' },
   agent: {
     name: 'separation-process-engineer',
     prompt: {
@@ -462,7 +456,6 @@ export const foulingManagementTask = defineTask('fouling-management', (args, tas
 export const economicComparisonTask = defineTask('economic-comparison', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Perform economic comparison with alternatives',
-  skill: { name: 'process-economics-estimator' },
   agent: {
     name: 'separation-process-engineer',
     prompt: {

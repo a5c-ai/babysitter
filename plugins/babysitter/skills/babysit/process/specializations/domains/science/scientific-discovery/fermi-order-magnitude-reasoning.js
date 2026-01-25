@@ -11,8 +11,10 @@ import { defineTask } from '@a5c-ai/babysitter-sdk';
 const analyzeTask = defineTask('fermi-order-magnitude-reasoning-analyze', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Fermi Order-of-Magnitude Reasoning Analysis',
+  skill: { name: 'bayesian-inference-engine' },
   agent: {
-    name: 'general-purpose',
+    name: 'estimation-specialist',
+    skills: ['bayesian-inference-engine', 'hypothesis-generator'],
     prompt: {
       role: 'Scientific reasoning specialist in Fermi estimation and order-of-magnitude reasoning',
       task: 'Apply Fermi order-of-magnitude reasoning to produce rough quantitative estimates by decomposing problems into estimable components',

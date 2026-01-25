@@ -275,8 +275,10 @@ export async function process(inputs, ctx) {
 export const effectDefinitionTask = defineTask('effect-definition', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Define the effect statement',
+  skill: { name: 'root-cause-analyzer' },
   agent: {
-    name: 'general-purpose',
+    name: 'root-cause-analyst',
+    skills: ['root-cause-analyzer', 'causal-inference-engine', 'hypothesis-generator'],
     prompt: {
       role: 'Quality analysis specialist',
       task: 'Define and clarify the effect (problem) statement for fishbone analysis',
@@ -320,8 +322,10 @@ export const effectDefinitionTask = defineTask('effect-definition', (args, taskC
 export const categorySelectionTask = defineTask('category-selection', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Select and customize categories',
+  skill: { name: 'root-cause-analyzer' },
   agent: {
-    name: 'general-purpose',
+    name: 'root-cause-analyst',
+    skills: ['root-cause-analyzer', 'causal-inference-engine', 'hypothesis-generator'],
     prompt: {
       role: 'Fishbone diagram specialist',
       task: 'Select and customize appropriate categories for the fishbone diagram',
@@ -366,8 +370,10 @@ export const categorySelectionTask = defineTask('category-selection', (args, tas
 export const categoryBrainstormTask = defineTask('category-brainstorm', (args, taskCtx) => ({
   kind: 'agent',
   title: `Brainstorm causes for: ${args.category}`,
+  skill: { name: 'root-cause-analyzer' },
   agent: {
-    name: 'general-purpose',
+    name: 'root-cause-analyst',
+    skills: ['root-cause-analyzer', 'causal-inference-engine', 'hypothesis-generator'],
     prompt: {
       role: 'Brainstorming facilitator',
       task: `Brainstorm potential causes within the "${args.category}" category`,
@@ -419,8 +425,10 @@ export const categoryBrainstormTask = defineTask('category-brainstorm', (args, t
 export const subCauseAnalysisTask = defineTask('sub-cause-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Analyze sub-causes',
+  skill: { name: 'root-cause-analyzer' },
   agent: {
-    name: 'general-purpose',
+    name: 'root-cause-analyst',
+    skills: ['root-cause-analyzer', 'causal-inference-engine', 'hypothesis-generator'],
     prompt: {
       role: 'Root cause analyst',
       task: 'Analyze each primary cause to identify sub-causes (secondary bones)',
@@ -474,8 +482,10 @@ export const subCauseAnalysisTask = defineTask('sub-cause-analysis', (args, task
 export const causeVerificationTask = defineTask('cause-verification', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Verify identified causes',
+  skill: { name: 'root-cause-analyzer' },
   agent: {
-    name: 'general-purpose',
+    name: 'root-cause-analyst',
+    skills: ['root-cause-analyzer', 'causal-inference-engine', 'hypothesis-generator'],
     prompt: {
       role: 'Cause verification specialist',
       task: 'Verify the validity and relevance of identified causes',
@@ -529,8 +539,10 @@ export const causeVerificationTask = defineTask('cause-verification', (args, tas
 export const causePrioritizationTask = defineTask('cause-prioritization', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Prioritize causes',
+  skill: { name: 'root-cause-analyzer' },
   agent: {
-    name: 'general-purpose',
+    name: 'root-cause-analyst',
+    skills: ['root-cause-analyzer', 'causal-inference-engine', 'hypothesis-generator'],
     prompt: {
       role: 'Prioritization specialist',
       task: 'Prioritize causes based on impact, likelihood, and addressability',
@@ -588,8 +600,10 @@ export const causePrioritizationTask = defineTask('cause-prioritization', (args,
 export const diagramGenerationTask = defineTask('diagram-generation', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Generate fishbone diagram',
+  skill: { name: 'root-cause-analyzer' },
   agent: {
-    name: 'general-purpose',
+    name: 'root-cause-analyst',
+    skills: ['root-cause-analyzer', 'causal-inference-engine', 'hypothesis-generator'],
     prompt: {
       role: 'Diagram visualization specialist',
       task: 'Generate the complete fishbone diagram structure and visualization',
@@ -638,8 +652,10 @@ export const diagramGenerationTask = defineTask('diagram-generation', (args, tas
 export const rootCauseSelectionTask = defineTask('root-cause-selection', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Select root causes for action',
+  skill: { name: 'root-cause-analyzer' },
   agent: {
-    name: 'general-purpose',
+    name: 'root-cause-analyst',
+    skills: ['root-cause-analyzer', 'causal-inference-engine', 'hypothesis-generator'],
     prompt: {
       role: 'Root cause selection specialist',
       task: 'Select the root causes to address based on prioritization and context',
@@ -692,8 +708,10 @@ export const rootCauseSelectionTask = defineTask('root-cause-selection', (args, 
 export const fishboneActionPlanTask = defineTask('fishbone-action-plan', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Develop action plan',
+  skill: { name: 'root-cause-analyzer' },
   agent: {
-    name: 'general-purpose',
+    name: 'root-cause-analyst',
+    skills: ['root-cause-analyzer', 'causal-inference-engine', 'hypothesis-generator'],
     prompt: {
       role: 'Action planning specialist',
       task: 'Develop action plan to address selected root causes',
@@ -749,8 +767,10 @@ export const fishboneActionPlanTask = defineTask('fishbone-action-plan', (args, 
 export const fishboneQualityScoringTask = defineTask('fishbone-quality-scoring', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Score analysis quality',
+  skill: { name: 'root-cause-analyzer' },
   agent: {
-    name: 'general-purpose',
+    name: 'root-cause-analyst',
+    skills: ['root-cause-analyzer', 'causal-inference-engine', 'hypothesis-generator'],
     prompt: {
       role: 'Fishbone analysis quality auditor',
       task: 'Score the quality and completeness of the fishbone analysis',

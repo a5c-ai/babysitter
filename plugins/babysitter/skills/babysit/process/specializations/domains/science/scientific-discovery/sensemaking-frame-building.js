@@ -180,8 +180,10 @@ export async function process(inputs, ctx) {
 export const situationAnalysisTask = defineTask('situation-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 1: Situation Description and Cue Extraction',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'sensemaking-analyst',
+    skills: ['hypothesis-generator', 'analogy-mapper'],
     prompt: {
       role: 'Sensemaking Analyst specializing in situation assessment',
       task: 'Analyze situation and extract relevant cues',
@@ -247,8 +249,10 @@ export const situationAnalysisTask = defineTask('situation-analysis', (args, tas
 export const frameRetrievalTask = defineTask('frame-retrieval', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 2: Frame Retrieval and Activation',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'sensemaking-analyst',
+    skills: ['hypothesis-generator', 'analogy-mapper'],
     prompt: {
       role: 'Frame Retrieval Expert',
       task: 'Retrieve and activate potentially relevant frames',
@@ -305,8 +309,10 @@ export const frameRetrievalTask = defineTask('frame-retrieval', (args, taskCtx) 
 export const frameFitAssessmentTask = defineTask('frame-fit-assessment', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 3: Frame Fit Assessment',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'sensemaking-analyst',
+    skills: ['hypothesis-generator', 'analogy-mapper'],
     prompt: {
       role: 'Frame Fit Assessor',
       task: 'Assess how well each frame fits the situation',
@@ -363,8 +369,10 @@ export const frameFitAssessmentTask = defineTask('frame-fit-assessment', (args, 
 export const anomalyIdentificationTask = defineTask('anomaly-identification', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 4: Anomaly and Gap Identification',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'sensemaking-analyst',
+    skills: ['hypothesis-generator', 'analogy-mapper'],
     prompt: {
       role: 'Anomaly Detection Expert',
       task: 'Identify anomalies and gaps in frame coverage',
@@ -420,8 +428,10 @@ export const anomalyIdentificationTask = defineTask('anomaly-identification', (a
 export const frameConstructionTask = defineTask('frame-construction', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 5: Frame Construction and Modification',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'sensemaking-analyst',
+    skills: ['hypothesis-generator', 'analogy-mapper'],
     prompt: {
       role: 'Frame Construction Expert',
       task: 'Construct new frames or modify existing ones to fit better',
@@ -481,8 +491,10 @@ export const frameConstructionTask = defineTask('frame-construction', (args, tas
 export const plausibilityAssessmentTask = defineTask('plausibility-assessment', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 6: Plausibility Assessment',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'sensemaking-analyst',
+    skills: ['hypothesis-generator', 'analogy-mapper'],
     prompt: {
       role: 'Plausibility Assessor',
       task: 'Assess plausibility of each frame',
@@ -541,8 +553,10 @@ export const plausibilityAssessmentTask = defineTask('plausibility-assessment', 
 export const actionImplicationsTask = defineTask('action-implications', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 7: Action Implications Analysis',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'sensemaking-analyst',
+    skills: ['hypothesis-generator', 'analogy-mapper'],
     prompt: {
       role: 'Action Implications Analyst',
       task: 'Analyze action implications of each frame',
@@ -599,8 +613,10 @@ export const actionImplicationsTask = defineTask('action-implications', (args, t
 export const frameSelectionTask = defineTask('frame-selection', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 8: Frame Selection and Commitment',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'sensemaking-analyst',
+    skills: ['hypothesis-generator', 'analogy-mapper'],
     prompt: {
       role: 'Frame Selection Expert',
       task: 'Select best frame and determine commitment level',
@@ -657,8 +673,10 @@ export const frameSelectionTask = defineTask('frame-selection', (args, taskCtx) 
 export const sensemakingValidationTask = defineTask('sensemaking-validation', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 9: Sensemaking Validation',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'sensemaking-analyst',
+    skills: ['hypothesis-generator', 'analogy-mapper'],
     prompt: {
       role: 'Sensemaking Validator',
       task: 'Validate the sensemaking process and outcome',
@@ -715,8 +733,10 @@ export const sensemakingValidationTask = defineTask('sensemaking-validation', (a
 export const sensemakingSynthesisTask = defineTask('sensemaking-synthesis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 10: Sensemaking Synthesis',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'sensemaking-analyst',
+    skills: ['hypothesis-generator', 'analogy-mapper'],
     prompt: {
       role: 'Sensemaking Synthesist',
       task: 'Synthesize sensemaking into actionable understanding',

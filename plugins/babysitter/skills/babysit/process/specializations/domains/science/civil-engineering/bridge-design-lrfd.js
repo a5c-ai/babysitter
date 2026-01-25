@@ -197,7 +197,6 @@ export async function process(inputs, ctx) {
 export const bridgeGeometryTask = defineTask('bridge-geometry', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Determine bridge type and geometry',
-  skill: { name: 'highway-alignment-designer' },
   agent: {
     name: 'bridge-engineer',
     prompt: {
@@ -242,7 +241,6 @@ export const bridgeGeometryTask = defineTask('bridge-geometry', (args, taskCtx) 
 export const bridgeLoadAnalysisTask = defineTask('bridge-load-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Perform bridge load analysis',
-  skill: { name: 'fea-structural-engine' },
   agent: {
     name: 'bridge-engineer',
     prompt: {
@@ -286,7 +284,6 @@ export const bridgeLoadAnalysisTask = defineTask('bridge-load-analysis', (args, 
 export const superstructureDesignTask = defineTask('superstructure-design', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Design bridge superstructure',
-  skill: { name: 'section-property-calculator' },
   agent: {
     name: 'bridge-engineer',
     prompt: {
@@ -330,7 +327,6 @@ export const superstructureDesignTask = defineTask('superstructure-design', (arg
 export const deckDesignTask = defineTask('deck-design', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Design bridge deck',
-  skill: { name: 'concrete-design-calculator' },
   agent: {
     name: 'bridge-engineer',
     prompt: {
@@ -379,7 +375,6 @@ export const deckDesignTask = defineTask('deck-design', (args, taskCtx) => ({
 export const substructureDesignTask = defineTask('substructure-design', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Design bridge substructure',
-  skill: { name: 'fea-structural-engine' },
   agent: {
     name: 'bridge-engineer',
     prompt: {
@@ -423,7 +418,6 @@ export const substructureDesignTask = defineTask('substructure-design', (args, t
 export const bridgeFoundationTask = defineTask('bridge-foundation', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Design bridge foundations',
-  skill: { name: 'pile-capacity-analyzer' },
   agent: {
     name: 'foundation-engineer',
     prompt: {
@@ -467,7 +461,6 @@ export const bridgeFoundationTask = defineTask('bridge-foundation', (args, taskC
 export const bearingDesignTask = defineTask('bearing-design', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Design bridge bearings',
-  skill: { name: 'section-property-calculator' },
   agent: {
     name: 'bridge-engineer',
     prompt: {
@@ -510,7 +503,6 @@ export const bearingDesignTask = defineTask('bearing-design', (args, taskCtx) =>
 export const loadRatingTask = defineTask('load-rating', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Perform bridge load rating',
-  skill: { name: 'fea-structural-engine' },
   agent: {
     name: 'bridge-engineer',
     prompt: {
@@ -560,7 +552,6 @@ export const loadRatingTask = defineTask('load-rating', (args, taskCtx) => ({
 export const bridgeReportTask = defineTask('bridge-report', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Generate bridge design report',
-  skill: { name: 'engineering-report-generator' },
   agent: {
     name: 'technical-report-writer',
     prompt: {

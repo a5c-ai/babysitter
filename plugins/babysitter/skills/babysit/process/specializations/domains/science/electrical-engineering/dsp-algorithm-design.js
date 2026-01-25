@@ -192,7 +192,6 @@ export async function process(inputs, ctx) {
 export const requirementsDefinitionTask = defineTask('requirements-definition', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 1: Requirements Definition - ${args.algorithmName}`,
-  skill: { name: 'dsp-implementation' },
   agent: {
     name: 'dsp-algorithm-engineer',
     prompt: {
@@ -246,7 +245,6 @@ export const requirementsDefinitionTask = defineTask('requirements-definition', 
 export const floatingPointDevelopmentTask = defineTask('floating-point-development', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 2: Floating-Point Development - ${args.algorithmName}`,
-  skill: { name: 'dsp-implementation' },
   agent: {
     name: 'dsp-algorithm-engineer',
     prompt: {
@@ -308,7 +306,6 @@ export const floatingPointDevelopmentTask = defineTask('floating-point-developme
 export const algorithmValidationTask = defineTask('algorithm-validation', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 3: Algorithm Validation - ${args.algorithmName}`,
-  skill: { name: 'dsp-implementation' },
   agent: {
     name: 'dsp-algorithm-engineer',
     prompt: {
@@ -366,7 +363,6 @@ export const algorithmValidationTask = defineTask('algorithm-validation', (args,
 export const fixedPointConversionTask = defineTask('fixed-point-conversion', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 4: Fixed-Point Conversion - ${args.algorithmName}`,
-  skill: { name: 'dsp-implementation' },
   agent: {
     name: 'dsp-algorithm-engineer',
     prompt: {
@@ -428,7 +424,6 @@ export const fixedPointConversionTask = defineTask('fixed-point-conversion', (ar
 export const quantizationAnalysisTask = defineTask('quantization-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 5: Quantization Analysis - ${args.algorithmName}`,
-  skill: { name: 'dsp-implementation' },
   agent: {
     name: 'dsp-algorithm-engineer',
     prompt: {
@@ -484,7 +479,6 @@ export const quantizationAnalysisTask = defineTask('quantization-analysis', (arg
 export const computationalOptimizationTask = defineTask('computational-optimization', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 6: Computational Optimization - ${args.algorithmName}`,
-  skill: { name: 'dsp-implementation' },
   agent: {
     name: 'dsp-algorithm-engineer',
     prompt: {
@@ -546,7 +540,6 @@ export const computationalOptimizationTask = defineTask('computational-optimizat
 export const platformImplementationTask = defineTask('platform-implementation', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 7: Platform Implementation - ${args.algorithmName}`,
-  skill: { name: 'dsp-implementation' },
   agent: {
     name: 'dsp-algorithm-engineer',
     prompt: {
@@ -607,7 +600,6 @@ export const platformImplementationTask = defineTask('platform-implementation', 
 export const implementationVerificationTask = defineTask('implementation-verification', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 8: Implementation Verification - ${args.algorithmName}`,
-  skill: { name: 'dsp-implementation' },
   agent: {
     name: 'dsp-algorithm-engineer',
     prompt: {

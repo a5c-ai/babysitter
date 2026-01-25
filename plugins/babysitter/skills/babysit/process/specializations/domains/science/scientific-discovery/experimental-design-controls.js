@@ -279,8 +279,10 @@ export async function process(inputs, ctx) {
 export const designTypeSelectionTask = defineTask('design-type-selection', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Select optimal experimental design type',
+  skill: { name: 'statistical-test-selector' },
   agent: {
-    name: 'general-purpose',
+    name: 'experimental-design-methodologist',
+    skills: ['statistical-test-selector', 'hypothesis-generator'],
     prompt: {
       role: 'Experimental design methodologist',
       task: 'Select the most appropriate experimental design type based on hypothesis, variables, and constraints',
@@ -323,8 +325,10 @@ export const designTypeSelectionTask = defineTask('design-type-selection', (args
 export const controlGroupDesignTask = defineTask('control-group-design', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Design control groups and conditions',
+  skill: { name: 'statistical-test-selector' },
   agent: {
-    name: 'general-purpose',
+    name: 'experimental-design-methodologist',
+    skills: ['statistical-test-selector', 'hypothesis-generator'],
     prompt: {
       role: 'Clinical trial designer specializing in control conditions',
       task: 'Design appropriate control groups and control conditions to isolate treatment effects',
@@ -384,8 +388,10 @@ export const controlGroupDesignTask = defineTask('control-group-design', (args, 
 export const randomizationProtocolTask = defineTask('randomization-protocol', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Develop randomization protocol',
+  skill: { name: 'statistical-test-selector' },
   agent: {
-    name: 'general-purpose',
+    name: 'experimental-design-methodologist',
+    skills: ['statistical-test-selector', 'hypothesis-generator'],
     prompt: {
       role: 'Randomization specialist and biostatistician',
       task: 'Design rigorous randomization protocol to ensure unbiased group allocation',
@@ -430,8 +436,10 @@ export const randomizationProtocolTask = defineTask('randomization-protocol', (a
 export const blindingProtocolTask = defineTask('blinding-protocol', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Design blinding protocol',
+  skill: { name: 'statistical-test-selector' },
   agent: {
-    name: 'general-purpose',
+    name: 'experimental-design-methodologist',
+    skills: ['statistical-test-selector', 'hypothesis-generator'],
     prompt: {
       role: 'Clinical trial methodologist specializing in masking procedures',
       task: 'Design comprehensive blinding protocol to prevent bias in assessment',
@@ -484,8 +492,10 @@ export const blindingProtocolTask = defineTask('blinding-protocol', (args, taskC
 export const powerAnalysisTask = defineTask('power-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Conduct power analysis',
+  skill: { name: 'statistical-test-selector' },
   agent: {
-    name: 'general-purpose',
+    name: 'experimental-design-methodologist',
+    skills: ['statistical-test-selector', 'hypothesis-generator'],
     prompt: {
       role: 'Biostatistician specializing in sample size calculation',
       task: 'Conduct power analysis to determine required sample size',
@@ -542,8 +552,10 @@ export const powerAnalysisTask = defineTask('power-analysis', (args, taskCtx) =>
 export const protocolDocumentationTask = defineTask('protocol-documentation', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Document experimental protocol',
+  skill: { name: 'statistical-test-selector' },
   agent: {
-    name: 'general-purpose',
+    name: 'experimental-design-methodologist',
+    skills: ['statistical-test-selector', 'hypothesis-generator'],
     prompt: {
       role: 'Research protocol writer',
       task: 'Create comprehensive experimental protocol documentation',
@@ -609,8 +621,10 @@ export const protocolDocumentationTask = defineTask('protocol-documentation', (a
 export const validityThreatAssessmentTask = defineTask('validity-threat-assessment', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Assess threats to validity',
+  skill: { name: 'statistical-test-selector' },
   agent: {
-    name: 'general-purpose',
+    name: 'experimental-design-methodologist',
+    skills: ['statistical-test-selector', 'hypothesis-generator'],
     prompt: {
       role: 'Research methodology reviewer',
       task: 'Systematically identify and assess threats to internal and external validity',
@@ -670,8 +684,10 @@ export const validityThreatAssessmentTask = defineTask('validity-threat-assessme
 export const designQualityScoringTask = defineTask('design-quality-scoring', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Score experimental design quality',
+  skill: { name: 'statistical-test-selector' },
   agent: {
-    name: 'general-purpose',
+    name: 'experimental-design-methodologist',
+    skills: ['statistical-test-selector', 'hypothesis-generator'],
     prompt: {
       role: 'Research design auditor and methodological reviewer',
       task: 'Score the overall quality of the experimental design against best practices',

@@ -148,8 +148,10 @@ export async function process(inputs, ctx) {
 export const analyzeResearchQuestionTask = defineTask('experimental-question-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 1: Research Question Analysis',
+  skill: { name: 'statistical-test-selector' },
   agent: {
-    name: 'general-purpose',
+    name: 'experimental-designer',
+    skills: ['statistical-test-selector', 'hypothesis-generator', 'causal-inference-engine'],
     prompt: {
       role: 'Research methodology specialist with expertise in experimental design and hypothesis formulation',
       task: 'Analyze research question for testability, clarity, and experimental feasibility',
@@ -186,8 +188,10 @@ export const analyzeResearchQuestionTask = defineTask('experimental-question-ana
 export const analyzeVariablesTask = defineTask('experimental-variable-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 2: Variable Operationalization',
+  skill: { name: 'statistical-test-selector' },
   agent: {
-    name: 'general-purpose',
+    name: 'experimental-designer',
+    skills: ['statistical-test-selector', 'hypothesis-generator', 'causal-inference-engine'],
     prompt: {
       role: 'Measurement and operationalization specialist',
       task: 'Operationalize variables with valid, reliable measures',
@@ -223,8 +227,10 @@ export const analyzeVariablesTask = defineTask('experimental-variable-analysis',
 export const identifyConfoundsTask = defineTask('experimental-confound-identification', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 3: Confound Identification',
+  skill: { name: 'causal-inference-engine' },
   agent: {
-    name: 'general-purpose',
+    name: 'experimental-designer',
+    skills: ['causal-inference-engine', 'statistical-test-selector', 'hypothesis-generator'],
     prompt: {
       role: 'Causal inference and confound analysis specialist',
       task: 'Identify potential confounding variables and threats to causal inference',
@@ -260,8 +266,10 @@ export const identifyConfoundsTask = defineTask('experimental-confound-identific
 export const selectDesignTask = defineTask('experimental-design-selection', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 4: Design Selection',
+  skill: { name: 'statistical-test-selector' },
   agent: {
-    name: 'general-purpose',
+    name: 'experimental-designer',
+    skills: ['statistical-test-selector', 'hypothesis-generator', 'causal-inference-engine'],
     prompt: {
       role: 'Experimental design architect',
       task: 'Select optimal experimental design given constraints and objectives',
@@ -299,8 +307,10 @@ export const selectDesignTask = defineTask('experimental-design-selection', (arg
 export const planRandomizationTask = defineTask('experimental-randomization-plan', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 5: Randomization Planning',
+  skill: { name: 'statistical-test-selector' },
   agent: {
-    name: 'general-purpose',
+    name: 'experimental-designer',
+    skills: ['statistical-test-selector', 'bayesian-inference-engine'],
     prompt: {
       role: 'Randomization and allocation specialist',
       task: 'Design randomization strategy ensuring unbiased group allocation',
@@ -338,8 +348,10 @@ export const planRandomizationTask = defineTask('experimental-randomization-plan
 export const planControlsTask = defineTask('experimental-control-planning', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 6: Control and Blinding Strategy',
+  skill: { name: 'statistical-test-selector' },
   agent: {
-    name: 'general-purpose',
+    name: 'experimental-designer',
+    skills: ['statistical-test-selector', 'causal-inference-engine'],
     prompt: {
       role: 'Experimental control and blinding specialist',
       task: 'Design control conditions and blinding procedures',
@@ -377,8 +389,10 @@ export const planControlsTask = defineTask('experimental-control-planning', (arg
 export const planStatisticalAnalysisTask = defineTask('experimental-statistical-plan', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 7: Statistical Analysis Planning',
+  skill: { name: 'statistical-test-selector' },
   agent: {
-    name: 'general-purpose',
+    name: 'experimental-designer',
+    skills: ['statistical-test-selector', 'bayesian-inference-engine', 'hypothesis-generator'],
     prompt: {
       role: 'Biostatistician and analysis planning specialist',
       task: 'Develop comprehensive statistical analysis plan',
@@ -416,8 +430,10 @@ export const planStatisticalAnalysisTask = defineTask('experimental-statistical-
 export const assessValidityTask = defineTask('experimental-validity-assessment', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 8: Validity Assessment',
+  skill: { name: 'statistical-test-selector' },
   agent: {
-    name: 'general-purpose',
+    name: 'experimental-designer',
+    skills: ['statistical-test-selector', 'causal-inference-engine', 'hypothesis-generator'],
     prompt: {
       role: 'Research validity and methodological rigor specialist',
       task: 'Assess design validity using Campbell & Stanley framework',
@@ -458,8 +474,10 @@ export const assessValidityTask = defineTask('experimental-validity-assessment',
 export const developProtocolsTask = defineTask('experimental-protocol-development', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 9: Protocol Development',
+  skill: { name: 'statistical-test-selector' },
   agent: {
-    name: 'general-purpose',
+    name: 'experimental-designer',
+    skills: ['statistical-test-selector', 'hypothesis-generator'],
     prompt: {
       role: 'Experimental protocol and procedure specialist',
       task: 'Develop detailed experimental protocols',
@@ -498,8 +516,10 @@ export const developProtocolsTask = defineTask('experimental-protocol-developmen
 export const conductPowerAnalysisTask = defineTask('experimental-power-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 10: Power Analysis',
+  skill: { name: 'statistical-test-selector' },
   agent: {
-    name: 'general-purpose',
+    name: 'experimental-designer',
+    skills: ['statistical-test-selector', 'bayesian-inference-engine'],
     prompt: {
       role: 'Statistical power and sample size specialist',
       task: 'Conduct power analysis and determine sample size requirements',

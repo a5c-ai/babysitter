@@ -206,7 +206,6 @@ export async function process(inputs, ctx) {
 export const specificationDefinitionTask = defineTask('specification-definition', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 1: Specification Definition - ${args.filterName}`,
-  skill: { name: 'digital-filter-design' },
   agent: {
     name: 'dsp-algorithm-engineer',
     prompt: {
@@ -263,7 +262,6 @@ export const specificationDefinitionTask = defineTask('specification-definition'
 export const filterTypeSelectionTask = defineTask('filter-type-selection', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 2: Filter Type Selection - ${args.filterName}`,
-  skill: { name: 'digital-filter-design' },
   agent: {
     name: 'dsp-algorithm-engineer',
     prompt: {
@@ -325,7 +323,6 @@ export const filterTypeSelectionTask = defineTask('filter-type-selection', (args
 export const designMethodSelectionTask = defineTask('design-method-selection', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 3: Design Method Selection - ${args.filterName}`,
-  skill: { name: 'digital-filter-design' },
   agent: {
     name: 'dsp-algorithm-engineer',
     prompt: {
@@ -378,7 +375,6 @@ export const designMethodSelectionTask = defineTask('design-method-selection', (
 export const coefficientCalculationTask = defineTask('coefficient-calculation', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 4: Coefficient Calculation - ${args.filterName}`,
-  skill: { name: 'digital-filter-design' },
   agent: {
     name: 'dsp-algorithm-engineer',
     prompt: {
@@ -439,7 +435,6 @@ export const coefficientCalculationTask = defineTask('coefficient-calculation', 
 export const responseAnalysisTask = defineTask('response-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 5: Response Analysis - ${args.filterName}`,
-  skill: { name: 'digital-filter-design' },
   agent: {
     name: 'dsp-algorithm-engineer',
     prompt: {
@@ -496,7 +491,6 @@ export const responseAnalysisTask = defineTask('response-analysis', (args, taskC
 export const stabilityAnalysisTask = defineTask('stability-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 6: Stability Analysis - ${args.filterName}`,
-  skill: { name: 'digital-filter-design' },
   agent: {
     name: 'dsp-algorithm-engineer',
     prompt: {
@@ -555,7 +549,6 @@ export const stabilityAnalysisTask = defineTask('stability-analysis', (args, tas
 export const filterImplementationTask = defineTask('filter-implementation', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 7: Filter Implementation - ${args.filterName}`,
-  skill: { name: 'digital-filter-design' },
   agent: {
     name: 'dsp-algorithm-engineer',
     prompt: {
@@ -617,7 +610,6 @@ export const filterImplementationTask = defineTask('filter-implementation', (arg
 export const fixedPointOptimizationTask = defineTask('fixed-point-optimization', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 8: Fixed-Point Optimization - ${args.filterName}`,
-  skill: { name: 'digital-filter-design' },
   agent: {
     name: 'dsp-algorithm-engineer',
     prompt: {

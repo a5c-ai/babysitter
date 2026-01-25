@@ -214,7 +214,6 @@ export async function process(inputs, ctx) {
 export const systemModelingTask = defineTask('system-modeling', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 1: System Modeling - ${args.systemName}`,
-  skill: { name: 'power-flow-analysis' },
   agent: {
     name: 'power-systems-engineer',
     prompt: {
@@ -272,7 +271,6 @@ export const systemModelingTask = defineTask('system-modeling', (args, taskCtx) 
 export const dataGatheringTask = defineTask('data-gathering', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 2: Data Gathering - ${args.systemName}`,
-  skill: { name: 'power-flow-analysis' },
   agent: {
     name: 'power-systems-engineer',
     prompt: {
@@ -334,7 +332,6 @@ export const dataGatheringTask = defineTask('data-gathering', (args, taskCtx) =>
 export const solverConfigurationTask = defineTask('solver-configuration', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 3: Solver Configuration - ${args.systemName}`,
-  skill: { name: 'power-flow-analysis' },
   agent: {
     name: 'power-systems-engineer',
     prompt: {
@@ -389,7 +386,6 @@ export const solverConfigurationTask = defineTask('solver-configuration', (args,
 export const baseCasePowerFlowTask = defineTask('base-case-power-flow', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 4: Base Case Power Flow - ${args.systemName}`,
-  skill: { name: 'power-flow-analysis' },
   agent: {
     name: 'power-systems-engineer',
     prompt: {
@@ -449,7 +445,6 @@ export const baseCasePowerFlowTask = defineTask('base-case-power-flow', (args, t
 export const voltageAndLossAnalysisTask = defineTask('voltage-loss-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 5: Voltage and Loss Analysis - ${args.systemName}`,
-  skill: { name: 'power-flow-analysis' },
   agent: {
     name: 'power-systems-engineer',
     prompt: {
@@ -517,7 +512,6 @@ export const voltageAndLossAnalysisTask = defineTask('voltage-loss-analysis', (a
 export const contingencyAnalysisTask = defineTask('contingency-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 6: Contingency Analysis - ${args.systemName}`,
-  skill: { name: 'power-flow-analysis' },
   agent: {
     name: 'power-systems-engineer',
     prompt: {
@@ -590,7 +584,6 @@ export const contingencyAnalysisTask = defineTask('contingency-analysis', (args,
 export const violationIdentificationTask = defineTask('violation-identification', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 7: Violation Identification - ${args.systemName}`,
-  skill: { name: 'power-flow-analysis' },
   agent: {
     name: 'power-systems-engineer',
     prompt: {
@@ -645,7 +638,6 @@ export const violationIdentificationTask = defineTask('violation-identification'
 export const recommendationsAndDocumentationTask = defineTask('recommendations-documentation', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 8: Recommendations and Documentation - ${args.systemName}`,
-  skill: { name: 'power-flow-analysis' },
   agent: {
     name: 'power-systems-engineer',
     prompt: {

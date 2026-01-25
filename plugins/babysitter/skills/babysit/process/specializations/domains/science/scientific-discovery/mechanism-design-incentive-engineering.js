@@ -185,8 +185,10 @@ export async function process(inputs, ctx) {
 export const objectiveFormalizationTask = defineTask('objective-formalization', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 1: Objective Formalization',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'mechanism-designer',
+    skills: ['hypothesis-generator', 'bayesian-inference-engine', 'formal-logic-reasoner'],
     prompt: {
       role: 'Mechanism Design Theorist specializing in social choice',
       task: 'Formalize objectives as implementable social choice functions',
@@ -244,8 +246,10 @@ export const objectiveFormalizationTask = defineTask('objective-formalization', 
 export const agentTypeAnalysisTask = defineTask('agent-type-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 2: Agent Type Analysis',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'mechanism-designer',
+    skills: ['hypothesis-generator', 'bayesian-inference-engine', 'formal-logic-reasoner'],
     prompt: {
       role: 'Behavioral Mechanism Design Expert',
       task: 'Analyze agent types, preferences, and strategic behavior',
@@ -304,8 +308,10 @@ export const agentTypeAnalysisTask = defineTask('agent-type-analysis', (args, ta
 export const privateInformationAnalysisTask = defineTask('private-information-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 3: Private Information Structure Analysis',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'mechanism-designer',
+    skills: ['hypothesis-generator', 'bayesian-inference-engine', 'formal-logic-reasoner'],
     prompt: {
       role: 'Information Economics Expert',
       task: 'Analyze private information structure and revelation constraints',
@@ -362,8 +368,10 @@ export const privateInformationAnalysisTask = defineTask('private-information-an
 export const socialChoiceFunctionTask = defineTask('social-choice-function', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 4: Social Choice Function Design',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'mechanism-designer',
+    skills: ['hypothesis-generator', 'bayesian-inference-engine', 'formal-logic-reasoner'],
     prompt: {
       role: 'Social Choice Theorist',
       task: 'Design social choice function mapping reported types to outcomes',
@@ -425,8 +433,10 @@ export const socialChoiceFunctionTask = defineTask('social-choice-function', (ar
 export const incentiveCompatibilityTask = defineTask('incentive-compatibility', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 5: Incentive Compatibility Analysis',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'mechanism-designer',
+    skills: ['hypothesis-generator', 'bayesian-inference-engine', 'formal-logic-reasoner'],
     prompt: {
       role: 'Incentive Compatibility Expert',
       task: 'Analyze and ensure incentive compatibility of mechanisms',
@@ -480,8 +490,10 @@ export const incentiveCompatibilityTask = defineTask('incentive-compatibility', 
 export const mechanismSynthesisTask = defineTask('mechanism-synthesis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 6: Mechanism Synthesis',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'mechanism-designer',
+    skills: ['hypothesis-generator', 'bayesian-inference-engine', 'formal-logic-reasoner'],
     prompt: {
       role: 'Mechanism Design Synthesist',
       task: 'Synthesize complete mechanisms implementing social choice function',
@@ -541,8 +553,10 @@ export const mechanismSynthesisTask = defineTask('mechanism-synthesis', (args, t
 export const transferDesignTask = defineTask('transfer-design', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 7: Transfer and Payment Design',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'mechanism-designer',
+    skills: ['hypothesis-generator', 'bayesian-inference-engine', 'formal-logic-reasoner'],
     prompt: {
       role: 'Transfer Payment Design Expert',
       task: 'Design transfer payments and incentive structures',
@@ -599,8 +613,10 @@ export const transferDesignTask = defineTask('transfer-design', (args, taskCtx) 
 export const implementationVerificationTask = defineTask('implementation-verification', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 8: Implementation and Verification',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'mechanism-designer',
+    skills: ['hypothesis-generator', 'bayesian-inference-engine', 'formal-logic-reasoner'],
     prompt: {
       role: 'Implementation Theory Expert',
       task: 'Verify mechanism implementation and practical requirements',
@@ -654,8 +670,10 @@ export const implementationVerificationTask = defineTask('implementation-verific
 export const robustnessAnalysisTask = defineTask('robustness-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 9: Robustness and Edge Case Analysis',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'mechanism-designer',
+    skills: ['hypothesis-generator', 'bayesian-inference-engine', 'formal-logic-reasoner'],
     prompt: {
       role: 'Robust Mechanism Design Expert',
       task: 'Analyze mechanism robustness to various perturbations',
@@ -713,8 +731,10 @@ export const robustnessAnalysisTask = defineTask('robustness-analysis', (args, t
 export const mechanismRecommendationTask = defineTask('mechanism-recommendation', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 10: Final Mechanism Recommendation',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'mechanism-designer',
+    skills: ['hypothesis-generator', 'bayesian-inference-engine', 'formal-logic-reasoner'],
     prompt: {
       role: 'Mechanism Design Advisor',
       task: 'Synthesize analysis and provide final mechanism recommendations',

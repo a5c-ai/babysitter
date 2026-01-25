@@ -285,7 +285,6 @@ export async function process(inputs, ctx) {
 export const recordsReviewTask = defineTask('records-review', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Historical Records Review',
-  skill: { name: 'site-assessment' },
   agent: {
     name: 'remediation-specialist',
     prompt: {
@@ -329,7 +328,6 @@ export const recordsReviewTask = defineTask('records-review', (args, taskCtx) =>
 export const siteReconnaissanceTask = defineTask('site-reconnaissance', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Site Reconnaissance',
-  skill: { name: 'site-assessment' },
   agent: {
     name: 'remediation-specialist',
     prompt: {
@@ -374,7 +372,6 @@ export const siteReconnaissanceTask = defineTask('site-reconnaissance', (args, t
 export const interviewsTask = defineTask('interviews', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Interviews',
-  skill: { name: 'site-assessment' },
   agent: {
     name: 'remediation-specialist',
     prompt: {
@@ -418,7 +415,6 @@ export const interviewsTask = defineTask('interviews', (args, taskCtx) => ({
 export const recEvaluationTask = defineTask('rec-evaluation', (args, taskCtx) => ({
   kind: 'agent',
   title: 'REC Evaluation',
-  skill: { name: 'site-assessment' },
   agent: {
     name: 'remediation-specialist',
     prompt: {
@@ -464,7 +460,6 @@ export const recEvaluationTask = defineTask('rec-evaluation', (args, taskCtx) =>
 export const samplingPlanTask = defineTask('sampling-plan', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Sampling Plan Development',
-  skill: { name: 'site-assessment' },
   agent: {
     name: 'remediation-specialist',
     prompt: {
@@ -509,7 +504,6 @@ export const samplingPlanTask = defineTask('sampling-plan', (args, taskCtx) => (
 export const fieldInvestigationTask = defineTask('field-investigation', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Field Investigation',
-  skill: { name: 'site-assessment' },
   agent: {
     name: 'remediation-specialist',
     prompt: {
@@ -554,7 +548,6 @@ export const fieldInvestigationTask = defineTask('field-investigation', (args, t
 export const labAnalysisTask = defineTask('lab-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Laboratory Analysis',
-  skill: { name: 'site-assessment' },
   agent: {
     name: 'remediation-specialist',
     prompt: {
@@ -598,7 +591,6 @@ export const labAnalysisTask = defineTask('lab-analysis', (args, taskCtx) => ({
 export const dataEvaluationTask = defineTask('data-evaluation', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Data Evaluation',
-  skill: { name: 'site-assessment' },
   agent: {
     name: 'remediation-specialist',
     prompt: {
@@ -643,7 +635,6 @@ export const dataEvaluationTask = defineTask('data-evaluation', (args, taskCtx) 
 export const delineationTask = defineTask('delineation', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Contamination Delineation',
-  skill: { name: 'site-assessment' },
   agent: {
     name: 'remediation-specialist',
     prompt: {
@@ -689,7 +680,6 @@ export const delineationTask = defineTask('delineation', (args, taskCtx) => ({
 export const assessmentReportTask = defineTask('assessment-report', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Assessment Report',
-  skill: { name: 'site-assessment' },
   agent: {
     name: 'remediation-specialist',
     prompt: {

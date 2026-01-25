@@ -153,7 +153,6 @@ export async function process(inputs, ctx) {
 export const sifIdentificationTask = defineTask('sif-identification', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Identify safety instrumented functions',
-  skill: { name: 'hazop-facilitator' },
   agent: {
     name: 'safety-systems-engineer',
     prompt: {
@@ -205,7 +204,6 @@ export const sifIdentificationTask = defineTask('sif-identification', (args, tas
 export const silDeterminationTask = defineTask('sil-determination', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Determine required SIL for each SIF',
-  skill: { name: 'sil-calculator' },
   agent: {
     name: 'safety-systems-engineer',
     prompt: {
@@ -257,7 +255,6 @@ export const silDeterminationTask = defineTask('sil-determination', (args, taskC
 export const sisArchitectureTask = defineTask('sis-architecture', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Select SIS architecture and components',
-  skill: { name: 'sil-calculator' },
   agent: {
     name: 'safety-systems-engineer',
     prompt: {
@@ -306,7 +303,6 @@ export const sisArchitectureTask = defineTask('sis-architecture', (args, taskCtx
 export const silVerificationTask = defineTask('sil-verification', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Calculate achieved SIL through reliability analysis',
-  skill: { name: 'sil-calculator' },
   agent: {
     name: 'safety-systems-engineer',
     prompt: {
@@ -360,7 +356,6 @@ export const silVerificationTask = defineTask('sil-verification', (args, taskCtx
 export const diagnosticsDesignTask = defineTask('diagnostics-design', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Design diagnostics and proof testing',
-  skill: { name: 'control-strategy-designer' },
   agent: {
     name: 'safety-systems-engineer',
     prompt: {
@@ -410,7 +405,6 @@ export const diagnosticsDesignTask = defineTask('diagnostics-design', (args, tas
 export const srsDocumentTask = defineTask('srs-document', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Develop Safety Requirements Specification',
-  skill: { name: 'sil-calculator' },
   agent: {
     name: 'safety-systems-engineer',
     prompt: {
@@ -458,7 +452,6 @@ export const srsDocumentTask = defineTask('srs-document', (args, taskCtx) => ({
 export const validationTestPlanTask = defineTask('validation-test-plan', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Develop SIS validation test plan',
-  skill: { name: 'sil-calculator' },
   agent: {
     name: 'safety-systems-engineer',
     prompt: {

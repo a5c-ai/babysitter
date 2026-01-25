@@ -202,7 +202,6 @@ export async function process(inputs, ctx) {
 export const seismicHazardTask = defineTask('seismic-hazard', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Perform site seismic hazard analysis',
-  skill: { name: 'seismic-hazard-analyzer' },
   agent: {
     name: 'seismic-design-specialist',
     prompt: {
@@ -251,7 +250,6 @@ export const seismicHazardTask = defineTask('seismic-hazard', (args, taskCtx) =>
 export const sdcDeterminationTask = defineTask('sdc-determination', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Determine Seismic Design Category',
-  skill: { name: 'seismic-hazard-analyzer' },
   agent: {
     name: 'building-code-analyst',
     prompt: {
@@ -295,7 +293,6 @@ export const sdcDeterminationTask = defineTask('sdc-determination', (args, taskC
 export const systemSelectionTask = defineTask('system-selection', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Select seismic force-resisting system',
-  skill: { name: 'fea-structural-engine' },
   agent: {
     name: 'seismic-design-specialist',
     prompt: {
@@ -341,7 +338,6 @@ export const systemSelectionTask = defineTask('system-selection', (args, taskCtx
 export const seismicForceAnalysisTask = defineTask('seismic-force-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Perform seismic force analysis',
-  skill: { name: 'fea-structural-engine' },
   agent: {
     name: 'seismic-design-specialist',
     prompt: {
@@ -386,7 +382,6 @@ export const seismicForceAnalysisTask = defineTask('seismic-force-analysis', (ar
 export const responseSpectrumTask = defineTask('response-spectrum', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Perform response spectrum analysis',
-  skill: { name: 'seismic-hazard-analyzer' },
   agent: {
     name: 'seismic-design-specialist',
     prompt: {
@@ -431,7 +426,6 @@ export const responseSpectrumTask = defineTask('response-spectrum', (args, taskC
 export const driftAnalysisTask = defineTask('drift-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Analyze drift and stability',
-  skill: { name: 'fea-structural-engine' },
   agent: {
     name: 'seismic-design-specialist',
     prompt: {
@@ -485,7 +479,6 @@ export const driftAnalysisTask = defineTask('drift-analysis', (args, taskCtx) =>
 export const seismicDetailingTask = defineTask('seismic-detailing', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Develop seismic detailing requirements',
-  skill: { name: 'fea-structural-engine' },
   agent: {
     name: 'building-code-analyst',
     prompt: {
@@ -535,7 +528,6 @@ export const seismicDetailingTask = defineTask('seismic-detailing', (args, taskC
 export const nonStructuralTask = defineTask('non-structural', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Design for non-structural components',
-  skill: { name: 'seismic-hazard-analyzer' },
   agent: {
     name: 'seismic-design-specialist',
     prompt: {
@@ -578,7 +570,6 @@ export const nonStructuralTask = defineTask('non-structural', (args, taskCtx) =>
 export const seismicReportTask = defineTask('seismic-report', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Generate seismic design report',
-  skill: { name: 'engineering-report-generator' },
   agent: {
     name: 'technical-report-writer',
     prompt: {

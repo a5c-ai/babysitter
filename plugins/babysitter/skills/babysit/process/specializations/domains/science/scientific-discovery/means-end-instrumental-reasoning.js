@@ -189,8 +189,10 @@ export async function process(inputs, ctx) {
 export const goalAnalysisTask = defineTask('goal-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: `Goal Analysis - ${args.domain}`,
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'planning-analyst',
+    skills: ['hypothesis-generator', 'causal-inference-engine'],
     prompt: {
       role: 'Expert in goal specification and requirements analysis',
       task: 'Analyze and formalize the goal for means-end reasoning',
@@ -272,8 +274,10 @@ export const goalAnalysisTask = defineTask('goal-analysis', (args, taskCtx) => (
 export const gapAnalysisTask = defineTask('gap-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Gap Analysis',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'planning-analyst',
+    skills: ['hypothesis-generator', 'causal-inference-engine'],
     prompt: {
       role: 'Expert in problem space analysis and state comparison',
       task: 'Identify gaps between current state and goal state',
@@ -351,8 +355,10 @@ export const gapAnalysisTask = defineTask('gap-analysis', (args, taskCtx) => ({
 export const subgoalGenerationTask = defineTask('subgoal-generation', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Subgoal Generation (Backward Chaining)',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'planning-analyst',
+    skills: ['hypothesis-generator', 'causal-inference-engine'],
     prompt: {
       role: 'Expert in goal decomposition and backward chaining',
       task: 'Generate subgoals through backward chaining from main goal',
@@ -439,8 +445,10 @@ export const subgoalGenerationTask = defineTask('subgoal-generation', (args, tas
 export const actionIdentificationTask = defineTask('action-identification', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Action Identification',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'planning-analyst',
+    skills: ['hypothesis-generator', 'causal-inference-engine'],
     prompt: {
       role: 'Expert in action planning and operator selection',
       task: 'Identify actions that can achieve subgoals',
@@ -524,8 +532,10 @@ export const actionIdentificationTask = defineTask('action-identification', (arg
 export const preconditionAnalysisTask = defineTask('precondition-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Precondition Analysis',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'planning-analyst',
+    skills: ['hypothesis-generator', 'causal-inference-engine'],
     prompt: {
       role: 'Expert in planning preconditions and enablement analysis',
       task: 'Analyze action preconditions and their satisfaction',
@@ -618,8 +628,10 @@ export const preconditionAnalysisTask = defineTask('precondition-analysis', (arg
 export const taskDecompositionTask = defineTask('task-decomposition', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Hierarchical Task Decomposition',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'planning-analyst',
+    skills: ['hypothesis-generator', 'causal-inference-engine'],
     prompt: {
       role: 'Expert in hierarchical task network planning',
       task: 'Decompose tasks into primitive actions',
@@ -699,8 +711,10 @@ export const taskDecompositionTask = defineTask('task-decomposition', (args, tas
 export const constraintSatisfactionTask = defineTask('constraint-satisfaction', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Constraint Satisfaction',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'planning-analyst',
+    skills: ['hypothesis-generator', 'causal-inference-engine'],
     prompt: {
       role: 'Expert in constraint satisfaction and resource planning',
       task: 'Check and enforce constraints on the plan',
@@ -773,8 +787,10 @@ export const constraintSatisfactionTask = defineTask('constraint-satisfaction', 
 export const planOrderingTask = defineTask('plan-ordering', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Plan Ordering and Sequencing',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'planning-analyst',
+    skills: ['hypothesis-generator', 'causal-inference-engine'],
     prompt: {
       role: 'Expert in plan linearization and scheduling',
       task: 'Order actions into executable sequence',
@@ -855,8 +871,10 @@ export const planOrderingTask = defineTask('plan-ordering', (args, taskCtx) => (
 export const resourceAllocationTask = defineTask('resource-allocation', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Resource Allocation',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'planning-analyst',
+    skills: ['hypothesis-generator', 'causal-inference-engine'],
     prompt: {
       role: 'Expert in resource planning and allocation',
       task: 'Allocate resources to plan steps',
@@ -931,8 +949,10 @@ export const resourceAllocationTask = defineTask('resource-allocation', (args, t
 export const contingencyPlanningTask = defineTask('contingency-planning', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Contingency Planning',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'planning-analyst',
+    skills: ['hypothesis-generator', 'causal-inference-engine'],
     prompt: {
       role: 'Expert in risk management and contingency planning',
       task: 'Develop contingency plans for potential failures',
@@ -1018,8 +1038,10 @@ export const contingencyPlanningTask = defineTask('contingency-planning', (args,
 export const planValidationTask = defineTask('plan-validation', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Plan Validation',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'planning-analyst',
+    skills: ['hypothesis-generator', 'causal-inference-engine'],
     prompt: {
       role: 'Expert in plan verification and validation',
       task: 'Validate the plan achieves the goal',

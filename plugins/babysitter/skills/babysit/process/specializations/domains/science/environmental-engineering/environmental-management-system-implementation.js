@@ -245,7 +245,6 @@ export async function process(inputs, ctx) {
 export const emsGapAnalysisTask = defineTask('ems-gap-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'ISO 14001 Gap Analysis',
-  skill: { name: 'ems-implementation' },
   agent: {
     name: 'environmental-compliance-specialist',
     prompt: {
@@ -292,7 +291,6 @@ export const emsGapAnalysisTask = defineTask('ems-gap-analysis', (args, taskCtx)
 export const contextScopeTask = defineTask('context-scope', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Context of Organization and Scope',
-  skill: { name: 'ems-implementation' },
   agent: {
     name: 'environmental-compliance-specialist',
     prompt: {
@@ -339,7 +337,6 @@ export const contextScopeTask = defineTask('context-scope', (args, taskCtx) => (
 export const environmentalPolicyTask = defineTask('environmental-policy', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Environmental Policy Development',
-  skill: { name: 'ems-implementation' },
   agent: {
     name: 'environmental-compliance-specialist',
     prompt: {
@@ -384,7 +381,6 @@ export const environmentalPolicyTask = defineTask('environmental-policy', (args,
 export const aspectsImpactsTask = defineTask('aspects-impacts', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Environmental Aspects and Impacts',
-  skill: { name: 'ems-implementation' },
   agent: {
     name: 'environmental-compliance-specialist',
     prompt: {
@@ -430,7 +426,6 @@ export const aspectsImpactsTask = defineTask('aspects-impacts', (args, taskCtx) 
 export const objectivesPlanningTask = defineTask('objectives-planning', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Objectives and Environmental Planning',
-  skill: { name: 'ems-implementation' },
   agent: {
     name: 'environmental-compliance-specialist',
     prompt: {
@@ -476,7 +471,6 @@ export const objectivesPlanningTask = defineTask('objectives-planning', (args, t
 export const supportOperationsTask = defineTask('support-operations', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Support and Operational Controls',
-  skill: { name: 'ems-implementation' },
   agent: {
     name: 'environmental-compliance-specialist',
     prompt: {
@@ -523,7 +517,6 @@ export const supportOperationsTask = defineTask('support-operations', (args, tas
 export const performanceEvaluationTask = defineTask('performance-evaluation', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Performance Evaluation System',
-  skill: { name: 'ems-implementation' },
   agent: {
     name: 'environmental-compliance-specialist',
     prompt: {
@@ -570,7 +563,6 @@ export const performanceEvaluationTask = defineTask('performance-evaluation', (a
 export const managementReviewTask = defineTask('management-review', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Management Review Process',
-  skill: { name: 'ems-implementation' },
   agent: {
     name: 'environmental-compliance-specialist',
     prompt: {
@@ -617,7 +609,6 @@ export const managementReviewTask = defineTask('management-review', (args, taskC
 export const internalAuditTask = defineTask('internal-audit', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Internal Audit Program',
-  skill: { name: 'ems-implementation' },
   agent: {
     name: 'environmental-compliance-specialist',
     prompt: {
@@ -665,7 +656,6 @@ export const internalAuditTask = defineTask('internal-audit', (args, taskCtx) =>
 export const emsDocumentationTask = defineTask('ems-documentation', (args, taskCtx) => ({
   kind: 'agent',
   title: 'EMS Documentation Package',
-  skill: { name: 'ems-implementation' },
   agent: {
     name: 'environmental-compliance-specialist',
     prompt: {

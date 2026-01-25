@@ -162,7 +162,6 @@ export async function process(inputs, ctx) {
 export const catalystScreeningTask = defineTask('catalyst-screening', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Screen candidate catalysts for activity and selectivity',
-  skill: { name: 'catalyst-analyzer' },
   agent: {
     name: 'catalysis-specialist',
     prompt: {
@@ -215,7 +214,6 @@ export const catalystScreeningTask = defineTask('catalyst-screening', (args, tas
 export const conditionOptimizationTask = defineTask('condition-optimization', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Optimize catalyst loading and operating conditions',
-  skill: { name: 'catalyst-analyzer' },
   agent: {
     name: 'catalysis-specialist',
     prompt: {
@@ -273,7 +271,6 @@ export const conditionOptimizationTask = defineTask('condition-optimization', (a
 export const deactivationCharacterizationTask = defineTask('deactivation-characterization', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Characterize catalyst deactivation mechanisms',
-  skill: { name: 'catalyst-analyzer' },
   agent: {
     name: 'catalysis-specialist',
     prompt: {
@@ -332,7 +329,6 @@ export const deactivationCharacterizationTask = defineTask('deactivation-charact
 export const regenerationProcedureTask = defineTask('regeneration-procedure', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Develop catalyst regeneration procedures',
-  skill: { name: 'catalyst-analyzer' },
   agent: {
     name: 'catalysis-specialist',
     prompt: {
@@ -388,7 +384,6 @@ export const regenerationProcedureTask = defineTask('regeneration-procedure', (a
 export const lifetimePredictionTask = defineTask('lifetime-prediction', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Predict catalyst lifetime and replacement schedule',
-  skill: { name: 'kinetic-modeler' },
   agent: {
     name: 'catalysis-specialist',
     prompt: {
@@ -438,7 +433,6 @@ export const lifetimePredictionTask = defineTask('lifetime-prediction', (args, t
 export const catalystEconomicsTask = defineTask('catalyst-economics', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Evaluate catalyst cost and supply chain',
-  skill: { name: 'process-economics-estimator' },
   agent: {
     name: 'catalysis-specialist',
     prompt: {
@@ -494,7 +488,6 @@ export const catalystEconomicsTask = defineTask('catalyst-economics', (args, tas
 export const catalystManagementPlanTask = defineTask('catalyst-management-plan', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Develop catalyst management plan',
-  skill: { name: 'catalyst-analyzer' },
   agent: {
     name: 'catalysis-specialist',
     prompt: {

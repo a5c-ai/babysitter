@@ -197,7 +197,6 @@ export async function process(inputs, ctx) {
 export const cemsRequirementsTask = defineTask('cems-requirements', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Monitoring Requirements Analysis',
-  skill: { name: 'cems-implementation' },
   agent: {
     name: 'air-quality-specialist',
     prompt: {
@@ -241,7 +240,6 @@ export const cemsRequirementsTask = defineTask('cems-requirements', (args, taskC
 export const cemsDesignTask = defineTask('cems-design', (args, taskCtx) => ({
   kind: 'agent',
   title: 'CEMS System Design',
-  skill: { name: 'cems-implementation' },
   agent: {
     name: 'air-quality-specialist',
     prompt: {
@@ -287,7 +285,6 @@ export const cemsDesignTask = defineTask('cems-design', (args, taskCtx) => ({
 export const cemsInstallationTask = defineTask('cems-installation', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Installation Planning',
-  skill: { name: 'cems-implementation' },
   agent: {
     name: 'air-quality-specialist',
     prompt: {
@@ -332,7 +329,6 @@ export const cemsInstallationTask = defineTask('cems-installation', (args, taskC
 export const cemsQAQCTask = defineTask('cems-qaqc', (args, taskCtx) => ({
   kind: 'agent',
   title: 'QA/QC Procedures Development',
-  skill: { name: 'cems-implementation' },
   agent: {
     name: 'air-quality-specialist',
     prompt: {
@@ -378,7 +374,6 @@ export const cemsQAQCTask = defineTask('cems-qaqc', (args, taskCtx) => ({
 export const cemsDataManagementTask = defineTask('cems-data-management', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Data Management System Design',
-  skill: { name: 'cems-implementation' },
   agent: {
     name: 'air-quality-specialist',
     prompt: {
@@ -424,7 +419,6 @@ export const cemsDataManagementTask = defineTask('cems-data-management', (args, 
 export const cemsCertificationTask = defineTask('cems-certification', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Certification Testing Plan',
-  skill: { name: 'cems-implementation' },
   agent: {
     name: 'air-quality-specialist',
     prompt: {
@@ -470,7 +464,6 @@ export const cemsCertificationTask = defineTask('cems-certification', (args, tas
 export const cemsDocumentationTask = defineTask('cems-documentation', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Implementation Documentation',
-  skill: { name: 'cems-implementation' },
   agent: {
     name: 'air-quality-specialist',
     prompt: {

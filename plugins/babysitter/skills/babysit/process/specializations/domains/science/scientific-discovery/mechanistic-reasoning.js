@@ -189,8 +189,10 @@ export async function process(inputs, ctx) {
 export const phenomenonCharacterizationTask = defineTask('phenomenon-characterization', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phenomenon Characterization - ${args.phenomenon}`,
+  skill: { name: 'causal-inference-engine' },
   agent: {
-    name: 'general-purpose',
+    name: 'mechanistic-analyst',
+    skills: ['causal-inference-engine', 'hypothesis-generator', 'root-cause-analyzer'],
     prompt: {
       role: 'Expert in mechanistic explanation and philosophy of science',
       task: 'Characterize the phenomenon to be explained mechanistically',
@@ -269,8 +271,10 @@ export const phenomenonCharacterizationTask = defineTask('phenomenon-characteriz
 export const systemDecompositionTask = defineTask('system-decomposition', (args, taskCtx) => ({
   kind: 'agent',
   title: 'System Decomposition',
+  skill: { name: 'causal-inference-engine' },
   agent: {
-    name: 'general-purpose',
+    name: 'mechanistic-analyst',
+    skills: ['causal-inference-engine', 'hypothesis-generator', 'root-cause-analyzer'],
     prompt: {
       role: 'Expert in systems analysis and mechanistic decomposition',
       task: 'Decompose the system responsible for the phenomenon',
@@ -357,8 +361,10 @@ export const systemDecompositionTask = defineTask('system-decomposition', (args,
 export const componentIdentificationTask = defineTask('component-identification', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Mechanism Component Identification',
+  skill: { name: 'causal-inference-engine' },
   agent: {
-    name: 'general-purpose',
+    name: 'mechanistic-analyst',
+    skills: ['causal-inference-engine', 'hypothesis-generator', 'root-cause-analyzer'],
     prompt: {
       role: 'Expert in mechanism discovery and component analysis',
       task: 'Identify the components (entities/parts) of the mechanism',
@@ -444,8 +450,10 @@ export const componentIdentificationTask = defineTask('component-identification'
 export const activityIdentificationTask = defineTask('activity-identification', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Mechanism Activity Identification',
+  skill: { name: 'causal-inference-engine' },
   agent: {
-    name: 'general-purpose',
+    name: 'mechanistic-analyst',
+    skills: ['causal-inference-engine', 'hypothesis-generator', 'root-cause-analyzer'],
     prompt: {
       role: 'Expert in mechanism dynamics and process analysis',
       task: 'Identify the activities (operations/processes) in the mechanism',
@@ -524,8 +532,10 @@ export const activityIdentificationTask = defineTask('activity-identification', 
 export const organizationalAnalysisTask = defineTask('organizational-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Mechanism Organizational Analysis',
+  skill: { name: 'causal-inference-engine' },
   agent: {
-    name: 'general-purpose',
+    name: 'mechanistic-analyst',
+    skills: ['causal-inference-engine', 'hypothesis-generator', 'root-cause-analyzer'],
     prompt: {
       role: 'Expert in system organization and mechanism structure',
       task: 'Analyze the organization of components and activities in the mechanism',
@@ -618,8 +628,10 @@ export const organizationalAnalysisTask = defineTask('organizational-analysis', 
 export const causalChainConstructionTask = defineTask('causal-chain-construction', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Mechanism Causal Chain Construction',
+  skill: { name: 'causal-inference-engine' },
   agent: {
-    name: 'general-purpose',
+    name: 'mechanistic-analyst',
+    skills: ['causal-inference-engine', 'hypothesis-generator', 'root-cause-analyzer'],
     prompt: {
       role: 'Expert in causal mechanism analysis and explanatory chains',
       task: 'Construct the causal chain from setup to termination conditions',
@@ -714,8 +726,10 @@ export const causalChainConstructionTask = defineTask('causal-chain-construction
 export const mechanismIntegrationTask = defineTask('mechanism-integration', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Mechanism Integration',
+  skill: { name: 'causal-inference-engine' },
   agent: {
-    name: 'general-purpose',
+    name: 'mechanistic-analyst',
+    skills: ['causal-inference-engine', 'hypothesis-generator', 'root-cause-analyzer'],
     prompt: {
       role: 'Expert in mechanism synthesis and integration',
       task: 'Integrate components, activities, and organization into complete mechanism',
@@ -800,8 +814,10 @@ export const mechanismIntegrationTask = defineTask('mechanism-integration', (arg
 export const multiLevelAnalysisTask = defineTask('multi-level-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Multi-Level Mechanism Analysis',
+  skill: { name: 'causal-inference-engine' },
   agent: {
-    name: 'general-purpose',
+    name: 'mechanistic-analyst',
+    skills: ['causal-inference-engine', 'hypothesis-generator', 'root-cause-analyzer'],
     prompt: {
       role: 'Expert in multi-level explanation and inter-level relations',
       task: 'Analyze mechanism across multiple levels of organization',
@@ -877,8 +893,10 @@ export const multiLevelAnalysisTask = defineTask('multi-level-analysis', (args, 
 export const predictionGenerationTask = defineTask('prediction-generation', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Mechanistic Prediction Generation',
+  skill: { name: 'causal-inference-engine' },
   agent: {
-    name: 'general-purpose',
+    name: 'mechanistic-analyst',
+    skills: ['causal-inference-engine', 'hypothesis-generator', 'root-cause-analyzer'],
     prompt: {
       role: 'Expert in mechanistic prediction and hypothesis generation',
       task: 'Generate testable predictions from the mechanistic explanation',
@@ -949,8 +967,10 @@ export const predictionGenerationTask = defineTask('prediction-generation', (arg
 export const mechanismValidationTask = defineTask('mechanism-validation', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Mechanism Validation',
+  skill: { name: 'causal-inference-engine' },
   agent: {
-    name: 'general-purpose',
+    name: 'mechanistic-analyst',
+    skills: ['causal-inference-engine', 'hypothesis-generator', 'root-cause-analyzer'],
     prompt: {
       role: 'Expert in mechanism validation and evidence assessment',
       task: 'Validate the mechanistic explanation against evidence',
@@ -1031,8 +1051,10 @@ export const mechanismValidationTask = defineTask('mechanism-validation', (args,
 export const mechanisticExplanationTask = defineTask('mechanistic-explanation', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Mechanistic Explanation Generation',
+  skill: { name: 'causal-inference-engine' },
   agent: {
-    name: 'general-purpose',
+    name: 'mechanistic-analyst',
+    skills: ['causal-inference-engine', 'hypothesis-generator', 'root-cause-analyzer'],
     prompt: {
       role: 'Expert in scientific explanation and science communication',
       task: 'Generate clear mechanistic explanation of the phenomenon',

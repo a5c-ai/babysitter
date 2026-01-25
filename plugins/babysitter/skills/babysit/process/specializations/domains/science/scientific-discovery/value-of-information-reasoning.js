@@ -19,8 +19,10 @@ import { defineTask } from '@a5c-ai/babysitter-sdk';
 const analyzeDecisionStructureTask = defineTask('voi-analyze-decision', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Decision Structure Analysis',
+  skill: { name: 'bayesian-inference-engine' },
   agent: {
-    name: 'general-purpose',
+    name: 'voi-analyst',
+    skills: ['bayesian-inference-engine', 'statistical-test-selector'],
     prompt: {
       role: 'Decision analysis and uncertainty quantification specialist',
       task: 'Analyze the decision structure including alternatives, uncertainties, and outcomes',
@@ -87,8 +89,10 @@ const analyzeDecisionStructureTask = defineTask('voi-analyze-decision', (args, t
 const calculatePriorExpectedValueTask = defineTask('voi-prior-ev', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Prior Expected Value Calculation',
+  skill: { name: 'bayesian-inference-engine' },
   agent: {
-    name: 'general-purpose',
+    name: 'voi-analyst',
+    skills: ['bayesian-inference-engine', 'statistical-test-selector'],
     prompt: {
       role: 'Expected value computation specialist',
       task: 'Calculate the expected value of the optimal decision under current prior beliefs',
@@ -151,8 +155,10 @@ const calculatePriorExpectedValueTask = defineTask('voi-prior-ev', (args, taskCt
 const characterizeInformationSourcesTask = defineTask('voi-characterize-sources', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Information Source Characterization',
+  skill: { name: 'bayesian-inference-engine' },
   agent: {
-    name: 'general-purpose',
+    name: 'voi-analyst',
+    skills: ['bayesian-inference-engine', 'statistical-test-selector'],
     prompt: {
       role: 'Information source and reliability specialist',
       task: 'Characterize available information sources including reliability, cost, and timing',
@@ -220,8 +226,10 @@ const characterizeInformationSourcesTask = defineTask('voi-characterize-sources'
 const analyzePosteriorsTask = defineTask('voi-posterior-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Posterior Distribution Analysis',
+  skill: { name: 'bayesian-inference-engine' },
   agent: {
-    name: 'general-purpose',
+    name: 'voi-analyst',
+    skills: ['bayesian-inference-engine', 'statistical-test-selector'],
     prompt: {
       role: 'Bayesian updating and posterior analysis specialist',
       task: 'Analyze how each potential information outcome would update beliefs',
@@ -280,8 +288,10 @@ const analyzePosteriorsTask = defineTask('voi-posterior-analysis', (args, taskCt
 const calculateEVSITask = defineTask('voi-calculate-evsi', (args, taskCtx) => ({
   kind: 'agent',
   title: 'EVSI Calculation',
+  skill: { name: 'bayesian-inference-engine' },
   agent: {
-    name: 'general-purpose',
+    name: 'voi-analyst',
+    skills: ['bayesian-inference-engine', 'statistical-test-selector'],
     prompt: {
       role: 'Expected value of sample information specialist',
       task: 'Calculate the expected value of sample information for each source',
@@ -342,8 +352,10 @@ const calculateEVSITask = defineTask('voi-calculate-evsi', (args, taskCtx) => ({
 const designSequentialStrategyTask = defineTask('voi-sequential-strategy', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Sequential Information Strategy',
+  skill: { name: 'bayesian-inference-engine' },
   agent: {
-    name: 'general-purpose',
+    name: 'voi-analyst',
+    skills: ['bayesian-inference-engine', 'statistical-test-selector'],
     prompt: {
       role: 'Sequential decision and information strategy specialist',
       task: 'Design optimal sequential strategy for information acquisition',
@@ -402,8 +414,10 @@ const designSequentialStrategyTask = defineTask('voi-sequential-strategy', (args
 const optimizeInformationPortfolioTask = defineTask('voi-portfolio-optimization', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Information Portfolio Optimization',
+  skill: { name: 'bayesian-inference-engine' },
   agent: {
-    name: 'general-purpose',
+    name: 'voi-analyst',
+    skills: ['bayesian-inference-engine', 'statistical-test-selector'],
     prompt: {
       role: 'Information portfolio optimization specialist',
       task: 'Optimize the portfolio of information sources subject to budget constraints',
@@ -463,8 +477,10 @@ const optimizeInformationPortfolioTask = defineTask('voi-portfolio-optimization'
 const planImplementationTask = defineTask('voi-implementation-plan', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Information Acquisition Implementation Plan',
+  skill: { name: 'bayesian-inference-engine' },
   agent: {
-    name: 'general-purpose',
+    name: 'voi-analyst',
+    skills: ['bayesian-inference-engine', 'statistical-test-selector'],
     prompt: {
       role: 'Information acquisition and implementation specialist',
       task: 'Develop practical plan for implementing the information acquisition strategy',
@@ -532,8 +548,10 @@ const planImplementationTask = defineTask('voi-implementation-plan', (args, task
 const synthesizeResultsTask = defineTask('voi-synthesize', (args, taskCtx) => ({
   kind: 'agent',
   title: 'VOI Analysis Synthesis',
+  skill: { name: 'bayesian-inference-engine' },
   agent: {
-    name: 'general-purpose',
+    name: 'voi-analyst',
+    skills: ['bayesian-inference-engine', 'statistical-test-selector'],
     prompt: {
       role: 'Value of information synthesis specialist',
       task: 'Synthesize all VOI analysis results into comprehensive conclusions and recommendations',

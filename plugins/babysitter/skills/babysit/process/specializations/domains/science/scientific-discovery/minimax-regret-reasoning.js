@@ -152,8 +152,10 @@ export async function process(inputs, ctx) {
 export const regretProblemStructuringTask = defineTask('regret-problem-structuring', (args, taskCtx) => ({
   kind: 'agent',
   title: `Minimax Regret Problem Structuring - ${args.domain}`,
+  skill: { name: 'bayesian-inference-engine' },
   agent: {
-    name: 'general-purpose',
+    name: 'decision-analyst',
+    skills: ['bayesian-inference-engine', 'hypothesis-generator'],
     prompt: {
       role: 'Expert in decision theory and regret analysis',
       task: 'Structure the decision problem for minimax regret analysis',
@@ -228,8 +230,10 @@ export const regretProblemStructuringTask = defineTask('regret-problem-structuri
 export const payoffMatrixConstructionTask = defineTask('payoff-matrix-construction', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Payoff Matrix Construction',
+  skill: { name: 'bayesian-inference-engine' },
   agent: {
-    name: 'general-purpose',
+    name: 'decision-analyst',
+    skills: ['bayesian-inference-engine', 'hypothesis-generator'],
     prompt: {
       role: 'Expert in decision matrix construction and payoff estimation',
       task: 'Construct the payoff matrix for all alternative-scenario pairs',
@@ -304,8 +308,10 @@ export const payoffMatrixConstructionTask = defineTask('payoff-matrix-constructi
 export const opportunityCostCalculationTask = defineTask('opportunity-cost-calculation', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Opportunity Cost Calculation',
+  skill: { name: 'bayesian-inference-engine' },
   agent: {
-    name: 'general-purpose',
+    name: 'decision-analyst',
+    skills: ['bayesian-inference-engine', 'hypothesis-generator'],
     prompt: {
       role: 'Expert in opportunity cost and counterfactual analysis',
       task: 'Calculate opportunity cost (best achievable) for each scenario',
@@ -370,8 +376,10 @@ export const opportunityCostCalculationTask = defineTask('opportunity-cost-calcu
 export const regretMatrixConstructionTask = defineTask('regret-matrix-construction', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Regret Matrix Construction',
+  skill: { name: 'bayesian-inference-engine' },
   agent: {
-    name: 'general-purpose',
+    name: 'decision-analyst',
+    skills: ['bayesian-inference-engine', 'hypothesis-generator'],
     prompt: {
       role: 'Expert in regret theory and decision analysis',
       task: 'Construct the regret matrix from payoffs and opportunity costs',
@@ -454,8 +462,10 @@ export const regretMatrixConstructionTask = defineTask('regret-matrix-constructi
 export const maxRegretAnalysisTask = defineTask('max-regret-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Maximum Regret Analysis',
+  skill: { name: 'bayesian-inference-engine' },
   agent: {
-    name: 'general-purpose',
+    name: 'decision-analyst',
+    skills: ['bayesian-inference-engine', 'hypothesis-generator'],
     prompt: {
       role: 'Expert in worst-case regret analysis',
       task: 'Identify maximum regret for each alternative',
@@ -535,8 +545,10 @@ export const maxRegretAnalysisTask = defineTask('max-regret-analysis', (args, ta
 export const minimaxRegretSelectionTask = defineTask('minimax-regret-selection', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Minimax Regret Selection',
+  skill: { name: 'bayesian-inference-engine' },
   agent: {
-    name: 'general-purpose',
+    name: 'decision-analyst',
+    skills: ['bayesian-inference-engine', 'hypothesis-generator'],
     prompt: {
       role: 'Expert in minimax regret decision criterion',
       task: 'Apply minimax regret criterion to select alternative',
@@ -599,8 +611,10 @@ export const minimaxRegretSelectionTask = defineTask('minimax-regret-selection',
 export const regretDistributionTask = defineTask('regret-distribution', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Regret Distribution Analysis',
+  skill: { name: 'bayesian-inference-engine' },
   agent: {
-    name: 'general-purpose',
+    name: 'decision-analyst',
+    skills: ['bayesian-inference-engine', 'hypothesis-generator'],
     prompt: {
       role: 'Expert in regret distribution and statistical analysis',
       task: 'Analyze the distribution of regret for each alternative',
@@ -674,8 +688,10 @@ export const regretDistributionTask = defineTask('regret-distribution', (args, t
 export const criteriaComparisonTask = defineTask('criteria-comparison', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Decision Criteria Comparison',
+  skill: { name: 'bayesian-inference-engine' },
   agent: {
-    name: 'general-purpose',
+    name: 'decision-analyst',
+    skills: ['bayesian-inference-engine', 'hypothesis-generator'],
     prompt: {
       role: 'Expert in decision criteria and comparative analysis',
       task: 'Compare minimax regret with other decision criteria',
@@ -759,8 +775,10 @@ export const criteriaComparisonTask = defineTask('criteria-comparison', (args, t
 export const regretRobustnessTask = defineTask('regret-robustness', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Regret Robustness Analysis',
+  skill: { name: 'bayesian-inference-engine' },
   agent: {
-    name: 'general-purpose',
+    name: 'decision-analyst',
+    skills: ['bayesian-inference-engine', 'hypothesis-generator'],
     prompt: {
       role: 'Expert in sensitivity and robustness analysis',
       task: 'Analyze robustness of minimax regret selection',
@@ -839,8 +857,10 @@ export const regretRobustnessTask = defineTask('regret-robustness', (args, taskC
 export const regretRecommendationTask = defineTask('regret-recommendation', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Minimax Regret Recommendation',
+  skill: { name: 'bayesian-inference-engine' },
   agent: {
-    name: 'general-purpose',
+    name: 'decision-analyst',
+    skills: ['bayesian-inference-engine', 'hypothesis-generator'],
     prompt: {
       role: 'Expert in decision advisory and synthesis',
       task: 'Synthesize minimax regret analysis into recommendation',

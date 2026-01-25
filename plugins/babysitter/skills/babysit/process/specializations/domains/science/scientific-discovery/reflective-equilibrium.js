@@ -165,8 +165,10 @@ export async function process(inputs, ctx) {
 export const assessInitialStateTask = defineTask('equilibrium-initial-assessment', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 1: Initial State Assessment',
+  skill: { name: 'formal-logic-reasoner' },
   agent: {
-    name: 'general-purpose',
+    name: 'equilibrium-analyst',
+    skills: ['formal-logic-reasoner', 'hypothesis-generator'],
     prompt: {
       role: 'Reflective equilibrium specialist',
       task: 'Assess initial coherence state of principles and judgments',
@@ -203,8 +205,10 @@ export const assessInitialStateTask = defineTask('equilibrium-initial-assessment
 export const identifyConflictsTask = defineTask('equilibrium-conflict-identification', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 2: Conflict Identification',
+  skill: { name: 'formal-logic-reasoner' },
   agent: {
-    name: 'general-purpose',
+    name: 'equilibrium-analyst',
+    skills: ['formal-logic-reasoner', 'hypothesis-generator'],
     prompt: {
       role: 'Coherence analysis specialist',
       task: 'Identify conflicts between principles and judgments',
@@ -241,8 +245,10 @@ export const identifyConflictsTask = defineTask('equilibrium-conflict-identifica
 export const generateAdjustmentOptionsTask = defineTask('equilibrium-adjustment-generation', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 3: Adjustment Option Generation',
+  skill: { name: 'formal-logic-reasoner' },
   agent: {
-    name: 'general-purpose',
+    name: 'equilibrium-analyst',
+    skills: ['formal-logic-reasoner', 'hypothesis-generator'],
     prompt: {
       role: 'Equilibrium adjustment specialist',
       task: 'Generate options for resolving conflicts',
@@ -279,8 +285,10 @@ export const generateAdjustmentOptionsTask = defineTask('equilibrium-adjustment-
 export const evaluateAdjustmentsTask = defineTask('equilibrium-adjustment-evaluation', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 4: Adjustment Evaluation',
+  skill: { name: 'formal-logic-reasoner' },
   agent: {
-    name: 'general-purpose',
+    name: 'equilibrium-analyst',
+    skills: ['formal-logic-reasoner', 'hypothesis-generator'],
     prompt: {
       role: 'Adjustment evaluation specialist',
       task: 'Evaluate adjustment options and select best',
@@ -317,8 +325,10 @@ export const evaluateAdjustmentsTask = defineTask('equilibrium-adjustment-evalua
 export const applyAdjustmentTask = defineTask('equilibrium-adjustment-application', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 5: Apply Adjustment',
+  skill: { name: 'formal-logic-reasoner' },
   agent: {
-    name: 'general-purpose',
+    name: 'equilibrium-analyst',
+    skills: ['formal-logic-reasoner', 'hypothesis-generator'],
     prompt: {
       role: 'Equilibrium adjustment application specialist',
       task: 'Apply selected adjustment to principles and judgments',
@@ -354,8 +364,10 @@ export const applyAdjustmentTask = defineTask('equilibrium-adjustment-applicatio
 export const reassessConflictsTask = defineTask('equilibrium-conflict-reassessment', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 6: Conflict Reassessment',
+  skill: { name: 'formal-logic-reasoner' },
   agent: {
-    name: 'general-purpose',
+    name: 'equilibrium-analyst',
+    skills: ['formal-logic-reasoner', 'hypothesis-generator'],
     prompt: {
       role: 'Conflict reassessment specialist',
       task: 'Reassess conflicts after adjustment',
@@ -391,8 +403,10 @@ export const reassessConflictsTask = defineTask('equilibrium-conflict-reassessme
 export const verifyEquilibriumTask = defineTask('equilibrium-verification', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 7: Equilibrium Verification',
+  skill: { name: 'formal-logic-reasoner' },
   agent: {
-    name: 'general-purpose',
+    name: 'equilibrium-analyst',
+    skills: ['formal-logic-reasoner', 'hypothesis-generator'],
     prompt: {
       role: 'Equilibrium verification specialist',
       task: 'Verify that equilibrium has been achieved',
@@ -429,8 +443,10 @@ export const verifyEquilibriumTask = defineTask('equilibrium-verification', (arg
 export const checkWideEquilibriumTask = defineTask('equilibrium-wide-check', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 8: Wide Equilibrium Check',
+  skill: { name: 'formal-logic-reasoner' },
   agent: {
-    name: 'general-purpose',
+    name: 'equilibrium-analyst',
+    skills: ['formal-logic-reasoner', 'hypothesis-generator'],
     prompt: {
       role: 'Wide reflective equilibrium specialist',
       task: 'Check consistency with background theories and facts',
@@ -467,8 +483,10 @@ export const checkWideEquilibriumTask = defineTask('equilibrium-wide-check', (ar
 export const analyzeStabilityTask = defineTask('equilibrium-stability-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 9: Stability Analysis',
+  skill: { name: 'formal-logic-reasoner' },
   agent: {
-    name: 'general-purpose',
+    name: 'equilibrium-analyst',
+    skills: ['formal-logic-reasoner', 'hypothesis-generator'],
     prompt: {
       role: 'Equilibrium stability analyst',
       task: 'Analyze stability of achieved equilibrium',
@@ -505,8 +523,10 @@ export const analyzeStabilityTask = defineTask('equilibrium-stability-analysis',
 export const documentEquilibriumTask = defineTask('equilibrium-documentation', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 10: Documentation',
+  skill: { name: 'formal-logic-reasoner' },
   agent: {
-    name: 'general-purpose',
+    name: 'equilibrium-analyst',
+    skills: ['formal-logic-reasoner', 'hypothesis-generator'],
     prompt: {
       role: 'Equilibrium documentation specialist',
       task: 'Document equilibrium process and provide recommendations',

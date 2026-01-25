@@ -186,8 +186,10 @@ export async function process(inputs, ctx) {
 export const eventDocumentationTask = defineTask('event-documentation', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 1: Event Documentation and Ordering',
+  skill: { name: 'causal-inference-engine' },
   agent: {
-    name: 'general-purpose',
+    name: 'narrative-analyst',
+    skills: ['causal-inference-engine', 'hypothesis-generator', 'analogy-mapper'],
     prompt: {
       role: 'Historical Event Analyst',
       task: 'Document and order events for narrative construction',
@@ -245,8 +247,10 @@ export const eventDocumentationTask = defineTask('event-documentation', (args, t
 export const causalConnectionTask = defineTask('causal-connection', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 2: Causal Connection Identification',
+  skill: { name: 'causal-inference-engine' },
   agent: {
-    name: 'general-purpose',
+    name: 'narrative-analyst',
+    skills: ['causal-inference-engine', 'hypothesis-generator', 'analogy-mapper'],
     prompt: {
       role: 'Causal Reasoning Expert',
       task: 'Identify causal connections between events',
@@ -303,8 +307,10 @@ export const causalConnectionTask = defineTask('causal-connection', (args, taskC
 export const actorAgencyTask = defineTask('actor-agency', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 3: Actor and Agency Analysis',
+  skill: { name: 'causal-inference-engine' },
   agent: {
-    name: 'general-purpose',
+    name: 'narrative-analyst',
+    skills: ['causal-inference-engine', 'hypothesis-generator', 'analogy-mapper'],
     prompt: {
       role: 'Narrative Agency Analyst',
       task: 'Analyze actors and their agency in the narrative',
@@ -362,8 +368,10 @@ export const actorAgencyTask = defineTask('actor-agency', (args, taskCtx) => ({
 export const contextSettingTask = defineTask('context-setting', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 4: Context and Setting Construction',
+  skill: { name: 'causal-inference-engine' },
   agent: {
-    name: 'general-purpose',
+    name: 'narrative-analyst',
+    skills: ['causal-inference-engine', 'hypothesis-generator', 'analogy-mapper'],
     prompt: {
       role: 'Contextual Setting Expert',
       task: 'Construct the context and setting for the narrative',
@@ -419,8 +427,10 @@ export const contextSettingTask = defineTask('context-setting', (args, taskCtx) 
 export const plotStructureTask = defineTask('plot-structure', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 5: Plot Structure Identification',
+  skill: { name: 'causal-inference-engine' },
   agent: {
-    name: 'general-purpose',
+    name: 'narrative-analyst',
+    skills: ['causal-inference-engine', 'hypothesis-generator', 'analogy-mapper'],
     prompt: {
       role: 'Narrative Structure Analyst',
       task: 'Identify the plot structure of the narrative',
@@ -476,8 +486,10 @@ export const plotStructureTask = defineTask('plot-structure', (args, taskCtx) =>
 export const turningPointsTask = defineTask('turning-points', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 6: Turning Points and Key Moments',
+  skill: { name: 'causal-inference-engine' },
   agent: {
-    name: 'general-purpose',
+    name: 'narrative-analyst',
+    skills: ['causal-inference-engine', 'hypothesis-generator', 'analogy-mapper'],
     prompt: {
       role: 'Critical Moment Analyst',
       task: 'Identify turning points and key moments',
@@ -532,8 +544,10 @@ export const turningPointsTask = defineTask('turning-points', (args, taskCtx) =>
 export const counterfactualTask = defineTask('counterfactual', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 7: Counterfactual Analysis',
+  skill: { name: 'causal-inference-engine' },
   agent: {
-    name: 'general-purpose',
+    name: 'narrative-analyst',
+    skills: ['causal-inference-engine', 'hypothesis-generator', 'analogy-mapper'],
     prompt: {
       role: 'Counterfactual Reasoning Expert',
       task: 'Analyze counterfactual scenarios to strengthen causal narrative',
@@ -589,8 +603,10 @@ export const counterfactualTask = defineTask('counterfactual', (args, taskCtx) =
 export const narrativeArcTask = defineTask('narrative-arc', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 8: Narrative Arc Construction',
+  skill: { name: 'causal-inference-engine' },
   agent: {
-    name: 'general-purpose',
+    name: 'narrative-analyst',
+    skills: ['causal-inference-engine', 'hypothesis-generator', 'analogy-mapper'],
     prompt: {
       role: 'Narrative Arc Constructor',
       task: 'Construct the complete narrative arc',
@@ -646,8 +662,10 @@ export const narrativeArcTask = defineTask('narrative-arc', (args, taskCtx) => (
 export const coherenceValidityTask = defineTask('coherence-validity', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 9: Coherence and Validity Check',
+  skill: { name: 'causal-inference-engine' },
   agent: {
-    name: 'general-purpose',
+    name: 'narrative-analyst',
+    skills: ['causal-inference-engine', 'hypothesis-generator', 'analogy-mapper'],
     prompt: {
       role: 'Narrative Coherence Validator',
       task: 'Check narrative coherence and validity',
@@ -698,8 +716,10 @@ export const coherenceValidityTask = defineTask('coherence-validity', (args, tas
 export const narrativeSynthesisTask = defineTask('narrative-synthesis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 10: Final Narrative Synthesis',
+  skill: { name: 'causal-inference-engine' },
   agent: {
-    name: 'general-purpose',
+    name: 'narrative-analyst',
+    skills: ['causal-inference-engine', 'hypothesis-generator', 'analogy-mapper'],
     prompt: {
       role: 'Narrative Synthesist',
       task: 'Synthesize all elements into final narrative',

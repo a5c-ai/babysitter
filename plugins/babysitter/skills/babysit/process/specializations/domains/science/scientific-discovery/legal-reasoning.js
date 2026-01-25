@@ -131,8 +131,10 @@ export async function process(inputs, ctx) {
 export const identifyIssuesTask = defineTask('legal-issue-identification', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 1: Issue Identification',
+  skill: { name: 'formal-logic-reasoner' },
   agent: {
-    name: 'general-purpose',
+    name: 'legal-analyst',
+    skills: ['formal-logic-reasoner', 'hypothesis-generator', 'analogy-mapper'],
     prompt: {
       role: 'Legal analyst specializing in issue spotting and case analysis',
       task: 'Identify legal issues presented by the facts and question',
@@ -169,8 +171,10 @@ export const identifyIssuesTask = defineTask('legal-issue-identification', (args
 export const identifyRulesTask = defineTask('legal-rule-identification', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 2: Rule Identification',
+  skill: { name: 'formal-logic-reasoner' },
   agent: {
-    name: 'general-purpose',
+    name: 'legal-analyst',
+    skills: ['formal-logic-reasoner', 'hypothesis-generator', 'analogy-mapper'],
     prompt: {
       role: 'Legal research specialist',
       task: 'Identify applicable legal rules, statutes, and precedents',
@@ -207,8 +211,10 @@ export const identifyRulesTask = defineTask('legal-rule-identification', (args, 
 export const interpretStatutesTask = defineTask('legal-statutory-interpretation', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 3: Statutory Interpretation',
+  skill: { name: 'formal-logic-reasoner' },
   agent: {
-    name: 'general-purpose',
+    name: 'legal-analyst',
+    skills: ['formal-logic-reasoner', 'hypothesis-generator', 'analogy-mapper'],
     prompt: {
       role: 'Statutory interpretation specialist',
       task: 'Interpret applicable statutes using canons of construction',
@@ -245,8 +251,10 @@ export const interpretStatutesTask = defineTask('legal-statutory-interpretation'
 export const analyzePrecedentsTask = defineTask('legal-precedent-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 4: Precedent Analysis',
+  skill: { name: 'formal-logic-reasoner' },
   agent: {
-    name: 'general-purpose',
+    name: 'legal-analyst',
+    skills: ['formal-logic-reasoner', 'hypothesis-generator', 'analogy-mapper'],
     prompt: {
       role: 'Case law analysis specialist',
       task: 'Analyze relevant precedents and their application',
@@ -283,8 +291,10 @@ export const analyzePrecedentsTask = defineTask('legal-precedent-analysis', (arg
 export const applyAnalogicalReasoningTask = defineTask('legal-analogical-reasoning', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 5: Analogical Reasoning',
+  skill: { name: 'formal-logic-reasoner' },
   agent: {
-    name: 'general-purpose',
+    name: 'legal-analyst',
+    skills: ['formal-logic-reasoner', 'hypothesis-generator', 'analogy-mapper'],
     prompt: {
       role: 'Legal analogical reasoning specialist',
       task: 'Apply analogical reasoning from precedents to current facts',
@@ -321,8 +331,10 @@ export const applyAnalogicalReasoningTask = defineTask('legal-analogical-reasoni
 export const applyRulesToFactsTask = defineTask('legal-rule-application', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 6: Rule Application',
+  skill: { name: 'formal-logic-reasoner' },
   agent: {
-    name: 'general-purpose',
+    name: 'legal-analyst',
+    skills: ['formal-logic-reasoner', 'hypothesis-generator', 'analogy-mapper'],
     prompt: {
       role: 'Legal analysis and rule application specialist',
       task: 'Apply identified rules to the facts of the case',
@@ -361,8 +373,10 @@ export const applyRulesToFactsTask = defineTask('legal-rule-application', (args,
 export const constructArgumentsTask = defineTask('legal-argument-construction', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 7: Argument Construction',
+  skill: { name: 'formal-logic-reasoner' },
   agent: {
-    name: 'general-purpose',
+    name: 'legal-analyst',
+    skills: ['formal-logic-reasoner', 'hypothesis-generator', 'analogy-mapper'],
     prompt: {
       role: 'Legal argumentation specialist',
       task: 'Construct persuasive legal arguments',
@@ -399,8 +413,10 @@ export const constructArgumentsTask = defineTask('legal-argument-construction', 
 export const analyzeCounterargumentsTask = defineTask('legal-counterargument-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 8: Counterargument Analysis',
+  skill: { name: 'formal-logic-reasoner' },
   agent: {
-    name: 'general-purpose',
+    name: 'legal-analyst',
+    skills: ['formal-logic-reasoner', 'hypothesis-generator', 'analogy-mapper'],
     prompt: {
       role: 'Adversarial legal analysis specialist',
       task: 'Anticipate and address counterarguments',
@@ -436,8 +452,10 @@ export const analyzeCounterargumentsTask = defineTask('legal-counterargument-ana
 export const formConclusionsTask = defineTask('legal-conclusion-formation', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 9: Conclusion Formation',
+  skill: { name: 'formal-logic-reasoner' },
   agent: {
-    name: 'general-purpose',
+    name: 'legal-analyst',
+    skills: ['formal-logic-reasoner', 'hypothesis-generator', 'analogy-mapper'],
     prompt: {
       role: 'Legal conclusion and outcome assessment specialist',
       task: 'Form conclusions based on legal analysis',
@@ -474,8 +492,10 @@ export const formConclusionsTask = defineTask('legal-conclusion-formation', (arg
 export const developRecommendationsTask = defineTask('legal-recommendations', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 10: Recommendation Development',
+  skill: { name: 'formal-logic-reasoner' },
   agent: {
-    name: 'general-purpose',
+    name: 'legal-analyst',
+    skills: ['formal-logic-reasoner', 'hypothesis-generator', 'analogy-mapper'],
     prompt: {
       role: 'Legal strategy and advisory specialist',
       task: 'Develop actionable legal recommendations',

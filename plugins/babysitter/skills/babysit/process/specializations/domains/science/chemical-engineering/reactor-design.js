@@ -180,7 +180,6 @@ export async function process(inputs, ctx) {
 export const chemistryReviewTask = defineTask('chemistry-review', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Review reaction chemistry and thermodynamics',
-  skill: { name: 'kinetic-modeler' },
   agent: {
     name: 'reaction-engineer',
     prompt: {
@@ -231,7 +230,6 @@ export const chemistryReviewTask = defineTask('chemistry-review', (args, taskCtx
 export const reactorTypeSelectionTask = defineTask('reactor-type-selection', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Select appropriate reactor type',
-  skill: { name: 'reactor-designer' },
   agent: {
     name: 'reaction-engineer',
     prompt: {
@@ -283,7 +281,6 @@ export const reactorTypeSelectionTask = defineTask('reactor-type-selection', (ar
 export const reactorSizingTask = defineTask('reactor-sizing', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Size reactor for conversion and throughput',
-  skill: { name: 'reactor-designer' },
   agent: {
     name: 'reaction-engineer',
     prompt: {
@@ -333,7 +330,6 @@ export const reactorSizingTask = defineTask('reactor-sizing', (args, taskCtx) =>
 export const heatTransferDesignTask = defineTask('heat-transfer-design', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Design heat transfer systems for temperature control',
-  skill: { name: 'reactor-designer' },
   agent: {
     name: 'reaction-engineer',
     prompt: {
@@ -383,7 +379,6 @@ export const heatTransferDesignTask = defineTask('heat-transfer-design', (args, 
 export const mixingMassTransferTask = defineTask('mixing-mass-transfer', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Evaluate mixing and mass transfer requirements',
-  skill: { name: 'scale-up-analyzer' },
   agent: {
     name: 'reaction-engineer',
     prompt: {
@@ -433,7 +428,6 @@ export const mixingMassTransferTask = defineTask('mixing-mass-transfer', (args, 
 export const reactorSafetyTask = defineTask('reactor-safety', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Assess reactor safety',
-  skill: { name: 'reactive-hazards-analyzer' },
   agent: {
     name: 'reaction-engineer',
     prompt: {
@@ -484,7 +478,6 @@ export const reactorSafetyTask = defineTask('reactor-safety', (args, taskCtx) =>
 export const operatingEnvelopeTask = defineTask('operating-envelope', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Define operating envelope',
-  skill: { name: 'reactor-designer' },
   agent: {
     name: 'reaction-engineer',
     prompt: {
@@ -533,7 +526,6 @@ export const operatingEnvelopeTask = defineTask('operating-envelope', (args, tas
 export const reactorDocumentationTask = defineTask('reactor-documentation', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Generate reactor design documentation',
-  skill: { name: 'reactor-designer' },
   agent: {
     name: 'reaction-engineer',
     prompt: {

@@ -207,7 +207,6 @@ export async function process(inputs, ctx) {
 export const goalScopeTask = defineTask('goal-scope', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Goal and Scope Definition',
-  skill: { name: 'life-cycle-assessment' },
   agent: {
     name: 'sustainability-specialist',
     prompt: {
@@ -255,7 +254,6 @@ export const goalScopeTask = defineTask('goal-scope', (args, taskCtx) => ({
 export const inventoryAnalysisTask = defineTask('inventory-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Life Cycle Inventory Analysis',
-  skill: { name: 'life-cycle-assessment' },
   agent: {
     name: 'sustainability-specialist',
     prompt: {
@@ -302,7 +300,6 @@ export const inventoryAnalysisTask = defineTask('inventory-analysis', (args, tas
 export const impactAssessmentLCATask = defineTask('impact-assessment-lca', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Life Cycle Impact Assessment',
-  skill: { name: 'life-cycle-assessment' },
   agent: {
     name: 'sustainability-specialist',
     prompt: {
@@ -349,7 +346,6 @@ export const impactAssessmentLCATask = defineTask('impact-assessment-lca', (args
 export const interpretationTask = defineTask('interpretation', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Interpretation',
-  skill: { name: 'life-cycle-assessment' },
   agent: {
     name: 'sustainability-specialist',
     prompt: {
@@ -397,7 +393,6 @@ export const interpretationTask = defineTask('interpretation', (args, taskCtx) =
 export const lcaSensitivityTask = defineTask('lca-sensitivity', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Sensitivity and Uncertainty Analysis',
-  skill: { name: 'life-cycle-assessment' },
   agent: {
     name: 'sustainability-specialist',
     prompt: {
@@ -444,7 +439,6 @@ export const lcaSensitivityTask = defineTask('lca-sensitivity', (args, taskCtx) 
 export const criticalReviewTask = defineTask('critical-review', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Critical Review Preparation',
-  skill: { name: 'life-cycle-assessment' },
   agent: {
     name: 'sustainability-specialist',
     prompt: {
@@ -490,7 +484,6 @@ export const criticalReviewTask = defineTask('critical-review', (args, taskCtx) 
 export const lcaReportTask = defineTask('lca-report', (args, taskCtx) => ({
   kind: 'agent',
   title: 'LCA Report Generation',
-  skill: { name: 'life-cycle-assessment' },
   agent: {
     name: 'sustainability-specialist',
     prompt: {

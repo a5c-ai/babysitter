@@ -134,7 +134,6 @@ export async function process(inputs, ctx) {
 export const processDynamicsTask = defineTask('process-dynamics', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Identify process dynamics',
-  skill: { name: 'hysys-dynamic-simulator' },
   agent: {
     name: 'control-systems-engineer',
     prompt: {
@@ -186,7 +185,6 @@ export const processDynamicsTask = defineTask('process-dynamics', (args, taskCtx
 export const tuningMethodSelectionTask = defineTask('tuning-method-selection', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Select tuning method',
-  skill: { name: 'pid-tuning-optimizer' },
   agent: {
     name: 'control-systems-engineer',
     prompt: {
@@ -229,7 +227,6 @@ export const tuningMethodSelectionTask = defineTask('tuning-method-selection', (
 export const initialTuningTask = defineTask('initial-tuning', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Calculate initial tuning parameters',
-  skill: { name: 'pid-tuning-optimizer' },
   agent: {
     name: 'control-systems-engineer',
     prompt: {
@@ -283,7 +280,6 @@ export const initialTuningTask = defineTask('initial-tuning', (args, taskCtx) =>
 export const tuningImplementationTask = defineTask('tuning-implementation', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Implement and test tuning parameters',
-  skill: { name: 'hysys-dynamic-simulator' },
   agent: {
     name: 'control-systems-engineer',
     prompt: {
@@ -336,7 +332,6 @@ export const tuningImplementationTask = defineTask('tuning-implementation', (arg
 export const robustnessTuningTask = defineTask('robustness-tuning', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Fine-tune for robustness',
-  skill: { name: 'pid-tuning-optimizer' },
   agent: {
     name: 'control-systems-engineer',
     prompt: {
@@ -391,7 +386,6 @@ export const robustnessTuningTask = defineTask('robustness-tuning', (args, taskC
 export const tuningDocumentationTask = defineTask('tuning-documentation', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Document final parameters and performance',
-  skill: { name: 'pid-tuning-optimizer' },
   agent: {
     name: 'control-systems-engineer',
     prompt: {

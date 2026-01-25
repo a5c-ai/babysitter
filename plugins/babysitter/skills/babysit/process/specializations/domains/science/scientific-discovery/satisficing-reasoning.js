@@ -19,8 +19,10 @@ import { defineTask } from '@a5c-ai/babysitter-sdk';
 const analyzeResourceConstraintsTask = defineTask('satisficing-analyze-constraints', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Resource and Constraint Analysis',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'satisficing-analyst',
+    skills: ['hypothesis-generator', 'bayesian-inference-engine'],
     prompt: {
       role: 'Bounded rationality and resource analysis specialist',
       task: 'Analyze the available resources, time constraints, and cognitive limitations affecting the decision',
@@ -80,8 +82,10 @@ const analyzeResourceConstraintsTask = defineTask('satisficing-analyze-constrain
 const setAspirationLevelsTask = defineTask('satisficing-set-aspirations', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Aspiration Level Setting',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'satisficing-analyst',
+    skills: ['hypothesis-generator', 'bayesian-inference-engine'],
     prompt: {
       role: 'Aspiration level and threshold specialist',
       task: 'Establish appropriate aspiration levels and acceptability thresholds for each criterion',
@@ -149,8 +153,10 @@ const setAspirationLevelsTask = defineTask('satisficing-set-aspirations', (args,
 const designSearchStrategyTask = defineTask('satisficing-search-strategy', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Sequential Search Strategy Design',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'satisficing-analyst',
+    skills: ['hypothesis-generator', 'bayesian-inference-engine'],
     prompt: {
       role: 'Search strategy and stopping rule specialist',
       task: 'Design an efficient sequential search strategy with appropriate stopping rules',
@@ -213,8 +219,10 @@ const designSearchStrategyTask = defineTask('satisficing-search-strategy', (args
 const generateAndScreenAlternativesTask = defineTask('satisficing-generate-screen', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Alternative Generation and Screening',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'satisficing-analyst',
+    skills: ['hypothesis-generator', 'bayesian-inference-engine'],
     prompt: {
       role: 'Alternative generation and screening specialist',
       task: 'Generate alternatives and apply fast screening heuristics to identify promising candidates',
@@ -276,8 +284,10 @@ const generateAndScreenAlternativesTask = defineTask('satisficing-generate-scree
 const evaluateSatisficingTask = defineTask('satisficing-evaluate', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Satisficing Evaluation',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'satisficing-analyst',
+    skills: ['hypothesis-generator', 'bayesian-inference-engine'],
     prompt: {
       role: 'Satisficing evaluation and acceptability specialist',
       task: 'Evaluate promising alternatives against aspiration levels to identify satisficing solutions',
@@ -345,8 +355,10 @@ const evaluateSatisficingTask = defineTask('satisficing-evaluate', (args, taskCt
 const adaptAspirationsTask = defineTask('satisficing-adapt-aspirations', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Aspiration Level Adaptation',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'satisficing-analyst',
+    skills: ['hypothesis-generator', 'bayesian-inference-engine'],
     prompt: {
       role: 'Adaptive aspiration and expectation adjustment specialist',
       task: 'Adjust aspiration levels based on search experience and environmental feedback',
@@ -409,8 +421,10 @@ const adaptAspirationsTask = defineTask('satisficing-adapt-aspirations', (args, 
 const compareSatisficingOptimizingTask = defineTask('satisficing-compare-strategies', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Satisficing vs Optimizing Comparison',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'satisficing-analyst',
+    skills: ['hypothesis-generator', 'bayesian-inference-engine'],
     prompt: {
       role: 'Decision strategy comparison specialist',
       task: 'Compare satisficing approach to optimization and assess appropriateness for this context',
@@ -483,8 +497,10 @@ const compareSatisficingOptimizingTask = defineTask('satisficing-compare-strateg
 const selectSolutionTask = defineTask('satisficing-select-solution', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Satisficing Solution Selection',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'satisficing-analyst',
+    skills: ['hypothesis-generator', 'bayesian-inference-engine'],
     prompt: {
       role: 'Decision selection and commitment specialist',
       task: 'Select the satisficing solution and establish commitment to the choice',
@@ -544,8 +560,10 @@ const selectSolutionTask = defineTask('satisficing-select-solution', (args, task
 const synthesizeResultsTask = defineTask('satisficing-synthesize', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Satisficing Analysis Synthesis',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'satisficing-analyst',
+    skills: ['hypothesis-generator', 'bayesian-inference-engine'],
     prompt: {
       role: 'Satisficing reasoning synthesis specialist',
       task: 'Synthesize all satisficing reasoning results into comprehensive conclusions',

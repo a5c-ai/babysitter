@@ -176,7 +176,6 @@ export async function process(inputs, ctx) {
 export const permitRequirementsTask = defineTask('permit-requirements', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Identify permit requirements',
-  skill: { name: 'regulatory-compliance-checker' },
   agent: {
     name: 'environmental-permit-specialist',
     prompt: {
@@ -220,7 +219,6 @@ export const permitRequirementsTask = defineTask('permit-requirements', (args, t
 export const buildingPermitTask = defineTask('building-permit', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Prepare building permit application',
-  skill: { name: 'regulatory-compliance-checker' },
   agent: {
     name: 'environmental-permit-specialist',
     prompt: {
@@ -265,7 +263,6 @@ export const buildingPermitTask = defineTask('building-permit', (args, taskCtx) 
 export const sitePermitTask = defineTask('site-permit', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Prepare site/civil permit application',
-  skill: { name: 'regulatory-compliance-checker' },
   agent: {
     name: 'environmental-permit-specialist',
     prompt: {
@@ -309,7 +306,6 @@ export const sitePermitTask = defineTask('site-permit', (args, taskCtx) => ({
 export const environmentalPermitsTask = defineTask('environmental-permits', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Prepare environmental permit applications',
-  skill: { name: 'regulatory-compliance-checker' },
   agent: {
     name: 'environmental-permit-specialist',
     prompt: {
@@ -353,7 +349,6 @@ export const environmentalPermitsTask = defineTask('environmental-permits', (arg
 export const utilityPermitsTask = defineTask('utility-permits', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Prepare utility permit applications',
-  skill: { name: 'regulatory-compliance-checker' },
   agent: {
     name: 'environmental-permit-specialist',
     prompt: {
@@ -397,7 +392,6 @@ export const utilityPermitsTask = defineTask('utility-permits', (args, taskCtx) 
 export const supportingDocsTask = defineTask('supporting-docs', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Assemble supporting documentation',
-  skill: { name: 'regulatory-compliance-checker' },
   agent: {
     name: 'environmental-permit-specialist',
     prompt: {
@@ -441,7 +435,6 @@ export const supportingDocsTask = defineTask('supporting-docs', (args, taskCtx) 
 export const feeCalculationTask = defineTask('fee-calculation', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Calculate permit fees',
-  skill: { name: 'cost-database-interface' },
   agent: {
     name: 'cost-estimator',
     prompt: {
@@ -486,7 +479,6 @@ export const feeCalculationTask = defineTask('fee-calculation', (args, taskCtx) 
 export const submissionPackageTask = defineTask('submission-package', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Prepare permit submission packages',
-  skill: { name: 'engineering-report-generator' },
   agent: {
     name: 'technical-report-writer',
     prompt: {

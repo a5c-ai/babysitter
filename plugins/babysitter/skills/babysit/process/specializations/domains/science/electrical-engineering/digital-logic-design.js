@@ -222,7 +222,6 @@ export async function process(inputs, ctx) {
 export const requirementsAnalysisTask = defineTask('requirements-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 1: Requirements Analysis - ${args.designName}`,
-  skill: { name: 'hdl-design' },
   agent: {
     name: 'digital-design-engineer',
     prompt: {
@@ -279,7 +278,6 @@ export const requirementsAnalysisTask = defineTask('requirements-analysis', (arg
 export const architectureDesignTask = defineTask('architecture-design', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 2: Architecture Design - ${args.designName}`,
-  skill: { name: 'hdl-design' },
   agent: {
     name: 'digital-design-engineer',
     prompt: {
@@ -346,7 +344,6 @@ export const architectureDesignTask = defineTask('architecture-design', (args, t
 export const rtlDevelopmentTask = defineTask('rtl-development', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 3: RTL Development - ${args.designName}`,
-  skill: { name: 'hdl-design' },
   agent: {
     name: 'digital-design-engineer',
     prompt: {
@@ -411,7 +408,6 @@ export const rtlDevelopmentTask = defineTask('rtl-development', (args, taskCtx) 
 export const verificationPlanningTask = defineTask('verification-planning', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 4: Verification Planning - ${args.designName}`,
-  skill: { name: 'hdl-design' },
   agent: {
     name: 'digital-design-engineer',
     prompt: {
@@ -476,7 +472,6 @@ export const verificationPlanningTask = defineTask('verification-planning', (arg
 export const functionalSimulationTask = defineTask('functional-simulation', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 5: Functional Simulation - ${args.designName}`,
-  skill: { name: 'hdl-design' },
   agent: {
     name: 'digital-design-engineer',
     prompt: {
@@ -552,7 +547,6 @@ export const functionalSimulationTask = defineTask('functional-simulation', (arg
 export const synthesisAnalysisTask = defineTask('synthesis-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 6: Synthesis and Timing Analysis - ${args.designName}`,
-  skill: { name: 'hdl-design' },
   agent: {
     name: 'digital-design-engineer',
     prompt: {
@@ -619,7 +613,6 @@ export const synthesisAnalysisTask = defineTask('synthesis-analysis', (args, tas
 export const ppaOptimizationTask = defineTask('ppa-optimization', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 7: PPA Optimization - ${args.designName}`,
-  skill: { name: 'hdl-design' },
   agent: {
     name: 'digital-design-engineer',
     prompt: {
@@ -685,7 +678,6 @@ export const ppaOptimizationTask = defineTask('ppa-optimization', (args, taskCtx
 export const implementationDocumentationTask = defineTask('implementation-documentation', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 8: Implementation Documentation - ${args.designName}`,
-  skill: { name: 'hdl-design' },
   agent: {
     name: 'digital-design-engineer',
     prompt: {

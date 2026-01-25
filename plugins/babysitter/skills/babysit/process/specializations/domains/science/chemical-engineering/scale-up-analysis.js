@@ -163,7 +163,6 @@ export async function process(inputs, ctx) {
 export const scaleDependentPhenomenaTask = defineTask('scale-dependent-phenomena', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Identify scale-dependent phenomena',
-  skill: { name: 'scale-up-analyzer' },
   agent: {
     name: 'scale-up-engineer',
     prompt: {
@@ -215,7 +214,6 @@ export const scaleDependentPhenomenaTask = defineTask('scale-dependent-phenomena
 export const scaleUpCriteriaTask = defineTask('scale-up-criteria', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Develop scale-up criteria and dimensionless groups',
-  skill: { name: 'scale-up-analyzer' },
   agent: {
     name: 'scale-up-engineer',
     prompt: {
@@ -258,7 +256,6 @@ export const scaleUpCriteriaTask = defineTask('scale-up-criteria', (args, taskCt
 export const pilotScaleDesignTask = defineTask('pilot-scale-design', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Design pilot-scale experiments',
-  skill: { name: 'reactor-designer' },
   agent: {
     name: 'scale-up-engineer',
     prompt: {
@@ -308,7 +305,6 @@ export const pilotScaleDesignTask = defineTask('pilot-scale-design', (args, task
 export const intermediateScaleValidationTask = defineTask('intermediate-scale-validation', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Validate models at intermediate scales',
-  skill: { name: 'aspen-plus-simulator' },
   agent: {
     name: 'scale-up-engineer',
     prompt: {
@@ -356,7 +352,6 @@ export const intermediateScaleValidationTask = defineTask('intermediate-scale-va
 export const transportPhenomenaTask = defineTask('transport-phenomena', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Address mixing, heat transfer, and mass transfer changes',
-  skill: { name: 'scale-up-analyzer' },
   agent: {
     name: 'scale-up-engineer',
     prompt: {
@@ -406,7 +401,6 @@ export const transportPhenomenaTask = defineTask('transport-phenomena', (args, t
 export const scaleUpRiskAssessmentTask = defineTask('scale-up-risk-assessment', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Assess and manage scale-up risks',
-  skill: { name: 'scale-up-analyzer' },
   agent: {
     name: 'scale-up-engineer',
     prompt: {
@@ -455,7 +449,6 @@ export const scaleUpRiskAssessmentTask = defineTask('scale-up-risk-assessment', 
 export const technologyTransferTask = defineTask('technology-transfer', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Create technology transfer package',
-  skill: { name: 'scale-up-analyzer' },
   agent: {
     name: 'scale-up-engineer',
     prompt: {

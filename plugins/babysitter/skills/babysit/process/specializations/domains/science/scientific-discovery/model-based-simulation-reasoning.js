@@ -170,8 +170,10 @@ export async function process(inputs, ctx) {
 export const modelAnalysisTask = defineTask('model-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: `Model Analysis - ${args.domain}`,
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'simulation-analyst',
+    skills: ['hypothesis-generator', 'causal-inference-engine'],
     prompt: {
       role: 'Expert in computational modeling and system dynamics',
       task: 'Analyze the model structure and capabilities for simulation',
@@ -265,8 +267,10 @@ export const modelAnalysisTask = defineTask('model-analysis', (args, taskCtx) =>
 export const scenarioSpecificationTask = defineTask('scenario-specification', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Scenario Specification',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'simulation-analyst',
+    skills: ['hypothesis-generator', 'causal-inference-engine'],
     prompt: {
       role: 'Expert in scenario planning and simulation design',
       task: 'Specify the simulation scenario in detail',
@@ -355,8 +359,10 @@ export const scenarioSpecificationTask = defineTask('scenario-specification', (a
 export const initialStateSetupTask = defineTask('initial-state-setup', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Initial State Setup',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'simulation-analyst',
+    skills: ['hypothesis-generator', 'causal-inference-engine'],
     prompt: {
       role: 'Expert in simulation initialization and state specification',
       task: 'Set up initial state for simulation',
@@ -426,8 +432,10 @@ export const initialStateSetupTask = defineTask('initial-state-setup', (args, ta
 export const simulationExecutionTask = defineTask('simulation-execution', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Simulation Execution',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'simulation-analyst',
+    skills: ['hypothesis-generator', 'causal-inference-engine'],
     prompt: {
       role: 'Expert in simulation execution and numerical methods',
       task: 'Execute the model simulation and generate trajectories',
@@ -513,8 +521,10 @@ export const simulationExecutionTask = defineTask('simulation-execution', (args,
 export const trajectoryAnalysisTask = defineTask('trajectory-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Trajectory Analysis',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'simulation-analyst',
+    skills: ['hypothesis-generator', 'causal-inference-engine'],
     prompt: {
       role: 'Expert in time series analysis and system behavior interpretation',
       task: 'Analyze simulation trajectories and extract key findings',
@@ -607,8 +617,10 @@ export const trajectoryAnalysisTask = defineTask('trajectory-analysis', (args, t
 export const sensitivityAnalysisTask = defineTask('sensitivity-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Sensitivity Analysis',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'simulation-analyst',
+    skills: ['hypothesis-generator', 'causal-inference-engine'],
     prompt: {
       role: 'Expert in sensitivity analysis and parameter uncertainty',
       task: 'Analyze sensitivity of results to parameter changes',
@@ -687,8 +699,10 @@ export const sensitivityAnalysisTask = defineTask('sensitivity-analysis', (args,
 export const uncertaintyQuantificationTask = defineTask('uncertainty-quantification', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Uncertainty Quantification',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'simulation-analyst',
+    skills: ['hypothesis-generator', 'causal-inference-engine'],
     prompt: {
       role: 'Expert in uncertainty quantification and probabilistic prediction',
       task: 'Quantify uncertainty in simulation predictions',
@@ -777,8 +791,10 @@ export const uncertaintyQuantificationTask = defineTask('uncertainty-quantificat
 export const scenarioComparisonTask = defineTask('scenario-comparison', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Scenario Comparison',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'simulation-analyst',
+    skills: ['hypothesis-generator', 'causal-inference-engine'],
     prompt: {
       role: 'Expert in scenario analysis and comparative evaluation',
       task: 'Compare simulation results across alternative scenarios',
@@ -859,8 +875,10 @@ export const scenarioComparisonTask = defineTask('scenario-comparison', (args, t
 export const insightExtractionTask = defineTask('insight-extraction', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Insight Extraction',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'simulation-analyst',
+    skills: ['hypothesis-generator', 'causal-inference-engine'],
     prompt: {
       role: 'Expert in simulation interpretation and knowledge extraction',
       task: 'Extract actionable insights from simulation analysis',
@@ -962,8 +980,10 @@ export const insightExtractionTask = defineTask('insight-extraction', (args, tas
 export const simulationValidationTask = defineTask('simulation-validation', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Simulation Validation',
+  skill: { name: 'hypothesis-generator' },
   agent: {
-    name: 'general-purpose',
+    name: 'simulation-analyst',
+    skills: ['hypothesis-generator', 'causal-inference-engine'],
     prompt: {
       role: 'Expert in simulation validation and verification',
       task: 'Validate simulation results and assess confidence',

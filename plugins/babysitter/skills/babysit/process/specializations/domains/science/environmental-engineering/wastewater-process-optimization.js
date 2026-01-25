@@ -201,7 +201,6 @@ export async function process(inputs, ctx) {
 export const processAssessmentTask = defineTask('process-assessment', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Current Process Assessment',
-  skill: { name: 'wastewater-optimization' },
   agent: {
     name: 'water-treatment-specialist',
     prompt: {
@@ -246,7 +245,6 @@ export const processAssessmentTask = defineTask('process-assessment', (args, tas
 export const benchmarkingTask = defineTask('performance-benchmarking', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Performance Benchmarking',
-  skill: { name: 'wastewater-optimization' },
   agent: {
     name: 'water-treatment-specialist',
     prompt: {
@@ -289,7 +287,6 @@ export const benchmarkingTask = defineTask('performance-benchmarking', (args, ta
 export const processModelingTask = defineTask('process-modeling', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Process Modeling and Simulation',
-  skill: { name: 'wastewater-optimization' },
   agent: {
     name: 'water-treatment-specialist',
     prompt: {
@@ -334,7 +331,6 @@ export const processModelingTask = defineTask('process-modeling', (args, taskCtx
 export const optimizationAnalysisTask = defineTask('optimization-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Optimization Opportunity Analysis',
-  skill: { name: 'wastewater-optimization' },
   agent: {
     name: 'water-treatment-specialist',
     prompt: {
@@ -385,7 +381,6 @@ export const optimizationAnalysisTask = defineTask('optimization-analysis', (arg
 export const implementationPlanTask = defineTask('implementation-plan', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Implementation Planning',
-  skill: { name: 'wastewater-optimization' },
   agent: {
     name: 'water-treatment-specialist',
     prompt: {
@@ -430,7 +425,6 @@ export const implementationPlanTask = defineTask('implementation-plan', (args, t
 export const monitoringSetupTask = defineTask('monitoring-setup', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Performance Monitoring Setup',
-  skill: { name: 'wastewater-optimization' },
   agent: {
     name: 'water-treatment-specialist',
     prompt: {
@@ -475,7 +469,6 @@ export const monitoringSetupTask = defineTask('monitoring-setup', (args, taskCtx
 export const optimizationReportTask = defineTask('optimization-report', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Optimization Report Generation',
-  skill: { name: 'wastewater-optimization' },
   agent: {
     name: 'water-treatment-specialist',
     prompt: {

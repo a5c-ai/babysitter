@@ -259,7 +259,6 @@ export async function process(inputs, ctx) {
 export const sourceWaterCharacterizationTask = defineTask('source-water-characterization', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Source Water Characterization',
-  skill: { name: 'water-treatment-design' },
   agent: {
     name: 'water-treatment-specialist',
     prompt: {
@@ -303,7 +302,6 @@ export const sourceWaterCharacterizationTask = defineTask('source-water-characte
 export const regulatoryAnalysisTask = defineTask('regulatory-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Regulatory Requirements Analysis',
-  skill: { name: 'regulatory-compliance' },
   agent: {
     name: 'environmental-compliance-specialist',
     prompt: {
@@ -346,7 +344,6 @@ export const regulatoryAnalysisTask = defineTask('regulatory-analysis', (args, t
 export const processSelectionTask = defineTask('process-selection', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Treatment Process Selection',
-  skill: { name: 'water-treatment-design' },
   agent: {
     name: 'water-treatment-specialist',
     prompt: {
@@ -390,7 +387,6 @@ export const processSelectionTask = defineTask('process-selection', (args, taskC
 export const pilotTestingPlanTask = defineTask('pilot-testing-plan', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Pilot Testing Plan Development',
-  skill: { name: 'water-treatment-design' },
   agent: {
     name: 'water-treatment-specialist',
     prompt: {
@@ -436,7 +432,6 @@ export const pilotTestingPlanTask = defineTask('pilot-testing-plan', (args, task
 export const preliminaryDesignTask = defineTask('preliminary-design', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Preliminary Engineering Design',
-  skill: { name: 'water-treatment-design' },
   agent: {
     name: 'water-treatment-specialist',
     prompt: {
@@ -483,7 +478,6 @@ export const preliminaryDesignTask = defineTask('preliminary-design', (args, tas
 export const hydraulicAnalysisTask = defineTask('hydraulic-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Hydraulic Analysis and Profile',
-  skill: { name: 'water-treatment-design' },
   agent: {
     name: 'water-treatment-specialist',
     prompt: {
@@ -527,7 +521,6 @@ export const hydraulicAnalysisTask = defineTask('hydraulic-analysis', (args, tas
 export const detailedDesignTask = defineTask('detailed-design', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Detailed Engineering Design',
-  skill: { name: 'water-treatment-design' },
   agent: {
     name: 'water-treatment-specialist',
     prompt: {
@@ -572,7 +565,6 @@ export const detailedDesignTask = defineTask('detailed-design', (args, taskCtx) 
 export const omPlanTask = defineTask('om-plan', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Operations and Maintenance Plan',
-  skill: { name: 'water-treatment-design' },
   agent: {
     name: 'water-treatment-specialist',
     prompt: {
@@ -618,7 +610,6 @@ export const omPlanTask = defineTask('om-plan', (args, taskCtx) => ({
 export const designReportTask = defineTask('design-report', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Design Report Generation',
-  skill: { name: 'water-treatment-design' },
   agent: {
     name: 'water-treatment-specialist',
     prompt: {

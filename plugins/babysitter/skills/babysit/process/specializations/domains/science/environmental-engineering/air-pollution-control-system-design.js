@@ -202,7 +202,6 @@ export async function process(inputs, ctx) {
 export const emissionCharacterizationTask = defineTask('emission-characterization', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Emission Source Characterization',
-  skill: { name: 'air-pollution-control' },
   agent: {
     name: 'air-quality-specialist',
     prompt: {
@@ -246,7 +245,6 @@ export const emissionCharacterizationTask = defineTask('emission-characterizatio
 export const controlTechScreeningTask = defineTask('control-tech-screening', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Control Technology Screening',
-  skill: { name: 'air-pollution-control' },
   agent: {
     name: 'air-quality-specialist',
     prompt: {
@@ -290,7 +288,6 @@ export const controlTechScreeningTask = defineTask('control-tech-screening', (ar
 export const controlSystemDesignTask = defineTask('control-system-design', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Detailed Control System Design',
-  skill: { name: 'air-pollution-control' },
   agent: {
     name: 'air-quality-specialist',
     prompt: {
@@ -336,7 +333,6 @@ export const controlSystemDesignTask = defineTask('control-system-design', (args
 export const auxiliarySystemsTask = defineTask('auxiliary-systems', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Auxiliary Systems Design',
-  skill: { name: 'air-pollution-control' },
   agent: {
     name: 'air-quality-specialist',
     prompt: {
@@ -381,7 +377,6 @@ export const auxiliarySystemsTask = defineTask('auxiliary-systems', (args, taskC
 export const performanceTestingPlanTask = defineTask('performance-testing-plan', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Performance Testing Plan',
-  skill: { name: 'air-pollution-control' },
   agent: {
     name: 'air-quality-specialist',
     prompt: {
@@ -426,7 +421,6 @@ export const performanceTestingPlanTask = defineTask('performance-testing-plan',
 export const controlCostAnalysisTask = defineTask('control-cost-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Cost Analysis',
-  skill: { name: 'air-pollution-control' },
   agent: {
     name: 'air-quality-specialist',
     prompt: {
@@ -470,7 +464,6 @@ export const controlCostAnalysisTask = defineTask('control-cost-analysis', (args
 export const controlDesignDocsTask = defineTask('control-design-docs', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Design Documentation',
-  skill: { name: 'air-pollution-control' },
   agent: {
     name: 'air-quality-specialist',
     prompt: {

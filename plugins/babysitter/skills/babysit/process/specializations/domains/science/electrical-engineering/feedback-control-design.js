@@ -188,7 +188,6 @@ export async function process(inputs, ctx) {
 export const plantModelingTask = defineTask('plant-modeling', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 1: Plant Modeling - ${args.systemName}`,
-  skill: { name: 'control-system-sim' },
   agent: {
     name: 'control-systems-engineer',
     prompt: {
@@ -243,7 +242,6 @@ export const plantModelingTask = defineTask('plant-modeling', (args, taskCtx) =>
 export const objectivesDefinitionTask = defineTask('objectives-definition', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 2: Objectives Definition - ${args.systemName}`,
-  skill: { name: 'control-system-sim' },
   agent: {
     name: 'control-systems-engineer',
     prompt: {
@@ -311,7 +309,6 @@ export const objectivesDefinitionTask = defineTask('objectives-definition', (arg
 export const openLoopAnalysisTask = defineTask('open-loop-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 3: Open-Loop Analysis - ${args.systemName}`,
-  skill: { name: 'control-system-sim' },
   agent: {
     name: 'control-systems-engineer',
     prompt: {
@@ -361,7 +358,6 @@ export const openLoopAnalysisTask = defineTask('open-loop-analysis', (args, task
 export const controllerDesignTask = defineTask('controller-design', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 4: Controller Design - ${args.systemName}`,
-  skill: { name: 'control-system-sim' },
   agent: {
     name: 'control-systems-engineer',
     prompt: {
@@ -426,7 +422,6 @@ export const controllerDesignTask = defineTask('controller-design', (args, taskC
 export const closedLoopSimulationTask = defineTask('closed-loop-simulation', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 5: Closed-Loop Simulation - ${args.systemName}`,
-  skill: { name: 'control-system-sim' },
   agent: {
     name: 'control-systems-engineer',
     prompt: {
@@ -488,7 +483,6 @@ export const closedLoopSimulationTask = defineTask('closed-loop-simulation', (ar
 export const stabilityAnalysisTask = defineTask('stability-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 6: Stability Analysis - ${args.systemName}`,
-  skill: { name: 'control-system-sim' },
   agent: {
     name: 'control-systems-engineer',
     prompt: {
@@ -545,7 +539,6 @@ export const stabilityAnalysisTask = defineTask('stability-analysis', (args, tas
 export const controllerTuningTask = defineTask('controller-tuning', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 7: Controller Tuning - ${args.systemName}`,
-  skill: { name: 'control-system-sim' },
   agent: {
     name: 'control-systems-engineer',
     prompt: {
@@ -608,7 +601,6 @@ export const controllerTuningTask = defineTask('controller-tuning', (args, taskC
 export const hilValidationTask = defineTask('hil-validation', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 8: HIL Validation - ${args.systemName}`,
-  skill: { name: 'control-system-sim' },
   agent: {
     name: 'control-systems-engineer',
     prompt: {

@@ -181,7 +181,6 @@ export async function process(inputs, ctx) {
 export const standardsIdentificationTask = defineTask('standards-identification', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 1: Standards Identification - ${args.productName}`,
-  skill: { name: 'emc-pre-compliance' },
   agent: {
     name: 'emc-engineer',
     prompt: {
@@ -228,7 +227,6 @@ export const standardsIdentificationTask = defineTask('standards-identification'
 export const emcDesignRulesTask = defineTask('emc-design-rules', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 2: EMC Design Rules - ${args.productName}`,
-  skill: { name: 'emc-pre-compliance' },
   agent: {
     name: 'emc-engineer',
     prompt: {
@@ -284,7 +282,6 @@ export const emcDesignRulesTask = defineTask('emc-design-rules', (args, taskCtx)
 export const filteringDesignTask = defineTask('filtering-design', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 3: Filtering Design - ${args.productName}`,
-  skill: { name: 'emc-pre-compliance' },
   agent: {
     name: 'emc-engineer',
     prompt: {
@@ -339,7 +336,6 @@ export const filteringDesignTask = defineTask('filtering-design', (args, taskCtx
 export const groundingShieldingTask = defineTask('grounding-shielding', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 4: Grounding and Shielding - ${args.productName}`,
-  skill: { name: 'emc-pre-compliance' },
   agent: {
     name: 'emc-engineer',
     prompt: {
@@ -392,7 +388,6 @@ export const groundingShieldingTask = defineTask('grounding-shielding', (args, t
 export const emissionsTestingTask = defineTask('emissions-testing', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 5: Emissions Testing - ${args.productName}`,
-  skill: { name: 'emc-pre-compliance' },
   agent: {
     name: 'emc-engineer',
     prompt: {
@@ -444,7 +439,6 @@ export const emissionsTestingTask = defineTask('emissions-testing', (args, taskC
 export const immunityTestingTask = defineTask('immunity-testing', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 6: Immunity Testing - ${args.productName}`,
-  skill: { name: 'emc-pre-compliance' },
   agent: {
     name: 'emc-engineer',
     prompt: {
@@ -501,7 +495,6 @@ export const immunityTestingTask = defineTask('immunity-testing', (args, taskCtx
 export const emcDebuggingTask = defineTask('emc-debugging', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 7: EMC Debugging - ${args.productName}`,
-  skill: { name: 'emc-pre-compliance' },
   agent: {
     name: 'emc-engineer',
     prompt: {
@@ -557,7 +550,6 @@ export const emcDebuggingTask = defineTask('emc-debugging', (args, taskCtx) => (
 export const complianceDocumentationTask = defineTask('compliance-documentation', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 8: Compliance Documentation - ${args.productName}`,
-  skill: { name: 'emc-pre-compliance' },
   agent: {
     name: 'emc-engineer',
     prompt: {

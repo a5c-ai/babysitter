@@ -151,7 +151,6 @@ export async function process(inputs, ctx) {
 export const startupSequenceTask = defineTask('startup-sequence', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Define startup sequence and milestones',
-  skill: { name: 'hysys-dynamic-simulator' },
   agent: {
     name: 'startup-commissioning-engineer',
     prompt: {
@@ -200,7 +199,6 @@ export const startupSequenceTask = defineTask('startup-sequence', (args, taskCtx
 export const pssrDevelopmentTask = defineTask('pssr-development', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Develop pre-startup safety review items',
-  skill: { name: 'pssr-checklist-generator' },
   agent: {
     name: 'startup-commissioning-engineer',
     prompt: {
@@ -248,7 +246,6 @@ export const pssrDevelopmentTask = defineTask('pssr-development', (args, taskCtx
 export const operatingProceduresTask = defineTask('operating-procedures', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Develop detailed operating procedures',
-  skill: { name: 'control-strategy-designer' },
   agent: {
     name: 'startup-commissioning-engineer',
     prompt: {
@@ -296,7 +293,6 @@ export const operatingProceduresTask = defineTask('operating-procedures', (args,
 export const startupParametersTask = defineTask('startup-parameters', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Define startup parameters and limits',
-  skill: { name: 'hysys-dynamic-simulator' },
   agent: {
     name: 'startup-commissioning-engineer',
     prompt: {
@@ -345,7 +341,6 @@ export const startupParametersTask = defineTask('startup-parameters', (args, tas
 export const staffingTrainingTask = defineTask('staffing-training', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Plan staffing and training',
-  skill: { name: 'pssr-checklist-generator' },
   agent: {
     name: 'startup-commissioning-engineer',
     prompt: {
@@ -400,7 +395,6 @@ export const staffingTrainingTask = defineTask('staffing-training', (args, taskC
 export const troubleshootingGuideTask = defineTask('troubleshooting-guide', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Prepare startup troubleshooting guide',
-  skill: { name: 'control-strategy-designer' },
   agent: {
     name: 'startup-commissioning-engineer',
     prompt: {
@@ -448,7 +442,6 @@ export const troubleshootingGuideTask = defineTask('troubleshooting-guide', (arg
 export const startupTimelineTask = defineTask('startup-timeline', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Create startup timeline',
-  skill: { name: 'hysys-dynamic-simulator' },
   agent: {
     name: 'startup-commissioning-engineer',
     prompt: {
