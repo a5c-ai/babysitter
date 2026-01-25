@@ -3,6 +3,8 @@
  * @description Protocol for coordinating rehearsals and performances including scheduling, communication, prompt book management, show calling, and production documentation
  * @inputs { productionTitle: string, productionType: string, rehearsalStart: string, openingDate: string, castSize: number }
  * @outputs { success: boolean, promptBook: object, rehearsalReports: array, showDocumentation: object, artifacts: array }
+ * @recommendedSkills SK-AC-005 (production-coordination)
+ * @recommendedAgents AG-AC-005 (production-manager-agent)
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

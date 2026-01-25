@@ -3,6 +3,8 @@
  * @description Creating clear, reliable scoring rubrics with defined criteria and performance levels for consistent assessment of student work
  * @inputs { assessmentTask: string, learningObjectives: array, performanceLevels: number, rubricType: string, context: object }
  * @outputs { success: boolean, rubric: object, anchorExamples: array, scorerGuide: object, artifacts: array }
+ * @recommendedSkills SK-EDU-004 (rubric-development), SK-EDU-002 (learning-objectives-writing)
+ * @recommendedAgents AG-EDU-003 (assessment-specialist)
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

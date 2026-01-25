@@ -202,8 +202,9 @@ export async function process(inputs, ctx) {
 export const seismicHazardTask = defineTask('seismic-hazard', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Perform site seismic hazard analysis',
+  skill: { name: 'seismic-hazard-analyzer' },
   agent: {
-    name: 'seismic-engineer',
+    name: 'seismic-design-specialist',
     prompt: {
       role: 'geotechnical/seismic engineer',
       task: 'Determine site seismic hazard parameters',
@@ -250,8 +251,9 @@ export const seismicHazardTask = defineTask('seismic-hazard', (args, taskCtx) =>
 export const sdcDeterminationTask = defineTask('sdc-determination', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Determine Seismic Design Category',
+  skill: { name: 'seismic-hazard-analyzer' },
   agent: {
-    name: 'seismic-engineer',
+    name: 'building-code-analyst',
     prompt: {
       role: 'structural engineer',
       task: 'Determine Seismic Design Category per ASCE 7',
@@ -293,8 +295,9 @@ export const sdcDeterminationTask = defineTask('sdc-determination', (args, taskC
 export const systemSelectionTask = defineTask('system-selection', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Select seismic force-resisting system',
+  skill: { name: 'fea-structural-engine' },
   agent: {
-    name: 'structural-engineer',
+    name: 'seismic-design-specialist',
     prompt: {
       role: 'structural engineer',
       task: 'Select and evaluate seismic force-resisting system',
@@ -338,8 +341,9 @@ export const systemSelectionTask = defineTask('system-selection', (args, taskCtx
 export const seismicForceAnalysisTask = defineTask('seismic-force-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Perform seismic force analysis',
+  skill: { name: 'fea-structural-engine' },
   agent: {
-    name: 'structural-engineer',
+    name: 'seismic-design-specialist',
     prompt: {
       role: 'structural engineer',
       task: 'Calculate seismic design forces per ASCE 7',
@@ -382,8 +386,9 @@ export const seismicForceAnalysisTask = defineTask('seismic-force-analysis', (ar
 export const responseSpectrumTask = defineTask('response-spectrum', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Perform response spectrum analysis',
+  skill: { name: 'seismic-hazard-analyzer' },
   agent: {
-    name: 'seismic-engineer',
+    name: 'seismic-design-specialist',
     prompt: {
       role: 'structural engineer',
       task: 'Perform modal response spectrum analysis',
@@ -426,8 +431,9 @@ export const responseSpectrumTask = defineTask('response-spectrum', (args, taskC
 export const driftAnalysisTask = defineTask('drift-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Analyze drift and stability',
+  skill: { name: 'fea-structural-engine' },
   agent: {
-    name: 'structural-engineer',
+    name: 'seismic-design-specialist',
     prompt: {
       role: 'structural engineer',
       task: 'Check seismic drift and stability requirements',
@@ -479,8 +485,9 @@ export const driftAnalysisTask = defineTask('drift-analysis', (args, taskCtx) =>
 export const seismicDetailingTask = defineTask('seismic-detailing', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Develop seismic detailing requirements',
+  skill: { name: 'fea-structural-engine' },
   agent: {
-    name: 'structural-engineer',
+    name: 'building-code-analyst',
     prompt: {
       role: 'structural engineer',
       task: 'Define seismic detailing requirements',
@@ -528,8 +535,9 @@ export const seismicDetailingTask = defineTask('seismic-detailing', (args, taskC
 export const nonStructuralTask = defineTask('non-structural', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Design for non-structural components',
+  skill: { name: 'seismic-hazard-analyzer' },
   agent: {
-    name: 'structural-engineer',
+    name: 'seismic-design-specialist',
     prompt: {
       role: 'structural engineer',
       task: 'Design non-structural component anchorage per ASCE 7',
@@ -570,8 +578,9 @@ export const nonStructuralTask = defineTask('non-structural', (args, taskCtx) =>
 export const seismicReportTask = defineTask('seismic-report', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Generate seismic design report',
+  skill: { name: 'engineering-report-generator' },
   agent: {
-    name: 'technical-writer',
+    name: 'technical-report-writer',
     prompt: {
       role: 'structural engineer',
       task: 'Generate comprehensive seismic design report',

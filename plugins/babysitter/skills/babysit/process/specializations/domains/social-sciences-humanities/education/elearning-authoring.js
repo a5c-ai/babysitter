@@ -3,6 +3,8 @@
  * @description Development of interactive digital learning content using authoring tools following multimedia learning principles
  * @inputs { courseName: string, learningObjectives: array, contentOutline: object, targetPlatform: string, constraints: object }
  * @outputs { success: boolean, coursePackage: object, mediaAssets: array, interactiveElements: array, artifacts: array }
+ * @recommendedSkills SK-EDU-005 (elearning-storyboarding), SK-EDU-006 (multimedia-learning-design), SK-EDU-011 (instructional-video-production), SK-EDU-010 (accessibility-compliance-auditing)
+ * @recommendedAgents AG-EDU-004 (elearning-developer), AG-EDU-008 (accessibility-udl-specialist)
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

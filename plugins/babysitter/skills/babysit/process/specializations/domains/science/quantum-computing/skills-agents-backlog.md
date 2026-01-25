@@ -1027,30 +1027,30 @@ This backlog identifies specialized skills and agents that could enhance the Qua
 
 ## Process to Skills/Agents Mapping
 
-| Process | Recommended Skills | Recommended Agents |
-|---------|-------------------|-------------------|
-| QC-ALGO-001: Quantum Circuit Design and Optimization | qiskit-circuit-builder, cirq-circuit-builder, circuit-optimizer, tket-compiler, pyzx-simplifier, qubit-mapper | quantum-circuit-architect |
-| QC-ALGO-002: Variational Algorithm Implementation | pennylane-hybrid-executor, ansatz-designer, barren-plateau-analyzer, qubo-formulator | variational-algorithm-specialist |
-| QC-ALGO-003: Quantum Algorithm Benchmarking | statevector-simulator, rb-benchmarker, tensor-network-simulator, resource-estimator | algorithm-benchmarker |
-| QC-ERR-001: Error Mitigation Strategy Implementation | mitiq-error-mitigator, noise-modeler, rb-benchmarker, calibration-analyzer | error-mitigation-engineer |
-| QC-ERR-002: Quantum Error Correction Code Implementation | qec-code-builder, stim-simulator, pymatching-decoder, resource-estimator | qec-specialist |
-| QC-ERR-003: Hardware Noise Characterization | rb-benchmarker, noise-modeler, calibration-analyzer, stim-simulator | noise-characterizer |
-| QC-CHEM-001: Molecular Ground State Energy Calculation | openfermion-hamiltonian, pyscf-interface, qiskit-nature-solver, ansatz-designer | quantum-chemist |
-| QC-CHEM-002: Hamiltonian Simulation Implementation | trotter-simulator, openfermion-hamiltonian, qiskit-nature-solver, tensor-network-simulator | hamiltonian-simulator |
-| QC-ML-001: Quantum Classifier Implementation | quantum-kernel-estimator, vqc-trainer, data-encoder, pennylane-hybrid-executor | qml-engineer |
-| QC-ML-002: Quantum Neural Network Training | vqc-trainer, barren-plateau-analyzer, data-encoder, pennylane-hybrid-executor | qnn-trainer |
-| QC-SW-001: Quantum Circuit Testing Framework | statevector-simulator, qiskit-circuit-builder, cirq-circuit-builder | quantum-test-engineer |
-| QC-SW-002: Quantum-Classical Hybrid System Integration | braket-executor, pennylane-hybrid-executor, backend-selector | hybrid-system-architect |
-| QC-SW-003: Quantum SDK/Library Development | qiskit-circuit-builder, cirq-circuit-builder, pennylane-hybrid-executor, tket-compiler | quantum-sdk-developer |
-| QC-HW-001: Hardware Backend Configuration | qubit-mapper, calibration-analyzer, circuit-optimizer, qiskit-circuit-builder | hardware-integrator |
-| QC-HW-002: Multi-Platform Deployment | qiskit-circuit-builder, cirq-circuit-builder, braket-executor, tket-compiler, backend-selector | multi-platform-engineer |
-| QC-SEC-001: Post-Quantum Cryptography Assessment | pqc-evaluator, resource-estimator | pqc-analyst |
-| QC-SEC-002: Quantum Random Number Generation | qrng-generator, qiskit-circuit-builder, statevector-simulator | qrng-engineer |
-| QC-APP-001: Quantum Optimization Application | qubo-formulator, ansatz-designer, pennylane-hybrid-executor | quantum-optimization-engineer |
-| QC-APP-002: Quantum Finance Application | pennylane-hybrid-executor, qiskit-circuit-builder, qubo-formulator | quantum-finance-analyst |
-| QC-DOC-001: Quantum Algorithm Documentation | resource-estimator, statevector-simulator, qiskit-circuit-builder | quantum-documentation-specialist |
-| QC-DOC-002: Quantum Resource Estimation | resource-estimator, qsharp-compiler | quantum-documentation-specialist |
-| QC-EDU-001: Quantum Computing Training Program | statevector-simulator, qiskit-circuit-builder, pennylane-hybrid-executor | quantum-documentation-specialist |
+| Process | Recommended Skills | Recommended Agents | Integrated |
+|---------|-------------------|-------------------|------------|
+| QC-ALGO-001: Quantum Circuit Design and Optimization | qiskit-circuit-builder, cirq-circuit-builder, circuit-optimizer, tket-compiler, pyzx-simplifier, qubit-mapper | quantum-circuit-architect | [x] |
+| QC-ALGO-002: Variational Algorithm Implementation | pennylane-hybrid-executor, ansatz-designer, barren-plateau-analyzer, qubo-formulator | variational-algorithm-specialist | [x] |
+| QC-ALGO-003: Quantum Algorithm Benchmarking | statevector-simulator, rb-benchmarker, tensor-network-simulator, resource-estimator | algorithm-benchmarker | [x] |
+| QC-ERR-001: Error Mitigation Strategy Implementation | mitiq-error-mitigator, noise-modeler, rb-benchmarker, calibration-analyzer | error-mitigation-engineer | [x] |
+| QC-ERR-002: Quantum Error Correction Code Implementation | qec-code-builder, stim-simulator, pymatching-decoder, resource-estimator | qec-specialist | [x] |
+| QC-ERR-003: Hardware Noise Characterization | rb-benchmarker, noise-modeler, calibration-analyzer, stim-simulator | noise-characterizer | [x] |
+| QC-CHEM-001: Molecular Ground State Energy Calculation | openfermion-hamiltonian, pyscf-interface, qiskit-nature-solver, ansatz-designer | quantum-chemist | [x] |
+| QC-CHEM-002: Hamiltonian Simulation Implementation | trotter-simulator, openfermion-hamiltonian, qiskit-nature-solver, tensor-network-simulator | hamiltonian-simulator | [x] |
+| QC-ML-001: Quantum Classifier Implementation | quantum-kernel-estimator, vqc-trainer, data-encoder, pennylane-hybrid-executor | qml-engineer | [x] |
+| QC-ML-002: Quantum Neural Network Training | vqc-trainer, barren-plateau-analyzer, data-encoder, pennylane-hybrid-executor | qnn-trainer | [x] |
+| QC-SW-001: Quantum Circuit Testing Framework | statevector-simulator, qiskit-circuit-builder, cirq-circuit-builder | quantum-test-engineer | [x] |
+| QC-SW-002: Quantum-Classical Hybrid System Integration | braket-executor, pennylane-hybrid-executor, backend-selector | hybrid-system-architect | [x] |
+| QC-SW-003: Quantum SDK/Library Development | qiskit-circuit-builder, cirq-circuit-builder, pennylane-hybrid-executor, tket-compiler | quantum-sdk-developer | [x] |
+| QC-HW-001: Hardware Backend Configuration | qubit-mapper, calibration-analyzer, circuit-optimizer, qiskit-circuit-builder | hardware-integrator | [x] |
+| QC-HW-002: Multi-Platform Deployment | qiskit-circuit-builder, cirq-circuit-builder, braket-executor, tket-compiler, backend-selector | multi-platform-engineer | [x] |
+| QC-SEC-001: Post-Quantum Cryptography Assessment | pqc-evaluator, resource-estimator | pqc-analyst | [x] |
+| QC-SEC-002: Quantum Random Number Generation | qrng-generator, qiskit-circuit-builder, statevector-simulator | qrng-engineer | [x] |
+| QC-APP-001: Quantum Optimization Application | qubo-formulator, ansatz-designer, pennylane-hybrid-executor | quantum-optimization-engineer | [x] |
+| QC-APP-002: Quantum Finance Application | pennylane-hybrid-executor, qiskit-circuit-builder, qubo-formulator | quantum-finance-analyst | [x] |
+| QC-DOC-001: Quantum Algorithm Documentation | resource-estimator, statevector-simulator, qiskit-circuit-builder | quantum-documentation-specialist | [x] |
+| QC-DOC-002: Quantum Resource Estimation | resource-estimator, qsharp-compiler | quantum-documentation-specialist | [x] |
+| QC-EDU-001: Quantum Computing Training Program | statevector-simulator, qiskit-circuit-builder, pennylane-hybrid-executor | quantum-documentation-specialist | [x] |
 
 ---
 

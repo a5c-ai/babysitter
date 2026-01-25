@@ -208,7 +208,8 @@ export const hardnessVerificationTask = defineTask('hardness-verification', (arg
   kind: 'agent',
   title: 'Verify problem NP-hardness via reduction',
   agent: {
-    name: 'hardness-verifier',
+    name: 'complexity-theorist',
+    skills: ['reduction-builder', 'complexity-class-oracle'],
     prompt: {
       role: 'complexity theorist',
       task: 'Verify or establish NP-hardness of the optimization problem via reduction',
@@ -250,7 +251,8 @@ export const inapproximabilityAnalysisTask = defineTask('inapproximability-analy
   kind: 'agent',
   title: 'Analyze inapproximability results',
   agent: {
-    name: 'inapproximability-analyst',
+    name: 'approximation-specialist',
+    skills: ['approximation-ratio-calculator', 'reduction-builder', 'complexity-class-oracle'],
     prompt: {
       role: 'approximation complexity specialist',
       task: 'Analyze known inapproximability results and lower bounds for the problem',
@@ -303,7 +305,8 @@ export const approximationTechniqueSelectionTask = defineTask('approximation-tec
   kind: 'agent',
   title: 'Select approximation technique',
   agent: {
-    name: 'technique-selector',
+    name: 'approximation-specialist',
+    skills: ['approximation-ratio-calculator', 'probabilistic-analysis-toolkit'],
     prompt: {
       role: 'approximation algorithm designer',
       task: 'Select the most appropriate approximation technique for the problem',
@@ -356,7 +359,8 @@ export const lpRelaxationRoundingTask = defineTask('lp-relaxation-rounding', (ar
   kind: 'agent',
   title: 'Apply LP relaxation and rounding techniques',
   agent: {
-    name: 'lp-rounding-designer',
+    name: 'approximation-specialist',
+    skills: ['approximation-ratio-calculator', 'smt-solver-interface'],
     prompt: {
       role: 'LP-based approximation specialist',
       task: 'Design LP relaxation and rounding scheme for the problem',
@@ -414,7 +418,8 @@ export const approximationAlgorithmDesignTask = defineTask('approximation-algori
   kind: 'agent',
   title: 'Design approximation algorithm',
   agent: {
-    name: 'algorithm-designer',
+    name: 'approximation-specialist',
+    skills: ['approximation-ratio-calculator', 'asymptotic-notation-calculator'],
     prompt: {
       role: 'approximation algorithm designer',
       task: 'Design complete approximation algorithm with guaranteed ratio',

@@ -3,6 +3,8 @@
  * @description Systematic framework for sequencing instructional activities including attention, objectives, recall, presentation, guidance, practice, feedback, assessment, and transfer
  * @inputs { lessonTopic: string, learningObjectives: array, targetAudience: object, contentMaterials: array, constraints: object }
  * @outputs { success: boolean, instructionalSequence: array, lessonPlan: object, materials: array, artifacts: array }
+ * @recommendedSkills SK-EDU-002 (learning-objectives-writing), SK-EDU-014 (learning-transfer-design), SK-EDU-006 (multimedia-learning-design)
+ * @recommendedAgents AG-EDU-001 (instructional-design-lead), AG-EDU-010 (learning-experience-designer)
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

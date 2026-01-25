@@ -3,6 +3,8 @@
  * @description Financial planning and management workflow for arts organizations including annual budgeting, cash flow management, variance analysis, and financial reporting
  * @inputs { fiscalYear: string, organizationType: string, annualBudget: number, reportingPeriod: string }
  * @outputs { success: boolean, budgetReport: object, varianceAnalysis: object, cashFlowForecast: object, artifacts: array }
+ * @recommendedSkills SK-AC-002 (grant-proposal-writing), SK-AC-009 (donor-relationship-management), SK-AC-007 (audience-analytics)
+ * @recommendedAgents AG-AC-002 (arts-administrator-agent), AG-AC-003 (development-officer-agent)
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

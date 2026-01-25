@@ -253,7 +253,8 @@ export const problemAnalysisTask = defineTask('qc-problem-analysis', (args, task
   kind: 'agent',
   title: 'Quantum Problem Analysis',
   agent: {
-    name: 'general-purpose',
+    name: 'quantum-circuit-architect',
+    skills: ['qiskit-circuit-builder', 'cirq-circuit-builder', 'circuit-optimizer', 'tket-compiler', 'pyzx-simplifier', 'qubit-mapper'],
     prompt: {
       role: 'Quantum Algorithm Design Specialist',
       task: 'Analyze computational problem and estimate quantum resource requirements',
@@ -301,7 +302,8 @@ export const circuitArchitectureTask = defineTask('qc-circuit-architecture', (ar
   kind: 'agent',
   title: 'Quantum Circuit Architecture Design',
   agent: {
-    name: 'general-purpose',
+    name: 'quantum-circuit-architect',
+    skills: ['qiskit-circuit-builder', 'cirq-circuit-builder', 'circuit-optimizer', 'tket-compiler', 'pyzx-simplifier', 'qubit-mapper'],
     prompt: {
       role: 'Quantum Circuit Architect',
       task: 'Design the high-level architecture of the quantum circuit',
@@ -347,7 +349,8 @@ export const circuitImplementationTask = defineTask('qc-circuit-implementation',
   kind: 'agent',
   title: 'Quantum Circuit Implementation',
   agent: {
-    name: 'general-purpose',
+    name: 'quantum-circuit-architect',
+    skills: ['qiskit-circuit-builder', 'cirq-circuit-builder', 'circuit-optimizer', 'tket-compiler', 'pyzx-simplifier', 'qubit-mapper'],
     prompt: {
       role: 'Quantum Software Developer',
       task: 'Implement the quantum circuit using the specified framework',
@@ -391,7 +394,8 @@ export const circuitOptimizationTask = defineTask('qc-circuit-optimization', (ar
   kind: 'agent',
   title: 'Quantum Circuit Optimization',
   agent: {
-    name: 'general-purpose',
+    name: 'quantum-circuit-architect',
+    skills: ['qiskit-circuit-builder', 'cirq-circuit-builder', 'circuit-optimizer', 'tket-compiler', 'pyzx-simplifier', 'qubit-mapper'],
     prompt: {
       role: 'Quantum Circuit Optimization Specialist',
       task: 'Optimize the quantum circuit for depth and gate count',
@@ -435,7 +439,8 @@ export const hardwareTranspilationTask = defineTask('qc-hardware-transpilation',
   kind: 'agent',
   title: 'Hardware Transpilation',
   agent: {
-    name: 'general-purpose',
+    name: 'quantum-circuit-architect',
+    skills: ['qiskit-circuit-builder', 'cirq-circuit-builder', 'circuit-optimizer', 'tket-compiler', 'pyzx-simplifier', 'qubit-mapper'],
     prompt: {
       role: 'Quantum Hardware Integration Specialist',
       task: 'Transpile circuit to native hardware gate set',
@@ -482,7 +487,8 @@ export const simulationValidationTask = defineTask('qc-simulation-validation', (
   kind: 'agent',
   title: 'Simulation Validation',
   agent: {
-    name: 'general-purpose',
+    name: 'quantum-circuit-architect',
+    skills: ['qiskit-circuit-builder', 'cirq-circuit-builder', 'circuit-optimizer', 'tket-compiler', 'pyzx-simplifier', 'qubit-mapper'],
     prompt: {
       role: 'Quantum Verification Specialist',
       task: 'Validate circuit correctness through simulation',
@@ -527,7 +533,8 @@ export const circuitDocumentationTask = defineTask('qc-circuit-documentation', (
   kind: 'agent',
   title: 'Circuit Documentation',
   agent: {
-    name: 'general-purpose',
+    name: 'quantum-circuit-architect',
+    skills: ['qiskit-circuit-builder', 'cirq-circuit-builder', 'circuit-optimizer', 'tket-compiler', 'pyzx-simplifier', 'qubit-mapper'],
     prompt: {
       role: 'Technical Documentation Specialist',
       task: 'Create comprehensive documentation for the quantum circuit',

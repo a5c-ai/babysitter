@@ -288,7 +288,8 @@ export const calibrationDataRetrievalTask = defineTask('qc-calibration-retrieval
   kind: 'agent',
   title: 'Calibration Data Retrieval',
   agent: {
-    name: 'general-purpose',
+    name: 'noise-characterizer',
+    skills: ['rb-benchmarker', 'noise-modeler', 'calibration-analyzer', 'stim-simulator'],
     prompt: {
       role: 'Quantum Hardware Specialist',
       task: 'Retrieve calibration data from quantum hardware backend',
@@ -332,7 +333,8 @@ export const coherenceMeasurementTask = defineTask('qc-coherence-measurement', (
   kind: 'agent',
   title: 'Coherence Time Measurement',
   agent: {
-    name: 'general-purpose',
+    name: 'noise-characterizer',
+    skills: ['rb-benchmarker', 'noise-modeler', 'calibration-analyzer', 'stim-simulator'],
     prompt: {
       role: 'Quantum Coherence Specialist',
       task: 'Measure T1 and T2 coherence times for all qubits',
@@ -376,7 +378,8 @@ export const randomizedBenchmarkingTask = defineTask('qc-randomized-benchmarking
   kind: 'agent',
   title: 'Randomized Benchmarking',
   agent: {
-    name: 'general-purpose',
+    name: 'noise-characterizer',
+    skills: ['rb-benchmarker', 'noise-modeler', 'calibration-analyzer', 'stim-simulator'],
     prompt: {
       role: 'Quantum Benchmarking Specialist',
       task: 'Perform randomized benchmarking to measure gate fidelities',
@@ -420,7 +423,8 @@ export const readoutCharacterizationTask = defineTask('qc-readout-characterizati
   kind: 'agent',
   title: 'Readout Error Characterization',
   agent: {
-    name: 'general-purpose',
+    name: 'noise-characterizer',
+    skills: ['rb-benchmarker', 'noise-modeler', 'calibration-analyzer', 'stim-simulator'],
     prompt: {
       role: 'Quantum Measurement Specialist',
       task: 'Characterize readout errors for all qubits',
@@ -463,7 +467,8 @@ export const crosstalkCharacterizationTask = defineTask('qc-crosstalk-characteri
   kind: 'agent',
   title: 'Crosstalk Characterization',
   agent: {
-    name: 'general-purpose',
+    name: 'noise-characterizer',
+    skills: ['rb-benchmarker', 'noise-modeler', 'calibration-analyzer', 'stim-simulator'],
     prompt: {
       role: 'Quantum Crosstalk Specialist',
       task: 'Characterize crosstalk between qubits',
@@ -506,7 +511,8 @@ export const gateSetTomographyTask = defineTask('qc-gate-set-tomography', (args,
   kind: 'agent',
   title: 'Gate Set Tomography',
   agent: {
-    name: 'general-purpose',
+    name: 'noise-characterizer',
+    skills: ['rb-benchmarker', 'noise-modeler', 'calibration-analyzer', 'stim-simulator'],
     prompt: {
       role: 'Quantum Tomography Specialist',
       task: 'Perform gate set tomography for detailed gate characterization',
@@ -549,7 +555,8 @@ export const noiseModelConstructionTask = defineTask('qc-noise-model-constructio
   kind: 'agent',
   title: 'Noise Model Construction',
   agent: {
-    name: 'general-purpose',
+    name: 'noise-characterizer',
+    skills: ['rb-benchmarker', 'noise-modeler', 'calibration-analyzer', 'stim-simulator'],
     prompt: {
       role: 'Quantum Noise Modeling Specialist',
       task: 'Construct comprehensive noise model from characterization data',
@@ -591,7 +598,8 @@ export const qubitRankingRecommendationsTask = defineTask('qc-qubit-ranking', (a
   kind: 'agent',
   title: 'Qubit Ranking and Recommendations',
   agent: {
-    name: 'general-purpose',
+    name: 'noise-characterizer',
+    skills: ['rb-benchmarker', 'noise-modeler', 'calibration-analyzer', 'stim-simulator'],
     prompt: {
       role: 'Quantum Hardware Optimization Specialist',
       task: 'Rank qubits and provide optimization recommendations',
@@ -635,7 +643,8 @@ export const noiseCharacterizationReportTask = defineTask('qc-noise-report', (ar
   kind: 'agent',
   title: 'Noise Characterization Report',
   agent: {
-    name: 'general-purpose',
+    name: 'noise-characterizer',
+    skills: ['rb-benchmarker', 'noise-modeler', 'calibration-analyzer', 'stim-simulator'],
     prompt: {
       role: 'Technical Documentation Specialist',
       task: 'Generate comprehensive noise characterization report',

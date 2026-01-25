@@ -3,6 +3,8 @@
  * @description Systematic preparation for program accreditation including self-study, evidence collection, and continuous improvement documentation
  * @inputs { programName: string, accreditingBody: string, standards: array, timeline: object, context: object }
  * @outputs { success: boolean, selfStudy: object, evidencePortfolio: object, improvementPlan: object, artifacts: array }
+ * @recommendedSkills SK-EDU-013 (quality-assurance-review), SK-EDU-015 (curriculum-gap-analysis), SK-EDU-009 (learning-analytics-interpretation)
+ * @recommendedAgents AG-EDU-009 (quality-assurance-coordinator), AG-EDU-007 (learning-evaluation-analyst)
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

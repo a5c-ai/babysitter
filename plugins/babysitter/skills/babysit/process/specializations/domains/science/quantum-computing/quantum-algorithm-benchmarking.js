@@ -254,7 +254,8 @@ export const benchmarkSuiteDesignTask = defineTask('qc-benchmark-suite-design', 
   kind: 'agent',
   title: 'Benchmark Suite Design',
   agent: {
-    name: 'general-purpose',
+    name: 'algorithm-benchmarker',
+    skills: ['statevector-simulator', 'rb-benchmarker', 'tensor-network-simulator', 'resource-estimator'],
     prompt: {
       role: 'Quantum Benchmarking Specialist',
       task: 'Design comprehensive benchmark suite for quantum algorithms',
@@ -298,7 +299,8 @@ export const classicalBaselineExecutionTask = defineTask('qc-classical-baseline'
   kind: 'agent',
   title: 'Classical Baseline Execution',
   agent: {
-    name: 'general-purpose',
+    name: 'algorithm-benchmarker',
+    skills: ['statevector-simulator', 'rb-benchmarker', 'tensor-network-simulator', 'resource-estimator'],
     prompt: {
       role: 'Classical Algorithm Specialist',
       task: 'Execute classical baseline algorithms for benchmark comparison',
@@ -341,7 +343,8 @@ export const quantumSimulatorExecutionTask = defineTask('qc-simulator-execution'
   kind: 'agent',
   title: 'Quantum Simulator Execution',
   agent: {
-    name: 'general-purpose',
+    name: 'algorithm-benchmarker',
+    skills: ['statevector-simulator', 'rb-benchmarker', 'tensor-network-simulator', 'resource-estimator'],
     prompt: {
       role: 'Quantum Simulation Specialist',
       task: 'Execute quantum algorithms on simulators for benchmarking',
@@ -384,7 +387,8 @@ export const quantumHardwareExecutionTask = defineTask('qc-hardware-execution', 
   kind: 'agent',
   title: 'Quantum Hardware Execution',
   agent: {
-    name: 'general-purpose',
+    name: 'algorithm-benchmarker',
+    skills: ['statevector-simulator', 'rb-benchmarker', 'tensor-network-simulator', 'resource-estimator'],
     prompt: {
       role: 'Quantum Hardware Execution Specialist',
       task: 'Execute quantum algorithms on real hardware for benchmarking',
@@ -427,7 +431,8 @@ export const performanceMetricCalculationTask = defineTask('qc-performance-metri
   kind: 'agent',
   title: 'Performance Metric Calculation',
   agent: {
-    name: 'general-purpose',
+    name: 'algorithm-benchmarker',
+    skills: ['statevector-simulator', 'rb-benchmarker', 'tensor-network-simulator', 'resource-estimator'],
     prompt: {
       role: 'Performance Analysis Specialist',
       task: 'Calculate and consolidate performance metrics across all benchmarks',
@@ -470,7 +475,8 @@ export const scalingAnalysisTask = defineTask('qc-scaling-analysis', (args, task
   kind: 'agent',
   title: 'Scaling Analysis',
   agent: {
-    name: 'general-purpose',
+    name: 'algorithm-benchmarker',
+    skills: ['statevector-simulator', 'rb-benchmarker', 'tensor-network-simulator', 'resource-estimator'],
     prompt: {
       role: 'Computational Complexity Specialist',
       task: 'Analyze scaling behavior of quantum vs classical algorithms',
@@ -514,7 +520,8 @@ export const quantumAdvantageAnalysisTask = defineTask('qc-advantage-analysis', 
   kind: 'agent',
   title: 'Quantum Advantage Analysis',
   agent: {
-    name: 'general-purpose',
+    name: 'algorithm-benchmarker',
+    skills: ['statevector-simulator', 'rb-benchmarker', 'tensor-network-simulator', 'resource-estimator'],
     prompt: {
       role: 'Quantum Advantage Assessment Specialist',
       task: 'Analyze conditions for quantum advantage based on benchmark results',
@@ -558,7 +565,8 @@ export const benchmarkReportGenerationTask = defineTask('qc-benchmark-report', (
   kind: 'agent',
   title: 'Benchmark Report Generation',
   agent: {
-    name: 'general-purpose',
+    name: 'algorithm-benchmarker',
+    skills: ['statevector-simulator', 'rb-benchmarker', 'tensor-network-simulator', 'resource-estimator'],
     prompt: {
       role: 'Technical Report Specialist',
       task: 'Generate comprehensive benchmark report',

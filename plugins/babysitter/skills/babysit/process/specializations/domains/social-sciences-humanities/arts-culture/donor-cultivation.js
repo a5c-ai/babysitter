@@ -3,6 +3,8 @@
  * @description Systematic approach to identifying, cultivating, soliciting, and stewarding individual donors including major gift strategies and planned giving programs
  * @inputs { organizationName: string, donorSegment: string, campaignGoal: number, donorData: object }
  * @outputs { success: boolean, cultivationPlan: object, solicitationStrategy: object, stewardshipProgram: object, artifacts: array }
+ * @recommendedSkills SK-AC-009 (donor-relationship-management), SK-AC-002 (grant-proposal-writing), SK-AC-013 (stakeholder-facilitation)
+ * @recommendedAgents AG-AC-003 (development-officer-agent), AG-AC-002 (arts-administrator-agent)
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

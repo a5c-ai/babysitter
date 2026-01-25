@@ -3,6 +3,8 @@
  * @description Methodology for designing and delivering educational programs for schools, families, and adult learners including curriculum development, teacher training, and program evaluation
  * @inputs { programName: string, targetAudience: string, programType: string, subjectMatter: object, institutionInfo: object }
  * @outputs { success: boolean, curriculum: object, deliveryPlan: object, evaluationFramework: object, artifacts: array }
+ * @recommendedSkills SK-AC-008 (interpretive-writing), SK-AC-012 (accessibility-compliance), SK-AC-014 (digital-engagement-strategy)
+ * @recommendedAgents AG-AC-007 (education-outreach-agent)
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

@@ -3,6 +3,8 @@
  * @description Framework for developing organizational vision, mission, goals, and implementation strategies for cultural institutions using balanced scorecard and cultural vitality approaches
  * @inputs { organizationName: string, organizationType: string, currentState: object, planningHorizon: string }
  * @outputs { success: boolean, strategicPlan: object, implementation: object, metrics: array, artifacts: array }
+ * @recommendedSkills SK-AC-002 (grant-proposal-writing), SK-AC-009 (donor-relationship-management), SK-AC-013 (stakeholder-facilitation), SK-AC-010 (cultural-policy-analysis)
+ * @recommendedAgents AG-AC-002 (arts-administrator-agent), AG-AC-009 (cultural-policy-agent)
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

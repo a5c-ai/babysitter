@@ -159,8 +159,9 @@ export async function process(inputs, ctx) {
 export const reliefScenarioIdentificationTask = defineTask('relief-scenario-identification', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Identify relief scenarios',
+  skill: { name: 'relief-system-designer' },
   agent: {
-    name: 'relief-engineer',
+    name: 'pressure-relief-engineer',
     prompt: {
       role: 'pressure relief engineer',
       task: 'Identify all credible relief scenarios for protected equipment',
@@ -210,8 +211,9 @@ export const reliefScenarioIdentificationTask = defineTask('relief-scenario-iden
 export const reliefRateCalculationTask = defineTask('relief-rate-calculation', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Calculate required relief rates',
+  skill: { name: 'relief-system-designer' },
   agent: {
-    name: 'relief-calculator',
+    name: 'pressure-relief-engineer',
     prompt: {
       role: 'relief rate calculation engineer',
       task: 'Calculate required relief rates for each scenario',
@@ -262,8 +264,9 @@ export const reliefRateCalculationTask = defineTask('relief-rate-calculation', (
 export const reliefDeviceSelectionTask = defineTask('relief-device-selection', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Select relief device types',
+  skill: { name: 'relief-system-designer' },
   agent: {
-    name: 'device-selector',
+    name: 'pressure-relief-engineer',
     prompt: {
       role: 'relief device selection engineer',
       task: 'Select appropriate relief device types',
@@ -312,8 +315,9 @@ export const reliefDeviceSelectionTask = defineTask('relief-device-selection', (
 export const reliefDeviceSizingTask = defineTask('relief-device-sizing', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Size relief devices per API 520',
+  skill: { name: 'relief-system-designer' },
   agent: {
-    name: 'sizing-engineer',
+    name: 'pressure-relief-engineer',
     prompt: {
       role: 'relief device sizing engineer',
       task: 'Size relief devices per API 520 methodology',
@@ -365,8 +369,9 @@ export const reliefDeviceSizingTask = defineTask('relief-device-sizing', (args, 
 export const reliefHeaderDesignTask = defineTask('relief-header-design', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Design relief header and collection system',
+  skill: { name: 'relief-system-designer' },
   agent: {
-    name: 'header-engineer',
+    name: 'pressure-relief-engineer',
     prompt: {
       role: 'relief header design engineer',
       task: 'Design relief header and collection system',
@@ -414,8 +419,9 @@ export const reliefHeaderDesignTask = defineTask('relief-header-design', (args, 
 export const disposalSystemDesignTask = defineTask('disposal-system-design', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Design disposal system per API 521',
+  skill: { name: 'consequence-modeler' },
   agent: {
-    name: 'disposal-engineer',
+    name: 'pressure-relief-engineer',
     prompt: {
       role: 'flare/disposal system engineer',
       task: 'Design relief disposal system per API 521',

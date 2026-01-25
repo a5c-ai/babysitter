@@ -3,6 +3,8 @@
  * @description Structured approach to developing and executing marketing strategies for exhibitions, performances, and cultural programs including audience segmentation, messaging, and channel optimization
  * @inputs { campaignName: string, programType: string, targetAudiences: array, budget: number, timeline: object }
  * @outputs { success: boolean, campaignStrategy: object, contentPlan: object, channelMix: object, artifacts: array }
+ * @recommendedSkills SK-AC-007 (audience-analytics), SK-AC-014 (digital-engagement-strategy), SK-AC-008 (interpretive-writing)
+ * @recommendedAgents AG-AC-008 (marketing-communications-agent)
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

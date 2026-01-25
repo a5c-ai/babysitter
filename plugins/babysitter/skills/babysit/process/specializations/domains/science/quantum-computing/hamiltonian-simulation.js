@@ -260,7 +260,8 @@ export const hamiltonianAnalysisTask = defineTask('hs-hamiltonian-analysis', (ar
   kind: 'agent',
   title: 'Hamiltonian Analysis',
   agent: {
-    name: 'general-purpose',
+    name: 'hamiltonian-simulator',
+    skills: ['trotter-simulator', 'openfermion-hamiltonian', 'qiskit-nature-solver', 'tensor-network-simulator'],
     prompt: {
       role: 'Quantum Hamiltonian Specialist',
       task: 'Analyze Hamiltonian structure for simulation',
@@ -305,7 +306,8 @@ export const simulationMethodOptimizationTask = defineTask('hs-method-optimizati
   kind: 'agent',
   title: 'Simulation Method Optimization',
   agent: {
-    name: 'general-purpose',
+    name: 'hamiltonian-simulator',
+    skills: ['trotter-simulator', 'openfermion-hamiltonian', 'qiskit-nature-solver', 'tensor-network-simulator'],
     prompt: {
       role: 'Quantum Simulation Method Specialist',
       task: 'Optimize simulation method parameters',
@@ -348,7 +350,8 @@ export const evolutionCircuitConstructionTask = defineTask('hs-circuit-construct
   kind: 'agent',
   title: 'Evolution Circuit Construction',
   agent: {
-    name: 'general-purpose',
+    name: 'hamiltonian-simulator',
+    skills: ['trotter-simulator', 'openfermion-hamiltonian', 'qiskit-nature-solver', 'tensor-network-simulator'],
     prompt: {
       role: 'Quantum Circuit Synthesis Specialist',
       task: 'Construct time evolution circuit from Hamiltonian',
@@ -391,7 +394,8 @@ export const simulationCircuitOptimizationTask = defineTask('hs-circuit-optimiza
   kind: 'agent',
   title: 'Simulation Circuit Optimization',
   agent: {
-    name: 'general-purpose',
+    name: 'hamiltonian-simulator',
+    skills: ['trotter-simulator', 'openfermion-hamiltonian', 'qiskit-nature-solver', 'tensor-network-simulator'],
     prompt: {
       role: 'Quantum Circuit Optimization Specialist',
       task: 'Optimize evolution circuit for depth and gate count',
@@ -434,7 +438,8 @@ export const simulationErrorAnalysisTask = defineTask('hs-error-analysis', (args
   kind: 'agent',
   title: 'Simulation Error Analysis',
   agent: {
-    name: 'general-purpose',
+    name: 'hamiltonian-simulator',
+    skills: ['trotter-simulator', 'openfermion-hamiltonian', 'qiskit-nature-solver', 'tensor-network-simulator'],
     prompt: {
       role: 'Quantum Error Analysis Specialist',
       task: 'Analyze error bounds for Hamiltonian simulation',
@@ -478,7 +483,8 @@ export const simulationValidationTask = defineTask('hs-validation', (args, taskC
   kind: 'agent',
   title: 'Simulation Validation',
   agent: {
-    name: 'general-purpose',
+    name: 'hamiltonian-simulator',
+    skills: ['trotter-simulator', 'openfermion-hamiltonian', 'qiskit-nature-solver', 'tensor-network-simulator'],
     prompt: {
       role: 'Quantum Simulation Validation Specialist',
       task: 'Validate Hamiltonian simulation correctness',
@@ -521,7 +527,8 @@ export const simulationResourceEstimationTask = defineTask('hs-resource-estimati
   kind: 'agent',
   title: 'Simulation Resource Estimation',
   agent: {
-    name: 'general-purpose',
+    name: 'hamiltonian-simulator',
+    skills: ['trotter-simulator', 'openfermion-hamiltonian', 'qiskit-nature-solver', 'tensor-network-simulator'],
     prompt: {
       role: 'Quantum Resource Estimation Specialist',
       task: 'Estimate resources required for Hamiltonian simulation',
@@ -566,7 +573,8 @@ export const hamiltonianSimulationReportTask = defineTask('hs-report', (args, ta
   kind: 'agent',
   title: 'Hamiltonian Simulation Report',
   agent: {
-    name: 'general-purpose',
+    name: 'hamiltonian-simulator',
+    skills: ['trotter-simulator', 'openfermion-hamiltonian', 'qiskit-nature-solver', 'tensor-network-simulator'],
     prompt: {
       role: 'Technical Documentation Specialist',
       task: 'Generate comprehensive Hamiltonian simulation report',

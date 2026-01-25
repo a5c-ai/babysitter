@@ -247,7 +247,8 @@ export const quboIsingFormulationTask = defineTask('qopt-qubo-formulation', (arg
   kind: 'agent',
   title: 'QUBO/Ising Formulation',
   agent: {
-    name: 'general-purpose',
+    name: 'quantum-optimization-engineer',
+    skills: ['qubo-formulator', 'ansatz-designer', 'pennylane-hybrid-executor'],
     prompt: {
       role: 'Combinatorial Optimization Specialist',
       task: 'Formulate optimization problem as QUBO/Ising model',
@@ -290,7 +291,8 @@ export const problemEncodingTask = defineTask('qopt-problem-encoding', (args, ta
   kind: 'agent',
   title: 'Problem Encoding',
   agent: {
-    name: 'general-purpose',
+    name: 'quantum-optimization-engineer',
+    skills: ['qubo-formulator', 'ansatz-designer', 'pennylane-hybrid-executor'],
     prompt: {
       role: 'Quantum Encoding Specialist',
       task: 'Encode optimization problem for quantum processing',
@@ -332,7 +334,8 @@ export const optimizationCircuitDesignTask = defineTask('qopt-circuit-design', (
   kind: 'agent',
   title: 'Optimization Circuit Design',
   agent: {
-    name: 'general-purpose',
+    name: 'quantum-optimization-engineer',
+    skills: ['qubo-formulator', 'ansatz-designer', 'pennylane-hybrid-executor'],
     prompt: {
       role: 'QAOA Circuit Design Specialist',
       task: 'Design QAOA or optimization circuit',
@@ -375,7 +378,8 @@ export const classicalPostProcessingTask = defineTask('qopt-post-processing', (a
   kind: 'agent',
   title: 'Classical Post-Processing',
   agent: {
-    name: 'general-purpose',
+    name: 'quantum-optimization-engineer',
+    skills: ['qubo-formulator', 'ansatz-designer', 'pennylane-hybrid-executor'],
     prompt: {
       role: 'Post-Processing Specialist',
       task: 'Configure classical post-processing for quantum results',
@@ -417,7 +421,8 @@ export const quantumOptimizationExecutionTask = defineTask('qopt-execution', (ar
   kind: 'agent',
   title: 'Quantum Optimization Execution',
   agent: {
-    name: 'general-purpose',
+    name: 'quantum-optimization-engineer',
+    skills: ['qubo-formulator', 'ansatz-designer', 'pennylane-hybrid-executor'],
     prompt: {
       role: 'Quantum Execution Specialist',
       task: 'Execute quantum optimization algorithm',
@@ -461,7 +466,8 @@ export const solutionDecodingTask = defineTask('qopt-solution-decoding', (args, 
   kind: 'agent',
   title: 'Solution Decoding',
   agent: {
-    name: 'general-purpose',
+    name: 'quantum-optimization-engineer',
+    skills: ['qubo-formulator', 'ansatz-designer', 'pennylane-hybrid-executor'],
     prompt: {
       role: 'Solution Decoding Specialist',
       task: 'Decode quantum solution to problem solution',
@@ -504,7 +510,8 @@ export const classicalSolverBenchmarkTask = defineTask('qopt-classical-benchmark
   kind: 'agent',
   title: 'Classical Solver Benchmark',
   agent: {
-    name: 'general-purpose',
+    name: 'quantum-optimization-engineer',
+    skills: ['qubo-formulator', 'ansatz-designer', 'pennylane-hybrid-executor'],
     prompt: {
       role: 'Optimization Benchmarking Specialist',
       task: 'Benchmark against classical solvers',
@@ -547,7 +554,8 @@ export const applicationPackagingTask = defineTask('qopt-application-packaging',
   kind: 'agent',
   title: 'Application Packaging',
   agent: {
-    name: 'general-purpose',
+    name: 'quantum-optimization-engineer',
+    skills: ['qubo-formulator', 'ansatz-designer', 'pennylane-hybrid-executor'],
     prompt: {
       role: 'Application Packaging Specialist',
       task: 'Package optimization application for deployment',

@@ -250,7 +250,8 @@ export const cryptographicInventoryTask = defineTask('pqc-crypto-inventory', (ar
   kind: 'agent',
   title: 'Cryptographic Inventory',
   agent: {
-    name: 'general-purpose',
+    name: 'pqc-analyst',
+    skills: ['pqc-evaluator', 'resource-estimator'],
     prompt: {
       role: 'Cryptographic Audit Specialist',
       task: 'Inventory all cryptographic usage in the organization',
@@ -293,7 +294,8 @@ export const quantumVulnerabilityAssessmentTask = defineTask('pqc-vulnerability-
   kind: 'agent',
   title: 'Quantum Vulnerability Assessment',
   agent: {
-    name: 'general-purpose',
+    name: 'pqc-analyst',
+    skills: ['pqc-evaluator', 'resource-estimator'],
     prompt: {
       role: 'Quantum Security Specialist',
       task: 'Assess quantum vulnerability of cryptographic algorithms',
@@ -337,7 +339,8 @@ export const nistPqcCandidateEvaluationTask = defineTask('pqc-nist-evaluation', 
   kind: 'agent',
   title: 'NIST PQC Candidate Evaluation',
   agent: {
-    name: 'general-purpose',
+    name: 'pqc-analyst',
+    skills: ['pqc-evaluator', 'resource-estimator'],
     prompt: {
       role: 'Post-Quantum Cryptography Specialist',
       task: 'Evaluate NIST PQC candidates for organization needs',
@@ -379,7 +382,8 @@ export const migrationStrategyDesignTask = defineTask('pqc-migration-strategy', 
   kind: 'agent',
   title: 'Migration Strategy Design',
   agent: {
-    name: 'general-purpose',
+    name: 'pqc-analyst',
+    skills: ['pqc-evaluator', 'resource-estimator'],
     prompt: {
       role: 'Cryptographic Migration Specialist',
       task: 'Design migration strategy from vulnerable to PQC algorithms',
@@ -423,7 +427,8 @@ export const hybridCryptographyPlanningTask = defineTask('pqc-hybrid-planning', 
   kind: 'agent',
   title: 'Hybrid Cryptography Planning',
   agent: {
-    name: 'general-purpose',
+    name: 'pqc-analyst',
+    skills: ['pqc-evaluator', 'resource-estimator'],
     prompt: {
       role: 'Hybrid Cryptography Specialist',
       task: 'Plan hybrid classical-PQC cryptography approach',
@@ -465,7 +470,8 @@ export const pqcImplementationGuidelinesTask = defineTask('pqc-implementation-gu
   kind: 'agent',
   title: 'PQC Implementation Guidelines',
   agent: {
-    name: 'general-purpose',
+    name: 'pqc-analyst',
+    skills: ['pqc-evaluator', 'resource-estimator'],
     prompt: {
       role: 'Cryptographic Implementation Specialist',
       task: 'Create PQC implementation guidelines',
@@ -508,7 +514,8 @@ export const pqcTestingValidationPlanTask = defineTask('pqc-testing-plan', (args
   kind: 'agent',
   title: 'PQC Testing and Validation Plan',
   agent: {
-    name: 'general-purpose',
+    name: 'pqc-analyst',
+    skills: ['pqc-evaluator', 'resource-estimator'],
     prompt: {
       role: 'Cryptographic Testing Specialist',
       task: 'Create testing and validation plan for PQC implementation',
@@ -550,7 +557,8 @@ export const securityValidationReportTask = defineTask('pqc-security-report', (a
   kind: 'agent',
   title: 'Security Validation Report',
   agent: {
-    name: 'general-purpose',
+    name: 'pqc-analyst',
+    skills: ['pqc-evaluator', 'resource-estimator'],
     prompt: {
       role: 'Security Report Specialist',
       task: 'Generate comprehensive PQC security validation report',

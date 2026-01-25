@@ -3,6 +3,8 @@
  * @description Creating standards-compliant learning packages for interoperability across LMS platforms with proper tracking and reporting
  * @inputs { courseName: string, contentStructure: object, trackingRequirements: array, targetStandard: string, lmsTarget: string }
  * @outputs { success: boolean, packageSpec: object, trackingConfig: object, testResults: object, artifacts: array }
+ * @recommendedSkills SK-EDU-005 (elearning-storyboarding), SK-EDU-007 (lms-configuration-administration)
+ * @recommendedAgents AG-EDU-004 (elearning-developer), AG-EDU-005 (learning-technology-administrator)
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

@@ -181,8 +181,9 @@ export async function process(inputs, ctx) {
 export const productRequirementsTask = defineTask('product-requirements', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Specify product purity and recovery requirements',
+  skill: { name: 'distillation-designer' },
   agent: {
-    name: 'process-engineer',
+    name: 'distillation-specialist',
     prompt: {
       role: 'distillation process engineer',
       task: 'Specify product purity and recovery requirements for distillation',
@@ -229,8 +230,9 @@ export const productRequirementsTask = defineTask('product-requirements', (args,
 export const columnConfigurationTask = defineTask('column-configuration', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Select column configuration',
+  skill: { name: 'distillation-designer' },
   agent: {
-    name: 'distillation-engineer',
+    name: 'distillation-specialist',
     prompt: {
       role: 'distillation design engineer',
       task: 'Select appropriate column configuration',
@@ -277,8 +279,9 @@ export const columnConfigurationTask = defineTask('column-configuration', (args,
 export const minimumDesignTask = defineTask('minimum-design', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Determine minimum stages and reflux ratio',
+  skill: { name: 'aspen-plus-simulator' },
   agent: {
-    name: 'separation-engineer',
+    name: 'distillation-specialist',
     prompt: {
       role: 'separation design engineer',
       task: 'Calculate minimum stages and reflux ratio',
@@ -322,8 +325,9 @@ export const minimumDesignTask = defineTask('minimum-design', (args, taskCtx) =>
 export const columnSizingTask = defineTask('column-sizing', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Size column diameter and height',
+  skill: { name: 'equipment-sizing-calculator' },
   agent: {
-    name: 'column-engineer',
+    name: 'distillation-specialist',
     prompt: {
       role: 'column sizing engineer',
       task: 'Size column diameter and height',
@@ -378,8 +382,9 @@ export const columnSizingTask = defineTask('column-sizing', (args, taskCtx) => (
 export const internalsSelectionTask = defineTask('internals-selection', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Select column internals (trays or packing)',
+  skill: { name: 'distillation-designer' },
   agent: {
-    name: 'internals-engineer',
+    name: 'distillation-specialist',
     prompt: {
       role: 'column internals specialist',
       task: 'Select and design column internals',
@@ -427,8 +432,9 @@ export const internalsSelectionTask = defineTask('internals-selection', (args, t
 export const energyOptimizationTask = defineTask('energy-optimization', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Optimize for energy efficiency',
+  skill: { name: 'aspen-plus-simulator' },
   agent: {
-    name: 'energy-engineer',
+    name: 'distillation-specialist',
     prompt: {
       role: 'distillation energy optimization engineer',
       task: 'Optimize distillation for energy efficiency',
@@ -471,8 +477,9 @@ export const energyOptimizationTask = defineTask('energy-optimization', (args, t
 export const operatingProceduresTask = defineTask('operating-procedures', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Develop operating procedures for startup',
+  skill: { name: 'distillation-designer' },
   agent: {
-    name: 'operations-engineer',
+    name: 'distillation-specialist',
     prompt: {
       role: 'distillation operations engineer',
       task: 'Develop startup and operating procedures',
@@ -518,8 +525,9 @@ export const operatingProceduresTask = defineTask('operating-procedures', (args,
 export const columnSpecificationTask = defineTask('column-specification', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Generate column specification sheet',
+  skill: { name: 'equipment-sizing-calculator' },
   agent: {
-    name: 'specification-engineer',
+    name: 'distillation-specialist',
     prompt: {
       role: 'equipment specification engineer',
       task: 'Generate comprehensive column specification sheet',

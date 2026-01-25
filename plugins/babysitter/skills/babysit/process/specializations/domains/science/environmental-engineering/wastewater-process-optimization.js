@@ -201,8 +201,9 @@ export async function process(inputs, ctx) {
 export const processAssessmentTask = defineTask('process-assessment', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Current Process Assessment',
+  skill: { name: 'wastewater-optimization' },
   agent: {
-    name: 'environmental-engineer',
+    name: 'water-treatment-specialist',
     prompt: {
       role: 'Wastewater Process Engineer',
       task: 'Assess current wastewater treatment process performance',
@@ -245,8 +246,9 @@ export const processAssessmentTask = defineTask('process-assessment', (args, tas
 export const benchmarkingTask = defineTask('performance-benchmarking', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Performance Benchmarking',
+  skill: { name: 'wastewater-optimization' },
   agent: {
-    name: 'environmental-engineer',
+    name: 'water-treatment-specialist',
     prompt: {
       role: 'Wastewater Benchmarking Specialist',
       task: 'Benchmark facility performance against industry standards',
@@ -287,8 +289,9 @@ export const benchmarkingTask = defineTask('performance-benchmarking', (args, ta
 export const processModelingTask = defineTask('process-modeling', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Process Modeling and Simulation',
+  skill: { name: 'wastewater-optimization' },
   agent: {
-    name: 'environmental-engineer',
+    name: 'water-treatment-specialist',
     prompt: {
       role: 'Wastewater Process Modeler',
       task: 'Develop and calibrate process model',
@@ -331,8 +334,9 @@ export const processModelingTask = defineTask('process-modeling', (args, taskCtx
 export const optimizationAnalysisTask = defineTask('optimization-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Optimization Opportunity Analysis',
+  skill: { name: 'wastewater-optimization' },
   agent: {
-    name: 'environmental-engineer',
+    name: 'water-treatment-specialist',
     prompt: {
       role: 'Wastewater Optimization Engineer',
       task: 'Identify and analyze optimization opportunities',
@@ -381,8 +385,9 @@ export const optimizationAnalysisTask = defineTask('optimization-analysis', (arg
 export const implementationPlanTask = defineTask('implementation-plan', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Implementation Planning',
+  skill: { name: 'wastewater-optimization' },
   agent: {
-    name: 'environmental-engineer',
+    name: 'water-treatment-specialist',
     prompt: {
       role: 'Wastewater Project Manager',
       task: 'Develop optimization implementation plan',
@@ -425,8 +430,9 @@ export const implementationPlanTask = defineTask('implementation-plan', (args, t
 export const monitoringSetupTask = defineTask('monitoring-setup', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Performance Monitoring Setup',
+  skill: { name: 'wastewater-optimization' },
   agent: {
-    name: 'environmental-engineer',
+    name: 'water-treatment-specialist',
     prompt: {
       role: 'Wastewater Monitoring Specialist',
       task: 'Design performance monitoring system',
@@ -469,8 +475,9 @@ export const monitoringSetupTask = defineTask('monitoring-setup', (args, taskCtx
 export const optimizationReportTask = defineTask('optimization-report', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Optimization Report Generation',
+  skill: { name: 'wastewater-optimization' },
   agent: {
-    name: 'environmental-engineer',
+    name: 'water-treatment-specialist',
     prompt: {
       role: 'Environmental Engineering Report Writer',
       task: 'Generate comprehensive optimization report',

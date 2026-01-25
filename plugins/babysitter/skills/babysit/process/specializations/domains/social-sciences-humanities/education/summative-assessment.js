@@ -3,6 +3,8 @@
  * @description Designing end-of-unit or end-of-course assessments that measure student achievement against learning objectives with validity and reliability
  * @inputs { courseName: string, learningObjectives: array, standards: array, context: object, constraints: object }
  * @outputs { success: boolean, assessmentPlan: object, testBlueprint: object, items: array, validityReport: object, artifacts: array }
+ * @recommendedSkills SK-EDU-003 (assessment-design-validation), SK-EDU-004 (rubric-development), SK-EDU-002 (learning-objectives-writing)
+ * @recommendedAgents AG-EDU-003 (assessment-specialist)
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

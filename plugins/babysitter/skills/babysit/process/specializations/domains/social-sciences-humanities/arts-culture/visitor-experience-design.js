@@ -3,6 +3,8 @@
  * @description Approach to creating engaging visitor journeys including interpretive planning, wayfinding, accessibility accommodations, and experience evaluation
  * @inputs { projectName: string, experienceType: string, visitorProfiles: array, spaceInfo: object, contentFocus: object }
  * @outputs { success: boolean, experienceDesign: object, interpretivePlan: object, wayfinding: object, artifacts: array }
+ * @recommendedSkills SK-AC-004 (exhibition-design), SK-AC-007 (audience-analytics), SK-AC-012 (accessibility-compliance), SK-AC-014 (digital-engagement-strategy)
+ * @recommendedAgents AG-AC-010 (exhibition-designer-agent), AG-AC-007 (education-outreach-agent), AG-AC-008 (marketing-communications-agent)
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

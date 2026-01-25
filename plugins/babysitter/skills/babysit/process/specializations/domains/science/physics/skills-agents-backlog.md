@@ -1223,32 +1223,32 @@ This backlog identifies specialized skills and agents that could enhance the Phy
 
 ## Process to Skills/Agents Mapping
 
-| Process | Recommended Skills | Recommended Agents |
-|---------|-------------------|-------------------|
-| Mathematical Model Derivation | scipy-optimization-toolkit, latex-physics-documenter, qiskit-quantum-simulator | theoretical-model-developer |
-| Perturbation Theory Analysis | scipy-optimization-toolkit, pyscf-quantum-chemistry | perturbation-theory-analyst |
-| Symmetry and Conservation Law Analysis | pyscf-quantum-chemistry, qiskit-quantum-simulator | theoretical-model-developer |
-| Quantum Field Theory Calculations | madgraph-amplitude-calculator, pythia-event-generator | qft-calculator |
-| Experiment Design and Planning | geant4-detector-simulator, comsol-multiphysics-modeler | experiment-designer |
-| Data Acquisition System Development | labview-instrument-controller, epics-control-system, bluesky-data-collection | daq-engineer |
-| Systematic Uncertainty Evaluation | root-data-analyzer, iminuit-statistical-fitter | systematic-uncertainty-analyst |
-| Detector Calibration and Characterization | root-data-analyzer, bluesky-data-collection, pymeasure-automation | detector-calibrator |
-| Molecular Dynamics Simulation Setup | lammps-md-simulator, gromacs-biosim-runner | md-simulation-specialist |
-| Density Functional Theory Calculations | vasp-dft-calculator, quantum-espresso-runner, wannier90-tight-binding | dft-specialist |
-| Monte Carlo Simulation Implementation | monte-carlo-physics-simulator, geant4-detector-simulator | monte-carlo-specialist |
-| High-Performance Computing Workflow | lammps-md-simulator, vasp-dft-calculator, paraview-scientific-visualizer | hpc-workflow-engineer |
-| Statistical Analysis Pipeline | root-data-analyzer, iminuit-statistical-fitter, scikit-hep-analysis | statistical-analyst |
-| Machine Learning for Physics | tensorflow-physics-ml, scikit-hep-analysis | physics-ml-developer |
-| Uncertainty Propagation and Quantification | emcee-mcmc-sampler, pymc-bayesian-modeler | uncertainty-propagator |
-| Blinded Analysis Protocol | root-data-analyzer, iminuit-statistical-fitter | blinded-analysis-coordinator |
-| Event Reconstruction | root-data-analyzer, geant4-detector-simulator, delphes-fast-simulator | event-reconstructor |
-| Monte Carlo Event Generation | pythia-event-generator, madgraph-amplitude-calculator | mc-generator-specialist |
-| Beyond Standard Model Search | madgraph-amplitude-calculator, root-data-analyzer, scikit-hep-analysis | bsm-search-analyst |
-| Material Synthesis and Characterization | vasp-dft-calculator, aflow-materials-discovery, spinw-magnetic-simulator | materials-synthesizer |
-| Spectroscopy Measurement Campaign | spinw-magnetic-simulator, bluesky-data-collection | spectroscopy-analyst |
-| Phase Transition Investigation | quimb-tensor-network, monte-carlo-physics-simulator | phase-transition-investigator |
-| Scientific Paper Preparation | latex-physics-documenter, paraview-scientific-visualizer | physics-paper-writer |
-| Research Data Management | latex-physics-documenter, paraview-scientific-visualizer | research-data-manager |
+| Process | Recommended Skills | Recommended Agents | Integrated |
+|---------|-------------------|-------------------|------------|
+| Mathematical Model Derivation | scipy-optimization-toolkit, latex-physics-documenter, qiskit-quantum-simulator | theoretical-model-developer | [x] |
+| Perturbation Theory Analysis | scipy-optimization-toolkit, pyscf-quantum-chemistry | perturbation-theory-analyst | [x] |
+| Symmetry and Conservation Law Analysis | pyscf-quantum-chemistry, qiskit-quantum-simulator | theoretical-model-developer | [x] |
+| Quantum Field Theory Calculations | madgraph-amplitude-calculator, pythia-event-generator | qft-calculator | [x] |
+| Experiment Design and Planning | geant4-detector-simulator, comsol-multiphysics-modeler | experiment-designer | [x] |
+| Data Acquisition System Development | labview-instrument-controller, epics-control-system, bluesky-data-collection | daq-engineer | [x] |
+| Systematic Uncertainty Evaluation | root-data-analyzer, iminuit-statistical-fitter | systematic-uncertainty-analyst | [x] |
+| Detector Calibration and Characterization | root-data-analyzer, bluesky-data-collection, pymeasure-automation | detector-calibrator | [x] |
+| Molecular Dynamics Simulation Setup | lammps-md-simulator, gromacs-biosim-runner | md-simulation-specialist | [x] |
+| Density Functional Theory Calculations | vasp-dft-calculator, quantum-espresso-runner, wannier90-tight-binding | dft-specialist | [x] |
+| Monte Carlo Simulation Implementation | monte-carlo-physics-simulator, geant4-detector-simulator | monte-carlo-specialist | [x] |
+| High-Performance Computing Workflow | lammps-md-simulator, vasp-dft-calculator, paraview-scientific-visualizer | hpc-workflow-engineer | [x] |
+| Statistical Analysis Pipeline | root-data-analyzer, iminuit-statistical-fitter, scikit-hep-analysis | statistical-analyst | [x] |
+| Machine Learning for Physics | tensorflow-physics-ml, scikit-hep-analysis | physics-ml-developer | [x] |
+| Uncertainty Propagation and Quantification | emcee-mcmc-sampler, pymc-bayesian-modeler | uncertainty-propagator | [x] |
+| Blinded Analysis Protocol | root-data-analyzer, iminuit-statistical-fitter | blinded-analysis-coordinator | [x] |
+| Event Reconstruction | root-data-analyzer, geant4-detector-simulator, delphes-fast-simulator | event-reconstructor | [x] |
+| Monte Carlo Event Generation | pythia-event-generator, madgraph-amplitude-calculator | mc-generator-specialist | [x] |
+| Beyond Standard Model Search | madgraph-amplitude-calculator, root-data-analyzer, scikit-hep-analysis | bsm-search-analyst | [x] |
+| Material Synthesis and Characterization | vasp-dft-calculator, aflow-materials-discovery, spinw-magnetic-simulator | materials-synthesizer | [x] |
+| Spectroscopy Measurement Campaign | spinw-magnetic-simulator, bluesky-data-collection | spectroscopy-analyst | [x] |
+| Phase Transition Investigation | quimb-tensor-network, monte-carlo-physics-simulator | phase-transition-investigator | [x] |
+| Scientific Paper Preparation | latex-physics-documenter, paraview-scientific-visualizer | physics-paper-writer | [x] |
+| Research Data Management | latex-physics-documenter, paraview-scientific-visualizer | research-data-manager | [x] |
 
 ---
 

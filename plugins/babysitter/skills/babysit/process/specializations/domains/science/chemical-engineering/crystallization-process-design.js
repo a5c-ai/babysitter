@@ -165,8 +165,9 @@ export async function process(inputs, ctx) {
 export const solubilityCharacterizationTask = defineTask('solubility-characterization', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Characterize solubility and metastable zone',
+  skill: { name: 'thermodynamic-model-selector' },
   agent: {
-    name: 'crystallization-scientist',
+    name: 'separation-process-engineer',
     prompt: {
       role: 'crystallization scientist',
       task: 'Characterize solubility and metastable zone width',
@@ -212,8 +213,9 @@ export const solubilityCharacterizationTask = defineTask('solubility-characteriz
 export const crystallizationMethodTask = defineTask('crystallization-method', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Select crystallization method',
+  skill: { name: 'crystallizer-designer' },
   agent: {
-    name: 'crystallization-engineer',
+    name: 'separation-process-engineer',
     prompt: {
       role: 'crystallization process engineer',
       task: 'Select optimal crystallization method',
@@ -260,8 +262,9 @@ export const crystallizationMethodTask = defineTask('crystallization-method', (a
 export const crystallizerDesignTask = defineTask('crystallizer-design', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Design crystallizer equipment',
+  skill: { name: 'crystallizer-designer' },
   agent: {
-    name: 'equipment-engineer',
+    name: 'separation-process-engineer',
     prompt: {
       role: 'crystallizer design engineer',
       task: 'Design crystallizer equipment',
@@ -309,8 +312,9 @@ export const crystallizerDesignTask = defineTask('crystallizer-design', (args, t
 export const csdControlTask = defineTask('csd-control', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Design crystal size distribution control',
+  skill: { name: 'crystallizer-designer' },
   agent: {
-    name: 'csd-engineer',
+    name: 'separation-process-engineer',
     prompt: {
       role: 'crystal size distribution engineer',
       task: 'Design system to control crystal size distribution',
@@ -366,8 +370,9 @@ export const csdControlTask = defineTask('csd-control', (args, taskCtx) => ({
 export const solidLiquidSeparationTask = defineTask('solid-liquid-separation', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Design downstream solid-liquid separation',
+  skill: { name: 'crystallizer-designer' },
   agent: {
-    name: 'separation-engineer',
+    name: 'separation-process-engineer',
     prompt: {
       role: 'solid-liquid separation engineer',
       task: 'Design solid-liquid separation for crystal slurry',
@@ -414,8 +419,9 @@ export const solidLiquidSeparationTask = defineTask('solid-liquid-separation', (
 export const polymorphismPurityTask = defineTask('polymorphism-purity', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Address polymorphism and purity requirements',
+  skill: { name: 'crystallizer-designer' },
   agent: {
-    name: 'polymorph-specialist',
+    name: 'separation-process-engineer',
     prompt: {
       role: 'polymorphism and purity specialist',
       task: 'Address polymorphism control and product purity',
@@ -468,8 +474,9 @@ export const polymorphismPurityTask = defineTask('polymorphism-purity', (args, t
 export const operatingProcedureTask = defineTask('operating-procedure', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Develop operating procedure for crystal quality',
+  skill: { name: 'crystallizer-designer' },
   agent: {
-    name: 'operations-engineer',
+    name: 'separation-process-engineer',
     prompt: {
       role: 'crystallization operations engineer',
       task: 'Develop operating procedure for consistent crystal quality',
@@ -516,8 +523,9 @@ export const operatingProcedureTask = defineTask('operating-procedure', (args, t
 export const validationPlanTask = defineTask('validation-plan', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Create product purity validation plan',
+  skill: { name: 'crystallizer-designer' },
   agent: {
-    name: 'validation-engineer',
+    name: 'separation-process-engineer',
     prompt: {
       role: 'process validation engineer',
       task: 'Create validation plan for crystallization process',

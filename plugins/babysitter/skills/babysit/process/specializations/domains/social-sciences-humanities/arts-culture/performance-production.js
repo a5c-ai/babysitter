@@ -3,6 +3,8 @@
  * @description End-to-end workflow for producing concerts, theatrical productions, and live events including pre-production planning, creative development, rehearsal management, technical production, and closing procedures
  * @inputs { productionTitle: string, productionType: string, venueInfo: object, performanceDates: array, budget: number }
  * @outputs { success: boolean, productionPlan: object, technicalRequirements: object, rehearsalSchedule: object, artifacts: array }
+ * @recommendedSkills SK-AC-005 (production-coordination), SK-AC-011 (risk-mitigation-planning), SK-AC-013 (stakeholder-facilitation)
+ * @recommendedAgents AG-AC-005 (production-manager-agent)
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

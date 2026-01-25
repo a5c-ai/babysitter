@@ -273,7 +273,8 @@ export const hybridArchitectureDesignTask = defineTask('hybrid-architecture-desi
   kind: 'agent',
   title: 'Hybrid Architecture Design',
   agent: {
-    name: 'general-purpose',
+    name: 'hybrid-system-architect',
+    skills: ['braket-executor', 'pennylane-hybrid-executor', 'backend-selector'],
     prompt: {
       role: 'Hybrid System Architect',
       task: 'Design hybrid quantum-classical system architecture',
@@ -316,7 +317,8 @@ export const jobSubmissionPipelineTask = defineTask('hybrid-job-pipeline', (args
   kind: 'agent',
   title: 'Job Submission Pipeline',
   agent: {
-    name: 'general-purpose',
+    name: 'hybrid-system-architect',
+    skills: ['braket-executor', 'pennylane-hybrid-executor', 'backend-selector'],
     prompt: {
       role: 'Quantum Job Management Specialist',
       task: 'Implement job submission pipeline for quantum backends',
@@ -358,7 +360,8 @@ export const resultProcessingSystemTask = defineTask('hybrid-result-processing',
   kind: 'agent',
   title: 'Result Processing System',
   agent: {
-    name: 'general-purpose',
+    name: 'hybrid-system-architect',
+    skills: ['braket-executor', 'pennylane-hybrid-executor', 'backend-selector'],
     prompt: {
       role: 'Quantum Result Processing Specialist',
       task: 'Implement result aggregation and post-processing system',
@@ -400,7 +403,8 @@ export const classicalOptimizationIntegrationTask = defineTask('hybrid-optimizat
   kind: 'agent',
   title: 'Classical Optimization Integration',
   agent: {
-    name: 'general-purpose',
+    name: 'hybrid-system-architect',
+    skills: ['braket-executor', 'pennylane-hybrid-executor', 'backend-selector'],
     prompt: {
       role: 'Hybrid Optimization Specialist',
       task: 'Integrate classical optimization with quantum execution',
@@ -442,7 +446,8 @@ export const errorHandlingRetryTask = defineTask('hybrid-error-handling', (args,
   kind: 'agent',
   title: 'Error Handling and Retry Logic',
   agent: {
-    name: 'general-purpose',
+    name: 'hybrid-system-architect',
+    skills: ['braket-executor', 'pennylane-hybrid-executor', 'backend-selector'],
     prompt: {
       role: 'Fault Tolerance Specialist',
       task: 'Implement error handling and retry mechanisms',
@@ -484,7 +489,8 @@ export const resourceManagementTask = defineTask('hybrid-resource-management', (
   kind: 'agent',
   title: 'Resource Management Configuration',
   agent: {
-    name: 'general-purpose',
+    name: 'hybrid-system-architect',
+    skills: ['braket-executor', 'pennylane-hybrid-executor', 'backend-selector'],
     prompt: {
       role: 'Resource Management Specialist',
       task: 'Configure resource management for hybrid system',
@@ -526,7 +532,8 @@ export const monitoringLoggingSetupTask = defineTask('hybrid-monitoring-setup', 
   kind: 'agent',
   title: 'Monitoring and Logging Setup',
   agent: {
-    name: 'general-purpose',
+    name: 'hybrid-system-architect',
+    skills: ['braket-executor', 'pennylane-hybrid-executor', 'backend-selector'],
     prompt: {
       role: 'Observability Specialist',
       task: 'Set up monitoring and logging for hybrid system',
@@ -568,7 +575,8 @@ export const hybridIntegrationTestingTask = defineTask('hybrid-integration-testi
   kind: 'agent',
   title: 'Hybrid Integration Testing',
   agent: {
-    name: 'general-purpose',
+    name: 'hybrid-system-architect',
+    skills: ['braket-executor', 'pennylane-hybrid-executor', 'backend-selector'],
     prompt: {
       role: 'Integration Testing Specialist',
       task: 'Test hybrid system integration',
@@ -611,7 +619,8 @@ export const hybridSystemDocumentationTask = defineTask('hybrid-system-docs', (a
   kind: 'agent',
   title: 'Hybrid System Documentation',
   agent: {
-    name: 'general-purpose',
+    name: 'hybrid-system-architect',
+    skills: ['braket-executor', 'pennylane-hybrid-executor', 'backend-selector'],
     prompt: {
       role: 'Technical Documentation Specialist',
       task: 'Generate comprehensive hybrid system documentation',

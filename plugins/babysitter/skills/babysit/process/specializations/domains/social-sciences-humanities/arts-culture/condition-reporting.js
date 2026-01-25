@@ -3,6 +3,8 @@
  * @description Standardized methodology for documenting the physical state of artworks and cultural objects including terminology, photography, and digital documentation systems
  * @inputs { objectTitle: string, objectType: string, reportPurpose: string, reportingStandard: string }
  * @outputs { success: boolean, conditionReport: object, documentation: object, terminology: object, artifacts: array }
+ * @recommendedSkills SK-AC-006 (conservation-assessment), SK-AC-003 (collection-documentation)
+ * @recommendedAgents AG-AC-004 (conservator-agent), AG-AC-006 (registrar-agent)
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

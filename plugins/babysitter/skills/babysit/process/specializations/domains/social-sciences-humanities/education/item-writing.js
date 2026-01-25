@@ -3,6 +3,8 @@
  * @description Systematic development of assessment items across formats (multiple choice, constructed response) following psychometric best practices
  * @inputs { assessmentPurpose: string, contentDomain: string, cognitiveLevel: string, itemFormat: string, specifications: object }
  * @outputs { success: boolean, items: array, itemBank: object, qualityReport: object, artifacts: array }
+ * @recommendedSkills SK-EDU-003 (assessment-design-validation), SK-EDU-002 (learning-objectives-writing)
+ * @recommendedAgents AG-EDU-003 (assessment-specialist)
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

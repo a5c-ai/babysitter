@@ -182,8 +182,9 @@ export async function process(inputs, ctx) {
 export const steelDesignCriteriaTask = defineTask('steel-design-criteria', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Establish steel design criteria',
+  skill: { name: 'section-property-calculator' },
   agent: {
-    name: 'structural-engineer',
+    name: 'structural-steel-designer',
     prompt: {
       role: 'senior structural engineer',
       task: 'Establish design criteria per AISC 360',
@@ -233,8 +234,9 @@ export const steelDesignCriteriaTask = defineTask('steel-design-criteria', (args
 export const steelBeamDesignTask = defineTask('steel-beam-design', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Design steel beams',
+  skill: { name: 'fea-structural-engine' },
   agent: {
-    name: 'structural-engineer',
+    name: 'structural-steel-designer',
     prompt: {
       role: 'structural engineer',
       task: 'Design steel beams per AISC 360',
@@ -277,8 +279,9 @@ export const steelBeamDesignTask = defineTask('steel-beam-design', (args, taskCt
 export const steelColumnDesignTask = defineTask('steel-column-design', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Design steel columns',
+  skill: { name: 'fea-structural-engine' },
   agent: {
-    name: 'structural-engineer',
+    name: 'structural-steel-designer',
     prompt: {
       role: 'structural engineer',
       task: 'Design steel columns per AISC 360',
@@ -322,8 +325,9 @@ export const steelColumnDesignTask = defineTask('steel-column-design', (args, ta
 export const bracingDesignTask = defineTask('bracing-design', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Design bracing systems',
+  skill: { name: 'fea-structural-engine' },
   agent: {
-    name: 'structural-engineer',
+    name: 'seismic-design-specialist',
     prompt: {
       role: 'structural engineer',
       task: 'Design steel bracing systems per AISC 360',
@@ -366,8 +370,9 @@ export const bracingDesignTask = defineTask('bracing-design', (args, taskCtx) =>
 export const momentFrameDesignTask = defineTask('moment-frame-design', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Design moment frames',
+  skill: { name: 'fea-structural-engine' },
   agent: {
-    name: 'structural-engineer',
+    name: 'seismic-design-specialist',
     prompt: {
       role: 'structural engineer',
       task: 'Design steel moment frames per AISC 360 and AISC 341',
@@ -410,8 +415,9 @@ export const momentFrameDesignTask = defineTask('moment-frame-design', (args, ta
 export const connectionDesignTask = defineTask('connection-design', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Design steel connections',
+  skill: { name: 'steel-connection-designer' },
   agent: {
-    name: 'connection-engineer',
+    name: 'structural-steel-designer',
     prompt: {
       role: 'structural connection engineer',
       task: 'Design steel connections per AISC 360',
@@ -463,8 +469,9 @@ export const connectionDesignTask = defineTask('connection-design', (args, taskC
 export const steelDetailingTask = defineTask('steel-detailing', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Generate steel details',
+  skill: { name: 'section-property-calculator' },
   agent: {
-    name: 'steel-detailer',
+    name: 'structural-steel-designer',
     prompt: {
       role: 'steel detailer',
       task: 'Generate steel fabrication and erection details',
@@ -515,8 +522,9 @@ export const steelDetailingTask = defineTask('steel-detailing', (args, taskCtx) 
 export const materialTakeoffTask = defineTask('material-takeoff', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Generate material takeoff',
+  skill: { name: 'quantity-takeoff-calculator' },
   agent: {
-    name: 'estimator',
+    name: 'cost-estimator',
     prompt: {
       role: 'steel estimator',
       task: 'Generate steel material takeoff',

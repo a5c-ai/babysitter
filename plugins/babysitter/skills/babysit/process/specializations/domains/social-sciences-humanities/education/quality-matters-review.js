@@ -3,6 +3,8 @@
  * @description Applying QM rubric standards to evaluate and improve online course design across eight general standards
  * @inputs { courseName: string, courseUrl: string, reviewType: string, context: object }
  * @outputs { success: boolean, reviewReport: object, standardScores: object, recommendations: array, artifacts: array }
+ * @recommendedSkills SK-EDU-013 (quality-assurance-review), SK-EDU-010 (accessibility-compliance-auditing)
+ * @recommendedAgents AG-EDU-009 (quality-assurance-coordinator), AG-EDU-008 (accessibility-udl-specialist)
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

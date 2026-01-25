@@ -3,6 +3,8 @@
  * @description Workflow for managing lighting, sound, set construction, and multimedia elements in performance and exhibition contexts
  * @inputs { projectTitle: string, projectType: string, venueSpecs: object, designRequirements: object, budget: number }
  * @outputs { success: boolean, technicalDesign: object, equipmentList: object, installationPlan: object, artifacts: array }
+ * @recommendedSkills SK-AC-005 (production-coordination), SK-AC-004 (exhibition-design)
+ * @recommendedAgents AG-AC-005 (production-manager-agent), AG-AC-010 (exhibition-designer-agent)
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

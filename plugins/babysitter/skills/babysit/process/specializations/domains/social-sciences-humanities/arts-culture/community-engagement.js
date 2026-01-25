@@ -3,6 +3,8 @@
  * @description Framework for building meaningful relationships with diverse communities through participatory programming, outreach initiatives, and inclusive practices
  * @inputs { organizationName: string, targetCommunities: array, engagementGoals: array, existingRelationships: object }
  * @outputs { success: boolean, engagementStrategy: object, programs: array, partnerships: array, artifacts: array }
+ * @recommendedSkills SK-AC-012 (accessibility-compliance), SK-AC-013 (stakeholder-facilitation), SK-AC-008 (interpretive-writing)
+ * @recommendedAgents AG-AC-007 (education-outreach-agent), AG-AC-009 (cultural-policy-agent)
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

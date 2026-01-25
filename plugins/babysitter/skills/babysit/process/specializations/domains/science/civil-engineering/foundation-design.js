@@ -200,8 +200,9 @@ export async function process(inputs, ctx) {
 export const foundationSelectionTask = defineTask('foundation-selection', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Select foundation type',
+  skill: { name: 'bearing-capacity-calculator' },
   agent: {
-    name: 'geotechnical-engineer',
+    name: 'foundation-engineer',
     prompt: {
       role: 'senior geotechnical engineer',
       task: 'Evaluate and select appropriate foundation type',
@@ -242,8 +243,9 @@ export const foundationSelectionTask = defineTask('foundation-selection', (args,
 export const bearingCapacityTask = defineTask('bearing-capacity', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Perform bearing capacity analysis',
+  skill: { name: 'bearing-capacity-calculator' },
   agent: {
-    name: 'geotechnical-engineer',
+    name: 'foundation-engineer',
     prompt: {
       role: 'geotechnical engineer',
       task: 'Calculate bearing capacity for foundations',
@@ -285,8 +287,9 @@ export const bearingCapacityTask = defineTask('bearing-capacity', (args, taskCtx
 export const settlementAnalysisTask = defineTask('settlement-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Perform settlement analysis',
+  skill: { name: 'settlement-calculator' },
   agent: {
-    name: 'geotechnical-engineer',
+    name: 'foundation-engineer',
     prompt: {
       role: 'geotechnical engineer',
       task: 'Calculate foundation settlements',
@@ -329,8 +332,9 @@ export const settlementAnalysisTask = defineTask('settlement-analysis', (args, t
 export const shallowFoundationTask = defineTask('shallow-foundation', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Design shallow foundations',
+  skill: { name: 'concrete-design-calculator' },
   agent: {
-    name: 'structural-engineer',
+    name: 'foundation-engineer',
     prompt: {
       role: 'structural engineer',
       task: 'Design shallow foundation elements',
@@ -371,8 +375,9 @@ export const shallowFoundationTask = defineTask('shallow-foundation', (args, tas
 export const deepFoundationTask = defineTask('deep-foundation', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Design deep foundations',
+  skill: { name: 'pile-capacity-analyzer' },
   agent: {
-    name: 'geotechnical-engineer',
+    name: 'foundation-engineer',
     prompt: {
       role: 'geotechnical/structural engineer',
       task: 'Design deep foundation elements',
@@ -416,8 +421,9 @@ export const deepFoundationTask = defineTask('deep-foundation', (args, taskCtx) 
 export const pileCapDesignTask = defineTask('pile-cap-design', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Design pile caps',
+  skill: { name: 'concrete-design-calculator' },
   agent: {
-    name: 'structural-engineer',
+    name: 'foundation-engineer',
     prompt: {
       role: 'structural engineer',
       task: 'Design pile caps per ACI 318',
@@ -457,8 +463,9 @@ export const pileCapDesignTask = defineTask('pile-cap-design', (args, taskCtx) =
 export const gradeBeamDesignTask = defineTask('grade-beam-design', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Design grade beams',
+  skill: { name: 'concrete-design-calculator' },
   agent: {
-    name: 'structural-engineer',
+    name: 'reinforced-concrete-designer',
     prompt: {
       role: 'structural engineer',
       task: 'Design grade beams and tie beams',
@@ -497,6 +504,7 @@ export const gradeBeamDesignTask = defineTask('grade-beam-design', (args, taskCt
 export const foundationPlansTask = defineTask('foundation-plans', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Generate foundation plans',
+  skill: { name: 'revit-api-interface' },
   agent: {
     name: 'structural-drafter',
     prompt: {
@@ -546,6 +554,7 @@ export const foundationPlansTask = defineTask('foundation-plans', (args, taskCtx
 export const foundationSpecsTask = defineTask('foundation-specifications', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Develop foundation specifications',
+  skill: { name: 'csi-specification-writer' },
   agent: {
     name: 'specifications-writer',
     prompt: {

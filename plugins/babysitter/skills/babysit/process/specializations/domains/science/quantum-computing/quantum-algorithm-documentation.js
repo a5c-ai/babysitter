@@ -216,7 +216,8 @@ export const mathematicalFoundationsTask = defineTask('qdoc-math-foundations', (
   kind: 'agent',
   title: 'Mathematical Foundations',
   agent: {
-    name: 'general-purpose',
+    name: 'quantum-documentation-specialist',
+    skills: ['resource-estimator', 'statevector-simulator', 'qiskit-circuit-builder'],
     prompt: {
       role: 'Quantum Algorithm Mathematician',
       task: 'Document mathematical foundations of quantum algorithm',
@@ -258,7 +259,8 @@ export const circuitDiagramsTask = defineTask('qdoc-circuit-diagrams', (args, ta
   kind: 'agent',
   title: 'Circuit Diagrams',
   agent: {
-    name: 'general-purpose',
+    name: 'quantum-documentation-specialist',
+    skills: ['resource-estimator', 'statevector-simulator', 'qiskit-circuit-builder'],
     prompt: {
       role: 'Quantum Circuit Documentation Specialist',
       task: 'Create circuit diagrams and visualizations',
@@ -299,7 +301,8 @@ export const complexityAnalysisTask = defineTask('qdoc-complexity-analysis', (ar
   kind: 'agent',
   title: 'Complexity Analysis',
   agent: {
-    name: 'general-purpose',
+    name: 'quantum-documentation-specialist',
+    skills: ['resource-estimator', 'statevector-simulator', 'qiskit-circuit-builder'],
     prompt: {
       role: 'Computational Complexity Specialist',
       task: 'Document algorithm complexity analysis',
@@ -342,7 +345,8 @@ export const implementationGuideTask = defineTask('qdoc-implementation-guide', (
   kind: 'agent',
   title: 'Implementation Guide',
   agent: {
-    name: 'general-purpose',
+    name: 'quantum-documentation-specialist',
+    skills: ['resource-estimator', 'statevector-simulator', 'qiskit-circuit-builder'],
     prompt: {
       role: 'Quantum Implementation Guide Writer',
       task: 'Create implementation guide for quantum algorithm',
@@ -384,7 +388,8 @@ export const apiDocumentationTask = defineTask('qdoc-api-docs', (args, taskCtx) 
   kind: 'agent',
   title: 'API Documentation',
   agent: {
-    name: 'general-purpose',
+    name: 'quantum-documentation-specialist',
+    skills: ['resource-estimator', 'statevector-simulator', 'qiskit-circuit-builder'],
     prompt: {
       role: 'API Documentation Specialist',
       task: 'Create API documentation for quantum algorithm',
@@ -426,7 +431,8 @@ export const tutorialNotebooksTask = defineTask('qdoc-tutorials', (args, taskCtx
   kind: 'agent',
   title: 'Tutorial Notebooks',
   agent: {
-    name: 'general-purpose',
+    name: 'quantum-documentation-specialist',
+    skills: ['resource-estimator', 'statevector-simulator', 'qiskit-circuit-builder'],
     prompt: {
       role: 'Quantum Education Content Creator',
       task: 'Create tutorial Jupyter notebooks',
@@ -467,7 +473,8 @@ export const visualCircuitGuidesTask = defineTask('qdoc-visual-guides', (args, t
   kind: 'agent',
   title: 'Visual Circuit Guides',
   agent: {
-    name: 'general-purpose',
+    name: 'quantum-documentation-specialist',
+    skills: ['resource-estimator', 'statevector-simulator', 'qiskit-circuit-builder'],
     prompt: {
       role: 'Visual Documentation Specialist',
       task: 'Create visual circuit guides',
@@ -509,7 +516,8 @@ export const documentationCompilationTask = defineTask('qdoc-compilation', (args
   kind: 'agent',
   title: 'Documentation Compilation',
   agent: {
-    name: 'general-purpose',
+    name: 'quantum-documentation-specialist',
+    skills: ['resource-estimator', 'statevector-simulator', 'qiskit-circuit-builder'],
     prompt: {
       role: 'Documentation Build Specialist',
       task: 'Compile all documentation into final form',

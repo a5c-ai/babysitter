@@ -263,7 +263,8 @@ export const moleculeSetupTask = defineTask('qc-molecule-setup', (args, taskCtx)
   kind: 'agent',
   title: 'Molecular Structure Setup',
   agent: {
-    name: 'general-purpose',
+    name: 'quantum-chemist',
+    skills: ['openfermion-hamiltonian', 'pyscf-interface', 'qiskit-nature-solver', 'ansatz-designer'],
     prompt: {
       role: 'Computational Chemistry Specialist',
       task: 'Set up molecular structure for quantum chemistry calculation',
@@ -309,7 +310,8 @@ export const hamiltonianConstructionTask = defineTask('qc-hamiltonian-constructi
   kind: 'agent',
   title: 'Molecular Hamiltonian Construction',
   agent: {
-    name: 'general-purpose',
+    name: 'quantum-chemist',
+    skills: ['openfermion-hamiltonian', 'pyscf-interface', 'qiskit-nature-solver', 'ansatz-designer'],
     prompt: {
       role: 'Quantum Chemistry Hamiltonian Specialist',
       task: 'Construct molecular Hamiltonian in qubit representation',
@@ -352,7 +354,8 @@ export const classicalReferenceCalculationTask = defineTask('qc-classical-refere
   kind: 'agent',
   title: 'Classical Reference Calculation',
   agent: {
-    name: 'general-purpose',
+    name: 'quantum-chemist',
+    skills: ['openfermion-hamiltonian', 'pyscf-interface', 'qiskit-nature-solver', 'ansatz-designer'],
     prompt: {
       role: 'Quantum Chemistry Specialist',
       task: 'Calculate classical reference energies for comparison',
@@ -395,7 +398,8 @@ export const chemistryAnsatzDesignTask = defineTask('qc-chemistry-ansatz', (args
   kind: 'agent',
   title: 'Chemistry Ansatz Design',
   agent: {
-    name: 'general-purpose',
+    name: 'quantum-chemist',
+    skills: ['openfermion-hamiltonian', 'pyscf-interface', 'qiskit-nature-solver', 'ansatz-designer'],
     prompt: {
       role: 'Variational Chemistry Specialist',
       task: 'Design chemistry-informed ansatz for VQE',
@@ -438,7 +442,8 @@ export const quantumChemistryExecutionTask = defineTask('qc-chemistry-execution'
   kind: 'agent',
   title: 'Quantum Chemistry Execution',
   agent: {
-    name: 'general-purpose',
+    name: 'quantum-chemist',
+    skills: ['openfermion-hamiltonian', 'pyscf-interface', 'qiskit-nature-solver', 'ansatz-designer'],
     prompt: {
       role: 'VQE Execution Specialist',
       task: 'Execute VQE or QPE for molecular energy calculation',
@@ -482,7 +487,8 @@ export const chemicalAccuracyAssessmentTask = defineTask('qc-chemical-accuracy',
   kind: 'agent',
   title: 'Chemical Accuracy Assessment',
   agent: {
-    name: 'general-purpose',
+    name: 'quantum-chemist',
+    skills: ['openfermion-hamiltonian', 'pyscf-interface', 'qiskit-nature-solver', 'ansatz-designer'],
     prompt: {
       role: 'Quantum Chemistry Accuracy Specialist',
       task: 'Assess whether chemical accuracy was achieved',
@@ -526,7 +532,8 @@ export const molecularPropertyExtractionTask = defineTask('qc-molecular-properti
   kind: 'agent',
   title: 'Molecular Property Extraction',
   agent: {
-    name: 'general-purpose',
+    name: 'quantum-chemist',
+    skills: ['openfermion-hamiltonian', 'pyscf-interface', 'qiskit-nature-solver', 'ansatz-designer'],
     prompt: {
       role: 'Molecular Property Specialist',
       task: 'Extract molecular properties from quantum calculation',
@@ -569,7 +576,8 @@ export const molecularEnergyReportTask = defineTask('qc-molecular-report', (args
   kind: 'agent',
   title: 'Molecular Energy Report',
   agent: {
-    name: 'general-purpose',
+    name: 'quantum-chemist',
+    skills: ['openfermion-hamiltonian', 'pyscf-interface', 'qiskit-nature-solver', 'ansatz-designer'],
     prompt: {
       role: 'Computational Chemistry Documentation Specialist',
       task: 'Generate comprehensive molecular energy calculation report',

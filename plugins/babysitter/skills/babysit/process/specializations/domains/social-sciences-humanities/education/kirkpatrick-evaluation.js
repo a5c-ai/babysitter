@@ -3,6 +3,8 @@
  * @description Comprehensive training evaluation measuring reaction (satisfaction), learning (knowledge gain), behavior (transfer), and results (business impact)
  * @inputs { programName: string, programDescription: object, stakeholders: array, evaluationScope: string, constraints: object }
  * @outputs { success: boolean, evaluationPlan: object, instruments: array, analysisFramework: object, artifacts: array }
+ * @recommendedSkills SK-EDU-001 (learning-needs-analysis), SK-EDU-009 (learning-analytics-interpretation), SK-EDU-003 (assessment-item-development)
+ * @recommendedAgents AG-EDU-007 (learning-evaluation-analyst)
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

@@ -197,7 +197,8 @@ export const specificationDefinitionTask = defineTask('specification-definition'
   kind: 'agent',
   title: 'Define preconditions, postconditions, and invariants',
   agent: {
-    name: 'specification-analyst',
+    name: 'algorithm-analyst',
+    skills: ['loop-invariant-generator', 'termination-analyzer', 'theorem-prover-interface'],
     prompt: {
       role: 'formal methods specialist',
       task: 'Define formal specification for the algorithm including preconditions, postconditions, and global invariants',
@@ -258,7 +259,8 @@ export const loopInvariantAnalysisTask = defineTask('loop-invariant-analysis', (
   kind: 'agent',
   title: 'Identify and specify loop invariants',
   agent: {
-    name: 'invariant-analyst',
+    name: 'algorithm-analyst',
+    skills: ['loop-invariant-generator', 'termination-analyzer'],
     prompt: {
       role: 'algorithm verification specialist',
       task: 'Identify all loops and define appropriate loop invariants for correctness proof',
@@ -311,7 +313,8 @@ export const inductionProofTask = defineTask('induction-proof', (args, taskCtx) 
   kind: 'agent',
   title: 'Apply proof by induction for recursive algorithms',
   agent: {
-    name: 'induction-prover',
+    name: 'theorem-proving-expert',
+    skills: ['theorem-prover-interface', 'loop-invariant-generator'],
     prompt: {
       role: 'mathematician specializing in mathematical induction',
       task: 'Apply structural or strong induction to prove correctness of recursive algorithms',
@@ -367,7 +370,8 @@ export const invariantVerificationTask = defineTask('invariant-verification', (a
   kind: 'agent',
   title: 'Verify loop invariants (initialization, maintenance, termination)',
   agent: {
-    name: 'invariant-verifier',
+    name: 'theorem-proving-expert',
+    skills: ['loop-invariant-generator', 'theorem-prover-interface'],
     prompt: {
       role: 'formal verification specialist',
       task: 'Verify that loop invariants satisfy the three required properties',
@@ -437,7 +441,8 @@ export const terminationProofTask = defineTask('termination-proof', (args, taskC
   kind: 'agent',
   title: 'Prove algorithm termination',
   agent: {
-    name: 'termination-prover',
+    name: 'algorithm-analyst',
+    skills: ['termination-analyzer', 'loop-invariant-generator'],
     prompt: {
       role: 'termination analysis specialist',
       task: 'Prove that the algorithm terminates for all valid inputs',
@@ -503,7 +508,8 @@ export const edgeCaseAnalysisTask = defineTask('edge-case-analysis', (args, task
   kind: 'agent',
   title: 'Handle edge cases and boundary conditions',
   agent: {
-    name: 'edge-case-analyst',
+    name: 'algorithm-analyst',
+    skills: ['loop-invariant-generator'],
     prompt: {
       role: 'software testing and verification specialist',
       task: 'Identify and verify handling of edge cases and boundary conditions',
@@ -562,7 +568,8 @@ export const completeProofAssemblyTask = defineTask('complete-proof-assembly', (
   kind: 'agent',
   title: 'Assemble complete correctness proof',
   agent: {
-    name: 'proof-assembler',
+    name: 'algorithm-analyst',
+    skills: ['latex-proof-formatter', 'theorem-prover-interface'],
     prompt: {
       role: 'technical writer specializing in formal proofs',
       task: 'Assemble all proof components into a complete, structured correctness proof document',

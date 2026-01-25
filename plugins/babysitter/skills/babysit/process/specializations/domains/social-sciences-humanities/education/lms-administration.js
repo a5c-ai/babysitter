@@ -3,6 +3,8 @@
  * @description Systematic setup, configuration, and management of learning management systems including user roles, integrations, and course templates
  * @inputs { lmsPlatform: string, organization: object, requirements: array, integrations: array, constraints: object }
  * @outputs { success: boolean, configuration: object, templates: array, documentation: object, artifacts: array }
+ * @recommendedSkills SK-EDU-007 (lms-configuration-administration), SK-EDU-010 (accessibility-compliance-auditing)
+ * @recommendedAgents AG-EDU-005 (learning-technology-administrator)
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

@@ -171,8 +171,9 @@ export async function process(inputs, ctx) {
 export const siteAssessmentTask = defineTask('site-assessment', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Perform preliminary site assessment',
+  skill: { name: 'soil-classification-tool' },
   agent: {
-    name: 'geotechnical-engineer',
+    name: 'geotechnical-investigation-specialist',
     prompt: {
       role: 'senior geotechnical engineer',
       task: 'Conduct preliminary site assessment and desktop study',
@@ -214,8 +215,9 @@ export const siteAssessmentTask = defineTask('site-assessment', (args, taskCtx) 
 export const boringProgramTask = defineTask('boring-program', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Design boring program',
+  skill: { name: 'soil-classification-tool' },
   agent: {
-    name: 'geotechnical-engineer',
+    name: 'geotechnical-investigation-specialist',
     prompt: {
       role: 'geotechnical engineer',
       task: 'Design subsurface exploration program',
@@ -258,8 +260,9 @@ export const boringProgramTask = defineTask('boring-program', (args, taskCtx) =>
 export const fieldInvestigationTask = defineTask('field-investigation', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Execute field investigation',
+  skill: { name: 'soil-classification-tool' },
   agent: {
-    name: 'field-engineer',
+    name: 'geotechnical-investigation-specialist',
     prompt: {
       role: 'geotechnical field engineer',
       task: 'Document field investigation results',
@@ -301,8 +304,9 @@ export const fieldInvestigationTask = defineTask('field-investigation', (args, t
 export const labTestingTask = defineTask('lab-testing', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Execute laboratory testing program',
+  skill: { name: 'soil-classification-tool' },
   agent: {
-    name: 'lab-technician',
+    name: 'geotechnical-investigation-specialist',
     prompt: {
       role: 'geotechnical laboratory manager',
       task: 'Plan and document laboratory testing',
@@ -349,8 +353,9 @@ export const labTestingTask = defineTask('lab-testing', (args, taskCtx) => ({
 export const subsurfaceCharacterizationTask = defineTask('subsurface-characterization', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Characterize subsurface conditions',
+  skill: { name: 'soil-classification-tool' },
   agent: {
-    name: 'geotechnical-engineer',
+    name: 'geotechnical-investigation-specialist',
     prompt: {
       role: 'geotechnical engineer',
       task: 'Develop subsurface characterization',
@@ -392,8 +397,9 @@ export const subsurfaceCharacterizationTask = defineTask('subsurface-characteriz
 export const foundationRecommendationsTask = defineTask('foundation-recommendations', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Develop foundation recommendations',
+  skill: { name: 'bearing-capacity-calculator' },
   agent: {
-    name: 'geotechnical-engineer',
+    name: 'geotechnical-investigation-specialist',
     prompt: {
       role: 'geotechnical engineer',
       task: 'Develop foundation recommendations',
@@ -447,8 +453,9 @@ export const foundationRecommendationsTask = defineTask('foundation-recommendati
 export const constructionConsiderationsTask = defineTask('construction-considerations', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Identify construction considerations',
+  skill: { name: 'settlement-calculator' },
   agent: {
-    name: 'geotechnical-engineer',
+    name: 'geotechnical-investigation-specialist',
     prompt: {
       role: 'geotechnical engineer',
       task: 'Identify geotechnical construction considerations',
@@ -490,8 +497,9 @@ export const constructionConsiderationsTask = defineTask('construction-considera
 export const geotechReportTask = defineTask('geotech-report', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Generate geotechnical engineering report',
+  skill: { name: 'engineering-report-generator' },
   agent: {
-    name: 'technical-writer',
+    name: 'technical-report-writer',
     prompt: {
       role: 'geotechnical engineer',
       task: 'Generate comprehensive geotechnical engineering report',

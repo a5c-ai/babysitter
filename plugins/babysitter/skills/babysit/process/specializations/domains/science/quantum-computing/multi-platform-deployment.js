@@ -253,7 +253,8 @@ export const platformAbstractionLayerTask = defineTask('mp-abstraction-layer', (
   kind: 'agent',
   title: 'Platform Abstraction Layer',
   agent: {
-    name: 'general-purpose',
+    name: 'multi-platform-engineer',
+    skills: ['qiskit-circuit-builder', 'cirq-circuit-builder', 'braket-executor', 'tket-compiler', 'backend-selector'],
     prompt: {
       role: 'Platform Abstraction Specialist',
       task: 'Create platform abstraction layer for multi-platform support',
@@ -295,7 +296,8 @@ export const platformSpecificTranspilationTask = defineTask('mp-platform-transpi
   kind: 'agent',
   title: 'Platform-Specific Transpilation',
   agent: {
-    name: 'general-purpose',
+    name: 'multi-platform-engineer',
+    skills: ['qiskit-circuit-builder', 'cirq-circuit-builder', 'braket-executor', 'tket-compiler', 'backend-selector'],
     prompt: {
       role: 'Platform Transpilation Specialist',
       task: 'Transpile circuit for specific platform',
@@ -337,7 +339,8 @@ export const unifiedJobSubmissionInterfaceTask = defineTask('mp-unified-interfac
   kind: 'agent',
   title: 'Unified Job Submission Interface',
   agent: {
-    name: 'general-purpose',
+    name: 'multi-platform-engineer',
+    skills: ['qiskit-circuit-builder', 'cirq-circuit-builder', 'braket-executor', 'tket-compiler', 'backend-selector'],
     prompt: {
       role: 'Interface Design Specialist',
       task: 'Build unified job submission interface',
@@ -378,7 +381,8 @@ export const platformExecutionTask = defineTask('mp-platform-execution', (args, 
   kind: 'agent',
   title: 'Platform Execution',
   agent: {
-    name: 'general-purpose',
+    name: 'multi-platform-engineer',
+    skills: ['qiskit-circuit-builder', 'cirq-circuit-builder', 'braket-executor', 'tket-compiler', 'backend-selector'],
     prompt: {
       role: 'Platform Execution Specialist',
       task: 'Execute circuit on target platform',
@@ -421,7 +425,8 @@ export const resultNormalizationTask = defineTask('mp-result-normalization', (ar
   kind: 'agent',
   title: 'Result Normalization',
   agent: {
-    name: 'general-purpose',
+    name: 'multi-platform-engineer',
+    skills: ['qiskit-circuit-builder', 'cirq-circuit-builder', 'braket-executor', 'tket-compiler', 'backend-selector'],
     prompt: {
       role: 'Result Processing Specialist',
       task: 'Normalize results across platforms',
@@ -462,7 +467,8 @@ export const crossPlatformComparisonTask = defineTask('mp-cross-comparison', (ar
   kind: 'agent',
   title: 'Cross-Platform Comparison',
   agent: {
-    name: 'general-purpose',
+    name: 'multi-platform-engineer',
+    skills: ['qiskit-circuit-builder', 'cirq-circuit-builder', 'braket-executor', 'tket-compiler', 'backend-selector'],
     prompt: {
       role: 'Platform Comparison Specialist',
       task: 'Compare performance across platforms',
@@ -505,7 +511,8 @@ export const platformDifferencesDocumentationTask = defineTask('mp-differences-d
   kind: 'agent',
   title: 'Platform Differences Documentation',
   agent: {
-    name: 'general-purpose',
+    name: 'multi-platform-engineer',
+    skills: ['qiskit-circuit-builder', 'cirq-circuit-builder', 'braket-executor', 'tket-compiler', 'backend-selector'],
     prompt: {
       role: 'Documentation Specialist',
       task: 'Document platform differences',
@@ -546,7 +553,8 @@ export const bestPracticesDocumentationTask = defineTask('mp-best-practices', (a
   kind: 'agent',
   title: 'Best Practices Documentation',
   agent: {
-    name: 'general-purpose',
+    name: 'multi-platform-engineer',
+    skills: ['qiskit-circuit-builder', 'cirq-circuit-builder', 'braket-executor', 'tket-compiler', 'backend-selector'],
     prompt: {
       role: 'Best Practices Specialist',
       task: 'Document multi-platform best practices',

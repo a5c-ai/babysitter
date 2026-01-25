@@ -287,7 +287,8 @@ export const qnnArchitectureDesignTask = defineTask('qnn-architecture-design', (
   kind: 'agent',
   title: 'QNN Architecture Design',
   agent: {
-    name: 'general-purpose',
+    name: 'qnn-trainer',
+    skills: ['vqc-trainer', 'barren-plateau-analyzer', 'data-encoder', 'pennylane-hybrid-executor'],
     prompt: {
       role: 'Quantum Neural Network Architect',
       task: 'Design quantum neural network architecture',
@@ -332,7 +333,8 @@ export const barrenPlateauAnalysisTask = defineTask('qnn-barren-plateau', (args,
   kind: 'agent',
   title: 'Barren Plateau Analysis',
   agent: {
-    name: 'general-purpose',
+    name: 'qnn-trainer',
+    skills: ['vqc-trainer', 'barren-plateau-analyzer', 'data-encoder', 'pennylane-hybrid-executor'],
     prompt: {
       role: 'Quantum Trainability Specialist',
       task: 'Analyze barren plateau risk for QNN',
@@ -375,7 +377,8 @@ export const parameterInitializationTask = defineTask('qnn-parameter-init', (arg
   kind: 'agent',
   title: 'Parameter Initialization',
   agent: {
-    name: 'general-purpose',
+    name: 'qnn-trainer',
+    skills: ['vqc-trainer', 'barren-plateau-analyzer', 'data-encoder', 'pennylane-hybrid-executor'],
     prompt: {
       role: 'QNN Initialization Specialist',
       task: 'Initialize QNN parameters for optimal training',
@@ -417,7 +420,8 @@ export const gradientComputationSetupTask = defineTask('qnn-gradient-setup', (ar
   kind: 'agent',
   title: 'Gradient Computation Setup',
   agent: {
-    name: 'general-purpose',
+    name: 'qnn-trainer',
+    skills: ['vqc-trainer', 'barren-plateau-analyzer', 'data-encoder', 'pennylane-hybrid-executor'],
     prompt: {
       role: 'Quantum Gradient Specialist',
       task: 'Set up gradient computation for QNN training',
@@ -459,7 +463,8 @@ export const qnnTrainingLoopTask = defineTask('qnn-training-loop', (args, taskCt
   kind: 'agent',
   title: 'QNN Training Loop',
   agent: {
-    name: 'general-purpose',
+    name: 'qnn-trainer',
+    skills: ['vqc-trainer', 'barren-plateau-analyzer', 'data-encoder', 'pennylane-hybrid-executor'],
     prompt: {
       role: 'QNN Training Specialist',
       task: 'Execute QNN training loop',
@@ -503,7 +508,8 @@ export const expressibilityAnalysisTask = defineTask('qnn-expressibility', (args
   kind: 'agent',
   title: 'Expressibility Analysis',
   agent: {
-    name: 'general-purpose',
+    name: 'qnn-trainer',
+    skills: ['vqc-trainer', 'barren-plateau-analyzer', 'data-encoder', 'pennylane-hybrid-executor'],
     prompt: {
       role: 'Quantum Expressibility Specialist',
       task: 'Analyze expressibility and entangling capability of QNN',
@@ -545,7 +551,8 @@ export const qnnPerformanceEvaluationTask = defineTask('qnn-performance-eval', (
   kind: 'agent',
   title: 'QNN Performance Evaluation',
   agent: {
-    name: 'general-purpose',
+    name: 'qnn-trainer',
+    skills: ['vqc-trainer', 'barren-plateau-analyzer', 'data-encoder', 'pennylane-hybrid-executor'],
     prompt: {
       role: 'ML Performance Evaluation Specialist',
       task: 'Evaluate trained QNN performance',
@@ -587,7 +594,8 @@ export const trainingRecommendationsTask = defineTask('qnn-recommendations', (ar
   kind: 'agent',
   title: 'Training Strategy Recommendations',
   agent: {
-    name: 'general-purpose',
+    name: 'qnn-trainer',
+    skills: ['vqc-trainer', 'barren-plateau-analyzer', 'data-encoder', 'pennylane-hybrid-executor'],
     prompt: {
       role: 'QNN Optimization Specialist',
       task: 'Provide training strategy recommendations',
@@ -629,7 +637,8 @@ export const qnnReportTask = defineTask('qnn-report', (args, taskCtx) => ({
   kind: 'agent',
   title: 'QNN Report Generation',
   agent: {
-    name: 'general-purpose',
+    name: 'qnn-trainer',
+    skills: ['vqc-trainer', 'barren-plateau-analyzer', 'data-encoder', 'pennylane-hybrid-executor'],
     prompt: {
       role: 'Technical Documentation Specialist',
       task: 'Generate comprehensive QNN training report',

@@ -49,57 +49,57 @@ This backlog defines the skills and agents to be implemented for the Arts and Cu
 
 ### Curatorial Processes
 
-| Process | Recommended Skills | Recommended Agents |
-|---------|-------------------|-------------------|
-| Exhibition Development Process | SK-AC-001, SK-AC-004, SK-AC-008, SK-AC-003 | AG-AC-001, AG-AC-010, AG-AC-006 |
-| Collection Management Process | SK-AC-003, SK-AC-001, SK-AC-006 | AG-AC-006, AG-AC-001, AG-AC-004 |
-| Curatorial Research Process | SK-AC-001, SK-AC-008 | AG-AC-001 |
-| Loan Agreement Process | SK-AC-003, SK-AC-011 | AG-AC-006, AG-AC-001 |
+| Process | Recommended Skills | Recommended Agents | Status |
+|---------|-------------------|-------------------|--------|
+| Exhibition Development Process | SK-AC-001, SK-AC-004, SK-AC-008, SK-AC-003 | AG-AC-001, AG-AC-010, AG-AC-006 | [x] |
+| Collection Management Process | SK-AC-003, SK-AC-001, SK-AC-006 | AG-AC-006, AG-AC-001, AG-AC-004 | [x] |
+| Curatorial Research Process | SK-AC-001, SK-AC-008 | AG-AC-001 | [x] |
+| Loan Agreement Process | SK-AC-003, SK-AC-011 | AG-AC-006, AG-AC-001 | [x] |
 
 ### Arts Administration Processes
 
-| Process | Recommended Skills | Recommended Agents |
-|---------|-------------------|-------------------|
-| Grant Writing Process | SK-AC-002, SK-AC-010 | AG-AC-003, AG-AC-002 |
-| Budget Management Process | SK-AC-002, SK-AC-009, SK-AC-007 | AG-AC-002, AG-AC-003 |
-| Strategic Planning Process | SK-AC-002, SK-AC-009, SK-AC-013, SK-AC-010 | AG-AC-002, AG-AC-009 |
-| Board Governance Process | SK-AC-013, SK-AC-009 | AG-AC-002 |
-| Donor Cultivation Process | SK-AC-009, SK-AC-002, SK-AC-013 | AG-AC-003, AG-AC-002 |
+| Process | Recommended Skills | Recommended Agents | Status |
+|---------|-------------------|-------------------|--------|
+| Grant Writing Process | SK-AC-002, SK-AC-010 | AG-AC-003, AG-AC-002 | [x] |
+| Budget Management Process | SK-AC-002, SK-AC-009, SK-AC-007 | AG-AC-002, AG-AC-003 | [x] |
+| Strategic Planning Process | SK-AC-002, SK-AC-009, SK-AC-013, SK-AC-010 | AG-AC-002, AG-AC-009 | [x] |
+| Board Governance Process | SK-AC-013, SK-AC-009 | AG-AC-002 | [x] |
+| Donor Cultivation Process | SK-AC-009, SK-AC-002, SK-AC-013 | AG-AC-003, AG-AC-002 | [x] |
 
 ### Production Processes
 
-| Process | Recommended Skills | Recommended Agents |
-|---------|-------------------|-------------------|
-| Performance Production Process | SK-AC-005, SK-AC-011, SK-AC-013 | AG-AC-005 |
-| Event Planning Process | SK-AC-005, SK-AC-011, SK-AC-013 | AG-AC-005, AG-AC-008 |
-| Stage Management Process | SK-AC-005 | AG-AC-005 |
-| Technical Production Process | SK-AC-005, SK-AC-004 | AG-AC-005, AG-AC-010 |
+| Process | Recommended Skills | Recommended Agents | Status |
+|---------|-------------------|-------------------|--------|
+| Performance Production Process | SK-AC-005, SK-AC-011, SK-AC-013 | AG-AC-005 | [x] |
+| Event Planning Process | SK-AC-005, SK-AC-011, SK-AC-013 | AG-AC-005, AG-AC-008 | [x] |
+| Stage Management Process | SK-AC-005 | AG-AC-005 | [x] |
+| Technical Production Process | SK-AC-005, SK-AC-004 | AG-AC-005, AG-AC-010 | [x] |
 
 ### Conservation Processes
 
-| Process | Recommended Skills | Recommended Agents |
-|---------|-------------------|-------------------|
-| Preventive Conservation Process | SK-AC-006, SK-AC-011, SK-AC-003 | AG-AC-004, AG-AC-006 |
-| Conservation Treatment Process | SK-AC-006, SK-AC-003 | AG-AC-004 |
-| Condition Reporting Process | SK-AC-006, SK-AC-003 | AG-AC-004, AG-AC-006 |
-| Collection Risk Assessment Process | SK-AC-011, SK-AC-006 | AG-AC-004, AG-AC-006, AG-AC-002 |
+| Process | Recommended Skills | Recommended Agents | Status |
+|---------|-------------------|-------------------|--------|
+| Preventive Conservation Process | SK-AC-006, SK-AC-011, SK-AC-003 | AG-AC-004, AG-AC-006 | [x] |
+| Conservation Treatment Process | SK-AC-006, SK-AC-003 | AG-AC-004 | [x] |
+| Condition Reporting Process | SK-AC-006, SK-AC-003 | AG-AC-004, AG-AC-006 | [x] |
+| Collection Risk Assessment Process | SK-AC-011, SK-AC-006 | AG-AC-004, AG-AC-006, AG-AC-002 | [x] |
 
 ### Audience Development Processes
 
-| Process | Recommended Skills | Recommended Agents |
-|---------|-------------------|-------------------|
-| Marketing Campaign Process | SK-AC-007, SK-AC-014, SK-AC-008 | AG-AC-008 |
-| Education Program Development Process | SK-AC-008, SK-AC-012, SK-AC-014 | AG-AC-007 |
-| Community Engagement Process | SK-AC-012, SK-AC-013, SK-AC-008 | AG-AC-007, AG-AC-009 |
-| Visitor Experience Design Process | SK-AC-004, SK-AC-007, SK-AC-012, SK-AC-014 | AG-AC-010, AG-AC-007, AG-AC-008 |
+| Process | Recommended Skills | Recommended Agents | Status |
+|---------|-------------------|-------------------|--------|
+| Marketing Campaign Process | SK-AC-007, SK-AC-014, SK-AC-008 | AG-AC-008 | [x] |
+| Education Program Development Process | SK-AC-008, SK-AC-012, SK-AC-014 | AG-AC-007 | [x] |
+| Community Engagement Process | SK-AC-012, SK-AC-013, SK-AC-008 | AG-AC-007, AG-AC-009 | [x] |
+| Visitor Experience Design Process | SK-AC-004, SK-AC-007, SK-AC-012, SK-AC-014 | AG-AC-010, AG-AC-007, AG-AC-008 | [x] |
 
 ### Cultural Policy Processes
 
-| Process | Recommended Skills | Recommended Agents |
-|---------|-------------------|-------------------|
-| Cultural Planning Process | SK-AC-010, SK-AC-013, SK-AC-015 | AG-AC-009, AG-AC-002 |
-| Cultural Impact Assessment Process | SK-AC-010, SK-AC-007, SK-AC-015 | AG-AC-009 |
-| Arts Advocacy Process | SK-AC-015, SK-AC-010, SK-AC-013 | AG-AC-009, AG-AC-002 |
+| Process | Recommended Skills | Recommended Agents | Status |
+|---------|-------------------|-------------------|--------|
+| Cultural Planning Process | SK-AC-010, SK-AC-013, SK-AC-015 | AG-AC-009, AG-AC-002 | [x] |
+| Cultural Impact Assessment Process | SK-AC-010, SK-AC-007, SK-AC-015 | AG-AC-009 | [x] |
+| Arts Advocacy Process | SK-AC-015, SK-AC-010, SK-AC-013 | AG-AC-009, AG-AC-002 | [x] |
 
 ---
 

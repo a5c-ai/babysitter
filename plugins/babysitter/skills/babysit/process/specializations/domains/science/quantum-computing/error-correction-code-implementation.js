@@ -282,7 +282,8 @@ export const qecCodeAnalysisTask = defineTask('qec-code-analysis', (args, taskCt
   kind: 'agent',
   title: 'QEC Code Analysis',
   agent: {
-    name: 'general-purpose',
+    name: 'qec-specialist',
+    skills: ['qec-code-builder', 'stim-simulator', 'pymatching-decoder', 'resource-estimator'],
     prompt: {
       role: 'Quantum Error Correction Theorist',
       task: 'Analyze and characterize the selected quantum error correction code',
@@ -327,7 +328,8 @@ export const logicalEncodingTask = defineTask('qec-logical-encoding', (args, tas
   kind: 'agent',
   title: 'Logical Qubit Encoding',
   agent: {
-    name: 'general-purpose',
+    name: 'qec-specialist',
+    skills: ['qec-code-builder', 'stim-simulator', 'pymatching-decoder', 'resource-estimator'],
     prompt: {
       role: 'QEC Circuit Design Specialist',
       task: 'Implement logical qubit encoding circuit for the QEC code',
@@ -369,7 +371,8 @@ export const syndromeExtractionTask = defineTask('qec-syndrome-extraction', (arg
   kind: 'agent',
   title: 'Syndrome Extraction Circuit',
   agent: {
-    name: 'general-purpose',
+    name: 'qec-specialist',
+    skills: ['qec-code-builder', 'stim-simulator', 'pymatching-decoder', 'resource-estimator'],
     prompt: {
       role: 'QEC Syndrome Measurement Specialist',
       task: 'Design syndrome extraction circuits for error detection',
@@ -412,7 +415,8 @@ export const decoderImplementationTask = defineTask('qec-decoder-implementation'
   kind: 'agent',
   title: 'QEC Decoder Implementation',
   agent: {
-    name: 'general-purpose',
+    name: 'qec-specialist',
+    skills: ['qec-code-builder', 'stim-simulator', 'pymatching-decoder', 'resource-estimator'],
     prompt: {
       role: 'QEC Decoder Specialist',
       task: 'Implement classical decoder for syndrome interpretation',
@@ -455,7 +459,8 @@ export const qecSimulationTask = defineTask('qec-simulation', (args, taskCtx) =>
   kind: 'agent',
   title: 'QEC Simulation',
   agent: {
-    name: 'general-purpose',
+    name: 'qec-specialist',
+    skills: ['qec-code-builder', 'stim-simulator', 'pymatching-decoder', 'resource-estimator'],
     prompt: {
       role: 'QEC Simulation Specialist',
       task: 'Simulate error correction performance',
@@ -498,7 +503,8 @@ export const thresholdAnalysisTask = defineTask('qec-threshold-analysis', (args,
   kind: 'agent',
   title: 'Threshold Analysis',
   agent: {
-    name: 'general-purpose',
+    name: 'qec-specialist',
+    skills: ['qec-code-builder', 'stim-simulator', 'pymatching-decoder', 'resource-estimator'],
     prompt: {
       role: 'QEC Threshold Analysis Specialist',
       task: 'Analyze error correction threshold and scaling',
@@ -541,7 +547,8 @@ export const resourceOverheadAnalysisTask = defineTask('qec-resource-overhead', 
   kind: 'agent',
   title: 'Resource Overhead Analysis',
   agent: {
-    name: 'general-purpose',
+    name: 'qec-specialist',
+    skills: ['qec-code-builder', 'stim-simulator', 'pymatching-decoder', 'resource-estimator'],
     prompt: {
       role: 'QEC Resource Analysis Specialist',
       task: 'Analyze resource overhead of error correction',
@@ -584,7 +591,8 @@ export const qecDocumentationTask = defineTask('qec-documentation', (args, taskC
   kind: 'agent',
   title: 'QEC Documentation',
   agent: {
-    name: 'general-purpose',
+    name: 'qec-specialist',
+    skills: ['qec-code-builder', 'stim-simulator', 'pymatching-decoder', 'resource-estimator'],
     prompt: {
       role: 'Technical Documentation Specialist',
       task: 'Generate comprehensive QEC implementation documentation',

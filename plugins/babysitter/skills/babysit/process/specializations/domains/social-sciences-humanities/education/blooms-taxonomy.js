@@ -3,6 +3,8 @@
  * @description Applying cognitive taxonomy levels (Remember, Understand, Apply, Analyze, Evaluate, Create) to write measurable learning objectives and design aligned assessments
  * @inputs { courseName: string, contentTopics: array, targetLevel: string, context: object }
  * @outputs { success: boolean, objectives: array, assessmentAlignment: object, activityAlignment: object, artifacts: array }
+ * @recommendedSkills SK-EDU-002 (learning-objectives-writing), SK-EDU-003 (assessment-design-validation), SK-EDU-004 (rubric-development)
+ * @recommendedAgents AG-EDU-001 (instructional-designer), AG-EDU-002 (curriculum-development-specialist), AG-EDU-003 (assessment-specialist)
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

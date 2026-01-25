@@ -3,6 +3,8 @@
  * @description Structured peer observation protocols with pre-observation conferences, classroom observations, and constructive feedback sessions
  * @inputs { observationType: string, focusAreas: array, instructor: object, observer: object, context: object }
  * @outputs { success: boolean, protocol: object, observationTools: array, feedbackFramework: object, artifacts: array }
+ * @recommendedSkills SK-EDU-012 (facilitation-workshop-delivery)
+ * @recommendedAgents AG-EDU-006 (faculty-development-facilitator)
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

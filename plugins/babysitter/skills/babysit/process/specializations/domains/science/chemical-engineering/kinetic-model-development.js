@@ -456,8 +456,9 @@ export const uncertaintyAssessmentTask = defineTask('uncertainty-assessment', (a
 export const kineticsDocumentationTask = defineTask('kinetics-documentation', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Document kinetic model',
+  skill: { name: 'kinetic-modeler' },
   agent: {
-    name: 'documentation-engineer',
+    name: 'reaction-engineer',
     prompt: {
       role: 'kinetics documentation engineer',
       task: 'Create comprehensive kinetic model documentation',

@@ -290,7 +290,8 @@ export const testArchitectureDesignTask = defineTask('qc-test-architecture', (ar
   kind: 'agent',
   title: 'Test Architecture Design',
   agent: {
-    name: 'general-purpose',
+    name: 'quantum-test-engineer',
+    skills: ['statevector-simulator', 'qiskit-circuit-builder', 'cirq-circuit-builder'],
     prompt: {
       role: 'Quantum Software Testing Architect',
       task: 'Design test architecture for quantum circuit project',
@@ -333,7 +334,8 @@ export const unitTestImplementationTask = defineTask('qc-unit-tests', (args, tas
   kind: 'agent',
   title: 'Unit Test Implementation',
   agent: {
-    name: 'general-purpose',
+    name: 'quantum-test-engineer',
+    skills: ['statevector-simulator', 'qiskit-circuit-builder', 'cirq-circuit-builder'],
     prompt: {
       role: 'Quantum Unit Test Specialist',
       task: 'Implement unit tests for quantum circuit components',
@@ -375,7 +377,8 @@ export const integrationTestImplementationTask = defineTask('qc-integration-test
   kind: 'agent',
   title: 'Integration Test Implementation',
   agent: {
-    name: 'general-purpose',
+    name: 'quantum-test-engineer',
+    skills: ['statevector-simulator', 'qiskit-circuit-builder', 'cirq-circuit-builder'],
     prompt: {
       role: 'Quantum Integration Test Specialist',
       task: 'Implement integration tests for quantum algorithms',
@@ -417,7 +420,8 @@ export const propertyBasedTestImplementationTask = defineTask('qc-property-tests
   kind: 'agent',
   title: 'Property-Based Test Implementation',
   agent: {
-    name: 'general-purpose',
+    name: 'quantum-test-engineer',
+    skills: ['statevector-simulator', 'qiskit-circuit-builder', 'cirq-circuit-builder'],
     prompt: {
       role: 'Property-Based Testing Specialist',
       task: 'Implement property-based tests for quantum circuits',
@@ -459,7 +463,8 @@ export const simulationValidationTestsTask = defineTask('qc-simulation-tests', (
   kind: 'agent',
   title: 'Simulation Validation Tests',
   agent: {
-    name: 'general-purpose',
+    name: 'quantum-test-engineer',
+    skills: ['statevector-simulator', 'qiskit-circuit-builder', 'cirq-circuit-builder'],
     prompt: {
       role: 'Quantum Simulation Testing Specialist',
       task: 'Implement simulation-based validation tests',
@@ -501,7 +506,8 @@ export const testFixtureCreationTask = defineTask('qc-test-fixtures', (args, tas
   kind: 'agent',
   title: 'Test Fixture Creation',
   agent: {
-    name: 'general-purpose',
+    name: 'quantum-test-engineer',
+    skills: ['statevector-simulator', 'qiskit-circuit-builder', 'cirq-circuit-builder'],
     prompt: {
       role: 'Test Fixture Specialist',
       task: 'Create test fixtures and mocks for quantum testing',
@@ -543,7 +549,8 @@ export const cicdPipelineConfigurationTask = defineTask('qc-cicd-config', (args,
   kind: 'agent',
   title: 'CI/CD Pipeline Configuration',
   agent: {
-    name: 'general-purpose',
+    name: 'quantum-test-engineer',
+    skills: ['statevector-simulator', 'qiskit-circuit-builder', 'cirq-circuit-builder'],
     prompt: {
       role: 'CI/CD Configuration Specialist',
       task: 'Configure CI/CD pipeline for quantum code testing',
@@ -585,7 +592,8 @@ export const testExecutionCoverageTask = defineTask('qc-test-execution', (args, 
   kind: 'agent',
   title: 'Test Execution and Coverage',
   agent: {
-    name: 'general-purpose',
+    name: 'quantum-test-engineer',
+    skills: ['statevector-simulator', 'qiskit-circuit-builder', 'cirq-circuit-builder'],
     prompt: {
       role: 'Test Execution Specialist',
       task: 'Execute test suite and measure coverage',
@@ -630,7 +638,8 @@ export const testingDocumentationTask = defineTask('qc-testing-docs', (args, tas
   kind: 'agent',
   title: 'Testing Documentation',
   agent: {
-    name: 'general-purpose',
+    name: 'quantum-test-engineer',
+    skills: ['statevector-simulator', 'qiskit-circuit-builder', 'cirq-circuit-builder'],
     prompt: {
       role: 'Technical Documentation Specialist',
       task: 'Generate comprehensive testing framework documentation',

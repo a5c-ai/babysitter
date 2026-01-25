@@ -216,7 +216,8 @@ export const financialModelDefinitionTask = defineTask('qfin-model-definition', 
   kind: 'agent',
   title: 'Financial Model Definition',
   agent: {
-    name: 'general-purpose',
+    name: 'quantum-finance-analyst',
+    skills: ['pennylane-hybrid-executor', 'qiskit-circuit-builder', 'qubo-formulator'],
     prompt: {
       role: 'Quantitative Finance Specialist',
       task: 'Define financial model for quantum computation',
@@ -259,7 +260,8 @@ export const probabilityDistributionEncodingTask = defineTask('qfin-distribution
   kind: 'agent',
   title: 'Probability Distribution Encoding',
   agent: {
-    name: 'general-purpose',
+    name: 'quantum-finance-analyst',
+    skills: ['pennylane-hybrid-executor', 'qiskit-circuit-builder', 'qubo-formulator'],
     prompt: {
       role: 'Quantum Encoding Specialist',
       task: 'Encode probability distributions on quantum computer',
@@ -301,7 +303,8 @@ export const amplitudeEstimationCircuitTask = defineTask('qfin-ae-circuit', (arg
   kind: 'agent',
   title: 'Amplitude Estimation Circuit',
   agent: {
-    name: 'general-purpose',
+    name: 'quantum-finance-analyst',
+    skills: ['pennylane-hybrid-executor', 'qiskit-circuit-builder', 'qubo-formulator'],
     prompt: {
       role: 'Amplitude Estimation Specialist',
       task: 'Design amplitude estimation circuit for finance',
@@ -344,7 +347,8 @@ export const quantumFinanceExecutionTask = defineTask('qfin-execution', (args, t
   kind: 'agent',
   title: 'Quantum Finance Execution',
   agent: {
-    name: 'general-purpose',
+    name: 'quantum-finance-analyst',
+    skills: ['pennylane-hybrid-executor', 'qiskit-circuit-builder', 'qubo-formulator'],
     prompt: {
       role: 'Quantum Execution Specialist',
       task: 'Execute quantum finance algorithm',
@@ -387,7 +391,8 @@ export const classicalFinanceValidationTask = defineTask('qfin-classical-validat
   kind: 'agent',
   title: 'Classical Finance Validation',
   agent: {
-    name: 'general-purpose',
+    name: 'quantum-finance-analyst',
+    skills: ['pennylane-hybrid-executor', 'qiskit-circuit-builder', 'qubo-formulator'],
     prompt: {
       role: 'Quantitative Validation Specialist',
       task: 'Validate quantum results against classical methods',
@@ -430,7 +435,8 @@ export const financialDataIntegrationTask = defineTask('qfin-data-integration', 
   kind: 'agent',
   title: 'Financial Data Integration',
   agent: {
-    name: 'general-purpose',
+    name: 'quantum-finance-analyst',
+    skills: ['pennylane-hybrid-executor', 'qiskit-circuit-builder', 'qubo-formulator'],
     prompt: {
       role: 'Financial Systems Integration Specialist',
       task: 'Integrate quantum finance with data sources',
@@ -471,7 +477,8 @@ export const regulatoryComplianceDocumentationTask = defineTask('qfin-compliance
   kind: 'agent',
   title: 'Regulatory Compliance Documentation',
   agent: {
-    name: 'general-purpose',
+    name: 'quantum-finance-analyst',
+    skills: ['pennylane-hybrid-executor', 'qiskit-circuit-builder', 'qubo-formulator'],
     prompt: {
       role: 'Financial Compliance Specialist',
       task: 'Document regulatory compliance for quantum finance',

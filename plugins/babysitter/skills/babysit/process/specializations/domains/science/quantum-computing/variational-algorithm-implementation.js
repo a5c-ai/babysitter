@@ -259,7 +259,8 @@ export const problemFormulationTask = defineTask('vqa-problem-formulation', (arg
   kind: 'agent',
   title: 'VQA Problem Formulation',
   agent: {
-    name: 'general-purpose',
+    name: 'variational-algorithm-specialist',
+    skills: ['pennylane-hybrid-executor', 'ansatz-designer', 'barren-plateau-analyzer', 'qubo-formulator'],
     prompt: {
       role: 'Quantum Chemistry and Optimization Specialist',
       task: 'Formulate the problem as a Hamiltonian for variational quantum algorithm',
@@ -304,7 +305,8 @@ export const ansatzDesignTask = defineTask('vqa-ansatz-design', (args, taskCtx) 
   kind: 'agent',
   title: 'VQA Ansatz Design',
   agent: {
-    name: 'general-purpose',
+    name: 'variational-algorithm-specialist',
+    skills: ['pennylane-hybrid-executor', 'ansatz-designer', 'barren-plateau-analyzer', 'qubo-formulator'],
     prompt: {
       role: 'Quantum Circuit Design Specialist',
       task: 'Design the parameterized ansatz circuit for the variational algorithm',
@@ -349,7 +351,8 @@ export const optimizerConfigurationTask = defineTask('vqa-optimizer-config', (ar
   kind: 'agent',
   title: 'VQA Optimizer Configuration',
   agent: {
-    name: 'general-purpose',
+    name: 'variational-algorithm-specialist',
+    skills: ['pennylane-hybrid-executor', 'ansatz-designer', 'barren-plateau-analyzer', 'qubo-formulator'],
     prompt: {
       role: 'Optimization Algorithm Specialist',
       task: 'Configure the classical optimizer for the variational algorithm',
@@ -392,7 +395,8 @@ export const hybridOptimizationTask = defineTask('vqa-hybrid-optimization', (arg
   kind: 'agent',
   title: 'VQA Hybrid Optimization Loop',
   agent: {
-    name: 'general-purpose',
+    name: 'variational-algorithm-specialist',
+    skills: ['pennylane-hybrid-executor', 'ansatz-designer', 'barren-plateau-analyzer', 'qubo-formulator'],
     prompt: {
       role: 'Hybrid Algorithm Execution Specialist',
       task: 'Execute the hybrid quantum-classical optimization loop',
@@ -436,7 +440,8 @@ export const convergenceAnalysisTask = defineTask('vqa-convergence-analysis', (a
   kind: 'agent',
   title: 'VQA Convergence Analysis',
   agent: {
-    name: 'general-purpose',
+    name: 'variational-algorithm-specialist',
+    skills: ['pennylane-hybrid-executor', 'ansatz-designer', 'barren-plateau-analyzer', 'qubo-formulator'],
     prompt: {
       role: 'Numerical Analysis Specialist',
       task: 'Analyze the convergence behavior of the variational algorithm',
@@ -481,7 +486,8 @@ export const classicalBenchmarkTask = defineTask('vqa-classical-benchmark', (arg
   kind: 'agent',
   title: 'Classical Benchmark Comparison',
   agent: {
-    name: 'general-purpose',
+    name: 'variational-algorithm-specialist',
+    skills: ['pennylane-hybrid-executor', 'ansatz-designer', 'barren-plateau-analyzer', 'qubo-formulator'],
     prompt: {
       role: 'Computational Chemistry/Optimization Specialist',
       task: 'Compare variational quantum results with classical methods',
@@ -525,7 +531,8 @@ export const resultAnalysisTask = defineTask('vqa-result-analysis', (args, taskC
   kind: 'agent',
   title: 'VQA Result Analysis',
   agent: {
-    name: 'general-purpose',
+    name: 'variational-algorithm-specialist',
+    skills: ['pennylane-hybrid-executor', 'ansatz-designer', 'barren-plateau-analyzer', 'qubo-formulator'],
     prompt: {
       role: 'Quantum Algorithm Analysis Specialist',
       task: 'Analyze and document variational algorithm results',

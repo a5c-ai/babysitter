@@ -47,13 +47,13 @@ This document defines the skills and agents required to support the Education an
 
 ### Instructional Design Processes
 
-| Process | Recommended Skills | Recommended Agents |
-|---------|-------------------|-------------------|
-| ADDIE Model Implementation | SK-EDU-001, SK-EDU-002, SK-EDU-005, SK-EDU-014 | AG-EDU-001, AG-EDU-004 |
-| SAM (Successive Approximation Model) | SK-EDU-005, SK-EDU-006, SK-EDU-011 | AG-EDU-001, AG-EDU-004, AG-EDU-010 |
-| Backward Design (Understanding by Design) | SK-EDU-002, SK-EDU-008, SK-EDU-003 | AG-EDU-001, AG-EDU-002, AG-EDU-003 |
-| Action Mapping | SK-EDU-001, SK-EDU-014, SK-EDU-002 | AG-EDU-001, AG-EDU-007 |
-| Gagne's Nine Events of Instruction | SK-EDU-002, SK-EDU-014, SK-EDU-006 | AG-EDU-001, AG-EDU-010 |
+| Process | Recommended Skills | Recommended Agents | Status |
+|---------|-------------------|-------------------|--------|
+| ADDIE Model Implementation | SK-EDU-001, SK-EDU-002, SK-EDU-005, SK-EDU-014 | AG-EDU-001, AG-EDU-004 | [x] |
+| SAM (Successive Approximation Model) | SK-EDU-005, SK-EDU-006, SK-EDU-011 | AG-EDU-001, AG-EDU-004, AG-EDU-010 | [x] |
+| Backward Design (Understanding by Design) | SK-EDU-002, SK-EDU-008, SK-EDU-003 | AG-EDU-001, AG-EDU-002, AG-EDU-003 | [x] |
+| Action Mapping | SK-EDU-001, SK-EDU-014, SK-EDU-002 | AG-EDU-001, AG-EDU-007 | [x] |
+| Gagne's Nine Events of Instruction | SK-EDU-002, SK-EDU-014, SK-EDU-006 | AG-EDU-001, AG-EDU-010 | [x] |
 
 ### Curriculum Development Processes
 

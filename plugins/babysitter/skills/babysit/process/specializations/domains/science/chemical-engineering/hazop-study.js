@@ -167,8 +167,9 @@ export async function process(inputs, ctx) {
 export const scopeDefinitionTask = defineTask('scope-definition', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Define HAZOP study scope and objectives',
+  skill: { name: 'hazop-facilitator' },
   agent: {
-    name: 'hazop-facilitator',
+    name: 'hazop-leader',
     prompt: {
       role: 'HAZOP study facilitator',
       task: 'Define the scope and objectives for the HAZOP study',
@@ -216,8 +217,9 @@ export const scopeDefinitionTask = defineTask('scope-definition', (args, taskCtx
 export const teamAssemblyTask = defineTask('team-assembly', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Assemble multi-disciplinary HAZOP team',
+  skill: { name: 'hazop-facilitator' },
   agent: {
-    name: 'team-coordinator',
+    name: 'hazop-leader',
     prompt: {
       role: 'HAZOP team coordinator',
       task: 'Assemble and prepare multi-disciplinary HAZOP team',
@@ -264,8 +266,9 @@ export const teamAssemblyTask = defineTask('team-assembly', (args, taskCtx) => (
 export const nodeIdentificationTask = defineTask('node-identification', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Review P&IDs and identify study nodes',
+  skill: { name: 'pfd-pid-generator' },
   agent: {
-    name: 'pid-analyst',
+    name: 'hazop-leader',
     prompt: {
       role: 'P&ID analyst',
       task: 'Identify study nodes from P&ID review',
@@ -315,8 +318,9 @@ export const nodeIdentificationTask = defineTask('node-identification', (args, t
 export const deviationAnalysisTask = defineTask('deviation-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Apply guidewords and identify deviations',
+  skill: { name: 'hazop-facilitator' },
   agent: {
-    name: 'deviation-analyst',
+    name: 'risk-analyst',
     prompt: {
       role: 'HAZOP deviation analyst',
       task: 'Apply guidewords systematically to identify deviations',
@@ -366,6 +370,7 @@ export const deviationAnalysisTask = defineTask('deviation-analysis', (args, tas
 export const causesConsequencesTask = defineTask('causes-consequences', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Evaluate causes and consequences of deviations',
+  skill: { name: 'consequence-modeler' },
   agent: {
     name: 'risk-analyst',
     prompt: {
@@ -420,8 +425,9 @@ export const causesConsequencesTask = defineTask('causes-consequences', (args, t
 export const safeguardsEvaluationTask = defineTask('safeguards-evaluation', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Evaluate existing safeguards',
+  skill: { name: 'hazop-facilitator' },
   agent: {
-    name: 'safeguards-engineer',
+    name: 'risk-analyst',
     prompt: {
       role: 'process safety engineer',
       task: 'Evaluate adequacy of existing safeguards',
@@ -472,8 +478,9 @@ export const safeguardsEvaluationTask = defineTask('safeguards-evaluation', (arg
 export const safeguardRecommendationsTask = defineTask('safeguard-recommendations', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Recommend additional safeguards',
+  skill: { name: 'hazop-facilitator' },
   agent: {
-    name: 'recommendations-engineer',
+    name: 'hazop-leader',
     prompt: {
       role: 'safety recommendations engineer',
       task: 'Recommend additional safeguards to close gaps',
@@ -536,8 +543,9 @@ export const safeguardRecommendationsTask = defineTask('safeguard-recommendation
 export const hazopDocumentationTask = defineTask('hazop-documentation', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Document HAZOP findings and create report',
+  skill: { name: 'hazop-facilitator' },
   agent: {
-    name: 'documentation-engineer',
+    name: 'hazop-leader',
     prompt: {
       role: 'HAZOP documentation engineer',
       task: 'Create comprehensive HAZOP study documentation',

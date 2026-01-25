@@ -3,6 +3,8 @@
  * @description Structured approach to developing funding proposals for foundations, government agencies, and corporations including prospect research, narrative development, budgeting, and submission management
  * @inputs { projectTitle: string, fundingAmount: number, funderType: string, deadline: string, projectDescription: string }
  * @outputs { success: boolean, proposal: object, budget: object, supportingDocs: array, artifacts: array }
+ * @recommendedSkills SK-AC-002 (grant-proposal-writing), SK-AC-010 (cultural-policy-analysis)
+ * @recommendedAgents AG-AC-003 (development-officer-agent), AG-AC-002 (arts-administrator-agent)
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

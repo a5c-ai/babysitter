@@ -281,7 +281,8 @@ export const dataPreprocessingTask = defineTask('qml-data-preprocessing', (args,
   kind: 'agent',
   title: 'Data Preprocessing',
   agent: {
-    name: 'general-purpose',
+    name: 'qml-engineer',
+    skills: ['quantum-kernel-estimator', 'vqc-trainer', 'data-encoder', 'pennylane-hybrid-executor'],
     prompt: {
       role: 'Machine Learning Data Specialist',
       task: 'Preprocess dataset for quantum classifier',
@@ -327,7 +328,8 @@ export const dataEncodingCircuitTask = defineTask('qml-data-encoding', (args, ta
   kind: 'agent',
   title: 'Data Encoding Circuit Design',
   agent: {
-    name: 'general-purpose',
+    name: 'qml-engineer',
+    skills: ['quantum-kernel-estimator', 'vqc-trainer', 'data-encoder', 'pennylane-hybrid-executor'],
     prompt: {
       role: 'Quantum Data Encoding Specialist',
       task: 'Design quantum circuit for classical data encoding',
@@ -370,7 +372,8 @@ export const classifierArchitectureTask = defineTask('qml-classifier-architectur
   kind: 'agent',
   title: 'Classifier Architecture Design',
   agent: {
-    name: 'general-purpose',
+    name: 'qml-engineer',
+    skills: ['quantum-kernel-estimator', 'vqc-trainer', 'data-encoder', 'pennylane-hybrid-executor'],
     prompt: {
       role: 'Quantum ML Architecture Specialist',
       task: 'Design quantum classifier architecture',
@@ -414,7 +417,8 @@ export const classifierTrainingTask = defineTask('qml-classifier-training', (arg
   kind: 'agent',
   title: 'Classifier Training',
   agent: {
-    name: 'general-purpose',
+    name: 'qml-engineer',
+    skills: ['quantum-kernel-estimator', 'vqc-trainer', 'data-encoder', 'pennylane-hybrid-executor'],
     prompt: {
       role: 'Quantum ML Training Specialist',
       task: 'Train quantum classifier on dataset',
@@ -458,7 +462,8 @@ export const classifierValidationTask = defineTask('qml-classifier-validation', 
   kind: 'agent',
   title: 'Classifier Validation',
   agent: {
-    name: 'general-purpose',
+    name: 'qml-engineer',
+    skills: ['quantum-kernel-estimator', 'vqc-trainer', 'data-encoder', 'pennylane-hybrid-executor'],
     prompt: {
       role: 'ML Validation Specialist',
       task: 'Validate trained quantum classifier',
@@ -502,7 +507,8 @@ export const testSetEvaluationTask = defineTask('qml-test-evaluation', (args, ta
   kind: 'agent',
   title: 'Test Set Evaluation',
   agent: {
-    name: 'general-purpose',
+    name: 'qml-engineer',
+    skills: ['quantum-kernel-estimator', 'vqc-trainer', 'data-encoder', 'pennylane-hybrid-executor'],
     prompt: {
       role: 'ML Evaluation Specialist',
       task: 'Evaluate trained classifier on test set',
@@ -547,7 +553,8 @@ export const classicalBaselineComparisonTask = defineTask('qml-classical-baselin
   kind: 'agent',
   title: 'Classical Baseline Comparison',
   agent: {
-    name: 'general-purpose',
+    name: 'qml-engineer',
+    skills: ['quantum-kernel-estimator', 'vqc-trainer', 'data-encoder', 'pennylane-hybrid-executor'],
     prompt: {
       role: 'ML Benchmarking Specialist',
       task: 'Compare quantum classifier with classical baselines',
@@ -590,7 +597,8 @@ export const trainingConvergenceAnalysisTask = defineTask('qml-convergence-analy
   kind: 'agent',
   title: 'Training Convergence Analysis',
   agent: {
-    name: 'general-purpose',
+    name: 'qml-engineer',
+    skills: ['quantum-kernel-estimator', 'vqc-trainer', 'data-encoder', 'pennylane-hybrid-executor'],
     prompt: {
       role: 'Optimization Analysis Specialist',
       task: 'Analyze training convergence of quantum classifier',
@@ -633,7 +641,8 @@ export const classifierReportTask = defineTask('qml-classifier-report', (args, t
   kind: 'agent',
   title: 'Classifier Report Generation',
   agent: {
-    name: 'general-purpose',
+    name: 'qml-engineer',
+    skills: ['quantum-kernel-estimator', 'vqc-trainer', 'data-encoder', 'pennylane-hybrid-executor'],
     prompt: {
       role: 'ML Documentation Specialist',
       task: 'Generate comprehensive quantum classifier report',

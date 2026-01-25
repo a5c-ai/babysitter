@@ -3,6 +3,8 @@
  * @description Curriculum design starting from desired learning outcomes, determining acceptable evidence, then planning learning experiences (Understanding by Design - UbD)
  * @inputs { courseName: string, desiredResults: array, transferGoals: array, standards: array, constraints: object }
  * @outputs { success: boolean, stage1Results: object, stage2Evidence: object, stage3Plan: object, artifacts: array }
+ * @recommendedSkills SK-EDU-002 (learning-objectives-writing), SK-EDU-008 (standards-alignment-mapping), SK-EDU-003 (assessment-item-development)
+ * @recommendedAgents AG-EDU-001 (instructional-design-lead), AG-EDU-002 (curriculum-development-specialist), AG-EDU-003 (assessment-design-specialist)
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

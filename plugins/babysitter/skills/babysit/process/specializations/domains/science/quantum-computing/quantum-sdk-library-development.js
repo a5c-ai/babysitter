@@ -288,7 +288,8 @@ export const libraryArchitectureDesignTask = defineTask('sdk-architecture-design
   kind: 'agent',
   title: 'Library Architecture Design',
   agent: {
-    name: 'general-purpose',
+    name: 'quantum-sdk-developer',
+    skills: ['qiskit-circuit-builder', 'cirq-circuit-builder', 'pennylane-hybrid-executor', 'tket-compiler'],
     prompt: {
       role: 'Software Architecture Specialist',
       task: 'Design quantum library architecture',
@@ -331,7 +332,8 @@ export const circuitPrimitivesImplementationTask = defineTask('sdk-circuit-primi
   kind: 'agent',
   title: 'Circuit Primitives Implementation',
   agent: {
-    name: 'general-purpose',
+    name: 'quantum-sdk-developer',
+    skills: ['qiskit-circuit-builder', 'cirq-circuit-builder', 'pennylane-hybrid-executor', 'tket-compiler'],
     prompt: {
       role: 'Quantum Circuit Developer',
       task: 'Implement reusable circuit primitives',
@@ -373,7 +375,8 @@ export const algorithmTemplatesImplementationTask = defineTask('sdk-algorithm-te
   kind: 'agent',
   title: 'Algorithm Templates Implementation',
   agent: {
-    name: 'general-purpose',
+    name: 'quantum-sdk-developer',
+    skills: ['qiskit-circuit-builder', 'cirq-circuit-builder', 'pennylane-hybrid-executor', 'tket-compiler'],
     prompt: {
       role: 'Quantum Algorithm Developer',
       task: 'Implement algorithm templates',
@@ -415,7 +418,8 @@ export const hardwareAbstractionLayerTask = defineTask('sdk-hardware-abstraction
   kind: 'agent',
   title: 'Hardware Abstraction Layer',
   agent: {
-    name: 'general-purpose',
+    name: 'quantum-sdk-developer',
+    skills: ['qiskit-circuit-builder', 'cirq-circuit-builder', 'pennylane-hybrid-executor', 'tket-compiler'],
     prompt: {
       role: 'Hardware Integration Specialist',
       task: 'Implement hardware abstraction layer',
@@ -457,7 +461,8 @@ export const apiDesignImplementationTask = defineTask('sdk-api-design', (args, t
   kind: 'agent',
   title: 'API Design and Implementation',
   agent: {
-    name: 'general-purpose',
+    name: 'quantum-sdk-developer',
+    skills: ['qiskit-circuit-builder', 'cirq-circuit-builder', 'pennylane-hybrid-executor', 'tket-compiler'],
     prompt: {
       role: 'API Design Specialist',
       task: 'Design and implement library APIs',
@@ -499,7 +504,8 @@ export const documentationGenerationTask = defineTask('sdk-documentation', (args
   kind: 'agent',
   title: 'Documentation Generation',
   agent: {
-    name: 'general-purpose',
+    name: 'quantum-sdk-developer',
+    skills: ['qiskit-circuit-builder', 'cirq-circuit-builder', 'pennylane-hybrid-executor', 'tket-compiler'],
     prompt: {
       role: 'Technical Writer',
       task: 'Generate comprehensive library documentation',
@@ -541,7 +547,8 @@ export const exampleNotebooksCreationTask = defineTask('sdk-example-notebooks', 
   kind: 'agent',
   title: 'Example Notebooks Creation',
   agent: {
-    name: 'general-purpose',
+    name: 'quantum-sdk-developer',
+    skills: ['qiskit-circuit-builder', 'cirq-circuit-builder', 'pennylane-hybrid-executor', 'tket-compiler'],
     prompt: {
       role: 'Quantum Education Specialist',
       task: 'Create example Jupyter notebooks',
@@ -582,7 +589,8 @@ export const multiPlatformSupportTask = defineTask('sdk-multi-platform', (args, 
   kind: 'agent',
   title: 'Multi-Platform Support',
   agent: {
-    name: 'general-purpose',
+    name: 'quantum-sdk-developer',
+    skills: ['qiskit-circuit-builder', 'cirq-circuit-builder', 'pennylane-hybrid-executor', 'tket-compiler'],
     prompt: {
       role: 'Cross-Platform Specialist',
       task: 'Implement multi-platform support',
@@ -623,7 +631,8 @@ export const sdkTestingValidationTask = defineTask('sdk-testing-validation', (ar
   kind: 'agent',
   title: 'SDK Testing and Validation',
   agent: {
-    name: 'general-purpose',
+    name: 'quantum-sdk-developer',
+    skills: ['qiskit-circuit-builder', 'cirq-circuit-builder', 'pennylane-hybrid-executor', 'tket-compiler'],
     prompt: {
       role: 'SDK Testing Specialist',
       task: 'Test and validate SDK functionality',
@@ -666,7 +675,8 @@ export const packagingDistributionTask = defineTask('sdk-packaging', (args, task
   kind: 'agent',
   title: 'Packaging and Distribution',
   agent: {
-    name: 'general-purpose',
+    name: 'quantum-sdk-developer',
+    skills: ['qiskit-circuit-builder', 'cirq-circuit-builder', 'pennylane-hybrid-executor', 'tket-compiler'],
     prompt: {
       role: 'Package Management Specialist',
       task: 'Package and prepare SDK for distribution',

@@ -3,6 +3,8 @@
  * @description Creating ongoing assessments that provide immediate feedback to inform instruction and support learning during the instructional process
  * @inputs { courseName: string, learningObjectives: array, targetAudience: object, instructionalContext: object, constraints: object }
  * @outputs { success: boolean, assessmentPlan: object, instruments: array, feedbackStrategies: object, artifacts: array }
+ * @recommendedSkills SK-EDU-003 (assessment-design-validation), SK-EDU-002 (learning-objectives-writing), SK-EDU-009 (adaptive-learning-design)
+ * @recommendedAgents AG-EDU-003 (assessment-specialist), AG-EDU-007 (educational-data-analyst)
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

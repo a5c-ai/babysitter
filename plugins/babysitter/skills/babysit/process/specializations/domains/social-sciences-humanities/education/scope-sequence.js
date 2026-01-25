@@ -3,6 +3,8 @@
  * @description Systematic development of curriculum breadth (scope) and order (sequence) ensuring comprehensive coverage and logical progression of content
  * @inputs { courseName: string, standards: array, gradeLevel: string, duration: string, constraints: object }
  * @outputs { success: boolean, scope: object, sequence: object, pacingGuide: object, artifacts: array }
+ * @recommendedSkills SK-EDU-008 (standards-alignment-mapping), SK-EDU-002 (learning-objectives-writing)
+ * @recommendedAgents AG-EDU-002 (curriculum-development-specialist)
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

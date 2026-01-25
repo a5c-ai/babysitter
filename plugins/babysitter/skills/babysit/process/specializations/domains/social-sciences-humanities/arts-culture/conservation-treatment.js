@@ -3,6 +3,8 @@
  * @description Protocol for assessing artwork condition, developing treatment proposals, executing interventions, and documenting conservation activities with ethical decision-making frameworks
  * @inputs { objectTitle: string, objectType: string, ownerInfo: object, condition: object, treatmentGoals: array }
  * @outputs { success: boolean, conditionAssessment: object, treatmentProposal: object, treatmentDocumentation: object, artifacts: array }
+ * @recommendedSkills SK-AC-006 (conservation-assessment), SK-AC-003 (collection-documentation)
+ * @recommendedAgents AG-AC-004 (conservator-agent)
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

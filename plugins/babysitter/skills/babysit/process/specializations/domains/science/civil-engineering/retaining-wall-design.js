@@ -187,8 +187,9 @@ export async function process(inputs, ctx) {
 export const wallGeometryTask = defineTask('wall-geometry', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Determine wall geometry',
+  skill: { name: 'earth-pressure-calculator' },
   agent: {
-    name: 'structural-engineer',
+    name: 'retaining-structure-designer',
     prompt: {
       role: 'structural/geotechnical engineer',
       task: 'Define retaining wall geometry',
@@ -238,8 +239,9 @@ export const wallGeometryTask = defineTask('wall-geometry', (args, taskCtx) => (
 export const earthPressureTask = defineTask('earth-pressure', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Calculate earth pressures',
+  skill: { name: 'earth-pressure-calculator' },
   agent: {
-    name: 'geotechnical-engineer',
+    name: 'retaining-structure-designer',
     prompt: {
       role: 'geotechnical engineer',
       task: 'Calculate lateral earth pressures on wall',
@@ -289,8 +291,9 @@ export const earthPressureTask = defineTask('earth-pressure', (args, taskCtx) =>
 export const externalStabilityTask = defineTask('external-stability', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Perform external stability analysis',
+  skill: { name: 'slope-stability-analyzer' },
   agent: {
-    name: 'geotechnical-engineer',
+    name: 'retaining-structure-designer',
     prompt: {
       role: 'geotechnical engineer',
       task: 'Check external stability of retaining wall',
@@ -334,8 +337,9 @@ export const externalStabilityTask = defineTask('external-stability', (args, tas
 export const structuralDesignTask = defineTask('structural-design', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Perform structural design',
+  skill: { name: 'concrete-design-calculator' },
   agent: {
-    name: 'structural-engineer',
+    name: 'reinforced-concrete-designer',
     prompt: {
       role: 'structural engineer',
       task: 'Design wall structural elements',
@@ -384,8 +388,9 @@ export const structuralDesignTask = defineTask('structural-design', (args, taskC
 export const globalStabilityTask = defineTask('global-stability', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Check global stability',
+  skill: { name: 'slope-stability-analyzer' },
   agent: {
-    name: 'geotechnical-engineer',
+    name: 'retaining-structure-designer',
     prompt: {
       role: 'geotechnical engineer',
       task: 'Perform global slope stability analysis',
@@ -426,8 +431,9 @@ export const globalStabilityTask = defineTask('global-stability', (args, taskCtx
 export const drainageDesignTask = defineTask('drainage-design', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Design drainage system',
+  skill: { name: 'hydraulic-analysis-engine' },
   agent: {
-    name: 'civil-engineer',
+    name: 'retaining-structure-designer',
     prompt: {
       role: 'civil engineer',
       task: 'Design wall drainage system',
@@ -469,6 +475,7 @@ export const drainageDesignTask = defineTask('drainage-design', (args, taskCtx) 
 export const wallDrawingsTask = defineTask('wall-drawings', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Generate structural drawings',
+  skill: { name: 'revit-api-interface' },
   agent: {
     name: 'structural-drafter',
     prompt: {
@@ -518,6 +525,7 @@ export const wallDrawingsTask = defineTask('wall-drawings', (args, taskCtx) => (
 export const wallSpecsTask = defineTask('wall-specifications', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Develop construction specifications',
+  skill: { name: 'csi-specification-writer' },
   agent: {
     name: 'specifications-writer',
     prompt: {

@@ -237,7 +237,8 @@ export const trainingNeedsAssessmentTask = defineTask('qc-training-needs', (args
   kind: 'agent',
   title: 'Training Needs Assessment',
   agent: {
-    name: 'general-purpose',
+    name: 'quantum-documentation-specialist',
+    skills: ['statevector-simulator', 'qiskit-circuit-builder', 'pennylane-hybrid-executor'],
     prompt: {
       role: 'Learning and Development Specialist',
       task: 'Assess training needs for quantum computing program',
@@ -280,7 +281,8 @@ export const curriculumDesignTask = defineTask('qc-curriculum-design', (args, ta
   kind: 'agent',
   title: 'Curriculum Design',
   agent: {
-    name: 'general-purpose',
+    name: 'quantum-documentation-specialist',
+    skills: ['statevector-simulator', 'qiskit-circuit-builder', 'pennylane-hybrid-executor'],
     prompt: {
       role: 'Curriculum Design Specialist',
       task: 'Design quantum computing curriculum',
@@ -322,7 +324,8 @@ export const learningMaterialsDevelopmentTask = defineTask('qc-materials-develop
   kind: 'agent',
   title: 'Learning Materials Development',
   agent: {
-    name: 'general-purpose',
+    name: 'quantum-documentation-specialist',
+    skills: ['statevector-simulator', 'qiskit-circuit-builder', 'pennylane-hybrid-executor'],
     prompt: {
       role: 'Instructional Designer',
       task: 'Develop quantum computing learning materials',
@@ -364,7 +367,8 @@ export const handsOnLabDevelopmentTask = defineTask('qc-lab-development', (args,
   kind: 'agent',
   title: 'Hands-On Lab Development',
   agent: {
-    name: 'general-purpose',
+    name: 'quantum-documentation-specialist',
+    skills: ['statevector-simulator', 'qiskit-circuit-builder', 'pennylane-hybrid-executor'],
     prompt: {
       role: 'Quantum Computing Lab Developer',
       task: 'Develop hands-on quantum computing labs',
@@ -407,7 +411,8 @@ export const assessmentDevelopmentTask = defineTask('qc-assessment-development',
   kind: 'agent',
   title: 'Assessment Development',
   agent: {
-    name: 'general-purpose',
+    name: 'quantum-documentation-specialist',
+    skills: ['statevector-simulator', 'qiskit-circuit-builder', 'pennylane-hybrid-executor'],
     prompt: {
       role: 'Assessment Design Specialist',
       task: 'Develop assessments for quantum computing training',
@@ -449,7 +454,8 @@ export const instructorGuideCreationTask = defineTask('qc-instructor-guide', (ar
   kind: 'agent',
   title: 'Instructor Guide Creation',
   agent: {
-    name: 'general-purpose',
+    name: 'quantum-documentation-specialist',
+    skills: ['statevector-simulator', 'qiskit-circuit-builder', 'pennylane-hybrid-executor'],
     prompt: {
       role: 'Training Delivery Specialist',
       task: 'Create instructor guide for quantum computing training',
@@ -491,7 +497,8 @@ export const learningPathConfigurationTask = defineTask('qc-learning-paths', (ar
   kind: 'agent',
   title: 'Learning Path Configuration',
   agent: {
-    name: 'general-purpose',
+    name: 'quantum-documentation-specialist',
+    skills: ['statevector-simulator', 'qiskit-circuit-builder', 'pennylane-hybrid-executor'],
     prompt: {
       role: 'Learning Experience Designer',
       task: 'Configure learning paths for quantum computing',
@@ -533,7 +540,8 @@ export const programValidationTask = defineTask('qc-program-validation', (args, 
   kind: 'agent',
   title: 'Program Validation',
   agent: {
-    name: 'general-purpose',
+    name: 'quantum-documentation-specialist',
+    skills: ['statevector-simulator', 'qiskit-circuit-builder', 'pennylane-hybrid-executor'],
     prompt: {
       role: 'Training Quality Specialist',
       task: 'Validate quantum computing training program',

@@ -3,6 +3,8 @@
  * @description Framework for identifying, evaluating, and mitigating risks to cultural collections including natural disasters, theft, environmental damage, and deterioration
  * @inputs { collectionName: string, institutionType: string, facilityInfo: object, collectionValue: object }
  * @outputs { success: boolean, riskAssessment: object, mitigationPlan: object, prioritization: array, artifacts: array }
+ * @recommendedSkills SK-AC-011 (risk-mitigation-planning), SK-AC-006 (conservation-assessment)
+ * @recommendedAgents AG-AC-004 (conservator-agent), AG-AC-006 (registrar-agent), AG-AC-002 (arts-administrator-agent)
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

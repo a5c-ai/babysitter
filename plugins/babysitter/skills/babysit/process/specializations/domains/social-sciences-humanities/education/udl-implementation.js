@@ -3,6 +3,8 @@
  * @description Applying Universal Design for Learning principles to provide multiple means of engagement, representation, and action/expression for diverse learners
  * @inputs { courseName: string, learnerProfile: object, contentOutline: object, constraints: object }
  * @outputs { success: boolean, udlPlan: object, engagementStrategies: array, representationStrategies: array, actionExpressionStrategies: array, artifacts: array }
+ * @recommendedSkills SK-EDU-006 (multimedia-learning-design), SK-EDU-010 (accessibility-compliance-auditing), SK-EDU-014 (learning-transfer-design)
+ * @recommendedAgents AG-EDU-008 (accessibility-udl-specialist), AG-EDU-010 (learning-experience-designer)
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

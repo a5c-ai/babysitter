@@ -276,7 +276,8 @@ export const noiseCharacterizationTask = defineTask('qc-noise-characterization',
   kind: 'agent',
   title: 'Hardware Noise Characterization',
   agent: {
-    name: 'general-purpose',
+    name: 'error-mitigation-engineer',
+    skills: ['mitiq-error-mitigator', 'noise-modeler', 'rb-benchmarker', 'calibration-analyzer'],
     prompt: {
       role: 'Quantum Hardware Characterization Specialist',
       task: 'Characterize noise properties of the target quantum hardware',
@@ -323,7 +324,8 @@ export const mitigationStrategySelectionTask = defineTask('qc-mitigation-strateg
   kind: 'agent',
   title: 'Mitigation Strategy Selection',
   agent: {
-    name: 'general-purpose',
+    name: 'error-mitigation-engineer',
+    skills: ['mitiq-error-mitigator', 'noise-modeler', 'rb-benchmarker', 'calibration-analyzer'],
     prompt: {
       role: 'Error Mitigation Strategy Specialist',
       task: 'Select optimal error mitigation techniques for the given circuit and noise profile',
@@ -366,7 +368,8 @@ export const measurementErrorMitigationTask = defineTask('qc-measurement-mitigat
   kind: 'agent',
   title: 'Measurement Error Mitigation',
   agent: {
-    name: 'general-purpose',
+    name: 'error-mitigation-engineer',
+    skills: ['mitiq-error-mitigator', 'noise-modeler', 'rb-benchmarker', 'calibration-analyzer'],
     prompt: {
       role: 'Measurement Error Correction Specialist',
       task: 'Implement measurement error mitigation calibration and correction',
@@ -409,7 +412,8 @@ export const dynamicalDecouplingTask = defineTask('qc-dynamical-decoupling', (ar
   kind: 'agent',
   title: 'Dynamical Decoupling Implementation',
   agent: {
-    name: 'general-purpose',
+    name: 'error-mitigation-engineer',
+    skills: ['mitiq-error-mitigator', 'noise-modeler', 'rb-benchmarker', 'calibration-analyzer'],
     prompt: {
       role: 'Dynamical Decoupling Specialist',
       task: 'Implement dynamical decoupling sequences to suppress decoherence',
@@ -452,7 +456,8 @@ export const zeroNoiseExtrapolationTask = defineTask('qc-zne', (args, taskCtx) =
   kind: 'agent',
   title: 'Zero-Noise Extrapolation',
   agent: {
-    name: 'general-purpose',
+    name: 'error-mitigation-engineer',
+    skills: ['mitiq-error-mitigator', 'noise-modeler', 'rb-benchmarker', 'calibration-analyzer'],
     prompt: {
       role: 'Zero-Noise Extrapolation Specialist',
       task: 'Implement ZNE to extrapolate to zero-noise limit',
@@ -496,7 +501,8 @@ export const probabilisticErrorCancellationTask = defineTask('qc-pec', (args, ta
   kind: 'agent',
   title: 'Probabilistic Error Cancellation',
   agent: {
-    name: 'general-purpose',
+    name: 'error-mitigation-engineer',
+    skills: ['mitiq-error-mitigator', 'noise-modeler', 'rb-benchmarker', 'calibration-analyzer'],
     prompt: {
       role: 'Probabilistic Error Cancellation Specialist',
       task: 'Implement PEC for exact error cancellation',
@@ -539,7 +545,8 @@ export const mitigationValidationTask = defineTask('qc-mitigation-validation', (
   kind: 'agent',
   title: 'Mitigation Validation',
   agent: {
-    name: 'general-purpose',
+    name: 'error-mitigation-engineer',
+    skills: ['mitiq-error-mitigator', 'noise-modeler', 'rb-benchmarker', 'calibration-analyzer'],
     prompt: {
       role: 'Error Mitigation Validation Specialist',
       task: 'Validate effectiveness of error mitigation techniques',
@@ -583,7 +590,8 @@ export const mitigationReportTask = defineTask('qc-mitigation-report', (args, ta
   kind: 'agent',
   title: 'Mitigation Report Generation',
   agent: {
-    name: 'general-purpose',
+    name: 'error-mitigation-engineer',
+    skills: ['mitiq-error-mitigator', 'noise-modeler', 'rb-benchmarker', 'calibration-analyzer'],
     prompt: {
       role: 'Technical Documentation Specialist',
       task: 'Generate comprehensive error mitigation report',

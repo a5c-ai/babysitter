@@ -200,7 +200,8 @@ export const problemStructureAnalysisTask = defineTask('problem-structure-analys
   kind: 'agent',
   title: 'Analyze problem structure',
   agent: {
-    name: 'problem-analyst',
+    name: 'algorithm-analyst',
+    skills: ['asymptotic-notation-calculator', 'approximation-ratio-calculator', 'probabilistic-analysis-toolkit'],
     prompt: {
       role: 'algorithm design specialist',
       task: 'Analyze the computational problem structure to identify properties relevant to paradigm selection',
@@ -245,7 +246,8 @@ export const divideConquerAssessmentTask = defineTask('divide-conquer-assessment
   kind: 'agent',
   title: 'Assess divide-and-conquer applicability',
   agent: {
-    name: 'dc-analyst',
+    name: 'algorithm-analyst',
+    skills: ['recurrence-solver', 'asymptotic-notation-calculator'],
     prompt: {
       role: 'divide-and-conquer algorithm specialist',
       task: 'Evaluate the applicability of divide-and-conquer paradigm to the problem',
@@ -292,7 +294,8 @@ export const dynamicProgrammingAssessmentTask = defineTask('dynamic-programming-
   kind: 'agent',
   title: 'Assess dynamic programming feasibility',
   agent: {
-    name: 'dp-analyst',
+    name: 'algorithm-analyst',
+    skills: ['asymptotic-notation-calculator', 'recurrence-solver'],
     prompt: {
       role: 'dynamic programming specialist',
       task: 'Evaluate the feasibility of dynamic programming for the problem',
@@ -342,7 +345,8 @@ export const greedyAlgorithmAssessmentTask = defineTask('greedy-algorithm-assess
   kind: 'agent',
   title: 'Assess greedy algorithm potential',
   agent: {
-    name: 'greedy-analyst',
+    name: 'approximation-specialist',
+    skills: ['approximation-ratio-calculator', 'asymptotic-notation-calculator'],
     prompt: {
       role: 'greedy algorithm specialist',
       task: 'Evaluate the potential for greedy algorithms with matroid analysis',
@@ -396,7 +400,8 @@ export const randomizationAssessmentTask = defineTask('randomization-assessment'
   kind: 'agent',
   title: 'Explore randomization benefits',
   agent: {
-    name: 'randomization-analyst',
+    name: 'randomized-algorithms-expert',
+    skills: ['probabilistic-analysis-toolkit', 'asymptotic-notation-calculator'],
     prompt: {
       role: 'randomized algorithm specialist',
       task: 'Evaluate the benefits of randomization for the problem',
@@ -443,7 +448,8 @@ export const paradigmSelectionTask = defineTask('paradigm-selection', (args, tas
   kind: 'agent',
   title: 'Compare paradigms and select best approach',
   agent: {
-    name: 'paradigm-selector',
+    name: 'algorithm-analyst',
+    skills: ['asymptotic-notation-calculator', 'approximation-ratio-calculator'],
     prompt: {
       role: 'senior algorithm designer',
       task: 'Compare all paradigm assessments and select the most appropriate approach',
@@ -507,7 +513,8 @@ export const algorithmDesignTask = defineTask('algorithm-design', (args, taskCtx
   kind: 'agent',
   title: 'Design algorithm using selected paradigm',
   agent: {
-    name: 'algorithm-designer',
+    name: 'algorithm-analyst',
+    skills: ['asymptotic-notation-calculator', 'latex-proof-formatter'],
     prompt: {
       role: 'algorithm designer',
       task: 'Design a high-level algorithm using the selected paradigm',

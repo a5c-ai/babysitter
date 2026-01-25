@@ -3,6 +3,8 @@
  * @description Visual documentation of curriculum including content, skills, assessments, and resources organized by time and subject to identify gaps and redundancies (Jacobs Model)
  * @inputs { curriculumData: object, timeframe: string, subjects: array, gradeLevel: string, context: object }
  * @outputs { success: boolean, curriculumMap: object, gapAnalysis: object, redundancyAnalysis: object, artifacts: array }
+ * @recommendedSkills SK-EDU-008 (standards-alignment-mapping), SK-EDU-015 (curriculum-gap-analysis)
+ * @recommendedAgents AG-EDU-002 (curriculum-development-specialist)
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

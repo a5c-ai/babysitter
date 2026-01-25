@@ -217,7 +217,8 @@ export const algorithmResourceAnalysisTask = defineTask('qre-algorithm-analysis'
   kind: 'agent',
   title: 'Algorithm Resource Analysis',
   agent: {
-    name: 'general-purpose',
+    name: 'quantum-documentation-specialist',
+    skills: ['resource-estimator', 'qsharp-compiler'],
     prompt: {
       role: 'Quantum Algorithm Analysis Specialist',
       task: 'Analyze algorithm resource requirements',
@@ -262,7 +263,8 @@ export const circuitDepthEstimationTask = defineTask('qre-depth-estimation', (ar
   kind: 'agent',
   title: 'Circuit Depth Estimation',
   agent: {
-    name: 'general-purpose',
+    name: 'quantum-documentation-specialist',
+    skills: ['resource-estimator', 'qsharp-compiler'],
     prompt: {
       role: 'Circuit Depth Analysis Specialist',
       task: 'Estimate circuit depth requirements',
@@ -305,7 +307,8 @@ export const errorCorrectionOverheadTask = defineTask('qre-qec-overhead', (args,
   kind: 'agent',
   title: 'Error Correction Overhead',
   agent: {
-    name: 'general-purpose',
+    name: 'quantum-documentation-specialist',
+    skills: ['resource-estimator', 'qsharp-compiler'],
     prompt: {
       role: 'QEC Resource Estimation Specialist',
       task: 'Calculate error correction overhead',
@@ -349,7 +352,8 @@ export const hardwareRequirementProjectionTask = defineTask('qre-hardware-projec
   kind: 'agent',
   title: 'Hardware Requirement Projection',
   agent: {
-    name: 'general-purpose',
+    name: 'quantum-documentation-specialist',
+    skills: ['resource-estimator', 'qsharp-compiler'],
     prompt: {
       role: 'Quantum Hardware Requirements Specialist',
       task: 'Project hardware requirements',
@@ -393,7 +397,8 @@ export const feasibilityAnalysisTask = defineTask('qre-feasibility-analysis', (a
   kind: 'agent',
   title: 'Feasibility Analysis',
   agent: {
-    name: 'general-purpose',
+    name: 'quantum-documentation-specialist',
+    skills: ['resource-estimator', 'qsharp-compiler'],
     prompt: {
       role: 'Quantum Feasibility Analyst',
       task: 'Analyze feasibility of quantum computation',
@@ -437,7 +442,8 @@ export const timelineRecommendationsTask = defineTask('qre-timeline-recommendati
   kind: 'agent',
   title: 'Timeline Recommendations',
   agent: {
-    name: 'general-purpose',
+    name: 'quantum-documentation-specialist',
+    skills: ['resource-estimator', 'qsharp-compiler'],
     prompt: {
       role: 'Quantum Technology Forecaster',
       task: 'Provide timeline recommendations',
@@ -480,7 +486,8 @@ export const resourceEstimationReportTask = defineTask('qre-report', (args, task
   kind: 'agent',
   title: 'Resource Estimation Report',
   agent: {
-    name: 'general-purpose',
+    name: 'quantum-documentation-specialist',
+    skills: ['resource-estimator', 'qsharp-compiler'],
     prompt: {
       role: 'Technical Report Specialist',
       task: 'Generate comprehensive resource estimation report',

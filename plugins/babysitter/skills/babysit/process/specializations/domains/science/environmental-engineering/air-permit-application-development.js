@@ -208,8 +208,9 @@ export async function process(inputs, ctx) {
 export const regulatoryApplicabilityTask = defineTask('regulatory-applicability', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Regulatory Applicability Determination',
+  skill: { name: 'regulatory-compliance' },
   agent: {
-    name: 'environmental-engineer',
+    name: 'air-quality-specialist',
     prompt: {
       role: 'Air Quality Regulatory Specialist',
       task: 'Determine regulatory applicability for air permit',
@@ -252,8 +253,9 @@ export const regulatoryApplicabilityTask = defineTask('regulatory-applicability'
 export const emissionInventoryTask = defineTask('emission-inventory', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Emission Inventory Development',
+  skill: { name: 'emission-inventory' },
   agent: {
-    name: 'environmental-engineer',
+    name: 'air-quality-specialist',
     prompt: {
       role: 'Air Emissions Engineer',
       task: 'Develop comprehensive emission inventory',
@@ -296,8 +298,9 @@ export const emissionInventoryTask = defineTask('emission-inventory', (args, tas
 export const controlTechAnalysisTask = defineTask('control-tech-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Control Technology Analysis',
+  skill: { name: 'air-pollution-control' },
   agent: {
-    name: 'environmental-engineer',
+    name: 'air-quality-specialist',
     prompt: {
       role: 'Air Pollution Control Engineer',
       task: 'Evaluate and select emission control technologies',
@@ -340,8 +343,9 @@ export const controlTechAnalysisTask = defineTask('control-tech-analysis', (args
 export const dispersionModelingTask = defineTask('dispersion-modeling', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Air Dispersion Modeling',
+  skill: { name: 'air-dispersion-modeling' },
   agent: {
-    name: 'environmental-engineer',
+    name: 'air-quality-specialist',
     prompt: {
       role: 'Air Quality Modeler',
       task: 'Perform air dispersion modeling analysis',
@@ -385,8 +389,9 @@ export const dispersionModelingTask = defineTask('dispersion-modeling', (args, t
 export const complianceDemoTask = defineTask('compliance-demo', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Compliance Demonstration',
+  skill: { name: 'regulatory-compliance' },
   agent: {
-    name: 'environmental-engineer',
+    name: 'environmental-compliance-specialist',
     prompt: {
       role: 'Air Quality Compliance Specialist',
       task: 'Prepare compliance demonstration for permit application',
@@ -430,8 +435,9 @@ export const complianceDemoTask = defineTask('compliance-demo', (args, taskCtx) 
 export const permitApplicationTask = defineTask('permit-application', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Permit Application Preparation',
+  skill: { name: 'regulatory-compliance' },
   agent: {
-    name: 'environmental-engineer',
+    name: 'air-quality-specialist',
     prompt: {
       role: 'Air Permit Application Specialist',
       task: 'Prepare complete permit application package',

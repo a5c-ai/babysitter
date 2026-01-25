@@ -3,6 +3,8 @@
  * @description Systematic approach to collection preservation including environmental monitoring, integrated pest management, storage protocols, and emergency preparedness following AIC standards
  * @inputs { collectionName: string, collectionType: string, facilityInfo: object, currentConditions: object }
  * @outputs { success: boolean, preservationPlan: object, monitoringProtocols: object, emergencyPlan: object, artifacts: array }
+ * @recommendedSkills SK-AC-006 (conservation-assessment), SK-AC-011 (risk-mitigation-planning), SK-AC-003 (collection-documentation)
+ * @recommendedAgents AG-AC-004 (conservator-agent), AG-AC-006 (registrar-agent)
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

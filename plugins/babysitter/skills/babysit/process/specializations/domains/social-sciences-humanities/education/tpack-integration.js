@@ -3,6 +3,8 @@
  * @description Building educator capacity in Technological Pedagogical Content Knowledge for effective technology integration in teaching
  * @inputs { educatorProfile: object, contentArea: string, technologyTools: array, learningContext: object }
  * @outputs { success: boolean, tpackPlan: object, integrationStrategies: array, professionalDevelopment: object, artifacts: array }
+ * @recommendedSkills SK-EDU-012 (facilitation-workshop-delivery), SK-EDU-007 (lms-configuration-administration)
+ * @recommendedAgents AG-EDU-006 (faculty-development-facilitator), AG-EDU-005 (learning-technology-administrator)
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

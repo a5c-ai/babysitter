@@ -280,7 +280,8 @@ export const backendAnalysisTask = defineTask('hw-backend-analysis', (args, task
   kind: 'agent',
   title: 'Backend Analysis',
   agent: {
-    name: 'general-purpose',
+    name: 'hardware-integrator',
+    skills: ['qubit-mapper', 'calibration-analyzer', 'circuit-optimizer', 'qiskit-circuit-builder'],
     prompt: {
       role: 'Quantum Hardware Specialist',
       task: 'Analyze quantum backend properties',
@@ -324,7 +325,8 @@ export const qubitMappingStrategyTask = defineTask('hw-qubit-mapping', (args, ta
   kind: 'agent',
   title: 'Qubit Mapping Strategy',
   agent: {
-    name: 'general-purpose',
+    name: 'hardware-integrator',
+    skills: ['qubit-mapper', 'calibration-analyzer', 'circuit-optimizer', 'qiskit-circuit-builder'],
     prompt: {
       role: 'Qubit Mapping Specialist',
       task: 'Determine optimal qubit mapping for circuit',
@@ -366,7 +368,8 @@ export const routingSwapInsertionTask = defineTask('hw-routing-swap', (args, tas
   kind: 'agent',
   title: 'Routing and SWAP Insertion',
   agent: {
-    name: 'general-purpose',
+    name: 'hardware-integrator',
+    skills: ['qubit-mapper', 'calibration-analyzer', 'circuit-optimizer', 'qiskit-circuit-builder'],
     prompt: {
       role: 'Circuit Routing Specialist',
       task: 'Route circuit and insert SWAPs for connectivity',
@@ -409,7 +412,8 @@ export const nativeGateTranspilationTask = defineTask('hw-native-transpilation',
   kind: 'agent',
   title: 'Native Gate Transpilation',
   agent: {
-    name: 'general-purpose',
+    name: 'hardware-integrator',
+    skills: ['qubit-mapper', 'calibration-analyzer', 'circuit-optimizer', 'qiskit-circuit-builder'],
     prompt: {
       role: 'Gate Transpilation Specialist',
       task: 'Transpile circuit to native hardware gates',
@@ -452,7 +456,8 @@ export const schedulingOptimizationTask = defineTask('hw-scheduling', (args, tas
   kind: 'agent',
   title: 'Scheduling Optimization',
   agent: {
-    name: 'general-purpose',
+    name: 'hardware-integrator',
+    skills: ['qubit-mapper', 'calibration-analyzer', 'circuit-optimizer', 'qiskit-circuit-builder'],
     prompt: {
       role: 'Circuit Scheduling Specialist',
       task: 'Optimize circuit scheduling for hardware timing',
@@ -494,7 +499,8 @@ export const dynamicalDecouplingConfigTask = defineTask('hw-dd-config', (args, t
   kind: 'agent',
   title: 'Dynamical Decoupling Configuration',
   agent: {
-    name: 'general-purpose',
+    name: 'hardware-integrator',
+    skills: ['qubit-mapper', 'calibration-analyzer', 'circuit-optimizer', 'qiskit-circuit-builder'],
     prompt: {
       role: 'Dynamical Decoupling Specialist',
       task: 'Configure dynamical decoupling for decoherence suppression',
@@ -536,7 +542,8 @@ export const noiseAwareOptimizationTask = defineTask('hw-noise-optimization', (a
   kind: 'agent',
   title: 'Noise-Aware Optimization',
   agent: {
-    name: 'general-purpose',
+    name: 'hardware-integrator',
+    skills: ['qubit-mapper', 'calibration-analyzer', 'circuit-optimizer', 'qiskit-circuit-builder'],
     prompt: {
       role: 'Noise-Aware Optimization Specialist',
       task: 'Apply noise-aware optimizations',
@@ -578,7 +585,8 @@ export const hardwareConfigValidationTask = defineTask('hw-config-validation', (
   kind: 'agent',
   title: 'Hardware Configuration Validation',
   agent: {
-    name: 'general-purpose',
+    name: 'hardware-integrator',
+    skills: ['qubit-mapper', 'calibration-analyzer', 'circuit-optimizer', 'qiskit-circuit-builder'],
     prompt: {
       role: 'Validation Specialist',
       task: 'Validate hardware configuration',
@@ -621,7 +629,8 @@ export const configurationProfileGenerationTask = defineTask('hw-config-profile'
   kind: 'agent',
   title: 'Configuration Profile Generation',
   agent: {
-    name: 'general-purpose',
+    name: 'hardware-integrator',
+    skills: ['qubit-mapper', 'calibration-analyzer', 'circuit-optimizer', 'qiskit-circuit-builder'],
     prompt: {
       role: 'Configuration Specialist',
       task: 'Generate reusable configuration profile',

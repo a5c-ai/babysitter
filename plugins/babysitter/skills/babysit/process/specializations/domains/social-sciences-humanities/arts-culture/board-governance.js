@@ -3,6 +3,8 @@
  * @description Best practices for managing trustee relations, board meetings, committee structures, fiduciary responsibilities, and organizational oversight
  * @inputs { organizationName: string, boardSize: number, meetingType: string, currentStructure: object }
  * @outputs { success: boolean, governanceFramework: object, meetingMaterials: object, fiduciaryGuidelines: object, artifacts: array }
+ * @recommendedSkills SK-AC-013 (stakeholder-facilitation), SK-AC-009 (donor-relationship-management)
+ * @recommendedAgents AG-AC-002 (arts-administrator-agent)
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

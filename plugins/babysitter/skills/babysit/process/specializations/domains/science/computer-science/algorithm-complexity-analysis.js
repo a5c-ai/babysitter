@@ -218,7 +218,8 @@ export const computationalModelIdentificationTask = defineTask('computational-mo
   kind: 'agent',
   title: 'Identify computational model and input representation',
   agent: {
-    name: 'complexity-analyst',
+    name: 'algorithm-analyst',
+    skills: ['asymptotic-notation-calculator', 'recurrence-solver', 'amortized-analysis-assistant'],
     prompt: {
       role: 'theoretical computer scientist specializing in algorithm analysis',
       task: 'Identify the appropriate computational model and input representation for complexity analysis',
@@ -269,7 +270,8 @@ export const asymptoticAnalysisTask = defineTask('asymptotic-analysis', (args, t
   kind: 'agent',
   title: 'Apply Big-O, Big-Omega, and Big-Theta analysis',
   agent: {
-    name: 'asymptotic-analyst',
+    name: 'algorithm-analyst',
+    skills: ['asymptotic-notation-calculator', 'recurrence-solver'],
     prompt: {
       role: 'algorithm complexity analyst',
       task: 'Perform comprehensive asymptotic analysis using standard notation',
@@ -320,7 +322,8 @@ export const recurrenceRelationAnalysisTask = defineTask('recurrence-relation-an
   kind: 'agent',
   title: 'Solve recurrence relations',
   agent: {
-    name: 'recurrence-solver',
+    name: 'algorithm-analyst',
+    skills: ['recurrence-solver', 'asymptotic-notation-calculator'],
     prompt: {
       role: 'mathematician specializing in discrete mathematics and recurrences',
       task: 'Derive and solve recurrence relations for recursive algorithms',
@@ -364,7 +367,8 @@ export const caseAnalysisTask = defineTask('case-analysis', (args, taskCtx) => (
   kind: 'agent',
   title: 'Analyze best-case, worst-case, and average-case complexity',
   agent: {
-    name: 'case-analyst',
+    name: 'algorithm-analyst',
+    skills: ['asymptotic-notation-calculator'],
     prompt: {
       role: 'algorithm analyst specializing in complexity case analysis',
       task: 'Perform comprehensive case analysis for algorithm complexity',
@@ -426,7 +430,8 @@ export const amortizedAnalysisTask = defineTask('amortized-analysis', (args, tas
   kind: 'agent',
   title: 'Perform amortized analysis for operation sequences',
   agent: {
-    name: 'amortized-analyst',
+    name: 'algorithm-analyst',
+    skills: ['amortized-analysis-assistant'],
     prompt: {
       role: 'algorithm analyst specializing in amortized analysis',
       task: 'Analyze amortized cost of operations over sequences',
@@ -477,7 +482,8 @@ export const spaceComplexityAnalysisTask = defineTask('space-complexity-analysis
   kind: 'agent',
   title: 'Analyze space complexity',
   agent: {
-    name: 'space-analyst',
+    name: 'algorithm-analyst',
+    skills: ['asymptotic-notation-calculator'],
     prompt: {
       role: 'algorithm analyst specializing in space complexity',
       task: 'Analyze memory usage and space complexity of the algorithm',
@@ -531,7 +537,8 @@ export const lowerBoundComparisonTask = defineTask('lower-bound-comparison', (ar
   kind: 'agent',
   title: 'Compare with known lower bounds',
   agent: {
-    name: 'lower-bound-analyst',
+    name: 'complexity-theorist',
+    skills: ['asymptotic-notation-calculator', 'complexity-class-oracle'],
     prompt: {
       role: 'complexity theorist',
       task: 'Compare algorithm complexity with known lower bounds for the problem',
@@ -575,7 +582,8 @@ export const proofDocumentationTask = defineTask('proof-documentation', (args, t
   kind: 'agent',
   title: 'Document complexity bounds with formal proofs',
   agent: {
-    name: 'proof-documenter',
+    name: 'algorithm-analyst',
+    skills: ['latex-proof-formatter', 'asymptotic-notation-calculator'],
     prompt: {
       role: 'technical writer specializing in mathematical proofs',
       task: 'Create comprehensive complexity analysis report with formal proofs',

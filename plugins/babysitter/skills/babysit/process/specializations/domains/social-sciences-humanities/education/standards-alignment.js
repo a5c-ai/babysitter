@@ -3,6 +3,8 @@
  * @description Systematic mapping of curriculum to educational standards ensuring vertical alignment across grade levels and horizontal alignment across subjects
  * @inputs { curriculum: object, standards: array, gradeLevel: string, subject: string, context: object }
  * @outputs { success: boolean, alignmentMatrix: object, gapAnalysis: object, recommendations: array, artifacts: array }
+ * @recommendedSkills SK-EDU-008 (standards-alignment-mapping), SK-EDU-015 (curriculum-gap-analysis), SK-EDU-002 (learning-objectives-writing)
+ * @recommendedAgents AG-EDU-002 (curriculum-development-specialist), AG-EDU-009 (quality-assurance-coordinator)
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

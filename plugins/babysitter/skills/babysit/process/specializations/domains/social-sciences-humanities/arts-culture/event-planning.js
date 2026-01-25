@@ -3,6 +3,8 @@
  * @description Comprehensive approach to planning cultural events including venue selection, vendor coordination, logistics management, risk assessment, and day-of execution
  * @inputs { eventName: string, eventType: string, expectedAttendance: number, eventDate: string, budget: number }
  * @outputs { success: boolean, eventPlan: object, logistics: object, riskAssessment: object, artifacts: array }
+ * @recommendedSkills SK-AC-005 (production-coordination), SK-AC-011 (risk-mitigation-planning), SK-AC-013 (stakeholder-facilitation)
+ * @recommendedAgents AG-AC-005 (production-manager-agent), AG-AC-008 (marketing-communications-agent)
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

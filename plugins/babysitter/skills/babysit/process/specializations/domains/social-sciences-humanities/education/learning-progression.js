@@ -3,6 +3,8 @@
  * @description Creating coherent sequences of learning experiences that build upon prior knowledge across grade levels using research-based progressions
  * @inputs { domain: string, gradeSpan: object, standards: array, research: array, context: object }
  * @outputs { success: boolean, progression: object, milestones: array, assessmentPoints: array, artifacts: array }
+ * @recommendedSkills SK-EDU-008 (standards-alignment-mapping), SK-EDU-002 (learning-objectives-writing), SK-EDU-015 (curriculum-gap-analysis)
+ * @recommendedAgents AG-EDU-002 (curriculum-development-specialist), AG-EDU-003 (assessment-design-specialist)
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';

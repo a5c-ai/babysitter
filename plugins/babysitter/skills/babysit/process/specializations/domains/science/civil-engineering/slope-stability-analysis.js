@@ -189,8 +189,9 @@ export async function process(inputs, ctx) {
 export const geometryDefinitionTask = defineTask('geometry-definition', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Define slope geometry',
+  skill: { name: 'civil3d-surface-analyzer' },
   agent: {
-    name: 'geotechnical-engineer',
+    name: 'slope-stability-analyst',
     prompt: {
       role: 'geotechnical engineer',
       task: 'Define slope geometry for stability analysis',
@@ -233,8 +234,9 @@ export const geometryDefinitionTask = defineTask('geometry-definition', (args, t
 export const soilCharacterizationTask = defineTask('soil-characterization', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Characterize soil parameters',
+  skill: { name: 'soil-classification-tool' },
   agent: {
-    name: 'geotechnical-engineer',
+    name: 'slope-stability-analyst',
     prompt: {
       role: 'geotechnical engineer',
       task: 'Determine soil strength parameters for analysis',
@@ -284,8 +286,9 @@ export const soilCharacterizationTask = defineTask('soil-characterization', (arg
 export const staticStabilityTask = defineTask('static-stability', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Perform static stability analysis',
+  skill: { name: 'slope-stability-analyzer' },
   agent: {
-    name: 'geotechnical-engineer',
+    name: 'slope-stability-analyst',
     prompt: {
       role: 'geotechnical engineer',
       task: 'Perform limit equilibrium slope stability analysis',
@@ -327,8 +330,9 @@ export const staticStabilityTask = defineTask('static-stability', (args, taskCtx
 export const seismicStabilityTask = defineTask('seismic-stability', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Perform seismic stability analysis',
+  skill: { name: 'slope-stability-analyzer' },
   agent: {
-    name: 'geotechnical-engineer',
+    name: 'slope-stability-analyst',
     prompt: {
       role: 'geotechnical engineer',
       task: 'Perform pseudo-static seismic stability analysis',
@@ -369,8 +373,9 @@ export const seismicStabilityTask = defineTask('seismic-stability', (args, taskC
 export const groundwaterSensitivityTask = defineTask('groundwater-sensitivity', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Perform groundwater sensitivity analysis',
+  skill: { name: 'slope-stability-analyzer' },
   agent: {
-    name: 'geotechnical-engineer',
+    name: 'slope-stability-analyst',
     prompt: {
       role: 'geotechnical engineer',
       task: 'Analyze sensitivity to groundwater conditions',
@@ -411,8 +416,9 @@ export const groundwaterSensitivityTask = defineTask('groundwater-sensitivity', 
 export const remediationDesignTask = defineTask('remediation-design', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Design slope remediation',
+  skill: { name: 'earth-pressure-calculator' },
   agent: {
-    name: 'geotechnical-engineer',
+    name: 'slope-stability-analyst',
     prompt: {
       role: 'geotechnical engineer',
       task: 'Design slope stabilization measures',
@@ -454,8 +460,9 @@ export const remediationDesignTask = defineTask('remediation-design', (args, tas
 export const monitoringPlanTask = defineTask('monitoring-plan', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Develop monitoring recommendations',
+  skill: { name: 'slope-stability-analyzer' },
   agent: {
-    name: 'geotechnical-engineer',
+    name: 'geotechnical-investigation-specialist',
     prompt: {
       role: 'geotechnical engineer',
       task: 'Develop slope monitoring plan',
@@ -496,8 +503,9 @@ export const monitoringPlanTask = defineTask('monitoring-plan', (args, taskCtx) 
 export const stabilityReportTask = defineTask('stability-report', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Generate slope stability report',
+  skill: { name: 'engineering-report-generator' },
   agent: {
-    name: 'technical-writer',
+    name: 'technical-report-writer',
     prompt: {
       role: 'geotechnical engineer',
       task: 'Generate comprehensive slope stability report',

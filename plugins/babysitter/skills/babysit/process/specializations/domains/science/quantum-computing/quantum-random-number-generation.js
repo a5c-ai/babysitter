@@ -224,7 +224,8 @@ export const qrngCircuitDesignTask = defineTask('qrng-circuit-design', (args, ta
   kind: 'agent',
   title: 'QRNG Circuit Design',
   agent: {
-    name: 'general-purpose',
+    name: 'qrng-engineer',
+    skills: ['qrng-generator', 'qiskit-circuit-builder', 'statevector-simulator'],
     prompt: {
       role: 'Quantum Circuit Design Specialist',
       task: 'Design quantum circuit for random number generation',
@@ -266,7 +267,8 @@ export const randomnessExtractionTask = defineTask('qrng-extraction', (args, tas
   kind: 'agent',
   title: 'Randomness Extraction',
   agent: {
-    name: 'general-purpose',
+    name: 'qrng-engineer',
+    skills: ['qrng-generator', 'qiskit-circuit-builder', 'statevector-simulator'],
     prompt: {
       role: 'Randomness Extraction Specialist',
       task: 'Implement randomness extraction from quantum measurements',
@@ -308,7 +310,8 @@ export const qrngImplementationTask = defineTask('qrng-implementation', (args, t
   kind: 'agent',
   title: 'QRNG Implementation',
   agent: {
-    name: 'general-purpose',
+    name: 'qrng-engineer',
+    skills: ['qrng-generator', 'qiskit-circuit-builder', 'statevector-simulator'],
     prompt: {
       role: 'QRNG Implementation Specialist',
       task: 'Implement complete QRNG system',
@@ -350,7 +353,8 @@ export const nistStatisticalTestingTask = defineTask('qrng-nist-testing', (args,
   kind: 'agent',
   title: 'NIST Statistical Testing',
   agent: {
-    name: 'general-purpose',
+    name: 'qrng-engineer',
+    skills: ['qrng-generator', 'qiskit-circuit-builder', 'statevector-simulator'],
     prompt: {
       role: 'Statistical Testing Specialist',
       task: 'Run NIST SP 800-22 statistical tests on QRNG output',
@@ -393,7 +397,8 @@ export const randomnessQualityValidationTask = defineTask('qrng-quality-validati
   kind: 'agent',
   title: 'Randomness Quality Validation',
   agent: {
-    name: 'general-purpose',
+    name: 'qrng-engineer',
+    skills: ['qrng-generator', 'qiskit-circuit-builder', 'statevector-simulator'],
     prompt: {
       role: 'Randomness Quality Specialist',
       task: 'Validate randomness quality for cryptographic use',
@@ -436,7 +441,8 @@ export const cryptographicIntegrationTask = defineTask('qrng-crypto-integration'
   kind: 'agent',
   title: 'Cryptographic Integration',
   agent: {
-    name: 'general-purpose',
+    name: 'qrng-engineer',
+    skills: ['qrng-generator', 'qiskit-circuit-builder', 'statevector-simulator'],
     prompt: {
       role: 'Cryptographic Integration Specialist',
       task: 'Integrate QRNG with cryptographic applications',
@@ -477,7 +483,8 @@ export const securityPropertiesDocumentationTask = defineTask('qrng-security-doc
   kind: 'agent',
   title: 'Security Properties Documentation',
   agent: {
-    name: 'general-purpose',
+    name: 'qrng-engineer',
+    skills: ['qrng-generator', 'qiskit-circuit-builder', 'statevector-simulator'],
     prompt: {
       role: 'Security Documentation Specialist',
       task: 'Document QRNG security properties',

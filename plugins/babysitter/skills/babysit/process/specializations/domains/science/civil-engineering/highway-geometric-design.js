@@ -196,8 +196,9 @@ export async function process(inputs, ctx) {
 export const designCriteriaTask = defineTask('design-criteria', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Establish design criteria',
+  skill: { name: 'highway-alignment-designer' },
   agent: {
-    name: 'highway-engineer',
+    name: 'highway-design-engineer',
     prompt: {
       role: 'senior highway engineer',
       task: 'Establish geometric design criteria per AASHTO',
@@ -246,8 +247,9 @@ export const designCriteriaTask = defineTask('design-criteria', (args, taskCtx) 
 export const horizontalAlignmentTask = defineTask('horizontal-alignment', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Design horizontal alignment',
+  skill: { name: 'highway-alignment-designer' },
   agent: {
-    name: 'highway-engineer',
+    name: 'highway-design-engineer',
     prompt: {
       role: 'highway engineer',
       task: 'Design horizontal alignment',
@@ -289,8 +291,9 @@ export const horizontalAlignmentTask = defineTask('horizontal-alignment', (args,
 export const verticalAlignmentTask = defineTask('vertical-alignment', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Design vertical alignment',
+  skill: { name: 'highway-alignment-designer' },
   agent: {
-    name: 'highway-engineer',
+    name: 'highway-design-engineer',
     prompt: {
       role: 'highway engineer',
       task: 'Design vertical alignment',
@@ -331,8 +334,9 @@ export const verticalAlignmentTask = defineTask('vertical-alignment', (args, tas
 export const crossSectionTask = defineTask('cross-section', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Design typical cross-sections',
+  skill: { name: 'civil3d-surface-analyzer' },
   agent: {
-    name: 'highway-engineer',
+    name: 'highway-design-engineer',
     prompt: {
       role: 'highway engineer',
       task: 'Design typical highway cross-sections',
@@ -376,8 +380,9 @@ export const crossSectionTask = defineTask('cross-section', (args, taskCtx) => (
 export const superelevationTask = defineTask('superelevation', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Design superelevation',
+  skill: { name: 'highway-alignment-designer' },
   agent: {
-    name: 'highway-engineer',
+    name: 'highway-design-engineer',
     prompt: {
       role: 'highway engineer',
       task: 'Design superelevation for horizontal curves',
@@ -418,8 +423,9 @@ export const superelevationTask = defineTask('superelevation', (args, taskCtx) =
 export const sightDistanceTask = defineTask('sight-distance', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Analyze sight distances',
+  skill: { name: 'highway-alignment-designer' },
   agent: {
-    name: 'highway-engineer',
+    name: 'highway-design-engineer',
     prompt: {
       role: 'highway engineer',
       task: 'Analyze and verify sight distances',
@@ -461,8 +467,9 @@ export const sightDistanceTask = defineTask('sight-distance', (args, taskCtx) =>
 export const intersectionDesignTask = defineTask('intersection-design', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Design intersections',
+  skill: { name: 'highway-alignment-designer' },
   agent: {
-    name: 'highway-engineer',
+    name: 'traffic-engineer',
     prompt: {
       role: 'highway engineer',
       task: 'Design at-grade intersections',
@@ -503,6 +510,7 @@ export const intersectionDesignTask = defineTask('intersection-design', (args, t
 export const planProfileTask = defineTask('plan-profile', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Generate plan and profile drawings',
+  skill: { name: 'civil3d-surface-analyzer' },
   agent: {
     name: 'highway-drafter',
     prompt: {
@@ -552,8 +560,9 @@ export const planProfileTask = defineTask('plan-profile', (args, taskCtx) => ({
 export const earthworkTask = defineTask('earthwork', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Calculate earthwork quantities',
+  skill: { name: 'civil3d-surface-analyzer' },
   agent: {
-    name: 'highway-engineer',
+    name: 'highway-design-engineer',
     prompt: {
       role: 'highway engineer',
       task: 'Calculate earthwork quantities',

@@ -3,6 +3,8 @@
  * @description Systematic collection, analysis, and reporting of learner data to inform instructional decisions and improve learning outcomes
  * @inputs { dataContext: object, analyticsGoals: array, dataSources: array, stakeholders: array, constraints: object }
  * @outputs { success: boolean, analyticsFramework: object, dashboards: array, reportingStructure: object, artifacts: array }
+ * @recommendedSkills SK-EDU-009 (learning-analytics-interpretation), SK-EDU-007 (lms-configuration-administration)
+ * @recommendedAgents AG-EDU-007 (learning-evaluation-analyst), AG-EDU-005 (learning-technology-administrator)
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
