@@ -3,6 +3,7 @@ import { runTaskIntrinsic, TaskIntrinsicContext } from "./intrinsics/task";
 import { runBreakpointIntrinsic } from "./intrinsics/breakpoint";
 import { runSleepIntrinsic } from "./intrinsics/sleep";
 import { runOrchestratorTaskIntrinsic } from "./intrinsics/orchestratorTask";
+import { runHookIntrinsic } from "./intrinsics/hook";
 import { callHook } from "../hooks/dispatcher";
 import { runParallelAll, runParallelMap } from "./intrinsics/parallel";
 import { ProcessContext, ParallelHelpers } from "./types";
