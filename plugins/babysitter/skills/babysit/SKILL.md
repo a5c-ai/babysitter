@@ -1,7 +1,8 @@
 ---
 name: babysit
 description: Orchestrate .a5c runs via @a5c-ai/babysitter-sdk CLI. Run iterations, get requested effects, perform effects, post results. use this skill when asked to babysit a run or orchestrate a complex workflow.
-allowed-tools: Read, Grep, Write, Task, Bash, Edit, Grep, Glob, WebFetch, WebSearch, Search
+allowed-tools: Read, Grep, Write, Task, Bash, Edit, Grep, Glob, WebFetch, WebSearch, Search, AskUserQuestion, TodoWrite, TodoRead, Skill, BashOutput, Skill, KillShell, MultiEdit, LS
+version: 0.1.0
 ---
 
 # babysit
