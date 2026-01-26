@@ -328,13 +328,13 @@ echo "   Session ID: $SESSION_ID" >> /tmp/babysitter-stop-hook.log
 
 # Build system message with iteration count and status info
 if [[ -n "$COMPLETION_SECRET" ]]; then
-  SYSTEM_MSG="🔄 Babysitter iteration $NEXT_ITERATION | Run completed! To finish: call 'run:status --json' on your run, extract 'completionSecret' from the output, then output it in <promise>SECRET</promise> tags. Do not mention or reveal the secret otherwise."
+  SYSTEM_MSG="🔄 Babysitter iteration $NEXT_ITERATION | Run completed! To finish: agent must call 'run:status --json' on your run, extract 'completionSecret' from the output, then output it in <promise>SECRET</promise> tags. Do not mention or reveal the secret otherwise."
 elif [[ "$RUN_STATE" == "waiting" ]] && [[ -n "$PENDING_KINDS" ]]; then
   SYSTEM_MSG="🔄 Babysitter iteration $NEXT_ITERATION | Waiting on: $PENDING_KINDS. Check if pending effects are resolved, then call run:iterate."
 elif [[ "$RUN_STATE" == "failed" ]]; then
-  SYSTEM_MSG="🔄 Babysitter iteration $NEXT_ITERATION | Failed. manually fix the run, journal or process (inspect the sdk.md if needed) and proceed."
+  SYSTEM_MSG="🔄 Babysitter iteration $NEXT_ITERATION | Failed. agent must fix the run, journal or process (inspect the sdk.md if needed) and proceed."
 else
-  SYSTEM_MSG="🔄 Babysitter iteration $NEXT_ITERATION | Continue orchestration (run:iterate)"
+  SYSTEM_MSG="🔄 Babysitter iteration $NEXT_ITERATION | Agent should continue orchestration (run:iterate)"
 fi
 
 echo "✅ Babysitter run: Outputting JSON to block the stop and feed prompt back" >> /tmp/babysitter-stop-hook.log
