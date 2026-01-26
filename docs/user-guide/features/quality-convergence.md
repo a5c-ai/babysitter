@@ -54,6 +54,21 @@ Output: Working login feature with all tests passing
 
 **Key insight**: The AI doesn't just try once - it learns from each failure and improves.
 
+### Understanding Quality Scores
+
+**Quality scores are multi-dimensional, not a single number.** A typical quality score includes:
+
+| Dimension | What It Measures | Example |
+|-----------|------------------|---------|
+| **Tests** | Pass rate and coverage | 92% tests passing, 85% coverage |
+| **Code Quality** | Lint errors, complexity | 0 lint errors, complexity < 10 |
+| **Security** | Vulnerabilities, secrets | 0 critical issues |
+| **Performance** | Response time, bundle size | p95 < 500ms |
+
+These dimensions are weighted and combined into an overall score. Different domains use different weights - for example, a security-critical system might weight security at 35% while a prototype might weight it at only 15%.
+
+**For detailed scoring formulas and weight configurations, see [Best Practices - Custom Scoring Strategies](./best-practices.md#custom-scoring-strategies).**
+
 ---
 
 ## Overview

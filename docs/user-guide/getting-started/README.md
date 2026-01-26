@@ -102,7 +102,7 @@ Choose from built-in methodologies (TDD, Spec-Kit, GSD) or create your own. Cons
 | Run my first workflow (5 min) | [Quickstart](./quickstart.md) |
 | Understand what happened | [First Run Deep Dive](./first-run.md) |
 | See all commands | [CLI Reference](../reference/cli-reference.md) |
-| Learn about methodologies | [Methodologies Guide](../05-methodologies/) |
+| Learn about Quality Convergence | [Quality Convergence Guide](../features/quality-convergence.md) |
 
 ---
 

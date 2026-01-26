@@ -310,9 +310,9 @@ Higher targets = more iterations = longer runtime = higher quality
 
 ---
 
-## The TDD Methodology in Action
+## TDD Quality Convergence in Action
 
-The quickstart used the **TDD Quality Convergence** methodology. Here's what it does:
+The quickstart used the **TDD Quality Convergence** methodology. TDD (shorthand used throughout this guide) combines test-first development with iterative quality improvement. Here's what it does:
 
 ### Phase 1: Research
 

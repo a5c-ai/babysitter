@@ -8,6 +8,8 @@ Welcome! In this quickstart, you will build a calculator module using Test-Drive
 - The TDD workflow (tests first, then implementation)
 - Journal-based persistence (everything is recorded)
 
+**Note:** TDD Quality Convergence is the full name; we use "TDD" as shorthand throughout this guide.
+
 Let's get started!
 
 ---
