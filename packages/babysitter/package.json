@@ -1,6 +1,6 @@
 {
   "name": "@a5c-ai/babysitter",
-  "version": "0.0.133",
+  "version": "0.0.134",
   "description": "Metapackage for installing all babysitter npm packages",
   "license": "UNLICENSED",
   "type": "commonjs",
