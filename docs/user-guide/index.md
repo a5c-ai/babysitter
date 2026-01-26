@@ -11,6 +11,17 @@ Welcome to the Babysitter documentation. Babysitter is an AI-powered development
 
 ---
 
+## Quick Start
+
+Get up and running with Babysitter in minutes.
+
+| Step | Description | Time |
+|------|-------------|------|
+| [Installation](./getting-started/installation.md) | Install the Babysitter plugin | 5 min |
+| [Quickstart](./getting-started/quickstart.md) | Configure your environment | 5 min |
+| [First Run](./getting-started/first-run.md) | Execute your first babysitter workflow | 10 min |
+
+---
 ## What is Babysitter? (Start Here if You're New)
 
 **Babysitter automates the "try, check, fix, repeat" cycle of development** so you don't have to do it manually.
@@ -96,18 +107,6 @@ Done! Your calculator module is ready.
 **The main command:** `/babysit <your request>` handles everything automatically.
 
 → **[Start the Quick Start Tutorial](./getting-started/quickstart.md)**
-
----
-
-## Quick Start
-
-Get up and running with Babysitter in minutes.
-
-| Step | Description | Time |
-|------|-------------|------|
-| [Installation](./getting-started/installation.md) | Install the Babysitter plugin | 5 min |
-| [Quickstart](./getting-started/quickstart.md) | Configure your environment | 5 min |
-| [First Run](./getting-started/first-run.md) | Execute your first babysitter workflow | 10 min |
 
 ---
 
