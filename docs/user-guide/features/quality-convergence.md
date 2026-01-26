@@ -56,7 +56,9 @@ Output: Working login feature with all tests passing
 
 ### Understanding Quality Scores
 
-**Quality scores are multi-dimensional, not a single number.** A typical quality score includes:
+**Quality scores are multi-dimensional, not a single number.** This is what makes Babysitter's quality convergence so accurate - instead of a simple pass/fail, you get nuanced feedback across multiple dimensions that guide improvement.
+
+A typical quality score includes:
 
 | Dimension | What It Measures | Example |
 |-----------|------------------|---------|
@@ -64,8 +66,27 @@ Output: Working login feature with all tests passing
 | **Code Quality** | Lint errors, complexity | 0 lint errors, complexity < 10 |
 | **Security** | Vulnerabilities, secrets | 0 critical issues |
 | **Performance** | Response time, bundle size | p95 < 500ms |
+| **Type Safety** | Type errors, null safety | 0 type errors |
 
-These dimensions are weighted and combined into an overall score. Different domains use different weights - for example, a security-critical system might weight security at 35% while a prototype might weight it at only 15%.
+### The Power of Custom Dimensions
+
+**You define what quality means for your project.** The dimensions above are just examples - you can:
+
+1. **Define your own 5 dimensions** that matter most for your domain
+2. **Ask Babysitter to suggest dimensions** appropriate for your specific task
+3. **Weight dimensions differently** based on project phase or criticality
+
+For example, a data pipeline might use completely different dimensions:
+
+| Dimension | Weight | Threshold |
+|-----------|--------|-----------|
+| **Data Accuracy** | 30% | > 99.9% |
+| **Processing Speed** | 25% | < 5 min/GB |
+| **Schema Validation** | 20% | 100% valid |
+| **Idempotency** | 15% | All operations idempotent |
+| **Error Recovery** | 10% | Auto-recovery < 30s |
+
+This flexibility means quality convergence adapts to any domain - from ML model training to infrastructure deployment to documentation generation.
 
 **For detailed scoring formulas and weight configurations, see [Best Practices - Custom Scoring Strategies](./best-practices.md#custom-scoring-strategies).**
 
@@ -81,11 +102,11 @@ From the [Two-Loops Control Plane architecture](./two-loops-architecture.md), th
 
 > **If you don't have evidence, you don't have completion.**
 
+*If you do only one thing: make completion require evidence.* — This single principle transforms "it seems done" into "it is done."
+
 Every phase must end with:
 - **Artifact**: The work product (patch, doc, config, report)
 - **Evidence**: Proof that it meets requirements (logs, test output, checks)
-
-This transforms "it seems done" into "it is done."
 
 ### Why Use Quality Convergence
 
@@ -1040,6 +1061,45 @@ const [coverage, lint, security] = await ctx.parallel.all([
 - [Parallel Execution](./parallel-execution.md) - Optimize quality checks with parallelism
 - [Breakpoints](./breakpoints.md) - Add approval gates to quality convergence workflows
 - [Best Practices](./best-practices.md) - Patterns for setting targets, custom scoring strategies, and balancing speed vs thoroughness
+- [Process Library](./process-library.md) - Browse 2,000+ pre-built processes with quality convergence
+- [Two-Loops Architecture](./two-loops-architecture.md) - Deep dive into the evidence-driven completion model
+
+---
+
+## Try Different Methodologies and Processes
+
+Babysitter offers two levels of reusable workflows:
+
+### Methodologies (19+) - The "How"
+
+**Quality convergence works with ANY of Babysitter's 19+ methodologies** - not just TDD. Methodologies define your development approach:
+
+| Methodology | Best For | Quality Focus |
+|-------------|----------|---------------|
+| **TDD Quality Convergence** | Test-first development | Test coverage, regression prevention |
+| **GSD (Get Stuff Done)** | Rapid prototyping | Working software, iteration speed |
+| **Spec-Kit** | Enterprise/governance | Specification compliance, audit trails |
+| **BDD/Specification by Example** | Team collaboration | Acceptance criteria, living documentation |
+| **Domain-Driven Design** | Complex business domains | Domain model integrity, bounded contexts |
+
+**Browse methodologies:**
+- [All 19+ methodologies with source code](../reference/glossary.md#methodology)
+- [Methodologies folder](../../../plugins/babysitter/skills/babysit/process/methodologies/)
+
+### Domain Processes (2,000+) - The "What"
+
+Beyond methodologies, Babysitter includes **2,000+ domain-specific processes** for specific tasks:
+
+| Domain | Processes | Examples |
+|--------|-----------|----------|
+| **Development** | 680+ | Web APIs, mobile apps, DevOps pipelines |
+| **Business** | 430+ | Legal contracts, HR workflows, marketing campaigns |
+| **Science & Engineering** | 550+ | Quantum algorithms, aerospace systems, biomedical devices |
+| **Social Sciences** | 150+ | Research methodologies, survey analysis |
+
+**Browse processes:**
+- [Process Library](./process-library.md) - Full catalog with descriptions
+- [Specializations folder](../../../plugins/babysitter/skills/babysit/process/specializations/)
 
 ---
 

@@ -552,6 +552,39 @@ export async function process(inputs, ctx) {
 - [Breakpoints](./breakpoints.md) - Add human approval gates
 - [Journal System](./journal-system.md) - Understand event sourcing
 - [Best Practices](./best-practices.md) - Patterns for process structure, error handling, idempotency, and testing
+- [Process Library](./process-library.md) - 2,000+ ready-to-use process definitions
+
+---
+
+## Pre-Built Workflows: Methodologies & Processes
+
+**Don't start from scratch!** Babysitter includes thousands of ready-to-use workflows:
+
+### Methodologies (19+) - Development Approaches
+
+High-level approaches you can apply to any project:
+
+- **TDD Quality Convergence** - Test-first with iterative quality improvement
+- **GSD (Get Stuff Done)** - Rapid 8-phase execution workflow
+- **Spec-Kit** - Specification-driven with governance
+- **Domain-Driven Design** - Strategic and tactical DDD patterns
+- And 15+ more...
+
+**Browse methodologies:**
+- [All 19+ with source code](../reference/glossary.md#methodology)
+- [Methodologies folder](../../../plugins/babysitter/skills/babysit/process/methodologies/)
+
+### Domain Processes (2,000+) - Task-Specific Workflows
+
+Complete process definitions for specific domains:
+
+| Domain | Processes | Browse |
+|--------|-----------|--------|
+| **Development** | 680+ | [specializations/](../../../plugins/babysitter/skills/babysit/process/specializations/) |
+| **Business** | 430+ | [domains/business/](../../../plugins/babysitter/skills/babysit/process/specializations/domains/business/) |
+| **Science & Engineering** | 550+ | [domains/science/](../../../plugins/babysitter/skills/babysit/process/specializations/domains/science/) |
+
+See the full catalog with descriptions in the [Process Library](./process-library.md).
 
 ---
 

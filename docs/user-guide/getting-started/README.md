@@ -267,7 +267,7 @@ Coverage: 92%
 | Resource | Best For |
 |----------|----------|
 | [Troubleshooting Guide](./installation.md#troubleshooting) | Installation issues |
-| [FAQ](../../README.md#faq) | Common questions |
+| [FAQ](../reference/faq.md) | Common questions |
 | [GitHub Issues](https://github.com/a5c-ai/babysitter/issues) | Bug reports |
 | [GitHub Discussions](https://github.com/a5c-ai/babysitter/discussions) | Questions and ideas |
 

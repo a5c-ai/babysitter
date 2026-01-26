@@ -1306,6 +1306,42 @@ if (process.env.BABYSITTER_AUTO_APPROVE !== 'true') {
 - [Run Resumption](./run-resumption.md) - Pause and continue
 - [Journal System](./journal-system.md) - Event sourcing
 - [Hooks](./hooks.md) - Extensible lifecycle events
+- [Process Library](./process-library.md) - 2,000+ pre-built processes
+
+---
+
+## Explore Methodologies and Processes
+
+**These best practices apply to ANY of Babysitter's workflows.** Whether you're using a methodology or a domain-specific process, these patterns will help you get the best results.
+
+### Methodologies (19+) - Development Approaches
+
+Not sure which methodology to use? Here's a quick guide:
+
+| If you need... | Try this methodology |
+|----------------|---------------------|
+| Fast, working code | GSD (Get Stuff Done) |
+| High test coverage | TDD Quality Convergence |
+| Enterprise governance | Spec-Kit |
+| Team alignment on requirements | BDD/Specification by Example |
+| Complex domain modeling | Domain-Driven Design |
+| Risk management | Spiral Model |
+
+**Browse methodologies:**
+- [All 19+ methodologies with source code](../reference/glossary.md#methodology)
+- [Methodologies folder](../../../plugins/babysitter/skills/babysit/process/methodologies/)
+
+### Domain Processes (2,000+) - Ready-to-Use Workflows
+
+Beyond methodologies, explore 2,000+ domain-specific processes:
+
+| Domain | Processes | Browse |
+|--------|-----------|--------|
+| **Development** | 680+ (web, mobile, DevOps, AI, security) | [Browse →](../../../plugins/babysitter/skills/babysit/process/specializations/) |
+| **Business** | 430+ (legal, HR, marketing, finance) | [Browse →](../../../plugins/babysitter/skills/babysit/process/specializations/domains/business/) |
+| **Science & Engineering** | 550+ (physics, aerospace, biomedical) | [Browse →](../../../plugins/babysitter/skills/babysit/process/specializations/domains/science/) |
+
+See the full catalog in the [Process Library](./process-library.md).
 
 ---
 
