@@ -323,12 +323,13 @@ Babysitter will find the `nextjs-fullstack-app` process and configure it based o
 
 ### Handle Breakpoints
 
-The process will pause at breakpoints for human review:
+The process will pause at breakpoints for human review. When a breakpoint triggers:
 
-```
-[BREAKPOINT] Review the implementation plan for "my-nextjs-app"
-Approve to proceed with setup? (yes/no)
-```
+1. Open **http://localhost:3184** in your browser
+2. Review the context files and question
+3. Click **Approve** to continue or **Reject** to halt
+
+See [Breakpoints](./breakpoints.md) for detailed instructions on setting up the breakpoints service.
 
 ## Methodologies Reference
 

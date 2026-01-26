@@ -237,28 +237,34 @@ export async function process(inputs, ctx) {
 }
 ```
 
-### Step 4: Run Your Process
+### Step 4: Create a Run
 
-Use the babysitter skill to run your process.
+Use the CLI to create a run with your process.
 
+```bash
+babysitter run:create \
+  --process-id my-workflow \
+  --entry ./code/main.js#process \
+  --inputs ./inputs.json \
+  --run-id "run-$(date -u +%Y%m%d-%H%M%S)"
 ```
-/babysit run my custom workflow
+
+### Step 5: Execute the Run
+
+Use the babysitter skill or CLI to drive execution.
+
+```bash
+# Via skill
+claude "/babysit run my-workflow"
+
+# Via CLI iteration loop
+while true; do
+  RESULT=$(babysitter run:iterate "$RUN_ID" --json)
+  STATUS=$(echo "$RESULT" | jq -r '.status')
+  [ "$STATUS" = "completed" ] && break
+  [ "$STATUS" = "failed" ] && exit 1
+done
 ```
-
-Or reference your process file directly:
-```
-/babysit run the workflow defined in ./code/main.js
-```
-
-### Step 5: Monitor and Continue
-
-The workflow runs automatically. If it pauses at a breakpoint:
-
-1. Approve via the breakpoints UI at http://localhost:3184
-2. Resume with:
-   ```
-   /babysit resume
-   ```
 
 ---
 
@@ -546,6 +552,39 @@ export async function process(inputs, ctx) {
 - [Breakpoints](./breakpoints.md) - Add human approval gates
 - [Journal System](./journal-system.md) - Understand event sourcing
 - [Best Practices](./best-practices.md) - Patterns for process structure, error handling, idempotency, and testing
+- [Process Library](./process-library.md) - 2,000+ ready-to-use process definitions
+
+---
+
+## Pre-Built Workflows: Methodologies & Processes
+
+**Don't start from scratch!** Babysitter includes thousands of ready-to-use workflows:
+
+### Methodologies (19+) - Development Approaches
+
+High-level approaches you can apply to any project:
+
+- **TDD Quality Convergence** - Test-first with iterative quality improvement
+- **GSD (Get Stuff Done)** - Rapid 8-phase execution workflow
+- **Spec-Kit** - Specification-driven with governance
+- **Domain-Driven Design** - Strategic and tactical DDD patterns
+- And 15+ more...
+
+**Browse methodologies:**
+- [All 19+ with source code](../reference/glossary.md#methodology)
+- [Methodologies folder](../../../plugins/babysitter/skills/babysit/process/methodologies/)
+
+### Domain Processes (2,000+) - Task-Specific Workflows
+
+Complete process definitions for specific domains:
+
+| Domain | Processes | Browse |
+|--------|-----------|--------|
+| **Development** | 680+ | [specializations/](../../../plugins/babysitter/skills/babysit/process/specializations/) |
+| **Business** | 430+ | [domains/business/](../../../plugins/babysitter/skills/babysit/process/specializations/domains/business/) |
+| **Science & Engineering** | 550+ | [domains/science/](../../../plugins/babysitter/skills/babysit/process/specializations/domains/science/) |
+
+See the full catalog with descriptions in the [Process Library](./process-library.md).
 
 ---
 

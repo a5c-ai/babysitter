@@ -127,8 +127,15 @@ The primary Claude Code skill for orchestrating runs. The skill manages the orch
 
 **Invocation:**
 ```bash
-/babysitter:babysit Build a REST API with TDD
+/babysit Build a REST API with TDD
 ```
+
+**Equivalent verbs:** The following commands are functionally identical:
+- `/babysit build a feature`
+- `/babysit create a feature`
+- `/babysit implement a feature`
+
+All verbs (build, create, implement) trigger the same orchestration workflow.
 
 **Related:** [Skill](#skill), [In-Session Loop](#in-session-loop)
 
@@ -167,8 +174,10 @@ npx -y @a5c-ai/babysitter-breakpoints@latest start
 ```
 
 **Ports:**
-- `3184` - Web UI
-- `3185` - REST API
+- `3184` - Web UI (open in browser: http://localhost:3184)
+- `3185` - REST API (for programmatic access)
+
+**Note:** The REST API on port 3185 is used for programmatic breakpoint operations. See [CLI Reference](./cli-reference.md) for API usage details.
 
 **Related:** [Breakpoint](#breakpoint)
 
@@ -544,18 +553,42 @@ An optional descriptive string attached to tasks for identification in logs and 
 
 ### Methodology
 
-A structured approach to software development packaged as a process definition. Babysitter includes several methodologies.
+A high-level structured approach or pattern for software development. Methodologies define the *conceptual framework* - the "what" and "why" of a development approach.
 
-**Built-in Methodologies:**
-- TDD Quality Convergence
-- GSD (Get Stuff Done)
-- Spec-Kit
-- ATDD/BDD
-- Domain-Driven Design
+**Key distinction:** Methodology = high-level concept/pattern; Process = low-level code implementation of a methodology.
 
-**Location:** `plugins/babysitter/skills/babysit/process/methodologies/`
+**You can use ANY methodology and get great results.** Babysitter includes 19+ built-in methodologies - pick the one that fits your project style, or let Babysitter choose automatically based on your request.
 
-**Related:** [Process](#process), [TDD](#tdd-test-driven-development)
+**Built-in Methodologies (19+):**
+
+| Methodology | Description | Source |
+|-------------|-------------|--------|
+| **TDD Quality Convergence** | Test-first development with iterative quality improvement | [tdd-quality-convergence.js](../../../plugins/babysitter/skills/babysit/process/tdd-quality-convergence.js) |
+| **GSD (Get Stuff Done)** | Rapid, pragmatic 8-phase execution | [gsd/](../../../plugins/babysitter/skills/babysit/process/gsd/) |
+| **Spec-Kit** | Specification-driven development with governance | [SPEC-KIT.md](../../../plugins/babysitter/skills/babysit/process/SPEC-KIT.md) |
+| **ATDD/TDD** | Acceptance test-driven and test-driven development | [atdd-tdd/](../../../plugins/babysitter/skills/babysit/process/methodologies/atdd-tdd/) |
+| **BDD/Specification by Example** | Behavior-driven development with Gherkin | [bdd-specification-by-example/](../../../plugins/babysitter/skills/babysit/process/methodologies/bdd-specification-by-example/) |
+| **Domain-Driven Design** | Strategic and tactical DDD patterns | [domain-driven-design/](../../../plugins/babysitter/skills/babysit/process/methodologies/domain-driven-design/) |
+| **Feature-Driven Development** | Feature-centric with parking lot tracking | [feature-driven-development/](../../../plugins/babysitter/skills/babysit/process/methodologies/feature-driven-development/) |
+| **Hypothesis-Driven Development** | Experimentation and validation framework | [hypothesis-driven-development/](../../../plugins/babysitter/skills/babysit/process/methodologies/hypothesis-driven-development/) |
+| **Example Mapping** | BDD workshop technique for requirements | [example-mapping/](../../../plugins/babysitter/skills/babysit/process/methodologies/example-mapping/) |
+| **Scrum** | Sprint-based iterative development | [scrum/](../../../plugins/babysitter/skills/babysit/process/methodologies/scrum/) |
+| **Kanban** | Pull-based system with WIP limits | [kanban/](../../../plugins/babysitter/skills/babysit/process/methodologies/kanban/) |
+| **Extreme Programming (XP)** | XP engineering practices (pair programming, TDD) | [extreme-programming/](../../../plugins/babysitter/skills/babysit/process/methodologies/extreme-programming/) |
+| **Shape Up** | 6-week cycle product development | [shape-up/](../../../plugins/babysitter/skills/babysit/process/methodologies/shape-up/) |
+| **Jobs to Be Done** | Outcome-focused development | [jobs-to-be-done/](../../../plugins/babysitter/skills/babysit/process/methodologies/jobs-to-be-done/) |
+| **Impact Mapping** | Goal-to-feature traceability | [impact-mapping/](../../../plugins/babysitter/skills/babysit/process/methodologies/impact-mapping/) |
+| **Event Storming** | Collaborative domain modeling workshop | [event-storming/](../../../plugins/babysitter/skills/babysit/process/methodologies/event-storming/) |
+| **Double Diamond** | Design thinking framework | [double-diamond/](../../../plugins/babysitter/skills/babysit/process/methodologies/double-diamond/) |
+| **V-Model** | Verification and validation phases | [v-model/](../../../plugins/babysitter/skills/babysit/process/methodologies/v-model/) |
+| **Spiral Model** | Risk-driven iterative development | [spiral-model/](../../../plugins/babysitter/skills/babysit/process/methodologies/spiral-model/) |
+| **Waterfall** | Sequential SDLC phases | [waterfall/](../../../plugins/babysitter/skills/babysit/process/methodologies/waterfall/) |
+| **RUP** | Rational Unified Process | [rup/](../../../plugins/babysitter/skills/babysit/process/methodologies/rup/) |
+| **Cleanroom** | Cleanroom software engineering | [cleanroom/](../../../plugins/babysitter/skills/babysit/process/methodologies/cleanroom/) |
+
+Each methodology has one or more [Process](#process) implementations in the codebase. Browse all methodologies at [`plugins/babysitter/skills/babysit/process/methodologies/`](../../../plugins/babysitter/skills/babysit/process/methodologies/).
+
+**Related:** [Process](#process), [TDD Quality Convergence](#tdd-quality-convergence), [Process Library](../features/process-library.md)
 
 ---
 
@@ -648,7 +681,17 @@ claude plugin install --scope user babysitter@a5c.ai
 
 ### Process
 
-A JavaScript/TypeScript function that defines workflow logic. Processes use the Context API to execute tasks, create breakpoints, and manage state.
+A JavaScript/TypeScript function that is the *low-level code implementation* of a workflow. Processes use the Context API to execute tasks, create breakpoints, and manage state.
+
+**Key distinction:** Process = low-level code implementation; [Methodology](#methodology) = high-level concept/pattern that a process implements.
+
+**Babysitter includes 2,000+ ready-to-use processes** organized by domain:
+
+| Domain | Processes | Browse |
+|--------|-----------|--------|
+| **Development** | 680+ (web, mobile, DevOps, AI, security) | [Browse →](../../../plugins/babysitter/skills/babysit/process/specializations/) |
+| **Business** | 430+ (legal, HR, marketing, finance) | [Browse →](../../../plugins/babysitter/skills/babysit/process/specializations/domains/business/) |
+| **Science & Engineering** | 550+ (physics, aerospace, biomedical) | [Browse →](../../../plugins/babysitter/skills/babysit/process/specializations/domains/science/) |
 
 **Structure:**
 ```javascript
@@ -662,9 +705,9 @@ export async function process(inputs, ctx) {
 
 **Location:** `.a5c/runs/<runId>/code/main.js`
 
-**Related:** [Context API](#context-api), [Entry Point](#entry-point)
+**Related:** [Methodology](#methodology), [Context API](#context-api), [Entry Point](#entry-point)
 
-**See Also:** [Process Definitions](../features/process-definitions.md)
+**See Also:** [Process Definitions](../features/process-definitions.md), [Process Library](../features/process-library.md)
 
 ---
 
@@ -705,17 +748,35 @@ implement -> measure quality -> below target? -> refine -> repeat
 
 ### Quality Score
 
-A numeric assessment of implementation quality. Typically scored by an agent task based on test coverage, linting, security, and other metrics.
+A **multi-dimensional** assessment of implementation quality. Quality scores are not a single number - they comprise multiple dimensions that are weighted and combined into an overall score.
+
+**Dimensions typically include:**
+- **Tests**: Pass rate and coverage percentage
+- **Code Quality**: Lint errors, complexity, formatting
+- **Security**: Vulnerability scans, secrets detection
+- **Performance**: Response times, bundle size (when applicable)
+- **Type Safety**: TypeScript errors, static analysis
 
 **Example:**
 ```json
 {
-  "score": 85,
-  "coverage": 88,
-  "lint": 0,
-  "security": "pass"
+  "overall": 85,
+  "dimensions": {
+    "tests": 92,
+    "codeQuality": 88,
+    "security": 100,
+    "performance": 75
+  },
+  "weights": {
+    "tests": 0.30,
+    "codeQuality": 0.25,
+    "security": 0.25,
+    "performance": 0.20
+  }
 }
 ```
+
+**See Also:** [Quality Convergence](../features/quality-convergence.md) for the five quality gate categories and detailed scoring formulas in [Best Practices](../features/best-practices.md#custom-scoring-strategies).
 
 **Related:** [Quality Convergence](#quality-convergence), [Agent](#agent)
 
@@ -999,17 +1060,29 @@ const buildTask = defineTask('build', (args, ctx) => ({
 
 ---
 
-### TDD (Test-Driven Development)
+### TDD Quality Convergence
 
-A development methodology where tests are written before implementation. Babysitter's TDD quality convergence combines TDD with iterative refinement.
+The full name for Babysitter's test-driven development methodology. TDD Quality Convergence combines traditional TDD (writing tests before implementation) with iterative quality improvement until targets are met.
 
 **Process:**
-1. Write tests
-2. Implement code
-3. Measure quality
-4. Iterate until target met
+1. Write tests first
+2. Implement code to pass tests
+3. Measure quality (tests, coverage, lint, security, etc.)
+4. Iterate until quality target is achieved
+
+**Shorthand:** "TDD" is acceptable after first mention in a document.
 
 **Related:** [Quality Convergence](#quality-convergence), [Methodology](#methodology)
+
+**See Also:** [Quality Convergence Guide](../features/quality-convergence.md)
+
+---
+
+### TDD (Test-Driven Development)
+
+See [TDD Quality Convergence](#tdd-quality-convergence).
+
+**Note:** In Babysitter documentation, "TDD" typically refers to the full TDD Quality Convergence methodology, not just traditional test-driven development.
 
 ---
 

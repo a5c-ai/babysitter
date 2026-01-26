@@ -1,8 +1,23 @@
 # Run Resumption: Pause and Continue Workflows
 
-**Version:** 1.0
-**Last Updated:** 2026-01-25
+**Version:** 1.1
+**Last Updated:** 2026-01-26
 **Category:** Feature Guide
+
+---
+
+## In Plain English
+
+**You can stop and come back later. Nothing is lost.**
+
+Close your laptop, end your session, or even have your computer crash - when you come back, just say "resume" and Babysitter picks up exactly where it left off.
+
+**Common scenarios:**
+- 🔋 Your laptop battery dies → resume later
+- ⏸️ Waiting for someone to approve → resume when they approve
+- 🌙 End of workday → resume tomorrow morning
+
+**How to resume:** Just tell Babysitter to continue your previous work, or use the CLI command shown below.
 
 ---
 
