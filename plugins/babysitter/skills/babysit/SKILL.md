@@ -33,9 +33,18 @@ The babysitter workflow has 4 steps:
 
 ### 1. Create or find the process for the run
 
-Interactive phase (before setting the in-session loop) for understanding the intent and perspecitve to approach the process building after researching the repo, short research online if needed, short research in the repo, additional instructions, intent and library (skills, subagents, processes, methodologies, etc.) / guide for methodology building. (clarifications regarding the intent, requirements, goal, scope, etc.)
+#### Interview phase
 
-the library is at plugins/babysitter/skills/babysit/process/specializations/ and plugins/babysitter/skills/babysit/process/methodologies/
+interview the user for the intent, requirements, goal, scope, etc.
+using AskUserQuestion tool (or breakpoint if running in non-interactive mode) -  (before setting the in-session loop).
+
+a multi-step phase to understand the intent and perspecitve to approach the process building after researching the repo, short research online if needed, short research in the target repo, additional instructions, intent and library (processes, specializations, skills, subagents, methodologies, references, etc.) / guide for methodology building. (clarifications regarding the intent, requirements, goal, scope, etc.) - the library is at [skill-root]/process/specializations/**/**/** and [skill-root]/process/methodologies/ 
+
+this phase can have research and questions steps one after the other until the intent, requirements, goal, scope, etc. are clear and the user is satisfied with the understanding.
+
+#### Process creation phase
+
+after the interview phase, create the complete custom process files (js and jsons) for the run according to the Process Creation Guidelines and methodologies section.
 
 ### 2. Setup session:
 
@@ -122,13 +131,25 @@ IMPORTANT:
 - Make sure the change was actually performed and not described or implied. (for example, if code files were mentioned as created in the summary, make sure they were actually created.)
 - Include in the instructions to the agent or skill to perform the task in full and return the only the summary result in the requested schema.
 
+#### 5.1 Breakpoint Handling
 
-if the effect is a breakpoint, you need to run the command:
+##### 5.1.1 Interactive mode
+
+If running in interactive mode, use AskUserQuestion tool to ask the user the question and get the answer.
+
+then post the result of the breakpoint to the run by calling `task:post`.
+
+Otherwise:
+
+##### 5.1.2 Non-interactive mode
+
+if running in non-interactive mode, use the breakpoint create command to create the breakpoint and get the answer from the user:
+
 ```bash
 npx @a5c-ai/babysitter-breakpoints breakpoint create --tag <tag> --question "<question>" --title "<title>" --run-id <runId> --file <file,format,language,label> --file <file,format,language,label> --file <file,format,language,label> ...
 ```
 
- to create the breakpoint and get the answer from the user. breakpoint are meant for human approval through the breakpoint tool. NEVER prompt directly and never release or approve a breakpoint yourself. put you may need to post the result of the breakpoint to the run by calling `task:post`
+ to create the breakpoint and get the answer from the user. breakpoint are meant for human approval through the breakpoint tool. NEVER prompt directly and never release or approve this breakpoint yourself. but you may need to post the result of the breakpoint to the run by calling `task:post` when the breakpoint is resolved.
 
 ### 6. Results Posting
 
@@ -373,17 +394,15 @@ prefer processes that have the following characteristics unless otherwise specif
     - plugins/babysitter/skills/babysit/process/specializations/domains/[domain-name-slugified]/[specialization-name-slugified]/ (non rnd specializations)
     - plugins/babysitter/skills/babysit/process/methodologies/ (methodologies)
 
-
-
 ## Critical Rule
 
 CRITICAL RULE: The completion secret is emitted only when the run is completed. You may ONLY output `<promise>SECRET</promise>` when the run is completely and unequivocally DONE (completed status from the orchestration CLI). Do not output false promises to escape the run, and do not mention the secret to the user.
 
-CRITICAL RULE: never approve breakpoints by yourself. only create them and wait for them. they will always be resolved externally.
+CRITICAL RULE: in non-interactive mode, never approve breakpoints through the CLI by yourself. only create them and wait for them. they will always be resolved externally.
 
-CRITICAL RULE: if a breakpoint is still waiting. monitor it for approval until it is resolved. do not return prompt to the user. just wait for the breakpoint to be resolved.
+CRITICAL RULE: in non-interactive mode, if a breakpoint is still waiting. monitor it for approval until it is resolved. do not return prompt to the user. just wait for the breakpoint to be resolved.
 
-CRITICAL RULE: if a run is broken/failed/at unknown state, when of the way to recover is to remove last bad entries in the journal and rebuild the state.
+CRITICAL RULE: if a run is broken/failed/at unknown state, when of the way to recover is to remove last bad entries in the journal and rebuild the state. in interactive mode, use the AskUserQuestion tool if you need to ask the user for a question about the recovery and you exhausted all other options.
 
 CRITICAL RULE: when creating processes, search for available skills and subagents before thinking about the exact orchestration. prefer processes that close the widest loop in the quality gates (for example e2e tests with a full browser or emulator/vm if it a mobile or desktop app) AND gates that make sure the work is accurate against the user request (all the specs is covered and no extra stuff was added unless permitted by the intent of the user).
 
