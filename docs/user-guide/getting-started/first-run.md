@@ -223,6 +223,10 @@ Captures quality assessments after each iteration.
 
 Records human approval checkpoints (if any were requested).
 
+**Note on breakpoint modes:** These events are recorded regardless of whether the breakpoint was handled:
+- **Interactively** (via AskUserQuestion in Claude Code chat), or
+- **Non-interactively** (via the breakpoints web UI at http://localhost:3184)
+
 ### Why Event Sourcing Matters
 
 The journal enables:
@@ -584,7 +588,9 @@ Now that you understand what happened in your first run, you're ready to explore
    ```
    /babysit refactor calculator with breakpoint approval before changes
    ```
-   Then approve at http://localhost:3184
+   Claude will ask you directly in the chat when approval is needed!
+
+   (For non-interactive mode, you'd approve at http://localhost:3184)
 
 3. **Test Session Resumption**
    - Start a longer run
@@ -628,9 +634,10 @@ CHECK STATUS:
 QUALITY SCORES:
   grep QUALITY_SCORE journal.jsonl | jq '.score'
 
-BREAKPOINTS SERVICE:
-  npx -y @a5c-ai/babysitter-breakpoints@latest start
-  Open: http://localhost:3184
+BREAKPOINTS:
+  Interactive (Claude Code): Handled in chat - no setup!
+  Non-Interactive: npx -y @a5c-ai/babysitter-breakpoints@latest start
+  Web UI (non-interactive): http://localhost:3184
 
 LIST ALL RUNS:
   ls .a5c/runs/

@@ -37,8 +37,15 @@ Before starting this tutorial, please ensure you have:
 ```bash
 # Verify SDK installation
 npx @a5c-ai/babysitter-sdk@latest --version
+```
 
-# Ensure breakpoints service is running
+### About Breakpoints
+
+**Interactive Mode (Claude Code)**: When running in Claude Code, breakpoints are handled directly in the chat - no service needed!
+
+**Non-Interactive Mode**: For CI/CD or headless automation, you need the breakpoints service:
+```bash
+# Only needed for non-interactive mode
 curl http://localhost:3184/health
 ```
 
@@ -743,22 +750,31 @@ Visit http://localhost:3184 to approve or reject.
 
 ## Step 8: Approve Breakpoints
 
-Open `http://localhost:3184` in your browser. You will see the staging deployment breakpoint waiting for approval.
+### Interactive Mode (Claude Code)
 
-### Breakpoint Details:
+Since you're running in Claude Code, Claude will ask you directly:
 
 ```
-Title: Staging Deployment Approval
-Question: Approve deployment to staging environment?
+Claude: The build is complete and ready for staging deployment.
 
-Context:
-  - Build Result: SUCCESS
-  - Quality Score: 92
-  - Security Status: PASS
-  - Target Environment: staging
+        Summary:
+        - Build Result: SUCCESS
+        - Quality Score: 92
+        - Security Status: PASS
+        - Target Environment: staging
 
-[Approve] [Reject] [Add Comment]
+        Approve deployment to staging environment?
+
+        [Approve] [Reject] [Add Comment]
+
+You: [Click Approve or type "yes"]
 ```
+
+Simply respond to approve and continue!
+
+### Non-Interactive Mode (Alternative)
+
+If using non-interactive mode, open `http://localhost:3184` in your browser. You will see the staging deployment breakpoint waiting for approval.
 
 Click **"Approve"** to continue the process.
 
@@ -997,14 +1013,18 @@ Now that you've mastered custom process definitions, here are paths to continue:
    ]);
    ```
 
-### Issue: "Breakpoint not appearing in UI"
+### Issue: "Breakpoint not appearing"
 
-**Symptom:** Process is waiting but no breakpoint appears.
+**Symptom:** Process is waiting but no breakpoint prompt appears.
 
-**Solution:**
+**Solution (Interactive Mode - Claude Code):**
+1. Look for Claude's question in the chat - scroll up if needed
+2. If the session disconnected, resume with `/babysit resume`
+
+**Solution (Non-Interactive Mode):**
 1. Verify breakpoints service is running: `curl http://localhost:3184/health`
 2. Check browser console for errors
-3. Try refreshing the breakpoints UI
+3. Try refreshing the breakpoints UI at http://localhost:3184
 
 ### Issue: "Task timeout"
 

@@ -42,9 +42,6 @@ node --version
 
 # Check if Babysitter SDK is installed
 npx @a5c-ai/babysitter-sdk@latest --version
-
-# Start the breakpoints service (in a separate terminal)
-npx -y @a5c-ai/babysitter-breakpoints@latest start
 ```
 
 **What you should see:**
@@ -54,12 +51,32 @@ For the Node.js check:
 v20.x.x or higher
 ```
 
-For the breakpoints service:
+### About Breakpoints
+
+Babysitter has two modes for handling breakpoints (approval prompts):
+
+1. **Interactive Mode (Claude Code)**: When running in Claude Code, breakpoints are handled directly in the chat - Claude asks you questions and you respond. **No setup required!**
+
+2. **Non-Interactive Mode**: For CI/CD or headless automation, you need the breakpoints service.
+
+**For this tutorial, we'll use interactive mode** - just respond to Claude's questions in the chat. No additional service needed!
+
+<details>
+<summary>Optional: Start breakpoints service for non-interactive mode</summary>
+
+```bash
+# In a separate terminal (only if using non-interactive mode)
+npx -y @a5c-ai/babysitter-breakpoints@latest start
+```
+
+You should see:
 ```
 Babysitter Breakpoints Service started on http://localhost:3184
 ```
 
-If any of these don't work, please revisit the installation guide before continuing.
+</details>
+
+If any verification commands don't work, please revisit the installation guide before continuing.
 
 ---
 
@@ -263,37 +280,40 @@ At this point, you might see a **breakpoint** requesting your approval of the sp
 
 Babysitter uses **breakpoints** to get human approval at critical decision points. This ensures you stay in control of important decisions.
 
-**What you should see:**
+### Interactive Mode (Claude Code) - What You'll See:
+
+Since you're running in Claude Code, Claude will ask you directly in the chat:
+
+```
+Claude: The specification phase is complete. Here's what I've planned:
+
+        Specifications:
+        - 5 CRUD endpoints defined
+        - In-memory storage (no database setup)
+        - Jest + Supertest for testing
+        - Basic validation rules
+
+        Do you approve these specifications to proceed with implementation?
+
+        [Approve] [Reject] [Request Changes]
+
+You: [Click Approve or type "yes"]
+
+Claude: Specifications approved. Proceeding with TDD implementation...
+```
+
+Simply respond to Claude's question to continue!
+
+### Non-Interactive Mode (Alternative):
+
+If you were running in non-interactive mode (CI/CD, scripts), you would instead see:
 
 ```
 Waiting for breakpoint approval...
-
-Breakpoint: Specification Review
-Question: Review and approve the specifications for the task management API?
-
-Context:
-- 5 CRUD endpoints defined
-- In-memory storage (no database setup)
-- Jest + Supertest for testing
-- Basic validation rules
-
 Visit http://localhost:3184 to approve or reject.
 ```
 
-Now open your browser and navigate to `http://localhost:3184`. You will see the breakpoint approval interface.
-
-### In the Breakpoints UI:
-
-1. **Review the specifications** - Make sure they match your expectations
-2. **Click "Approve"** if everything looks good
-3. Optionally, add a comment explaining your decision
-
-**What you should see after approval:**
-
-```
-Breakpoint approved by user
-Continuing workflow...
-```
+And you'd approve via the web UI at `http://localhost:3184`.
 
 > **Why Breakpoints Matter:**
 > Breakpoints create a human-in-the-loop workflow. This means:
@@ -301,7 +321,7 @@ Continuing workflow...
 > - Every approval is logged for audit trails
 > - You can reject and provide feedback if something isn't right
 
-**Checkpoint 3:** You should have successfully approved the specifications breakpoint.
+**Checkpoint 3:** You should have successfully approved the specifications breakpoint (via chat or web UI).
 
 ---
 
@@ -715,7 +735,12 @@ claude plugin enable --scope user babysitter@a5c.ai
 
 **Symptom:** Workflow is waiting for breakpoint approval but nothing happens.
 
-**Solution:**
+**Solution (Interactive Mode - Claude Code):**
+1. Look for Claude's question in the chat - scroll up if needed
+2. Respond to the question to continue
+3. If the session timed out, resume with `/babysit resume`
+
+**Solution (Non-Interactive Mode):**
 1. Ensure the breakpoints service is running: `npx -y @a5c-ai/babysitter-breakpoints@latest start`
 2. Check if you can access `http://localhost:3184` in your browser
 3. Look for pending breakpoints in the UI

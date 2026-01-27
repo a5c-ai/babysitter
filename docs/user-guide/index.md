@@ -64,7 +64,7 @@ When you ask an AI to write code, you typically:
 | **Run** | One execution of a process | Running the TDD workflow for your login page |
 | **Task** | A single step in the process | "Write tests", "Run linter", "Check coverage" |
 | **Quality Gate** | A check that must pass | Tests must be 90% passing |
-| **Breakpoint** | A pause for human approval | "Review this code before I deploy it" |
+| **Breakpoint** | A pause for human approval | "Review this code before I deploy it" (handled in chat or via web UI) |
 | **Iteration** | One try-check-fix cycle | Attempt #3 to pass the tests |
 | **Convergence** | Improving until target met | Going from 60% → 85% → 95% |
 
@@ -97,12 +97,17 @@ Iteration 2: Quality 82/100 - Tests: 9/10 passing
   → AI improving code coverage...
 
 Iteration 3: Quality 95/100 - Target met! ✅
-  → Waiting for your approval at http://localhost:3184
 
-[You approve via web UI]
+Claude: The implementation is complete. Quality score: 95/100.
+        Do you approve the final result?
+        [Approve] [Request Changes]
+
+You: [Approve]
 
 Done! Your calculator module is ready.
 ```
+
+**Note:** Breakpoints (approval prompts) are handled directly in the chat when using Claude Code. No external service needed!
 
 **The main command:** `/babysit <your request>` handles everything automatically.
 

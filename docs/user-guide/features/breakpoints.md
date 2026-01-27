@@ -1,7 +1,7 @@
 # Breakpoints: Human-in-the-Loop Approval
 
-**Version:** 1.1
-**Last Updated:** 2026-01-26
+**Version:** 1.2
+**Last Updated:** 2026-01-27
 **Category:** Feature Guide
 
 ---
@@ -15,13 +15,57 @@
 - The AI makes changes → pauses → you check the changes → approve → then it deploys
 - You stay in control of important decisions
 
-**How to approve:** When a breakpoint triggers, open `http://localhost:3184` in your browser, review the information, and click "Approve."
+**How to approve:** Babysitter supports **two modes** for handling breakpoints:
+
+| Mode | How It Works | Best For |
+|------|--------------|----------|
+| **Interactive** (Default in Claude Code) | Claude asks you directly in the chat using `AskUserQuestion` | Real-time sessions where you're actively working |
+| **Non-Interactive** | Open `http://localhost:3184` in your browser to approve | CI/CD pipelines, headless automation, asynchronous review |
+
+**No setup needed for interactive mode!** If you're using Claude Code, breakpoints "just work" - Claude will ask you directly.
 
 ---
 
 ## Overview
 
 Breakpoints provide human-in-the-loop approval gates within Babysitter workflows. Use breakpoints to pause automated execution at critical decision points, review context files, and make informed approvals before proceeding.
+
+### Two Modes of Operation
+
+Babysitter supports two distinct modes for handling breakpoints:
+
+#### Interactive Mode (Claude Code Sessions)
+
+When running Babysitter within an active Claude Code session, breakpoints are handled **directly in the chat**:
+
+1. Process reaches a breakpoint
+2. Claude uses the `AskUserQuestion` tool to present the question
+3. You respond in the chat
+4. Claude posts your response and the process continues
+
+**Advantages:**
+- No external service required
+- Immediate, real-time interaction
+- Context preserved in conversation
+
+**When it's used:** Automatically when you're in a Claude Code session running `/babysit`
+
+#### Non-Interactive Mode (External/Headless)
+
+When running Babysitter outside Claude Code (CI/CD, scripts, external orchestration), breakpoints use the **breakpoints service**:
+
+1. Process reaches a breakpoint
+2. Breakpoint is created in the service via CLI
+3. You approve via web UI at `http://localhost:3184`
+4. Process continues after approval
+
+**Advantages:**
+- Works in headless environments
+- Supports asynchronous review workflows
+- Team members can approve without terminal access
+- Mobile notifications via Telegram
+
+**When it's used:** Automated pipelines, scripts, or when explicitly configured
 
 ### Why Use Breakpoints
 
@@ -104,7 +148,36 @@ if (qualityScore < targetQuality && iteration < maxIterations) {
 
 ## Step-by-Step Instructions
 
-### Step 1: Start the Breakpoints Service
+### Interactive Mode (Claude Code) - No Setup Required
+
+If you're using Claude Code, breakpoints work automatically:
+
+1. Run `/babysit` with your request
+2. When a breakpoint is reached, Claude will ask you directly in the chat
+3. Answer the question (approve, reject, or provide feedback)
+4. The workflow continues
+
+**That's it!** No services to start, no URLs to open.
+
+**Example interaction:**
+```
+Claude: The implementation plan is ready. Review the plan below:
+        [Plan summary...]
+
+        Do you approve this plan to proceed with implementation?
+
+        [Approve] [Reject] [Request Changes]
+
+You: [Click Approve or type your response]
+
+Claude: Plan approved. Proceeding with implementation...
+```
+
+### Non-Interactive Mode (Headless/CI/CD)
+
+For automated pipelines or when running without an active Claude Code session:
+
+#### Step 1: Start the Breakpoints Service
 
 Start the breakpoints service before running workflows that contain breakpoints.
 
@@ -116,7 +189,7 @@ The service runs at:
 - **Web UI**: http://localhost:3184
 - **API**: http://localhost:3185
 
-### Step 2: Add Breakpoints to Your Process
+#### Step 2: Add Breakpoints to Your Process
 
 Use `ctx.breakpoint()` in your process definition to create approval gates.
 
@@ -146,24 +219,28 @@ await ctx.breakpoint({
 });
 ```
 
-### Step 3: Run Your Workflow
+#### Step 3: Run Your Workflow
 
 Execute your workflow using the babysitter skill or CLI.
 
 ```bash
+# In Claude Code (interactive mode - no breakpoints service needed)
 claude "/babysit implement user authentication with breakpoint approval"
+
+# Or for non-interactive/headless execution
+babysitter run:iterate .a5c/runs/<runId> --json
 ```
 
-### Step 4: Review and Approve
+#### Step 4: Review and Approve (Non-Interactive Mode)
 
-When the workflow reaches a breakpoint:
+When the workflow reaches a breakpoint in non-interactive mode:
 
 1. **Open the Web UI**: Navigate to http://localhost:3184 in your browser
 2. **Review Context**: Examine the question, title, and any attached context files
 3. **Make a Decision**: Click **Approve** to continue or **Reject** to halt the workflow
 4. **Add Comments** (optional): Provide feedback that will be recorded in the run journal
 
-### Step 5: Resume Workflow
+#### Step 5: Resume Workflow
 
 After approval, the workflow automatically continues from where it paused.
 
@@ -310,11 +387,19 @@ Waiting for breakpoint approval...
 Timeout after 300s
 ```
 
-**Causes:**
+**Causes (Interactive Mode):**
+- Session timeout or disconnection
+- Missed the question in the chat
+
+**Solution (Interactive Mode):**
+1. Scroll up in your Claude Code conversation to find the question
+2. If the session timed out, resume the run: `claude "Resume the babysitter run"`
+
+**Causes (Non-Interactive Mode):**
 - Breakpoints service not running
 - Service not accessible from the network
 
-**Solution:**
+**Solution (Non-Interactive Mode):**
 
 1. Verify the service is running:
    ```bash
@@ -403,4 +488,18 @@ Timeout after 300s
 
 ## Summary
 
-Breakpoints enable human-in-the-loop approval within automated workflows. Use them strategically to ensure human oversight at critical decision points while maintaining the benefits of automation. Configure the breakpoints service for your team's needs, whether through local web UI, ngrok tunneling, or Telegram integration.
+Breakpoints enable human-in-the-loop approval within automated workflows. Use them strategically to ensure human oversight at critical decision points while maintaining the benefits of automation.
+
+### Quick Reference: Which Mode to Use?
+
+| Scenario | Mode | Setup Required |
+|----------|------|----------------|
+| Using Claude Code interactively | Interactive | None |
+| CI/CD pipeline | Non-Interactive | Start breakpoints service |
+| Headless/scripted automation | Non-Interactive | Start breakpoints service |
+| Team review workflows | Non-Interactive | Start breakpoints service |
+| Mobile notifications needed | Non-Interactive | Breakpoints service + Telegram |
+
+**For most Claude Code users:** Just use `/babysit` - breakpoints work automatically in the chat. No setup needed!
+
+**For automation/CI/CD:** Start the breakpoints service and configure the breakpoints web UI, ngrok tunneling, or Telegram integration for your team's needs.

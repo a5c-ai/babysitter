@@ -42,7 +42,17 @@ npx -y @a5c-ai/babysitter-sdk@latest --version
 
 You should see a version number. If not, revisit the [installation guide](./installation.md).
 
-### Start the Breakpoints Service
+### Breakpoints Service (Optional)
+
+**Good news!** If you're using Claude Code interactively (which you probably are), **you don't need to start any service**. Breakpoints will be handled directly in the chat.
+
+**Only start the breakpoints service if:**
+- You're running workflows in CI/CD pipelines
+- You need team members to approve via web UI
+- You want mobile notifications via Telegram
+
+<details>
+<summary>Click to see breakpoints service setup (optional)</summary>
 
 Open a **new terminal window** and run:
 
@@ -55,6 +65,8 @@ Keep this terminal open. You should see:
 Babysitter Breakpoints Service
 Listening on http://localhost:3184
 ```
+
+</details>
 
 ### Open Your Project
 
@@ -396,9 +408,15 @@ No work lost!
 
 ### "Breakpoint timeout" error
 
-**Cause:** Breakpoints service not running.
+**Cause (Interactive Mode):** You may have missed the question in the chat or the session timed out.
 
-**Solution:**
+**Solution (Interactive Mode):**
+- Scroll up to find the breakpoint question and respond
+- Or resume the run: `claude "Resume the babysitter run"`
+
+**Cause (Non-Interactive Mode):** Breakpoints service not running.
+
+**Solution (Non-Interactive Mode):**
 ```bash
 # In a separate terminal
 npx -y @a5c-ai/babysitter-breakpoints@latest start
@@ -417,7 +435,11 @@ npx -y @a5c-ai/babysitter-breakpoints@latest start
 
 **Cause:** Waiting for breakpoint approval (if breakpoints are configured).
 
-**Solution:**
+**Solution (Interactive Mode):**
+- Look for a question from Claude in your chat
+- Respond to approve and continue the workflow
+
+**Solution (Non-Interactive Mode):**
 - Open http://localhost:3184 to check for pending approvals
 - Approve the breakpoint to continue
 
@@ -457,10 +479,7 @@ Congratulations! You've completed your first Babysitter run. Here's what to expl
 Commands used in this quickstart:
 
 ```bash
-# Start breakpoints service
-npx -y @a5c-ai/babysitter-breakpoints@latest start
-
-# Start a TDD run with quality target
+# Start a TDD run with quality target (in Claude Code)
 /babysit <description> with TDD and <X>% quality target
 
 # Resume an interrupted run
@@ -471,6 +490,9 @@ cat .a5c/runs/<runId>/journal/journal.jsonl
 
 # List all runs
 ls .a5c/runs/
+
+# (Optional) Start breakpoints service for non-interactive/CI mode
+npx -y @a5c-ai/babysitter-breakpoints@latest start
 ```
 
 ---

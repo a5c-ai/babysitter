@@ -644,9 +644,20 @@ babysitter task:post run-20260125-143012 ef-build-001 \
 
 The breakpoints commands are provided by the `@a5c-ai/babysitter-breakpoints` package.
 
+> **Note on Breakpoint Modes:**
+>
+> Babysitter supports two modes for handling breakpoints:
+>
+> | Mode | When Used | Service Required |
+> |------|-----------|-----------------|
+> | **Interactive** | Claude Code sessions | No - breakpoints handled via AskUserQuestion in chat |
+> | **Non-Interactive** | CI/CD, scripts, team workflows | Yes - use commands below |
+>
+> **If you're using Claude Code interactively, you don't need these commands** - breakpoints are handled directly in the chat. These commands are for non-interactive automation scenarios.
+
 ### breakpoints start
 
-Starts the full breakpoints service (API + Web UI + Worker).
+Starts the full breakpoints service (API + Web UI + Worker). **Only needed for non-interactive mode.**
 
 #### Synopsis
 
@@ -1011,10 +1022,10 @@ babysitter task:show <runId> <effectId> --json
 babysitter task:post <runId> <effectId> --status ok --value <file> --json
 ```
 
-### Breakpoints Commands
+### Breakpoints Commands (Non-Interactive Mode Only)
 
 ```bash
-# Start service
+# Start service (not needed for Claude Code interactive mode)
 breakpoints start
 
 # Create breakpoint
@@ -1023,6 +1034,8 @@ breakpoints breakpoint create --question "..." --title "..."
 # Wait for release
 breakpoints breakpoint wait <id>
 ```
+
+**Note:** If using Claude Code interactively, breakpoints are handled automatically in the chat - no commands needed!
 
 ---
 
