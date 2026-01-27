@@ -377,6 +377,79 @@ pkill -f "babysitter-breakpoints"
 
 ---
 
+## Recommended Tools
+
+The following tools enhance your workflow when using Babysitter. These are optional but highly recommended for a more productive development experience.
+
+### Playwright Skill Plugin
+
+**Browser automation for testing and validation**
+
+The Playwright Skill Plugin enables Claude to write and execute browser automation tests, take screenshots, fill forms, and validate web applications. This is essential for testing web applications and verifying UI functionality during development.
+
+**Why use it:**
+- Automate browser-based testing directly through Claude
+- Capture screenshots for visual validation
+- Test form submissions and user interactions
+- Verify web application behavior without leaving your terminal
+
+**Installation:**
+
+Run these commands in Claude Code CLI:
+
+```bash
+# Add the plugin from marketplace
+/plugin marketplace add lackeyjb/playwright-skill
+
+# Install the skill
+/plugin install playwright-skill@playwright-skill
+
+# Run setup to configure Playwright browsers
+cd ~/.claude/plugins/marketplaces/playwright-skill/skills/playwright-skill && npm run setup
+```
+
+> **Note:** Restart Claude Code after installation to activate the plugin.
+
+### GitHub CLI (gh)
+
+**Official GitHub command-line interface**
+
+The GitHub CLI allows Claude to seamlessly manage GitHub issues, pull requests, actions, and releases through natural language. Claude can create PRs, manage issues, check CI status, and debug GitHub Actions failures directly from the terminal.
+
+**Why use it:**
+- Create and manage pull requests without leaving your workflow
+- Track and update issues through natural language commands
+- Monitor CI/CD pipeline status and debug failures
+- Manage releases and repository settings efficiently
+
+**Installation:**
+
+```bash
+# macOS
+brew install gh
+
+# Linux (Debian/Ubuntu)
+sudo apt install gh
+
+# Linux (Fedora/RHEL)
+sudo dnf install gh
+
+# Windows
+winget install GitHub.cli
+```
+
+**Post-installation:**
+
+Authenticate with your GitHub account:
+
+```bash
+gh auth login
+```
+
+Follow the interactive prompts to complete authentication. This grants Claude access to manage your repositories and perform GitHub operations on your behalf.
+
+---
+
 ## Verification
 
 Let's confirm everything is working correctly.
