@@ -151,13 +151,13 @@ if [[ "$ITERATION" -ge 5 ]] && [[ -n "$REFERENCE_EPOCH" ]]; then
   fi
 fi
 
-NEW_TIMES_CSV=$(IFS=','; echo "${NEW_TIMES[*]}")
+NEW_TIMES_CSV=$(IFS=','; echo "${NEW_TIMES[*]-}")
 update_frontmatter_key "iteration_times" "$NEW_TIMES_CSV" "$BABYSITTER_STATE_FILE"
 update_frontmatter_key "last_iteration_at" "$CURRENT_TIME" "$BABYSITTER_STATE_FILE"
 
 TIME_COUNT=0
 TIME_SUM=0
-for t in "${NEW_TIMES[@]}"; do
+for t in "${NEW_TIMES[@]-}"; do
   if [[ "$t" =~ ^[0-9]+$ ]] && [[ "$t" -gt 0 ]]; then
     TIME_SUM=$((TIME_SUM + t))
     TIME_COUNT=$((TIME_COUNT + 1))
@@ -342,7 +342,7 @@ echo "   State file: $BABYSITTER_STATE_FILE" >> /tmp/babysitter-stop-hook.log
 echo "   Session ID: $SESSION_ID" >> /tmp/babysitter-stop-hook.log
 # Output JSON to block the stop and feed prompt back
 # The "reason" field contains the prompt that will be sent back to Claude
-jq -n \
+JSON_OUTPUT=$(jq -n \
   --arg prompt "$PROMPT_TEXT" \
   --arg msg "$SYSTEM_MSG" \
   '{
@@ -350,7 +350,8 @@ jq -n \
     "instructions": "use the babysitter skill to advance the orchestration to the next state (run:iterate) or perform the pending effects (task:list --pending --json), or fix the run if it failed.",
     "reason": $prompt,
     "systemMessage": $msg
-  }'
+  }')
+echo "$JSON_OUTPUT"
 echo "✅ Babysitter run: Output JSON: $JSON_OUTPUT" >> /tmp/babysitter-stop-hook.log
 echo "   State file: $BABYSITTER_STATE_FILE" >> /tmp/babysitter-stop-hook.log
 echo "   Session ID: $SESSION_ID" >> /tmp/babysitter-stop-hook.log

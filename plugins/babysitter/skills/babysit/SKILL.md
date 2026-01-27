@@ -39,7 +39,9 @@ using AskUserQuestion tool (or breakpoint if running in non-interactive mode) - 
 
 a multi-step phase to understand the intent and perspecitve to approach the process building after researching the repo, short research online if needed, short research in the target repo, additional instructions, intent and library (processes, specializations, skills, subagents, methodologies, references, etc.) / guide for methodology building. (clarifications regarding the intent, requirements, goal, scope, etc.) - the library is at [skill-root]/process/specializations/**/**/** and [skill-root]/process/methodologies/ 
 
-this phase can have research and questions steps one after the other until the intent, requirements, goal, scope, etc. are clear and the user is satisfied with the understanding.
+the first step should be the look at the state of the repo, then find the most relevant processes, specializations, skills, subagents, methodologies, references, etc. to use as a reference.
+
+then this phase can have: research online, research the repo, user questions, and other steps one after the other until the intent, requirements, goal, scope, etc. are clear and the user is satisfied with the understanding. after each step, decide the type of next step to take. do not plan more than 1 step ahead in this phase. and the same step type can be used more than once in this phase.
 
 #### Process creation phase
 
