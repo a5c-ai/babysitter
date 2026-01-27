@@ -60,15 +60,44 @@ claude --version
 
 If Claude Code is not installed, follow the [Claude Code installation guide](https://docs.anthropic.com/en/docs/claude-code) first.
 
+### Required: jq (JSON processor)
+
+Many Babysitter commands output JSON that is processed with `jq`. Install it for your platform:
+
+```bash
+jq --version
+```
+
+**Expected output:** `jq-1.6` or higher
+
+**Installation:**
+
+```bash
+# macOS
+brew install jq
+
+# Ubuntu/Debian
+sudo apt-get install jq
+
+# Fedora/RHEL
+sudo dnf install jq
+
+# Windows (via Chocolatey)
+choco install jq
+
+# Windows (via Scoop)
+scoop install jq
+```
+
 ### Verification Checkpoint
 
 Run this command to verify all prerequisites:
 
 ```bash
-echo "Node: $(node --version)" && echo "npm: $(npm --version)" && echo "Claude: $(claude --version 2>&1 | head -1)"
+echo "Node: $(node --version)" && echo "npm: $(npm --version)" && echo "Claude: $(claude --version 2>&1 | head -1)" && echo "jq: $(jq --version)"
 ```
 
-You should see version numbers for all three. If not, address the missing requirement before continuing.
+You should see version numbers for all four tools. If not, address the missing requirement before continuing.
 
 ---
 
@@ -386,6 +415,7 @@ claude "/babysit echo hello world"
 
 | Check | Command | Expected |
 |-------|---------|----------|
+| jq | `jq --version` | jq-1.6 or higher |
 | SDK | `npx @a5c-ai/babysitter-sdk --version` | Version number |
 | Plugin | `/skills` in Claude Code | "babysit" listed |
 | Breakpoints | `curl localhost:3184/health` | JSON response |

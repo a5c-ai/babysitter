@@ -154,6 +154,59 @@ npm install -g @a5c-ai/babysitter@latest @a5c-ai/babysitter-sdk@latest @a5c-ai/b
 
 ---
 
+### jq Not Found
+
+**Symptoms:**
+```
+command not found: jq
+jq: command not found
+```
+
+Many Babysitter diagnostic commands use `jq` for JSON processing. Without it, commands like journal analysis and status inspection will fail.
+
+**Diagnosis:**
+```bash
+which jq
+jq --version
+```
+
+**Solutions:**
+
+Install `jq` for your platform:
+
+```bash
+# macOS
+brew install jq
+
+# Ubuntu/Debian
+sudo apt-get install jq
+
+# Fedora/RHEL/CentOS
+sudo dnf install jq
+
+# Arch Linux
+sudo pacman -S jq
+
+# Windows (Chocolatey)
+choco install jq
+
+# Windows (Scoop)
+scoop install jq
+
+# Windows (WSL) - use Ubuntu instructions
+sudo apt-get install jq
+```
+
+**Verify installation:**
+```bash
+jq --version
+# Expected: jq-1.6 or higher
+```
+
+**Prevention:** Install `jq` as part of your initial setup. It's a standard tool for working with JSON on the command line.
+
+---
+
 ## Plugin Issues
 
 ### Plugin Not Appearing in /skills
