@@ -119,7 +119,8 @@ export const audioApproach = defineTask('audio-approach', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Establish audio design approach',
   agent: {
-    name: 'general-purpose',
+    name: 'production-coordinator-agent',
+    skills: ['SK-FTV-010'],
     prompt: {
       role: 'Sound Designer / Music Supervisor',
       task: 'Establish comprehensive audio design philosophy for the production',
@@ -184,7 +185,8 @@ export const musicSpotting = defineTask('music-spotting', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Spot music cues',
   agent: {
-    name: 'general-purpose',
+    name: 'production-coordinator-agent',
+    skills: ['SK-FTV-010'],
     prompt: {
       role: 'Music Supervisor / Composer',
       task: 'Create comprehensive music cue sheet spotting all musical moments',
@@ -244,7 +246,8 @@ export const soundDesignSpotting = defineTask('sound-design-spotting', (args, ta
   kind: 'agent',
   title: 'Spot sound design elements',
   agent: {
-    name: 'general-purpose',
+    name: 'production-coordinator-agent',
+    skills: ['SK-FTV-010'],
     prompt: {
       role: 'Sound Designer',
       task: 'Create comprehensive sound design spotting for all scenes',
@@ -307,7 +310,8 @@ export const scoreCompositionRequest = defineTask('score-composition-request', (
   kind: 'agent',
   title: 'Generate score composition request',
   agent: {
-    name: 'general-purpose',
+    name: 'production-coordinator-agent',
+    skills: ['SK-FTV-010'],
     prompt: {
       role: 'Music Supervisor',
       task: 'Generate a request package for the music-album-creation specialization to compose an original score',
@@ -369,7 +373,8 @@ export const compileAudioPackage = defineTask('compile-audio-package', (args, ta
   kind: 'agent',
   title: 'Compile audio design package',
   agent: {
-    name: 'general-purpose',
+    name: 'production-coordinator-agent',
+    skills: ['SK-FTV-010'],
     prompt: {
       role: 'Audio Package Compiler',
       task: 'Compile all audio design materials into organized deliverables',

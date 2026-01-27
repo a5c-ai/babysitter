@@ -349,7 +349,8 @@ export const storyDevelopmentPhase = defineTask('story-development-phase', (args
   kind: 'agent',
   title: 'Phase 1: Complete Story Development',
   agent: {
-    name: 'general-purpose',
+    name: 'story-developer-agent',
+    skills: ['SK-FTV-001', 'SK-FTV-002', 'SK-FTV-012'],
     prompt: {
       role: 'Story Developer',
       task: 'Execute complete story development from concept to scene-by-scene outline',
@@ -408,7 +409,8 @@ export const characterCreationPhase = defineTask('character-creation-phase', (ar
   kind: 'agent',
   title: 'Phase 2: Complete Character Creation',
   agent: {
-    name: 'general-purpose',
+    name: 'character-designer-agent',
+    skills: ['SK-FTV-004', 'SK-FTV-007', 'SK-FTV-012'],
     prompt: {
       role: 'Character Designer',
       task: 'Execute complete character creation with profiles, relationships, and visual designs',
@@ -468,7 +470,8 @@ export const worldBuildingPhase = defineTask('world-building-phase', (args, task
   kind: 'agent',
   title: 'Phase 3: Complete World Building',
   agent: {
-    name: 'general-purpose',
+    name: 'world-builder-agent',
+    skills: ['SK-FTV-008', 'SK-FTV-009', 'SK-FTV-012'],
     prompt: {
       role: 'World Builder / Production Designer',
       task: 'Execute complete world building with locations, props, costumes, and VFX planning',
@@ -527,7 +530,8 @@ export const screenplayWritingPhase = defineTask('screenplay-writing-phase', (ar
   kind: 'agent',
   title: 'Phase 4: Complete Screenplay Writing',
   agent: {
-    name: 'general-purpose',
+    name: 'screenwriter-agent',
+    skills: ['SK-FTV-003', 'SK-FTV-004', 'SK-FTV-011'],
     prompt: {
       role: 'Screenwriter',
       task: 'Execute complete screenplay writing with all acts and dialogue polish',
@@ -586,7 +590,8 @@ export const visualProductionPhase = defineTask('visual-production-phase', (args
   kind: 'agent',
   title: 'Phase 5: Complete Visual Production',
   agent: {
-    name: 'general-purpose',
+    name: 'visual-director-agent',
+    skills: ['SK-FTV-005', 'SK-FTV-006', 'SK-FTV-009'],
     prompt: {
       role: 'Visual Director',
       task: 'Execute complete visual production with shot lists, storyboards, and video prompts',
@@ -645,7 +650,8 @@ export const audioDesignPhase = defineTask('audio-design-phase', (args, taskCtx)
   kind: 'agent',
   title: 'Phase 6: Complete Audio Design',
   agent: {
-    name: 'general-purpose',
+    name: 'production-coordinator-agent',
+    skills: ['SK-FTV-010'],
     prompt: {
       role: 'Sound Designer / Music Supervisor',
       task: 'Execute complete audio design with music cues, sound design, and optional score request',
@@ -700,7 +706,8 @@ export const compileProductionBible = defineTask('compile-production-bible', (ar
   kind: 'agent',
   title: 'Phase 7: Compile Production Bible',
   agent: {
-    name: 'general-purpose',
+    name: 'production-coordinator-agent',
+    skills: ['SK-FTV-001', 'SK-FTV-002', 'SK-FTV-003', 'SK-FTV-004', 'SK-FTV-005', 'SK-FTV-006', 'SK-FTV-007', 'SK-FTV-008', 'SK-FTV-009', 'SK-FTV-010', 'SK-FTV-011', 'SK-FTV-012'],
     prompt: {
       role: 'Production Coordinator',
       task: 'Compile complete production bible with all materials',

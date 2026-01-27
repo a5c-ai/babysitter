@@ -133,7 +133,8 @@ export const worldOverview = defineTask('world-overview', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Establish world overview and rules',
   agent: {
-    name: 'general-purpose',
+    name: 'world-builder-agent',
+    skills: ['SK-FTV-008', 'SK-FTV-009', 'SK-FTV-012'],
     prompt: {
       role: 'World Architect',
       task: 'Establish the comprehensive world overview for the production',
@@ -194,7 +195,8 @@ export const locationDesign = defineTask('location-design', (args, taskCtx) => (
   kind: 'agent',
   title: 'Design production locations',
   agent: {
-    name: 'general-purpose',
+    name: 'world-builder-agent',
+    skills: ['SK-FTV-008', 'SK-FTV-009', 'SK-FTV-012'],
     prompt: {
       role: 'Production Designer - Locations',
       task: 'Design detailed location descriptions for all settings in the script',
@@ -256,7 +258,8 @@ export const propsDesign = defineTask('props-design', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Design props and set dressing',
   agent: {
-    name: 'general-purpose',
+    name: 'world-builder-agent',
+    skills: ['SK-FTV-008', 'SK-FTV-009', 'SK-FTV-012'],
     prompt: {
       role: 'Props Master',
       task: 'Create comprehensive props list and set dressing specifications',
@@ -317,7 +320,8 @@ export const costumeDesign = defineTask('costume-design', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Design character costumes',
   agent: {
-    name: 'general-purpose',
+    name: 'world-builder-agent',
+    skills: ['SK-FTV-008', 'SK-FTV-009', 'SK-FTV-012'],
     prompt: {
       role: 'Costume Designer',
       task: 'Create comprehensive wardrobe design for all characters',
@@ -381,7 +385,8 @@ export const vfxPlanning = defineTask('vfx-planning', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Plan visual effects',
   agent: {
-    name: 'general-purpose',
+    name: 'world-builder-agent',
+    skills: ['SK-FTV-008', 'SK-FTV-009', 'SK-FTV-012'],
     prompt: {
       role: 'VFX Supervisor',
       task: 'Create comprehensive VFX breakdown and planning',
@@ -445,7 +450,8 @@ export const compileWorldBible = defineTask('compile-world-bible', (args, taskCt
   kind: 'agent',
   title: 'Compile world bible and production design package',
   agent: {
-    name: 'general-purpose',
+    name: 'world-builder-agent',
+    skills: ['SK-FTV-008', 'SK-FTV-009', 'SK-FTV-012'],
     prompt: {
       role: 'World Bible Compiler',
       task: 'Compile all world-building materials into organized deliverable files',

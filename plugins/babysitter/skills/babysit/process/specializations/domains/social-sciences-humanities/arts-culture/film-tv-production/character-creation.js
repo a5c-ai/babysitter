@@ -139,7 +139,8 @@ export const characterIdentification = defineTask('character-identification', (a
   kind: 'agent',
   title: 'Identify all story characters',
   agent: {
-    name: 'general-purpose',
+    name: 'character-designer-agent',
+    skills: ['SK-FTV-004', 'SK-FTV-007', 'SK-FTV-012'],
     prompt: {
       role: 'Character Architect',
       task: 'Identify and categorize all characters needed for this story',
@@ -195,7 +196,8 @@ export const protagonistProfile = defineTask('protagonist-profile', (args, taskC
   kind: 'agent',
   title: 'Create detailed protagonist profile',
   agent: {
-    name: 'general-purpose',
+    name: 'character-designer-agent',
+    skills: ['SK-FTV-004', 'SK-FTV-007', 'SK-FTV-012'],
     prompt: {
       role: 'Character Psychologist',
       task: 'Create a comprehensive psychological and biographical profile for the protagonist',
@@ -243,7 +245,8 @@ export const supportingProfiles = defineTask('supporting-profiles', (args, taskC
   kind: 'agent',
   title: 'Create supporting character profiles',
   agent: {
-    name: 'general-purpose',
+    name: 'character-designer-agent',
+    skills: ['SK-FTV-004', 'SK-FTV-007', 'SK-FTV-012'],
     prompt: {
       role: 'Character Ensemble Designer',
       task: 'Create detailed profiles for antagonist and supporting characters',
@@ -290,7 +293,8 @@ export const relationshipDynamics = defineTask('relationship-dynamics', (args, t
   kind: 'agent',
   title: 'Map character relationship dynamics',
   agent: {
-    name: 'general-purpose',
+    name: 'character-designer-agent',
+    skills: ['SK-FTV-004', 'SK-FTV-007', 'SK-FTV-012'],
     prompt: {
       role: 'Relationship Architect',
       task: 'Create detailed relationship maps and dynamics between all characters',
@@ -339,7 +343,8 @@ export const visualCharacterDesign = defineTask('visual-character-design', (args
   kind: 'agent',
   title: 'Create visual character designs',
   agent: {
-    name: 'general-purpose',
+    name: 'character-designer-agent',
+    skills: ['SK-FTV-004', 'SK-FTV-007', 'SK-FTV-012'],
     prompt: {
       role: 'Visual Character Designer',
       task: 'Create detailed visual descriptions and image generation prompts for all characters',
@@ -394,7 +399,8 @@ export const compileCharacterBible = defineTask('compile-character-bible', (args
   kind: 'agent',
   title: 'Compile character bible',
   agent: {
-    name: 'general-purpose',
+    name: 'character-designer-agent',
+    skills: ['SK-FTV-004', 'SK-FTV-007', 'SK-FTV-012'],
     prompt: {
       role: 'Character Bible Compiler',
       task: 'Compile all character materials into organized deliverable files',

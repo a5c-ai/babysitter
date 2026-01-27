@@ -151,7 +151,8 @@ export const scriptSetup = defineTask('script-setup', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Set up screenplay parameters',
   agent: {
-    name: 'general-purpose',
+    name: 'screenwriter-agent',
+    skills: ['SK-FTV-003', 'SK-FTV-004', 'SK-FTV-011'],
     prompt: {
       role: 'Script Supervisor',
       task: 'Establish screenplay parameters and create title page',
@@ -212,7 +213,8 @@ export const writeAct1 = defineTask('write-act-1', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Write Act 1 scenes',
   agent: {
-    name: 'general-purpose',
+    name: 'screenwriter-agent',
+    skills: ['SK-FTV-003', 'SK-FTV-004', 'SK-FTV-011'],
     prompt: {
       role: 'Screenwriter',
       task: 'Write all scenes in Act 1 with proper screenplay format',
@@ -274,7 +276,8 @@ export const writeAct2A = defineTask('write-act-2a', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Write Act 2A scenes',
   agent: {
-    name: 'general-purpose',
+    name: 'screenwriter-agent',
+    skills: ['SK-FTV-003', 'SK-FTV-004', 'SK-FTV-011'],
     prompt: {
       role: 'Screenwriter',
       task: 'Write all scenes in Act 2A (first half of Act 2) with proper screenplay format',
@@ -325,7 +328,8 @@ export const writeAct2B = defineTask('write-act-2b', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Write Act 2B scenes',
   agent: {
-    name: 'general-purpose',
+    name: 'screenwriter-agent',
+    skills: ['SK-FTV-003', 'SK-FTV-004', 'SK-FTV-011'],
     prompt: {
       role: 'Screenwriter',
       task: 'Write all scenes in Act 2B (second half of Act 2) with proper screenplay format',
@@ -372,7 +376,8 @@ export const writeAct3 = defineTask('write-act-3', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Write Act 3 scenes',
   agent: {
-    name: 'general-purpose',
+    name: 'screenwriter-agent',
+    skills: ['SK-FTV-003', 'SK-FTV-004', 'SK-FTV-011'],
     prompt: {
       role: 'Screenwriter',
       task: 'Write all scenes in Act 3 with proper screenplay format',
@@ -424,7 +429,8 @@ export const dialoguePolish = defineTask('dialogue-polish', (args, taskCtx) => (
   kind: 'agent',
   title: 'Polish dialogue',
   agent: {
-    name: 'general-purpose',
+    name: 'screenwriter-agent',
+    skills: ['SK-FTV-003', 'SK-FTV-004', 'SK-FTV-011'],
     prompt: {
       role: 'Dialogue Specialist',
       task: 'Review and polish all dialogue for voice, subtext, and impact',
@@ -483,7 +489,8 @@ export const compileScreenplay = defineTask('compile-screenplay', (args, taskCtx
   kind: 'agent',
   title: 'Compile final screenplay',
   agent: {
-    name: 'general-purpose',
+    name: 'screenwriter-agent',
+    skills: ['SK-FTV-003', 'SK-FTV-004', 'SK-FTV-011'],
     prompt: {
       role: 'Script Compiler',
       task: 'Compile all scenes into complete screenplay document',

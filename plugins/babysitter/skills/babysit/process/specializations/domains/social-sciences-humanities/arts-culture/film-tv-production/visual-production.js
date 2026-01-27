@@ -127,7 +127,8 @@ export const visualStyleGuide = defineTask('visual-style-guide', (args, taskCtx)
   kind: 'agent',
   title: 'Create visual style guide',
   agent: {
-    name: 'general-purpose',
+    name: 'visual-director-agent',
+    skills: ['SK-FTV-005', 'SK-FTV-006', 'SK-FTV-009'],
     prompt: {
       role: 'Director of Photography / Visual Director',
       task: 'Establish comprehensive visual style guide for the production',
@@ -197,7 +198,8 @@ export const shotDesign = defineTask('shot-design', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Design shots for all scenes',
   agent: {
-    name: 'general-purpose',
+    name: 'visual-director-agent',
+    skills: ['SK-FTV-005', 'SK-FTV-006', 'SK-FTV-009'],
     prompt: {
       role: 'Director / Cinematographer',
       task: 'Create detailed shot lists for every scene in the screenplay',
@@ -250,7 +252,8 @@ export const storyboardFrames = defineTask('storyboard-frames', (args, taskCtx) 
   kind: 'agent',
   title: 'Create storyboard frame prompts',
   agent: {
-    name: 'general-purpose',
+    name: 'visual-director-agent',
+    skills: ['SK-FTV-005', 'SK-FTV-006', 'SK-FTV-009'],
     prompt: {
       role: 'Storyboard Artist / AI Prompt Engineer',
       task: 'Create detailed image generation prompts for key storyboard frames',
@@ -314,7 +317,8 @@ export const videoPrompts = defineTask('video-prompts', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Create video generation prompts',
   agent: {
-    name: 'general-purpose',
+    name: 'visual-director-agent',
+    skills: ['SK-FTV-005', 'SK-FTV-006', 'SK-FTV-009'],
     prompt: {
       role: 'AI Video Prompt Engineer',
       task: 'Create platform-agnostic video generation prompts for each scene',
@@ -382,7 +386,8 @@ export const lookbookCreation = defineTask('lookbook-creation', (args, taskCtx) 
   kind: 'agent',
   title: 'Create visual lookbook',
   agent: {
-    name: 'general-purpose',
+    name: 'visual-director-agent',
+    skills: ['SK-FTV-005', 'SK-FTV-006', 'SK-FTV-009'],
     prompt: {
       role: 'Visual Designer',
       task: 'Create comprehensive lookbook documenting the visual approach',
@@ -447,7 +452,8 @@ export const compileVisualPackage = defineTask('compile-visual-package', (args, 
   kind: 'agent',
   title: 'Compile visual production package',
   agent: {
-    name: 'general-purpose',
+    name: 'visual-director-agent',
+    skills: ['SK-FTV-005', 'SK-FTV-006', 'SK-FTV-009'],
     prompt: {
       role: 'Visual Package Compiler',
       task: 'Compile all visual materials into organized deliverable files',

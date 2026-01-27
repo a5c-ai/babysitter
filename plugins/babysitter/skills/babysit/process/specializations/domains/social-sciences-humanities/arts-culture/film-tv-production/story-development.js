@@ -153,7 +153,8 @@ export const conceptRefinementTask = defineTask('concept-refinement', (args, tas
   kind: 'agent',
   title: 'Refine and expand initial concept',
   agent: {
-    name: 'general-purpose',
+    name: 'story-developer-agent',
+    skills: ['SK-FTV-001', 'SK-FTV-002', 'SK-FTV-012'],
     prompt: {
       role: 'Story Development Executive',
       task: 'Analyze and refine the story concept into a workable premise',
@@ -198,7 +199,8 @@ export const loglineCreationTask = defineTask('logline-creation', (args, taskCtx
   kind: 'agent',
   title: 'Create compelling logline',
   agent: {
-    name: 'general-purpose',
+    name: 'story-developer-agent',
+    skills: ['SK-FTV-001', 'SK-FTV-002', 'SK-FTV-012'],
     prompt: {
       role: 'Logline Specialist',
       task: 'Create a compelling, marketable logline that captures the story essence',
@@ -238,7 +240,8 @@ export const treatmentWritingTask = defineTask('treatment-writing', (args, taskC
   kind: 'agent',
   title: 'Write narrative treatment',
   agent: {
-    name: 'general-purpose',
+    name: 'story-developer-agent',
+    skills: ['SK-FTV-001', 'SK-FTV-002', 'SK-FTV-012'],
     prompt: {
       role: 'Treatment Writer',
       task: 'Write a compelling narrative treatment that tells the complete story',
@@ -280,7 +283,8 @@ export const beatSheetCreationTask = defineTask('beat-sheet-creation', (args, ta
   kind: 'agent',
   title: 'Create detailed beat sheet',
   agent: {
-    name: 'general-purpose',
+    name: 'story-developer-agent',
+    skills: ['SK-FTV-001', 'SK-FTV-002', 'SK-FTV-012'],
     prompt: {
       role: 'Story Structuralist',
       task: 'Create a comprehensive beat sheet with all major story beats',
@@ -322,7 +326,8 @@ export const sceneOutlineTask = defineTask('scene-outline', (args, taskCtx) => (
   kind: 'agent',
   title: 'Create scene-by-scene outline',
   agent: {
-    name: 'general-purpose',
+    name: 'story-developer-agent',
+    skills: ['SK-FTV-001', 'SK-FTV-002', 'SK-FTV-012'],
     prompt: {
       role: 'Scene Architect',
       task: 'Break down the beat sheet into individual scenes with full detail',
@@ -368,7 +373,8 @@ export const compileStoryPackageTask = defineTask('compile-story-package', (args
   kind: 'agent',
   title: 'Compile story development package',
   agent: {
-    name: 'general-purpose',
+    name: 'story-developer-agent',
+    skills: ['SK-FTV-001', 'SK-FTV-002', 'SK-FTV-012'],
     prompt: {
       role: 'Story Package Compiler',
       task: 'Compile all story development materials into organized deliverable files',
