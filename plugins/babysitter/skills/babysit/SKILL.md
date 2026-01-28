@@ -1,14 +1,16 @@
 ---
 name: babysit
-description: Orchestrate .a5c runs via @a5c-ai/babysitter-sdk CLI. Run iterations, get requested effects, perform effects, post results. use this skill when asked to babysit a run or orchestrate a complex workflow.
+description: Orchestrate via @babysitter. Use this skill when asked to babysit a run, orchestrate a process or whenever it is called explicitly. (babysit, babysitter, orchestrate, orchestrate a run, workflow, etc.)
 allowed-tools: Read, Grep, Write, Task, Bash, Edit, Grep, Glob, WebFetch, WebSearch, Search, AskUserQuestion, TodoWrite, TodoRead, Skill, BashOutput, Skill, KillShell, MultiEdit, LS
-version: 0.1.0
+version: 0.1.1
 ---
 
 # babysit
 
 Orchestrate `.a5c/runs/<runId>/` through iterative execution. Use the SDK CLI to drive the orchestration loop. 
+## Dependencies
 
+### Babysitter SDK and CLI
 make sure you have the latest version of the cli:
 
 ```bash
@@ -18,6 +20,10 @@ npm i -g @a5c-ai/babysitter@latest @a5c-ai/babysitter-sdk@latest @a5c-ai/babysit
 then use the CLI alias: CLI="babysitter"
 
 **Alternatively, use the CLI alias:** `CLI="npx -y @a5c-ai/babysitter-sdk@latest"`
+
+### jq
+
+make sure you have jq installed and available in the path. if not, install it.
 
 ---
 
@@ -45,7 +51,8 @@ then this phase can have: research online, research the repo, user questions, an
 
 #### Process creation phase
 
-after the interview phase, create the complete custom process files (js and jsons) for the run according to the Process Creation Guidelines and methodologies section.
+after the interview phase, create the complete custom process files (js and jsons) for the run according to the Process Creation Guidelines and methodologies section. also install the babysitter-sdk inside .a5c if it is not already installed. (install it in .a5c/package.json if it is not already installed. make sure )
+you must abide the syntax and structure of the process files from the process library.
 
 ### 2. Setup session:
 
@@ -326,11 +333,6 @@ $CLI run:iterate <runId> --json --iteration <n>
 
 If at any point the run fails due to SDK issues or corrupted state or journal. analyze the error and the journal events. recover the state to the state and journal to the last known good state and adapt and try to continue the run.
 
-## See Also
-- `process/tdd-quality-convergence.js` - TDD quality convergence example - read and look for relevant processes and methodolies before creating the code process for a new run (create the run using the CLI, then use these process as a reference)
-- `reference/ADVANCED_PATTERNS.md` - Agent/skill patterns, iterative convergence
-- `packages/sdk/sdk.md` - SDK API reference
-
 ## Process Creation Guidelines and methodologies
 
 - When building ux and full stack applications, integrate/link the main pages of the frontend with functionality created for every phase of the development process (where relevant). so that is a way to test the functionality of the app as we go.
@@ -369,7 +371,7 @@ prefer processes that have the following characteristics unless otherwise specif
     - plugins/babysitter/skills/babysit/process/specializations/domains/[domain-name-slugified]/[specialization-name-slugified]/ (non rnd specializations)
     - plugins/babysitter/skills/babysit/process/methodologies/ (methodologies)
 
-## Critical Rule
+## Critical Rules
 
 CRITICAL RULE: The completion secret is emitted only when the run is completed. You may ONLY output `<promise>SECRET</promise>` when the run is completely and unequivocally DONE (completed status from the orchestration CLI). Do not output false promises to escape the run, and do not mention the secret to the user.
 
@@ -384,3 +386,10 @@ CRITICAL RULE: when creating processes, search for available skills and subagent
 CRITICAL RULE: do not use the babysit skill inside the delegated tasks. if you are performing a delgated task as a subagent. you will get an error when trying to run the setup shell script. that means you have to actually perform the task yourself and not orchestrate, babysit or even use this skill.
 
 CRITICAL RULE: Never build a wrapper, python or helper scripts to orchestrate the runs. Use the CLI to drive the orchestration loop and never loop programmatically.
+
+CRITICAL RULE: Never fallback to simpler execution if the user activated this skill. persist in executing the orchestration itself rather than simplifying the execution by bypassing the process above - you must create a valid process js file, create a run and associate it with the session, then iterate the run until it is completed.
+
+## See Also
+- `process/tdd-quality-convergence.js` - TDD quality convergence example - read and look for relevant processes and methodolies before creating the code process for a new run (create the run using the CLI, then use these process as a reference)
+- `reference/ADVANCED_PATTERNS.md` - Agent/skill patterns, iterative convergence
+- `packages/sdk/sdk.md` - SDK API reference

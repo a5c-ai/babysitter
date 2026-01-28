@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { promises as fs } from "node:fs";
 import * as path from "node:path";
+import { pathToFileURL } from "node:url";
 import * as crypto from "node:crypto";
 import { commitEffectResult } from "../runtime/commitEffectResult";
 import { createRun } from "../runtime/createRun";
@@ -467,6 +468,66 @@ function parseEntrypointSpecifier(specifier: string): { importPath: string; expo
   return { importPath, exportName };
 }
 
+type ModuleExports = Record<string, unknown>;
+
+// Use an indirect dynamic import so TypeScript does not downlevel to require() in CommonJS builds.
+// Vitest executes modules inside a VM context that requires direct import() support.
+const dynamicImportModule: (specifier: string) => Promise<ModuleExports> = (() => {
+  if (process.env.VITEST) {
+    return (specifier: string) => import(specifier);
+  }
+  return new Function("specifier", "return import(specifier);") as (specifier: string) => Promise<ModuleExports>;
+})();
+
+function listModuleExports(mod: ModuleExports): string {
+  const keys = Object.keys(mod);
+  return keys.length > 0 ? keys.join(", ") : "(none)";
+}
+
+async function validateProcessEntrypoint(importPath: string, exportName?: string): Promise<void> {
+  const resolvedPath = path.isAbsolute(importPath) ? importPath : path.resolve(importPath);
+  try {
+    await fs.access(resolvedPath);
+  } catch (error) {
+    throw new Error(
+      `Process entry file not found: ${resolvedPath}. ` +
+        `Ensure the path is correct and points to a valid JS/TS module.`
+    );
+  }
+
+  const moduleUrl = pathToFileURL(resolvedPath).href;
+  let mod: ModuleExports;
+  try {
+    mod = await dynamicImportModule(moduleUrl);
+  } catch (error) {
+    throw new Error(
+      `Failed to load process module at ${resolvedPath}: ${error instanceof Error ? error.message : String(error)}`
+    );
+  }
+
+  const resolvedExportName = exportName ?? "process";
+  const candidate =
+    (resolvedExportName && mod[resolvedExportName]) ??
+    mod.process ??
+    mod.default;
+
+  if (typeof candidate !== "function") {
+    const available = listModuleExports(mod);
+    if (resolvedExportName && !(resolvedExportName in mod) && mod.default) {
+      throw new Error(
+        `Process module ${resolvedPath} does not export '${resolvedExportName}'. ` +
+          `Available exports: ${available}. ` +
+          `If you intended a default export, pass --entry ${importPath}#default.`
+      );
+    }
+    throw new Error(
+      `Process module ${resolvedPath} does not export a valid process function. ` +
+        `Expected '${resolvedExportName}' (function) or default export. ` +
+        `Available exports: ${available}.`
+    );
+  }
+}
+
 async function readInputsFile(filePath: string): Promise<unknown> {
   const absolute = path.resolve(filePath);
   let contents: string;
@@ -552,6 +613,12 @@ async function handleRunCreate(parsed: ParsedArgs): Promise<number> {
       console.log(parts.join(" "));
     }
     return 0;
+  }
+  try {
+    await validateProcessEntrypoint(absoluteImportPath, entrypoint.exportName);
+  } catch (error) {
+    console.error(error instanceof Error ? error.message : String(error));
+    return 1;
   }
   const result = await createRun({
     runsDir,
