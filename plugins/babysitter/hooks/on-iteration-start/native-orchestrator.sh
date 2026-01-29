@@ -189,6 +189,38 @@ EOF
   exit 0
 fi
 
+# ─────────────────────────────────────────────────
+# Handle skill effects - return invocation instructions for the agent
+# ─────────────────────────────────────────────────
+SKILL_TASKS=$(echo "$PENDING_EFFECTS" | jq '[.[] | select(.kind == "skill")]')
+SKILL_COUNT=$(echo "$SKILL_TASKS" | jq 'length')
+
+if [ "$SKILL_COUNT" -gt 0 ]; then
+  echo "[native-orchestrator] Found $SKILL_COUNT skill task(s) - returning for agent invocation" >&2
+
+  # Extract skill names and context for the agent
+  SKILL_NAMES=$(echo "$SKILL_TASKS" | jq -r '[.[].label // .[].effectId] | join(", ")')
+  SKILL_DETAILS=$(echo "$SKILL_TASKS" | jq -c '[.[] | {
+    effectId: .effectId,
+    label: (.label // .effectId),
+    skill: (.skill // {}),
+    kind: "skill"
+  }]')
+
+  echo "[native-orchestrator] Skills to invoke: $SKILL_NAMES" >&2
+
+  cat <<EOF
+{
+  "action": "invoke-skills",
+  "count": $SKILL_COUNT,
+  "reason": "skill-tasks-pending",
+  "skills": $SKILL_DETAILS,
+  "instructions": "Use the Skill tool to invoke each skill listed. Pass the skill context from the task definition. Post results via task:post when done."
+}
+EOF
+  exit 0
+fi
+
 # Unknown effect type
 FIRST_EFFECT=$(echo "$PENDING_EFFECTS" | jq '.[0]')
 EFFECT_KIND=$(echo "$FIRST_EFFECT" | jq -r '.kind // "unknown"')
