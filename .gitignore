@@ -28,3 +28,8 @@ e2e-tests/fixtures/todo-app/**
 packages/sdk/test-fixtures/cli/.a5c/logs/hooks.log
 e2e-tests/fixtures/todo-app-nextjs/
 e2e-tests/fixtures/*/**
+**/node_modules/**
+**/.next/**
+**/.a5c/**
+**/.playwright-mcp/*
+

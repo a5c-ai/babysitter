@@ -55,3 +55,8 @@ next-env.d.ts
 .vscode/
 *.swp
 *.swo
+data/
+search-mock.jpg
+searchpanel-mock.jpg
+searchresult-mock.jpg
+searchresult2-mock.jpg
