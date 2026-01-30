@@ -19,13 +19,8 @@ Babysitter enables Claude Code to manage sophisticated development workflows thr
 
 ## See It In Action
 
-<div align="center">
 
-<video src="https://github.com/a5c-ai/babysitter/raw/main/docs/assets/babysitter-explainer.mp4" controls width="800"></video>
-
-*Your AI agent is 80% reliable per step. Over 5 steps: 80%⁵ = 33%. Babysitter loops until it works.*
-
-</div>
+https://github.com/user-attachments/assets/8c3b0078-9396-48e8-aa43-5f40da30c20b
 
 ---
 
