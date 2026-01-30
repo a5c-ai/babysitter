@@ -17,8 +17,6 @@ Babysitter enables Claude Code to manage sophisticated development workflows thr
 
 ---
 
-## See It In Action
-
 
 https://github.com/user-attachments/assets/8c3b0078-9396-48e8-aa43-5f40da30c20b
 
@@ -26,7 +24,6 @@ https://github.com/user-attachments/assets/8c3b0078-9396-48e8-aa43-5f40da30c20b
 
 ## Table of Contents
 
-- [See It In Action](#see-it-in-action)
 - [What is Babysitter?](#what-is-babysitter)
 - [What is @a5c-ai?](#what-is-a5c-ai)
 - [Prerequisites](#prerequisites)
