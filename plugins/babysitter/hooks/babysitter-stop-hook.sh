@@ -337,6 +337,19 @@ else
   SYSTEM_MSG="🔄 Babysitter iteration $NEXT_ITERATION | Agent should continue orchestration (run:iterate)"
 fi
 
+# ─────────────────────────────────────────────────
+# Inject available skill context into system message
+# ─────────────────────────────────────────────────
+SKILL_CONTEXT=""
+SKILL_RESOLVER="${CLAUDE_PLUGIN_ROOT:-}/hooks/skill-context-resolver.sh"
+if [[ -x "$SKILL_RESOLVER" ]]; then
+  SKILL_CONTEXT=$(bash "$SKILL_RESOLVER" "${RUN_ID:-}" "${CLAUDE_PLUGIN_ROOT:-}" 2>/dev/null || echo "")
+  if [[ -n "$SKILL_CONTEXT" ]]; then
+    SYSTEM_MSG="$SYSTEM_MSG | 🧩 Available skills for this task: $SKILL_CONTEXT. Use the Skill tool or skill-discovery to load any of these."
+    echo "✅ Babysitter run: Injected skill context ($SKILL_CONTEXT)" >> /tmp/babysitter-stop-hook.log
+  fi
+fi
+
 echo "✅ Babysitter run: Outputting JSON to block the stop and feed prompt back" >> /tmp/babysitter-stop-hook.log
 echo "   State file: $BABYSITTER_STATE_FILE" >> /tmp/babysitter-stop-hook.log
 echo "   Session ID: $SESSION_ID" >> /tmp/babysitter-stop-hook.log
