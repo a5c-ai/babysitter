@@ -21,32 +21,11 @@ Babysitter enables Claude Code to manage sophisticated development workflows thr
 
 <div align="center">
 
-<!-- Video placeholder - render with: cd video && npm run build -->
-**Why Babysitter?** Your AI agent is 80% reliable per step. Over 5 steps: 80%⁵ = **33% success rate**.
+<video src="https://github.com/a5c-ai/babysitter/raw/main/docs/assets/babysitter-explainer.mp4" controls width="800"></video>
 
-Babysitter loops until it works.
+*Your AI agent is 80% reliable per step. Over 5 steps: 80%⁵ = 33%. Babysitter loops until it works.*
 
 </div>
-
-```
-┌─────────────────────────────────────────────────────────────────────────┐
-│  Without Babysitter          │  With Babysitter                         │
-├─────────────────────────────────────────────────────────────────────────┤
-│  Step 1: 80%                 │  Step 1: 80% → 95% → 100% ✓              │
-│  Step 2: 64%                 │  Step 2: 80% → 92% → 100% ✓              │
-│  Step 3: 51%                 │  Step 3: 80% → 88% → 100% ✓              │
-│  Step 4: 41%                 │  Step 4: 80% → 91% → 100% ✓              │
-│  Step 5: 33% ✗               │  Step 5: 80% → 94% → 100% ✓              │
-│                              │                                          │
-│  Complex workflows fail.     │  Quality convergence succeeds.           │
-└─────────────────────────────────────────────────────────────────────────┘
-```
-
-**Build the explainer video:**
-```bash
-cd video && npm install && npm run dev   # Preview at localhost:3000
-cd video && npm run build                 # Render to out/babysitter-explainer.mp4
-```
 
 ---
 
