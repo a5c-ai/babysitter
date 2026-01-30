@@ -98,10 +98,7 @@ suite('Run Details webview template', () => {
       source.includes('id="processSummaryPreview"'),
       'expected process summary preview container',
     );
-    assert.ok(
-      !source.includes('processMermaid'),
-      'expected process.mermaid.md UI to be removed',
-    );
+    assert.ok(!source.includes('processMermaid'), 'expected process.mermaid.md UI to be removed');
     assert.ok(
       !/process\\.mermaid\\.md/i.test(source),
       'expected no references to process.mermaid.md',

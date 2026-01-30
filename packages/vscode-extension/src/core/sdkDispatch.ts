@@ -69,7 +69,7 @@ function spawnCollect(
 
 function extractRunIdFromOutput(text: string): string | undefined {
   try {
-    const json = JSON.parse(text);
+    const json = JSON.parse(text) as { runId?: string };
     return json.runId || undefined;
   } catch {
     // Try to extract from text output
@@ -82,10 +82,7 @@ export async function dispatchNewRunViaSdk(
   options: DispatchNewRunOptions,
 ): Promise<DispatchNewRunResult> {
   const sdkCommand = options.sdkBinaryPath || 'npx';
-  const sdkArgs =
-    options.sdkBinaryPath
-      ? []
-      : ['-y', '@a5c-ai/babysitter-sdk'];
+  const sdkArgs = options.sdkBinaryPath ? [] : ['-y', '@a5c-ai/babysitter-sdk'];
 
   // Create a temporary inputs file for the prompt
   const inputsContent = JSON.stringify({ prompt: options.prompt });
@@ -112,10 +109,14 @@ export async function dispatchNewRunViaSdk(
       [
         ...sdkArgs,
         'run:create',
-        '--process-id', 'dev/task',
-        '--entry', '.a5c/processes/core/task.js#task',
-        '--inputs', tempInputsPath,
-        '--runs-dir', options.runsRootPath,
+        '--process-id',
+        'dev/task',
+        '--entry',
+        '.a5c/processes/core/task.js#task',
+        '--inputs',
+        tempInputsPath,
+        '--runs-dir',
+        options.runsRootPath,
         '--json',
       ],
       spawnOptions,
@@ -172,10 +173,7 @@ export async function resumeExistingRunViaSdk(
   options: ResumeExistingRunOptions,
 ): Promise<ResumeExistingRunResult> {
   const sdkCommand = options.sdkBinaryPath || 'npx';
-  const sdkArgs =
-    options.sdkBinaryPath
-      ? []
-      : ['-y', '@a5c-ai/babysitter-sdk'];
+  const sdkArgs = options.sdkBinaryPath ? [] : ['-y', '@a5c-ai/babysitter-sdk'];
 
   const runRootPath = path.join(options.runsRootPath, options.runId);
 
@@ -188,13 +186,7 @@ export async function resumeExistingRunViaSdk(
 
   const result = await spawnCollect(
     sdkCommand,
-    [
-      ...sdkArgs,
-      'run:continue',
-      options.runId,
-      '--runs-dir', options.runsRootPath,
-      '--json',
-    ],
+    [...sdkArgs, 'run:continue', options.runId, '--runs-dir', options.runsRootPath, '--json'],
     spawnOptions,
   );
 

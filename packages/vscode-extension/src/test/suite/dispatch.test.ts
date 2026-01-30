@@ -22,7 +22,7 @@ function createOBinaryShim(tempDir: string, argsOutputPath: string): string {
       'const argv = process.argv.slice(2);',
       'fs.writeFileSync(argsOutputPath, JSON.stringify({ argv }, null, 2));',
       '',
-      "// Parse run:create command arguments",
+      '// Parse run:create command arguments',
       "const runsRootIndex = argv.indexOf('--runs-dir');",
       "const runsRoot = runsRootIndex >= 0 ? argv[runsRootIndex + 1] : path.join(process.cwd(), '.a5c', 'runs');",
       'const runRoot = path.join(runsRoot, runId);',

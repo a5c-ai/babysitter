@@ -248,7 +248,8 @@ function toRunRelative(runDir: string, absolutePath: string): string {
 
 function stableClone<T>(value: T): T {
   if (Array.isArray(value)) {
-    return value.map((entry) => stableClone(entry)) as T;
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+    return value.map((entry: unknown) => stableClone(entry)) as T;
   }
   if (value && typeof value === "object") {
     const entries = Object.keys(value as JsonRecord).sort((a, b) => a.localeCompare(b));

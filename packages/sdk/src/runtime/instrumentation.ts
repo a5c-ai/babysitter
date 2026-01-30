@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type RuntimeLogger = (...args: any[]) => void;
 
 export interface MetricPayload extends Record<string, unknown> {

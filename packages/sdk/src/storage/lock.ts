@@ -1,5 +1,4 @@
 import { promises as fs } from "fs";
-import path from "path";
 import { RunLockInfo } from "./types";
 import { getLockPath } from "./paths";
 import { getClockIsoString } from "./clock";

@@ -49,7 +49,7 @@ export async function readStateCache(runDir: string): Promise<StateCacheSnapshot
   const stateFile = getStateFile(runDir);
   try {
     const raw = await fs.readFile(stateFile, "utf8");
-    const parsed = JSON.parse(raw);
+    const parsed = JSON.parse(raw) as unknown;
     return normalizeSnapshot(parsed);
   } catch (error) {
     const err = error as NodeJS.ErrnoException;
@@ -97,7 +97,7 @@ export function createStateCacheSnapshot(
 }
 
 export function normalizeJournalHead(raw: unknown): StateCacheJournalHead | null | undefined {
-  if (raw === null || raw === undefined) return raw as null | undefined;
+  if (raw === null || raw === undefined) return raw;
   if (!isPlainObject(raw)) return undefined;
   const seq = Number(raw.seq);
   const ulid = raw.ulid;
@@ -234,7 +234,7 @@ function normalizePendingEffects(raw: unknown): Record<string, number> {
   return totals;
 }
 
-function isPlainObject(value: unknown): value is Record<string, any> {
+function isPlainObject(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 

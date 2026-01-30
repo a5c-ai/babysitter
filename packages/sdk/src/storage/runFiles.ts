@@ -12,11 +12,11 @@ export async function readRunMetadata(runDir: string): Promise<RunMetadata> {
   return JSON.parse(raw) as RunMetadata;
 }
 
-export async function readRunInputs(runDir: string): Promise<unknown | undefined> {
+export async function readRunInputs(runDir: string): Promise<unknown> {
   const inputsPath = path.join(runDir, INPUTS_FILE);
   try {
     const raw = await fs.readFile(inputsPath, "utf8");
-    return JSON.parse(raw);
+    return JSON.parse(raw) as unknown;
   } catch (error) {
     const err = error as NodeJS.ErrnoException;
     if (err.code === "ENOENT") {

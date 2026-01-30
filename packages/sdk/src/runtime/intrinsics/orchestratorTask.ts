@@ -10,7 +10,7 @@ const ORCHESTRATOR_TASK_ID = "__sdk.orchestratorTask";
 
 const orchestratorTask: DefinedTask<OrchestratorTaskArgs, unknown> = {
   id: ORCHESTRATOR_TASK_ID,
-  async build(args) {
+  build(args) {
     return {
       kind: "orchestrator_task",
       title: args.label,

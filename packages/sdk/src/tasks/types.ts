@@ -1,6 +1,10 @@
 import { JsonRecord } from "../storage/types";
 
-export type TaskKind = "node" | "breakpoint" | "orchestrator_task" | "sleep" | string;
+// Known task kinds (custom kinds are also allowed as any string)
+export type KnownTaskKind = "node" | "breakpoint" | "orchestrator_task" | "sleep";
+
+// TaskKind accepts any string (including custom task kinds)
+export type TaskKind = string;
 
 export interface TaskIOHints {
   inputJsonPath?: string;
@@ -104,12 +108,12 @@ export type TaskValueFactory<TArgs, TValue> = (args: TArgs, ctx: TaskBuildContex
 
 export type TaskValueOrFactory<TArgs, TValue> = TValue | TaskValueFactory<TArgs, TValue>;
 
-export type TaskImpl<TArgs = unknown, TResult = unknown> = (
+export type TaskImpl<TArgs = unknown, _TResult = unknown> = (
   args: TArgs,
   ctx: TaskBuildContext
 ) => TaskDef | Promise<TaskDef>;
 
-export interface DefinedTask<TArgs = unknown, TResult = unknown> {
+export interface DefinedTask<TArgs = unknown, _TResult = unknown> {
   id: string;
   build(args: TArgs, ctx: TaskBuildContext): TaskDef | Promise<TaskDef>;
 }

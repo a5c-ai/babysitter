@@ -21,7 +21,7 @@ function createOBinaryShim(tempDir: string, argsOutputPath: string): string {
       'const argv = process.argv.slice(2);',
       'fs.writeFileSync(argsOutputPath, JSON.stringify({ argv }, null, 2));',
       '',
-      "// Parse run:continue command arguments",
+      '// Parse run:continue command arguments',
       "// argv[0] should be 'run:continue', argv[1] should be the runId",
       'const runId = argv[1];',
       "const runsRootIndex = argv.indexOf('--runs-dir');",
@@ -91,7 +91,10 @@ suite('Resume', () => {
     const argsJson = JSON.parse(fs.readFileSync(argsOutputPath, 'utf8')) as {
       argv?: string[];
     };
-    assert.ok(argsJson.argv?.includes('run:continue'), 'expected run:continue command to be called');
+    assert.ok(
+      argsJson.argv?.includes('run:continue'),
+      'expected run:continue command to be called',
+    );
     assert.strictEqual(argsJson.argv?.[1], runId, 'expected runId to be passed as second argument');
     assert.ok(argsJson.argv?.includes('--json'), 'expected --json flag to be passed');
 

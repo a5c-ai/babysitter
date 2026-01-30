@@ -1,0 +1,392 @@
+/**
+ * Markdown Renderer Styles
+ * GitHub-style code highlighting theme with light/dark mode support
+ */
+
+/* ========================================
+   Base markdown content styles
+   ======================================== */
+
+.markdown-renderer {
+  /* @apply text-zinc-800 dark:text-zinc-200; */
+}
+
+/* ========================================
+   Code highlighting - GitHub style
+   ======================================== */
+
+/* Light mode base */
+.hljs {
+  color: #24292e;
+  background: transparent;
+}
+
+/* Dark mode base */
+.dark .hljs {
+  color: #e1e4e8;
+  background: transparent;
+}
+
+/* Comments */
+.hljs-comment,
+.hljs-quote {
+  color: #6a737d;
+  font-style: italic;
+}
+
+.dark .hljs-comment,
+.dark .hljs-quote {
+  color: #8b949e;
+}
+
+/* Keywords */
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-addition {
+  color: #d73a49;
+}
+
+.dark .hljs-keyword,
+.dark .hljs-selector-tag,
+.dark .hljs-addition {
+  color: #ff7b72;
+}
+
+/* Strings */
+.hljs-string,
+.hljs-doctag,
+.hljs-regexp {
+  color: #032f62;
+}
+
+.dark .hljs-string,
+.dark .hljs-doctag,
+.dark .hljs-regexp {
+  color: #a5d6ff;
+}
+
+/* Numbers */
+.hljs-number,
+.hljs-literal,
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag .hljs-attr {
+  color: #005cc5;
+}
+
+.dark .hljs-number,
+.dark .hljs-literal,
+.dark .hljs-variable,
+.dark .hljs-template-variable,
+.dark .hljs-tag .hljs-attr {
+  color: #79c0ff;
+}
+
+/* Functions */
+.hljs-function,
+.hljs-title,
+.hljs-section,
+.hljs-selector-id {
+  color: #6f42c1;
+}
+
+.dark .hljs-function,
+.dark .hljs-title,
+.dark .hljs-section,
+.dark .hljs-selector-id {
+  color: #d2a8ff;
+}
+
+/* Types and classes */
+.hljs-type,
+.hljs-class .hljs-title,
+.hljs-built_in {
+  color: #e36209;
+}
+
+.dark .hljs-type,
+.dark .hljs-class .hljs-title,
+.dark .hljs-built_in {
+  color: #ffa657;
+}
+
+/* Attributes */
+.hljs-attribute,
+.hljs-name,
+.hljs-tag {
+  color: #22863a;
+}
+
+.dark .hljs-attribute,
+.dark .hljs-name,
+.dark .hljs-tag {
+  color: #7ee787;
+}
+
+/* Symbols */
+.hljs-symbol,
+.hljs-bullet,
+.hljs-link {
+  color: #0366d6;
+}
+
+.dark .hljs-symbol,
+.dark .hljs-bullet,
+.dark .hljs-link {
+  color: #58a6ff;
+}
+
+/* Meta and preprocessor */
+.hljs-meta,
+.hljs-meta .hljs-keyword,
+.hljs-meta .hljs-string {
+  color: #6f42c1;
+}
+
+.dark .hljs-meta,
+.dark .hljs-meta .hljs-keyword,
+.dark .hljs-meta .hljs-string {
+  color: #d2a8ff;
+}
+
+/* Deletion */
+.hljs-deletion {
+  color: #b31d28;
+  background: #ffeef0;
+}
+
+.dark .hljs-deletion {
+  color: #ffa198;
+  background: rgba(248, 81, 73, 0.15);
+}
+
+/* Addition */
+.hljs-addition {
+  color: #22863a;
+  background: #e6ffec;
+}
+
+.dark .hljs-addition {
+  color: #7ee787;
+  background: rgba(63, 185, 80, 0.15);
+}
+
+/* Emphasis */
+.hljs-emphasis {
+  font-style: italic;
+}
+
+/* Strong */
+.hljs-strong {
+  font-weight: bold;
+}
+
+/* ========================================
+   Language-specific overrides
+   ======================================== */
+
+/* YAML */
+.hljs.language-yaml .hljs-attr {
+  color: #005cc5;
+}
+
+.dark .hljs.language-yaml .hljs-attr {
+  color: #79c0ff;
+}
+
+/* JSON */
+.hljs.language-json .hljs-attr {
+  color: #005cc5;
+}
+
+.dark .hljs.language-json .hljs-attr {
+  color: #79c0ff;
+}
+
+/* CSS */
+.hljs.language-css .hljs-selector-class {
+  color: #22863a;
+}
+
+.dark .hljs.language-css .hljs-selector-class {
+  color: #7ee787;
+}
+
+.hljs.language-css .hljs-attribute {
+  color: #005cc5;
+}
+
+.dark .hljs.language-css .hljs-attribute {
+  color: #79c0ff;
+}
+
+/* Shell/Bash */
+.hljs.language-bash .hljs-variable,
+.hljs.language-shell .hljs-variable {
+  color: #005cc5;
+}
+
+.dark .hljs.language-bash .hljs-variable,
+.dark .hljs.language-shell .hljs-variable {
+  color: #79c0ff;
+}
+
+/* TypeScript/JavaScript */
+.hljs.language-typescript .hljs-built_in,
+.hljs.language-javascript .hljs-built_in {
+  color: #e36209;
+}
+
+.dark .hljs.language-typescript .hljs-built_in,
+.dark .hljs.language-javascript .hljs-built_in {
+  color: #ffa657;
+}
+
+/* ========================================
+   Diff highlighting
+   ======================================== */
+
+.hljs.language-diff .hljs-meta {
+  color: #005cc5;
+}
+
+.dark .hljs.language-diff .hljs-meta {
+  color: #79c0ff;
+}
+
+/* ========================================
+   Selection highlighting
+   ======================================== */
+
+.hljs::selection,
+.hljs *::selection {
+  background-color: rgba(33, 136, 255, 0.3);
+}
+
+.dark .hljs::selection,
+.dark .hljs *::selection {
+  background-color: rgba(56, 139, 253, 0.4);
+}
+
+/* ========================================
+   Print styles
+   ======================================== */
+
+@media print {
+  .hljs {
+    background: white !important;
+    color: black !important;
+  }
+
+  .hljs-comment,
+  .hljs-quote {
+    color: #666 !important;
+  }
+
+  .hljs-keyword,
+  .hljs-selector-tag {
+    color: #900 !important;
+  }
+
+  .hljs-string {
+    color: #060 !important;
+  }
+
+  .hljs-number {
+    color: #009 !important;
+  }
+}
+
+/* ========================================
+   Additional markdown element styles
+   ======================================== */
+
+/* Footnotes */
+.markdown-renderer .footnotes {
+  /* @apply mt-8 border-t border-zinc-200 pt-4 text-sm dark:border-zinc-700; */
+}
+
+.markdown-renderer .footnotes-sep {
+  @apply hidden;
+}
+
+.markdown-renderer .footnote-ref {
+  /* @apply text-xs text-blue-600 dark:text-blue-400; */
+}
+
+.markdown-renderer .footnote-backref {
+  /* @apply ml-1 text-blue-600 no-underline dark:text-blue-400; */
+}
+
+/* Definition lists */
+.markdown-renderer dl {
+  /* @apply my-4; */
+}
+
+.markdown-renderer dt {
+  /* @apply font-semibold text-zinc-900 dark:text-zinc-100; */
+}
+
+.markdown-renderer dd {
+  /* @apply ml-4 text-zinc-600 dark:text-zinc-400; */
+}
+
+/* Keyboard keys */
+.markdown-renderer kbd {
+  /* @apply inline-block rounded border border-zinc-300 bg-zinc-100 px-1.5 py-0.5 font-mono text-xs text-zinc-700 shadow-sm dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-300; */
+}
+
+/* Abbreviations */
+.markdown-renderer abbr {
+  /* @apply cursor-help border-b border-dotted border-zinc-400 dark:border-zinc-500; */
+}
+
+/* Mark/Highlight */
+.markdown-renderer mark {
+  /* @apply rounded bg-yellow-200 px-0.5 dark:bg-yellow-900/50; */
+}
+
+/* Superscript and subscript */
+.markdown-renderer sup {
+  /* @apply text-xs; */
+}
+
+.markdown-renderer sub {
+  /* @apply text-xs; */
+}
+
+/* Details/Summary */
+.markdown-renderer details {
+  /* @apply my-4 rounded-lg border border-zinc-200 dark:border-zinc-700; */
+}
+
+.markdown-renderer summary {
+  /* @apply cursor-pointer select-none rounded-t-lg bg-zinc-50 px-4 py-2 font-medium dark:bg-zinc-800; */
+}
+
+.markdown-renderer details[open] summary {
+  /* @apply border-b border-zinc-200 dark:border-zinc-700; */
+}
+
+.markdown-renderer details > :not(summary) {
+  /* @apply px-4 py-2; */
+}
+
+/* ========================================
+   Accessibility
+   ======================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .markdown-renderer * {
+    transition: none !important;
+  }
+}
+
+/* Focus states */
+.markdown-renderer a:focus-visible {
+  /* @apply rounded outline-2 outline-offset-2 outline-blue-500; */
+}
+
+.markdown-renderer button:focus-visible {
+  /* @apply rounded outline-2 outline-offset-2 outline-blue-500; */
+}

@@ -1,0 +1,1070 @@
+@import "tailwindcss";
+
+/* Steampunk Design System Colors */
+:root {
+  /* Primary Steampunk Color Palette - Metallic Tones */
+  --steampunk-brass: #B8860B;
+  --steampunk-copper: #CD7F32;
+  --steampunk-bronze: #8B4513;
+  --steampunk-dark-brass: #8B6914;
+  --steampunk-polished-brass: #D4AF37;
+
+  /* Secondary - Parchment Tones */
+  --steampunk-parchment: #F5E6C8;
+  --steampunk-cream: #FDF5E6;
+  --steampunk-light-tan: #E8DCC4;
+  --steampunk-parchment-dark: #E8D5B0;
+
+  /* Background Colors */
+  --steampunk-bg-main: #F2E8D5;
+  --steampunk-card: #F8F0E0;
+  --steampunk-card-border: #8B7355;
+
+  /* Text Colors */
+  --steampunk-text-primary: #3D2314;
+  --steampunk-text-secondary: #5C4033;
+  --steampunk-text-muted: #7D6B5D;
+  --steampunk-text-header: #3D2B1F;
+  --steampunk-text-body: #4A3728;
+
+  /* Border & Accent */
+  --steampunk-border-brass: #A67C00;
+  --steampunk-accent-green: #6B8E23;
+  --steampunk-accent-pink: #DB7093;
+  --steampunk-accent-sepia: #704214;
+
+  /* Canvas (backgrounds) */
+  --color-canvas-default: var(--steampunk-bg-main);
+  --color-canvas-overlay: var(--steampunk-card);
+  --color-canvas-inset: var(--steampunk-parchment-dark);
+  --color-canvas-subtle: var(--steampunk-light-tan);
+
+  /* Foreground (text) */
+  --color-fg-default: var(--steampunk-text-body);
+  --color-fg-muted: var(--steampunk-text-muted);
+  --color-fg-subtle: var(--steampunk-card-border);
+  --color-fg-on-emphasis: var(--steampunk-cream);
+
+  /* Border */
+  --color-border-default: var(--steampunk-border-brass);
+  --color-border-muted: var(--steampunk-card-border);
+  --color-border-subtle: rgba(166, 124, 0, 0.3);
+
+  /* Accent colors - Brass tones */
+  --color-accent-fg: var(--steampunk-brass);
+  --color-accent-emphasis: var(--steampunk-dark-brass);
+  --color-accent-muted: rgba(184, 134, 11, 0.4);
+  --color-accent-subtle: rgba(212, 175, 55, 0.2);
+
+  /* Success colors - Steampunk green */
+  --color-success-fg: var(--steampunk-accent-green);
+  --color-success-emphasis: #556B2F;
+  --color-success-muted: rgba(107, 142, 35, 0.4);
+  --color-success-subtle: rgba(107, 142, 35, 0.15);
+
+  /* Warning colors - Copper tones */
+  --color-attention-fg: var(--steampunk-copper);
+  --color-attention-emphasis: #B87333;
+  --color-attention-muted: rgba(205, 127, 50, 0.4);
+  --color-attention-subtle: rgba(205, 127, 50, 0.15);
+
+  /* Danger colors - Victorian pink/rose */
+  --color-danger-fg: var(--steampunk-accent-pink);
+  --color-danger-emphasis: #C71585;
+  --color-danger-muted: rgba(219, 112, 147, 0.4);
+  --color-danger-subtle: rgba(219, 112, 147, 0.15);
+
+  /* Neutral colors - Bronze tones */
+  --color-neutral-emphasis: var(--steampunk-bronze);
+  --color-neutral-emphasis-plus: var(--steampunk-text-header);
+  --color-neutral-muted: rgba(139, 69, 19, 0.3);
+  --color-neutral-subtle: rgba(139, 69, 19, 0.1);
+
+  /* shadcn/ui CSS variables */
+  --background: var(--color-canvas-default);
+  --foreground: var(--color-fg-default);
+  --card: var(--steampunk-card);
+  --card-foreground: var(--color-fg-default);
+  --popover: var(--color-canvas-overlay);
+  --popover-foreground: var(--color-fg-default);
+  --primary: var(--steampunk-brass);
+  --primary-foreground: var(--color-fg-on-emphasis);
+  --secondary: var(--steampunk-parchment-dark);
+  --secondary-foreground: var(--color-fg-default);
+  --muted: var(--color-canvas-inset);
+  --muted-foreground: var(--color-fg-muted);
+  --accent: var(--steampunk-polished-brass);
+  --accent-foreground: var(--steampunk-text-header);
+  --destructive: var(--color-danger-emphasis);
+  --destructive-foreground: var(--color-fg-on-emphasis);
+  --border: var(--color-border-default);
+  --input: var(--color-border-default);
+  --ring: var(--steampunk-polished-brass);
+  --radius: 4px;
+
+  /* Chart colors - Steampunk style */
+  --chart-1: var(--steampunk-brass);
+  --chart-2: var(--steampunk-accent-green);
+  --chart-3: var(--steampunk-copper);
+  --chart-4: var(--steampunk-bronze);
+  --chart-5: var(--steampunk-accent-pink);
+
+  /* Steampunk Decorative Elements */
+  --steampunk-gear-color: var(--steampunk-brass);
+  --steampunk-pipe-color: var(--steampunk-copper);
+  --steampunk-rivet-color: var(--steampunk-bronze);
+  --steampunk-shadow-color: rgba(61, 35, 20, 0.25);
+}
+
+/* Tailwind v4 theme configuration */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius-sm: calc(var(--radius) - 2px);
+  --radius-md: var(--radius);
+  --radius-lg: calc(var(--radius) + 2px);
+  --radius-xl: calc(var(--radius) + 6px);
+
+  /* Steampunk specific colors for Tailwind */
+  --color-steampunk-brass: var(--steampunk-brass);
+  --color-steampunk-copper: var(--steampunk-copper);
+  --color-steampunk-bronze: var(--steampunk-bronze);
+  --color-steampunk-dark-brass: var(--steampunk-dark-brass);
+  --color-steampunk-polished-brass: var(--steampunk-polished-brass);
+  --color-steampunk-parchment: var(--steampunk-parchment);
+  --color-steampunk-cream: var(--steampunk-cream);
+  --color-steampunk-light-tan: var(--steampunk-light-tan);
+  --color-steampunk-parchment-dark: var(--steampunk-parchment-dark);
+  --color-steampunk-bg-main: var(--steampunk-bg-main);
+  --color-steampunk-card: var(--steampunk-card);
+  --color-steampunk-card-border: var(--steampunk-card-border);
+  --color-steampunk-text-primary: var(--steampunk-text-primary);
+  --color-steampunk-text-secondary: var(--steampunk-text-secondary);
+  --color-steampunk-text-muted: var(--steampunk-text-muted);
+  --color-steampunk-text-header: var(--steampunk-text-header);
+  --color-steampunk-text-body: var(--steampunk-text-body);
+  --color-steampunk-border-brass: var(--steampunk-border-brass);
+  --color-steampunk-accent-green: var(--steampunk-accent-green);
+  --color-steampunk-accent-pink: var(--steampunk-accent-pink);
+  --color-steampunk-accent-sepia: var(--steampunk-accent-sepia);
+
+  /* Primer compatibility layer */
+  --color-primer-canvas-default: var(--color-canvas-default);
+  --color-primer-canvas-subtle: var(--color-canvas-subtle);
+  --color-primer-canvas-inset: var(--color-canvas-inset);
+  --color-primer-fg-default: var(--color-fg-default);
+  --color-primer-fg-muted: var(--color-fg-muted);
+  --color-primer-border-default: var(--color-border-default);
+  --color-primer-border-muted: var(--color-border-muted);
+  --color-primer-accent-fg: var(--color-accent-fg);
+  --color-primer-success-fg: var(--color-success-fg);
+  --color-primer-attention-fg: var(--color-attention-fg);
+  --color-primer-danger-fg: var(--color-danger-fg);
+
+  /* Steampunk Typography - Victorian Serif Fonts */
+  --font-steampunk-header: "Playfair Display", Georgia, "Times New Roman", serif;
+  --font-steampunk-body: "Merriweather", Georgia, "Times New Roman", serif;
+  --font-steampunk-accent: "EB Garamond", Georgia, serif;
+  --font-sans: var(--font-body, var(--font-steampunk-body));
+  --font-serif: var(--font-header, var(--font-steampunk-header));
+  --font-mono: "Courier New", Courier, monospace;
+}
+
+
+/* Base styles */
+* {
+  border-color: var(--border);
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-body, var(--font-steampunk-body));
+  font-feature-settings: "liga" 1, "kern" 1, "onum" 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.6;
+  /* Parchment texture effect with subtle noise */
+  background-image:
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E"),
+    radial-gradient(ellipse at 20% 30%, rgba(184, 134, 11, 0.05) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 70%, rgba(139, 69, 19, 0.04) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 50%, rgba(245, 230, 200, 0.3) 0%, transparent 70%);
+}
+
+/* Typography - Headers use Playfair Display (Victorian Serif) */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-header, var(--font-steampunk-header));
+  color: var(--steampunk-text-header);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+}
+
+h1 {
+  font-size: 2.75rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+h2 {
+  font-size: 2.125rem;
+  font-weight: 600;
+}
+
+h3 {
+  font-size: 1.625rem;
+  font-weight: 600;
+}
+
+h4 {
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+h5 {
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+h6 {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+/* Paragraph styling */
+p {
+  font-family: var(--font-body, var(--font-steampunk-body));
+  line-height: 1.75;
+  color: var(--steampunk-text-body);
+}
+
+/* Links - Brass colored with Victorian elegance */
+a {
+  color: var(--steampunk-brass);
+  text-decoration: none;
+  transition: color 0.2s ease, text-shadow 0.2s ease;
+  border-bottom: 1px solid transparent;
+}
+
+a:hover {
+  color: var(--steampunk-polished-brass);
+  border-bottom-color: var(--steampunk-polished-brass);
+  text-shadow: 0 0 1px rgba(212, 175, 55, 0.3);
+}
+
+/* Selection styling */
+::selection {
+  background-color: rgba(184, 134, 11, 0.3);
+  color: var(--steampunk-text-header);
+}
+
+/* Focus ring styles - Brass glow */
+*:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+  box-shadow: 0 0 8px rgba(184, 134, 11, 0.3);
+}
+
+/* Scrollbar styles - Brass themed */
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-canvas-subtle);
+  border: 1px solid var(--steampunk-border-brass);
+  border-radius: 2px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, var(--steampunk-polished-brass) 0%, var(--steampunk-brass) 50%, var(--steampunk-dark-brass) 100%);
+  border-radius: 2px;
+  border: 1px solid var(--steampunk-border-brass);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, var(--steampunk-polished-brass) 0%, var(--steampunk-brass) 100%);
+}
+
+::-webkit-scrollbar-corner {
+  background: var(--color-canvas-subtle);
+}
+
+/* Code block styles - Aged parchment look */
+pre {
+  background-color: var(--color-canvas-subtle);
+  border: 2px solid var(--steampunk-border-brass);
+  border-radius: var(--radius);
+  overflow-x: auto;
+  box-shadow:
+    inset 0 2px 4px rgba(61, 43, 31, 0.1),
+    inset 0 0 0 1px rgba(184, 134, 11, 0.1);
+  font-family: var(--font-mono);
+}
+
+code {
+  font-family: var(--font-mono);
+  font-size: 0.875em;
+  color: var(--steampunk-dark-brass);
+}
+
+:not(pre) > code {
+  background-color: var(--color-neutral-muted);
+  padding: 0.2em 0.4em;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--steampunk-border-brass);
+}
+
+/* Blockquote - Victorian style */
+blockquote {
+  border-left: 4px solid var(--steampunk-brass);
+  padding-left: 1.5rem;
+  margin: 1.5rem 0;
+  font-style: italic;
+  font-family: var(--font-accent, var(--font-steampunk-accent));
+  color: var(--steampunk-text-secondary);
+  background: linear-gradient(90deg, rgba(184, 134, 11, 0.05) 0%, transparent 100%);
+  padding: 1rem 1.5rem;
+  border-radius: 0 var(--radius) var(--radius) 0;
+}
+
+/* Horizontal Rule - Steampunk divider */
+hr {
+  height: 2px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    var(--steampunk-border-brass) 15%,
+    var(--steampunk-polished-brass) 50%,
+    var(--steampunk-border-brass) 85%,
+    transparent 100%);
+  border: none;
+  margin: 2rem 0;
+}
+
+/* Lists */
+ul, ol {
+  color: var(--steampunk-text-body);
+}
+
+li::marker {
+  color: var(--steampunk-brass);
+}
+
+/* Tables */
+table {
+  border-collapse: collapse;
+  width: 100%;
+  font-family: var(--font-body, var(--font-steampunk-body));
+}
+
+th {
+  background-color: var(--steampunk-parchment-dark);
+  font-family: var(--font-header, var(--font-steampunk-header));
+  font-weight: 600;
+  color: var(--steampunk-text-header);
+  border: 1px solid var(--steampunk-border-brass);
+  padding: 0.75rem 1rem;
+  text-align: left;
+}
+
+td {
+  border: 1px solid var(--steampunk-card-border);
+  padding: 0.75rem 1rem;
+  background-color: var(--steampunk-card);
+}
+
+tr:hover td {
+  background-color: var(--steampunk-parchment);
+}
+
+/* ===========================================
+   STEAMPUNK UTILITY CLASSES
+   =========================================== */
+
+/* Brass border decorations */
+.border-brass {
+  border-color: var(--steampunk-border-brass);
+}
+
+.border-brass-ornate {
+  border: 2px solid var(--steampunk-border-brass);
+  border-radius: var(--radius);
+  box-shadow:
+    inset 0 0 0 1px var(--steampunk-polished-brass),
+    0 2px 4px var(--steampunk-shadow-color);
+}
+
+.border-copper {
+  border-color: var(--steampunk-copper);
+}
+
+.border-bronze {
+  border-color: var(--steampunk-bronze);
+}
+
+/* Gear pattern background */
+.bg-gears {
+  background-image:
+    radial-gradient(circle at 20% 50%, rgba(184, 134, 11, 0.08) 0%, transparent 25%),
+    radial-gradient(circle at 80% 50%, rgba(205, 127, 50, 0.08) 0%, transparent 25%),
+    radial-gradient(circle at 50% 20%, rgba(139, 69, 19, 0.06) 0%, transparent 20%),
+    radial-gradient(circle at 50% 80%, rgba(139, 69, 19, 0.06) 0%, transparent 20%);
+}
+
+/* Gear pattern with SVG */
+.bg-gears-pattern {
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'%3E%3Cg fill='none' stroke='%23B8860B' stroke-width='0.5' opacity='0.15'%3E%3Ccircle cx='30' cy='30' r='8'/%3E%3Ccircle cx='30' cy='30' r='12'/%3E%3Cpath d='M30 14v-4M30 50v-4M14 30h-4M50 30h-4M19.76 19.76l-2.83-2.83M43.07 43.07l-2.83-2.83M19.76 40.24l-2.83 2.83M43.07 16.93l-2.83 2.83'/%3E%3C/g%3E%3C/svg%3E");
+  background-repeat: repeat;
+}
+
+/* Pipe pattern background */
+.bg-pipes {
+  background-image:
+    linear-gradient(90deg, transparent 48%, rgba(205, 127, 50, 0.1) 48%, rgba(205, 127, 50, 0.1) 52%, transparent 52%),
+    linear-gradient(0deg, transparent 48%, rgba(139, 69, 19, 0.08) 48%, rgba(139, 69, 19, 0.08) 52%, transparent 52%);
+  background-size: 40px 40px;
+}
+
+/* Parchment texture background */
+.bg-parchment-texture {
+  background-image:
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E"),
+    radial-gradient(ellipse at 30% 20%, rgba(139, 69, 19, 0.03) 0%, transparent 50%),
+    radial-gradient(ellipse at 70% 80%, rgba(139, 69, 19, 0.03) 0%, transparent 50%);
+}
+
+/* Parchment card style */
+.card-parchment {
+  background-color: var(--steampunk-card);
+  border: 1px solid var(--steampunk-border-brass);
+  border-radius: var(--radius);
+  box-shadow:
+    0 1px 3px var(--steampunk-shadow-color),
+    0 1px 2px rgba(61, 43, 31, 0.08);
+}
+
+.card-parchment:hover {
+  box-shadow:
+    0 4px 6px var(--steampunk-shadow-color),
+    0 2px 4px rgba(61, 43, 31, 0.1);
+}
+
+/* Brass button style */
+.btn-brass {
+  background: linear-gradient(180deg, var(--steampunk-polished-brass) 0%, var(--steampunk-brass) 50%, var(--steampunk-dark-brass) 100%);
+  color: var(--steampunk-cream);
+  border: 1px solid var(--steampunk-dark-brass);
+  border-radius: var(--radius);
+  padding: 0.5rem 1rem;
+  font-family: var(--font-header, var(--font-steampunk-header));
+  font-weight: 500;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    0 2px 4px var(--steampunk-shadow-color);
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.btn-brass:hover {
+  background: linear-gradient(180deg, var(--steampunk-polished-brass) 0%, var(--steampunk-polished-brass) 50%, var(--steampunk-brass) 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    0 4px 8px var(--steampunk-shadow-color);
+}
+
+.btn-brass:active {
+  background: linear-gradient(180deg, var(--steampunk-dark-brass) 0%, var(--steampunk-brass) 50%, var(--steampunk-dark-brass) 100%);
+  box-shadow:
+    inset 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Copper accent style button */
+.btn-copper {
+  background: linear-gradient(180deg, #E0965A 0%, var(--steampunk-copper) 50%, #A66829 100%);
+  color: var(--steampunk-cream);
+  border: 1px solid #8B5A2B;
+  border-radius: var(--radius);
+  padding: 0.5rem 1rem;
+  font-family: var(--font-header, var(--font-steampunk-header));
+  font-weight: 500;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    0 2px 4px var(--steampunk-shadow-color);
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.btn-copper:hover {
+  background: linear-gradient(180deg, #E8A06A 0%, var(--steampunk-copper) 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    0 4px 8px var(--steampunk-shadow-color);
+}
+
+/* Bronze button style */
+.btn-bronze {
+  background: linear-gradient(180deg, #A06030 0%, var(--steampunk-bronze) 50%, #6B3A10 100%);
+  color: var(--steampunk-cream);
+  border: 1px solid #6B3A10;
+  border-radius: var(--radius);
+  padding: 0.5rem 1rem;
+  font-family: var(--font-header, var(--font-steampunk-header));
+  font-weight: 500;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.15),
+    0 2px 4px var(--steampunk-shadow-color);
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+/* Steampunk divider */
+.divider-steampunk {
+  height: 2px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    var(--steampunk-border-brass) 15%,
+    var(--steampunk-polished-brass) 50%,
+    var(--steampunk-border-brass) 85%,
+    transparent 100%);
+  border: none;
+  margin: 1rem 0;
+}
+
+/* Ornate divider with decorative elements */
+.divider-ornate {
+  position: relative;
+  height: 20px;
+  background: transparent;
+  margin: 2rem 0;
+}
+
+.divider-ornate::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    var(--steampunk-border-brass) 20%,
+    var(--steampunk-polished-brass) 50%,
+    var(--steampunk-border-brass) 80%,
+    transparent 100%);
+}
+
+.divider-ornate::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 12px;
+  height: 12px;
+  background: radial-gradient(circle at 30% 30%, var(--steampunk-polished-brass) 0%, var(--steampunk-dark-brass) 100%);
+  border-radius: 50%;
+  box-shadow:
+    inset -1px -1px 2px rgba(0, 0, 0, 0.3),
+    0 0 0 2px var(--steampunk-bg-main);
+}
+
+/* Victorian ornament decoration */
+.ornament-top {
+  position: relative;
+}
+
+.ornament-top::before {
+  content: "";
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 4px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    var(--steampunk-polished-brass) 30%,
+    var(--steampunk-polished-brass) 70%,
+    transparent 100%);
+  border-radius: 2px;
+}
+
+/* Corner ornaments */
+.ornament-corners {
+  position: relative;
+}
+
+.ornament-corners::before,
+.ornament-corners::after {
+  content: "";
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--steampunk-border-brass);
+}
+
+.ornament-corners::before {
+  top: -2px;
+  left: -2px;
+  border-right: none;
+  border-bottom: none;
+}
+
+.ornament-corners::after {
+  bottom: -2px;
+  right: -2px;
+  border-left: none;
+  border-top: none;
+}
+
+/* Text colors */
+.text-brass {
+  color: var(--steampunk-brass);
+}
+
+.text-copper {
+  color: var(--steampunk-copper);
+}
+
+.text-bronze {
+  color: var(--steampunk-bronze);
+}
+
+.text-header {
+  color: var(--steampunk-text-header);
+  font-family: var(--font-header, var(--font-steampunk-header));
+}
+
+.text-sepia {
+  color: var(--steampunk-accent-sepia);
+}
+
+/* Background colors */
+.bg-parchment {
+  background-color: var(--steampunk-parchment);
+}
+
+.bg-parchment-dark {
+  background-color: var(--steampunk-parchment-dark);
+}
+
+.bg-card-steampunk {
+  background-color: var(--steampunk-card);
+}
+
+.bg-cream {
+  background-color: var(--steampunk-cream);
+}
+
+.bg-light-tan {
+  background-color: var(--steampunk-light-tan);
+}
+
+/* Aged/vintage effect */
+.aged-effect {
+  position: relative;
+}
+
+.aged-effect::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse at 0% 0%, rgba(61, 43, 31, 0.08) 0%, transparent 50%),
+    radial-gradient(ellipse at 100% 100%, rgba(61, 43, 31, 0.08) 0%, transparent 50%);
+  border-radius: inherit;
+}
+
+/* Vignette effect */
+.vignette {
+  position: relative;
+}
+
+.vignette::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  box-shadow: inset 0 0 100px rgba(61, 43, 31, 0.15);
+  border-radius: inherit;
+}
+
+/* Brass gradient text */
+.text-brass-gradient {
+  background: linear-gradient(180deg, var(--steampunk-polished-brass) 0%, var(--steampunk-brass) 50%, var(--steampunk-dark-brass) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Copper gradient text */
+.text-copper-gradient {
+  background: linear-gradient(180deg, #E0965A 0%, var(--steampunk-copper) 50%, #A66829 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Rivet decoration */
+.rivets {
+  position: relative;
+}
+
+.rivets::before,
+.rivets::after {
+  content: "";
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: radial-gradient(circle at 30% 30%, var(--steampunk-polished-brass) 0%, var(--steampunk-dark-brass) 100%);
+  border-radius: 50%;
+  box-shadow: inset -1px -1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.rivets::before {
+  top: 8px;
+  left: 8px;
+}
+
+.rivets::after {
+  top: 8px;
+  right: 8px;
+}
+
+/* Four corner rivets */
+.rivets-four {
+  position: relative;
+}
+
+.rivets-four::before {
+  content: "";
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: radial-gradient(circle at 30% 30%, var(--steampunk-polished-brass) 0%, var(--steampunk-dark-brass) 100%);
+  border-radius: 50%;
+  box-shadow:
+    inset -1px -1px 2px rgba(0, 0, 0, 0.3),
+    calc(100% - 16px) 0 0 0 currentColor,
+    0 calc(100% - 16px) 0 0 currentColor,
+    calc(100% - 16px) calc(100% - 16px) 0 0 currentColor;
+  top: 8px;
+  left: 8px;
+}
+
+/* Input field steampunk style */
+.input-steampunk {
+  background-color: var(--steampunk-card);
+  border: 1px solid var(--steampunk-border-brass);
+  border-radius: var(--radius);
+  padding: 0.5rem 0.75rem;
+  font-family: var(--font-body, var(--font-steampunk-body));
+  color: var(--steampunk-text-body);
+  box-shadow: inset 0 1px 3px rgba(61, 43, 31, 0.1);
+  transition: all 0.2s ease;
+}
+
+.input-steampunk:focus {
+  outline: none;
+  border-color: var(--steampunk-polished-brass);
+  box-shadow:
+    inset 0 1px 3px rgba(61, 43, 31, 0.1),
+    0 0 0 2px rgba(212, 175, 55, 0.2);
+}
+
+.input-steampunk::placeholder {
+  color: var(--steampunk-text-muted);
+  font-style: italic;
+}
+
+/* Victorian badge */
+.badge-steampunk {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  background: linear-gradient(180deg, var(--steampunk-parchment-dark) 0%, var(--steampunk-parchment) 100%);
+  border: 1px solid var(--steampunk-border-brass);
+  border-radius: 999px;
+  font-family: var(--font-header, var(--font-steampunk-header));
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--steampunk-text-header);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.badge-brass {
+  background: linear-gradient(180deg, var(--steampunk-polished-brass) 0%, var(--steampunk-brass) 100%);
+  color: var(--steampunk-cream);
+  border-color: var(--steampunk-dark-brass);
+}
+
+.badge-copper {
+  background: linear-gradient(180deg, #E0965A 0%, var(--steampunk-copper) 100%);
+  color: var(--steampunk-cream);
+  border-color: #8B5A2B;
+}
+
+/* Tooltip steampunk */
+.tooltip-steampunk {
+  background-color: var(--steampunk-text-header);
+  color: var(--steampunk-cream);
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius);
+  font-family: var(--font-body, var(--font-steampunk-body));
+  font-size: 0.875rem;
+  box-shadow: 0 4px 12px var(--steampunk-shadow-color);
+  border: 1px solid var(--steampunk-dark-brass);
+}
+
+/* Panel/Frame steampunk style */
+.panel-steampunk {
+  background-color: var(--steampunk-card);
+  border: 2px solid var(--steampunk-border-brass);
+  border-radius: var(--radius);
+  box-shadow:
+    inset 0 0 0 1px rgba(212, 175, 55, 0.2),
+    0 4px 8px var(--steampunk-shadow-color);
+}
+
+/* Embossed text effect */
+.text-embossed {
+  text-shadow:
+    1px 1px 0 rgba(255, 255, 255, 0.3),
+    -1px -1px 0 rgba(0, 0, 0, 0.1);
+}
+
+/* Engraved text effect */
+.text-engraved {
+  text-shadow:
+    1px 1px 0 rgba(255, 255, 255, 0.5),
+    -1px -1px 0 rgba(0, 0, 0, 0.2);
+  color: var(--steampunk-bronze);
+}
+
+/* ===========================================
+   STEAMPUNK ANIMATIONS
+   =========================================== */
+
+/* Animation for brass shimmer effect */
+@keyframes brass-shimmer {
+  0% {
+    background-position: -200% center;
+  }
+  100% {
+    background-position: 200% center;
+  }
+}
+
+.shimmer-brass {
+  background: linear-gradient(
+    90deg,
+    var(--steampunk-brass) 0%,
+    var(--steampunk-polished-brass) 25%,
+    var(--steampunk-brass) 50%,
+    var(--steampunk-polished-brass) 75%,
+    var(--steampunk-brass) 100%
+  );
+  background-size: 200% auto;
+  animation: brass-shimmer 3s linear infinite;
+}
+
+/* Loading gear animation */
+@keyframes gear-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.gear-spin {
+  animation: gear-spin 2s linear infinite;
+}
+
+.gear-spin-reverse {
+  animation: gear-spin 2s linear infinite reverse;
+}
+
+.gear-spin-slow {
+  animation: gear-spin 4s linear infinite;
+}
+
+/* Steam puff animation */
+@keyframes steam-puff {
+  0% {
+    opacity: 0.6;
+    transform: translateY(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-20px) scale(1.5);
+  }
+}
+
+.steam-puff {
+  animation: steam-puff 2s ease-out infinite;
+}
+
+/* Pressure gauge wobble */
+@keyframes gauge-wobble {
+  0%, 100% {
+    transform: rotate(-5deg);
+  }
+  50% {
+    transform: rotate(5deg);
+  }
+}
+
+.gauge-wobble {
+  animation: gauge-wobble 0.5s ease-in-out infinite;
+}
+
+/* Gentle pulse for lights/indicators */
+@keyframes brass-pulse {
+  0%, 100% {
+    box-shadow: 0 0 5px rgba(184, 134, 11, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 15px rgba(184, 134, 11, 0.6);
+  }
+}
+
+.pulse-brass {
+  animation: brass-pulse 2s ease-in-out infinite;
+}
+
+/* ===========================================
+   STEAMPUNK SEARCH PAGE SPECIFIC STYLES
+   =========================================== */
+
+.steampunk-card {
+  background-color: var(--steampunk-card);
+  border: 1px solid var(--steampunk-border-brass);
+  border-radius: var(--radius);
+  position: relative;
+}
+
+.steampunk-result-card {
+  background-color: var(--steampunk-card);
+  border: 1px solid var(--steampunk-border-brass);
+  border-radius: var(--radius);
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.steampunk-result-card:hover {
+  border-color: var(--steampunk-polished-brass);
+  box-shadow:
+    0 4px 8px var(--steampunk-shadow-color),
+    0 0 0 1px var(--steampunk-polished-brass);
+}
+
+/* Filter button styles */
+.steampunk-filter {
+  transition: all 0.2s ease;
+}
+
+.steampunk-filter:hover {
+  box-shadow: 0 2px 4px var(--steampunk-shadow-color);
+}
+
+.steampunk-filter-active {
+  box-shadow: 0 0 8px rgba(212, 175, 55, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+/* Search input steampunk styling */
+.steampunk-search-input {
+  background-color: var(--steampunk-parchment);
+  border: 2px solid var(--steampunk-brass);
+  border-radius: var(--radius);
+  font-family: var(--font-body, var(--font-steampunk-body));
+  color: var(--steampunk-text-body);
+}
+
+.steampunk-search-input:focus {
+  border-color: var(--steampunk-polished-brass);
+  box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.2);
+}
+
+.steampunk-search-input::placeholder {
+  color: var(--steampunk-text-muted);
+  font-style: italic;
+}
+
+/* Magnifying glass icon brass color */
+.steampunk-search-icon {
+  color: var(--steampunk-brass);
+}
+
+/* ===========================================
+   STEAMPUNK COMPONENT OVERRIDES
+   =========================================== */
+
+/* Card component override */
+[data-slot="card"] {
+  background-color: var(--steampunk-card);
+  border-color: var(--steampunk-card-border);
+}
+
+/* Button component override */
+[data-slot="button"] {
+  font-family: var(--font-header, var(--font-steampunk-header));
+}
+
+/* ===========================================
+   PRINT STYLES
+   =========================================== */
+
+@media print {
+  body {
+    background: white;
+    color: black;
+  }
+
+  .btn-brass,
+  .btn-copper,
+  .btn-bronze {
+    background: none;
+    border: 1px solid black;
+    color: black;
+  }
+
+  .shimmer-brass,
+  .gear-spin,
+  .gear-spin-reverse,
+  .steam-puff {
+    animation: none;
+  }
+}

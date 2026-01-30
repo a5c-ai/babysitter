@@ -17,18 +17,20 @@ import {
   OrchestrateOptions,
   EffectAction,
   EffectSchedulerHints,
+  ProcessContext,
 } from "./types";
 import { serializeUnknownError } from "./errorUtils";
 import { emitRuntimeMetric } from "./instrumentation";
 import { callRuntimeHook } from "./hooks/runtime";
 
-type ProcessFunction = (inputs: unknown, ctx: any, extra?: unknown) => unknown | Promise<unknown>;
+type ProcessFunction = (inputs: unknown, ctx: ProcessContext, extra?: unknown) => Promise<unknown>;
 // Use an indirect dynamic import so TypeScript does not downlevel to require() in CommonJS builds.
 // Vitest executes modules inside a VM context that requires direct import() support.
 const dynamicImportModule: (specifier: string) => Promise<Record<string, unknown>> = (() => {
   if (process.env.VITEST) {
     return (specifier) => import(specifier);
   }
+  // eslint-disable-next-line @typescript-eslint/no-implied-eval
   return new Function("specifier", "return import(specifier);") as (specifier: string) => Promise<Record<string, unknown>>;
 })();
 

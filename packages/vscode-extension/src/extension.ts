@@ -9,7 +9,6 @@ import {
 } from './core/config';
 import { dispatchNewRunViaSdk, resumeExistingRunViaSdk } from './core/sdkDispatch';
 import { isRunId } from './core/runId';
-import { listRunIds, waitForNewRunId } from './core/runPolling';
 import { sanitizeTerminalOutput } from './core/terminalSanitize';
 import type { Run } from './core/run';
 import { createRunFileWatchers } from './extension/runFileWatchers';
@@ -113,59 +112,6 @@ export function activate(context: vscode.ExtensionContext): BabysitterApi {
 
   let lastNotifiedFingerprint = '';
   let runWatchersDisposable: vscode.Disposable | undefined;
-
-  const bashSingleQuote = (value: string): string => `'${value.replace(/'/g, `'"'"'`)}'`;
-
-  const openGitBashTerminalAndSend = (params: {
-    name: string;
-    bashPath: string;
-    workspaceRoot: string;
-    command: string;
-  }): vscode.Terminal => {
-    const terminal = vscode.window.createTerminal({
-      name: params.name,
-      shellPath: params.bashPath,
-      shellArgs: ['-l'],
-      cwd: params.workspaceRoot,
-    });
-    terminal.show(true);
-    terminal.sendText(params.command, true);
-    return terminal;
-  };
-
-  const openPosixTerminalAndSend = (params: {
-    name: string;
-    workspaceRoot: string;
-    command: string;
-    workspaceFolder?: vscode.WorkspaceFolder;
-  }): { terminal: vscode.Terminal; shellPath: string } => {
-    const cfg = vscode.workspace.getConfiguration('babysitter', params.workspaceFolder);
-    const configuredShellPath = cfg.get<string>('dispatch.shellPath')?.trim();
-    const shellArgsSetting = cfg.get<string | string[]>('dispatch.shellArgs');
-    const envShell = (process.env.SHELL ?? '').trim();
-    const shellPath = configuredShellPath || envShell || '/bin/bash';
-    let configuredShellArgs: string[] | undefined;
-    if (Array.isArray(shellArgsSetting) && shellArgsSetting.length > 0) {
-      configuredShellArgs = shellArgsSetting
-        .map((arg) => (typeof arg === 'string' ? arg.trim() : ''))
-        .filter((arg): arg is string => Boolean(arg));
-    } else if (typeof shellArgsSetting === 'string' && shellArgsSetting.trim()) {
-      configuredShellArgs = [shellArgsSetting.trim()];
-    }
-    const shellArgs = configuredShellArgs ?? ['-l'];
-
-    const terminal = vscode.window.createTerminal({
-      name: params.name,
-      shellPath,
-      shellArgs,
-      cwd: params.workspaceRoot,
-    });
-    terminal.show(true);
-    terminal.sendText(params.command, true);
-    return { terminal, shellPath };
-  };
-
-  const isHeadlessSession = (): boolean => process.env.BABYSITTER_HEADLESS === '1';
 
   // No process cleanup needed - SDK manages processes
 
@@ -552,7 +498,9 @@ export function activate(context: vscode.ExtensionContext): BabysitterApi {
         const resolvedSdkBinary = result.config.sdkBinary;
         const resolvedRunsRoot = result.config.runsRoot;
         if (resolvedSdkBinary) {
-          output.appendLine(`- Resolved SDK: ${resolvedSdkBinary.path} (${resolvedSdkBinary.source})`);
+          output.appendLine(
+            `- Resolved SDK: ${resolvedSdkBinary.path} (${resolvedSdkBinary.source})`,
+          );
         }
         if (resolvedRunsRoot) {
           output.appendLine(

@@ -71,9 +71,9 @@ export async function loadJournal(runDir: string): Promise<JournalEvent[]> {
         ulid,
         filename: file,
         path: fullPath,
-        type: raw.type,
+        type: raw.type ?? "UNKNOWN",
         recordedAt: typeof raw.recordedAt === "string" ? raw.recordedAt : getClockIsoString(),
-        data: (raw.data ?? {}) as JsonRecord,
+        data: raw.data ?? {},
         checksum: typeof raw.checksum === "string" ? raw.checksum : undefined,
       });
     }
@@ -85,10 +85,17 @@ export async function loadJournal(runDir: string): Promise<JournalEvent[]> {
   }
 }
 
-async function parseJournalFile(fullPath: string) {
+interface ParsedJournalFile {
+  type?: string;
+  recordedAt?: string;
+  data?: JsonRecord;
+  checksum?: string;
+}
+
+async function parseJournalFile(fullPath: string): Promise<ParsedJournalFile> {
   const contents = await fs.readFile(fullPath, "utf8");
   try {
-    return JSON.parse(contents);
+    return JSON.parse(contents) as ParsedJournalFile;
   } catch (error) {
     const parseError = new Error(`Failed to parse journal file ${fullPath}: ${(error as Error).message}`);
     (parseError as NodeJS.ErrnoException).code = "JOURNAL_PARSE_FAILED";

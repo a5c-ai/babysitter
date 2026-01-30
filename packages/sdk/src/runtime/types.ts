@@ -1,10 +1,11 @@
 import type { JsonRecord, RunMetadata } from "../storage/types";
-import type { DefinedTask, TaskBuildContext, TaskDef, TaskInvokeOptions } from "../tasks/types";
+import type { DefinedTask, TaskDef, TaskInvokeOptions } from "../tasks/types";
 import type { StateCacheJournalHead } from "./replay/stateCache";
 
 export type { DefinedTask, TaskBuildContext, TaskDef, TaskInvokeOptions } from "../tasks/types";
 export type { StateCacheJournalHead } from "./replay/stateCache";
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type ProcessLogger = (...args: any[]) => void;
 
 export type EffectStatus = "requested" | "resolved_ok" | "resolved_error";

@@ -294,7 +294,7 @@ function summarizeActions(actions: EffectAction[]): ActionSummary[] {
 }
 
 
-function logPendingActions(
+function _logPendingActions(
   actions: EffectAction[],
   options: { command?: string; includeHeader?: boolean; metadataParts?: string[] } = {}
 ): ActionSummary[] {
@@ -322,7 +322,7 @@ function countActionsByKind(actions: EffectAction[]): Record<string, number> {
   return Object.fromEntries(Array.from(counts.entries()).sort(([a], [b]) => a.localeCompare(b)));
 }
 
-function enrichIterationMetadata(
+function _enrichIterationMetadata(
   metadata: IterationMetadata | undefined,
   pendingActions?: EffectAction[]
 ): IterationMetadata | undefined {
@@ -338,7 +338,7 @@ function enrichIterationMetadata(
   };
 }
 
-function logSleepHints(command: string, actions: EffectAction[]) {
+function _logSleepHints(command: string, actions: EffectAction[]) {
   for (const action of actions) {
     const sleepMs = action.schedulerHints?.sleepUntilEpochMs;
     if (typeof sleepMs !== "number") continue;
@@ -476,6 +476,7 @@ const dynamicImportModule: (specifier: string) => Promise<ModuleExports> = (() =
   if (process.env.VITEST) {
     return (specifier: string) => import(specifier);
   }
+  // eslint-disable-next-line @typescript-eslint/no-implied-eval
   return new Function("specifier", "return import(specifier);") as (specifier: string) => Promise<ModuleExports>;
 })();
 
@@ -999,7 +1000,7 @@ async function handleTaskPost(parsed: ParsedArgs): Promise<number> {
     return path.join(runDir, candidate);
   };
 
-  const readJsonFile = async (_label: string, filename?: string): Promise<unknown | undefined> => {
+  const readJsonFile = async (_label: string, filename?: string): Promise<unknown> => {
     if (!filename) return undefined;
     if (filename === "-") {
       const raw = await readStdinUtf8();

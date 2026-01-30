@@ -55,11 +55,7 @@ export type CreateBreakpointResult = {
   createdAt: string;
 };
 
-async function httpJson<T>(
-  method: string,
-  url: string,
-  body?: unknown,
-): Promise<T> {
+async function httpJson<T>(method: string, url: string, body?: unknown): Promise<T> {
   const headers: Record<string, string> = { 'Content-Type': 'application/json' };
   if (process.env.AGENT_TOKEN) {
     headers.Authorization = `Bearer ${process.env.AGENT_TOKEN}`;
@@ -97,11 +93,7 @@ export async function createBreakpoint(
     ttlSeconds: options.ttlSeconds,
   };
 
-  return httpJson<CreateBreakpointResult>(
-    'POST',
-    `${options.apiUrl}/api/breakpoints`,
-    body,
-  );
+  return httpJson<CreateBreakpointResult>('POST', `${options.apiUrl}/api/breakpoints`, body);
 }
 
 export async function getBreakpointStatus(
@@ -130,7 +122,7 @@ export async function waitForBreakpointRelease(
   const timeoutMs = options.timeoutMs || 600_000; // 10 minutes
   const startTime = Date.now();
 
-  while (true) {
+  for (;;) {
     if (Date.now() - startTime > timeoutMs) {
       throw new Error(`Breakpoint ${breakpointId} timed out after ${timeoutMs}ms`);
     }

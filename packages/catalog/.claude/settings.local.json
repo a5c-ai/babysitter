@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__plugin_playwright_playwright__browser_take_screenshot",
+      "mcp__plugin_playwright_playwright__browser_snapshot",
+      "Bash(babysitter run:status .a5c/runs/01KFZ787BRN4VYJ9XHB3YMB3QK --json)",
+      "Bash(babysitter run:status:*)"
+    ]
+  }
+}

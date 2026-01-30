@@ -82,11 +82,11 @@ export async function callHook(
     child.stdin.end();
 
     // Collect output
-    child.stdout.on("data", (data) => {
+    child.stdout.on("data", (data: Buffer) => {
       stdout += data.toString();
     });
 
-    child.stderr.on("data", (data) => {
+    child.stderr.on("data", (data: Buffer) => {
       stderr += data.toString();
     });
 
@@ -114,7 +114,7 @@ export async function callHook(
 
     child.on("close", (exitCode) => {
       clearTimeout(timeoutHandle);
-      const duration = Date.now() - startTime;
+      const _duration = Date.now() - startTime;
 
       if (timedOut) {
         const result: HookResult = {

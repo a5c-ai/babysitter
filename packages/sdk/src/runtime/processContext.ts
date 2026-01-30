@@ -27,7 +27,7 @@ export interface CreateProcessContextResult {
 }
 
 export function createProcessContext(init: ProcessContextInit): CreateProcessContextResult {
-  const safeLogger = typeof (init as any).logger === "function" ? (init as any).logger : undefined;
+  const safeLogger = typeof init.logger === "function" ? init.logger : undefined;
   const internal: InternalProcessContext = {
     ...init,
     logger: safeLogger,

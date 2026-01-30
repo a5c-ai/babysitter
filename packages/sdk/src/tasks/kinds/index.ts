@@ -394,7 +394,10 @@ function appendRedactedEnvKeys(metadata: JsonRecord | undefined, keys: string[])
     return metadata;
   }
   const result = ensureMetadata(metadata);
-  const existing = Array.isArray(result.redactedEnvKeys) ? result.redactedEnvKeys : [];
+  const existingValue = result.redactedEnvKeys;
+  const existing: string[] = Array.isArray(existingValue)
+    ? existingValue.filter((v): v is string => typeof v === "string")
+    : [];
   const merged = Array.from(new Set<string>([...existing, ...keys]));
   merged.sort((a, b) => a.localeCompare(b));
   result.redactedEnvKeys = merged;

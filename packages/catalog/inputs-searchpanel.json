@@ -1,0 +1,17 @@
+{
+  "projectName": "Search Panel - Pixel Perfect Match",
+  "mockImagePath": "packages/catalog/searchpanel-mock.jpg",
+  "targetPages": [
+    "/search"
+  ],
+  "targetQuality": 100,
+  "maxIterations": 5,
+  "focusArea": "search panel with brass pipe frame",
+  "qualityMetrics": {
+    "pipeFrame": 25,
+    "endCaps": 20,
+    "innerInput": 20,
+    "dropdown": 20,
+    "overall": 15
+  }
+}

@@ -3,7 +3,8 @@
  * Type definitions for the generalized hook system
  */
 
-export type HookType =
+// Known hook types (custom hooks are also allowed as any string)
+export type KnownHookType =
   // SDK Lifecycle Hooks
   | "on-run-start"
   | "on-run-complete"
@@ -18,9 +19,10 @@ export type HookType =
   | "pre-commit"
   | "pre-branch"
   | "post-planning"
-  | "on-score"
-  // Custom hooks
-  | string;
+  | "on-score";
+
+// HookType accepts any string (including custom hooks)
+export type HookType = string;
 
 export interface HookResult {
   hookType: HookType;

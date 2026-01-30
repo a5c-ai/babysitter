@@ -261,7 +261,7 @@ async function resolveStoredResultValue(runDir: string, stored: StoredTaskResult
   if (stored.resultRef) {
     const absolute = normalizeRef(runDir, stored.resultRef);
     const raw = await fs.readFile(absolute, "utf8");
-    return JSON.parse(raw);
+    return JSON.parse(raw) as unknown;
   }
   throw new RunFailedError("Result payload missing data", { effectId: stored.effectId });
 }

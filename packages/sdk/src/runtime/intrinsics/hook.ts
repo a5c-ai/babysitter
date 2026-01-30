@@ -43,7 +43,7 @@ export async function runHookIntrinsic(
 
   // Add runId from context if not in payload
   if (!("runId" in fullPayload) && context.runId) {
-    (fullPayload as any).runId = context.runId;
+    (fullPayload as Record<string, unknown>).runId = context.runId;
   }
 
   // Log the hook invocation

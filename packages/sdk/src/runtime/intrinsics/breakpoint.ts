@@ -12,7 +12,7 @@ const DEFAULT_BREAKPOINT_LABEL = "breakpoint";
 
 const breakpointTask: DefinedTask<BreakpointArgs, void> = {
   id: BREAKPOINT_TASK_ID,
-  async build(args) {
+  build(args) {
     return {
       kind: "breakpoint",
       title: args.label,

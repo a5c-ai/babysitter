@@ -183,7 +183,7 @@ export class EffectIndex {
       throw new RunFailedError("Malformed EFFECT_RESOLVED event missing status", { path: event.path });
     }
     if (payload.status !== "ok" && payload.status !== "error") {
-      throw new RunFailedError(`Unknown EFFECT_RESOLVED status '${payload.status}'`, { path: event.path });
+      throw new RunFailedError(`Unknown EFFECT_RESOLVED status '${String(payload.status)}'`, { path: event.path });
     }
     if (payload.resultRef && typeof payload.resultRef !== "string") {
       throw new RunFailedError("Malformed EFFECT_RESOLVED event resultRef", { path: event.path });

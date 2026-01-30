@@ -11,7 +11,7 @@ const SLEEP_TASK_ID = "__sdk.sleep";
 
 const sleepTask: DefinedTask<SleepArgs, void> = {
   id: SLEEP_TASK_ID,
-  async build(args) {
+  build(args) {
     return {
       kind: "sleep",
       title: `sleep:${args.iso}`,

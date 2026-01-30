@@ -11,6 +11,7 @@ import { journalHeadsEqual, readStateCache, rebuildStateCache, StateCacheSnapsho
 export interface CreateReplayEngineOptions {
   runDir: string;
   now?: () => Date;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   logger?: (...args: any[]) => void;
 }
 

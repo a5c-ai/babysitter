@@ -16,7 +16,7 @@ module.exports = {
     "eslint:recommended",
     "plugin:@typescript-eslint/recommended-type-checked"
   ],
-  ignorePatterns: ["**/dist/**", "node_modules/**"],
+  ignorePatterns: ["**/dist/**", "node_modules/**", "**/__tests__/**"],
   rules: {
     "@typescript-eslint/no-unused-vars": [
       "error",

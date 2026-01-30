@@ -111,9 +111,7 @@ export function resolveBabysitterConfig(options: ResolveConfigOptions): ResolveC
   resolvedConfig.breakpointsEnabled = settings.breakpointsEnabled !== false;
 
   // Resolve runs root
-  const rawRunsRoot = isNonEmptyString(settings.runsRoot)
-    ? settings.runsRoot.trim()
-    : '.a5c/runs';
+  const rawRunsRoot = isNonEmptyString(settings.runsRoot) ? settings.runsRoot.trim() : '.a5c/runs';
   const resolvedRunsRoot = resolveRunsRootPath(rawRunsRoot, options.workspaceRoot);
 
   if (!resolvedRunsRoot) {

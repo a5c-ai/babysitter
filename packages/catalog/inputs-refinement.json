@@ -1,0 +1,64 @@
+{
+  "projectName": "Process Library Catalog - Steampunk UI Final Refinement",
+  "mockImagePath": "packages/catalog/search-mock.jpg",
+  "targetPages": [
+    "/search"
+  ],
+  "designSystemScope": "full",
+  "targetQuality": 99,
+  "maxIterations": 10,
+  "qualityMetrics": {
+    "pixelSimilarity": 99,
+    "colorAccuracy": 99,
+    "layoutAccuracy": 99,
+    "typographyAccuracy": 95,
+    "decorativeElements": 99
+  },
+  "designElements": {
+    "colorPalette": {
+      "brass": "#b08d57",
+      "copper": "#8b4513",
+      "darkBronze": "#614e1a",
+      "parchment": "#f5e6c8",
+      "parchmentDark": "#e8d4a8",
+      "inkBrown": "#3d2914",
+      "inkBlack": "#1a1a1a",
+      "accent": "#c9a227",
+      "rust": "#a04000"
+    },
+    "typography": {
+      "headerFont": "serif/ornate",
+      "bodyFont": "serif",
+      "monoFont": "typewriter-style"
+    },
+    "decorativeFeatures": [
+      "brass pipe borders with joints and valves",
+      "gear decorations at corners and intersections",
+      "riveted metal panels",
+      "parchment/paper texture backgrounds",
+      "botanical illustrations (flowers, insects)",
+      "ornate brass nameplates with rounded ends",
+      "shadow and depth effects",
+      "vintage illustration style icons"
+    ],
+    "uiComponents": {
+      "header": "ornate brass frame with centered title plaque",
+      "searchBar": "brass-framed input with decorative magnifying glass",
+      "filterChips": "brass toggle buttons with gear icons",
+      "cards": "brass-cornered parchment cards with decorative frames",
+      "sections": "pipe-bordered sections with ornate headers"
+    }
+  },
+  "techStack": {
+    "framework": "next.js",
+    "styling": "tailwindcss v4",
+    "components": "shadcn/ui"
+  },
+  "outputDir": ".a5c/runs",
+  "previousScore": 97,
+  "remainingFeedback": [
+    "Card corners need more flowing scroll curves with inner flourishes",
+    "Botanical elements need more color variation/detail",
+    "Mechanical bees need slightly higher contrast in some areas"
+  ]
+}
