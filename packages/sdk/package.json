@@ -1,6 +1,6 @@
 {
   "name": "@a5c-ai/babysitter-sdk",
-  "version": "0.0.154",
+  "version": "0.0.155",
   "description": "Storage and run-registry primitives for event-sourced babysitter workflows.",
   "license": "UNLICENSED",
   "type": "commonjs",
