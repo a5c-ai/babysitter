@@ -136,6 +136,7 @@ Claude will create an orchestration run, execute tasks step-by-step, handle qual
 - [Beginner Tutorial: REST API](docs/user-guide/tutorials/beginner-rest-api.md)
 
 ### Features
+- [Process Library](docs/user-guide/features/process-library.md) - 2,000+ pre-built processes
 - [Process Definitions](docs/user-guide/features/process-definitions.md)
 - [Quality Convergence](docs/user-guide/features/quality-convergence.md)
 - [Run Resumption](docs/user-guide/features/run-resumption.md)
