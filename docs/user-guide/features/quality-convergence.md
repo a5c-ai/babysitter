@@ -467,12 +467,12 @@ function getCurrentTarget(iteration, finalTarget) {
 The V-Model process (`methodologies/v-model.js`) implements comprehensive quality gates:
 
 ```
-/babysit use the V-Model methodology to build a user authentication system with high safety level
+/babysitter:call use the V-Model methodology to build a user authentication system with high safety level
 ```
 
 Or with more detail:
 ```
-/babysit implement user authentication using V-Model with traceability and thorough testing
+/babysitter:call implement user authentication using V-Model with traceability and thorough testing
 ```
 
 **Quality Gates in V-Model:**
@@ -487,12 +487,12 @@ Or with more detail:
 The Spec-Kit process (`methodologies/spec-driven-development.js`) adds governance gates:
 
 ```
-/babysit use spec-driven development to build PCI-compliant payment processing
+/babysitter:call use spec-driven development to build PCI-compliant payment processing
 ```
 
 Or:
 ```
-/babysit build a payment flow using the spec-driven methodology with governance validation
+/babysitter:call build a payment flow using the spec-driven methodology with governance validation
 ```
 
 **Quality Gates in Spec-Kit:**
@@ -508,12 +508,12 @@ Or:
 The GSD process (`gsd/iterative-convergence.js`) implements feedback-driven convergence:
 
 ```
-/babysit build a shopping cart checkout flow with 90% quality target
+/babysitter:call build a shopping cart checkout flow with 90% quality target
 ```
 
 Or:
 ```
-/babysit implement checkout flow using iterative convergence with max 8 iterations
+/babysitter:call implement checkout flow using iterative convergence with max 8 iterations
 ```
 
 **Quality Gates in GSD:**
@@ -1107,7 +1107,7 @@ Beyond methodologies, Babysitter includes **2,000+ domain-specific processes** f
 
 | Your Goal | Next Step |
 |-----------|-----------|
-| Run a quality convergence workflow | Try `/babysit build a feature with 85% quality target` |
+| Run a quality convergence workflow | Try `/babysitter:call build a feature with 85% quality target` |
 | Build your own convergence loop | Copy the TDD example above and customize the scoring |
 | Add more quality gates | See the Five Quality Gate Categories section |
 | Debug a stuck convergence | Check [Best Practices - Debugging](./best-practices.md#debugging-and-troubleshooting) |

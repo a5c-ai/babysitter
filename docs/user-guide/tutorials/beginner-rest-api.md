@@ -181,7 +181,7 @@ Now comes the exciting part! We will ask Claude to use the Babysitter skill to b
 In Claude Code, type:
 
 ```
-/babysit Build a REST API for task management with Express.js. Include:
+/babysitter:call Build a REST API for task management with Express.js. Include:
 - GET /tasks to list all tasks
 - POST /tasks to create a task (with title and completed status)
 - GET /tasks/:id to get a specific task
@@ -640,7 +640,7 @@ If you were to close Claude Code mid-run (please don't do this for a completed r
 To resume a previously interrupted run, you would use:
 
 ```
-/babysit resume --run-id 01KFFTSF8TK8C9GT3YM9QYQ6WG
+/babysitter:call resume --run-id 01KFFTSF8TK8C9GT3YM9QYQ6WG
 ```
 
 Or in natural language:
@@ -738,7 +738,7 @@ claude plugin enable --scope user babysitter@a5c.ai
 **Solution (Interactive Mode - Claude Code):**
 1. Look for Claude's question in the chat - scroll up if needed
 2. Respond to the question to continue
-3. If the session timed out, resume with `/babysit resume`
+3. If the session timed out, resume with `/babysitter:call resume`
 
 **Solution (Non-Interactive Mode):**
 1. Ensure the breakpoints service is running: `npx -y @a5c-ai/babysitter-breakpoints@latest start`

@@ -258,7 +258,7 @@ Timeout after 300s
 3. Approve pending breakpoints at http://localhost:3184
 4. Resume the run:
    ```bash
-   /babysit resume --run-id <runId>
+   /babysitter:call resume --run-id <runId>
    ```
 
 ---
@@ -316,7 +316,7 @@ Error: Run encountered an error
 2. Fix underlying issue
 3. Resume if possible:
    ```
-   /babysit resume
+   /babysitter:call resume
    ```
 
 ---

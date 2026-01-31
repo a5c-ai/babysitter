@@ -88,7 +88,7 @@ npm init -y
 Open Claude Code in your project directory and enter this command:
 
 ```
-/babysit create a calculator module with add, subtract, multiply, and divide functions using TDD with 80% quality target
+/babysitter:call create a calculator module with add, subtract, multiply, and divide functions using TDD with 80% quality target
 ```
 
 **Alternative (natural language):**
@@ -315,7 +315,7 @@ This is the audit trail. Every decision, every iteration, every quality score - 
 Let's see how easy it is to extend your calculator. Ask Babysitter to add more features:
 
 ```
-/babysit add a power function and square root function to the calculator with TDD
+/babysitter:call add a power function and square root function to the calculator with TDD
 ```
 
 Babysitter will:
@@ -343,7 +343,7 @@ Let's recap what Babysitter did for you:
 
 ### With Babysitter (Automated Approach)
 
-1. You: "/babysit create calculator with TDD, 80% quality"
+1. You: "/babysitter:call create calculator with TDD, 80% quality"
 2. (Babysitter handles everything automatically)
 3. Done!
 
@@ -365,7 +365,7 @@ One of Babysitter's superpowers is persistence. Let's try it:
 ### Start a Long-Running Task
 
 ```
-/babysit build a REST API for task management with authentication, using TDD with 85% quality target and max 10 iterations
+/babysitter:call build a REST API for task management with authentication, using TDD with 85% quality target and max 10 iterations
 ```
 
 ### Interrupt It
@@ -377,13 +377,13 @@ Close Claude Code or press Ctrl+C while it's running.
 Open Claude Code again and run:
 
 ```
-Resume the babysitter run
+/babysitter:call resume the babysitter run
 ```
 
 or
 
 ```
-/babysit resume
+/babysitter:call resume
 ```
 
 Babysitter will:
@@ -412,7 +412,7 @@ No work lost!
 
 **Solution (Interactive Mode):**
 - Scroll up to find the breakpoint question and respond
-- Or resume the run: `claude "Resume the babysitter run"`
+- Or resume the run: `claude "/babysitter:call resume the babysitter run"`
 
 **Cause (Non-Interactive Mode):** Breakpoints service not running.
 
@@ -453,9 +453,9 @@ Congratulations! You've completed your first Babysitter run. Here's what to expl
 
 1. **[First Run Deep Dive](./first-run.md)** - Understand exactly what happened in detail
 2. **Try different prompts:**
-   - `/babysit refactor the calculator for better error handling`
-   - `/babysit add comprehensive documentation to the calculator`
-   - `/babysit increase test coverage to 95%`
+   - `/babysitter:call refactor the calculator for better error handling`
+   - `/babysitter:call add comprehensive documentation to the calculator`
+   - `/babysitter:call increase test coverage to 95%`
 
 ### This Week
 
@@ -480,10 +480,10 @@ Commands used in this quickstart:
 
 ```bash
 # Start a TDD run with quality target (in Claude Code)
-/babysit <description> with TDD and <X>% quality target
+/babysitter:call <description> with TDD and <X>% quality target
 
 # Resume an interrupted run
-/babysit resume
+/babysitter:call resume
 
 # View run journal
 cat .a5c/runs/<runId>/journal/journal.jsonl

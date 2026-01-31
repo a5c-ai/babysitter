@@ -593,7 +593,7 @@ TUTORIALS
 |   |
 |   +-- L1.3 Your First Run
 |   |   +-- Starting Claude Code
-|   |   +-- Running /babysit command
+|   |   +-- Running /babysitter:call command
 |   |   +-- Observing iteration
 |   |   +-- Viewing results
 |   |

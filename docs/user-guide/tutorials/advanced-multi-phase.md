@@ -1184,7 +1184,7 @@ claude
 ```
 
 ```
-/babysit run multi-phase-feature with featureDescription="Add user authentication with JWT tokens, including login, logout, and token refresh endpoints" qualityTarget=85 maxIterations=5 targetEnvironment=staging
+/babysitter:call run multi-phase-feature with featureDescription="Add user authentication with JWT tokens, including login, logout, and token refresh endpoints" qualityTarget=85 maxIterations=5 targetEnvironment=staging
 ```
 
 Or in natural language:
@@ -1477,7 +1477,7 @@ You have completed the advanced tutorials. Here are paths to continue your exper
 
 **Solution (Interactive Mode - Claude Code):**
 1. Look for Claude's question in the chat - scroll up if needed
-2. If the session disconnected, resume with `/babysit resume`
+2. If the session disconnected, resume with `/babysitter:call resume`
 3. Ensure you respond to the question to continue
 
 **Solution (Non-Interactive Mode):**

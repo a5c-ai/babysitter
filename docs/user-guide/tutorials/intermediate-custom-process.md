@@ -698,7 +698,7 @@ claude
 Then run the process:
 
 ```
-/babysit run build-deploy with environment=staging and qualityThreshold=75
+/babysitter:call run build-deploy with environment=staging and qualityThreshold=75
 ```
 
 Or using natural language:
@@ -808,7 +808,7 @@ Summary:
 Now let's test the full process with production deployment:
 
 ```
-/babysit run build-deploy with environment=production qualityThreshold=85
+/babysitter:call run build-deploy with environment=production qualityThreshold=85
 ```
 
 This time, you will see **multiple breakpoints**:
@@ -1019,7 +1019,7 @@ Now that you've mastered custom process definitions, here are paths to continue:
 
 **Solution (Interactive Mode - Claude Code):**
 1. Look for Claude's question in the chat - scroll up if needed
-2. If the session disconnected, resume with `/babysit resume`
+2. If the session disconnected, resume with `/babysitter:call resume`
 
 **Solution (Non-Interactive Mode):**
 1. Verify breakpoints service is running: `curl http://localhost:3184/health`

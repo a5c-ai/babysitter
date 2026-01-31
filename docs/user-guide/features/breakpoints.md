@@ -225,7 +225,7 @@ Execute your workflow using the babysitter skill or CLI.
 
 ```bash
 # In Claude Code (interactive mode - no breakpoints service needed)
-claude "/babysit implement user authentication with breakpoint approval"
+claude "/babysitter:call implement user authentication with breakpoint approval"
 
 # Or for non-interactive/headless execution
 babysitter run:iterate .a5c/runs/<runId> --json

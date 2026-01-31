@@ -21,7 +21,7 @@ In the quickstart, you built a calculator with a single command and watched Baby
 
 ## The Anatomy of a Babysitter Run
 
-When you typed `/babysit create a calculator with TDD and 80% quality target`, here's the sequence of events:
+When you typed `/babysitter:call create a calculator with TDD and 80% quality target`, here's the sequence of events:
 
 ```
 Your Command
@@ -301,13 +301,13 @@ You can customize targets in your prompts:
 
 ```
 # Conservative (high quality)
-/babysit build feature with TDD and 90% quality target
+/babysitter:call build feature with TDD and 90% quality target
 
 # Balanced (default-ish)
-/babysit build feature with TDD and 80% quality target
+/babysitter:call build feature with TDD and 80% quality target
 
 # Fast (lower quality, fewer iterations)
-/babysit build feature with TDD and 70% quality target
+/babysitter:call build feature with TDD and 70% quality target
 ```
 
 Higher targets = more iterations = longer runtime = higher quality
@@ -389,13 +389,13 @@ You can customize Babysitter's behavior in several ways:
 
 ```bash
 # Set quality target
-/babysit build API with 85% quality target
+/babysitter:call build API with 85% quality target
 
 # Set max iterations
-/babysit build API with max 10 iterations
+/babysitter:call build API with max 10 iterations
 
 # Combine options
-/babysit build API with TDD, 90% quality, max 8 iterations
+/babysitter:call build API with TDD, 90% quality, max 8 iterations
 ```
 
 ### Via Process Selection
@@ -410,8 +410,8 @@ Different methodologies for different needs:
 
 ```bash
 # Explicit methodology selection
-/babysit build feature using TDD methodology
-/babysit prototype using GSD methodology
+/babysitter:call build feature using TDD methodology
+/babysitter:call prototype using GSD methodology
 ```
 
 ### Via Iteration Limits
@@ -420,10 +420,10 @@ Prevent runaway loops:
 
 ```bash
 # Low limit (fast, may not reach target)
-/babysit build feature with max 3 iterations
+/babysitter:call build feature with max 3 iterations
 
 # High limit (thorough, takes longer)
-/babysit build feature with max 15 iterations
+/babysitter:call build feature with max 15 iterations
 ```
 
 If max iterations reached without meeting quality target, Babysitter completes with a warning.
@@ -481,7 +481,7 @@ cat .a5c/runs/<runId>/journal/journal.jsonl | grep QUALITY_SCORE | jq '.score'
 **Incomplete run:**
 ```bash
 # Resume and continue
-claude "Resume the babysitter run <runId>"
+claude "/babysitter:call resume the babysitter run <runId>"
 ```
 
 ---
@@ -581,12 +581,12 @@ Now that you understand what happened in your first run, you're ready to explore
 
 1. **Try Different Quality Targets**
    ```
-   /babysit add validation to calculator with 90% quality
+   /babysitter:call add validation to calculator with 90% quality
    ```
 
 2. **Experience Breakpoints**
    ```
-   /babysit refactor calculator with breakpoint approval before changes
+   /babysitter:call refactor calculator with breakpoint approval before changes
    ```
    Claude will ask you directly in the chat when approval is needed!
 
@@ -595,7 +595,7 @@ Now that you understand what happened in your first run, you're ready to explore
 3. **Test Session Resumption**
    - Start a longer run
    - Interrupt it (Ctrl+C or close Claude Code)
-   - Resume with `/babysit resume`
+   - Resume with `/babysitter:call resume`
 
 ### This Week
 
@@ -619,11 +619,11 @@ BABYSITTER QUICK REFERENCE
 ==========================
 
 START A RUN:
-  /babysit <request> with TDD and <X>% quality
+  /babysitter:call <request> with TDD and <X>% quality
 
 RESUME A RUN:
-  /babysit resume
-  /babysit resume --run-id <id>
+  /babysitter:call resume
+  /babysitter:call resume --run-id <id>
 
 VIEW JOURNAL:
   cat .a5c/runs/<id>/journal/journal.jsonl | jq .

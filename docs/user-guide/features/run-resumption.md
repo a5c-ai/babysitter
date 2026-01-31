@@ -43,12 +43,12 @@ A workflow is interrupted when a Claude Code session ends unexpectedly.
 
 ```bash
 # Session 1: Start a workflow
-claude "/babysit implement user authentication with TDD"
+claude "/babysitter:call implement user authentication with TDD"
 
 # ... session times out mid-execution ...
 
 # Session 2: Resume the workflow
-claude "/babysit resume --run-id 01KFFTSF8TK8C9GT3YM9QYQ6WG"
+claude "/babysitter:call resume --run-id 01KFFTSF8TK8C9GT3YM9QYQ6WG"
 ```
 
 ### Scenario 2: Continue After Breakpoint Approval
@@ -60,7 +60,7 @@ A workflow pauses at a breakpoint while you review and approve changes.
 # "Waiting for approval at breakpoint: Plan Review"
 
 # Later, after reviewing and approving via web UI or Telegram:
-claude "Resume the babysitter run for the auth feature"
+claude "/babysitter:call resume the babysitter run for the auth feature"
 ```
 
 ### Scenario 3: Team Handoff
@@ -75,7 +75,7 @@ babysitter run:create \
   --inputs ./inputs.json
 
 # Developer B (evening): Continues the run
-claude "/babysit resume --run-id feature-auth-20260125"
+claude "/babysitter:call resume --run-id feature-auth-20260125"
 ```
 
 ### Scenario 4: Retry After Failure
@@ -87,7 +87,7 @@ A task fails due to a transient error. Fix the issue and resume.
 # "Error: API rate limit exceeded"
 
 # After waiting for rate limit to reset:
-claude "/babysit resume --run-id 01KFFTSF8TK8C9GT3YM9QYQ6WG"
+claude "/babysitter:call resume --run-id 01KFFTSF8TK8C9GT3YM9QYQ6WG"
 ```
 
 ---
@@ -154,7 +154,7 @@ Resume the babysitter run for the auth feature
 
 **Via slash command:**
 ```bash
-/babysit resume --run-id 01KFFTSF8TK8C9GT3YM9QYQ6WG
+/babysitter:call resume --run-id 01KFFTSF8TK8C9GT3YM9QYQ6WG
 ```
 
 **Via CLI (for scripting):**
@@ -203,7 +203,7 @@ babysitter task:list 01KFFTSF8TK8C9GT3YM9QYQ6WG --pending --json
 ### Resume Command Options
 
 ```bash
-/babysit resume --run-id <id> [--max-iterations <n>]
+/babysitter:call resume --run-id <id> [--max-iterations <n>]
 ```
 
 | Option | Type | Default | Description |
@@ -317,7 +317,7 @@ babysitter run:events "$RUN_ID" --filter-type RUN_FAILED --json | jq '.events[].
 npm install missing-package
 
 # 3. Resume the run
-claude "/babysit resume --run-id $RUN_ID"
+claude "/babysitter:call resume --run-id $RUN_ID"
 ```
 
 ### Example 5: Resumable Process Design

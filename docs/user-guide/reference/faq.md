@@ -13,7 +13,7 @@
 | Question | Quick Answer |
 |----------|--------------|
 | **What does Babysitter actually do?** | It automates the "try → test → fix → repeat" loop until your code meets quality targets |
-| **How do I start?** | Just type `/babysit build a login page` in Claude Code |
+| **How do I start?** | Just type `/babysitter:call build a login page` in Claude Code |
 | **Do I need to write code?** | No - you use natural language. Babysitter handles the rest |
 | **What if something goes wrong?** | Everything is saved automatically. You can always resume or debug |
 | **Is it free?** | Babysitter is included with Claude Code - no additional cost |
@@ -79,7 +79,7 @@ Use the babysitter skill to implement user authentication with TDD
 Or use the slash command:
 
 ```
-/babysit implement user authentication with TDD
+/babysitter:call implement user authentication with TDD
 ```
 
 However, creating custom process definitions does require JavaScript/TypeScript knowledge.
@@ -246,12 +246,12 @@ Use the babysitter skill to implement user authentication
 
 **Via slash command:**
 ```
-/babysit implement user authentication with TDD
+/babysitter:call implement user authentication with TDD
 ```
 
 **With options:**
 ```
-/babysit implement user authentication --max-iterations 10
+/babysitter:call implement user authentication --max-iterations 10
 ```
 
 See: [Quickstart](../getting-started/quickstart.md)
@@ -275,7 +275,7 @@ Resume the babysitter run for the authentication feature
 
 **Via slash command with run ID:**
 ```
-/babysit resume --run-id 01KFFTSF8TK8C9GT3YM9QYQ6WG
+/babysitter:call resume --run-id 01KFFTSF8TK8C9GT3YM9QYQ6WG
 ```
 
 **Find your run ID:**
@@ -333,7 +333,7 @@ babysitter run:events <runId> --filter-type RUN_FAILED --json
 
 **To resume after fixing:**
 ```
-/babysit resume
+/babysitter:call resume
 ```
 
 ---
@@ -416,7 +416,7 @@ Timeout after 300s
 1. Ensure breakpoints service is running
 2. Check for pending breakpoints in the UI
 3. Approve the breakpoint
-4. Resume the run: `/babysit resume --run-id <runId>`
+4. Resume the run: `/babysitter:call resume --run-id <runId>`
 
 The run state is preserved and can be resumed after approval.
 
@@ -495,12 +495,12 @@ const { targetQuality = 85, maxIterations = 5 } = inputs;
 
 2. **Lower the target:**
    ```
-   /babysit continue with 75% quality target
+   /babysitter:call continue with 75% quality target
    ```
 
 3. **Increase iterations:**
    ```
-   /babysit continue with max 10 iterations
+   /babysitter:call continue with max 10 iterations
    ```
 
 4. **Review blocking issues:** Check lint errors, test failures, etc.
@@ -565,7 +565,7 @@ See: [Run Resumption](../features/run-resumption.md)
 **No.** All progress is preserved in the journal. Resume with:
 
 ```
-/babysit resume --run-id <runId>
+/babysitter:call resume --run-id <runId>
 ```
 
 ---
@@ -576,10 +576,10 @@ Yes. Runs are stored in the file system and can be continued by anyone with acce
 
 ```
 # Developer A starts
-/babysit implement feature X
+/babysitter:call implement feature X
 
 # Developer B continues
-/babysit resume the feature X workflow
+/babysitter:call resume the feature X workflow
 ```
 
 Ensure you share the `.a5c/` directory (e.g., via Git or shared storage).

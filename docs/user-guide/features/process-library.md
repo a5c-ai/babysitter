@@ -27,13 +27,13 @@ The Babysitter Process Library is a comprehensive collection of **2,000+ pre-bui
 **Most users never need to browse the library directly.** Just describe what you want:
 
 ```
-/babysit build a user authentication system with login, registration, and password reset
+/babysitter:call build a user authentication system with login, registration, and password reset
 ```
 
 Babysitter automatically finds and combines the right processes. Want a specific methodology?
 
 ```
-/babysit with TDD methodology, create a REST API for managing tasks
+/babysitter:call with TDD methodology, create a REST API for managing tasks
 ```
 
 That's it! See the sections below for details on what's available.
@@ -313,10 +313,10 @@ Processes for research methodologies, analysis frameworks, and academic workflow
 
 ## Using a Pre-Built Process
 
-**Recommended: Just use `/babysit`** - it selects the right process automatically:
+**Recommended: Just use `/babysitter:call <request>`** - it selects the right process automatically:
 
 ```
-/babysit build a Next.js app with authentication, PostgreSQL database, and Vercel deployment
+/babysitter:call build a Next.js app with authentication, PostgreSQL database, and Vercel deployment
 ```
 
 Babysitter will find the `nextjs-fullstack-app` process and configure it based on your request.

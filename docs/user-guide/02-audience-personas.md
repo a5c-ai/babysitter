@@ -1040,7 +1040,7 @@ A JWT authentication module with 85% quality target.
 
 ### Command
 ```bash
-claude "/babysit add JWT authentication module with TDD, 85% quality target"
+claude "/babysit:call add JWT authentication module with TDD, 85% quality target"
 ```
 
 ### What to Expect
@@ -1252,7 +1252,7 @@ cd ~/my-project
 Type this command exactly as shown:
 
 ```bash
-claude "/babysit create a calculator module with add and subtract functions"
+claude "/babysitter:call create a calculator module with add and subtract functions"
 ```
 
 **What you should see:**

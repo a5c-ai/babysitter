@@ -92,7 +92,7 @@ text-shadow: 0 0 10px #FF00E0, 0 0 20px #FF00E0, 0 0 40px #FF00E0;
 
 **Text:** "Babysitter loops until it works."
 
-**CLI snippet:** `/babysit "build API with 85% coverage"`
+**CLI snippet:** `/babysitter:call "build API with 85% coverage"`
 
 **End state:** All 5 steps glowing cyan with checkmarks
 

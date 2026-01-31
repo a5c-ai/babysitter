@@ -480,7 +480,7 @@ curl http://localhost:3184/health
 #### 4. Full Integration Test
 In Claude Code:
 ```
-claude "/babysit echo hello world"
+claude "/babysitter:call echo hello world"
 ```
 **Expected:** Babysitter creates a run and executes successfully
 
@@ -490,7 +490,7 @@ claude "/babysit echo hello world"
 |-------|---------|----------|
 | jq | `jq --version` | jq-1.6 or higher |
 | SDK | `npx @a5c-ai/babysitter-sdk --version` | Version number |
-| Plugin | `/skills` in Claude Code | "babysit" listed |
+| Plugin | `/skills` in Claude Code | "babysitter:call" listed |
 | Breakpoints | `curl localhost:3184/health` | JSON response |
 
 **All checks passed?** You're ready for the [Quickstart](./quickstart.md)!
@@ -692,10 +692,10 @@ Commands you'll use most often:
 
 ```bash
 # Start a new babysitter run
-claude "/babysit <your request>"
+claude "/babysitter:call <your request>"
 
 # Resume a run
-claude "Resume the babysitter run"
+claude "/babysitter:call resume the babysitter run"
 
 # Start breakpoints service
 npx -y @a5c-ai/babysitter-breakpoints@latest start

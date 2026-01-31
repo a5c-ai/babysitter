@@ -211,7 +211,7 @@ claude plugin update babysitter@a5c.ai
 
 **Command:**
 ```bash
-claude "/babysit implement a simple calculator module with TDD and 80% quality target"
+claude "/babysitter:call implement a simple calculator module with TDD and 80% quality target"
 ```
 
 **What Happens:**
@@ -232,10 +232,10 @@ claude "/babysit implement a simple calculator module with TDD and 80% quality t
 **Goal:** Demonstrate session persistence by resuming a paused run.
 
 **Steps:**
-1. Start a run: `claude "/babysit build a todo API --max-iterations 10"`
+1. Start a run: `claude "/babysitter:call build a todo API --max-iterations 10"`
 2. Close Claude Code mid-execution
 3. Reopen Claude Code
-4. Resume: `claude "Resume the babysitter run and continue"`
+4. Resume: `claude "/babysitter:call resume the babysitter run and continue"`
 
 **Success Criteria:**
 - Run continues from exact point of interruption
@@ -250,7 +250,7 @@ claude "/babysit implement a simple calculator module with TDD and 80% quality t
 
 **Command:**
 ```bash
-claude "/babysit refactor the auth module with breakpoint approval before changes"
+claude "/babysitter:call refactor the auth module with breakpoint approval before changes"
 ```
 
 **What Happens:**
@@ -285,7 +285,7 @@ claude "/babysit refactor the auth module with breakpoint approval before change
 Level 1: First Use (Day 1)
     |
     +---> Install babysitter
-    +---> Run first /babysit command
+    +---> Run first /babysitter:call command
     +---> Observe automatic iteration
     +---> See quality convergence in action
     |
@@ -335,7 +335,7 @@ Level 5: Expert Use (Ongoing)
    - Verifies installation works
 
 3. **First Run** (15-30 min)
-   - Uses `/babysit` with simple prompt
+   - Uses `/babysitter:call` with simple prompt
    - Observes automatic iteration
    - Sees quality convergence working
    - Feature delivered with tests
@@ -362,7 +362,7 @@ Level 5: Expert Use (Ongoing)
 | Moment | User Emotion | Risk | Mitigation |
 |--------|--------------|------|------------|
 | First installation | Cautious excitement | Installation failure | Clear prerequisites, verification steps |
-| First /babysit command | Curious | Nothing happens | Immediate feedback, progress indicators |
+| First /babysitter:call command | Curious | Nothing happens | Immediate feedback, progress indicators |
 | First breakpoint | Confused | Don't know how to approve | Clear instructions in CLI output |
 | Session interruption | Frustrated | Fear of lost work | Clear messaging about resumability |
 | Quality not converging | Frustrated | Wasted iterations | Guidance on adjusting targets |
@@ -400,7 +400,7 @@ Level 5: Expert Use (Ongoing)
 | **Breakpoint** | Pause point requiring human approval | Before production deployment |
 | **Deterministic Replay** | Same inputs + journal = same execution path | Session resumption |
 | **Event Sourcing** | State derived from replaying events | Journal-based state reconstruction |
-| **In-Session Loop** | Continuous iteration within a single Claude session | `/babysit` command with max iterations |
+| **In-Session Loop** | Continuous iteration within a single Claude session | `/babysitter:call` command with max iterations |
 
 ### 7.4 File Structure Glossary
 
@@ -441,7 +441,7 @@ Level 5: Expert Use (Ongoing)
 | Issue | Cause | Solution |
 |-------|-------|----------|
 | Breakpoint not resolving | Breakpoints service not running | Start with `npx @a5c-ai/babysitter-breakpoints@latest start` |
-| Session ended unexpectedly | Network issue, Claude Code crash | Resume with `/babysit resume --run-id <id>` |
+| Session ended unexpectedly | Network issue, Claude Code crash | Resume with `/babysitter:call resume --run-id <id>` |
 | Quality score not improving | Unrealistic target or blocking issues | Lower target, review iteration logs |
 | Agent task timeout | Large context, API issues | Reduce task scope, check API status |
 | Journal conflict | Concurrent operations | Avoid multiple instances, use resume to recover |

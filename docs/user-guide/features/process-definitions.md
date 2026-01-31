@@ -255,7 +255,7 @@ Use the babysitter skill or CLI to drive execution.
 
 ```bash
 # Via skill
-claude "/babysit run my-workflow"
+claude "/babysitter:call run my-workflow"
 
 # Via CLI iteration loop
 while true; do

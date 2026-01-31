@@ -113,37 +113,13 @@ claude plugin update babysitter@a5c.ai
 
 In Claude Code, type `/skills` to verify "babysit" appears in the list.
 
-### 4. Run the babysitter breakpoints service
-
-In a new terminal, run the following command:
-
-```bash
-npx -y @a5c-ai/babysitter-breakpoints@latest start
-```
-
-This will start the babysitter breakpoints service at http://localhost:3184
-
-You can either:
-
-1. use a tunneling service like ngrok to expose the service to the internet:
-
-```bash
-ngrok http 3184
-```
-
-OR
-
-2. configure the telegram extension of the breakpoints service. (from the breakpoints ui)
-
----
-
 ## Quick Start
 
 Simply ask Claude to use the babysitter skill:
 
 
 ```bash
-claude "/babysit implement user authentication with TDD"
+claude "/babysitter:call implement user authentication with TDD"
 ```
 
 or in English:
@@ -2199,7 +2175,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
-See [LICENSE](https://github.com/a5c-ai/babysitter/blob/main/LICENSE) for full details.
+See [LICENSE.md](https://github.com/a5c-ai/babysitter/blob/main/LICENSE.md) for full details.
 
 ---
 

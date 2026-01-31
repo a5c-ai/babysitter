@@ -84,7 +84,7 @@ When you ask an AI to write code, you typically:
 **What you'll see:**
 
 ```
-/babysit build a calculator with add, subtract, multiply, divide using TDD
+/babysitter:call build a calculator with add, subtract, multiply, divide using TDD
 
 Creating run: calculator-20260125-143012
 Process: TDD Quality Convergence
@@ -109,7 +109,7 @@ Done! Your calculator module is ready.
 
 **Note:** Breakpoints (approval prompts) are handled directly in the chat when using Claude Code. No external service needed!
 
-**The main command:** `/babysit <your request>` handles everything automatically.
+**The main command:** `/babysitter:call <your request>` handles everything automatically.
 
 → **[Start the Quick Start Tutorial](./getting-started/quickstart.md)**
 

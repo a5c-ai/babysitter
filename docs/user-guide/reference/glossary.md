@@ -127,13 +127,13 @@ The primary Claude Code skill for orchestrating runs. The skill manages the orch
 
 **Invocation:**
 ```bash
-/babysit Build a REST API with TDD
+/babysitter:call Build a REST API with TDD
 ```
 
 **Equivalent verbs:** The following commands are functionally identical:
-- `/babysit build a feature`
-- `/babysit create a feature`
-- `/babysit implement a feature`
+- `/babysitter:call build a feature`
+- `/babysitter:call create a feature`
+- `/babysitter:call implement a feature`
 
 All verbs (build, create, implement) trigger the same orchestration workflow.
 
@@ -412,7 +412,7 @@ A mechanism for continuous iteration within a single Claude Code session. The st
 
 **Invocation:**
 ```bash
-/babysitter:babysit Build feature --max-iterations 20
+/babysitter:call Build feature --max-iterations 20
 ```
 
 **Related:** [Stop Hook](#stop-hook), [Completion Promise](#completion-promise)

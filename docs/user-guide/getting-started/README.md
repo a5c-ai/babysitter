@@ -22,7 +22,7 @@ You: "Fix the tests"
 
 You just say:
 ```
-/babysit build a login page with 90% quality target
+/babysitter:call build a login page with 90% quality target
 ```
 
 Babysitter handles the iteration, testing, and quality checks automatically. Come back later, it's still working (or waiting for your approval).
@@ -70,7 +70,7 @@ Stop manually asking Claude to "make it better." Define your quality target (tes
 
 ```
 # Example: Iterate until 85% quality score
-claude "/babysit implement user auth with TDD, 85% quality target"
+claude "/babysitter:call implement user auth with TDD, 85% quality target"
 ```
 
 ### 2. Never Lose Progress
@@ -86,7 +86,7 @@ Add approval gates for critical decisions. Review context, approve or reject, an
 
 ```
 # Babysitter will pause for approval before deploying
-claude "/babysit deploy to production with breakpoint approval"
+claude "/babysitter:call deploy to production with breakpoint approval"
 ```
 
 ### 4. Structured Workflows
@@ -295,10 +295,10 @@ Keep these commands handy:
 
 ```bash
 # Start a new run
-claude "/babysit <your request>"
+claude "/babysitter:call <your request>"
 
 # Resume an existing run
-claude "Resume the babysitter run"
+claude "/babysitter:call resume the babysitter run"
 
 # Start breakpoints service
 npx -y @a5c-ai/babysitter-breakpoints@latest start

@@ -575,7 +575,7 @@ Validate processes before using them in production.
 
 Start a test run with minimal inputs:
 ```
-/babysit test my-process with small inputs
+/babysitter:call test my-process with small inputs
 ```
 
 Then ask Claude to show you the results:
@@ -786,25 +786,25 @@ Enable multiple team members to interact with runs.
 
 Start a clearly-named workflow:
 ```
-/babysit implement oauth2 authentication feature
+/babysitter:call implement oauth2 authentication feature
 ```
 
 Team members can easily find and resume:
 ```
-Resume the oauth2 authentication babysitter run
+/babysitter:call resume the oauth2 authentication babysitter run
 ```
 
 **Run handoff workflow:**
 
 ```
 # Developer A: Start the workflow during morning
-/babysit implement the API feature
+/babysitter:call implement the API feature
 # Run reaches breakpoint requiring review
 
 # Developer B: Review and continue in evening
 What's the status of the API feature babysitter run?
 # Approve breakpoint via UI at http://localhost:3184, then:
-/babysit resume the API feature run
+/babysitter:call resume the API feature run
 ```
 
 ### Code Review Workflows with Babysitter
@@ -1119,7 +1119,7 @@ My babysitter run state seems corrupted, can you help recover it?
 **If process code changed mid-run:**
 Best to start fresh - old state may be incompatible:
 ```
-/babysit start a new workflow for the same feature
+/babysitter:call start a new workflow for the same feature
 ```
 
 ---
@@ -1258,7 +1258,7 @@ if (process.env.BABYSITTER_AUTO_APPROVE !== 'true') {
 
 4. Resume:
    ```
-   /babysit resume
+   /babysitter:call resume
    ```
 
 ---

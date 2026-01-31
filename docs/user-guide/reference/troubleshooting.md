@@ -413,7 +413,7 @@ curl http://localhost:3184/api/breakpoints
 
 4. **Resume the run to retry breakpoint registration:**
    ```bash
-   /babysit resume --run-id <runId>
+   /babysitter:call resume --run-id <runId>
    ```
 
 ---
@@ -490,7 +490,7 @@ babysitter run:events <runId> --limit 10 --reverse --json
    - Fix the underlying issue (missing deps, file not found, etc.)
    - Resume:
      ```bash
-     /babysit resume --run-id <runId>
+     /babysitter:call resume --run-id <runId>
      ```
 
 4. **Ask Claude to analyze:**
@@ -586,7 +586,7 @@ babysitter run:status <runId> --json
 
 Resume the run:
 ```
-/babysit resume --run-id 01KFFTSF8TK8C9GT3YM9QYQ6WG
+/babysitter:call resume --run-id 01KFFTSF8TK8C9GT3YM9QYQ6WG
 ```
 
 Babysitter is designed to be resumable. All progress is preserved.
@@ -736,7 +736,7 @@ babysitter run:status <runId> --json | jq '.metadata.pendingEffectsByKind'
 
 2. **Then resume:**
    ```bash
-   /babysit resume --run-id <runId>
+   /babysitter:call resume --run-id <runId>
    ```
 
 ---
