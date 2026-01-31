@@ -50,6 +50,8 @@ https://github.com/user-attachments/assets/8c3b0078-9396-48e8-aa43-5f40da30c20b
 - [FAQ](#faq)
 - [Contributing](#contributing)
 - [Community and Support](#community-and-support)
+  - [Star History](#star-history)
+  - [Contributors](#contributors)
 - [License](#license)
 - [Further Reading](#further-reading)
 
@@ -2144,6 +2146,24 @@ For detailed guidelines, see [CONTRIBUTING.md](https://github.com/a5c-ai/babysit
 
 - **GitHub**: [github.com/a5c-ai/babysitter](https://github.com/a5c-ai/babysitter)
 - **npm**: [@a5c-ai/babysitter-sdk](https://www.npmjs.com/package/@a5c-ai/babysitter-sdk)
+
+### Star History
+
+<a href="https://star-history.com/#a5c-ai/babysitter&Date">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=a5c-ai/babysitter&type=Date&theme=dark" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=a5c-ai/babysitter&type=Date" />
+   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=a5c-ai/babysitter&type=Date" />
+ </picture>
+</a>
+
+### Contributors
+
+Thanks to all the contributors who have helped make Babysitter better!
+
+<a href="https://github.com/a5c-ai/babysitter/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=a5c-ai/babysitter" />
+</a>
 
 ### Code of Conduct
 
