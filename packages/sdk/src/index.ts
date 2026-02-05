@@ -6,3 +6,4 @@ export * from "./tasks";
 export * from "./cli/main";
 export * from "./testing";
 export * from "./hooks";
+export * from "./config";

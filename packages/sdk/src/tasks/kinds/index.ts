@@ -15,8 +15,13 @@ import {
   TaskValueFactory,
   TaskValueOrFactory,
 } from "../types";
+import { DEFAULTS } from "../../config/defaults";
 
-const DEFAULT_NODE_TIMEOUT_MS = 15 * 60 * 1000;
+/**
+ * Default node task timeout.
+ * @see DEFAULTS.nodeTaskTimeout for the centralized default
+ */
+const DEFAULT_NODE_TIMEOUT_MS = DEFAULTS.nodeTaskTimeout;
 const DEFAULT_BREAKPOINT_LABEL = "breakpoint";
 const DEFAULT_ORCHESTRATOR_LABEL = "orchestrator-task";
 const DEFAULT_SLEEP_TASK_ID = "__sdk.sleep";

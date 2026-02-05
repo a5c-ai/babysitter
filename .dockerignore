@@ -1,0 +1,61 @@
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Build outputs
+dist/
+**/dist/
+*.tsbuildinfo
+
+# Git
+.git/
+.gitignore
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Test and coverage
+coverage/
+.nyc_output/
+
+# Environment files (never include secrets in image)
+.env
+.env.*
+*.env
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Documentation (optional, reduce image size)
+*.md
+!README.md
+!DOCKER.md
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+.travis.yml
+
+# Babysitter runs (don't include old runs in image)
+.a5c/runs/
+.a5c/inputs/
+
+# VSCode extension build artifacts
+packages/vscode/out/
+packages/vscode-extension/.vscode-test/
+*.vsix

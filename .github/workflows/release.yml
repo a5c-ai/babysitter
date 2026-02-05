@@ -49,11 +49,6 @@ jobs:
           set -euo pipefail
           npm run verify:metadata 2>&1 | tee artifacts/logs/metadata.log
 
-      - name: Build extension
-        run: |
-          set -euo pipefail
-          npm run build 2>&1 | tee artifacts/logs/build.log
-
       - name: Unit tests
         run: |
           set -euo pipefail
@@ -127,7 +122,7 @@ jobs:
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add package.json packages/vscode-extension/package.json packages/breakpoints/package.json packages/sdk/package.json packages/babysitter/package.json package-lock.json CHANGELOG.md plugins/babysitter/.claude-plugin/plugin.json plugins/babysitter/plugin.json .claude-plugin/marketplace.json
+          git add package.json packages/breakpoints/package.json packages/sdk/package.json packages/babysitter/package.json package-lock.json CHANGELOG.md plugins/babysitter/.claude-plugin/plugin.json plugins/babysitter/plugin.json .claude-plugin/marketplace.json
           if git diff --cached --quiet; then
             echo "No version changes detected."
           else
@@ -146,18 +141,6 @@ jobs:
           set -euo pipefail
           npm run --workspace=@a5c-ai/babysitter-sdk build
 
-      - name: Package VSIX
-        run: |
-          set -euo pipefail
-          npm run package
-          shopt -s nullglob
-          files=( packages/vscode-extension/*.vsix )
-          if [[ ${#files[@]} -eq 0 ]]; then
-            echo "VSIX artifact not found" >&2
-            exit 1
-          fi
-          mv "${files[@]}" artifacts/release/
-
       - name: Pack npm artifacts
         run: |
           set -euo pipefail
@@ -169,12 +152,12 @@ jobs:
         run: |
           set -euo pipefail
           shopt -s nullglob
-          artifacts=( artifacts/release/*.vsix artifacts/release/*.tgz )
+          artifacts=( artifacts/release/*.tgz )
           if [[ ${#artifacts[@]} -eq 0 ]]; then
             echo "Release artifacts missing" >&2
             exit 1
           fi
-          (cd artifacts/release && sha256sum *.vsix *.tgz > artifacts.sha256)
+          (cd artifacts/release && sha256sum *.tgz > artifacts.sha256)
 
       - name: Publish SDK to npm
         env:

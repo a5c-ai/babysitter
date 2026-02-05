@@ -52,16 +52,6 @@ jobs:
           set -euo pipefail
           npm run test:unit:compiled 2>&1 | tee artifacts/test-logs/unit-tests.log
 
-      - name: Extension tests
-        run: |
-          set -euo pipefail
-          xvfb-run -a npm run test:extension:compiled 2>&1 | tee artifacts/test-logs/extension-tests.log
-
-      - name: Package VSIX
-        run: |
-          set -euo pipefail
-          npm run package 2>&1 | tee artifacts/test-logs/package.log
-
       - name: Upload test logs
         if: always()
         uses: actions/upload-artifact@v4
@@ -69,14 +59,6 @@ jobs:
           name: test-logs
           path: artifacts/test-logs
           if-no-files-found: error
-
-      - name: Upload VSIX
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: vsix
-          path: 'packages/vscode-extension/*.vsix'
-          if-no-files-found: ignore
 
   packages-sdk:
     name: SDK Matrix (os=${{ matrix.os }}, node=${{ matrix.node }})

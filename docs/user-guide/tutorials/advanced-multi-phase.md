@@ -49,7 +49,7 @@ This tutorial involves team collaboration breakpoints. How they work depends on 
 **Non-Interactive Mode (Team Collaboration)**: For team approval workflows, start the breakpoints service:
 ```bash
 # For team approval workflows with authentication
-npx -y @a5c-ai/babysitter-breakpoints@latest start --auth-required
+npx -y @a5c-ai/babysitter-sdk@latest breakpoints:start --auth-required
 ```
 
 Choose the mode that fits your workflow. For learning, interactive mode (no setup) is easiest.

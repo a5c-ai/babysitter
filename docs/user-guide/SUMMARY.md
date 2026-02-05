@@ -30,8 +30,6 @@ This is the GitBook-style table of contents for the Babysitter User Guide.
 * [Journal System](./features/journal-system.md)
 * [Run Resumption](./features/run-resumption.md)
 * [Parallel Execution](./features/parallel-execution.md)
-* [VSCode Extension](./features/vscode-extension.md)
-* [Telegram Integration](./features/telegram-integration.md)
 
 ---
 
@@ -87,8 +85,6 @@ docs/user-guide/
 |   +-- journal-system.md                 # Event sourcing and audit
 |   +-- run-resumption.md                 # Continue interrupted work
 |   +-- parallel-execution.md             # Concurrent task execution
-|   +-- vscode-extension.md               # VSCode extension guide
-|   +-- telegram-integration.md           # Telegram notifications
 |
 +-- tutorials/                            # Step-by-Step Tutorials
 |   +-- beginner-rest-api.md              # Build REST API (beginner)
@@ -115,12 +111,12 @@ docs/user-guide/
 | Section | Pages | Status |
 |---------|-------|--------|
 | Getting Started | 4 | Complete |
-| Features | 11 | Complete |
+| Features | 9 | Complete |
 | Tutorials | 3 | Complete |
 | Reference | 6 | Complete |
 | Planning | 3 | Complete |
 | Navigation | 3 | Complete |
-| **Total** | **30** | **Active** |
+| **Total** | **28** | **Active** |
 
 ---
 

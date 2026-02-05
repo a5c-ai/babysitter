@@ -1,0 +1,111 @@
+name: Docker Publish
+
+on:
+  push:
+    branches:
+      - main
+      - staging
+      - develop
+    paths:
+      - 'Dockerfile'
+      - 'docker-entrypoint.sh'
+      - 'docker-compose.yml'
+      - 'packages/sdk/**'
+      - 'plugins/babysitter/**'
+      - '.github/workflows/docker-publish.yml'
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}/babysitter
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata (tags, labels)
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            # For main branch: production tag + latest
+            type=raw,value=production,enable=${{ github.ref == 'refs/heads/main' }}
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
+            # For staging branch: staging tag
+            type=raw,value=staging,enable=${{ github.ref == 'refs/heads/staging' }}
+            # For develop branch: develop tag
+            type=raw,value=develop,enable=${{ github.ref == 'refs/heads/develop' }}
+            # SHA tag for all branches
+            type=sha,prefix={{branch}}-
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          platforms: linux/amd64,linux/arm64
+
+      - name: Generate artifact attestation
+        uses: actions/attest-build-provenance@v1
+        with:
+          subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          subject-digest: ${{ steps.build-and-push.outputs.digest }}
+          push-to-registry: true
+
+  # Staging deployment
+  deploy-staging:
+    needs: build-and-push
+    if: github.ref == 'refs/heads/staging'
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - name: Deploy notification
+        run: |
+          echo "🚀 Staging image published: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:staging"
+          echo "Pull with: docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:staging"
+
+  # Production deployment
+  deploy-production:
+    needs: build-and-push
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Deploy notification
+        run: |
+          echo "🚀 Production image published: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:production"
+          echo "Pull with: docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:production"
+          echo "Also available as: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest"
+
+  # Development deployment
+  deploy-develop:
+    needs: build-and-push
+    if: github.ref == 'refs/heads/develop'
+    runs-on: ubuntu-latest
+    environment: development
+    steps:
+      - name: Deploy notification
+        run: |
+          echo "🚀 Development image published: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:develop"
+          echo "Pull with: docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:develop"

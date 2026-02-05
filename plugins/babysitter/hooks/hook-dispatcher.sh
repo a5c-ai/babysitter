@@ -12,11 +12,25 @@
 
 set -euo pipefail
 
+# Determine plugin root (directory containing this script)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(cd "$SCRIPT_DIR/.." && pwd)}"
+
+# Source error codes helper for standardized error reporting
+# shellcheck source=../scripts/error-codes.sh
+if [[ -f "$PLUGIN_ROOT/scripts/error-codes.sh" ]]; then
+  source "$PLUGIN_ROOT/scripts/error-codes.sh"
+else
+  # Fallback if error-codes.sh not available
+  bsit_error() { echo "ERROR [BSIT-$1]: ${*:2}" >&2; }
+  bsit_warn() { echo "WARNING [BSIT-$1]: ${*:2}" >&2; }
+fi
+
 # Get hook type from first argument
 HOOK_TYPE="${1:-}"
 
 if [[ -z "$HOOK_TYPE" ]]; then
-  echo "Error: Hook type required as first argument" >&2
+  bsit_error "5001" "Hook type required as first argument"
   echo "Usage: $0 <hook-type>" >&2
   echo "Examples:" >&2
   echo "  $0 on-run-start" >&2
@@ -44,10 +58,6 @@ if [[ -z "$REPO_ROOT" ]]; then
     current_dir=$(dirname "$current_dir")
   done
 fi
-
-# Determine plugin root (directory containing this script)
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PLUGIN_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 # Determine user hooks directory
 USER_HOOKS_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/babysitter/hooks"
@@ -81,11 +91,11 @@ execute_hooks() {
     # Execute hook with payload on stdin
     # Keep stderr separate - only stdout is collected for JSON output
     if echo "$HOOK_PAYLOAD" | "$hook"; then
-      echo "[$hook_type_label] ✓ $hook_name succeeded" >&2
+      echo "[$hook_type_label] $hook_name succeeded" >&2
       echo "$hook_type_label:$hook_name:success" >> "$RESULTS_FILE"
     else
       local exit_code=$?
-      echo "[$hook_type_label] ✗ $hook_name failed (exit code: $exit_code)" >&2
+      bsit_warn "5003" "hook=$hook_name" "exit_code=$exit_code" "type=$HOOK_TYPE" "location=$hook_type_label"
       echo "$hook_type_label:$hook_name:failed:$exit_code" >> "$RESULTS_FILE"
       # Don't fail dispatcher if a hook fails - continue with other hooks
     fi
@@ -107,11 +117,16 @@ execute_hooks "$PLUGIN_ROOT/hooks/$HOOK_TYPE" "plugin"
 
 # Print summary
 echo "" >&2
-echo "Hook execution summary:" >&2
+echo "Hook execution summary for $HOOK_TYPE:" >&2
 if [[ -f "$RESULTS_FILE" ]] && [[ -s "$RESULTS_FILE" ]]; then
   cat "$RESULTS_FILE" >&2
+  # Count failures and report
+  failure_count=$(grep -c ":failed:" "$RESULTS_FILE" 2>/dev/null || echo "0")
+  if [[ "$failure_count" -gt 0 ]]; then
+    bsit_warn "5003" "$failure_count hook(s) failed for $HOOK_TYPE"
+  fi
 else
-  echo "No hooks executed for: $HOOK_TYPE" >&2
+  echo "No hooks found or executed for: $HOOK_TYPE" >&2
 fi
 
 # Exit with 0 regardless of individual hook failures

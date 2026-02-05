@@ -111,9 +111,8 @@ Any file produced during a run, stored in the `artifacts/` directory. Common art
 The orchestration framework for Claude Code that enables deterministic, event-sourced workflow management. Babysitter provides structured multi-step workflows with quality gates, human approval checkpoints, and session persistence.
 
 **Components:**
-- SDK (`@a5c-ai/babysitter-sdk`) - Core runtime and CLI
+- SDK (`@a5c-ai/babysitter-sdk`) - Core runtime, CLI, and breakpoints service
 - Plugin (`babysitter@a5c.ai`) - Claude Code integration
-- Breakpoints (`@a5c-ai/babysitter-breakpoints`) - Human approval system
 
 **Related:** [SDK](#sdk), [Plugin](#plugin), [Breakpoints Service](#breakpoints-service)
 
@@ -164,13 +163,13 @@ await ctx.breakpoint({
 
 ### Breakpoints Service
 
-The external service providing human approval UI and API. Consists of a web UI (port 3184), REST API (port 3185), and worker for job processing.
+The service providing human approval UI and API. Consists of a web UI (port 3184), REST API (port 3185), and worker for job processing.
 
-**Package:** `@a5c-ai/babysitter-breakpoints`
+**Built into:** `@a5c-ai/babysitter-sdk`
 
 **Start Command:**
 ```bash
-npx -y @a5c-ai/babysitter-breakpoints@latest start
+npx -y @a5c-ai/babysitter-sdk@latest breakpoints:start
 ```
 
 **Ports:**

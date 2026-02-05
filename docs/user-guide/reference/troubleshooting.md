@@ -12,7 +12,6 @@ This guide provides systematic troubleshooting procedures for common Babysitter 
 
 - [Installation Issues](#installation-issues)
 - [Plugin Issues](#plugin-issues)
-- [Breakpoints Service Issues](#breakpoints-service-issues)
 - [Run Execution Issues](#run-execution-issues)
 - [Quality Convergence Issues](#quality-convergence-issues)
 - [Resumption Issues](#resumption-issues)
@@ -88,7 +87,7 @@ ls -la $(npm config get prefix)/lib/node_modules/
 
 2. **Reinstall packages:**
    ```bash
-   npm install -g @a5c-ai/babysitter@latest @a5c-ai/babysitter-sdk@latest @a5c-ai/babysitter-breakpoints@latest
+   npm install -g @a5c-ai/babysitter@latest @a5c-ai/babysitter-sdk@latest
    ```
 
 **Prevention:** Never use `sudo npm install -g`. Configure npm for user installs.
@@ -140,14 +139,14 @@ Error: Incompatible version: sdk@0.0.120 requires babysitter@^0.0.120
 
 **Diagnosis:**
 ```bash
-npm list -g @a5c-ai/babysitter @a5c-ai/babysitter-sdk @a5c-ai/babysitter-breakpoints
+npm list -g @a5c-ai/babysitter @a5c-ai/babysitter-sdk
 ```
 
 **Solutions:**
 
 Update all packages to the latest versions:
 ```bash
-npm install -g @a5c-ai/babysitter@latest @a5c-ai/babysitter-sdk@latest @a5c-ai/babysitter-breakpoints@latest
+npm install -g @a5c-ai/babysitter@latest @a5c-ai/babysitter-sdk@latest
 ```
 
 **Prevention:** Update all packages together, not individually.
@@ -305,150 +304,6 @@ claude plugin list --all
    - Temporarily disable other plugins
    - Test Babysitter alone
    - Re-enable plugins one by one
-
----
-
-## Breakpoints Service Issues
-
-### Service Not Running
-
-**Symptoms:**
-```
-Waiting for breakpoint approval...
-Timeout after 300s
-Error: Breakpoint timed out
-```
-
-**Diagnosis:**
-```bash
-curl http://localhost:3184/health
-lsof -i :3184
-ps aux | grep breakpoints
-```
-
-**Solutions:**
-
-1. **Start the service:**
-   ```bash
-   npx -y @a5c-ai/babysitter-breakpoints@latest start
-   ```
-
-2. **Run in background:**
-   ```bash
-   nohup npx -y @a5c-ai/babysitter-breakpoints@latest start > breakpoints.log 2>&1 &
-   ```
-
-3. **Verify running:**
-   ```bash
-   curl http://localhost:3184/health
-   # Expected: {"status":"ok",...}
-   ```
-
-**Prevention:** Start breakpoints service before running workflows with breakpoints.
-
----
-
-### Port Already in Use
-
-**Symptoms:**
-```
-Error: listen EADDRINUSE: address already in use :::3184
-```
-
-**Diagnosis:**
-```bash
-lsof -i :3184
-# or on Windows:
-netstat -ano | findstr :3184
-```
-
-**Solutions:**
-
-1. **Kill the existing process:**
-   ```bash
-   kill $(lsof -t -i :3184)
-   ```
-
-2. **Use a different port:**
-   ```bash
-   npx -y @a5c-ai/babysitter-breakpoints@latest start --port 3185
-   ```
-
-3. **If previous breakpoints service:**
-   ```bash
-   pkill -f "babysitter-breakpoints"
-   ```
-
----
-
-### Breakpoint Not Appearing in UI
-
-**Symptoms:**
-- Workflow says "waiting for approval"
-- UI at localhost:3184 shows no pending breakpoints
-
-**Diagnosis:**
-```bash
-# Check pending effects
-babysitter run:status <runId> --json | jq '.metadata.pendingEffectsByKind'
-
-# Check breakpoints API
-curl http://localhost:3184/api/breakpoints
-```
-
-**Solutions:**
-
-1. **Refresh the breakpoints UI**
-
-2. **Verify run is actually waiting:**
-   ```bash
-   babysitter run:status <runId> --json
-   # Look for state: "waiting"
-   ```
-
-3. **Check if breakpoint was already resolved:**
-   ```bash
-   babysitter run:events <runId> --filter-type BREAKPOINT --json
-   ```
-
-4. **Resume the run to retry breakpoint registration:**
-   ```bash
-   /babysitter:call resume --run-id <runId>
-   ```
-
----
-
-### Remote Access Not Working (ngrok)
-
-**Symptoms:**
-- ngrok URL doesn't load breakpoints UI
-- Timeout accessing remote URL
-
-**Diagnosis:**
-```bash
-ngrok http 3184
-# Check the displayed URL works locally first
-curl http://localhost:3184
-```
-
-**Solutions:**
-
-1. **Ensure service is running locally first:**
-   ```bash
-   curl http://localhost:3184/health
-   ```
-
-2. **Restart ngrok:**
-   ```bash
-   pkill ngrok
-   ngrok http 3184
-   ```
-
-3. **Check ngrok status:**
-   Visit http://localhost:4040 for ngrok inspector
-
-4. **Alternative: Use Telegram:**
-   Configure Telegram integration in breakpoints UI for mobile notifications.
 
 ---
 
@@ -717,30 +572,6 @@ A completed run cannot be resumed - it's already finished. Create a new run inst
 
 ---
 
-### Breakpoint Not Resolved Before Resume
-
-**Symptoms:**
-- Resume says "waiting"
-- Nothing happens
-
-**Diagnosis:**
-```bash
-babysitter run:status <runId> --json | jq '.metadata.pendingEffectsByKind'
-```
-
-**Solutions:**
-
-1. **Approve the pending breakpoint:**
-   - Open http://localhost:3184
-   - Find and approve the breakpoint
-
-2. **Then resume:**
-   ```bash
-   /babysitter:call resume --run-id <runId>
-   ```
-
----
-
 ### State Corruption After Manual Edits
 
 **Symptoms:**
@@ -994,14 +825,11 @@ cat .a5c/runs/<runId>/tasks/<effectId>/result.json | jq .
 ### System Checks
 
 ```bash
-# Check breakpoints service
-curl http://localhost:3184/health
-
 # Check SDK version
 npx -y @a5c-ai/babysitter-sdk@latest --version
 
 # Check installed packages
-npm list -g @a5c-ai/babysitter @a5c-ai/babysitter-sdk @a5c-ai/babysitter-breakpoints
+npm list -g @a5c-ai/babysitter @a5c-ai/babysitter-sdk
 
 # Check plugin status
 claude plugin list | grep babysitter

@@ -74,53 +74,30 @@ fi
 
 STATE_FILE="$STATE_DIR/${CLAUDE_SESSION_ID_ARG}.md"
 
-# Check if state file exists
-if [[ ! -f "$STATE_FILE" ]]; then
-  echo "❌ Error: No active babysitter session found" >&2
-  echo "   Expected state file: $STATE_FILE" >&2
-  echo "" >&2
-  echo "   You must first call setup-babysitter-run.sh to initialize the session." >&2
+# Use SDK CLI for association (handles validation and atomic writes)
+CLI="${CLI:-npx -y @a5c-ai/babysitter-sdk@latest}"
+
+ASSOC_RESULT=$($CLI session:associate \
+  --session-id "$CLAUDE_SESSION_ID_ARG" \
+  --state-dir "$STATE_DIR" \
+  --run-id "$RUN_ID" \
+  --json 2>&1) || {
+  # Parse error from JSON output if possible
+  if echo "$ASSOC_RESULT" | grep -q '"error"'; then
+    ERROR_MSG=$(echo "$ASSOC_RESULT" | sed -n 's/.*"message":"\([^"]*\)".*/\1/p')
+    echo "❌ Error: ${ERROR_MSG:-Association failed}" >&2
+    # Check for specific error types
+    if echo "$ASSOC_RESULT" | grep -q "SESSION_NOT_FOUND"; then
+      echo "   Expected state file: $STATE_FILE" >&2
+      echo "" >&2
+      echo "   You must first call setup-babysitter-run.sh to initialize the session." >&2
+    fi
+  else
+    echo "❌ Error: Association failed" >&2
+    echo "$ASSOC_RESULT" >&2
+  fi
   exit 1
-fi
-
-# Prevent re-entrant association in the same session
-EXISTING_RUN_ID=$(sed -n '/^---$/,/^---$/{ /^---$/d; p; }' "$STATE_FILE" | grep '^run_id:' | sed 's/run_id: *//' | sed 's/^"\(.*\)"$/\1/')
-if [[ -n "${EXISTING_RUN_ID:-}" ]]; then
-  echo "❌ Error: This session is already associated with run: $EXISTING_RUN_ID" >&2
-  exit 1
-fi
-
-# Update run_id in state file
-# Create temp file, then atomically replace
-TEMP_FILE="${STATE_FILE}.tmp.$$"
-
-# Use awk to update or add run_id field in YAML frontmatter
-awk -v run_id="$RUN_ID" '
-  BEGIN { in_frontmatter=0; found_run_id=0; frontmatter_end=0 }
-  /^---$/ { 
-    if (in_frontmatter == 0) {
-      in_frontmatter=1
-      print
-      next
-    } else {
-      if (found_run_id == 0 && frontmatter_end == 0) {
-        print "run_id: \"" run_id "\""
-      }
-      frontmatter_end=1
-      in_frontmatter=0
-      print
-      next
-    }
-  }
-  in_frontmatter == 1 && /^run_id:/ {
-    print "run_id: \"" run_id "\""
-    found_run_id=1
-    next
-  }
-  { print }
-' "$STATE_FILE" > "$TEMP_FILE"
-
-mv "$TEMP_FILE" "$STATE_FILE"
+}
 
 echo "✅ Associated session with run: $RUN_ID"
 echo "   State file: $STATE_FILE"

@@ -108,7 +108,7 @@ ngrok http 3184 --basic-auth "user:secure-password"
 
 ```bash
 # Start with localhost only
-npx -y @a5c-ai/babysitter-breakpoints@latest start --host 127.0.0.1
+npx -y @a5c-ai/babysitter-sdk@latest breakpoints:start --host 127.0.0.1
 
 # Use SSH tunnel for remote access
 ssh -L 3184:localhost:3184 production-server

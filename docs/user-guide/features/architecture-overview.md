@@ -263,7 +263,7 @@ For more details on parallel execution, see [Parallel Execution](./parallel-exec
 
 ### 6. Breakpoints Service
 
-**Package:** `@a5c-ai/babysitter-breakpoints`
+**Built into:** `@a5c-ai/babysitter-sdk` (via `breakpoints:start` command)
 
 **Architecture:**
 

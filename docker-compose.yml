@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  babysitter:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: babysitter:latest
+    container_name: babysitter
+
+    # Required: Pass your Anthropic API key
+    environment:
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - PROMPT=${PROMPT:-}
+
+    # Mount current directory as /workspace for project access
+    volumes:
+      - ./:/workspace
+
+    # Enable interactive mode
+    stdin_open: true
+    tty: true
+
+    # Working directory inside container
+    working_dir: /workspace
+
+  # Alternative: Run with a specific prompt
+  babysitter-task:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: babysitter:latest
+
+    environment:
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - PROMPT=${PROMPT}
+
+    volumes:
+      - ./:/workspace
+
+    stdin_open: true
+    tty: true
+    working_dir: /workspace
+
+    # Only start when explicitly called
+    profiles:
+      - task

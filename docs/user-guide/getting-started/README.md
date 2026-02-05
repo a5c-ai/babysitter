@@ -301,7 +301,7 @@ claude "/babysitter:call <your request>"
 claude "/babysitter:call resume the babysitter run"
 
 # Start breakpoints service
-npx -y @a5c-ai/babysitter-breakpoints@latest start
+npx -y @a5c-ai/babysitter-sdk@latest breakpoints:start
 
 # Check available skills
 /skills

@@ -46,10 +46,9 @@ Babysitter is an **event-sourced orchestration framework** for Claude Code that 
 
 ### 1.3 Key Components
 
-1. **Babysitter SDK** (`@a5c-ai/babysitter-sdk`) - Core orchestration runtime and CLI
+1. **Babysitter SDK** (`@a5c-ai/babysitter-sdk`) - Core orchestration runtime, CLI, and breakpoints service
 2. **Babysitter Plugin** (`babysitter@a5c.ai`) - Claude Code integration
-3. **Breakpoints Service** (`@a5c-ai/babysitter-breakpoints`) - Human approval UI and API
-4. **Process Library** - Built-in methodologies (TDD, Spec-Kit, GSD, etc.)
+3. **Process Library** - Built-in methodologies (TDD, Spec-Kit, GSD, etc.)
 
 ### 1.4 Architecture Summary
 
@@ -151,7 +150,7 @@ User Request --> Claude Code --> Babysitter Skill --> SDK CLI
 
 **Step 1: Install SDK and Packages**
 ```bash
-npm install -g @a5c-ai/babysitter@latest @a5c-ai/babysitter-sdk@latest @a5c-ai/babysitter-breakpoints@latest
+npm install -g @a5c-ai/babysitter@latest @a5c-ai/babysitter-sdk@latest
 ```
 
 **Step 2: Install Claude Code Plugin**
@@ -179,7 +178,7 @@ babysitter --version
 
 **Step 5: Start Breakpoints Service**
 ```bash
-npx -y @a5c-ai/babysitter-breakpoints@latest start
+npx -y @a5c-ai/babysitter-sdk@latest breakpoints:start
 # Service runs at http://localhost:3184
 ```
 
@@ -194,7 +193,7 @@ npx -y @a5c-ai/babysitter-breakpoints@latest start
 
 ```bash
 # Update SDK packages
-npm update -g @a5c-ai/babysitter @a5c-ai/babysitter-sdk @a5c-ai/babysitter-breakpoints
+npm update -g @a5c-ai/babysitter @a5c-ai/babysitter-sdk
 
 # Update Claude Code plugin
 claude plugin marketplace update a5c.ai
@@ -440,7 +439,7 @@ Level 5: Expert Use (Ongoing)
 
 | Issue | Cause | Solution |
 |-------|-------|----------|
-| Breakpoint not resolving | Breakpoints service not running | Start with `npx @a5c-ai/babysitter-breakpoints@latest start` |
+| Breakpoint not resolving | Breakpoints service not running | Start with `npx @a5c-ai/babysitter-sdk@latest breakpoints:start` |
 | Session ended unexpectedly | Network issue, Claude Code crash | Resume with `/babysitter:call resume --run-id <id>` |
 | Quality score not improving | Unrealistic target or blocking issues | Lower target, review iteration logs |
 | Agent task timeout | Large context, API issues | Reduce task scope, check API status |

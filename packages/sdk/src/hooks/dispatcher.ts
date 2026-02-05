@@ -11,6 +11,7 @@ import type {
   HookResult,
   HookExecutionResult,
 } from "./types";
+import { DEFAULTS } from "../config/defaults";
 
 /**
  * Find `plugins/babysitter/hooks/hook-dispatcher.sh` by walking up from cwd.
@@ -47,7 +48,7 @@ export async function callHook(
     hookType,
     payload,
     cwd = process.cwd(),
-    timeout = 30000,
+    timeout = DEFAULTS.hookTimeout,
     throwOnFailure = false,
   } = options;
 

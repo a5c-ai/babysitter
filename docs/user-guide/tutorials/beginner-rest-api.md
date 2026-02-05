@@ -66,7 +66,7 @@ Babysitter has two modes for handling breakpoints (approval prompts):
 
 ```bash
 # In a separate terminal (only if using non-interactive mode)
-npx -y @a5c-ai/babysitter-breakpoints@latest start
+npx -y @a5c-ai/babysitter-sdk@latest breakpoints:start
 ```
 
 You should see:
@@ -741,7 +741,7 @@ claude plugin enable --scope user babysitter@a5c.ai
 3. If the session timed out, resume with `/babysitter:call resume`
 
 **Solution (Non-Interactive Mode):**
-1. Ensure the breakpoints service is running: `npx -y @a5c-ai/babysitter-breakpoints@latest start`
+1. Ensure the breakpoints service is running: `npx -y @a5c-ai/babysitter-sdk@latest breakpoints:start`
 2. Check if you can access `http://localhost:3184` in your browser
 3. Look for pending breakpoints in the UI
 

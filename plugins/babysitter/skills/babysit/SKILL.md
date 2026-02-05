@@ -14,7 +14,7 @@ Orchestrate `.a5c/runs/<runId>/` through iterative execution. Use the SDK CLI to
 make sure you have the latest version of the cli:
 
 ```bash
-npm i -g @a5c-ai/babysitter@latest @a5c-ai/babysitter-sdk@latest @a5c-ai/babysitter-breakpoints@latest
+npm i -g @a5c-ai/babysitter@latest @a5c-ai/babysitter-sdk@latest
 ```
 
 then use the CLI alias: CLI="babysitter"
@@ -153,13 +153,9 @@ Otherwise:
 
 ##### 5.1.2 Non-interactive mode
 
-if running in non-interactive mode, use the breakpoint create command to create the breakpoint and get the answer from the user:
+If running in non-interactive mode, use the AskUserQuestion tool to ask the user the question and get the answer. This tool handles breakpoint-style interactions where human input is required. if it is unavailable, skip the breakpoint and continue (by posting the breakpoint result as "skipped") or choosing the recommended option for each question or breakpoint.
 
-```bash
-npx @a5c-ai/babysitter-breakpoints breakpoint create --tag <tag> --question "<question>" --title "<title>" --run-id <runId> --file <file,format,language,label> --file <file,format,language,label> --file <file,format,language,label> ...
-```
-
- to create the breakpoint and get the answer from the user. breakpoint are meant for human approval through the breakpoint tool. NEVER prompt directly and never release or approve this breakpoint yourself. but you may need to post the result of the breakpoint to the run by calling `task:post` when the breakpoint is resolved.
+Breakpoints are meant for human approval. NEVER prompt directly and never release or approve breakpoints yourself. Once the user responds via the AskUserQuestion tool, post the result of the breakpoint to the run by calling `task:post` when the breakpoint is resolved.
 
 ### 6. Results Posting
 

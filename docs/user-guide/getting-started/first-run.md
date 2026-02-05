@@ -642,7 +642,7 @@ CHECK STATUS:
 
 BREAKPOINTS:
   Interactive (Claude Code): Handled in chat - no setup!
-  Non-Interactive: npx -y @a5c-ai/babysitter-breakpoints@latest start
+  Non-Interactive: npx -y @a5c-ai/babysitter-sdk@latest breakpoints:start
   Web UI (non-interactive): http://localhost:3184
 
 LIST ALL RUNS:

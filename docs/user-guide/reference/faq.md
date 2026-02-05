@@ -119,7 +119,7 @@ For simple, one-off tasks, using Claude Code directly may be faster.
 
 **Optional:**
 - Git (for version control)
-- ngrok (for remote breakpoint access)
+- ngrok (for remote breakpoints UI access)
 - Telegram (for mobile notifications)
 - jq (for CLI output parsing)
 
@@ -127,33 +127,29 @@ See: [Installation Guide](../getting-started/installation.md)
 
 ---
 
-### Why do I need three npm packages?
+### Why do I need two npm packages?
 
-Babysitter has three packages with distinct responsibilities:
+Babysitter has two packages with distinct responsibilities:
 
 1. **@a5c-ai/babysitter** - Core package
-2. **@a5c-ai/babysitter-sdk** - Orchestration runtime and CLI
-3. **@a5c-ai/babysitter-breakpoints** - Human approval UI service
+2. **@a5c-ai/babysitter-sdk** - Orchestration runtime, CLI, and integrated breakpoints UI
 
-Install all three:
+Install both:
 ```bash
-npm install -g @a5c-ai/babysitter@latest @a5c-ai/babysitter-sdk@latest @a5c-ai/babysitter-breakpoints@latest
+npm install -g @a5c-ai/babysitter@latest @a5c-ai/babysitter-sdk@latest
 ```
 
 ---
 
-### Why do I need the breakpoints service?
+### How do I access the breakpoints UI?
 
-The breakpoints service provides a web UI for human-in-the-loop approval. When workflows reach approval gates, breakpoints appear in the UI for review.
+The breakpoints UI is built into the SDK and starts automatically when you run a workflow that includes breakpoints. When a workflow reaches a breakpoint:
 
-Without the service running, breakpoints will timeout and workflows will fail.
+1. The SDK automatically serves the breakpoints UI
+2. Access the UI at http://localhost:3184
+3. Review and approve/reject breakpoints as needed
 
-**Start the service:**
-```bash
-npx -y @a5c-ai/babysitter-breakpoints@latest start
-```
-
-**Access the UI:** http://localhost:3184
+**Note:** No separate breakpoints service installation is required. The SDK handles everything.
 
 See: [Breakpoints Guide](../features/breakpoints.md)
 
@@ -163,10 +159,10 @@ See: [Breakpoints Guide](../features/breakpoints.md)
 
 Partially. The SDK and process execution work offline. However:
 
-- **Breakpoints require network access** to the breakpoints service
+- **Breakpoints require local network access** to the SDK's built-in breakpoints UI (localhost)
 - **Agent tasks** require API access to Claude
 
-For fully offline use, avoid breakpoints and agent tasks in your process definitions.
+For fully offline use, avoid agent tasks in your process definitions. Breakpoints work offline since the UI is served locally by the SDK.
 
 ---
 
@@ -194,7 +190,7 @@ rm -rf .a5c/runs/<old-run-id>
 
 **Update SDK packages:**
 ```bash
-npm update -g @a5c-ai/babysitter @a5c-ai/babysitter-sdk @a5c-ai/babysitter-breakpoints
+npm update -g @a5c-ai/babysitter @a5c-ai/babysitter-sdk
 ```
 
 **Update Claude Code plugin:**
@@ -371,9 +367,12 @@ See: [Troubleshooting Guide](./troubleshooting.md)
 Breakpoints pause workflow execution for human approval. When a workflow reaches a breakpoint:
 
 1. The workflow pauses
-2. A request appears in the breakpoints UI (http://localhost:3184)
-3. You review the context and approve/reject
-4. The workflow continues after approval
+2. The SDK automatically serves the breakpoints UI
+3. A request appears in the breakpoints UI (http://localhost:3184)
+4. You review the context and approve/reject
+5. The workflow continues after approval
+
+Breakpoints are fully integrated into the SDK - no separate service is required.
 
 See: [Breakpoints Guide](../features/breakpoints.md)
 
@@ -413,10 +412,9 @@ Timeout after 300s
 ```
 
 **Solution:**
-1. Ensure breakpoints service is running
-2. Check for pending breakpoints in the UI
-3. Approve the breakpoint
-4. Resume the run: `/babysitter:call resume --run-id <runId>`
+1. Check for pending breakpoints in the UI (http://localhost:3184)
+2. Approve the breakpoint
+3. Resume the run: `/babysitter:call resume --run-id <runId>`
 
 The run state is preserved and can be resumed after approval.
 
@@ -835,24 +833,25 @@ Are there any pending breakpoints in my babysitter run?
 
 ---
 
-### Why is the breakpoints service not accessible?
+### Why is the breakpoints UI not accessible?
 
-**Check if running:**
+The breakpoints UI is integrated into the SDK and starts automatically when a workflow reaches a breakpoint.
+
+**Check if accessible:**
 ```bash
 curl http://localhost:3184/health
 ```
 
-**If not running, start it:**
-```bash
-npx -y @a5c-ai/babysitter-breakpoints@latest start
-```
+**If not accessible:**
+1. Ensure a workflow with breakpoints is running
+2. The UI starts automatically when a breakpoint is reached
+3. Check if another process is using port 3184:
+   ```bash
+   lsof -i :3184
+   ```
 
 **If port is in use:**
-```bash
-lsof -i :3184
-# Kill the process or use a different port
-npx @a5c-ai/babysitter-breakpoints start --port 3185
-```
+Kill the conflicting process or configure a different port in your SDK settings.
 
 ---
 

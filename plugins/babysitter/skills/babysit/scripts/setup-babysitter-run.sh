@@ -146,34 +146,42 @@ else
   STATE_DIR="$(dirname "$(dirname "$0")")/state"
 fi
 
-# Create state file for stop hook (markdown with YAML frontmatter)
-mkdir -p "$STATE_DIR"
-BABYSITTER_STATE_FILE="$STATE_DIR/${CLAUDE_SESSION_ID}.md"
+# Create state file using SDK CLI (handles re-entrant check and atomic writes)
+CLI="${CLI:-npx -y @a5c-ai/babysitter-sdk@latest}"
 
-# Prevent re-entrant runs in the same session
-if [[ -f "$BABYSITTER_STATE_FILE" ]]; then
-  EXISTING_RUN_ID=$(sed -n '/^---$/,/^---$/{ /^---$/d; p; }' "$BABYSITTER_STATE_FILE" | grep '^run_id:' | sed 's/run_id: *//' | sed 's/^"\(.*\)"$/\1/')
-  if [[ -n "${EXISTING_RUN_ID:-}" ]]; then
-    echo "❌ Error: This session is already associated with a run (${EXISTING_RUN_ID})" >&2
-    exit 1
-  fi
-  echo "❌ Error: A babysitter run is already active for this session, but with no associated run ID." >&2
-  exit 1
+# Build CLI args
+CLI_ARGS=(
+  "session:init"
+  "--session-id" "$CLAUDE_SESSION_ID"
+  "--state-dir" "$STATE_DIR"
+  "--max-iterations" "$MAX_ITERATIONS"
+  "--prompt" "$PROMPT"
+  "--json"
+)
+
+# Add run-id if provided
+if [[ -n "$RUN_ID" ]]; then
+  CLI_ARGS+=("--run-id" "$RUN_ID")
 fi
 
-cat > "$BABYSITTER_STATE_FILE" <<EOF
----
-active: true
-iteration: 1
-max_iterations: $MAX_ITERATIONS
-run_id: "$RUN_ID"
-started_at: "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-last_iteration_at: "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-iteration_times:
----
+# Run the CLI command
+INIT_RESULT=$($CLI "${CLI_ARGS[@]}" 2>&1) || {
+  # Parse error from JSON output if possible
+  if echo "$INIT_RESULT" | grep -q '"error"'; then
+    ERROR_MSG=$(echo "$INIT_RESULT" | sed -n 's/.*"message":"\([^"]*\)".*/\1/p')
+    echo "❌ Error: ${ERROR_MSG:-Session initialization failed}" >&2
+  else
+    echo "❌ Error: Session initialization failed" >&2
+    echo "$INIT_RESULT" >&2
+  fi
+  exit 1
+}
 
-$PROMPT
-EOF
+# Extract state file path from JSON output
+BABYSITTER_STATE_FILE=$(echo "$INIT_RESULT" | sed -n 's/.*"stateFile":"\([^"]*\)".*/\1/p')
+if [[ -z "$BABYSITTER_STATE_FILE" ]]; then
+  BABYSITTER_STATE_FILE="$STATE_DIR/${CLAUDE_SESSION_ID}.md"
+fi
 
 # Output setup message
 cat <<EOF

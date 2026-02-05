@@ -114,71 +114,61 @@ else
   STATE_DIR="$(dirname "$(dirname "$0")")/state"
 fi
 
-# Verify run exists
-RUN_DIR=".a5c/runs/$RUN_ID"
-if [[ ! -d "$RUN_DIR" ]]; then
-  echo "❌ Error: Run not found: $RUN_ID" >&2
-  echo "   Expected directory: $RUN_DIR" >&2
-  echo "" >&2
-  echo "   Available runs:" >&2
-  if [[ -d ".a5c/runs" ]]; then
-    ls -1 .a5c/runs/ | head -10
+# Use SDK CLI for resume (handles run validation, state creation)
+CLI="${CLI:-npx -y @a5c-ai/babysitter-sdk@latest}"
+
+RESUME_RESULT=$($CLI session:resume \
+  --session-id "$CLAUDE_SESSION_ID" \
+  --state-dir "$STATE_DIR" \
+  --run-id "$RUN_ID" \
+  --max-iterations "$MAX_ITERATIONS" \
+  --runs-dir ".a5c/runs" \
+  --json 2>&1) || {
+  # Parse error from JSON output if possible
+  if echo "$RESUME_RESULT" | grep -q '"error"'; then
+    ERROR_CODE=$(echo "$RESUME_RESULT" | sed -n 's/.*"error":"\([^"]*\)".*/\1/p')
+    ERROR_MSG=$(echo "$RESUME_RESULT" | sed -n 's/.*"message":"\([^"]*\)".*/\1/p')
+
+    if [[ "$ERROR_CODE" == "RUN_NOT_FOUND" ]]; then
+      echo "❌ Error: Run not found: $RUN_ID" >&2
+      echo "   Expected directory: .a5c/runs/$RUN_ID" >&2
+      echo "" >&2
+      echo "   Available runs:" >&2
+      if [[ -d ".a5c/runs" ]]; then
+        ls -1 .a5c/runs/ 2>/dev/null | head -10 || echo "   (none)" >&2
+      else
+        echo "   (no .a5c/runs directory found)" >&2
+      fi
+    elif [[ "$ERROR_CODE" == "RUN_COMPLETED" ]]; then
+      echo "❌ Error: Run is already completed" >&2
+      echo "   Run ID: $RUN_ID" >&2
+      echo "   Cannot resume a completed run." >&2
+    else
+      echo "❌ Error: ${ERROR_MSG:-Resume failed}" >&2
+    fi
   else
-    echo "   (no .a5c/runs directory found)" >&2
+    echo "❌ Error: Resume failed" >&2
+    echo "$RESUME_RESULT" >&2
   fi
   exit 1
-fi
+}
 
-# Get run status using CLI
-CLI="npx -y @a5c-ai/babysitter-sdk@latest"
+# Extract values from JSON output
+STATE_FILE=$(echo "$RESUME_RESULT" | sed -n 's/.*"stateFile":"\([^"]*\)".*/\1/p')
+STATE=$(echo "$RESUME_RESULT" | sed -n 's/.*"runState":"\([^"]*\)".*/\1/p')
+PROCESS_ID=$(echo "$RESUME_RESULT" | sed -n 's/.*"processId":"\([^"]*\)".*/\1/p')
 
-RUN_STATUS=$($CLI run:status "$RUN_ID" --json 2>/dev/null || echo '{}')
-STATE="unknown"
-PROCESS_ID="unknown"
-if command -v jq >/dev/null 2>&1; then
-  STATE=$(echo "$RUN_STATUS" | jq -r '.state // "unknown"')
-  PROCESS_ID=$(echo "$RUN_STATUS" | jq -r '.metadata.processId // "unknown"')
-fi
+BABYSITTER_STATE_FILE="${STATE_FILE:-$STATE_DIR/${CLAUDE_SESSION_ID}.md}"
+STATE="${STATE:-unknown}"
+PROCESS_ID="${PROCESS_ID:-unknown}"
 
-# Check if run is in a resumable state
-if [[ "$STATE" == "completed" ]]; then
-  echo "❌ Error: Run is already completed" >&2
-  echo "   Run ID: $RUN_ID" >&2
-  echo "   Cannot resume a completed run." >&2
-  exit 1
-fi
-
-if [[ "$STATE" == "unknown" ]]; then
-  echo "⚠️  Warning: Could not determine run state" >&2
-  echo "   Run ID: $RUN_ID" >&2
-  echo "   Proceeding anyway..." >&2
-fi
-
-# Create prompt from run status
+# Create prompt for output
 PROMPT="Resume Babysitter run: $RUN_ID
 
 Process: $PROCESS_ID
 Current state: $STATE
 
 Continue orchestration using run:iterate, task:post, etc. or fix the run if it's broken/failed/unknown."
-
-# Create state file for stop hook (markdown with YAML frontmatter)
-mkdir -p "$STATE_DIR"
-BABYSITTER_STATE_FILE="$STATE_DIR/${CLAUDE_SESSION_ID}.md"
-
-cat > "$BABYSITTER_STATE_FILE" <<EOF
----
-active: true
-iteration: 1
-max_iterations: $MAX_ITERATIONS
-started_at: "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-last_iteration_at: "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-iteration_times:
-run_id: "$RUN_ID"
----
-
-$PROMPT
-EOF
 
 # Output setup message
 cat <<EOF

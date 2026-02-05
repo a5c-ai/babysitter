@@ -78,7 +78,7 @@ npm ERR! EACCES: permission denied, mkdir '/usr/local/lib/node_modules/...'
    ```
 2. Retry installation:
    ```bash
-   npm install -g @a5c-ai/babysitter@latest @a5c-ai/babysitter-sdk@latest @a5c-ai/babysitter-breakpoints@latest
+   npm install -g @a5c-ai/babysitter@latest @a5c-ai/babysitter-sdk@latest
    ```
 
 ---
@@ -100,7 +100,7 @@ npm ERR! Could not resolve dependency: @a5c-ai/babysitter-sdk@^0.0.120
 **Solutions:**
 1. Update all packages together:
    ```bash
-   npm install -g @a5c-ai/babysitter@latest @a5c-ai/babysitter-sdk@latest @a5c-ai/babysitter-breakpoints@latest
+   npm install -g @a5c-ai/babysitter@latest @a5c-ai/babysitter-sdk@latest
    ```
 2. Clear npm cache if needed:
    ```bash
@@ -222,11 +222,11 @@ Error: listen EADDRINUSE: address already in use :::3184
    ```
 2. Use different port:
    ```bash
-   npx @a5c-ai/babysitter-breakpoints start --port 3185
+   npx @a5c-ai/babysitter-sdk breakpoints:start --port 3185
    ```
 3. Kill all breakpoints processes:
    ```bash
-   pkill -f "babysitter-breakpoints"
+   pkill -f "babysitter-sdk"
    ```
 
 ---
@@ -253,7 +253,7 @@ Timeout after 300s
    ```
 2. Start service if not running:
    ```bash
-   npx -y @a5c-ai/babysitter-breakpoints@latest start
+   npx -y @a5c-ai/babysitter-sdk@latest breakpoints:start
    ```
 3. Approve pending breakpoints at http://localhost:3184
 4. Resume the run:
@@ -279,7 +279,7 @@ Error: connect ECONNREFUSED 127.0.0.1:3184
 **Solutions:**
 1. Start the service:
    ```bash
-   npx -y @a5c-ai/babysitter-breakpoints@latest start
+   npx -y @a5c-ai/babysitter-sdk@latest breakpoints:start
    ```
 2. Check correct port:
    ```bash

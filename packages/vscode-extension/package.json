@@ -194,16 +194,6 @@
           "type": "string",
           "default": ".a5c/runs",
           "description": "Runs root directory. Relative paths are resolved from the workspace root."
-        },
-        "babysitter.breakpoints.apiUrl": {
-          "type": "string",
-          "default": "http://localhost:3185",
-          "description": "URL for the Babysitter Breakpoints API server."
-        },
-        "babysitter.breakpoints.enabled": {
-          "type": "boolean",
-          "default": true,
-          "description": "Enable Breakpoints integration for user approvals and feedback during runs."
         }
       }
     }
@@ -240,7 +230,6 @@
   },
   "dependencies": {
     "@a5c-ai/babysitter-sdk": "^0.0.29",
-    "@a5c-ai/babysitter-breakpoints": "^0.0.29",
     "typescript": "^5.5.4"
   }
 }

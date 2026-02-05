@@ -16,7 +16,27 @@ import { loadJournal } from "../storage/journal";
 import { readRunMetadata } from "../storage/runFiles";
 import type { JournalEvent, RunMetadata, StoredTaskResult } from "../storage/types";
 import { runIterate } from "./commands/runIterate";
+import { handleHealthCommand } from "./commands/health";
+import { handleConfigureCommand } from "./commands/configure";
+import {
+  handleSessionInit,
+  handleSessionAssociate,
+  handleSessionResume,
+  handleSessionState,
+  handleSessionUpdate,
+  handleSessionCheckIteration,
+} from "./commands/session";
+import { handleSkillDiscover, handleSkillFetchRemote } from "./commands/skill";
 import { resolveCompletionSecret } from "./completionSecret";
+import {
+  BabysitterRuntimeError,
+  ErrorCategory,
+  formatErrorWithContext,
+  toStructuredError,
+  suggestCommand,
+  isBabysitterError,
+} from "../runtime/exceptions";
+import { DEFAULTS } from "../config/defaults";
 
 const USAGE = `Usage:
   babysitter run:create --process-id <id> --entry <path#export> [--runs-dir <dir>] [--inputs <file>] [--run-id <id>] [--process-revision <rev>] [--request <id>] [--json] [--dry-run]
@@ -28,6 +48,16 @@ const USAGE = `Usage:
   babysitter task:post <runDir> <effectId> --status <ok|error> [--runs-dir <dir>] [--json] [--dry-run] [--value <file>] [--error <file>] [--stdout-ref <ref>] [--stderr-ref <ref>] [--stdout-file <file>] [--stderr-file <file>] [--started-at <iso8601>] [--finished-at <iso8601>] [--metadata <file>] [--invocation-key <key>]
   babysitter task:list <runDir> [--runs-dir <dir>] [--pending] [--kind <kind>] [--json]
   babysitter task:show <runDir> <effectId> [--runs-dir <dir>] [--json]
+  babysitter session:init --session-id <id> --state-dir <dir> [--max-iterations <n>] [--run-id <id>] [--prompt <text>] [--json]
+  babysitter session:associate --session-id <id> --state-dir <dir> --run-id <id> [--json]
+  babysitter session:resume --session-id <id> --state-dir <dir> --run-id <id> [--max-iterations <n>] [--runs-dir <dir>] [--json]
+  babysitter session:state --session-id <id> --state-dir <dir> [--json]
+  babysitter session:update --session-id <id> --state-dir <dir> [--iteration <n>] [--last-iteration-at <iso8601>] [--iteration-times <csv>] [--delete] [--json]
+  babysitter session:check-iteration --session-id <id> --state-dir <dir> [--json]
+  babysitter skill:discover --plugin-root <dir> [--run-id <id>] [--cache-ttl <seconds>] [--runs-dir <dir>] [--json]
+  babysitter skill:fetch-remote --source-type <github|well-known> --url <url> [--json]
+  babysitter health [--json] [--verbose]
+  babysitter configure [show|validate|paths] [--json] [--defaults-only]
   babysitter version
 
 Global flags:
@@ -35,6 +65,7 @@ Global flags:
   --json             Emit JSON output when supported by the command.
   --dry-run          Describe planned mutations without changing on-disk state.
   --verbose          Log resolved paths and options to stderr for debugging.
+  --show-config      Show current configuration before executing command.
   --help, -h         Show this help text.
   --version, -v      Show CLI version.`;
 
@@ -70,6 +101,22 @@ interface ParsedArgs {
   processRevision?: string;
   requestId?: string;
   iteration?: number;
+  showConfig: boolean;
+  defaultsOnly: boolean;
+  configureSubcommand?: string;
+  // Session command args
+  sessionId?: string;
+  stateDir?: string;
+  maxIterations?: number;
+  prompt?: string;
+  lastIterationAt?: string;
+  iterationTimes?: string;
+  deleteSession?: boolean;
+  // Skill command args
+  pluginRoot?: string;
+  cacheTtl?: number;
+  sourceType?: "github" | "well-known";
+  url?: string;
 }
 
 interface ActionSummary {
@@ -95,19 +142,25 @@ interface TaskListEntry {
   resolvedAt?: string;
 }
 
-const LARGE_RESULT_PREVIEW_LIMIT = 1024 * 1024; // 1 MiB
+/**
+ * Maximum size for inline result preview.
+ * @see DEFAULTS.largeResultPreviewLimit for the centralized default
+ */
+const LARGE_RESULT_PREVIEW_LIMIT = DEFAULTS.largeResultPreviewLimit;
 
 function parseArgs(argv: string[]): ParsedArgs {
   const [initialCommand, ...rest] = argv;
   const parsed: ParsedArgs = {
     command: initialCommand,
-    runsDir: ".a5c/runs",
+    runsDir: DEFAULTS.runsDir,
     json: false,
     dryRun: false,
     verbose: false,
     helpRequested: false,
     pendingOnly: false,
     reverseOrder: false,
+    showConfig: false,
+    defaultsOnly: false,
   };
   if (parsed.command === "--help" || parsed.command === "-h") {
     parsed.command = undefined;
@@ -242,6 +295,66 @@ function parseArgs(argv: string[]): ParsedArgs {
       parsed.requestId = expectFlagValue(rest, ++i, "--request");
       continue;
     }
+    if (arg === "--show-config") {
+      parsed.showConfig = true;
+      continue;
+    }
+    if (arg === "--defaults-only") {
+      parsed.defaultsOnly = true;
+      continue;
+    }
+    // Session command flags
+    if (arg === "--session-id") {
+      parsed.sessionId = expectFlagValue(rest, ++i, "--session-id");
+      continue;
+    }
+    if (arg === "--state-dir") {
+      parsed.stateDir = expectFlagValue(rest, ++i, "--state-dir");
+      continue;
+    }
+    if (arg === "--max-iterations") {
+      const raw = expectFlagValue(rest, ++i, "--max-iterations");
+      parsed.maxIterations = parsePositiveInteger(raw, "--max-iterations");
+      continue;
+    }
+    if (arg === "--prompt") {
+      parsed.prompt = expectFlagValue(rest, ++i, "--prompt");
+      continue;
+    }
+    if (arg === "--last-iteration-at") {
+      parsed.lastIterationAt = expectFlagValue(rest, ++i, "--last-iteration-at");
+      continue;
+    }
+    if (arg === "--iteration-times") {
+      parsed.iterationTimes = expectFlagValue(rest, ++i, "--iteration-times");
+      continue;
+    }
+    if (arg === "--delete") {
+      parsed.deleteSession = true;
+      continue;
+    }
+    // Skill command flags
+    if (arg === "--plugin-root") {
+      parsed.pluginRoot = expectFlagValue(rest, ++i, "--plugin-root");
+      continue;
+    }
+    if (arg === "--cache-ttl") {
+      const raw = expectFlagValue(rest, ++i, "--cache-ttl");
+      parsed.cacheTtl = parsePositiveInteger(raw, "--cache-ttl");
+      continue;
+    }
+    if (arg === "--source-type") {
+      const raw = expectFlagValue(rest, ++i, "--source-type");
+      if (raw !== "github" && raw !== "well-known") {
+        throw new Error(`--source-type must be "github" or "well-known" (received: ${raw})`);
+      }
+      parsed.sourceType = raw as "github" | "well-known";
+      continue;
+    }
+    if (arg === "--url") {
+      parsed.url = expectFlagValue(rest, ++i, "--url");
+      continue;
+    }
     positionals.push(arg);
   }
   if (parsed.command === "task:post") {
@@ -260,6 +373,8 @@ function parseArgs(argv: string[]): ParsedArgs {
     [parsed.runDirArg] = positionals;
   } else if (parsed.command === "run:repair-journal") {
     [parsed.runDirArg] = positionals;
+  } else if (parsed.command === "configure") {
+    [parsed.configureSubcommand] = positionals;
   }
   return parsed;
 }
@@ -722,7 +837,8 @@ async function handleRunIterate(parsed: ParsedArgs): Promise<number> {
     } else {
       const countInfo = result.count ? ` count=${result.count}` : "";
       const actionInfo = result.action ? ` action=${result.action}` : "";
-      console.log(`[run:iterate] iteration=${result.iteration} status=${result.status}${actionInfo}${countInfo} reason=${result.reason}`);
+      const progressInfo = result.iterationCount > 0 ? ` (${result.iterationCount} completed)` : "";
+      console.log(`[run:iterate] iteration=${result.iteration}${progressInfo} status=${result.status}${actionInfo}${countInfo} reason=${result.reason}`);
       if (result.status === "completed" && result.completionSecret) {
         console.log(`[run:iterate] completionSecret=${result.completionSecret}`);
       }
@@ -1494,11 +1610,130 @@ async function readCliVersion(): Promise<string> {
   return parsed.version ?? "unknown";
 }
 
+/**
+ * Checks if stdout/stderr supports colors
+ */
+function supportsColors(): boolean {
+  // Check NO_COLOR environment variable (https://no-color.org/)
+  if (process.env.NO_COLOR !== undefined) {
+    return false;
+  }
+  // Check FORCE_COLOR environment variable
+  if (process.env.FORCE_COLOR !== undefined) {
+    return true;
+  }
+  // Check if running in a TTY
+  if (process.stderr && typeof process.stderr.isTTY === "boolean") {
+    return process.stderr.isTTY;
+  }
+  return false;
+}
+
+/**
+ * Valid CLI commands
+ */
+const VALID_COMMANDS = [
+  "run:create",
+  "run:status",
+  "run:iterate",
+  "run:events",
+  "run:rebuild-state",
+  "run:repair-journal",
+  "task:post",
+  "task:list",
+  "task:show",
+  "session:init",
+  "session:associate",
+  "session:resume",
+  "session:state",
+  "session:update",
+  "session:check-iteration",
+  "skill:discover",
+  "skill:fetch-remote",
+  "health",
+  "configure",
+  "version",
+];
+
+/**
+ * Handles unknown commands with suggestions
+ */
+function handleUnknownCommand(command: string, json: boolean): number {
+  const suggestion = suggestCommand(command);
+  const suggestions = suggestion ? [`Did you mean: ${suggestion}?`] : [];
+  const nextSteps = ["Run with --help to see all available commands"];
+
+  const error = new BabysitterRuntimeError("UnknownCommandError", `Unknown command: ${command}`, {
+    category: ErrorCategory.Validation,
+    suggestions,
+    nextSteps,
+    details: { command, validCommands: VALID_COMMANDS },
+  });
+
+  if (json) {
+    console.error(JSON.stringify(toStructuredError(error)));
+  } else {
+    const colors = supportsColors();
+    console.error(formatErrorWithContext(error, { colors }));
+  }
+
+  return 1;
+}
+
+/**
+ * Shows configuration before executing a command when --show-config is provided
+ */
+async function showConfigBeforeCommand(parsed: ParsedArgs): Promise<void> {
+  const { configureShow } = await import("./commands/configure");
+  const result = configureShow({ json: parsed.json, defaultsOnly: false });
+
+  if (parsed.json) {
+    console.error(JSON.stringify({ showConfig: result }, null, 2));
+  } else {
+    console.error("[show-config] Current effective configuration:");
+    for (const item of result.values) {
+      const sourceTag = item.source === "env" ? " (env)" : "";
+      console.error(`  ${item.key}=${formatVerboseValue(item.value)}${sourceTag}`);
+    }
+    console.error("");
+  }
+}
+
+/**
+ * Formats and outputs an error in the appropriate format
+ */
+function outputError(error: Error, options: { json: boolean; verbose?: boolean }): void {
+  const { json, verbose = false } = options;
+
+  if (json) {
+    console.error(JSON.stringify(toStructuredError(error, verbose)));
+  } else {
+    const colors = supportsColors();
+
+    if (isBabysitterError(error)) {
+      console.error(formatErrorWithContext(error, { colors, includeStack: verbose }));
+    } else {
+      // For non-babysitter errors, wrap them with basic formatting
+      const wrappedError = new BabysitterRuntimeError(error.name || "Error", error.message, {
+        category: ErrorCategory.Internal,
+        nextSteps: ["If this error persists, please report it as a bug"],
+      });
+      console.error(formatErrorWithContext(wrappedError, { colors, includeStack: verbose }));
+    }
+  }
+}
+
 export function createBabysitterCli() {
   return {
     async run(argv: string[] = process.argv.slice(2)): Promise<number> {
+      let parsedJson = false;
+      let parsedVerbose = false;
+
       try {
         const parsed = parseArgs(argv);
+        parsedJson = parsed.json;
+        parsedVerbose = parsed.verbose;
+
         if (parsed.command === "version") {
           console.log(await readCliVersion());
           return 0;
@@ -1507,6 +1742,17 @@ export function createBabysitterCli() {
           console.log(USAGE);
           return 0;
         }
+
+        // Show config if --show-config flag is provided
+        if (parsed.showConfig) {
+          await showConfigBeforeCommand(parsed);
+        }
+
+        // Check for valid commands and provide suggestions for unknown ones
+        if (!VALID_COMMANDS.includes(parsed.command)) {
+          return handleUnknownCommand(parsed.command, parsed.json);
+        }
+
         if (parsed.command === "run:create") {
           return await handleRunCreate(parsed);
         }
@@ -1534,10 +1780,96 @@ export function createBabysitterCli() {
         if (parsed.command === "task:show") {
           return await handleTaskShow(parsed);
         }
-        console.error(USAGE);
-        return 1;
+        // Session commands
+        if (parsed.command === "session:init") {
+          return await handleSessionInit({
+            sessionId: parsed.sessionId,
+            stateDir: parsed.stateDir,
+            maxIterations: parsed.maxIterations,
+            runId: parsed.runIdOverride,
+            prompt: parsed.prompt,
+            json: parsed.json,
+          });
+        }
+        if (parsed.command === "session:associate") {
+          return await handleSessionAssociate({
+            sessionId: parsed.sessionId,
+            stateDir: parsed.stateDir,
+            runId: parsed.runIdOverride,
+            json: parsed.json,
+          });
+        }
+        if (parsed.command === "session:resume") {
+          return await handleSessionResume({
+            sessionId: parsed.sessionId,
+            stateDir: parsed.stateDir,
+            runId: parsed.runIdOverride,
+            maxIterations: parsed.maxIterations,
+            runsDir: parsed.runsDir,
+            json: parsed.json,
+          });
+        }
+        if (parsed.command === "session:state") {
+          return await handleSessionState({
+            sessionId: parsed.sessionId,
+            stateDir: parsed.stateDir,
+            json: parsed.json,
+          });
+        }
+        if (parsed.command === "session:update") {
+          return await handleSessionUpdate({
+            sessionId: parsed.sessionId,
+            stateDir: parsed.stateDir,
+            iteration: parsed.iteration,
+            lastIterationAt: parsed.lastIterationAt,
+            iterationTimes: parsed.iterationTimes,
+            delete: parsed.deleteSession,
+            json: parsed.json,
+          });
+        }
+        if (parsed.command === "session:check-iteration") {
+          return await handleSessionCheckIteration({
+            sessionId: parsed.sessionId,
+            stateDir: parsed.stateDir,
+            json: parsed.json,
+          });
+        }
+        // Skill commands
+        if (parsed.command === "skill:discover") {
+          return await handleSkillDiscover({
+            pluginRoot: parsed.pluginRoot,
+            runId: parsed.runIdOverride,
+            cacheTtl: parsed.cacheTtl,
+            runsDir: parsed.runsDir,
+            json: parsed.json,
+          });
+        }
+        if (parsed.command === "skill:fetch-remote") {
+          return await handleSkillFetchRemote({
+            sourceType: parsed.sourceType,
+            url: parsed.url,
+            json: parsed.json,
+          });
+        }
+        if (parsed.command === "health") {
+          return await handleHealthCommand({
+            json: parsed.json,
+            verbose: parsed.verbose,
+          });
+        }
+        if (parsed.command === "configure") {
+          const args = parsed.configureSubcommand ? [parsed.configureSubcommand] : [];
+          return await handleConfigureCommand(args, {
+            json: parsed.json,
+            defaultsOnly: parsed.defaultsOnly,
+          });
+        }
+
+        // This should not be reached due to the VALID_COMMANDS check above
+        return handleUnknownCommand(parsed.command, parsed.json);
       } catch (error) {
-        console.error(error instanceof Error ? error.message : String(error));
+        const err = error instanceof Error ? error : new Error(String(error));
+        outputError(err, { json: parsedJson, verbose: parsedVerbose });
         return 1;
       }
     },

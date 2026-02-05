@@ -12,6 +12,8 @@
 
 import * as path from "path";
 import { readRunMetadata } from "../../storage/runFiles";
+import { loadJournal } from "../../storage/journal";
+import { readStateCache } from "../../runtime/replay/stateCache";
 import { callRuntimeHook } from "../../runtime/hooks/runtime";
 import { orchestrateIteration } from "../../runtime/orchestrateIteration";
 import type { EffectAction } from "../../runtime/types";
@@ -27,6 +29,7 @@ export interface RunIterateOptions {
 
 export interface RunIterateResult {
   iteration: number;
+  iterationCount: number;
   status: "executed" | "waiting" | "completed" | "failed" | "none";
   action?: string;
   reason?: string;
@@ -48,9 +51,9 @@ export async function runIterate(options: RunIterateOptions): Promise<RunIterate
   const metadata = await readRunMetadata(runDir);
   const runId = metadata.runId;
 
-  // Determine iteration number
-  // TODO: Read from state.json or journal
-  const iteration = options.iteration ?? 1;
+  // Determine iteration number from state cache or journal
+  const iterationCount = await detectIterationCount(runDir);
+  const iteration = options.iteration ?? (iterationCount + 1);
 
   const projectRoot = path.dirname(path.dirname(path.dirname(runDir)));
 
@@ -78,6 +81,7 @@ export async function runIterate(options: RunIterateOptions): Promise<RunIterate
     );
     return {
       iteration,
+      iterationCount,
       status: "completed",
       action: "none",
       reason: "completed",
@@ -101,6 +105,7 @@ export async function runIterate(options: RunIterateOptions): Promise<RunIterate
     );
     return {
       iteration,
+      iterationCount,
       status: "failed",
       action: "none",
       reason: "failed",
@@ -171,6 +176,7 @@ export async function runIterate(options: RunIterateOptions): Promise<RunIterate
   // Return result
   const result: RunIterateResult = {
     iteration,
+    iterationCount,
     status,
     action,
     reason,
@@ -185,6 +191,59 @@ export async function runIterate(options: RunIterateOptions): Promise<RunIterate
   };
 
   return result;
+}
+
+/**
+ * Detect the current iteration count from state cache or journal.
+ *
+ * The iteration count represents how many iterations have been completed so far.
+ * This is used to determine the next iteration number when --iteration is not specified.
+ *
+ * Strategy:
+ * 1. Read from state.json (stateCache snapshot) if available - uses stateVersion
+ *    which tracks the journal sequence number
+ * 2. Fall back to counting RUN_ITERATION events in the journal
+ * 3. Return 0 if neither is available (fresh run)
+ */
+async function detectIterationCount(runDir: string): Promise<number> {
+  // Strategy 1: Read from state cache
+  try {
+    const stateCache = await readStateCache(runDir);
+    if (stateCache && typeof stateCache.stateVersion === "number" && stateCache.stateVersion > 0) {
+      // stateVersion tracks journal sequence, which correlates to iteration progress
+      // We derive iteration count from the number of completed iteration cycles
+      // Each iteration typically produces multiple journal events, so we use
+      // RUN_ITERATION event count as the more accurate measure
+      const iterationCountFromJournal = await countIterationsFromJournal(runDir);
+      if (iterationCountFromJournal > 0) {
+        return iterationCountFromJournal;
+      }
+      // If no RUN_ITERATION events but we have state, estimate from stateVersion
+      // This provides backward compatibility for runs that don't log RUN_ITERATION
+      return Math.max(0, Math.floor(stateCache.stateVersion / 2));
+    }
+  } catch {
+    // State cache not available, fall through to journal
+  }
+
+  // Strategy 2: Count RUN_ITERATION events in journal
+  try {
+    return await countIterationsFromJournal(runDir);
+  } catch {
+    // Journal not available
+  }
+
+  // Strategy 3: Default to 0 for fresh runs
+  return 0;
+}
+
+/**
+ * Count the number of RUN_ITERATION events in the journal.
+ * Each RUN_ITERATION event represents one completed iteration.
+ */
+async function countIterationsFromJournal(runDir: string): Promise<number> {
+  const events = await loadJournal(runDir);
+  return events.filter((event) => event.type === "RUN_ITERATION").length;
 }
 
 function parseHookDecision(output: unknown): {

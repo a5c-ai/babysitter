@@ -6,25 +6,8 @@
     "packages/*"
   ],
   "scripts": {
-    "vscode:prepublish": "npm run build --workspace=babysitter-vscode",
-    "clean": "npm run clean --workspace=babysitter-vscode",
-    "build": "npm run build --workspace=babysitter-vscode",
-    "watch": "npm run watch --workspace=babysitter-vscode",
-    "lint": "npm run lint --workspace=babysitter-vscode",
     "verify:metadata": "node ./scripts/check-package-metadata.cjs",
-    "format": "npm run format --workspace=babysitter-vscode",
-    "format:check": "npm run format:check --workspace=babysitter-vscode",
-    "package": "npm run package --workspace=babysitter-vscode",
-    "test:unit": "npm run test:unit --workspace=babysitter-vscode",
-    "test:unit:compiled": "npm run test:unit:compiled --workspace=babysitter-vscode",
-    "test:extension": "npm run test:extension --workspace=babysitter-vscode",
-    "test:extension:compiled": "npm run test:extension:compiled --workspace=babysitter-vscode",
-    "test": "npm run test --workspace=babysitter-vscode",
-    "test:ci": "npm run test:ci --workspace=babysitter-vscode",
     "test:sdk": "npm run test --workspace=@a5c-ai/babysitter-sdk",
     "build:sdk": "npm run build --workspace=@a5c-ai/babysitter-sdk"
-  },
-  "devDependencies": {
-    "@vscode/vsce": "^3.7.1"
   }
 }

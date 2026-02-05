@@ -17,7 +17,6 @@ This guide walks you through installing Babysitter on your system. By the end, y
   - [Linux](#linux)
   - [Windows](#windows)
 - [Plugin Installation](#plugin-installation)
-- [Breakpoints Service Setup](#breakpoints-service-setup)
 - [Verification](#verification)
 - [Keeping Updated](#keeping-updated)
 - [Troubleshooting](#troubleshooting)
@@ -108,7 +107,7 @@ You should see version numbers for all four tools. If not, address the missing r
 Copy and paste this single command to install everything:
 
 ```bash
-npm install -g @a5c-ai/babysitter@latest @a5c-ai/babysitter-sdk@latest @a5c-ai/babysitter-breakpoints@latest && \
+npm install -g @a5c-ai/babysitter@latest @a5c-ai/babysitter-sdk@latest && \
 claude plugin marketplace add a5c-ai/babysitter && \
 claude plugin install --scope user babysitter@a5c.ai && \
 claude plugin enable --scope user babysitter@a5c.ai
@@ -125,17 +124,16 @@ If you prefer to understand each step, follow along below.
 Install the Babysitter CLI packages globally:
 
 ```bash
-npm install -g @a5c-ai/babysitter@latest @a5c-ai/babysitter-sdk@latest @a5c-ai/babysitter-breakpoints@latest
+npm install -g @a5c-ai/babysitter@latest @a5c-ai/babysitter-sdk@latest
 ```
 
 **What this installs:**
 - `@a5c-ai/babysitter` - Core babysitter CLI
 - `@a5c-ai/babysitter-sdk` - Orchestration runtime and commands
-- `@a5c-ai/babysitter-breakpoints` - Human approval UI service
 
 **Expected output:**
 ```
-added 3 packages in 15s
+added 2 packages in 15s
 ```
 
 **Verify installation:**
@@ -195,7 +193,7 @@ nvm use 22
 
 **Installation:**
 ```bash
-npm install -g @a5c-ai/babysitter@latest @a5c-ai/babysitter-sdk@latest @a5c-ai/babysitter-breakpoints@latest
+npm install -g @a5c-ai/babysitter@latest @a5c-ai/babysitter-sdk@latest
 ```
 
 **Permission Issues?**
@@ -209,7 +207,7 @@ echo 'export PATH=~/.npm-global/bin:$PATH' >> ~/.zshrc
 source ~/.zshrc
 
 # Then retry installation
-npm install -g @a5c-ai/babysitter@latest @a5c-ai/babysitter-sdk@latest @a5c-ai/babysitter-breakpoints@latest
+npm install -g @a5c-ai/babysitter@latest @a5c-ai/babysitter-sdk@latest
 ```
 
 ### Linux
@@ -224,7 +222,7 @@ sudo apt-get install -y nodejs
 node --version  # Should show v22.x.x
 
 # Install Babysitter
-npm install -g @a5c-ai/babysitter@latest @a5c-ai/babysitter-sdk@latest @a5c-ai/babysitter-breakpoints@latest
+npm install -g @a5c-ai/babysitter@latest @a5c-ai/babysitter-sdk@latest
 ```
 
 **Fedora/RHEL/CentOS:**
@@ -234,13 +232,13 @@ curl -fsSL https://rpm.nodesource.com/setup_22.x | sudo bash -
 sudo yum install -y nodejs
 
 # Install Babysitter
-npm install -g @a5c-ai/babysitter@latest @a5c-ai/babysitter-sdk@latest @a5c-ai/babysitter-breakpoints@latest
+npm install -g @a5c-ai/babysitter@latest @a5c-ai/babysitter-sdk@latest
 ```
 
 **Arch Linux:**
 ```bash
 sudo pacman -S nodejs npm
-npm install -g @a5c-ai/babysitter@latest @a5c-ai/babysitter-sdk@latest @a5c-ai/babysitter-breakpoints@latest
+npm install -g @a5c-ai/babysitter@latest @a5c-ai/babysitter-sdk@latest
 ```
 
 ### Windows
@@ -264,7 +262,7 @@ wsl --install
 3. Open Git Bash and run:
 
 ```bash
-npm install -g @a5c-ai/babysitter@latest @a5c-ai/babysitter-sdk@latest @a5c-ai/babysitter-breakpoints@latest
+npm install -g @a5c-ai/babysitter@latest @a5c-ai/babysitter-sdk@latest
 ```
 
 **Note:** Some shell commands in Babysitter may require Git Bash or WSL. PowerShell/CMD support is limited.
@@ -312,68 +310,6 @@ If you don't see it:
 1. Make sure you restarted Claude Code
 2. Try running `claude plugin list` to see installed plugins
 3. Check the [Troubleshooting](#troubleshooting) section
-
----
-
-## Breakpoints Service Setup
-
-The breakpoints service provides a web UI for human approval workflows. It's optional but highly recommended.
-
-### Start the Service
-
-Open a **new terminal window** (keep it running) and execute:
-
-```bash
-npx -y @a5c-ai/babysitter-breakpoints@latest start
-```
-
-**Expected output:**
-```
-Babysitter Breakpoints Service
-Listening on http://localhost:3184
-```
-
-### Access the UI
-
-Open your browser to: **http://localhost:3184**
-
-You should see the Babysitter Breakpoints dashboard. When runs request approval, they will appear here.
-
-### Making the Service Accessible Remotely
-
-If you want to approve breakpoints from your phone or another device:
-
-**Option 1: Use ngrok (simple)**
-```bash
-# Install ngrok
-brew install ngrok  # macOS
-# or download from https://ngrok.com
-
-# Expose the service
-ngrok http 3184
-```
-
-Copy the `https://xxxxx.ngrok.io` URL - you can access breakpoints from anywhere.
-
-**Option 2: Use Telegram notifications (recommended for mobile)**
-
-Configure Telegram integration in the breakpoints UI at http://localhost:3184 - this sends notifications directly to your Telegram account.
-
-### Running as a Background Service
-
-To keep the breakpoints service running even when you close the terminal:
-
-**macOS/Linux:**
-```bash
-# Run in background
-nohup npx -y @a5c-ai/babysitter-breakpoints@latest start > breakpoints.log 2>&1 &
-
-# Check if running
-curl http://localhost:3184/health
-
-# Stop the service
-pkill -f "babysitter-breakpoints"
-```
 
 ---
 
@@ -471,13 +407,7 @@ In Claude Code, type:
 ```
 **Expected:** "babysit" appears in the list
 
-#### 3. Breakpoints Service Running
-```bash
-curl http://localhost:3184/health
-```
-**Expected:** `{"status":"ok",...}`
-
-#### 4. Full Integration Test
+#### 3. Full Integration Test
 In Claude Code:
 ```
 claude "/babysitter:call echo hello world"
@@ -491,7 +421,6 @@ claude "/babysitter:call echo hello world"
 | jq | `jq --version` | jq-1.6 or higher |
 | SDK | `npx @a5c-ai/babysitter-sdk --version` | Version number |
 | Plugin | `/skills` in Claude Code | "babysitter:call" listed |
-| Breakpoints | `curl localhost:3184/health` | JSON response |
 
 **All checks passed?** You're ready for the [Quickstart](./quickstart.md)!
 
@@ -504,7 +433,7 @@ Babysitter is actively developed. Keep your installation current for the latest 
 ### Update SDK Packages
 
 ```bash
-npm update -g @a5c-ai/babysitter @a5c-ai/babysitter-sdk @a5c-ai/babysitter-breakpoints
+npm update -g @a5c-ai/babysitter @a5c-ai/babysitter-sdk
 ```
 
 ### Update Claude Code Plugin
@@ -559,7 +488,7 @@ echo 'export PATH=~/.npm-global/bin:$PATH' >> ~/.zshrc
 source ~/.zshrc
 
 # Retry installation
-npm install -g @a5c-ai/babysitter@latest @a5c-ai/babysitter-sdk@latest @a5c-ai/babysitter-breakpoints@latest
+npm install -g @a5c-ai/babysitter@latest @a5c-ai/babysitter-sdk@latest
 ```
 
 #### "Cannot find module '@a5c-ai/babysitter-sdk'"
@@ -610,34 +539,6 @@ claude plugin marketplace add a5c-ai/babysitter
 claude plugin install --scope user babysitter@a5c.ai
 ```
 
-### Breakpoints Service Issues
-
-#### "Connection refused" on localhost:3184
-
-**Problem:** Breakpoints service not running.
-
-**Solution:**
-```bash
-# Start the service
-npx -y @a5c-ai/babysitter-breakpoints@latest start
-
-# Keep terminal open - service runs in foreground
-```
-
-#### Port 3184 already in use
-
-**Problem:** Another process is using port 3184.
-
-**Solution:**
-```bash
-# Find what's using the port
-lsof -i :3184  # macOS/Linux
-netstat -ano | findstr :3184  # Windows
-
-# Kill the process or use a different port
-npx -y @a5c-ai/babysitter-breakpoints@latest start --port 3185
-```
-
 ### Runtime Issues
 
 #### "Run encountered an error"
@@ -652,15 +553,6 @@ cat .a5c/runs/<runId>/journal/journal.jsonl | head
 # Ask Claude to analyze
 claude "Analyze the babysitter run error for <runId> and try to recover"
 ```
-
-#### Breakpoint times out
-
-**Problem:** Breakpoints service not accessible or approval not given.
-
-**Solution:**
-1. Verify service is running: `curl localhost:3184/health`
-2. Open UI: http://localhost:3184
-3. Check for pending breakpoints and approve
 
 ### Getting More Help
 
@@ -697,10 +589,7 @@ claude "/babysitter:call <your request>"
 # Resume a run
 claude "/babysitter:call resume the babysitter run"
 
-# Start breakpoints service
-npx -y @a5c-ai/babysitter-breakpoints@latest start
-
 # Update everything
-npm update -g @a5c-ai/babysitter @a5c-ai/babysitter-sdk @a5c-ai/babysitter-breakpoints
+npm update -g @a5c-ai/babysitter @a5c-ai/babysitter-sdk
 claude plugin update babysitter@a5c.ai
 ```

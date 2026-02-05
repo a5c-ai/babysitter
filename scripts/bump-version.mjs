@@ -22,7 +22,6 @@ const bumpVersion = (version, level) => {
 
 const packageManifests = [
   { path: "package.json" },
-  { path: "packages/vscode-extension/package.json" },
   { path: "packages/sdk/package.json" },
   { path: "packages/breakpoints/package.json" },
   { path: "packages/babysitter/package.json" },
@@ -99,10 +98,6 @@ if (existsSync(lockPath)) {
   if (lock.packages && lock.packages[""]) {
     lock.packages[""].version = newVersion;
   }
-  const extensionWorkspaceKey = "packages/vscode-extension";
-  if (lock.packages && lock.packages[extensionWorkspaceKey]) {
-    lock.packages[extensionWorkspaceKey].version = newVersion;
-  }
   const sdkWorkspaceKey = "packages/sdk";
   if (lock.packages && lock.packages[sdkWorkspaceKey]) {
     lock.packages[sdkWorkspaceKey].version = newVersion;
@@ -114,16 +109,6 @@ if (existsSync(lockPath)) {
   const babysitterWorkspaceKey = "packages/babysitter";
   if (lock.packages && lock.packages[babysitterWorkspaceKey]) {
     lock.packages[babysitterWorkspaceKey].version = newVersion;
-  }
-  const extensionManifest = manifests.find(
-    (manifest) => manifest.path === "packages/vscode-extension/package.json",
-  );
-  const extensionName = extensionManifest?.data?.name;
-  if (extensionName) {
-    const extensionNodeModulesKey = `node_modules/${extensionName}`;
-    if (lock.packages && lock.packages[extensionNodeModulesKey]) {
-      lock.packages[extensionNodeModulesKey].version = newVersion;
-    }
   }
   const sdkManifest = manifests.find(
     (manifest) => manifest.path === "packages/sdk/package.json",

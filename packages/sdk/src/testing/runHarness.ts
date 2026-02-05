@@ -3,6 +3,7 @@ import { commitEffectResult } from "../runtime/commitEffectResult";
 import type { EffectAction, IterationMetadata, IterationResult, ProcessLogger, EffectSchedulerHints } from "../runtime/types";
 import type { JsonRecord } from "../storage/types";
 import type { DeterministicUlidHandle, FixedClockHandle } from "./deterministic";
+import { DEFAULTS as _DEFAULTS } from "../config/defaults";
 
 export interface FakeActionSuccess {
   status: "ok";
@@ -73,7 +74,11 @@ export interface HarnessActionSnapshot {
   schedulerHints?: EffectSchedulerHints;
 }
 
-const DEFAULT_MAX_ITERATIONS = 100;
+/**
+ * Default max iterations for the run harness.
+ * Uses a lower value than DEFAULTS.maxIterations for testing efficiency.
+ */
+const DEFAULT_MAX_ITERATIONS = 100; // Note: Testing default, see DEFAULTS.maxIterations for production
 
 export async function runToCompletionWithFakeRunner(
   options: RunToCompletionWithFakeRunnerOptions
