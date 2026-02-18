@@ -76,10 +76,13 @@ describe.skipIf(!HAS_API_KEY)("Full E2E orchestration (tic-tac-toe)", () => {
         `claude --plugin-dir '${PLUGIN_DIR}' --dangerously-skip-permissions --output-format text -p '/babysitter:babysit perform the tasks in the *.task.md files found in this dir'`,
       ].join(" && ");
 
-      // Post-run: copy artifacts from container filesystem to mounted volume
+      // Post-run: copy artifacts from container filesystem to mounted volume.
+      // NOTE: All shell variables ($d, $f) and command substitutions $(...)
+      // must be escaped as \$d, \$(...) etc. because the outer -c "..." is
+      // double-quoted, so the HOST shell would expand them otherwise.
       const postRunDiag = [
         // Copy .a5c from various locations under /home/claude
-        "for d in $(find /home/claude -path '*/.a5c/runs' -type d 2>/dev/null); do cp -rn $(dirname $d)/* /workspace/.a5c/ 2>/dev/null || true; done",
+        "for d in \\$(find /home/claude -path '*/.a5c/runs' -type d 2>/dev/null); do cp -rn \\$(dirname \\$d)/* /workspace/.a5c/ 2>/dev/null || true; done",
         "cp -rn /home/claude/.a5c/* /workspace/.a5c/ 2>/dev/null || true",
         // Copy plugin state directories for session verification
         "mkdir -p /workspace/.plugin-state",
@@ -90,7 +93,7 @@ describe.skipIf(!HAS_API_KEY)("Full E2E orchestration (tic-tac-toe)", () => {
         "echo '=== .a5c locations ===' && find / -name '.a5c' -type d 2>/dev/null || true",
         "echo '=== /workspace/.a5c contents ===' && ls -laR /workspace/.a5c/ 2>/dev/null || echo 'empty'",
         "echo '=== Plugin state files ===' && ls -la /workspace/.plugin-state/ 2>/dev/null || echo 'no state'",
-        "echo '=== Plugin state contents ===' && for f in /workspace/.plugin-state/*.md; do echo \"--- $f ---\" && cat \"$f\" 2>/dev/null || true; done",
+        "echo '=== Plugin state contents ===' && cat /workspace/.plugin-state/*.md 2>/dev/null || echo 'no state files'",
         "echo '=== Stop hook log ===' && cat /workspace/.e2e-logs/babysitter-stop-hook.log 2>/dev/null || echo 'no log'",
       ].join(" ; ");
 
