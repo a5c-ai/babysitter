@@ -36,7 +36,7 @@ import {
   suggestCommand,
   isBabysitterError,
 } from "../runtime/exceptions";
-import { DEFAULTS } from "../config/defaults";
+import { CONFIG_ENV_VARS, DEFAULTS } from "../config/defaults";
 
 const USAGE = `Usage:
   babysitter run:create --process-id <id> --entry <path#export> [--runs-dir <dir>] [--inputs <file>] [--run-id <id>] [--process-revision <rev>] [--request <id>] [--json] [--dry-run]
@@ -152,7 +152,7 @@ function parseArgs(argv: string[]): ParsedArgs {
   const [initialCommand, ...rest] = argv;
   const parsed: ParsedArgs = {
     command: initialCommand,
-    runsDir: DEFAULTS.runsDir,
+    runsDir: process.env[CONFIG_ENV_VARS.RUNS_DIR] ?? DEFAULTS.runsDir,
     json: false,
     dryRun: false,
     verbose: false,

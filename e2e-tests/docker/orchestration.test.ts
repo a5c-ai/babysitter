@@ -65,9 +65,10 @@ describe.skipIf(!HAS_API_KEY)("Full E2E orchestration (tic-tac-toe)", () => {
           ...envFlags,
           `-v ${WORKSPACE_HOST}:/workspace`,
           `-e BABYSITTER_LOG_DIR=/workspace/.e2e-logs`,
+          `-e BABYSITTER_RUNS_DIR=/workspace/.a5c/runs`,
           `--entrypoint bash`,
           IMAGE,
-          `-c "cd /workspace && claude --plugin-dir '${PLUGIN_DIR}' --dangerously-skip-permissions --output-format text -p '/babysitter:babysit perform the tasks in the *.task.md files found in this dir'"`,
+          `-c "cd /workspace && claude --plugin-dir '${PLUGIN_DIR}' --dangerously-skip-permissions --output-format text -p '/babysitter:babysit perform the tasks in the *.task.md files found in this dir' ; cp -r /home/claude/.a5c /workspace/.a5c 2>/dev/null || true"`,
         ].join(" "),
         { timeout: 1_800_000 }, // 30 min
       );

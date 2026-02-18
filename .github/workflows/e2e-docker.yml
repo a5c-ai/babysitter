@@ -68,9 +68,7 @@ jobs:
 
       - name: Run fixture & E2E orchestration tests
         if: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
-        # E2E orchestration requires valid credentials; allow failure so
-        # structural/SDK/hook tests still gate the pipeline.
-        continue-on-error: true
+        # E2E orchestration requires valid credentials (Foundry or Anthropic API key).
         run: |
           set -euo pipefail
           npx vitest run --config e2e-tests/docker/vitest.config.ts \
@@ -93,5 +91,6 @@ jobs:
         with:
           name: e2e-test-artifacts
           path: e2e-artifacts/
+          include-hidden-files: true
           if-no-files-found: warn
           retention-days: 14
