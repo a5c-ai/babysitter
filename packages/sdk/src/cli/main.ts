@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { promises as fs } from "node:fs";
+import { promises as fs, existsSync } from "node:fs";
 import * as path from "node:path";
 import { pathToFileURL } from "node:url";
 import * as crypto from "node:crypto";
@@ -379,9 +379,63 @@ function parseArgs(argv: string[]): ParsedArgs {
   return parsed;
 }
 
+/**
+ * Resolve a run directory from a base directory and a user-provided argument.
+ *
+ * Handles several common edge cases:
+ *  - Absolute paths are used directly (no base dir prepended).
+ *  - If the arg already contains the base dir prefix (e.g. ".a5c/runs/01RUN"
+ *    when base is ".a5c/runs"), it is resolved from CWD to avoid doubling.
+ *  - Doubled ".a5c/runs" segments in the final path are collapsed.
+ *  - If the resolved path doesn't exist, falls back to resolving from CWD.
+ */
 function resolveRunDir(baseDir: string, runDirArg?: string): string {
   if (!runDirArg) throw new Error("Run directory argument is required.");
-  return path.resolve(baseDir, runDirArg);
+
+  // Absolute path → use directly
+  if (path.isAbsolute(runDirArg)) {
+    return collapseDoubledA5cRuns(path.normalize(runDirArg));
+  }
+
+  // Detect if arg already starts with the base dir prefix to avoid
+  // ".a5c/runs" + ".a5c/runs/01RUN" → ".a5c/runs/.a5c/runs/01RUN"
+  const normalBase = normalizePosix(baseDir);
+  const normalArg = normalizePosix(runDirArg);
+  if (normalBase && (normalArg === normalBase || normalArg.startsWith(normalBase + "/"))) {
+    return collapseDoubledA5cRuns(path.resolve(runDirArg));
+  }
+
+  // Standard resolution: baseDir + arg
+  const standard = collapseDoubledA5cRuns(path.resolve(baseDir, runDirArg));
+
+  // Fallback: if the standard path doesn't exist, try from CWD
+  try {
+    if (!existsSync(standard)) {
+      const fromCwd = path.resolve(runDirArg);
+      if (existsSync(fromCwd)) return collapseDoubledA5cRuns(fromCwd);
+    }
+  } catch {
+    // Ignore filesystem errors during resolution
+  }
+
+  return standard;
+}
+
+/** Normalize a path to forward slashes with no trailing slash (for prefix comparison). */
+function normalizePosix(p: string): string {
+  return path.normalize(p).replace(/\\/g, "/").replace(/\/+$/, "");
+}
+
+/** Collapse doubled ".a5c/runs" segments: ".a5c/runs/.a5c/runs/X" → ".a5c/runs/X" */
+function collapseDoubledA5cRuns(p: string): string {
+  // Match both forward and back-slash variants
+  const pattern = /([/\\]?\.a5c[/\\]runs)[/\\]\.a5c[/\\]runs([/\\]|$)/;
+  let result = p;
+  // Collapse repeatedly in case of triple+ duplication
+  while (pattern.test(result)) {
+    result = result.replace(pattern, "$1$2");
+  }
+  return result;
 }
 
 function expectFlagValue(args: string[], index: number, flag: string): string {
@@ -1722,6 +1776,9 @@ function outputError(error: Error, options: { json: boolean; verbose?: boolean }
     }
   }
 }
+
+// Exported for unit testing
+export { resolveRunDir as _resolveRunDir, collapseDoubledA5cRuns as _collapseDoubledA5cRuns };
 
 export function createBabysitterCli() {
   return {
