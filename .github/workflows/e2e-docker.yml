@@ -68,7 +68,7 @@ jobs:
 
       - name: Run fixture & E2E orchestration tests
         if: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
-        # E2E orchestration requires a valid API key; allow failure so
+        # E2E orchestration requires valid credentials; allow failure so
         # structural/SDK/hook tests still gate the pipeline.
         continue-on-error: true
         run: |
@@ -79,7 +79,12 @@ jobs:
             e2e-tests/docker/orchestration.test.ts \
             2>&1 | tee e2e-artifacts/e2e-tests.log
         env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          CLAUDE_CODE_USE_FOUNDRY: ${{ secrets.CLAUDE_CODE_USE_FOUNDRY }}
+          ANTHROPIC_FOUNDRY_RESOURCE: ${{ secrets.ANTHROPIC_FOUNDRY_RESOURCE }}
+          ANTHROPIC_FOUNDRY_API_KEY: ${{ secrets.ANTHROPIC_FOUNDRY_API_KEY }}
+          ANTHROPIC_DEFAULT_SONNET_MODEL: ${{ secrets.ANTHROPIC_DEFAULT_SONNET_MODEL }}
+          ANTHROPIC_DEFAULT_HAIKU_MODEL: ${{ secrets.ANTHROPIC_DEFAULT_HAIKU_MODEL }}
+          ANTHROPIC_DEFAULT_OPUS_MODEL: ${{ secrets.ANTHROPIC_DEFAULT_OPUS_MODEL }}
         timeout-minutes: 35
 
       - name: Upload test artifacts
