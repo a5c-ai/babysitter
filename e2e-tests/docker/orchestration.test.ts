@@ -8,7 +8,8 @@ const FIXTURE_SRC = path.resolve(ROOT, "e2e-tests/fixtures/tic-tac-toe");
 const ARTIFACTS_DIR = path.resolve(ROOT, "e2e-artifacts");
 const WORKSPACE_HOST = path.resolve(ARTIFACTS_DIR, "workspace");
 
-const HAS_API_KEY = !!process.env.ANTHROPIC_API_KEY;
+const HAS_API_KEY =
+  !!process.env.ANTHROPIC_API_KEY || !!process.env.ANTHROPIC_FOUNDRY_API_KEY;
 
 beforeAll(() => {
   fs.mkdirSync(ARTIFACTS_DIR, { recursive: true });
@@ -43,10 +44,25 @@ describe.skipIf(!HAS_API_KEY)("Full E2E orchestration (tic-tac-toe)", () => {
   test(
     "babysitter orchestration runs to completion",
     () => {
+      // Build env flags for docker - pass through all credential vars
+      const envFlags: string[] = [];
+      const passthroughVars = [
+        "ANTHROPIC_API_KEY",
+        "CLAUDE_CODE_USE_FOUNDRY",
+        "ANTHROPIC_FOUNDRY_RESOURCE",
+        "ANTHROPIC_FOUNDRY_API_KEY",
+        "ANTHROPIC_DEFAULT_SONNET_MODEL",
+        "ANTHROPIC_DEFAULT_HAIKU_MODEL",
+        "ANTHROPIC_DEFAULT_OPUS_MODEL",
+      ];
+      for (const v of passthroughVars) {
+        if (process.env[v]) envFlags.push(`-e ${v}=${process.env[v]}`);
+      }
+
       const stdout = exec(
         [
           "docker run --rm",
-          `-e ANTHROPIC_API_KEY=${process.env.ANTHROPIC_API_KEY}`,
+          ...envFlags,
           `-v ${WORKSPACE_HOST}:/workspace`,
           `-e BABYSITTER_LOG_DIR=/workspace/.e2e-logs`,
           `--entrypoint bash`,
