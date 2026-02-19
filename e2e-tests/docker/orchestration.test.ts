@@ -209,11 +209,9 @@ describe.skipIf(!HAS_API_KEY)("Orchestration lifecycle verification", () => {
     expect(runDir).not.toBeNull();
 
     const runJson = JSON.parse(fs.readFileSync(path.join(runDir!, "run.json"), "utf-8"));
-    // SDK stores this as "completionSecret" — a random hex token that
-    // the stop hook must find in the <promise> tag to allow session exit.
-    expect(runJson.completionSecret).toBeDefined();
-    expect(typeof runJson.completionSecret).toBe("string");
-    expect(runJson.completionSecret.length).toBeGreaterThan(0);
+    expect(runJson.completionProof).toBeDefined();
+    expect(typeof runJson.completionProof).toBe("string");
+    expect(runJson.completionProof.length).toBeGreaterThan(0);
   });
 
   test("journal directory exists with entries", () => {
