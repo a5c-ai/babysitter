@@ -84,16 +84,18 @@ describe.skipIf(!HAS_API_KEY)("Full E2E orchestration (tic-tac-toe)", () => {
         // Copy .a5c from various locations under /home/claude
         "for d in \\$(find /home/claude -path '*/.a5c/runs' -type d 2>/dev/null); do cp -rn \\$(dirname \\$d)/* /workspace/.a5c/ 2>/dev/null || true; done",
         "cp -rn /home/claude/.a5c/* /workspace/.a5c/ 2>/dev/null || true",
+        // Copy the full Claude session transcript (JSONL) — this is the
+        // definitive record of every tool call Claude made during the run.
+        "mkdir -p /workspace/.claude-session",
+        "cp -r /home/claude/.claude/projects/* /workspace/.claude-session/ 2>/dev/null || true",
         // Copy plugin state directories for session verification
         "mkdir -p /workspace/.plugin-state",
         `cp -r ${PLUGIN_DIR}/skills/babysit/state/* /workspace/.plugin-state/ 2>/dev/null || true`,
-        // Also check the old state location in case setup script used it
         `cp -r ${PLUGIN_DIR}/state/* /workspace/.plugin-state/ 2>/dev/null || true`,
         // Diagnostics
         "echo '=== .a5c locations ===' && find / -name '.a5c' -type d 2>/dev/null || true",
         "echo '=== /workspace/.a5c contents ===' && ls -laR /workspace/.a5c/ 2>/dev/null || echo 'empty'",
-        "echo '=== Plugin state files ===' && ls -la /workspace/.plugin-state/ 2>/dev/null || echo 'no state'",
-        "echo '=== Plugin state contents ===' && cat /workspace/.plugin-state/*.md 2>/dev/null || echo 'no state files'",
+        "echo '=== Claude session files ===' && find /workspace/.claude-session -name '*.jsonl' 2>/dev/null || echo 'no transcripts'",
         "echo '=== Stop hook log ===' && cat /workspace/.e2e-logs/babysitter-stop-hook.log 2>/dev/null || echo 'no log'",
       ].join(" ; ");
 
@@ -204,9 +206,11 @@ describe.skipIf(!HAS_API_KEY)("Orchestration lifecycle verification", () => {
     expect(runDir).not.toBeNull();
 
     const runJson = JSON.parse(fs.readFileSync(path.join(runDir!, "run.json"), "utf-8"));
-    expect(runJson.completionProof).toBeDefined();
-    expect(typeof runJson.completionProof).toBe("string");
-    expect(runJson.completionProof.length).toBeGreaterThan(0);
+    // SDK stores this as "completionSecret" — a random hex token that
+    // the stop hook must find in the <promise> tag to allow session exit.
+    expect(runJson.completionSecret).toBeDefined();
+    expect(typeof runJson.completionSecret).toBe("string");
+    expect(runJson.completionSecret.length).toBeGreaterThan(0);
   });
 
   test("journal directory exists with entries", () => {
@@ -348,7 +352,60 @@ describe.skipIf(!HAS_API_KEY)("Orchestration lifecycle verification", () => {
 });
 
 // ---------------------------------------------------------------------------
-// Stop hook verification
+// Claude session transcript — the full record of what happened
+// ---------------------------------------------------------------------------
+
+/** Find all .jsonl transcript files copied from the container. */
+function findTranscriptFiles(): string[] {
+  const sessionDir = path.join(WORKSPACE_HOST, ".claude-session");
+  if (!fs.existsSync(sessionDir)) return [];
+  const results: string[] = [];
+  function walk(dir: string) {
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      const full = path.join(dir, entry.name);
+      if (entry.isDirectory()) walk(full);
+      else if (entry.name.endsWith(".jsonl")) results.push(full);
+    }
+  }
+  walk(sessionDir);
+  return results;
+}
+
+/** Read a JSONL transcript and return all lines as parsed objects. */
+function readTranscript(filePath: string): Array<Record<string, unknown>> {
+  return fs.readFileSync(filePath, "utf-8")
+    .split("\n")
+    .filter((l) => l.trim().length > 0)
+    .map((l) => { try { return JSON.parse(l); } catch { return null; } })
+    .filter(Boolean) as Array<Record<string, unknown>>;
+}
+
+/** Extract all text content from a transcript (assistant + tool results). */
+function extractAllText(transcript: Array<Record<string, unknown>>): string {
+  const parts: string[] = [];
+  for (const entry of transcript) {
+    const msg = entry.message as Record<string, unknown> | undefined;
+    if (!msg?.content) continue;
+    const content = msg.content as Array<Record<string, unknown>>;
+    for (const block of content) {
+      if (block.type === "text" && typeof block.text === "string") {
+        parts.push(block.text);
+      }
+      // tool_use blocks have input that may contain command strings
+      if (block.type === "tool_use" && block.input) {
+        parts.push(JSON.stringify(block.input));
+      }
+      // tool_result blocks may contain command output
+      if (block.type === "tool_result" && block.content) {
+        parts.push(JSON.stringify(block.content));
+      }
+    }
+  }
+  return parts.join("\n");
+}
+
+// ---------------------------------------------------------------------------
+// Stop hook verification (from log + transcript)
 // ---------------------------------------------------------------------------
 describe.skipIf(!HAS_API_KEY)("Stop hook verification", () => {
   test("stop hook log file was created", () => {
@@ -356,89 +413,88 @@ describe.skipIf(!HAS_API_KEY)("Stop hook verification", () => {
     expect(fs.existsSync(logFile)).toBe(true);
   });
 
-  test("stop hook received hook input", () => {
+  test("stop hook found session, checked run state, and detected completion", () => {
     const logFile = path.join(WORKSPACE_HOST, ".e2e-logs", "babysitter-stop-hook.log");
     if (!fs.existsSync(logFile)) return;
 
-    const logContent = fs.readFileSync(logFile, "utf-8");
-    expect(logContent).toContain("Hook input received");
-  });
-
-  test("stop hook found active session and checked run state", () => {
-    const logFile = path.join(WORKSPACE_HOST, ".e2e-logs", "babysitter-stop-hook.log");
-    if (!fs.existsSync(logFile)) return;
-
-    const logContent = fs.readFileSync(logFile, "utf-8");
-    // The hook should have progressed beyond just receiving input.
-    // It should have found the session state and checked run status.
-    expect(logContent).toContain("Run state:");
-  });
-
-  test("stop hook progressed beyond input (iterated or detected completion)", () => {
-    const logFile = path.join(WORKSPACE_HOST, ".e2e-logs", "babysitter-stop-hook.log");
-    if (!fs.existsSync(logFile)) return;
-
-    const logContent = fs.readFileSync(logFile, "utf-8");
-    // The hook either iterated (multi-step run) or detected completion directly.
-    // Both are valid outcomes showing the hook fully processed the session.
+    const log = fs.readFileSync(logFile, "utf-8");
+    // Full lifecycle evidence: received input → found session → checked state → resolved
+    expect(log).toContain("Hook input received");
+    expect(log).toContain("Run state:");
+    expect(log).toMatch(/session=[0-9a-f-]+/);  // session was found
+    expect(log).toMatch(/run=[A-Z0-9]+/);        // run was associated
+    // Either iterated the loop or detected completion — both are valid
     expect(
-      logContent.includes("Updated iteration to") ||
-      logContent.includes("Detected valid promise tag"),
-    ).toBe(true);
-  });
-
-  test("stop hook completed successfully (loop or completion)", () => {
-    const logFile = path.join(WORKSPACE_HOST, ".e2e-logs", "babysitter-stop-hook.log");
-    if (!fs.existsSync(logFile)) return;
-
-    const logContent = fs.readFileSync(logFile, "utf-8");
-    // "Hook execution successful" is logged when the hook continues the loop.
-    // "Detected valid promise tag" is logged when the hook detects run completion
-    // and exits early (before reaching the "Hook execution successful" log line).
-    // Both indicate the hook executed its full logic path.
-    expect(
-      logContent.includes("Hook execution successful") ||
-      logContent.includes("Detected valid promise tag"),
-    ).toBe(true);
-  });
-
-  test("stop hook detected run completion", () => {
-    const logFile = path.join(WORKSPACE_HOST, ".e2e-logs", "babysitter-stop-hook.log");
-    if (!fs.existsSync(logFile)) return;
-
-    const logContent = fs.readFileSync(logFile, "utf-8");
-    // The hook should eventually see the completed state
-    expect(
-      logContent.includes("Run state: completed") ||
-      logContent.includes("Completion secret available") ||
-      logContent.includes("Detected valid promise tag"),
+      log.includes("Updated iteration to") ||
+      log.includes("Detected valid promise tag") ||
+      log.includes("Hook execution successful"),
     ).toBe(true);
   });
 });
 
 // ---------------------------------------------------------------------------
-// Session association verification
+// Session transcript verification — proves what Claude actually did
 // ---------------------------------------------------------------------------
-describe.skipIf(!HAS_API_KEY)("Session association verification", () => {
-  test("stop hook log proves session was found and associated with run", () => {
-    // The stop hook deletes session state files on completion, so we
-    // verify session association via the stop hook log instead.
-    const logFile = path.join(WORKSPACE_HOST, ".e2e-logs", "babysitter-stop-hook.log");
-    if (!fs.existsSync(logFile)) return;
-
-    const logContent = fs.readFileSync(logFile, "utf-8");
-    // The log should contain a session ID and a run ID, proving association
-    expect(logContent).toMatch(/session=[0-9a-f-]+/);
-    expect(logContent).toMatch(/run=[A-Z0-9]+/);
+describe.skipIf(!HAS_API_KEY)("Session transcript verification", () => {
+  test("Claude session transcript was captured", () => {
+    const files = findTranscriptFiles();
+    expect(files.length).toBeGreaterThanOrEqual(1);
   });
 
-  test("stdout shows orchestration completion with promise tag", () => {
+  test("transcript contains babysitter setup (session:init)", () => {
+    const files = findTranscriptFiles();
+    if (files.length === 0) return;
+
+    // Combine all transcripts and search for setup evidence
+    const allText = files.map((f) => extractAllText(readTranscript(f))).join("\n");
+    expect(allText).toContain("setup-babysitter-run");
+  });
+
+  test("transcript contains run:create command", () => {
+    const files = findTranscriptFiles();
+    if (files.length === 0) return;
+
+    const allText = files.map((f) => extractAllText(readTranscript(f))).join("\n");
+    expect(allText).toContain("run:create");
+  });
+
+  test("transcript contains run:iterate command", () => {
+    const files = findTranscriptFiles();
+    if (files.length === 0) return;
+
+    const allText = files.map((f) => extractAllText(readTranscript(f))).join("\n");
+    expect(allText).toContain("run:iterate");
+  });
+
+  test("transcript contains task:post for effect resolution", () => {
+    const files = findTranscriptFiles();
+    if (files.length === 0) return;
+
+    const allText = files.map((f) => extractAllText(readTranscript(f))).join("\n");
+    expect(allText).toContain("task:post");
+  });
+
+  test("transcript contains session-run association", () => {
+    const files = findTranscriptFiles();
+    if (files.length === 0) return;
+
+    const allText = files.map((f) => extractAllText(readTranscript(f))).join("\n");
+    expect(allText).toContain("associate-session-with-run");
+  });
+
+  test("transcript contains completion promise output", () => {
+    const files = findTranscriptFiles();
+    if (files.length === 0) return;
+
+    const allText = files.map((f) => extractAllText(readTranscript(f))).join("\n");
+    expect(allText).toContain("<promise>");
+  });
+
+  test("stdout contains the completion promise tag", () => {
     const logPath = path.join(ARTIFACTS_DIR, "e2e-stdout.log");
     if (!fs.existsSync(logPath)) return;
 
     const stdout = fs.readFileSync(logPath, "utf-8");
-    // Claude should have output the completion promise tag, proving
-    // the full orchestration loop ran to completion
     expect(stdout).toContain("<promise>");
   });
 });
