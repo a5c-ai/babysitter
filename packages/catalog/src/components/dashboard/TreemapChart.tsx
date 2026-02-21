@@ -30,26 +30,28 @@ export interface TreemapChartProps {
   colors?: string[];
 }
 
+// Neon domain colors
 const DOMAIN_COLORS: Record<string, string> = {
-  science: "#3b82f6",
-  engineering: "#10b981",
-  business: "#f59e0b",
-  arts: "#ec4899",
-  technology: "#8b5cf6",
-  health: "#ef4444",
-  education: "#06b6d4",
-  default: "#6b7280",
+  science: "#00DFDF",
+  engineering: "#00FF88",
+  business: "#FFD700",
+  arts: "#FF00E0",
+  technology: "#7B61FF",
+  health: "#FF6B6B",
+  education: "#33FFFF",
+  default: "#7B61FF",
 };
 
+// Neon fallback colors
 const DEFAULT_COLORS = [
-  "#3b82f6",
-  "#10b981",
-  "#f59e0b",
-  "#ef4444",
-  "#8b5cf6",
-  "#ec4899",
-  "#06b6d4",
-  "#84cc16",
+  "#FF00E0",
+  "#00DFDF",
+  "#FFD700",
+  "#7B61FF",
+  "#FF6B6B",
+  "#00FF88",
+  "#FF3366",
+  "#33FFFF",
 ];
 
 interface CustomTooltipProps {
@@ -69,10 +71,17 @@ function CustomTooltip({ active, payload }: CustomTooltipProps) {
     if (!item) return null;
     const data = item.payload;
     return (
-      <div className="rounded-lg border bg-background p-3 shadow-md">
-        <p className="font-medium">{data.name}</p>
-        <p className="text-sm text-muted-foreground">
-          Count: <span className="font-semibold text-foreground">{data.size}</span>
+      <div
+        className="rounded-sm p-3"
+        style={{
+          background: 'var(--scifi-surface)',
+          border: '1px solid rgba(0, 223, 223, 0.3)',
+          boxShadow: '0 4px 16px rgba(0, 0, 0, 0.5), 0 0 8px rgba(0, 223, 223, 0.1)',
+        }}
+      >
+        <p className="font-medium text-white">{data.name}</p>
+        <p className="text-sm text-[rgba(255,255,255,0.5)]">
+          Count: <span className="font-semibold text-[var(--scifi-cyan)]">{data.size}</span>
         </p>
       </div>
     );
@@ -103,12 +112,13 @@ function CustomizedContent({
   colors,
   root,
 }: TreemapContentProps) {
-  // Get color based on domain name or fall back to index-based color
+  // Get color: use index-based neon palette color for each cell, with domain name fallback
   const domainName = root?.name?.toLowerCase() || name?.toLowerCase() || "";
-  const baseColor = DOMAIN_COLORS[domainName] || colors[index % colors.length] || DEFAULT_COLORS[0];
+  const indexColor = colors[index % colors.length] || DEFAULT_COLORS[index % DEFAULT_COLORS.length];
+  const baseColor = DOMAIN_COLORS[domainName] || indexColor || "#7B61FF";
 
   // Adjust color intensity based on depth
-  const safeBaseColor = baseColor || DEFAULT_COLORS[0] || "#3b82f6";
+  const safeBaseColor = baseColor || DEFAULT_COLORS[0] || "#7B61FF";
   const color = depth === 1 ? safeBaseColor : adjustColorBrightness(safeBaseColor, depth * 10);
 
   // Only show text if cell is large enough
@@ -123,9 +133,10 @@ function CustomizedContent({
         height={height}
         style={{
           fill: color,
-          stroke: "#fff",
+          stroke: "#0a0a0f",
           strokeWidth: 2,
           strokeOpacity: depth === 1 ? 1 : 0.5,
+          filter: `drop-shadow(0 0 2px ${color}40)`,
         }}
       />
       {showText && (
@@ -139,6 +150,7 @@ function CustomizedContent({
             fill: "#fff",
             fontSize: Math.min(14, Math.max(10, width / 8)),
             fontWeight: depth === 1 ? 600 : 400,
+            textShadow: '0 1px 3px rgba(0,0,0,0.5)',
           }}
         >
           {name.length > 15 ? `${name.slice(0, 12)}...` : name}
@@ -167,7 +179,7 @@ export function TreemapChart({
 }: TreemapChartProps) {
   // Transform data to treemap format
   const treemapData = data.map((item, index) => {
-    const itemColor = item.color || colors[index % colors.length] || DEFAULT_COLORS[0] || "#3b82f6";
+    const itemColor = item.color || colors[index % colors.length] || DEFAULT_COLORS[0] || "#7B61FF";
     return {
       name: item.name,
       size: item.size,
@@ -192,10 +204,10 @@ export function TreemapChart({
             data={treemapData}
             dataKey="size"
             aspectRatio={4 / 3}
-            stroke="#fff"
-            fill="#8884d8"
+            stroke="#0a0a0f"
             content={<CustomizedContent x={0} y={0} width={0} height={0} name="" depth={0} index={0} colors={colors} />}
             animationDuration={500}
+            isAnimationActive={false}
           >
             <Tooltip content={<CustomTooltip />} />
           </Treemap>

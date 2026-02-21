@@ -1,119 +1,120 @@
 @import "tailwindcss";
 
-/* Steampunk Design System Colors */
+/* Sci-Fi Design System Colors */
 :root {
-  /* Primary Steampunk Color Palette - Metallic Tones */
-  --steampunk-brass: #B8860B;
-  --steampunk-copper: #CD7F32;
-  --steampunk-bronze: #8B4513;
-  --steampunk-dark-brass: #8B6914;
-  --steampunk-polished-brass: #D4AF37;
+  /* Primary Sci-Fi Color Palette - Neon/Dark Tones */
+  --scifi-magenta: #FF00E0;
+  --scifi-cyan: #00DFDF;
+  --scifi-yellow: #FFD700;
+  --scifi-dark-magenta: #B800A0;
+  --scifi-bright-cyan: #33FFFF;
 
-  /* Secondary - Parchment Tones */
-  --steampunk-parchment: #F5E6C8;
-  --steampunk-cream: #FDF5E6;
-  --steampunk-light-tan: #E8DCC4;
-  --steampunk-parchment-dark: #E8D5B0;
+  /* Secondary - Dark Surface Tones */
+  --scifi-dark-bg: #0a0a0f;
+  --scifi-card-bg: #12121a;
+  --scifi-surface: #1a1a2e;
+  --scifi-surface-light: #222240;
+  --scifi-surface-elevated: #2a2a45;
 
   /* Background Colors */
-  --steampunk-bg-main: #F2E8D5;
-  --steampunk-card: #F8F0E0;
-  --steampunk-card-border: #8B7355;
+  --scifi-bg-main: #0a0a0f;
+  --scifi-card: #12121a;
+  --scifi-card-border: rgba(255, 0, 224, 0.2);
 
   /* Text Colors */
-  --steampunk-text-primary: #3D2314;
-  --steampunk-text-secondary: #5C4033;
-  --steampunk-text-muted: #7D6B5D;
-  --steampunk-text-header: #3D2B1F;
-  --steampunk-text-body: #4A3728;
+  --scifi-text-primary: #ffffff;
+  --scifi-text-secondary: rgba(255, 255, 255, 0.7);
+  --scifi-text-muted: rgba(255, 255, 255, 0.4);
+  --scifi-text-header: #ffffff;
+  --scifi-text-body: rgba(255, 255, 255, 0.85);
 
   /* Border & Accent */
-  --steampunk-border-brass: #A67C00;
-  --steampunk-accent-green: #6B8E23;
-  --steampunk-accent-pink: #DB7093;
-  --steampunk-accent-sepia: #704214;
+  --scifi-border-neon: rgba(255, 0, 224, 0.2);
+  --scifi-accent-cyan: #00DFDF;
+  --scifi-accent-magenta: #FF00E0;
+  --scifi-accent-yellow: #FFD700;
 
   /* Canvas (backgrounds) */
-  --color-canvas-default: var(--steampunk-bg-main);
-  --color-canvas-overlay: var(--steampunk-card);
-  --color-canvas-inset: var(--steampunk-parchment-dark);
-  --color-canvas-subtle: var(--steampunk-light-tan);
+  --color-canvas-default: var(--scifi-bg-main);
+  --color-canvas-overlay: var(--scifi-card);
+  --color-canvas-inset: var(--scifi-surface);
+  --color-canvas-subtle: var(--scifi-surface-light);
 
   /* Foreground (text) */
-  --color-fg-default: var(--steampunk-text-body);
-  --color-fg-muted: var(--steampunk-text-muted);
-  --color-fg-subtle: var(--steampunk-card-border);
-  --color-fg-on-emphasis: var(--steampunk-cream);
+  --color-fg-default: var(--scifi-text-body);
+  --color-fg-muted: var(--scifi-text-muted);
+  --color-fg-subtle: var(--scifi-text-secondary);
+  --color-fg-on-emphasis: #ffffff;
 
   /* Border */
-  --color-border-default: var(--steampunk-border-brass);
-  --color-border-muted: var(--steampunk-card-border);
-  --color-border-subtle: rgba(166, 124, 0, 0.3);
+  --color-border-default: var(--scifi-border-neon);
+  --color-border-muted: rgba(255, 0, 224, 0.1);
+  --color-border-subtle: rgba(0, 223, 223, 0.1);
 
-  /* Accent colors - Brass tones */
-  --color-accent-fg: var(--steampunk-brass);
-  --color-accent-emphasis: var(--steampunk-dark-brass);
-  --color-accent-muted: rgba(184, 134, 11, 0.4);
-  --color-accent-subtle: rgba(212, 175, 55, 0.2);
+  /* Accent colors - Neon tones */
+  --color-accent-fg: var(--scifi-cyan);
+  --color-accent-emphasis: var(--scifi-magenta);
+  --color-accent-muted: rgba(0, 223, 223, 0.3);
+  --color-accent-subtle: rgba(0, 223, 223, 0.1);
 
-  /* Success colors - Steampunk green */
-  --color-success-fg: var(--steampunk-accent-green);
-  --color-success-emphasis: #556B2F;
-  --color-success-muted: rgba(107, 142, 35, 0.4);
-  --color-success-subtle: rgba(107, 142, 35, 0.15);
+  /* Success colors - Neon green */
+  --color-success-fg: #00FF88;
+  --color-success-emphasis: #00CC6A;
+  --color-success-muted: rgba(0, 255, 136, 0.3);
+  --color-success-subtle: rgba(0, 255, 136, 0.1);
 
-  /* Warning colors - Copper tones */
-  --color-attention-fg: var(--steampunk-copper);
-  --color-attention-emphasis: #B87333;
-  --color-attention-muted: rgba(205, 127, 50, 0.4);
-  --color-attention-subtle: rgba(205, 127, 50, 0.15);
+  /* Warning colors - Neon yellow */
+  --color-attention-fg: var(--scifi-yellow);
+  --color-attention-emphasis: #FFC000;
+  --color-attention-muted: rgba(255, 215, 0, 0.3);
+  --color-attention-subtle: rgba(255, 215, 0, 0.1);
 
-  /* Danger colors - Victorian pink/rose */
-  --color-danger-fg: var(--steampunk-accent-pink);
-  --color-danger-emphasis: #C71585;
-  --color-danger-muted: rgba(219, 112, 147, 0.4);
-  --color-danger-subtle: rgba(219, 112, 147, 0.15);
+  /* Danger colors - Neon red */
+  --color-danger-fg: #FF3366;
+  --color-danger-emphasis: #FF0044;
+  --color-danger-muted: rgba(255, 51, 102, 0.3);
+  --color-danger-subtle: rgba(255, 51, 102, 0.1);
 
-  /* Neutral colors - Bronze tones */
-  --color-neutral-emphasis: var(--steampunk-bronze);
-  --color-neutral-emphasis-plus: var(--steampunk-text-header);
-  --color-neutral-muted: rgba(139, 69, 19, 0.3);
-  --color-neutral-subtle: rgba(139, 69, 19, 0.1);
+  /* Neutral colors - Dark tones */
+  --color-neutral-emphasis: var(--scifi-surface);
+  --color-neutral-emphasis-plus: var(--scifi-surface-elevated);
+  --color-neutral-muted: rgba(255, 255, 255, 0.1);
+  --color-neutral-subtle: rgba(255, 255, 255, 0.05);
 
   /* shadcn/ui CSS variables */
-  --background: var(--color-canvas-default);
-  --foreground: var(--color-fg-default);
-  --card: var(--steampunk-card);
+  --background: #0a0a0f;
+  --foreground: #ffffff;
+  --card: #12121a;
   --card-foreground: var(--color-fg-default);
   --popover: var(--color-canvas-overlay);
   --popover-foreground: var(--color-fg-default);
-  --primary: var(--steampunk-brass);
-  --primary-foreground: var(--color-fg-on-emphasis);
-  --secondary: var(--steampunk-parchment-dark);
+  --primary: #00DFDF;
+  --primary-foreground: #0a0a0f;
+  --secondary: var(--scifi-surface);
   --secondary-foreground: var(--color-fg-default);
   --muted: var(--color-canvas-inset);
   --muted-foreground: var(--color-fg-muted);
-  --accent: var(--steampunk-polished-brass);
-  --accent-foreground: var(--steampunk-text-header);
+  --accent: #FF00E0;
+  --accent-foreground: #ffffff;
   --destructive: var(--color-danger-emphasis);
   --destructive-foreground: var(--color-fg-on-emphasis);
   --border: var(--color-border-default);
   --input: var(--color-border-default);
-  --ring: var(--steampunk-polished-brass);
+  --ring: var(--scifi-cyan);
   --radius: 4px;
 
-  /* Chart colors - Steampunk style */
-  --chart-1: var(--steampunk-brass);
-  --chart-2: var(--steampunk-accent-green);
-  --chart-3: var(--steampunk-copper);
-  --chart-4: var(--steampunk-bronze);
-  --chart-5: var(--steampunk-accent-pink);
+  /* Chart colors - Sci-Fi style */
+  --chart-1: var(--scifi-cyan);
+  --chart-2: #00FF88;
+  --chart-3: var(--scifi-magenta);
+  --chart-4: var(--scifi-yellow);
+  --chart-5: #FF3366;
 
-  /* Steampunk Decorative Elements */
-  --steampunk-gear-color: var(--steampunk-brass);
-  --steampunk-pipe-color: var(--steampunk-copper);
-  --steampunk-rivet-color: var(--steampunk-bronze);
-  --steampunk-shadow-color: rgba(61, 35, 20, 0.25);
+  /* Sci-Fi Decorative Elements */
+  --scifi-glow-color: var(--scifi-cyan);
+  --scifi-neon-color: var(--scifi-magenta);
+  --scifi-pulse-color: var(--scifi-cyan);
+  --scifi-shadow-color: rgba(0, 0, 0, 0.5);
 }
 
 /* Tailwind v4 theme configuration */
@@ -142,28 +143,29 @@
   --radius-lg: calc(var(--radius) + 2px);
   --radius-xl: calc(var(--radius) + 6px);
 
-  /* Steampunk specific colors for Tailwind */
-  --color-steampunk-brass: var(--steampunk-brass);
-  --color-steampunk-copper: var(--steampunk-copper);
-  --color-steampunk-bronze: var(--steampunk-bronze);
-  --color-steampunk-dark-brass: var(--steampunk-dark-brass);
-  --color-steampunk-polished-brass: var(--steampunk-polished-brass);
-  --color-steampunk-parchment: var(--steampunk-parchment);
-  --color-steampunk-cream: var(--steampunk-cream);
-  --color-steampunk-light-tan: var(--steampunk-light-tan);
-  --color-steampunk-parchment-dark: var(--steampunk-parchment-dark);
-  --color-steampunk-bg-main: var(--steampunk-bg-main);
-  --color-steampunk-card: var(--steampunk-card);
-  --color-steampunk-card-border: var(--steampunk-card-border);
-  --color-steampunk-text-primary: var(--steampunk-text-primary);
-  --color-steampunk-text-secondary: var(--steampunk-text-secondary);
-  --color-steampunk-text-muted: var(--steampunk-text-muted);
-  --color-steampunk-text-header: var(--steampunk-text-header);
-  --color-steampunk-text-body: var(--steampunk-text-body);
-  --color-steampunk-border-brass: var(--steampunk-border-brass);
-  --color-steampunk-accent-green: var(--steampunk-accent-green);
-  --color-steampunk-accent-pink: var(--steampunk-accent-pink);
-  --color-steampunk-accent-sepia: var(--steampunk-accent-sepia);
+  /* Sci-Fi specific colors for Tailwind */
+  --color-scifi-magenta: var(--scifi-magenta);
+  --color-scifi-cyan: var(--scifi-cyan);
+  --color-scifi-yellow: var(--scifi-yellow);
+  --color-scifi-dark-magenta: var(--scifi-dark-magenta);
+  --color-scifi-bright-cyan: var(--scifi-bright-cyan);
+  --color-scifi-dark-bg: var(--scifi-dark-bg);
+  --color-scifi-card-bg: var(--scifi-card-bg);
+  --color-scifi-surface: var(--scifi-surface);
+  --color-scifi-surface-light: var(--scifi-surface-light);
+  --color-scifi-surface-elevated: var(--scifi-surface-elevated);
+  --color-scifi-bg-main: var(--scifi-bg-main);
+  --color-scifi-card: var(--scifi-card);
+  --color-scifi-card-border: var(--scifi-card-border);
+  --color-scifi-text-primary: var(--scifi-text-primary);
+  --color-scifi-text-secondary: var(--scifi-text-secondary);
+  --color-scifi-text-muted: var(--scifi-text-muted);
+  --color-scifi-text-header: var(--scifi-text-header);
+  --color-scifi-text-body: var(--scifi-text-body);
+  --color-scifi-border-neon: var(--scifi-border-neon);
+  --color-scifi-accent-cyan: var(--scifi-accent-cyan);
+  --color-scifi-accent-magenta: var(--scifi-accent-magenta);
+  --color-scifi-accent-yellow: var(--scifi-accent-yellow);
 
   /* Primer compatibility layer */
   --color-primer-canvas-default: var(--color-canvas-default);
@@ -178,13 +180,13 @@
   --color-primer-attention-fg: var(--color-attention-fg);
   --color-primer-danger-fg: var(--color-danger-fg);
 
-  /* Steampunk Typography - Victorian Serif Fonts */
-  --font-steampunk-header: "Playfair Display", Georgia, "Times New Roman", serif;
-  --font-steampunk-body: "Merriweather", Georgia, "Times New Roman", serif;
-  --font-steampunk-accent: "EB Garamond", Georgia, serif;
-  --font-sans: var(--font-body, var(--font-steampunk-body));
-  --font-serif: var(--font-header, var(--font-steampunk-header));
-  --font-mono: "Courier New", Courier, monospace;
+  /* Sci-Fi Typography - Futuristic Sans Fonts */
+  --font-scifi-header: "Orbitron", "Inter", system-ui, sans-serif;
+  --font-scifi-body: "Inter", system-ui, -apple-system, sans-serif;
+  --font-scifi-accent: "Orbitron", "Inter", system-ui, sans-serif;
+  --font-sans: var(--font-body, var(--font-scifi-body));
+  --font-serif: var(--font-header, var(--font-scifi-header));
+  --font-mono: "JetBrains Mono", "Fira Code", "Courier New", Courier, monospace;
 }
 
 
@@ -196,32 +198,43 @@
 body {
   background-color: var(--background);
   color: var(--foreground);
-  font-family: var(--font-body, var(--font-steampunk-body));
-  font-feature-settings: "liga" 1, "kern" 1, "onum" 1;
+  font-family: var(--font-body, var(--font-scifi-body));
+  font-feature-settings: "liga" 1, "kern" 1;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   line-height: 1.6;
-  /* Parchment texture effect with subtle noise */
+  /* Dark space gradient with subtle grid pattern */
   background-image:
-    url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E"),
-    radial-gradient(ellipse at 20% 30%, rgba(184, 134, 11, 0.05) 0%, transparent 50%),
-    radial-gradient(ellipse at 80% 70%, rgba(139, 69, 19, 0.04) 0%, transparent 50%),
-    radial-gradient(ellipse at 50% 50%, rgba(245, 230, 200, 0.3) 0%, transparent 70%);
+    radial-gradient(ellipse at 20% 30%, rgba(255, 0, 224, 0.03) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 70%, rgba(0, 223, 223, 0.03) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 50%, rgba(26, 26, 46, 0.5) 0%, transparent 70%);
+  position: relative;
 }
 
-/* Typography - Headers use Playfair Display (Victorian Serif) */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: radial-gradient(circle at 1px 1px, rgba(0,223,223,0.07) 1px, transparent 0);
+  background-size: 40px 40px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Typography - Headers use Orbitron (Futuristic) */
 h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-header, var(--font-steampunk-header));
-  color: var(--steampunk-text-header);
+  font-family: var(--font-header, var(--font-scifi-header));
+  color: var(--scifi-text-header);
   font-weight: 600;
-  letter-spacing: -0.01em;
+  letter-spacing: 0.02em;
   line-height: 1.3;
 }
 
 h1 {
   font-size: 2.75rem;
   font-weight: 700;
-  letter-spacing: -0.02em;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
 h2 {
@@ -251,332 +264,333 @@ h6 {
 
 /* Paragraph styling */
 p {
-  font-family: var(--font-body, var(--font-steampunk-body));
+  font-family: var(--font-body, var(--font-scifi-body));
   line-height: 1.75;
-  color: var(--steampunk-text-body);
+  color: var(--scifi-text-body);
 }
 
-/* Links - Brass colored with Victorian elegance */
+/* Links - Neon cyan with glow */
 a {
-  color: var(--steampunk-brass);
+  color: var(--scifi-cyan);
   text-decoration: none;
   transition: color 0.2s ease, text-shadow 0.2s ease;
   border-bottom: 1px solid transparent;
 }
 
 a:hover {
-  color: var(--steampunk-polished-brass);
-  border-bottom-color: var(--steampunk-polished-brass);
-  text-shadow: 0 0 1px rgba(212, 175, 55, 0.3);
+  color: var(--scifi-bright-cyan);
+  border-bottom-color: var(--scifi-cyan);
+  text-shadow: 0 0 8px rgba(0, 223, 223, 0.5);
 }
 
 /* Selection styling */
 ::selection {
-  background-color: rgba(184, 134, 11, 0.3);
-  color: var(--steampunk-text-header);
+  background-color: rgba(255, 0, 224, 0.3);
+  color: #ffffff;
 }
 
-/* Focus ring styles - Brass glow */
+/* Focus ring styles - Neon glow */
 *:focus-visible {
   outline: 2px solid var(--ring);
   outline-offset: 2px;
-  box-shadow: 0 0 8px rgba(184, 134, 11, 0.3);
+  box-shadow: 0 0 12px rgba(0, 223, 223, 0.4);
 }
 
-/* Scrollbar styles - Brass themed */
+/* Scrollbar styles - Dark theme with neon accent */
 ::-webkit-scrollbar {
-  width: 12px;
-  height: 12px;
+  width: 10px;
+  height: 10px;
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--color-canvas-subtle);
-  border: 1px solid var(--steampunk-border-brass);
+  background: var(--scifi-dark-bg);
+  border: 1px solid rgba(255, 0, 224, 0.1);
   border-radius: 2px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, var(--steampunk-polished-brass) 0%, var(--steampunk-brass) 50%, var(--steampunk-dark-brass) 100%);
+  background: linear-gradient(180deg, var(--scifi-magenta) 0%, var(--scifi-dark-magenta) 100%);
   border-radius: 2px;
-  border: 1px solid var(--steampunk-border-brass);
+  border: 1px solid rgba(255, 0, 224, 0.3);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, var(--steampunk-polished-brass) 0%, var(--steampunk-brass) 100%);
+  background: linear-gradient(180deg, var(--scifi-bright-cyan) 0%, var(--scifi-cyan) 100%);
 }
 
 ::-webkit-scrollbar-corner {
-  background: var(--color-canvas-subtle);
+  background: var(--scifi-dark-bg);
 }
 
-/* Code block styles - Aged parchment look */
+/* Code block styles - Dark holographic look */
 pre {
-  background-color: var(--color-canvas-subtle);
-  border: 2px solid var(--steampunk-border-brass);
+  background-color: var(--scifi-surface);
+  border: 1px solid var(--scifi-border-neon);
   border-radius: var(--radius);
   overflow-x: auto;
   box-shadow:
-    inset 0 2px 4px rgba(61, 43, 31, 0.1),
-    inset 0 0 0 1px rgba(184, 134, 11, 0.1);
+    inset 0 2px 4px rgba(0, 0, 0, 0.3),
+    0 0 8px rgba(255, 0, 224, 0.05);
   font-family: var(--font-mono);
 }
 
 code {
   font-family: var(--font-mono);
   font-size: 0.875em;
-  color: var(--steampunk-dark-brass);
+  color: var(--scifi-cyan);
 }
 
 :not(pre) > code {
   background-color: var(--color-neutral-muted);
   padding: 0.2em 0.4em;
   border-radius: var(--radius-sm);
-  border: 1px solid var(--steampunk-border-brass);
+  border: 1px solid var(--scifi-border-neon);
 }
 
-/* Blockquote - Victorian style */
+/* Blockquote - Sci-fi style */
 blockquote {
-  border-left: 4px solid var(--steampunk-brass);
+  border-left: 4px solid var(--scifi-magenta);
   padding-left: 1.5rem;
   margin: 1.5rem 0;
-  font-style: italic;
-  font-family: var(--font-accent, var(--font-steampunk-accent));
-  color: var(--steampunk-text-secondary);
-  background: linear-gradient(90deg, rgba(184, 134, 11, 0.05) 0%, transparent 100%);
+  font-style: normal;
+  font-family: var(--font-body, var(--font-scifi-body));
+  color: var(--scifi-text-secondary);
+  background: linear-gradient(90deg, rgba(255, 0, 224, 0.05) 0%, transparent 100%);
   padding: 1rem 1.5rem;
   border-radius: 0 var(--radius) var(--radius) 0;
 }
 
-/* Horizontal Rule - Steampunk divider */
+/* Horizontal Rule - Neon divider */
 hr {
-  height: 2px;
+  height: 1px;
   background: linear-gradient(90deg,
     transparent 0%,
-    var(--steampunk-border-brass) 15%,
-    var(--steampunk-polished-brass) 50%,
-    var(--steampunk-border-brass) 85%,
+    var(--scifi-magenta) 15%,
+    var(--scifi-cyan) 50%,
+    var(--scifi-magenta) 85%,
     transparent 100%);
   border: none;
   margin: 2rem 0;
+  box-shadow: 0 0 8px rgba(0, 223, 223, 0.3);
 }
 
 /* Lists */
 ul, ol {
-  color: var(--steampunk-text-body);
+  color: var(--scifi-text-body);
 }
 
 li::marker {
-  color: var(--steampunk-brass);
+  color: var(--scifi-cyan);
 }
 
 /* Tables */
 table {
   border-collapse: collapse;
   width: 100%;
-  font-family: var(--font-body, var(--font-steampunk-body));
+  font-family: var(--font-body, var(--font-scifi-body));
 }
 
 th {
-  background-color: var(--steampunk-parchment-dark);
-  font-family: var(--font-header, var(--font-steampunk-header));
+  background-color: var(--scifi-surface);
+  font-family: var(--font-header, var(--font-scifi-header));
   font-weight: 600;
-  color: var(--steampunk-text-header);
-  border: 1px solid var(--steampunk-border-brass);
+  color: var(--scifi-text-header);
+  border: 1px solid var(--scifi-border-neon);
   padding: 0.75rem 1rem;
   text-align: left;
+  font-size: 0.85em;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
 }
 
 td {
-  border: 1px solid var(--steampunk-card-border);
+  border: 1px solid rgba(255, 0, 224, 0.1);
   padding: 0.75rem 1rem;
-  background-color: var(--steampunk-card);
+  background-color: var(--scifi-card);
 }
 
 tr:hover td {
-  background-color: var(--steampunk-parchment);
+  background-color: var(--scifi-surface);
 }
 
 /* ===========================================
-   STEAMPUNK UTILITY CLASSES
+   SCI-FI UTILITY CLASSES
    =========================================== */
 
-/* Brass border decorations */
-.border-brass {
-  border-color: var(--steampunk-border-brass);
+/* Neon border decorations */
+.border-neon {
+  border-color: var(--scifi-border-neon);
 }
 
-.border-brass-ornate {
-  border: 2px solid var(--steampunk-border-brass);
+.border-neon-glow {
+  border: 1px solid var(--scifi-border-neon);
   border-radius: var(--radius);
   box-shadow:
-    inset 0 0 0 1px var(--steampunk-polished-brass),
-    0 2px 4px var(--steampunk-shadow-color);
+    0 0 8px rgba(255, 0, 224, 0.15),
+    inset 0 0 8px rgba(255, 0, 224, 0.05);
 }
 
-.border-copper {
-  border-color: var(--steampunk-copper);
+.border-cyan {
+  border-color: rgba(0, 223, 223, 0.3);
 }
 
-.border-bronze {
-  border-color: var(--steampunk-bronze);
+.border-magenta {
+  border-color: rgba(255, 0, 224, 0.3);
 }
 
-/* Gear pattern background */
-.bg-gears {
+/* Grid pattern background */
+.bg-grid {
   background-image:
-    radial-gradient(circle at 20% 50%, rgba(184, 134, 11, 0.08) 0%, transparent 25%),
-    radial-gradient(circle at 80% 50%, rgba(205, 127, 50, 0.08) 0%, transparent 25%),
-    radial-gradient(circle at 50% 20%, rgba(139, 69, 19, 0.06) 0%, transparent 20%),
-    radial-gradient(circle at 50% 80%, rgba(139, 69, 19, 0.06) 0%, transparent 20%);
-}
-
-/* Gear pattern with SVG */
-.bg-gears-pattern {
-  background-image:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'%3E%3Cg fill='none' stroke='%23B8860B' stroke-width='0.5' opacity='0.15'%3E%3Ccircle cx='30' cy='30' r='8'/%3E%3Ccircle cx='30' cy='30' r='12'/%3E%3Cpath d='M30 14v-4M30 50v-4M14 30h-4M50 30h-4M19.76 19.76l-2.83-2.83M43.07 43.07l-2.83-2.83M19.76 40.24l-2.83 2.83M43.07 16.93l-2.83 2.83'/%3E%3C/g%3E%3C/svg%3E");
-  background-repeat: repeat;
-}
-
-/* Pipe pattern background */
-.bg-pipes {
-  background-image:
-    linear-gradient(90deg, transparent 48%, rgba(205, 127, 50, 0.1) 48%, rgba(205, 127, 50, 0.1) 52%, transparent 52%),
-    linear-gradient(0deg, transparent 48%, rgba(139, 69, 19, 0.08) 48%, rgba(139, 69, 19, 0.08) 52%, transparent 52%);
+    linear-gradient(rgba(255, 0, 224, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 0, 224, 0.03) 1px, transparent 1px);
   background-size: 40px 40px;
 }
 
-/* Parchment texture background */
-.bg-parchment-texture {
+/* Circuit pattern background */
+.bg-circuit {
   background-image:
-    url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E"),
-    radial-gradient(ellipse at 30% 20%, rgba(139, 69, 19, 0.03) 0%, transparent 50%),
-    radial-gradient(ellipse at 70% 80%, rgba(139, 69, 19, 0.03) 0%, transparent 50%);
+    linear-gradient(90deg, transparent 48%, rgba(0, 223, 223, 0.05) 48%, rgba(0, 223, 223, 0.05) 52%, transparent 52%),
+    linear-gradient(0deg, transparent 48%, rgba(255, 0, 224, 0.04) 48%, rgba(255, 0, 224, 0.04) 52%, transparent 52%);
+  background-size: 40px 40px;
 }
 
-/* Parchment card style */
-.card-parchment {
-  background-color: var(--steampunk-card);
-  border: 1px solid var(--steampunk-border-brass);
+/* Dark surface background */
+.bg-dark-surface {
+  background-color: var(--scifi-surface);
+}
+
+/* Sci-fi card style */
+.card-scifi {
+  background-color: var(--scifi-card);
+  border: 1px solid var(--scifi-border-neon);
   border-radius: var(--radius);
   box-shadow:
-    0 1px 3px var(--steampunk-shadow-color),
-    0 1px 2px rgba(61, 43, 31, 0.08);
+    0 0 12px rgba(0, 0, 0, 0.3),
+    0 0 4px rgba(255, 0, 224, 0.05);
 }
 
-.card-parchment:hover {
+.card-scifi:hover {
   box-shadow:
-    0 4px 6px var(--steampunk-shadow-color),
-    0 2px 4px rgba(61, 43, 31, 0.1);
+    0 4px 16px rgba(0, 0, 0, 0.4),
+    0 0 12px rgba(255, 0, 224, 0.1);
 }
 
-/* Brass button style */
-.btn-brass {
-  background: linear-gradient(180deg, var(--steampunk-polished-brass) 0%, var(--steampunk-brass) 50%, var(--steampunk-dark-brass) 100%);
-  color: var(--steampunk-cream);
-  border: 1px solid var(--steampunk-dark-brass);
+/* Neon button style */
+.btn-neon {
+  background: linear-gradient(180deg, rgba(0, 223, 223, 0.2) 0%, rgba(0, 223, 223, 0.1) 100%);
+  color: var(--scifi-cyan);
+  border: 1px solid rgba(0, 223, 223, 0.4);
   border-radius: var(--radius);
   padding: 0.5rem 1rem;
-  font-family: var(--font-header, var(--font-steampunk-header));
+  font-family: var(--font-header, var(--font-scifi-header));
   font-weight: 500;
-  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+  font-size: 0.85em;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.2),
-    0 2px 4px var(--steampunk-shadow-color);
+    0 0 8px rgba(0, 223, 223, 0.15),
+    inset 0 0 8px rgba(0, 223, 223, 0.05);
   transition: all 0.2s ease;
   cursor: pointer;
 }
 
-.btn-brass:hover {
-  background: linear-gradient(180deg, var(--steampunk-polished-brass) 0%, var(--steampunk-polished-brass) 50%, var(--steampunk-brass) 100%);
+.btn-neon:hover {
+  background: linear-gradient(180deg, rgba(0, 223, 223, 0.3) 0%, rgba(0, 223, 223, 0.15) 100%);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.3),
-    0 4px 8px var(--steampunk-shadow-color);
+    0 0 16px rgba(0, 223, 223, 0.3),
+    inset 0 0 12px rgba(0, 223, 223, 0.1);
 }
 
-.btn-brass:active {
-  background: linear-gradient(180deg, var(--steampunk-dark-brass) 0%, var(--steampunk-brass) 50%, var(--steampunk-dark-brass) 100%);
+.btn-neon:active {
+  background: linear-gradient(180deg, rgba(0, 223, 223, 0.1) 0%, rgba(0, 223, 223, 0.05) 100%);
   box-shadow:
-    inset 0 2px 4px rgba(0, 0, 0, 0.2);
+    inset 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
-/* Copper accent style button */
-.btn-copper {
-  background: linear-gradient(180deg, #E0965A 0%, var(--steampunk-copper) 50%, #A66829 100%);
-  color: var(--steampunk-cream);
-  border: 1px solid #8B5A2B;
+/* Magenta accent button */
+.btn-magenta {
+  background: linear-gradient(180deg, rgba(255, 0, 224, 0.2) 0%, rgba(255, 0, 224, 0.1) 100%);
+  color: var(--scifi-magenta);
+  border: 1px solid rgba(255, 0, 224, 0.4);
   border-radius: var(--radius);
   padding: 0.5rem 1rem;
-  font-family: var(--font-header, var(--font-steampunk-header));
+  font-family: var(--font-header, var(--font-scifi-header));
   font-weight: 500;
-  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+  font-size: 0.85em;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.2),
-    0 2px 4px var(--steampunk-shadow-color);
+    0 0 8px rgba(255, 0, 224, 0.15),
+    inset 0 0 8px rgba(255, 0, 224, 0.05);
   transition: all 0.2s ease;
   cursor: pointer;
 }
 
-.btn-copper:hover {
-  background: linear-gradient(180deg, #E8A06A 0%, var(--steampunk-copper) 100%);
+.btn-magenta:hover {
+  background: linear-gradient(180deg, rgba(255, 0, 224, 0.3) 0%, rgba(255, 0, 224, 0.15) 100%);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.3),
-    0 4px 8px var(--steampunk-shadow-color);
+    0 0 16px rgba(255, 0, 224, 0.3),
+    inset 0 0 12px rgba(255, 0, 224, 0.1);
 }
 
-/* Bronze button style */
-.btn-bronze {
-  background: linear-gradient(180deg, #A06030 0%, var(--steampunk-bronze) 50%, #6B3A10 100%);
-  color: var(--steampunk-cream);
-  border: 1px solid #6B3A10;
+/* Yellow accent button */
+.btn-yellow {
+  background: linear-gradient(180deg, rgba(255, 215, 0, 0.2) 0%, rgba(255, 215, 0, 0.1) 100%);
+  color: var(--scifi-yellow);
+  border: 1px solid rgba(255, 215, 0, 0.4);
   border-radius: var(--radius);
   padding: 0.5rem 1rem;
-  font-family: var(--font-header, var(--font-steampunk-header));
+  font-family: var(--font-header, var(--font-scifi-header));
   font-weight: 500;
-  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+  font-size: 0.85em;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.15),
-    0 2px 4px var(--steampunk-shadow-color);
+    0 0 8px rgba(255, 215, 0, 0.15),
+    inset 0 0 8px rgba(255, 215, 0, 0.05);
   transition: all 0.2s ease;
   cursor: pointer;
 }
 
-/* Steampunk divider */
-.divider-steampunk {
-  height: 2px;
+/* Sci-fi divider */
+.divider-scifi {
+  height: 1px;
   background: linear-gradient(90deg,
     transparent 0%,
-    var(--steampunk-border-brass) 15%,
-    var(--steampunk-polished-brass) 50%,
-    var(--steampunk-border-brass) 85%,
+    var(--scifi-magenta) 15%,
+    var(--scifi-cyan) 50%,
+    var(--scifi-magenta) 85%,
     transparent 100%);
   border: none;
   margin: 1rem 0;
+  box-shadow: 0 0 4px rgba(0, 223, 223, 0.2);
 }
 
-/* Ornate divider with decorative elements */
-.divider-ornate {
+/* Glowing divider */
+.divider-glow {
   position: relative;
-  height: 20px;
+  height: 2px;
   background: transparent;
   margin: 2rem 0;
 }
 
-.divider-ornate::before {
+.divider-glow::before {
   content: "";
   position: absolute;
   top: 50%;
   left: 0;
   right: 0;
-  height: 2px;
+  height: 1px;
   background: linear-gradient(90deg,
     transparent 0%,
-    var(--steampunk-border-brass) 20%,
-    var(--steampunk-polished-brass) 50%,
-    var(--steampunk-border-brass) 80%,
+    var(--scifi-cyan) 20%,
+    var(--scifi-magenta) 50%,
+    var(--scifi-cyan) 80%,
     transparent 100%);
+  box-shadow: 0 0 8px rgba(0, 223, 223, 0.3);
 }
 
-.divider-ornate::after {
+.divider-glow::after {
   content: "";
   position: absolute;
   top: 50%;
@@ -584,111 +598,56 @@ tr:hover td {
   transform: translate(-50%, -50%);
   width: 12px;
   height: 12px;
-  background: radial-gradient(circle at 30% 30%, var(--steampunk-polished-brass) 0%, var(--steampunk-dark-brass) 100%);
+  background: var(--scifi-cyan);
   border-radius: 50%;
-  box-shadow:
-    inset -1px -1px 2px rgba(0, 0, 0, 0.3),
-    0 0 0 2px var(--steampunk-bg-main);
-}
-
-/* Victorian ornament decoration */
-.ornament-top {
-  position: relative;
-}
-
-.ornament-top::before {
-  content: "";
-  position: absolute;
-  top: -8px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 60px;
-  height: 4px;
-  background: linear-gradient(90deg,
-    transparent 0%,
-    var(--steampunk-polished-brass) 30%,
-    var(--steampunk-polished-brass) 70%,
-    transparent 100%);
-  border-radius: 2px;
-}
-
-/* Corner ornaments */
-.ornament-corners {
-  position: relative;
-}
-
-.ornament-corners::before,
-.ornament-corners::after {
-  content: "";
-  position: absolute;
-  width: 20px;
-  height: 20px;
-  border: 2px solid var(--steampunk-border-brass);
-}
-
-.ornament-corners::before {
-  top: -2px;
-  left: -2px;
-  border-right: none;
-  border-bottom: none;
-}
-
-.ornament-corners::after {
-  bottom: -2px;
-  right: -2px;
-  border-left: none;
-  border-top: none;
+  box-shadow: 0 0 12px rgba(0, 223, 223, 0.6);
 }
 
 /* Text colors */
-.text-brass {
-  color: var(--steampunk-brass);
+.text-neon {
+  color: var(--scifi-cyan);
 }
 
-.text-copper {
-  color: var(--steampunk-copper);
+.text-magenta {
+  color: var(--scifi-magenta);
 }
 
-.text-bronze {
-  color: var(--steampunk-bronze);
+.text-yellow-neon {
+  color: var(--scifi-yellow);
 }
 
 .text-header {
-  color: var(--steampunk-text-header);
-  font-family: var(--font-header, var(--font-steampunk-header));
-}
-
-.text-sepia {
-  color: var(--steampunk-accent-sepia);
+  color: var(--scifi-text-header);
+  font-family: var(--font-header, var(--font-scifi-header));
 }
 
 /* Background colors */
-.bg-parchment {
-  background-color: var(--steampunk-parchment);
+.bg-dark-main {
+  background-color: var(--scifi-bg-main);
 }
 
-.bg-parchment-dark {
-  background-color: var(--steampunk-parchment-dark);
+.bg-dark-card {
+  background-color: var(--scifi-card);
 }
 
-.bg-card-steampunk {
-  background-color: var(--steampunk-card);
+.bg-card-scifi {
+  background-color: var(--scifi-card);
 }
 
-.bg-cream {
-  background-color: var(--steampunk-cream);
+.bg-surface {
+  background-color: var(--scifi-surface);
 }
 
-.bg-light-tan {
-  background-color: var(--steampunk-light-tan);
+.bg-surface-light {
+  background-color: var(--scifi-surface-light);
 }
 
-/* Aged/vintage effect */
-.aged-effect {
+/* Holographic effect */
+.holo-effect {
   position: relative;
 }
 
-.aged-effect::after {
+.holo-effect::after {
   content: "";
   position: absolute;
   top: 0;
@@ -697,17 +656,16 @@ tr:hover td {
   bottom: 0;
   pointer-events: none;
   background:
-    radial-gradient(ellipse at 0% 0%, rgba(61, 43, 31, 0.08) 0%, transparent 50%),
-    radial-gradient(ellipse at 100% 100%, rgba(61, 43, 31, 0.08) 0%, transparent 50%);
+    linear-gradient(135deg, rgba(0, 223, 223, 0.03) 0%, transparent 50%, rgba(255, 0, 224, 0.03) 100%);
   border-radius: inherit;
 }
 
-/* Vignette effect */
-.vignette {
+/* Scanline effect */
+.scanlines {
   position: relative;
 }
 
-.vignette::after {
+.scanlines::after {
   content: "";
   position: absolute;
   top: 0;
@@ -715,169 +673,152 @@ tr:hover td {
   right: 0;
   bottom: 0;
   pointer-events: none;
-  box-shadow: inset 0 0 100px rgba(61, 43, 31, 0.15);
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.03) 2px,
+    rgba(0, 0, 0, 0.03) 4px
+  );
   border-radius: inherit;
 }
 
-/* Brass gradient text */
-.text-brass-gradient {
-  background: linear-gradient(180deg, var(--steampunk-polished-brass) 0%, var(--steampunk-brass) 50%, var(--steampunk-dark-brass) 100%);
+/* Neon gradient text */
+.text-neon-gradient {
+  background: linear-gradient(90deg, var(--scifi-cyan) 0%, var(--scifi-magenta) 50%, var(--scifi-cyan) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
-/* Copper gradient text */
-.text-copper-gradient {
-  background: linear-gradient(180deg, #E0965A 0%, var(--steampunk-copper) 50%, #A66829 100%);
+/* Magenta gradient text */
+.text-magenta-gradient {
+  background: linear-gradient(90deg, var(--scifi-magenta) 0%, var(--scifi-bright-cyan) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
-/* Rivet decoration */
-.rivets {
-  position: relative;
-}
-
-.rivets::before,
-.rivets::after {
-  content: "";
-  position: absolute;
-  width: 8px;
-  height: 8px;
-  background: radial-gradient(circle at 30% 30%, var(--steampunk-polished-brass) 0%, var(--steampunk-dark-brass) 100%);
-  border-radius: 50%;
-  box-shadow: inset -1px -1px 2px rgba(0, 0, 0, 0.3);
-}
-
-.rivets::before {
-  top: 8px;
-  left: 8px;
-}
-
-.rivets::after {
-  top: 8px;
-  right: 8px;
-}
-
-/* Four corner rivets */
-.rivets-four {
-  position: relative;
-}
-
-.rivets-four::before {
-  content: "";
-  position: absolute;
-  width: 8px;
-  height: 8px;
-  background: radial-gradient(circle at 30% 30%, var(--steampunk-polished-brass) 0%, var(--steampunk-dark-brass) 100%);
-  border-radius: 50%;
-  box-shadow:
-    inset -1px -1px 2px rgba(0, 0, 0, 0.3),
-    calc(100% - 16px) 0 0 0 currentColor,
-    0 calc(100% - 16px) 0 0 currentColor,
-    calc(100% - 16px) calc(100% - 16px) 0 0 currentColor;
-  top: 8px;
-  left: 8px;
-}
-
-/* Input field steampunk style */
-.input-steampunk {
-  background-color: var(--steampunk-card);
-  border: 1px solid var(--steampunk-border-brass);
+/* Input field sci-fi style */
+.input-scifi {
+  background-color: var(--scifi-surface);
+  border: 1px solid var(--scifi-border-neon);
   border-radius: var(--radius);
   padding: 0.5rem 0.75rem;
-  font-family: var(--font-body, var(--font-steampunk-body));
-  color: var(--steampunk-text-body);
-  box-shadow: inset 0 1px 3px rgba(61, 43, 31, 0.1);
+  font-family: var(--font-body, var(--font-scifi-body));
+  color: var(--scifi-text-primary);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3);
   transition: all 0.2s ease;
 }
 
-.input-steampunk:focus {
+.input-scifi:focus {
   outline: none;
-  border-color: var(--steampunk-polished-brass);
+  border-color: var(--scifi-cyan);
   box-shadow:
-    inset 0 1px 3px rgba(61, 43, 31, 0.1),
-    0 0 0 2px rgba(212, 175, 55, 0.2);
+    inset 0 1px 3px rgba(0, 0, 0, 0.3),
+    0 0 8px rgba(0, 223, 223, 0.2);
 }
 
-.input-steampunk::placeholder {
-  color: var(--steampunk-text-muted);
-  font-style: italic;
+.input-scifi::placeholder {
+  color: var(--scifi-text-muted);
 }
 
-/* Victorian badge */
-.badge-steampunk {
+/* Sci-fi badge */
+.badge-scifi {
   display: inline-flex;
   align-items: center;
   padding: 0.25rem 0.75rem;
-  background: linear-gradient(180deg, var(--steampunk-parchment-dark) 0%, var(--steampunk-parchment) 100%);
-  border: 1px solid var(--steampunk-border-brass);
+  background: rgba(0, 223, 223, 0.1);
+  border: 1px solid rgba(0, 223, 223, 0.3);
   border-radius: 999px;
-  font-family: var(--font-header, var(--font-steampunk-header));
-  font-size: 0.75rem;
+  font-family: var(--font-header, var(--font-scifi-header));
+  font-size: 0.7rem;
   font-weight: 500;
-  color: var(--steampunk-text-header);
+  color: var(--scifi-cyan);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.08em;
 }
 
-.badge-brass {
-  background: linear-gradient(180deg, var(--steampunk-polished-brass) 0%, var(--steampunk-brass) 100%);
-  color: var(--steampunk-cream);
-  border-color: var(--steampunk-dark-brass);
+.badge-neon {
+  background: rgba(0, 223, 223, 0.15);
+  color: var(--scifi-cyan);
+  border-color: rgba(0, 223, 223, 0.4);
 }
 
-.badge-copper {
-  background: linear-gradient(180deg, #E0965A 0%, var(--steampunk-copper) 100%);
-  color: var(--steampunk-cream);
-  border-color: #8B5A2B;
+.badge-magenta {
+  background: rgba(255, 0, 224, 0.15);
+  color: var(--scifi-magenta);
+  border-color: rgba(255, 0, 224, 0.4);
 }
 
-/* Tooltip steampunk */
-.tooltip-steampunk {
-  background-color: var(--steampunk-text-header);
-  color: var(--steampunk-cream);
+/* Tooltip sci-fi */
+.tooltip-scifi {
+  background-color: var(--scifi-surface);
+  color: var(--scifi-text-primary);
   padding: 0.5rem 0.75rem;
   border-radius: var(--radius);
-  font-family: var(--font-body, var(--font-steampunk-body));
+  font-family: var(--font-body, var(--font-scifi-body));
   font-size: 0.875rem;
-  box-shadow: 0 4px 12px var(--steampunk-shadow-color);
-  border: 1px solid var(--steampunk-dark-brass);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+  border: 1px solid var(--scifi-border-neon);
 }
 
-/* Panel/Frame steampunk style */
-.panel-steampunk {
-  background-color: var(--steampunk-card);
-  border: 2px solid var(--steampunk-border-brass);
+/* Panel/Frame sci-fi style */
+.panel-scifi {
+  background-color: var(--scifi-card);
+  border: 1px solid var(--scifi-border-neon);
   border-radius: var(--radius);
   box-shadow:
-    inset 0 0 0 1px rgba(212, 175, 55, 0.2),
-    0 4px 8px var(--steampunk-shadow-color);
+    0 0 12px rgba(0, 0, 0, 0.3),
+    0 0 4px rgba(255, 0, 224, 0.05);
 }
 
-/* Embossed text effect */
-.text-embossed {
-  text-shadow:
-    1px 1px 0 rgba(255, 255, 255, 0.3),
-    -1px -1px 0 rgba(0, 0, 0, 0.1);
+/* Glowing text effect */
+.text-glow {
+  text-shadow: 0 0 8px rgba(0, 223, 223, 0.5);
 }
 
-/* Engraved text effect */
-.text-engraved {
+/* Neon text shadow */
+.text-neon-shadow {
   text-shadow:
-    1px 1px 0 rgba(255, 255, 255, 0.5),
-    -1px -1px 0 rgba(0, 0, 0, 0.2);
-  color: var(--steampunk-bronze);
+    0 0 4px rgba(0, 223, 223, 0.4),
+    0 0 12px rgba(0, 223, 223, 0.2);
 }
 
 /* ===========================================
-   STEAMPUNK ANIMATIONS
+   SCI-FI ANIMATIONS
    =========================================== */
 
-/* Animation for brass shimmer effect */
-@keyframes brass-shimmer {
+/* Neon glow pulse animation */
+@keyframes neon-glow {
+  0%, 100% {
+    box-shadow: 0 0 5px rgba(0, 223, 223, 0.3), 0 0 10px rgba(0, 223, 223, 0.1);
+  }
+  50% {
+    box-shadow: 0 0 15px rgba(0, 223, 223, 0.5), 0 0 30px rgba(0, 223, 223, 0.2);
+  }
+}
+
+.glow-neon {
+  animation: neon-glow 2s ease-in-out infinite;
+}
+
+/* Magenta pulse animation */
+@keyframes magenta-pulse {
+  0%, 100% {
+    box-shadow: 0 0 5px rgba(255, 0, 224, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 15px rgba(255, 0, 224, 0.6);
+  }
+}
+
+.pulse-magenta {
+  animation: magenta-pulse 2s ease-in-out infinite;
+}
+
+/* Neon shimmer animation */
+@keyframes neon-shimmer {
   0% {
     background-position: -200% center;
   }
@@ -886,161 +827,153 @@ tr:hover td {
   }
 }
 
-.shimmer-brass {
+.shimmer-neon {
   background: linear-gradient(
     90deg,
-    var(--steampunk-brass) 0%,
-    var(--steampunk-polished-brass) 25%,
-    var(--steampunk-brass) 50%,
-    var(--steampunk-polished-brass) 75%,
-    var(--steampunk-brass) 100%
+    var(--scifi-cyan) 0%,
+    var(--scifi-magenta) 25%,
+    var(--scifi-cyan) 50%,
+    var(--scifi-magenta) 75%,
+    var(--scifi-cyan) 100%
   );
   background-size: 200% auto;
-  animation: brass-shimmer 3s linear infinite;
+  animation: neon-shimmer 3s linear infinite;
 }
 
-/* Loading gear animation */
-@keyframes gear-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-.gear-spin {
-  animation: gear-spin 2s linear infinite;
-}
-
-.gear-spin-reverse {
-  animation: gear-spin 2s linear infinite reverse;
-}
-
-.gear-spin-slow {
-  animation: gear-spin 4s linear infinite;
-}
-
-/* Steam puff animation */
-@keyframes steam-puff {
+/* Data stream animation */
+@keyframes data-stream {
   0% {
-    opacity: 0.6;
-    transform: translateY(0) scale(1);
+    opacity: 0.3;
+    transform: translateY(0);
+  }
+  50% {
+    opacity: 1;
   }
   100% {
-    opacity: 0;
-    transform: translateY(-20px) scale(1.5);
+    opacity: 0.3;
+    transform: translateY(-10px);
   }
 }
 
-.steam-puff {
-  animation: steam-puff 2s ease-out infinite;
+.data-stream {
+  animation: data-stream 2s ease-in-out infinite;
 }
 
-/* Pressure gauge wobble */
-@keyframes gauge-wobble {
+/* Flicker animation for neon effect */
+@keyframes neon-flicker {
   0%, 100% {
-    transform: rotate(-5deg);
+    opacity: 1;
+  }
+  92% {
+    opacity: 1;
+  }
+  93% {
+    opacity: 0.8;
+  }
+  94% {
+    opacity: 1;
+  }
+  96% {
+    opacity: 0.9;
+  }
+  97% {
+    opacity: 1;
+  }
+}
+
+.flicker-neon {
+  animation: neon-flicker 4s ease-in-out infinite;
+}
+
+/* Gentle pulse for indicators */
+@keyframes cyber-pulse {
+  0%, 100% {
+    box-shadow: 0 0 5px rgba(0, 223, 223, 0.3);
   }
   50% {
-    transform: rotate(5deg);
+    box-shadow: 0 0 15px rgba(0, 223, 223, 0.6);
   }
 }
 
-.gauge-wobble {
-  animation: gauge-wobble 0.5s ease-in-out infinite;
-}
-
-/* Gentle pulse for lights/indicators */
-@keyframes brass-pulse {
-  0%, 100% {
-    box-shadow: 0 0 5px rgba(184, 134, 11, 0.3);
-  }
-  50% {
-    box-shadow: 0 0 15px rgba(184, 134, 11, 0.6);
-  }
-}
-
-.pulse-brass {
-  animation: brass-pulse 2s ease-in-out infinite;
+.pulse-cyber {
+  animation: cyber-pulse 2s ease-in-out infinite;
 }
 
 /* ===========================================
-   STEAMPUNK SEARCH PAGE SPECIFIC STYLES
+   SCI-FI SEARCH PAGE SPECIFIC STYLES
    =========================================== */
 
-.steampunk-card {
-  background-color: var(--steampunk-card);
-  border: 1px solid var(--steampunk-border-brass);
+.scifi-card {
+  background-color: var(--scifi-card);
+  border: 1px solid var(--scifi-border-neon);
   border-radius: var(--radius);
   position: relative;
 }
 
-.steampunk-result-card {
-  background-color: var(--steampunk-card);
-  border: 1px solid var(--steampunk-border-brass);
+.scifi-result-card {
+  background-color: var(--scifi-card);
+  border: 1px solid var(--scifi-border-neon);
   border-radius: var(--radius);
   position: relative;
   transition: all 0.2s ease;
 }
 
-.steampunk-result-card:hover {
-  border-color: var(--steampunk-polished-brass);
+.scifi-result-card:hover {
+  border-color: var(--scifi-cyan);
   box-shadow:
-    0 4px 8px var(--steampunk-shadow-color),
-    0 0 0 1px var(--steampunk-polished-brass);
+    0 4px 16px rgba(0, 0, 0, 0.4),
+    0 0 12px rgba(0, 223, 223, 0.1);
 }
 
 /* Filter button styles */
-.steampunk-filter {
+.scifi-filter {
   transition: all 0.2s ease;
 }
 
-.steampunk-filter:hover {
-  box-shadow: 0 2px 4px var(--steampunk-shadow-color);
+.scifi-filter:hover {
+  box-shadow: 0 0 8px rgba(0, 223, 223, 0.2);
 }
 
-.steampunk-filter-active {
-  box-shadow: 0 0 8px rgba(212, 175, 55, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+.scifi-filter-active {
+  box-shadow: 0 0 12px rgba(0, 223, 223, 0.4), inset 0 0 8px rgba(0, 223, 223, 0.1);
 }
 
-/* Search input steampunk styling */
-.steampunk-search-input {
-  background-color: var(--steampunk-parchment);
-  border: 2px solid var(--steampunk-brass);
+/* Search input sci-fi styling */
+.scifi-search-input {
+  background-color: var(--scifi-surface);
+  border: 1px solid var(--scifi-border-neon);
   border-radius: var(--radius);
-  font-family: var(--font-body, var(--font-steampunk-body));
-  color: var(--steampunk-text-body);
+  font-family: var(--font-body, var(--font-scifi-body));
+  color: var(--scifi-text-primary);
 }
 
-.steampunk-search-input:focus {
-  border-color: var(--steampunk-polished-brass);
-  box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.2);
+.scifi-search-input:focus {
+  border-color: var(--scifi-cyan);
+  box-shadow: 0 0 12px rgba(0, 223, 223, 0.2);
 }
 
-.steampunk-search-input::placeholder {
-  color: var(--steampunk-text-muted);
-  font-style: italic;
+.scifi-search-input::placeholder {
+  color: var(--scifi-text-muted);
 }
 
-/* Magnifying glass icon brass color */
-.steampunk-search-icon {
-  color: var(--steampunk-brass);
+/* Search icon neon color */
+.scifi-search-icon {
+  color: var(--scifi-cyan);
 }
 
 /* ===========================================
-   STEAMPUNK COMPONENT OVERRIDES
+   SCI-FI COMPONENT OVERRIDES
    =========================================== */
 
 /* Card component override */
 [data-slot="card"] {
-  background-color: var(--steampunk-card);
-  border-color: var(--steampunk-card-border);
+  background-color: var(--scifi-card);
+  border-color: var(--scifi-card-border);
 }
 
 /* Button component override */
 [data-slot="button"] {
-  font-family: var(--font-header, var(--font-steampunk-header));
+  font-family: var(--font-header, var(--font-scifi-header));
 }
 
 /* ===========================================
@@ -1053,18 +986,18 @@ tr:hover td {
     color: black;
   }
 
-  .btn-brass,
-  .btn-copper,
-  .btn-bronze {
+  .btn-neon,
+  .btn-magenta,
+  .btn-yellow {
     background: none;
     border: 1px solid black;
     color: black;
   }
 
-  .shimmer-brass,
-  .gear-spin,
-  .gear-spin-reverse,
-  .steam-puff {
+  .shimmer-neon,
+  .glow-neon,
+  .pulse-magenta,
+  .data-stream {
     animation: none;
   }
 }

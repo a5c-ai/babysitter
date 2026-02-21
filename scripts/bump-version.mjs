@@ -23,7 +23,6 @@ const bumpVersion = (version, level) => {
 const packageManifests = [
   { path: "package.json" },
   { path: "packages/sdk/package.json" },
-  { path: "packages/breakpoints/package.json" },
   { path: "packages/babysitter/package.json" },
 ];
 
@@ -102,10 +101,6 @@ if (existsSync(lockPath)) {
   if (lock.packages && lock.packages[sdkWorkspaceKey]) {
     lock.packages[sdkWorkspaceKey].version = newVersion;
   }
-  const breakpointsWorkspaceKey = "packages/breakpoints";
-  if (lock.packages && lock.packages[breakpointsWorkspaceKey]) {
-    lock.packages[breakpointsWorkspaceKey].version = newVersion;
-  }
   const babysitterWorkspaceKey = "packages/babysitter";
   if (lock.packages && lock.packages[babysitterWorkspaceKey]) {
     lock.packages[babysitterWorkspaceKey].version = newVersion;
@@ -118,16 +113,6 @@ if (existsSync(lockPath)) {
     const sdkNodeModulesKey = `node_modules/${sdkName}`;
     if (lock.packages && lock.packages[sdkNodeModulesKey]) {
       lock.packages[sdkNodeModulesKey].version = newVersion;
-    }
-  }
-  const breakpointsManifest = manifests.find(
-    (manifest) => manifest.path === "packages/breakpoints/package.json",
-  );
-  const breakpointsName = breakpointsManifest?.data?.name;
-  if (breakpointsName) {
-    const breakpointsNodeModulesKey = `node_modules/${breakpointsName}`;
-    if (lock.packages && lock.packages[breakpointsNodeModulesKey]) {
-      lock.packages[breakpointsNodeModulesKey].version = newVersion;
     }
   }
   const babysitterManifest = manifests.find(

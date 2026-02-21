@@ -59,12 +59,13 @@ const TYPE_ICONS: Record<EntityType, React.ReactNode> = {
   ),
 };
 
+// Neon sci-fi colors for entity types
 const TYPE_COLORS: Record<EntityType, string> = {
-  agent: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
-  skill: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400",
-  process: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
-  domain: "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400",
-  specialization: "bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-400",
+  agent: "bg-[rgba(255,215,0,0.1)] text-[var(--scifi-yellow)]",
+  skill: "bg-[rgba(0,255,136,0.1)] text-[#00FF88]",
+  process: "bg-[rgba(0,223,223,0.1)] text-[var(--scifi-cyan)]",
+  domain: "bg-[rgba(123,97,255,0.1)] text-[#7B61FF]",
+  specialization: "bg-[rgba(255,0,224,0.1)] text-[var(--scifi-magenta)]",
 };
 
 function getHref(item: ActivityItem): string {
@@ -101,23 +102,25 @@ function ActivityRow({ item }: { item: ActivityItem }) {
   return (
     <Link
       href={getHref(item) as Route}
-      className="flex items-center justify-between rounded-lg p-3 transition-colors hover:bg-muted/50"
+      className="flex items-center justify-between rounded-sm p-3 transition-colors hover:bg-[var(--scifi-surface)] border-b-0"
     >
       <div className="flex items-center gap-3">
         <div className={cn(
-          "flex h-8 w-8 items-center justify-center rounded-lg",
+          "flex h-8 w-8 items-center justify-center rounded-sm",
           TYPE_COLORS[item.type]
-        )}>
+        )}
+        style={{ border: '1px solid rgba(255, 255, 255, 0.05)' }}
+        >
           {TYPE_ICONS[item.type]}
         </div>
         <div>
-          <p className="text-sm font-medium leading-none">{item.name}</p>
-          <p className="mt-1 text-xs text-muted-foreground capitalize">
+          <p className="text-sm font-medium leading-none text-white">{item.name}</p>
+          <p className="mt-1 text-xs text-[rgba(255,255,255,0.4)] capitalize">
             {item.action || "updated"} {item.type}
           </p>
         </div>
       </div>
-      <time className="text-xs text-muted-foreground">
+      <time className="text-xs text-[rgba(255,255,255,0.3)]">
         {formatRelativeTime(item.updatedAt)}
       </time>
     </Link>
@@ -151,7 +154,7 @@ export function RecentActivity({
           </div>
         ) : (
           <div className="flex items-center justify-center py-10">
-            <p className="text-sm text-muted-foreground">No recent activity</p>
+            <p className="text-sm text-[rgba(255,255,255,0.4)]">No recent activity</p>
           </div>
         )}
       </CardContent>

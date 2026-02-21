@@ -38,15 +38,15 @@ export interface BarChartProps {
   colors?: string[];
 }
 
-// Fallback colors if CSS variables are not defined
+// Neon sci-fi color palette
 const FALLBACK_COLORS = [
-  "#3b82f6", // blue
-  "#10b981", // green
-  "#f59e0b", // amber
-  "#ef4444", // red
-  "#8b5cf6", // violet
-  "#ec4899", // pink
-  "#06b6d4", // cyan
+  "#FF00E0", // magenta
+  "#00DFDF", // cyan
+  "#FFD700", // yellow
+  "#7B61FF", // violet
+  "#FF6B6B", // coral
+  "#00FF88", // green
+  "#FF3366", // hot pink
 ];
 
 interface CustomTooltipProps {
@@ -62,10 +62,17 @@ function CustomTooltip({ active, payload }: CustomTooltipProps) {
     const data = payload[0];
     if (!data) return null;
     return (
-      <div className="rounded-lg border bg-background p-3 shadow-md">
-        <p className="font-medium">{data.payload.name}</p>
-        <p className="text-sm text-muted-foreground">
-          Count: <span className="font-semibold text-foreground">{data.value}</span>
+      <div
+        className="rounded-sm p-3"
+        style={{
+          background: 'var(--scifi-surface)',
+          border: '1px solid rgba(0, 223, 223, 0.3)',
+          boxShadow: '0 4px 16px rgba(0, 0, 0, 0.5), 0 0 8px rgba(0, 223, 223, 0.1)',
+        }}
+      >
+        <p className="font-medium text-white">{data.payload.name}</p>
+        <p className="text-sm text-[rgba(255,255,255,0.5)]">
+          Count: <span className="font-semibold text-[var(--scifi-cyan)]">{data.value}</span>
         </p>
       </div>
     );
@@ -111,18 +118,25 @@ export function BarChart({
             layout="vertical"
             margin={{ top: 5, right: 30, left: 60, bottom: 5 }}
           >
-            <XAxis type="number" />
+            <XAxis
+              type="number"
+              tick={{ fill: 'rgba(255,255,255,0.85)', fontSize: 12 }}
+              axisLine={{ stroke: 'rgba(255,255,255,0.2)' }}
+              tickLine={{ stroke: 'rgba(255,255,255,0.2)' }}
+            />
             <YAxis
               type="category"
               dataKey="name"
-              tick={{ fontSize: 12 }}
+              tick={{ fill: 'rgba(255,255,255,0.85)', fontSize: 12 }}
               width={80}
+              axisLine={{ stroke: 'rgba(255,255,255,0.2)' }}
+              tickLine={{ stroke: 'rgba(255,255,255,0.2)' }}
             />
             <Tooltip content={<CustomTooltip />} />
             {showLegend && (
               <Legend
                 formatter={(value) => (
-                  <span className="text-sm text-muted-foreground">{value}</span>
+                  <span className="text-sm text-[rgba(255,255,255,0.85)]">{value}</span>
                 )}
               />
             )}

@@ -18,7 +18,8 @@ import {
 
 async function getAnalytics(): Promise<AnalyticsResponse | null> {
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+    const port = process.env.PORT || "3001";
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL || `http://localhost:${port}`;
     const res = await fetch(`${baseUrl}/api/analytics`, {
       cache: "no-store",
     });
@@ -50,7 +51,7 @@ export default async function DashboardPage() {
     size: item.count,
   })) || [];
 
-  // Prepare quick links with counts
+  // Prepare quick links with counts - neon sci-fi colors
   const quickLinks: QuickLinkItem[] = [
     {
       title: "Browse Processes",
@@ -61,7 +62,7 @@ export default async function DashboardPage() {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
         </svg>
       ),
-      color: "bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400",
+      color: "bg-[rgba(0,223,223,0.1)] text-[var(--scifi-cyan)]",
       count: analytics?.counts.processes,
     },
     {
@@ -73,7 +74,7 @@ export default async function DashboardPage() {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
         </svg>
       ),
-      color: "bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400",
+      color: "bg-[rgba(123,97,255,0.1)] text-[#7B61FF]",
       count: analytics?.counts.domains,
     },
     {
@@ -85,7 +86,7 @@ export default async function DashboardPage() {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
         </svg>
       ),
-      color: "bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400",
+      color: "bg-[rgba(0,255,136,0.1)] text-[#00FF88]",
       count: analytics?.counts.skills,
     },
     {
@@ -97,7 +98,7 @@ export default async function DashboardPage() {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
         </svg>
       ),
-      color: "bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400",
+      color: "bg-[rgba(255,215,0,0.1)] text-[var(--scifi-yellow)]",
       count: analytics?.counts.agents,
     },
   ];
@@ -105,27 +106,42 @@ export default async function DashboardPage() {
   return (
     <div className="container py-10">
       {/* Hero Section */}
-      <section className="mx-auto flex max-w-[980px] flex-col items-center gap-2 py-8 md:py-12 md:pb-8 lg:py-16 lg:pb-12">
-        <Badge variant="secondary" className="mb-4">
+      <section
+        className="mx-auto flex max-w-[980px] flex-col items-center gap-2 py-8 md:py-12 md:pb-8 lg:py-16 lg:pb-12 relative"
+      >
+        {/* Subtle glow behind hero */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background: 'radial-gradient(ellipse at 50% 50%, rgba(0, 223, 223, 0.05) 0%, transparent 70%)',
+          }}
+        />
+
+        <Badge variant="neon" className="mb-4">
           Babysitter Framework
         </Badge>
-        <h1 className="text-center text-3xl font-bold leading-tight tracking-tighter md:text-5xl lg:leading-[1.1]">
+        <h1
+          className="text-center text-3xl font-bold leading-tight tracking-tighter md:text-5xl lg:leading-[1.1] text-white relative"
+          style={{
+            textShadow: '0 0 30px rgba(0, 223, 223, 0.2), 0 0 60px rgba(255, 0, 224, 0.1)',
+          }}
+        >
           Process Library Catalog
         </h1>
-        <p className="max-w-[750px] text-center text-lg text-muted-foreground sm:text-xl">
+        <p className="max-w-[750px] text-center text-lg text-[rgba(255,255,255,0.5)] sm:text-xl relative">
           Browse and explore process definitions, agents, and skills for
           building intelligent automation workflows.
         </p>
-        <div className="flex w-full items-center justify-center space-x-4 py-4 md:pb-10">
+        <div className="flex w-full items-center justify-center space-x-4 py-4 md:pb-10 relative">
           <Link
             href={"/processes" as Route}
-            className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-8 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+            className="btn-neon inline-flex h-10 items-center justify-center px-8 text-sm font-medium"
           >
             Browse Catalog
           </Link>
           <Link
             href={"/search" as Route}
-            className="inline-flex h-10 items-center justify-center rounded-md border border-input bg-background px-8 text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+            className="btn-magenta inline-flex h-10 items-center justify-center px-8 text-sm font-medium"
           >
             Search
           </Link>
@@ -210,8 +226,8 @@ export default async function DashboardPage() {
       {/* Quick Links Section */}
       <section className="mt-12">
         <div className="mb-6 flex flex-col gap-2">
-          <h2 className="text-2xl font-bold tracking-tight">Quick Links</h2>
-          <p className="text-muted-foreground">
+          <h2 className="text-2xl font-bold tracking-tight text-white">Quick Links</h2>
+          <p className="text-[rgba(255,255,255,0.4)]">
             Navigate to key sections of the catalog.
           </p>
         </div>
@@ -252,8 +268,8 @@ export default async function DashboardPage() {
       {/* Recent Activity Section */}
       <section className="mt-12">
         <div className="mb-6 flex flex-col gap-2">
-          <h2 className="text-2xl font-bold tracking-tight">Recent Activity</h2>
-          <p className="text-muted-foreground">
+          <h2 className="text-2xl font-bold tracking-tight text-white">Recent Activity</h2>
+          <p className="text-[rgba(255,255,255,0.4)]">
             Latest additions and modifications to the catalog.
           </p>
         </div>

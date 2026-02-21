@@ -44,17 +44,6 @@ cd packages/catalog && npm run reindex:force   # Force full reindex
 cd packages/catalog && npm run reindex:reset   # Reset and reindex with stats
 ```
 
-### Breakpoints (`packages/breakpoints` / `@a5c-ai/babysitter-breakpoints`)
-
-```bash
-cd packages/breakpoints && npm run start:api   # Express API server
-cd packages/breakpoints && npm run start:worker  # Background worker
-cd packages/breakpoints && npm run dev         # Dev runner (API + worker)
-cd packages/breakpoints && npm run init:db     # Initialize SQLite database
-```
-
-No build step — plain JavaScript.
-
 ### VS Code Extension (`packages/vscode-extension` / `babysitter-vscode`)
 
 ```bash
@@ -89,7 +78,6 @@ Config: `testTimeout: 30000`, `hookTimeout: 300000`, `fileParallelism: false`, J
 | `packages/sdk` | `@a5c-ai/babysitter-sdk` | Core: runtime, storage, tasks, CLI, hooks, testing, config. CJS. |
 | `packages/babysitter` | `@a5c-ai/babysitter` | Metapackage re-exporting SDK. Provides `babysitter` CLI. |
 | `packages/catalog` | `process-library-catalog` | Next.js 16 app (React 19, SQLite, Radix UI, Tailwind). |
-| `packages/breakpoints` | `@a5c-ai/babysitter-breakpoints` | Express API + SQLite worker for human approval gates. Plain JS, no build step. |
 | `packages/vscode-extension` | `babysitter-vscode` | VS Code extension for dispatching/monitoring runs. Mocha tests. |
 
 ## SDK Architecture (`packages/sdk/src/`)

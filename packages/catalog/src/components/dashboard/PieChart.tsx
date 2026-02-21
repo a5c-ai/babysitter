@@ -36,17 +36,18 @@ export interface PieChartProps {
   colors?: string[];
 }
 
+// Neon sci-fi color palette
 const DEFAULT_COLORS = [
-  "#3b82f6", // blue
-  "#10b981", // green
-  "#f59e0b", // amber
-  "#ef4444", // red
-  "#8b5cf6", // violet
-  "#ec4899", // pink
-  "#06b6d4", // cyan
-  "#84cc16", // lime
-  "#f97316", // orange
-  "#6366f1", // indigo
+  "#FF00E0", // magenta
+  "#00DFDF", // cyan
+  "#FFD700", // yellow
+  "#7B61FF", // violet
+  "#FF6B6B", // coral
+  "#00FF88", // green
+  "#FF3366", // hot pink
+  "#33FFFF", // bright cyan
+  "#FFA500", // orange
+  "#9B59B6", // purple
 ];
 
 interface CustomTooltipProps {
@@ -65,13 +66,20 @@ function CustomTooltip({ active, payload }: CustomTooltipProps) {
     const total = payload.reduce((acc, p) => acc + (p?.value ?? 0), 0);
     const percent = total > 0 ? ((data.value / total) * 100) : 0;
     return (
-      <div className="rounded-lg border bg-background p-3 shadow-md">
-        <p className="font-medium">{data.name}</p>
-        <p className="text-sm text-muted-foreground">
-          Count: <span className="font-semibold text-foreground">{data.value}</span>
+      <div
+        className="rounded-sm p-3"
+        style={{
+          background: 'var(--scifi-surface)',
+          border: '1px solid rgba(0, 223, 223, 0.3)',
+          boxShadow: '0 4px 16px rgba(0, 0, 0, 0.5), 0 0 8px rgba(0, 223, 223, 0.1)',
+        }}
+      >
+        <p className="font-medium text-white">{data.name}</p>
+        <p className="text-sm text-[rgba(255,255,255,0.5)]">
+          Count: <span className="font-semibold text-[var(--scifi-cyan)]">{data.value}</span>
         </p>
-        <p className="text-sm text-muted-foreground">
-          Percentage: <span className="font-semibold text-foreground">{percent.toFixed(1)}%</span>
+        <p className="text-sm text-[rgba(255,255,255,0.5)]">
+          Percentage: <span className="font-semibold text-[var(--scifi-cyan)]">{percent.toFixed(1)}%</span>
         </p>
       </div>
     );
@@ -93,9 +101,12 @@ function CustomLegend({ payload }: CustomLegendProps) {
         <div key={`legend-${index}`} className="flex items-center gap-2">
           <div
             className="h-3 w-3 rounded-full"
-            style={{ backgroundColor: entry.color }}
+            style={{
+              backgroundColor: entry.color,
+              boxShadow: `0 0 4px ${entry.color}40`,
+            }}
           />
-          <span className="text-sm text-muted-foreground">{entry.value}</span>
+          <span className="text-sm text-[rgba(255,255,255,0.85)]">{entry.value}</span>
         </div>
       ))}
     </div>
@@ -135,6 +146,7 @@ function renderCustomizedLabel({
       textAnchor="middle"
       dominantBaseline="central"
       className="text-xs font-medium"
+      style={{ textShadow: '0 0 4px rgba(0,0,0,0.5)' }}
     >
       {`${(percent * 100).toFixed(0)}%`}
     </text>
@@ -190,16 +202,19 @@ export function PieChart({
               onMouseLeave={onPieLeave}
               animationBegin={0}
               animationDuration={800}
+              fill="#FF00E0"
             >
               {chartData.map((entry, index) => (
                 <Cell
                   key={`cell-${index}`}
-                  fill={entry.fill}
-                  stroke={entry.fill}
+                  fill={entry.fill || colors[index % colors.length]}
+                  stroke="rgba(10,10,15,0.8)"
                   strokeWidth={activeIndex === index ? 3 : 1}
-                  opacity={activeIndex === null || activeIndex === index ? 1 : 0.6}
+                  opacity={activeIndex === null || activeIndex === index ? 1 : 0.7}
                   style={{
-                    filter: activeIndex === index ? "brightness(1.1)" : "none",
+                    filter: activeIndex === index
+                      ? `brightness(1.2) drop-shadow(0 0 6px ${entry.fill}60)`
+                      : "none",
                     transition: "all 0.2s ease-in-out",
                   }}
                 />

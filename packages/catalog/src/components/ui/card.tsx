@@ -5,23 +5,28 @@ import { cn } from "@/lib/utils";
 const Card = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => (
+>(({ className, style, onMouseEnter, onMouseLeave, ...props }, ref) => (
   <div
     ref={ref}
     className={cn(
-      "rounded-lg border text-card-foreground shadow-sm relative",
-      // Steampunk parchment background and brass border with enhanced styling
-      "bg-[#F9F0DC] border-[#A67C00] border-2",
+      "rounded-sm text-card-foreground shadow-sm relative",
+      // Sci-fi dark card with neon border
+      "bg-[#12121a] border border-[rgba(255,0,224,0.15)]",
+      "hover:border-[rgba(0,223,223,0.4)]",
       className
     )}
     style={{
-      boxShadow: `
-        0 1px 3px rgba(61, 43, 31, 0.15),
-        0 2px 4px rgba(61, 43, 31, 0.1),
-        0 4px 8px rgba(61, 43, 31, 0.08),
-        inset 0 1px 3px rgba(61, 43, 31, 0.08),
-        inset 0 -1px 2px rgba(255, 255, 255, 0.3)
-      `,
+      boxShadow: '0 0 12px rgba(0, 0, 0, 0.3), 0 0 4px rgba(255, 0, 224, 0.05)',
+      transition: 'box-shadow 0.3s ease, border-color 0.3s ease',
+      ...style,
+    }}
+    onMouseEnter={(e) => {
+      (e.currentTarget as HTMLDivElement).style.boxShadow = '0 0 20px rgba(0,223,223,0.3), 0 0 12px rgba(0, 0, 0, 0.3)';
+      onMouseEnter?.(e);
+    }}
+    onMouseLeave={(e) => {
+      (e.currentTarget as HTMLDivElement).style.boxShadow = '0 0 12px rgba(0, 0, 0, 0.3), 0 0 4px rgba(255, 0, 224, 0.05)';
+      onMouseLeave?.(e);
     }}
     {...props}
   />
@@ -48,11 +53,11 @@ const CardTitle = React.forwardRef<
     ref={ref}
     className={cn(
       "font-semibold leading-none tracking-tight",
-      // Steampunk header typography
-      "text-[#3D2B1F]"
+      // Sci-fi header text
+      "text-white"
     )}
     style={{
-      fontFamily: '"Playfair Display", Georgia, serif',
+      fontFamily: 'var(--font-header, var(--font-scifi-header))',
     }}
     {...props}
   />
@@ -65,10 +70,9 @@ const CardDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn("text-sm", className)}
+    className={cn("text-sm text-[rgba(255,255,255,0.5)]", className)}
     style={{
-      fontFamily: 'Georgia, serif',
-      color: '#4A3728',
+      fontFamily: 'var(--font-body, var(--font-scifi-body))',
     }}
     {...props}
   />
