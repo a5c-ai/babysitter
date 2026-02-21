@@ -67,6 +67,7 @@ export interface CreateRunOptions {
     exportName?: string;
   };
   request?: string;
+  prompt?: string;
   inputs?: unknown;
   processRevision?: string;
   layoutVersion?: string;

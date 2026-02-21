@@ -43,6 +43,7 @@ export async function createRunDir(options: CreateRunDirOptions) {
     processRevision: options.processRevision,
     layoutVersion,
     createdAt,
+    ...(options.prompt !== undefined ? { prompt: options.prompt } : {}),
   };
   if (options.extraMetadata) {
     Object.assign(metadata, options.extraMetadata);

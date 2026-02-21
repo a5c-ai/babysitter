@@ -170,6 +170,61 @@ describe("babysitter run:create CLI", () => {
     expect(await listRunDirs()).toHaveLength(0);
   });
 
+  it("accepts --prompt flag and persists prompt in metadata and journal", async () => {
+    const entryFile = await writeEntrypoint("processes/prompted.mjs", `export async function process() {\n  return "prompted";\n}\n`);
+
+    const cli = createBabysitterCli();
+    const exitCode = await cli.run([
+      "run:create",
+      "--runs-dir",
+      runsRoot,
+      "--process-id",
+      "ci/prompted",
+      "--entry",
+      `${entryFile}#process`,
+      "--prompt",
+      "Build a REST API with user authentication",
+    ]);
+
+    expect(exitCode).toBe(0);
+
+    const runDir = await expectSingleRunDir();
+    const metadata = await readRunMetadata(runDir);
+    expect(metadata.prompt).toBe("Build a REST API with user authentication");
+    expect(metadata.processId).toBe("ci/prompted");
+
+    const journal = await loadJournal(runDir);
+    expect(journal).toHaveLength(1);
+    expect(journal[0].type).toBe("RUN_CREATED");
+    expect(journal[0].data.prompt).toBe("Build a REST API with user authentication");
+  });
+
+  it("omits prompt from metadata and journal when --prompt is not provided", async () => {
+    const entryFile = await writeEntrypoint("processes/noprompt.mjs", `export async function process() {\n  return "no-prompt";\n}\n`);
+
+    const cli = createBabysitterCli();
+    const exitCode = await cli.run([
+      "run:create",
+      "--runs-dir",
+      runsRoot,
+      "--process-id",
+      "ci/noprompt",
+      "--entry",
+      `${entryFile}#process`,
+    ]);
+
+    expect(exitCode).toBe(0);
+
+    const runDir = await expectSingleRunDir();
+    const metadata = await readRunMetadata(runDir);
+    expect(metadata.prompt).toBeUndefined();
+
+    const journal = await loadJournal(runDir);
+    expect(journal).toHaveLength(1);
+    expect(journal[0].type).toBe("RUN_CREATED");
+    expect(journal[0].data.prompt).toBeUndefined();
+  });
+
   it("fails fast when required flags are missing", async () => {
     const cli = createBabysitterCli();
     const exitCode = await cli.run(["run:create", "--entry", "./process.mjs"]);

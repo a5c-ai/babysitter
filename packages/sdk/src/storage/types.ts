@@ -17,6 +17,7 @@ export interface RunMetadata extends JsonRecord {
   layoutVersion: string;
   createdAt: string;
   completionProof?: string;
+  prompt?: string;
 }
 
 export interface CreateRunDirOptions {
@@ -33,6 +34,7 @@ export interface CreateRunDirOptions {
   layoutVersion?: string;
   inputs?: unknown;
   extraMetadata?: Record<string, unknown>;
+  prompt?: string;
 }
 
 export interface AppendEventOptions {

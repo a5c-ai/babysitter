@@ -33,6 +33,7 @@ export async function createRun(options: CreateRunOptions): Promise<CreateRunRes
     entrypoint: normalizedEntrypoint,
     processPath: normalizedEntrypoint.importPath,
     extraMetadata,
+    prompt: options.prompt,
   });
 
   let lockAcquired = false;
@@ -49,6 +50,9 @@ export async function createRun(options: CreateRunOptions): Promise<CreateRunRes
     }
     if (options.inputs !== undefined) {
       eventPayload.inputsRef = INPUTS_FILE;
+    }
+    if (options.prompt !== undefined) {
+      eventPayload.prompt = options.prompt;
     }
     await appendEvent({
       runDir,
