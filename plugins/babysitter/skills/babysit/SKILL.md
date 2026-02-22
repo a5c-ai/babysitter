@@ -151,13 +151,15 @@ If running in interactive mode, use AskUserQuestion tool to ask the user the que
 
 then post the result of the breakpoint to the run by calling `task:post`.
 
+Breakpoints are meant for human approval. NEVER prompt directly and never release or approve breakpoints yourself. Once the user responds via the AskUserQuestion tool, post the result of the breakpoint to the run by calling `task:post` when the breakpoint is resolved.
+
+Never user AskUserQuestion tool to offer an options like: "chat about this" or "i'll provide an answer in the chat" or anything that implies that the user will provide the answer in the chat. use either explicit options (and optionally one open option that the user can just write a free text answer to).
+
 Otherwise:
 
 ##### 5.1.2 Non-interactive mode
 
-If running in non-interactive mode, use the AskUserQuestion tool to ask the user the question and get the answer. This tool handles breakpoint-style interactions where human input is required. if it is unavailable, skip the breakpoint and continue (by posting the breakpoint result as "skipped") or choosing the recommended option for each question or breakpoint.
-
-Breakpoints are meant for human approval. NEVER prompt directly and never release or approve breakpoints yourself. Once the user responds via the AskUserQuestion tool, post the result of the breakpoint to the run by calling `task:post` when the breakpoint is resolved.
+If running in non-interactive mode, skip the AskUserQuestion tool as it is not available. resolve the breakpoint by selecting the best option according to the context and the intent of the user. then post the result of the breakpoint to the run by calling `task:post` when the breakpoint is resolved.
 
 ### 6. Results Posting
 
