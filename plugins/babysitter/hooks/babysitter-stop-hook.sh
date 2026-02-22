@@ -1,22 +1,24 @@
 #!/bin/bash
 # Babysitter Stop Hook - delegates to SDK CLI
 # All logic is implemented in: babysitter hook:run --hook-type stop
+
+# If babysitter CLI is not installed yet, allow exit silently.
+command -v babysitter &>/dev/null || { echo '{"decision":"allow"}'; exit 0; }
+
 PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(cd "$(dirname "$0")/.." && pwd)}"
 LOG_DIR="${BABYSITTER_LOG_DIR:-}"
 LOG_FILE="${LOG_DIR:+$LOG_DIR/babysitter-stop-hook.log}"
 
-# Diagnostic marker: if BABYSITTER_LOG_DIR is set, ensure the directory exists
-# and write markers so we know the hook fired (even if the CLI fails).
+# Diagnostic logging (when BABYSITTER_LOG_DIR is set)
 if [ -n "$LOG_FILE" ]; then
   mkdir -p "$LOG_DIR" 2>/dev/null
   {
     echo "[INFO] $(date -u +%Y-%m-%dT%H:%M:%SZ) Hook script invoked"
     echo "[INFO] $(date -u +%Y-%m-%dT%H:%M:%SZ) PLUGIN_ROOT=$PLUGIN_ROOT"
-    echo "[INFO] $(date -u +%Y-%m-%dT%H:%M:%SZ) babysitter=$(which babysitter 2>/dev/null || echo 'not found')"
   } >> "$LOG_FILE" 2>/dev/null
 fi
 
-# Capture stdin into a temp file so we can both log it and pass to the CLI
+# Capture stdin so we can log size and pass to CLI
 INPUT_FILE=$(mktemp 2>/dev/null || echo "/tmp/hook-input-$$.json")
 cat > "$INPUT_FILE"
 
