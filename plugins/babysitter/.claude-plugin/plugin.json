@@ -1,7 +1,7 @@
 {
   "name": "babysitter",
   "version": "4.0.139",
-  "sdkVersion": "0.0.170-staging.ef53e312",
+  "sdkVersion": "0.0.170-staging.00f09ef7",
   "description": "Implementation of the babysitter technique - continuous orchestration loops for deterministic development. Run Claude in a loop with orchestration steps based on the babysitter-sdk and technique.",
   "author": {
     "name": "Tal Muskal",
