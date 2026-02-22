@@ -578,10 +578,6 @@ async function cleanupSession(filePath: string): Promise<void> {
 export async function handleHookRun(args: HookRunCommandArgs): Promise<number> {
   const { hookType, json } = args;
 
-  // Early diagnostic log — helps verify CLI dispatch reaches this handler
-  const dispatchLog = createHookLogger("babysitter-stop-hook");
-  dispatchLog.info(`handleHookRun dispatching hookType=${hookType || "(empty)"}`);
-
   if (!hookType) {
     const error = {
       error: "MISSING_HOOK_TYPE",
