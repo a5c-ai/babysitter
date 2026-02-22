@@ -2101,9 +2101,9 @@ if (require.main === module) {
   createBabysitterCli()
     .run()
     .then((code) => {
-      process.exit(code);
+      process.exitCode = code;
     })
     .catch(() => {
-      process.exit(1);
+      process.exitCode = 1;
     });
 }
