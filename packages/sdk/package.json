@@ -7,7 +7,6 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {
-    "babysitter": "dist/cli/main.js",
     "babysitter-sdk": "dist/cli/main.js"
   },
   "files": [
