@@ -19,6 +19,8 @@ import * as os from 'node:os';
 import {
   discoverSkillsInternal,
   handleSkillDiscover,
+  parseProcessFileMarkers,
+  discoverFromProcessFile,
   type DiscoverSkillsResult,
   type SkillMetadata,
 } from '../skill';
@@ -698,5 +700,228 @@ category: test
     const output = JSON.parse(logSpy.mock.calls[logSpy.mock.calls.length - 1][0] as string);
     // Empty summary should resolve to null
     expect(output.skillContext).toBeNull();
+  });
+});
+
+// ── Process file marker parsing ──────────────────────────────────────
+
+describe('parseProcessFileMarkers', () => {
+  let testDir: string;
+
+  beforeEach(async () => {
+    testDir = path.join(os.tmpdir(), `process-markers-test-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`);
+    await fs.mkdir(testDir, { recursive: true });
+  });
+
+  afterEach(async () => {
+    try {
+      await fs.rm(testDir, { recursive: true, force: true });
+    } catch {
+      // Ignore cleanup errors on Windows
+    }
+  });
+
+  it('parses @skill and @agent markers from JSDoc header', async () => {
+    const processFile = path.join(testDir, 'test-process.js');
+    await fs.writeFile(processFile, `/**
+ * @process specializations/web-dev/react-app
+ * @description React app development
+ * @skill frontend-design specializations/web-dev/skills/frontend-design/SKILL.md
+ * @skill visual-diff specializations/web-dev/skills/visual-diff/SKILL.md
+ * @agent frontend-arch specializations/web-dev/agents/frontend-arch/AGENT.md
+ */
+export async function process(inputs, ctx) {}
+`, 'utf8');
+
+    const result = parseProcessFileMarkers(processFile);
+
+    expect(result.hasMarkers).toBe(true);
+    expect(result.skills).toHaveLength(2);
+    expect(result.agents).toHaveLength(1);
+    expect(result.skills[0]).toEqual({
+      type: 'skill',
+      name: 'frontend-design',
+      relativePath: 'specializations/web-dev/skills/frontend-design/SKILL.md',
+    });
+    expect(result.skills[1]).toEqual({
+      type: 'skill',
+      name: 'visual-diff',
+      relativePath: 'specializations/web-dev/skills/visual-diff/SKILL.md',
+    });
+    expect(result.agents[0]).toEqual({
+      type: 'agent',
+      name: 'frontend-arch',
+      relativePath: 'specializations/web-dev/agents/frontend-arch/AGENT.md',
+    });
+  });
+
+  it('returns hasMarkers=false when no JSDoc block exists', async () => {
+    const processFile = path.join(testDir, 'no-jsdoc.js');
+    await fs.writeFile(processFile, `// no JSDoc here
+export async function process(inputs, ctx) {}
+`, 'utf8');
+
+    const result = parseProcessFileMarkers(processFile);
+
+    expect(result.hasMarkers).toBe(false);
+    expect(result.skills).toEqual([]);
+    expect(result.agents).toEqual([]);
+  });
+
+  it('returns hasMarkers=false when JSDoc has no @skill/@agent markers', async () => {
+    const processFile = path.join(testDir, 'no-markers.js');
+    await fs.writeFile(processFile, `/**
+ * @process specializations/testing/unit-tests
+ * @description Unit testing process
+ */
+export async function process(inputs, ctx) {}
+`, 'utf8');
+
+    const result = parseProcessFileMarkers(processFile);
+
+    expect(result.hasMarkers).toBe(false);
+    expect(result.skills).toEqual([]);
+    expect(result.agents).toEqual([]);
+  });
+
+  it('deduplicates markers by name', async () => {
+    const processFile = path.join(testDir, 'dup-markers.js');
+    await fs.writeFile(processFile, `/**
+ * @skill my-skill path/to/SKILL.md
+ * @skill my-skill path/to/other/SKILL.md
+ * @agent my-agent path/to/AGENT.md
+ * @agent my-agent path/to/other/AGENT.md
+ */
+export async function process(inputs, ctx) {}
+`, 'utf8');
+
+    const result = parseProcessFileMarkers(processFile);
+
+    expect(result.hasMarkers).toBe(true);
+    expect(result.skills).toHaveLength(1);
+    expect(result.agents).toHaveLength(1);
+    expect(result.skills[0].name).toBe('my-skill');
+    expect(result.skills[0].relativePath).toBe('path/to/SKILL.md');
+    expect(result.agents[0].name).toBe('my-agent');
+    expect(result.agents[0].relativePath).toBe('path/to/AGENT.md');
+  });
+
+  it('handles markers without relative path', async () => {
+    const processFile = path.join(testDir, 'no-path.js');
+    await fs.writeFile(processFile, `/**
+ * @skill standalone-skill
+ * @agent standalone-agent
+ */
+export async function process(inputs, ctx) {}
+`, 'utf8');
+
+    const result = parseProcessFileMarkers(processFile);
+
+    expect(result.hasMarkers).toBe(true);
+    expect(result.skills).toHaveLength(1);
+    expect(result.skills[0].relativePath).toBeUndefined();
+    expect(result.agents).toHaveLength(1);
+    expect(result.agents[0].relativePath).toBeUndefined();
+  });
+
+  it('returns empty result for non-existent file', () => {
+    const result = parseProcessFileMarkers('/nonexistent/file.js');
+
+    expect(result.hasMarkers).toBe(false);
+    expect(result.skills).toEqual([]);
+    expect(result.agents).toEqual([]);
+  });
+});
+
+describe('discoverFromProcessFile', () => {
+  let testDir: string;
+  let pluginRoot: string;
+
+  beforeEach(async () => {
+    testDir = path.join(os.tmpdir(), `process-discover-test-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`);
+    pluginRoot = path.join(testDir, 'plugin');
+    await fs.mkdir(path.join(pluginRoot, 'skills', 'babysit', 'process'), { recursive: true });
+  });
+
+  afterEach(async () => {
+    try {
+      await fs.rm(testDir, { recursive: true, force: true });
+    } catch {
+      // Ignore cleanup errors on Windows
+    }
+  });
+
+  it('returns resolved metadata with full file paths', async () => {
+    const processFile = path.join(testDir, 'my-process.js');
+    await fs.writeFile(processFile, `/**
+ * @skill my-skill specializations/web-dev/skills/my-skill/SKILL.md
+ * @agent my-agent specializations/web-dev/agents/my-agent/AGENT.md
+ */
+export async function process(inputs, ctx) {}
+`, 'utf8');
+
+    const result = discoverFromProcessFile({
+      processFilePath: processFile,
+      pluginRoot,
+    });
+
+    expect(result).not.toBeNull();
+    expect(result!.skills).toHaveLength(1);
+    expect(result!.agents).toHaveLength(1);
+
+    const expectedSkillPath = path.resolve(
+      pluginRoot, 'skills', 'babysit', 'process',
+      'specializations/web-dev/skills/my-skill/SKILL.md'
+    );
+    const expectedAgentPath = path.resolve(
+      pluginRoot, 'skills', 'babysit', 'process',
+      'specializations/web-dev/agents/my-agent/AGENT.md'
+    );
+
+    expect(result!.skills[0]).toEqual({ name: 'my-skill', file: expectedSkillPath });
+    expect(result!.agents[0]).toEqual({ name: 'my-agent', file: expectedAgentPath });
+  });
+
+  it('returns null when process file has no markers', async () => {
+    const processFile = path.join(testDir, 'no-markers.js');
+    await fs.writeFile(processFile, `/**
+ * @process specializations/testing/unit-tests
+ */
+export async function process(inputs, ctx) {}
+`, 'utf8');
+
+    const result = discoverFromProcessFile({
+      processFilePath: processFile,
+      pluginRoot,
+    });
+
+    expect(result).toBeNull();
+  });
+
+  it('returns null for non-existent process file', () => {
+    const result = discoverFromProcessFile({
+      processFilePath: '/nonexistent/process.js',
+      pluginRoot,
+    });
+
+    expect(result).toBeNull();
+  });
+
+  it('returns markers without file when no relative path given', async () => {
+    const processFile = path.join(testDir, 'name-only.js');
+    await fs.writeFile(processFile, `/**
+ * @skill standalone-skill
+ */
+export async function process(inputs, ctx) {}
+`, 'utf8');
+
+    const result = discoverFromProcessFile({
+      processFilePath: processFile,
+      pluginRoot,
+    });
+
+    expect(result).not.toBeNull();
+    expect(result!.skills).toHaveLength(1);
+    expect(result!.skills[0]).toEqual({ name: 'standalone-skill' });
   });
 });

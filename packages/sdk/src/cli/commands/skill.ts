@@ -3,7 +3,7 @@
  * Replaces bash logic from skill-context-resolver.sh and skill-discovery.sh
  */
 
-import { promises as fs } from 'node:fs';
+import { promises as fs, readFileSync } from 'node:fs';
 import * as path from 'node:path';
 import * as os from 'node:os';
 
@@ -449,6 +449,136 @@ function sortAgentsByDomain(agents: AgentMetadata[], domain: string): AgentMetad
     const bMatch = b.category.toLowerCase().includes(lowerDomain) ? 0 : 1;
     return aMatch - bMatch;
   });
+}
+
+// ---------------------------------------------------------------------------
+// Process-file marker parsing (@skill / @agent JSDoc markers)
+// ---------------------------------------------------------------------------
+
+/**
+ * A single @skill or @agent marker parsed from a process file JSDoc header.
+ */
+export interface ProcessMarker {
+  type: 'skill' | 'agent';
+  name: string;
+  relativePath?: string;
+}
+
+/**
+ * Result of parsing all @skill/@agent markers from a process file.
+ */
+export interface ProcessMarkersResult {
+  skills: ProcessMarker[];
+  agents: ProcessMarker[];
+  hasMarkers: boolean;
+}
+
+/**
+ * Result of resolving process markers to full metadata.
+ */
+export interface ProcessDiscoveryResult {
+  skills: Array<{ name: string; file?: string }>;
+  agents: Array<{ name: string; file?: string }>;
+}
+
+/**
+ * Parse @skill and @agent markers from a process file's JSDoc header.
+ *
+ * Expected format in the JSDoc block:
+ *   @skill <name> <relative-path-to-SKILL.md>
+ *   @agent <name> <relative-path-to-AGENT.md>
+ *
+ * Paths are relative to the plugin's process root:
+ *   pluginRoot/skills/babysit/process/
+ */
+export function parseProcessFileMarkers(filePath: string): ProcessMarkersResult {
+  let content: string;
+  try {
+    content = readFileSync(filePath, 'utf8');
+  } catch {
+    return { skills: [], agents: [], hasMarkers: false };
+  }
+
+  // Extract first JSDoc block
+  const jsdocMatch = content.match(/\/\*\*([\s\S]*?)\*\//);
+  if (!jsdocMatch) {
+    return { skills: [], agents: [], hasMarkers: false };
+  }
+
+  const jsdocBody = jsdocMatch[1];
+  const markerRegex = /^\s*\*\s*@(skill|agent)\s+(\S+)(?:[ \t]+(\S+))?/gm;
+
+  const skills: ProcessMarker[] = [];
+  const agents: ProcessMarker[] = [];
+  const seenSkills = new Set<string>();
+  const seenAgents = new Set<string>();
+
+  let match;
+  while ((match = markerRegex.exec(jsdocBody)) !== null) {
+    const type = match[1] as 'skill' | 'agent';
+    const name = match[2];
+    const relativePath = match[3] || undefined;
+
+    if (type === 'skill') {
+      if (!seenSkills.has(name)) {
+        seenSkills.add(name);
+        skills.push({ type, name, relativePath });
+      }
+    } else {
+      if (!seenAgents.has(name)) {
+        seenAgents.add(name);
+        agents.push({ type, name, relativePath });
+      }
+    }
+  }
+
+  return {
+    skills,
+    agents,
+    hasMarkers: skills.length > 0 || agents.length > 0,
+  };
+}
+
+/**
+ * Resolve parsed markers to full file paths using the plugin process root.
+ *
+ * processRoot = pluginRoot/skills/babysit/process/
+ * Each marker's relativePath is resolved against processRoot.
+ */
+function resolveMarkersToMetadata(
+  markers: ProcessMarkersResult,
+  pluginRoot: string,
+): ProcessDiscoveryResult {
+  const processRoot = path.join(pluginRoot, 'skills', 'babysit', 'process');
+
+  const resolveMarker = (marker: ProcessMarker): { name: string; file?: string } => {
+    if (!marker.relativePath) {
+      return { name: marker.name };
+    }
+    const resolved = path.resolve(processRoot, marker.relativePath);
+    return { name: marker.name, file: resolved };
+  };
+
+  return {
+    skills: markers.skills.map(resolveMarker),
+    agents: markers.agents.map(resolveMarker),
+  };
+}
+
+/**
+ * Discover skills and agents from @skill/@agent markers in a process file.
+ *
+ * Returns null if no markers are found (caller should fall back to generic scan).
+ */
+export function discoverFromProcessFile(options: {
+  processFilePath: string;
+  pluginRoot: string;
+}): ProcessDiscoveryResult | null {
+  const markers = parseProcessFileMarkers(options.processFilePath);
+  if (!markers.hasMarkers) {
+    return null;
+  }
+  return resolveMarkersToMetadata(markers, options.pluginRoot);
 }
 
 // ---------------------------------------------------------------------------

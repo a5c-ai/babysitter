@@ -19,7 +19,7 @@ import { orchestrateIteration } from "../../runtime/orchestrateIteration";
 import type { EffectAction } from "../../runtime/types";
 import type { JsonRecord } from "../../storage/types";
 import { resolveCompletionProof } from "../completionProof";
-import { discoverSkillsInternal } from "./skill";
+import { discoverSkillsInternal, discoverFromProcessFile } from "./skill";
 
 export interface RunIterateOptions {
   runDir: string;
@@ -43,8 +43,8 @@ export interface RunIterateResult {
     runId: string;
     processId: string;
     hookStatus?: string;
-    discoveredSkills?: string[];
-    discoveredAgents?: string[];
+    discoveredSkills?: Array<{ name: string; file?: string }>;
+    discoveredAgents?: Array<{ name: string; file?: string }>;
   };
 }
 
@@ -195,12 +195,24 @@ export async function runIterate(options: RunIterateOptions): Promise<RunIterate
   };
 
   // Discover available skills and agents
+  // Try process-driven discovery first (reads @skill/@agent markers from process file)
   const pluginRoot = options.pluginRoot;
   if (pluginRoot && result.metadata) {
     try {
-      const discoverResult = await discoverSkillsInternal({ pluginRoot, runId });
-      result.metadata.discoveredSkills = discoverResult.skills.map(s => s.name);
-      result.metadata.discoveredAgents = discoverResult.agents.map(a => a.name);
+      const processFilePath = metadata.entrypoint?.importPath ?? metadata.processPath;
+      const processDiscovery = processFilePath
+        ? discoverFromProcessFile({ processFilePath, pluginRoot })
+        : null;
+
+      if (processDiscovery) {
+        result.metadata.discoveredSkills = processDiscovery.skills;
+        result.metadata.discoveredAgents = processDiscovery.agents;
+      } else {
+        // Fallback to generic scan
+        const discoverResult = await discoverSkillsInternal({ pluginRoot, runId });
+        result.metadata.discoveredSkills = discoverResult.skills.map(s => ({ name: s.name, file: s.file }));
+        result.metadata.discoveredAgents = discoverResult.agents.map(a => ({ name: a.name, file: a.file }));
+      }
     } catch {
       // Non-fatal
     }

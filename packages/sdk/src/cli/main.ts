@@ -29,7 +29,7 @@ import {
   handleSessionLastMessage,
   handleSessionIterationMessage,
 } from "./commands/session";
-import { handleSkillDiscover, handleSkillFetchRemote, discoverSkillsInternal } from "./commands/skill";
+import { handleSkillDiscover, handleSkillFetchRemote, discoverSkillsInternal, discoverFromProcessFile } from "./commands/skill";
 import { handleHookLog } from "./commands/hookLog";
 import { handleHookRun } from "./commands/hookRun";
 import { resolveCompletionProof } from "./completionProof";
@@ -1070,18 +1070,30 @@ async function handleRunCreate(parsed: ParsedArgs): Promise<number> {
   }
 
   // Discover available skills and agents for the new run
-  let discoveredSkills: string[] | undefined;
-  let discoveredAgents: string[] | undefined;
+  // Try process-driven discovery first (reads @skill/@agent markers from process file)
+  let discoveredSkills: Array<{ name: string; file?: string }> | undefined;
+  let discoveredAgents: Array<{ name: string; file?: string }> | undefined;
   const discoverPluginRoot = parsed.pluginRoot || process.env.CLAUDE_PLUGIN_ROOT;
   if (discoverPluginRoot) {
     try {
-      const discoverResult = await discoverSkillsInternal({
+      const processDiscovery = discoverFromProcessFile({
+        processFilePath: absoluteImportPath,
         pluginRoot: discoverPluginRoot,
-        runId: result.runId,
-        runsDir: parsed.runsDir,
       });
-      discoveredSkills = discoverResult.skills.map(s => s.name);
-      discoveredAgents = discoverResult.agents.map(a => a.name);
+
+      if (processDiscovery) {
+        discoveredSkills = processDiscovery.skills;
+        discoveredAgents = processDiscovery.agents;
+      } else {
+        // Fallback to generic scan
+        const discoverResult = await discoverSkillsInternal({
+          pluginRoot: discoverPluginRoot,
+          runId: result.runId,
+          runsDir: parsed.runsDir,
+        });
+        discoveredSkills = discoverResult.skills.map(s => ({ name: s.name, file: s.file }));
+        discoveredAgents = discoverResult.agents.map(a => ({ name: a.name, file: a.file }));
+      }
     } catch {
       // Non-fatal
     }

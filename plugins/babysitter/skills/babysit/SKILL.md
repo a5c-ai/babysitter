@@ -379,7 +379,31 @@ If at any point the run fails due to SDK issues or corrupted state or journal. a
 
 - include verification and refinement steps (and loops) for planning phases and integration phases, debugging phases, refactoring phases, etc. as well.
 
-- Create the process with the available skills and subagents. 
+- Create the process with the available skills and subagents.
+
+### Process File Discovery Markers
+
+When creating process files, include `@skill` and `@agent` markers in the JSDoc header listing the skills and agents relevant to this process. The SDK reads these markers to provide targeted discovery results instead of scanning all available skills.
+
+**Format** (one per line, path relative to process root `pluginRoot/skills/babysit/process/`):
+```javascript
+/**
+ * @process specializations/web-development/react-app-development
+ * @description React app development with TDD
+ * @skill frontend-design specializations/web-development/skills/frontend-design/SKILL.md
+ * @skill visual-diff-scorer specializations/web-development/skills/visual-diff-scorer/SKILL.md
+ * @agent frontend-architect specializations/web-development/agents/frontend-architect/AGENT.md
+ * @agent fullstack-architect specializations/web-development/agents/fullstack-architect/AGENT.md
+ */
+```
+
+**Steps during process creation:**
+1. Use `babysitter skill:discover --process-path <path> --plugin-root ... --json` to find relevant skills/agents in the specialization directory
+2. Select the ones actually needed by the process tasks
+3. Add them as `@skill`/`@agent` markers in the JSDoc header
+4. Use full relative path from the process root (`pluginRoot/skills/babysit/process/`)
+
+When these markers are present, `run:create` and `run:iterate` will return only the marked skills/agents (with full file paths) instead of scanning the entire plugin tree. If no markers are found, the SDK falls back to generic discovery.
 
 - Unless otherwise specified, prefer processes that close the widest loop in the quality gates (for example e2e tests with a full browser or emulator/vm if it a mobile or desktop app) AND gates that make sure the work is accurate against the user request (all the specs is covered and no extra stuff was added unless permitted by the intent of the user).
 
