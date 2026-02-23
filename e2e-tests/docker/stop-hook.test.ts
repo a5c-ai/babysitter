@@ -526,3 +526,95 @@ describe("Stop hook run state handling", () => {
     assertSessionDeleted(sid);
   });
 });
+
+// ---------------------------------------------------------------------------
+// run:create --harness session binding (integration with stop hook)
+// ---------------------------------------------------------------------------
+
+describe("run:create --harness session binding triggers stop hook", () => {
+  test("run:create --harness claude-code creates session state file", () => {
+    const sid = "harness-" + Date.now();
+    const processDir = `/tmp/hook-test-harness-process-${sid}`;
+
+    // Create a minimal process file for run:create
+    dockerExec(`mkdir -p ${processDir}`);
+    dockerExec(
+      `printf '%s' 'export async function process(inputs, ctx) { return { done: true }; }' > ${processDir}/proc.js`,
+    );
+
+    // Run run:create with --harness --session-id --plugin-root
+    const createOut = dockerExec(
+      `babysitter run:create --process-id test-harness --entry ${processDir}/proc.js#process --prompt "harness test" --harness claude-code --session-id ${sid} --plugin-root ${PLUGIN_DIR} --json`,
+    ).trim();
+
+    const createResult = JSON.parse(createOut);
+    expect(createResult.runId).toBeTruthy();
+    expect(createResult.session).toBeDefined();
+    expect(createResult.session.harness).toBe("claude-code");
+    expect(createResult.session.sessionId).toBe(sid);
+    expect(createResult.session.stateFile).toBeTruthy();
+    expect(createResult.session.error).toBeUndefined();
+
+    // Verify the session state file was actually created
+    const stateOut = dockerExec(
+      `babysitter session:state --session-id ${sid} --state-dir ${STATE_DIR} --json`,
+    ).trim();
+    const state = JSON.parse(stateOut);
+    expect(state.found).toBe(true);
+    expect(state.state.runId).toBe(createResult.runId);
+    expect(state.state.active).toBe(true);
+  });
+
+  test("stop hook blocks exit after run:create --harness binds session", () => {
+    const sid = "harness-block-" + Date.now();
+    const processDir = `/tmp/hook-test-harness-block-${sid}`;
+    const transcriptFile = `/tmp/hook-transcript-harness-block-${sid}.jsonl`;
+
+    // Create a minimal process file
+    dockerExec(`mkdir -p ${processDir}`);
+    dockerExec(
+      `printf '%s' 'export async function process(inputs, ctx) { return { done: true }; }' > ${processDir}/proc.js`,
+    );
+
+    // Create run with harness binding
+    const createOut = dockerExec(
+      `babysitter run:create --process-id test-harness-block --entry ${processDir}/proc.js#process --prompt "block test" --harness claude-code --session-id ${sid} --plugin-root ${PLUGIN_DIR} --json`,
+    ).trim();
+    const createResult = JSON.parse(createOut);
+    expect(createResult.session?.error).toBeUndefined();
+
+    // Create a transcript for the stop hook
+    createTranscript(transcriptFile, "I am working on the task");
+
+    // Now run the stop hook — it should block because session is bound to a run
+    const { exitCode, stdout } = runHook(sid, transcriptFile);
+
+    expect(exitCode).toBe(0);
+    const parsed = parseJsonBlock(stdout);
+    expect(parsed).toBeDefined();
+    expect(parsed!.decision).toBe("block");
+    expect(parsed!.systemMessage).toContain("iteration");
+  });
+
+  test("run:create --harness without --session-id reports error in JSON", () => {
+    const processDir = `/tmp/hook-test-harness-nosid-${Date.now()}`;
+
+    dockerExec(`mkdir -p ${processDir}`);
+    dockerExec(
+      `printf '%s' 'export async function process(inputs, ctx) { return { done: true }; }' > ${processDir}/proc.js`,
+    );
+
+    // Run with --harness but no --session-id and no CLAUDE_SESSION_ID env var
+    const createOut = dockerExec(
+      `babysitter run:create --process-id test-harness-nosid --entry ${processDir}/proc.js#process --prompt "no sid" --harness claude-code --plugin-root ${PLUGIN_DIR} --json`,
+    ).trim();
+
+    const createResult = JSON.parse(createOut);
+    // The run should still be created
+    expect(createResult.runId).toBeTruthy();
+    // But session binding should report an error
+    expect(createResult.session).toBeDefined();
+    expect(createResult.session.error).toBeTruthy();
+    expect(createResult.session.error).toContain("session ID");
+  });
+});

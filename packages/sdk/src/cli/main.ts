@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { promises as fs, existsSync } from "node:fs";
+import { promises as fs, existsSync, readFileSync } from "node:fs";
 import * as path from "node:path";
 import { pathToFileURL } from "node:url";
 import * as crypto from "node:crypto";
@@ -919,6 +919,31 @@ async function bindRunToClaudeCodeSession(
   return { harness: "claude-code", sessionId, stateFile: filePath };
 }
 
+/**
+ * Resolve the session ID from multiple sources, in priority order:
+ * 1. --session-id CLI flag
+ * 2. CLAUDE_SESSION_ID environment variable
+ * 3. CLAUDE_ENV_FILE contents (written by session-start hook)
+ */
+function resolveSessionId(parsed: ParsedArgs): string | undefined {
+  if (parsed.sessionId) return parsed.sessionId;
+  if (process.env.CLAUDE_SESSION_ID) return process.env.CLAUDE_SESSION_ID;
+
+  // Fallback: read from CLAUDE_ENV_FILE (written by session-start hook)
+  const envFile = process.env.CLAUDE_ENV_FILE;
+  if (envFile) {
+    try {
+      const content = readFileSync(envFile, "utf-8");
+      const match = content.match(/export CLAUDE_SESSION_ID="([^"]+)"/);
+      if (match?.[1]) return match[1];
+    } catch {
+      // Non-fatal — env file may not exist or be unreadable
+    }
+  }
+
+  return undefined;
+}
+
 async function handleRunCreate(parsed: ParsedArgs): Promise<number> {
   if (!parsed.processId) {
     console.error("--process-id is required for run:create");
@@ -1011,12 +1036,25 @@ async function handleRunCreate(parsed: ParsedArgs): Promise<number> {
   const entrySpec = formatEntrypointSpecifier(result.metadata.entrypoint);
 
   // --- Harness-specific session binding ---
-  // When --session-id and --harness are provided, bind the new run to the
-  // caller's session. Each harness has its own session management strategy.
+  // When --harness is provided, bind the new run to the caller's session.
+  // Session ID is resolved from: --session-id flag > CLAUDE_SESSION_ID env >
+  // CLAUDE_ENV_FILE contents (written by session-start hook).
   let sessionBound: HarnessSessionBindResult | undefined;
-  const sessionId = parsed.sessionId || process.env.CLAUDE_SESSION_ID;
   const harness = parsed.harness;
-  if (sessionId && harness) {
+  const sessionId = harness ? resolveSessionId(parsed) : undefined;
+
+  if (harness && !sessionId) {
+    const msg = `--harness ${harness} requires a session ID. Provide --session-id <id>, set CLAUDE_SESSION_ID env var, or ensure the session-start hook has run.`;
+    if (parsed.json) {
+      sessionBound = {
+        harness,
+        sessionId: "",
+        error: msg,
+      };
+    } else {
+      console.error(`[run:create] Error: ${msg}`);
+    }
+  } else if (sessionId && harness) {
     sessionBound = await bindRunToHarnessSession({
       harness,
       sessionId,
@@ -1060,8 +1098,10 @@ async function handleRunCreate(parsed: ParsedArgs): Promise<number> {
     }));
   } else {
     console.log(`[run:create] runId=${result.runId} runDir=${result.runDir} entry=${entrySpec}`);
-    if (sessionBound) {
-      console.log(`[run:create] session=${sessionId} bound via ${harness}`);
+    if (sessionBound?.error) {
+      console.error(`[run:create] Session binding error: ${sessionBound.error}`);
+    } else if (sessionBound) {
+      console.log(`[run:create] session=${sessionId} bound via ${harness} stateFile=${sessionBound.stateFile}`);
     }
   }
   return 0;
