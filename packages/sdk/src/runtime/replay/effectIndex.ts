@@ -71,10 +71,9 @@ export class EffectIndex {
         this.handleEffectResolved(event);
         return;
       default:
-        throw new RunFailedError(`Unknown journal event type '${event.type}'`, {
-          path: event.path,
-          seq: event.seq,
-        });
+        // Informational events (e.g. STOP_HOOK_INVOKED) don't affect the
+        // effect index — skip them silently.
+        return;
     }
   }
 

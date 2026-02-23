@@ -16,7 +16,8 @@ Read the SDK version from the plugin manifest to ensure version compatibility:
 
 ```bash
 SDK_VERSION=$(node -e "try{console.log(JSON.parse(require('fs').readFileSync('${CLAUDE_PLUGIN_ROOT}/plugin.json','utf8')).sdkVersion||'latest')}catch{console.log('latest')}")
-npm i -g @a5c-ai/babysitter-sdk@$SDK_VERSION
+sudo npm i -g @a5c-ai/babysitter-sdk@$SDK_VERSION
+# sudo is depending on the env and system
 ```
 
 then use the CLI alias: CLI="babysitter"
@@ -408,7 +409,7 @@ When creating process files, include `@skill` and `@agent` markers in the JSDoc 
 3. Add them as `@skill`/`@agent` markers in the JSDoc header
 4. Use full relative path from the process root (`pluginRoot/skills/babysit/process/`)
 
-When these markers are present, `run:create` and `run:iterate` will return only the marked skills/agents (with full file paths) instead of scanning the entire plugin tree. If no markers are found, the SDK falls back to generic discovery.
+When these markers are present, `run:create` and `run:iterate` will return only the marked skills/agents (with full file paths) instead of scanning the entire plugin tree. Without markers, the SDK falls back to scanning ALL specializations, which can return dozens of irrelevant results (e.g., AI agent skills surfaced for a simple file-writing task) and degrade orchestration quality.
 
 - Unless otherwise specified, prefer processes that close the widest loop in the quality gates (for example e2e tests with a full browser or emulator/vm if it a mobile or desktop app) AND gates that make sure the work is accurate against the user request (all the specs is covered and no extra stuff was added unless permitted by the intent of the user).
 
@@ -433,6 +434,7 @@ prefer processes that have the following characteristics unless otherwise specif
     - plugins/babysitter/skills/babysit/process/specializations/[rnd-specialization-name-slugified]/ (rnd specializations)
     - plugins/babysitter/skills/babysit/process/specializations/domains/[domain-name-slugified]/[specialization-name-slugified]/ (non rnd specializations)
     - plugins/babysitter/skills/babysit/process/methodologies/ (methodologies)
+    - When creating the process file, add `@skill` and `@agent` JSDoc markers for the relevant skills and agents found during this search (see "Process File Discovery Markers" above). This ensures only the needed dependencies are surfaced during orchestration instead of scanning all available specializations.
 
 ## Critical Rules
 

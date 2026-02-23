@@ -934,6 +934,7 @@ async function handleRunCreate(parsed: ParsedArgs): Promise<number> {
           pluginRoot: discoverPluginRoot,
           runId: result.runId,
           runsDir: parsed.runsDir,
+          processPath: absoluteImportPath,
         });
         discoveredSkills = discoverResult.skills.map(s => ({ name: s.name, file: s.file }));
         discoveredAgents = discoverResult.agents.map(a => ({ name: a.name, file: a.file }));

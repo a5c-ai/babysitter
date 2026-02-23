@@ -31,3 +31,5 @@ e2e-tests/fixtures/*/**
 **/.a5c/**
 **/.playwright-mcp/*
 
+test-machine.sh
+bug.task.md

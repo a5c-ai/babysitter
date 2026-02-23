@@ -102,13 +102,11 @@ describe("EffectIndex", () => {
     });
   });
 
-  test("throws when encountering unknown journal event types", async () => {
-    const badEvent = makeEvent(1, "SOMETHING_NEW", {});
-    await expect(buildEffectIndex({ runDir, events: [badEvent] })).rejects.toSatisfy((error) => {
-      expect(error).toBeInstanceOf(RunFailedError);
-      expect((error as RunFailedError).details).toMatchObject({ path: badEvent.path, seq: 1 });
-      return true;
-    });
+  test("silently skips unknown journal event types", async () => {
+    const unknownEvent = makeEvent(1, "STOP_HOOK_INVOKED", { reason: "test" });
+    const index = await buildEffectIndex({ runDir, events: [unknownEvent] });
+    // Informational events should not affect the effect index
+    expect(index.listEffects()).toHaveLength(0);
   });
 
   test("validates EFFECT_REQUESTED payload fields", async () => {

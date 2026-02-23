@@ -16,7 +16,7 @@ if ! command -v babysitter &>/dev/null; then
       babysitter() { npx -y "@a5c-ai/babysitter-sdk@${SDK_VERSION}" "$@"; }
     else
       # No CLI available at all — allow exit silently
-      echo '{"decision":"approve"}'
+      echo '{}'
       exit 0
     fi
   fi

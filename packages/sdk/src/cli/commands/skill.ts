@@ -451,6 +451,27 @@ function sortAgentsByDomain(agents: AgentMetadata[], domain: string): AgentMetad
   });
 }
 
+/**
+ * Cap the number of items per specialization to ensure diversity in unscoped results.
+ * Extracts the specialization name from each item's file path (the directory name
+ * under specializations/) and keeps at most `cap` items per specialization.
+ * Items not under a specializations/ directory are always kept.
+ */
+function capPerSpecialization<T extends { file?: string }>(items: T[], cap: number): T[] {
+  const counts = new Map<string, number>();
+  return items.filter(item => {
+    if (!item.file) return true;
+    const normalized = item.file.replace(/\\/g, '/');
+    const match = normalized.match(/\/specializations\/([^/]+)\//);
+    if (!match) return true;
+    const spec = match[1].toLowerCase();
+    const count = counts.get(spec) ?? 0;
+    if (count >= cap) return false;
+    counts.set(spec, count + 1);
+    return true;
+  });
+}
+
 // ---------------------------------------------------------------------------
 // Process-file marker parsing (@skill / @agent JSDoc markers)
 // ---------------------------------------------------------------------------
@@ -771,6 +792,11 @@ export async function discoverSkillsInternal(options: {
     // Sort by domain relevance
     skills = sortSkillsByDomain(skills, domain);
     agents = sortAgentsByDomain(agents, domain);
+
+    // When unscoped, cap per-specialization to ensure diversity
+    const PER_SPEC_CAP = 5;
+    skills = capPerSpecialization(skills, PER_SPEC_CAP);
+    agents = capPerSpecialization(agents, PER_SPEC_CAP);
   }
 
   // Limit for context window efficiency

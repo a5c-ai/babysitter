@@ -889,12 +889,14 @@ export async function handleSessionIterationMessage(
   let runState: string | null = null;
   let completionProof: string | null = null;
   let pendingKinds: string | null = null;
+  let entrypointImportPath: string | undefined;
 
   // If --run-id is provided, resolve run state from SDK internals
   if (runId) {
     const runDir = path.isAbsolute(runId) ? runId : path.join(runsDir, runId);
     try {
       const metadata = await readRunMetadata(runDir);
+      entrypointImportPath = metadata?.entrypoint?.importPath;
       const journal = await loadJournal(runDir);
       const index = await buildEffectIndex({ runDir, events: journal });
 
@@ -955,6 +957,7 @@ export async function handleSessionIterationMessage(
         pluginRoot,
         runId,
         runsDir,
+        processPath: entrypointImportPath,
       });
       skillContext = discoverResult.summary || null;
     } catch {
