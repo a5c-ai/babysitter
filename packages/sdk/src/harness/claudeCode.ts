@@ -555,7 +555,12 @@ async function handleStopHookImpl(args: HookHandlerArgs): Promise<number> {
         processPath: entrypointImportPath,
       });
       if (discoverResult.summary) {
-        iterationContext = `${iterationContext} | Available skills: ${discoverResult.summary}.`;
+        // Cap skill summary to avoid bloating the reason field
+        const maxSummaryLen = 300;
+        const summary = discoverResult.summary.length > maxSummaryLen
+          ? discoverResult.summary.slice(0, maxSummaryLen) + "..."
+          : discoverResult.summary;
+        iterationContext = `${iterationContext} | Available skills: ${summary}`;
       }
     } catch {
       // Skill discovery failure is non-fatal

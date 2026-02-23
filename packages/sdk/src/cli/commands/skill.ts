@@ -771,8 +771,13 @@ export async function discoverSkillsInternal(options: {
   let skills = deduplicateSkills(allSkills);
   let agents = deduplicateAgents(allAgents);
 
+  const isSpecFile = (filePath?: string) => {
+    if (!filePath) return false;
+    return filePath.replace(/\\/g, '/').includes('/specializations/');
+  };
+
   if (processPath && domain) {
-    // Filter to matching specialization
+    // Filter to matching specialization only
     const lowerDomain = domain.toLowerCase();
     const matchesSpec = (filePath?: string) => {
       if (!filePath) return false;
@@ -788,12 +793,18 @@ export async function discoverSkillsInternal(options: {
         p.category.toLowerCase() === lowerDomain
       );
     }
+  } else if (processPath && !domain) {
+    // Process path provided but not in a specialization directory —
+    // exclude specialization skills entirely (they're irrelevant).
+    // Only keep plugin-level and repo-level skills/agents.
+    skills = skills.filter(s => !isSpecFile(s.file));
+    agents = agents.filter(a => !isSpecFile(a.file));
   } else {
-    // Sort by domain relevance
+    // No processPath at all (fully unscoped) — sort by domain relevance
+    // and cap per-specialization to ensure diversity
     skills = sortSkillsByDomain(skills, domain);
     agents = sortAgentsByDomain(agents, domain);
 
-    // When unscoped, cap per-specialization to ensure diversity
     const PER_SPEC_CAP = 5;
     skills = capPerSpecialization(skills, PER_SPEC_CAP);
     agents = capPerSpecialization(agents, PER_SPEC_CAP);
