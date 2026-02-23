@@ -75,9 +75,29 @@ After the process is created and before creating the run:
 **For new runs:**
 
 ```bash
-$CLI run:create --process-id <id> --entry <path> --inputs <file> --prompt "$PROMPT" \
-  --harness claude-code --session-id "${CLAUDE_SESSION_ID}" --plugin-root "${CLAUDE_PLUGIN_ROOT}" --json
+$CLI run:create \
+  --process-id <id> \
+  --entry <path>#<export> \
+  --inputs <file> \
+  --prompt "$PROMPT" \
+  --harness claude-code \
+  --session-id "${CLAUDE_SESSION_ID}" \
+  --plugin-root "${CLAUDE_PLUGIN_ROOT}" \
+  --json
 ```
+
+**Required flags:**
+- `--process-id <id>` — unique identifier for the process definition
+- `--entry <path>#<export>` — path to the process JS file and its named export (e.g., `./my-process.js#process`)
+- `--prompt "$PROMPT"` — the user's initial prompt/request text
+- `--harness claude-code` — activates Claude Code session binding (init + associate in one step)
+- `--session-id "${CLAUDE_SESSION_ID}"` — the current Claude Code session ID (available as env var)
+- `--plugin-root "${CLAUDE_PLUGIN_ROOT}"` — plugin root directory for state file resolution
+
+**Optional flags:**
+- `--inputs <file>` — path to a JSON file with process inputs
+- `--run-id <id>` — override auto-generated run ID
+- `--runs-dir <dir>` — override runs directory (default: `.a5c/runs`)
 
 This single command creates the run AND binds the session (initializing the stop-hook loop). The JSON output includes `runId`, `runDir`, and `session` binding status.
 
@@ -303,8 +323,9 @@ export const skillTask = defineTask('analyzer-skill', (args, taskCtx) => ({
 
 **Create run (with session binding):**
 ```bash
-$CLI run:create --process-id <id> --entry <path>#<export> --inputs <path> --run-id <id> --prompt "<initial prompt>" \
-  --harness claude-code --session-id "${CLAUDE_SESSION_ID}" --plugin-root "${CLAUDE_PLUGIN_ROOT}" --json
+$CLI run:create --process-id <id> --entry <path>#<export> --inputs <file> \
+  --prompt "$PROMPT" --harness claude-code \
+  --session-id "${CLAUDE_SESSION_ID}" --plugin-root "${CLAUDE_PLUGIN_ROOT}" --json
 ```
 
 **Check status:**
