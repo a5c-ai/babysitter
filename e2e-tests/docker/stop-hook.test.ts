@@ -201,7 +201,9 @@ describe("Stop hook core lifecycle", () => {
     const output = parseJsonBlock(stdout);
     expect(output).toBeDefined();
     expect(output!.decision).toBe("block");
-    expect(output!.reason).toBe("test orchestration");
+    // reason wraps the original prompt with iteration context for Claude
+    expect(output!.reason).toContain("test orchestration");
+    expect(output!.reason).toContain("Babysitter iteration");
     expect(output!.systemMessage).toContain("iteration");
   });
 

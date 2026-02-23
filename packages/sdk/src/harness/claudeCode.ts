@@ -140,6 +140,7 @@ function readStdin(): Promise<string> {
 interface ClaudeCodeStopHookInput {
   session_id?: string;
   transcript_path?: string;
+  last_assistant_message?: string;
 }
 
 interface ClaudeCodeSessionStartHookInput {
@@ -374,37 +375,29 @@ async function handleStopHookImpl(args: HookHandlerArgs): Promise<number> {
           hasPromise = promiseValue !== null;
         }
       } catch {
-        if (verbose) {
-          process.stderr.write(
-            `[hook:run stop] Transcript parse error: ${resolvedTranscript}\n`,
-          );
-        }
-        await cleanupSession(filePath);
-        process.stdout.write("{}\n");
-        return 0;
+        log.warn(`Transcript parse error: ${resolvedTranscript}`);
       }
     } else {
-      if (verbose) {
-        process.stderr.write(
-          `[hook:run stop] Transcript not found: ${resolvedTranscript}\n`,
-        );
-      }
-      await cleanupSession(filePath);
-      process.stdout.write("{}\n");
-      return 0;
+      log.warn(`Transcript not found: ${resolvedTranscript}`);
     }
   }
 
+  // Fallback: use last_assistant_message from hook input if transcript parse
+  // yielded no text (e.g., last JSONL line was tool_use-only).
   if (!lastText) {
-    if (verbose) {
-      process.stderr.write(
-        "[hook:run stop] No assistant text content found in transcript\n",
-      );
+    const hookLastMsg = safeStr(hookInput as Record<string, unknown>, "last_assistant_message");
+    if (hookLastMsg) {
+      lastText = hookLastMsg;
+      promiseValue = extractPromiseTag(hookLastMsg);
+      hasPromise = promiseValue !== null;
+      log.info("Using last_assistant_message from hook input (transcript had no text)");
     }
-    await cleanupSession(filePath);
-    process.stdout.write("{}\n");
-    return 0;
   }
+
+  // Note: lastText may still be null if the assistant's last turn was all
+  // tool_use blocks and the hook input didn't include last_assistant_message.
+  // This is fine — we proceed with promise check (which will be false) and
+  // continue the loop if a run is bound.
 
   // 4b. If no run is associated, there's nothing to iterate on — allow exit
   if (!runId) {
@@ -573,7 +566,16 @@ async function handleStopHookImpl(args: HookHandlerArgs): Promise<number> {
   const reason = `${iterationContext}\n\n${prompt}`;
 
   // systemMessage = short user-facing status (not sent to Claude)
-  const systemMessage = `\u{1F504} Babysitter iteration ${nextIteration}/${maxIterations} [${runState}]`;
+  let systemMessage: string;
+  if (completionProof) {
+    systemMessage = `\u{1F504} Babysitter iteration ${nextIteration}/${maxIterations} | Run completed! Extract promise tag to finish.`;
+  } else if (runState === "waiting" && pendingKinds) {
+    systemMessage = `\u{1F504} Babysitter iteration ${nextIteration}/${maxIterations} | Waiting on: ${pendingKinds}`;
+  } else if (runState === "failed") {
+    systemMessage = `\u{1F504} Babysitter iteration ${nextIteration}/${maxIterations} | Failed — check run state`;
+  } else {
+    systemMessage = `\u{1F504} Babysitter iteration ${nextIteration}/${maxIterations} [${runState}]`;
+  }
 
   // 10. Output block decision (only documented fields: decision, reason, systemMessage)
   const output = {
