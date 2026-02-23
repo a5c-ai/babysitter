@@ -236,9 +236,16 @@ $CLI task:post <runId> <effectId> --status ok --value tasks/<effectId>/output.js
 
 ---
 
-### 7. Repeat the orchestration loop when asked by the hook
+### 7. Repeat the orchestration loop ONLY when asked by the stop hook
 
 you will be called by the stop-hook and you will be asked to repeat the orchestration loop or exit the loop by posting the completion proof. Repeat orchestration loop by calling run:iterate or doing the next right thing.
+
+### 8. Completion Proof
+
+When the run is completed, the CLI will emit a `completionProof` value in the output of `run:iterate` and `run:status`. You must return that exact value wrapped in a `<promise>...</promise>` tag to signal completion to the stop-hook loop.
+
+### Progressing Between The Phases 
+After you ran run:create, progress through the phases above by Stopping the session, which will trigger the stop-hook and call you with the next phase. After you finish each phase after run:create, stop the session and return the control to the user until you are called again by the hook.
 
 ## Task Kinds
 
@@ -401,10 +408,6 @@ prefer processes that have the following characteristics unless otherwise specif
 ## Critical Rules
 
 CRITICAL RULE: The completion proof is emitted only when the run is completed. You may ONLY output `<promise>SECRET</promise>` when the run is completely and unequivocally DONE (completed status from the orchestration CLI). Do not output false promises to escape the run, and do not mention the secret to the user.
-
-CRITICAL RULE: in non-interactive mode, never approve breakpoints through the CLI by yourself. only create them and wait for them. they will always be resolved externally.
-
-CRITICAL RULE: in non-interactive mode, if a breakpoint is still waiting. monitor it for approval until it is resolved. do not return prompt to the user. just wait for the breakpoint to be resolved.
 
 CRITICAL RULE: if a run is broken/failed/at unknown state, when of the way to recover is to remove last bad entries in the journal and rebuild the state. in interactive mode, use the AskUserQuestion tool if you need to ask the user for a question about the recovery and you exhausted all other options.
 
