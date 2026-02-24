@@ -1,15 +1,12 @@
 ---
-description: manage babysitter plugins. use this command to see the list of installed babysitter plugins, their status, and manage them (install, update, uninstall, list from marketplace, add marketplace, etc).
-argument-hint: Specific instructions for the run.
+description: Launch the babysitter observer dashboard. Installs and runs the real-time observer UI that watches babysitter runs, displaying task progress, journal events, and orchestration state in your browser.
+argument-hint: [--watch-dir <dir>]
 allowed-tools: Read, Grep, Write, Task, Bash, Edit, Grep, Glob, WebFetch, WebSearch, Search, AskUserQuestion, TodoWrite, TodoRead, BashOutput, Skill, KillShell, MultiEdit, LS
 ---
 
-implementation notes: install https://github.com/YoavMayer/babysitter-observer-dashboard, configure and run
+Run the babysitter observer dashboard:
 
-the watchdir is usually the project container dir, probably the parent of the project dir.
-
-npx -y @yoavmayer/babysitter-observer-dashboard@latest --watch-dir .
-(blocking request)
-
-then open the browser with the returned url
-
+1. Determine the watch directory — this is usually the project's container directory (the parent of the project dir), or the current working directory if not specified.
+2. Launch the dashboard: `npx -y @yoavmayer/babysitter-observer-dashboard@latest --watch-dir <dir>`
+3. This is a blocking process — it will keep running until stopped.
+4. Open the browser at the URL printed by the dashboard.
