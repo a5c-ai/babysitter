@@ -324,8 +324,9 @@ export const checkExistingSetupTask = defineTask('check-existing-setup', (args, 
         additionalContext: args.additionalContext
       },
       instructions: [
-        'Check if .a5c/project-profile.json exists in the project root (or the custom projectRoot if provided)',
-        'If it exists, read and parse the JSON file completely',
+        'Run `babysitter profile:read --project --json` to check for an existing project profile (add `--dir <dir>` if a custom projectRoot is provided)',
+        'If the command succeeds (exit 0), parse the JSON output as the existing profile',
+        'If the command fails (exit 1), there is no existing profile',
         'Check if .a5c/ directory exists and list its contents',
         'Determine if this is a new project by checking:',
         '  - Is the git repo empty or has only 1-2 initial commits?',
@@ -335,7 +336,8 @@ export const checkExistingSetupTask = defineTask('check-existing-setup', (args, 
         'Check for existing CI/CD configuration files (.github/workflows/, .gitlab-ci.yml, Jenkinsfile, etc.)',
         'Report whether this is a fresh install, an update, or a new project',
         'If an existing profile is found, include it in full in the output so it can be used as a merge base',
-        'Do NOT modify any files - this is a read-only check'
+        'Do NOT modify any files - this is a read-only check',
+        'IMPORTANT: Always use the babysitter CLI for profile operations — never import SDK profile functions directly'
       ],
       outputFormat: 'JSON with existingProfile (full profile object or null), isFirstRun (boolean), isNewProject (boolean), a5cDirExists (boolean), a5cFiles (array), claudeMdExists (boolean), cicdConfigFiles (array of paths found), gitCommitCount (number)'
     },
@@ -732,7 +734,7 @@ export const buildProfileTask = defineTask('build-profile', (args, taskCtx) => (
     name: 'general-purpose',
     prompt: {
       role: 'project profile architect and data integration engineer',
-      task: 'Build a comprehensive ProjectProfile by merging all available information sources. The profile must conform to the babysitter SDK ProjectProfile schema. Use mergeProjectProfile semantics: merge, do not overwrite.',
+      task: 'Build a comprehensive ProjectProfile by merging all available information sources. The profile must conform to the babysitter SDK ProjectProfile schema. Use merge semantics: merge, do not overwrite. Always use the babysitter CLI for profile I/O — never import SDK profile functions directly.',
       context: {
         existingProfile: args.existingProfile,
         repoStructure: args.repoStructure,
@@ -756,7 +758,8 @@ export const buildProfileTask = defineTask('build-profile', (args, taskCtx) => (
       },
       instructions: [
         'Read the breakpoint response from the user interview (Phase 4) to get user-provided information',
-        'If an existing profile exists, use it as the base and merge new information on top',
+        'If an existing profile exists (loaded via `babysitter profile:read --project --json` in Phase 1), use it as the base and merge new information on top',
+        'IMPORTANT: Do not import or call SDK profile functions directly — use the babysitter CLI for all profile I/O',
         'Incorporate repo structure analysis into architecture, techStack, and conventions',
         'Incorporate tools and services analysis into tools, services, cicd, externalIntegrations, and workflows',
         'Incorporate process mining results into bottlenecks, painPoints, conventions (git patterns), and workflows',
@@ -1129,24 +1132,21 @@ export const saveProfileTask = defineTask('save-profile', (args, taskCtx) => ({
         claudeMdResult: args.claudeMdResult,
         newProjectResult: args.newProjectResult,
         projectRoot: args.projectRoot,
-        defaultProfileDir: '.a5c/',
-        profileFilename: 'project-profile.json',
-        markdownFilename: 'project-profile.md'
+        defaultProfileDir: '.a5c/'
       },
       instructions: [
-        'Determine the profile directory: {projectRoot}/.a5c/ (or .a5c/ in cwd)',
-        'Create the .a5c/ directory if it does not exist: mkdir -p .a5c/',
         'Finalize the profile with any last updates from CI/CD and CLAUDE.md results:',
         '  - If CI/CD was configured, ensure profile.cicd.babysitterIntegration is updated',
         '  - If CLAUDE.md was updated, ensure profile.claudeMdInstructions is populated',
         '  - Update profile.installedSkills, installedAgents, installedProcesses from tool selection',
         '  - Ensure updatedAt is set to current timestamp',
-        'Write the profile as JSON to .a5c/project-profile.json with 2-space indentation',
-        'Generate a human-readable markdown summary and write it to .a5c/project-profile.md',
-        'The markdown should include sections for: Project Name, Description, Goals, Tech Stack, Architecture, Team, Workflows, Processes, Tools, Services, CI/CD, Pain Points, Bottlenecks, Conventions, Installed Extensions',
-        'Use atomic write pattern: write to .tmp file first, then rename',
-        'Verify the written files can be read back successfully',
-        'Report the full paths of all files written'
+        'Write the finalized profile JSON to a temporary file (e.g., /tmp/project-profile-final.json)',
+        'Run `babysitter profile:write --project --input /tmp/project-profile-final.json --json` to write the profile (add `--dir <dir>` if a custom projectRoot is provided)',
+        'The CLI handles atomic writes, directory creation, and markdown generation automatically',
+        'Run `babysitter profile:read --project --json` to verify the written profile can be read back successfully',
+        'Clean up the temporary file',
+        'Report the full paths of all files written',
+        'IMPORTANT: Always use the babysitter CLI for profile operations — never import SDK profile functions directly'
       ],
       outputFormat: 'JSON with savedProfile (the profile object as written), profileJsonPath (string), profileMdPath (string), filesWritten (array of full paths), bytesWritten (number), verified (boolean)'
     },

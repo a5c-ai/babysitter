@@ -256,13 +256,15 @@ export const checkExistingSetupTask = defineTask('check-existing-setup', (args, 
         additionalContext: args.additionalContext
       },
       instructions: [
-        'Check if ~/.a5c/user-profile.json exists (or the custom profileDir if provided)',
-        'If it exists, read and parse the JSON file completely',
+        'Run `babysitter profile:read --user --json` to check for an existing user profile (add `--dir <dir>` if a custom profileDir is provided)',
+        'If the command succeeds (exit 0), parse the JSON output as the existing profile',
+        'If the command fails (exit 1), there is no existing profile — this is a fresh install',
         'Check if ~/.a5c/ directory exists and list its contents',
         'Check if any .a5c/ directory exists in the current working directory',
         'Report whether this is a fresh install or an update to an existing setup',
         'If an existing profile is found, include it in full in the output so it can be used as a merge base',
-        'Do NOT modify any files - this is a read-only check'
+        'Do NOT modify any files - this is a read-only check',
+        'IMPORTANT: Always use the babysitter CLI for profile operations — never import SDK profile functions directly'
       ],
       outputFormat: 'JSON with existingProfile (full profile object or null), configDirExists (boolean), configFiles (array of filenames found), isFirstRun (boolean)'
     },
@@ -492,9 +494,10 @@ export const buildProfileTask = defineTask('build-profile', (args, taskCtx) => (
       },
       instructions: [
         'Read the breakpoint response from the user interview (Phase 3) to get the user-provided information',
-        'If an existing profile exists, use it as the base and merge new information on top',
+        'If an existing profile exists (loaded via `babysitter profile:read --user --json` in Phase 1), use it as the base and merge new information on top',
         'If social research is available, incorporate verified findings (prefer user-stated info over inferred)',
         'Build a complete UserProfile object conforming to the schema described in context',
+        'IMPORTANT: Do not import or call SDK profile functions directly — use the babysitter CLI for all profile I/O',
         'For any fields the user did not provide, use sensible defaults:',
         '  - preferences.verbosity: "normal"',
         '  - preferences.autonomyLevel: "semi-autonomous"',
@@ -705,21 +708,18 @@ export const saveProfileTask = defineTask('save-profile', (args, taskCtx) => ({
         toolSelection: args.toolSelection,
         configResult: args.configResult,
         profileDir: args.profileDir,
-        defaultProfileDir: '~/.a5c/',
-        profileFilename: 'user-profile.json',
-        markdownFilename: 'user-profile.md'
+        defaultProfileDir: '~/.a5c/'
       },
       instructions: [
-        'Create the profile directory if it does not exist: mkdir -p ~/.a5c/ (or custom profileDir)',
-        'Write the profile as JSON to user-profile.json with 2-space indentation',
-        'Generate a human-readable markdown summary and write it to user-profile.md',
-        'The markdown should include sections for: Name, Specialties, Expertise Levels, Goals, Preferences, Tool Preferences, Breakpoint Tolerance, Communication Style, Experience, Social Profiles, Installed Extensions',
-        'Write the configuration to config.json in the same directory',
+        'Write the profile JSON to a temporary file (e.g., /tmp/user-profile-final.json)',
+        'Run `babysitter profile:write --user --input /tmp/user-profile-final.json --json` to write the profile (add `--dir <dir>` if a custom profileDir is provided)',
+        'The CLI handles atomic writes, directory creation, and markdown generation automatically',
+        'Write the configuration to config.json in the profile directory (mkdir -p ~/.a5c/ or custom profileDir first)',
         'If a tool-recommendations.json was generated, ensure it is saved alongside the profile',
-        'Verify the written files can be read back successfully',
-        'Use atomic write pattern: write to .tmp file first, then rename',
-        'Set appropriate file permissions (readable by user only: 600)',
-        'Report the full paths of all files written'
+        'Run `babysitter profile:read --user --json` to verify the written profile can be read back successfully',
+        'Clean up the temporary file',
+        'Report the full paths of all files written',
+        'IMPORTANT: Always use the babysitter CLI for profile operations — never import SDK profile functions directly'
       ],
       outputFormat: 'JSON with savedProfile (the profile object as written), configPath (string), markdownPath (string), filesWritten (array of full paths), bytesWritten (number), verified (boolean)'
     },

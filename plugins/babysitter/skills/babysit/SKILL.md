@@ -66,7 +66,7 @@ When running non-interactively, skip the interview phase entirely. Instead:
 
 Before building the process, check for an existing user profile to personalize the orchestration:
 
-1. **Read user profile**: Run `babysitter profile:read --user --json` to load the user profile from `~/.a5c/user-profile.json`. Alternatively, use `readUserProfile()` from `@a5c-ai/babysitter-sdk` directly.
+1. **Read user profile**: Run `babysitter profile:read --user --json` to load the user profile from `~/.a5c/user-profile.json`. **Always use the CLI for profile operations — never import or call SDK profile functions directly.**
 
 2. **Pre-fill context**: Use the profile to understand the user's specialties, expertise levels, preferences, and communication style. This informs how you conduct the interview (skip questions the profile already answers) and how you build the process.
 
@@ -83,7 +83,7 @@ Before building the process, check for an existing user profile to personalize t
 
 6. **If no profile exists**: Proceed normally with the interview phase. Consider suggesting the user run `/user-install` first to create a profile for better personalization.
 
-7. **CLI profile commands**: Use the babysitter CLI for profile operations during processes:
+7. **CLI profile commands (mandatory)**: **All profile operations MUST use the babysitter CLI — never import SDK profile functions directly.** This applies to the babysit skill itself, all generated processes, and all agent task instructions:
    - `babysitter profile:read --user --json` — Read user profile as JSON
    - `babysitter profile:read --project --json` — Read project profile as JSON
    - `babysitter profile:write --user --input <file> --json` — Write user profile from file
@@ -93,12 +93,16 @@ Before building the process, check for an existing user profile to personalize t
    - `babysitter profile:render --user` — Render user profile as readable markdown
    - `babysitter profile:render --project` — Render project profile as readable markdown
 
+   Use `--dir <dir>` to override the default profile directory when needed.
+
 #### Process creation phase
 
 after the interview phase, create the complete custom process files (js and jsons) for the run according to the Process Creation Guidelines and methodologies section. also install the babysitter-sdk inside .a5c if it is not already installed. (install it in .a5c/package.json if it is not already installed, make sure to use the latest version)
 you must abide the syntax and structure of the process files from the process library.
 
 **User profile awareness**: If a user profile was loaded in the User Profile Integration step, use it to inform process design — adjust breakpoint density per the user's tolerance level, select agents/skills the user prefers, and match the process complexity to the user's expertise.
+
+**IMPORTANT — Profile I/O in processes**: When generating process files, all profile read/write/merge operations MUST use the babysitter CLI commands (`babysitter profile:read`, `profile:write`, `profile:merge`, `profile:render`). Never instruct agents to import or call SDK profile functions (`readUserProfile`, `writeUserProfile`, etc.) directly. The CLI handles atomic writes, directory creation, and markdown generation automatically.
 
 After the process is created and before creating the run:
 - **Interactive mode**: describe the process at high level (not the code or implementation details) to the user and ask for confirmation to use it, also generate it as a [process-name].diagram.md and [process-name].process.md file. If the user is not satisfied with the process, go back to the process creation phase and modify the process according to the feedback of the user until the user is satisfied with the process.
