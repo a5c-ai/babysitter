@@ -9,7 +9,7 @@
  */
 
 import { promises as fs } from "node:fs";
-import * as path from "node:path";
+import { resolveInputPath } from "../resolveInputPath";
 
 import {
   readUserProfile,
@@ -103,7 +103,7 @@ export async function handleProfileWrite(args: ProfileCommandArgs): Promise<numb
 
   let profileData: unknown;
   try {
-    const raw = await fs.readFile(path.resolve(inputPath), "utf8");
+    const raw = await fs.readFile(resolveInputPath(inputPath), "utf8");
     profileData = JSON.parse(raw);
   } catch (error) {
     console.error(`[profile:write] Failed to read input file: ${error instanceof Error ? error.message : String(error)}`);
@@ -145,7 +145,7 @@ export async function handleProfileMerge(args: ProfileCommandArgs): Promise<numb
 
   let updates: unknown;
   try {
-    const raw = await fs.readFile(path.resolve(inputPath), "utf8");
+    const raw = await fs.readFile(resolveInputPath(inputPath), "utf8");
     updates = JSON.parse(raw);
   } catch (error) {
     console.error(`[profile:merge] Failed to read input file: ${error instanceof Error ? error.message : String(error)}`);

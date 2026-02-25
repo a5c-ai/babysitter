@@ -3,6 +3,7 @@ import { promises as fs, existsSync } from "node:fs";
 import * as path from "node:path";
 import { pathToFileURL } from "node:url";
 import * as crypto from "node:crypto";
+import { collapseDoubledA5cRuns as _sharedCollapseDoubledA5cRuns, resolveInputPath } from "./resolveInputPath";
 import { commitEffectResult } from "../runtime/commitEffectResult";
 import { createRun } from "../runtime/createRun";
 import { buildEffectIndex } from "../runtime/replay/effectIndex";
@@ -519,17 +520,8 @@ function normalizePosix(p: string): string {
   return path.normalize(p).replace(/\\/g, "/").replace(/\/+$/, "");
 }
 
-/** Collapse doubled ".a5c/runs" segments: ".a5c/runs/.a5c/runs/X" → ".a5c/runs/X" */
-function collapseDoubledA5cRuns(p: string): string {
-  // Match both forward and back-slash variants
-  const pattern = /([/\\]?\.a5c[/\\]runs)[/\\]\.a5c[/\\]runs([/\\]|$)/;
-  let result = p;
-  // Collapse repeatedly in case of triple+ duplication
-  while (pattern.test(result)) {
-    result = result.replace(pattern, "$1$2");
-  }
-  return result;
-}
+/** Collapse doubled ".a5c/runs" segments — delegates to shared utility. */
+const collapseDoubledA5cRuns = _sharedCollapseDoubledA5cRuns;
 
 function expectFlagValue(args: string[], index: number, flag: string): string {
   const value = args[index];
@@ -748,7 +740,7 @@ function listModuleExports(mod: ModuleExports): string {
 }
 
 async function validateProcessEntrypoint(importPath: string, exportName?: string): Promise<void> {
-  const resolvedPath = path.isAbsolute(importPath) ? importPath : path.resolve(importPath);
+  const resolvedPath = path.isAbsolute(importPath) ? importPath : resolveInputPath(importPath);
   try {
     await fs.access(resolvedPath);
   } catch (error) {
@@ -792,7 +784,7 @@ async function validateProcessEntrypoint(importPath: string, exportName?: string
 }
 
 async function readInputsFile(filePath: string): Promise<unknown> {
-  const absolute = path.resolve(filePath);
+  const absolute = resolveInputPath(filePath);
   let contents: string;
   try {
     contents = await fs.readFile(absolute, "utf8");

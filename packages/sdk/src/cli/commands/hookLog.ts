@@ -9,6 +9,7 @@
 
 import { promises as fs } from "node:fs";
 import * as path from "node:path";
+import { resolveInputPath } from "../resolveInputPath";
 import type { KnownHookType } from "../../hooks/types";
 
 // ---------------------------------------------------------------------------
@@ -273,9 +274,10 @@ export async function handleHookLog(args: HookLogCommandArgs): Promise<number> {
 
   // Ensure log directory exists and append
   try {
-    const logDir = path.dirname(path.resolve(logFile));
+    const resolvedLogFile = resolveInputPath(logFile);
+    const logDir = path.dirname(resolvedLogFile);
     await fs.mkdir(logDir, { recursive: true });
-    await fs.appendFile(path.resolve(logFile), logLine + "\n", "utf8");
+    await fs.appendFile(resolvedLogFile, logLine + "\n", "utf8");
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
     const error = { error: "LOG_WRITE_ERROR", message: msg };
@@ -293,7 +295,7 @@ export async function handleHookLog(args: HookLogCommandArgs): Promise<number> {
       JSON.stringify({
         hookType,
         eventLabel,
-        logFile: path.resolve(logFile),
+        logFile: resolveInputPath(logFile),
         logLine,
       }),
     );

@@ -5,6 +5,7 @@
 
 import { promises as fs, existsSync, readFileSync } from 'node:fs';
 import * as path from 'node:path';
+import { resolveInputPath } from '../resolveInputPath';
 import { loadJournal } from '../../storage/journal';
 import { readRunMetadata } from '../../storage/runFiles';
 import { buildEffectIndex } from '../../runtime/replay/effectIndex';
@@ -793,7 +794,7 @@ export function handleSessionLastMessage(
     promiseValue: null,
   };
 
-  const transcriptPath = path.resolve(args.transcriptPath);
+  const transcriptPath = resolveInputPath(args.transcriptPath);
 
   if (!existsSync(transcriptPath)) {
     result.error = 'TRANSCRIPT_NOT_FOUND';
