@@ -145,9 +145,15 @@ IMPORTANT:
 
 ##### 5.1.1 Interactive mode
 
-If running in interactive mode, use AskUserQuestion tool to ask the user the question and get the answer.
+If running in interactive mode, use AskUserQuestion tool to ask the user the breakpoint question.
 
-then post the result of the breakpoint to the run by calling `task:post`.
+**CRITICAL: Response validation rules:**
+- The AskUserQuestion MUST include explicit "Approve" and "Reject" (or similar) options so the user's intent is unambiguous.
+- If AskUserQuestion returns empty, no selection, or the user dismisses it without choosing an option: treat as **NOT approved**. Re-ask the question or keep the breakpoint in a pending/waiting state. Do NOT proceed.
+- NEVER fabricate, synthesize, or infer approval text. Only pass through the user's actual selected response verbatim.
+- NEVER assume approval from ambiguous, empty, or missing responses. When in doubt, the answer is "not approved".
+
+After receiving an explicit approval or rejection from the user, post the result of the breakpoint to the run by calling `task:post`.
 
 Otherwise:
 
@@ -376,6 +382,8 @@ prefer processes that have the following characteristics unless otherwise specif
 ## Critical Rules
 
 CRITICAL RULE: The completion secret is emitted only when the run is completed. You may ONLY output `<promise>SECRET</promise>` when the run is completely and unequivocally DONE (completed status from the orchestration CLI). Do not output false promises to escape the run, and do not mention the secret to the user.
+
+CRITICAL RULE: in interactive mode, NEVER auto-approve breakpoints. If AskUserQuestion returns empty, no selection, or is dismissed, treat it as NOT approved and re-ask. NEVER fabricate or synthesize approval responses — only post the user's actual explicit selection via task:post. An empty response is NOT approval.
 
 CRITICAL RULE: in non-interactive mode, never approve breakpoints through the CLI by yourself. only create them and wait for them. they will always be resolved externally.
 
