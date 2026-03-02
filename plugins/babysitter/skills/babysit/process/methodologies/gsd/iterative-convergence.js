@@ -7,6 +7,15 @@
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
 
+/**
+ * Agents referenced from agents/ directory:
+ *   - gsd-executor: Implements feature iterations
+ *   - gsd-verifier: Quality scoring with structured rubric
+ *
+ * Skills referenced from skills/ directory:
+ *   - verification-suite: Quality scoring rubric and convergence patterns
+ *   - gsd-tools: Config and iteration tracking
+ */
 export async function process(inputs, ctx) {
   const { feature, targetQuality = 85, maxIterations = 5 } = inputs;
 
@@ -66,7 +75,7 @@ export const implementTask = defineTask('implement', (args, taskCtx) => ({
   kind: 'agent',
   title: `Implement: ${args.feature} (iter ${args.iteration})`,
   agent: {
-    name: 'implementer',
+    name: 'gsd-executor',
     prompt: {
       role: 'senior engineer',
       task: 'Implement feature with quality',
@@ -102,7 +111,7 @@ export const qualityScoringTask = defineTask('quality-scoring', (args, taskCtx) 
   kind: 'agent',
   title: `Score quality (iter ${args.iteration})`,
   agent: {
-    name: 'quality-scorer',
+    name: 'gsd-verifier',
     prompt: {
       role: 'QA engineer',
       task: 'Score implementation quality 0-100',

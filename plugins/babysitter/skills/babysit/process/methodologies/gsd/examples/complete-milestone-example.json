@@ -1,0 +1,20 @@
+{
+  "milestoneId": "milestone-1-mvp",
+  "milestoneName": "MVP Launch",
+  "options": {
+    "createTag": true,
+    "tagFormat": "v1.0",
+    "archiveArtifacts": true,
+    "generateReleaseNotes": true
+  },
+  "context": {
+    "projectPath": ".",
+    "phases": [
+      "phase-1-auth",
+      "phase-2-tasks",
+      "phase-3-teams"
+    ],
+    "auditStatus": "passed",
+    "auditFile": ".planning/MILESTONE-AUDIT.md"
+  }
+}

@@ -13,6 +13,15 @@ import { defineTask } from '@a5c-ai/babysitter-sdk';
  * GSD Methodology: Execute tasks in parallel waves with fresh agent contexts
  * Each task gets atomic git commit immediately upon completion
  *
+ * Agents referenced from agents/ directory:
+ *   - gsd-executor: Executes task plans with atomic commits
+ *   - gsd-verifier: Verifies phase completion against requirements
+ *
+ * Skills referenced from skills/ directory:
+ *   - git-integration: Atomic git commits per task
+ *   - verification-suite: Task and phase verification patterns
+ *   - gsd-tools: Config and path utilities
+ *
  * @param {Object} inputs - Process inputs
  * @param {string} inputs.phaseId - Phase identifier
  * @param {string} inputs.phaseName - Phase name
@@ -173,7 +182,7 @@ export const executeTaskTask = defineTask('execute-task', (args, taskCtx) => ({
   description: `Wave ${args.waveIndex}/${args.totalWaves}`,
 
   agent: {
-    name: 'task-executor',
+    name: 'gsd-executor',
     prompt: {
       role: 'senior software engineer with fresh context',
       task: 'Execute the task plan completely and document what changed',
@@ -268,7 +277,7 @@ export const verifyPhaseTask = defineTask('verify-phase', (args, taskCtx) => ({
   description: 'Verify all requirements satisfied',
 
   agent: {
-    name: 'phase-verifier',
+    name: 'gsd-verifier',
     prompt: {
       role: 'senior QA engineer',
       task: 'Verify phase completion against requirements',

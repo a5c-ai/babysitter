@@ -7,6 +7,16 @@
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
 
+/**
+ * Agents referenced from agents/ directory:
+ *   - gsd-codebase-mapper: Parallel analysis of structure, patterns, dependencies, tech stack
+ *   - gsd-integration-checker: Creates integration plan for new work
+ *
+ * Skills referenced from skills/ directory:
+ *   - gsd-tools: Config and path utilities
+ *   - context-engineering: Codebase context capture and management
+ *   - template-scaffolding: Codebase map document templates
+ */
 export async function process(inputs, ctx) {
   const { codebasePath, analysisDepth = 'standard' } = inputs;
 
@@ -52,7 +62,7 @@ export const analyzeStructureTask = defineTask('analyze-structure', (args, taskC
   kind: 'agent',
   title: 'Analyze codebase structure',
   agent: {
-    name: 'structure-analyzer',
+    name: 'gsd-codebase-mapper',
     prompt: {
       role: 'senior architect',
       task: 'Analyze codebase directory structure and organization',
@@ -81,7 +91,7 @@ export const analyzePatternsTask = defineTask('analyze-patterns', (args, taskCtx
   kind: 'agent',
   title: 'Analyze code patterns',
   agent: {
-    name: 'pattern-analyzer',
+    name: 'gsd-codebase-mapper',
     prompt: {
       role: 'senior engineer',
       task: 'Identify coding patterns and conventions',
@@ -110,7 +120,7 @@ export const analyzeDependenciesTask = defineTask('analyze-dependencies', (args,
   kind: 'agent',
   title: 'Analyze dependencies',
   agent: {
-    name: 'dependency-analyzer',
+    name: 'gsd-codebase-mapper',
     prompt: {
       role: 'senior engineer',
       task: 'Analyze dependency graph',
@@ -139,7 +149,7 @@ export const analyzeTechStackTask = defineTask('analyze-tech-stack', (args, task
   kind: 'agent',
   title: 'Analyze tech stack',
   agent: {
-    name: 'tech-analyzer',
+    name: 'gsd-codebase-mapper',
     prompt: {
       role: 'senior architect',
       task: 'Identify technologies and versions',
@@ -169,7 +179,7 @@ export const createIntegrationPlanTask = defineTask('create-integration-plan', (
   kind: 'agent',
   title: 'Create integration plan',
   agent: {
-    name: 'integration-planner',
+    name: 'gsd-integration-checker',
     prompt: {
       role: 'senior architect',
       task: 'Create plan for integrating new work',

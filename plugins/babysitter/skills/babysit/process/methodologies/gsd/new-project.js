@@ -18,6 +18,17 @@ import { defineTask } from '@a5c-ai/babysitter-sdk';
  * 3. Requirements Scoping - v1/v2 separation with traceability
  * 4. Roadmap Creation - Phased milestones with dependencies
  *
+ * Agents referenced from agents/ directory:
+ *   - gsd-project-researcher: Vision capture and initial project analysis
+ *   - gsd-phase-researcher: Parallel domain research (stack, features, architecture, pitfalls)
+ *   - gsd-planner: Requirements scoping with v1/v2 separation
+ *   - gsd-roadmapper: Phased roadmap creation with milestones
+ *
+ * Skills referenced from skills/ directory:
+ *   - gsd-tools: Config loading and project initialization
+ *   - template-scaffolding: PROJECT.md, REQUIREMENTS.md, ROADMAP.md templates
+ *   - state-management: Project state initialization
+ *
  * @param {Object} inputs - Process inputs
  * @param {string} inputs.projectName - Name of the project
  * @param {string} inputs.projectType - Type of project (web, mobile, api, etc.)
@@ -161,7 +172,7 @@ export const visionCaptureTask = defineTask('vision-capture', (args, taskCtx) =>
   description: 'Systematic questioning to clarify project vision',
 
   agent: {
-    name: 'vision-architect',
+    name: 'gsd-project-researcher',
     prompt: {
       role: 'senior product manager and technical visionary',
       task: 'Through systematic questioning and analysis, capture a complete, clear project vision',
@@ -223,7 +234,7 @@ export const stackResearchTask = defineTask('stack-research', (args, taskCtx) =>
   description: 'Investigate appropriate technologies and tools',
 
   agent: {
-    name: 'stack-researcher',
+    name: 'gsd-phase-researcher',
     prompt: {
       role: 'senior technology consultant and architect',
       task: 'Research and recommend technology stack for the project',
@@ -282,7 +293,7 @@ export const featuresResearchTask = defineTask('features-research', (args, taskC
   description: 'Investigate how similar features are typically implemented',
 
   agent: {
-    name: 'features-researcher',
+    name: 'gsd-phase-researcher',
     prompt: {
       role: 'senior product engineer and UX specialist',
       task: 'Research feature implementation patterns and best practices',
@@ -339,7 +350,7 @@ export const architectureResearchTask = defineTask('architecture-research', (arg
   description: 'Investigate appropriate architecture for project scale and requirements',
 
   agent: {
-    name: 'architecture-researcher',
+    name: 'gsd-phase-researcher',
     prompt: {
       role: 'principal architect and systems designer',
       task: 'Research and recommend architecture patterns for the project',
@@ -400,7 +411,7 @@ export const pitfallsResearchTask = defineTask('pitfalls-research', (args, taskC
   description: 'Identify common mistakes and how to avoid them',
 
   agent: {
-    name: 'pitfalls-researcher',
+    name: 'gsd-phase-researcher',
     prompt: {
       role: 'senior engineer with extensive debugging and post-mortem experience',
       task: 'Research common pitfalls for this project type and how to avoid them',
@@ -457,7 +468,7 @@ export const requirementsScopingTask = defineTask('requirements-scoping', (args,
   description: 'Create scoped requirements with v1/v2 separation',
 
   agent: {
-    name: 'requirements-analyst',
+    name: 'gsd-planner',
     prompt: {
       role: 'senior product manager and requirements engineer',
       task: 'Create comprehensive, scoped requirements with v1 MVP and v2 enhancements',
@@ -528,7 +539,7 @@ export const roadmapCreationTask = defineTask('roadmap-creation', (args, taskCtx
   description: 'Generate phased roadmap with milestones',
 
   agent: {
-    name: 'roadmap-planner',
+    name: 'gsd-roadmapper',
     prompt: {
       role: 'senior project manager and technical lead',
       task: 'Create a phased development roadmap with clear milestones',

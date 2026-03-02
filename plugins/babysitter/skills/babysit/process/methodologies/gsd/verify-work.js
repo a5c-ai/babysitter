@@ -12,6 +12,17 @@ import { defineTask } from '@a5c-ai/babysitter-sdk';
  *
  * GSD Methodology: User acceptance testing → Automated diagnosis → Fix planning → Re-verification
  *
+ * Agents referenced from agents/ directory:
+ *   - gsd-verifier: Prepares UAT checklists and verification
+ *   - gsd-debugger: Automated issue diagnosis with root cause analysis
+ *   - gsd-planner: Creates fix plans from diagnosis
+ *   - gsd-executor: Executes fix plans with atomic commits
+ *
+ * Skills referenced from skills/ directory:
+ *   - verification-suite: UAT checklist patterns and verification
+ *   - git-integration: Atomic commits for fixes
+ *   - template-scaffolding: UAT checklist and diagnosis report templates
+ *
  * @param {Object} inputs - Process inputs
  * @param {string} inputs.phaseId - Phase identifier
  * @param {string} inputs.phaseName - Phase name
@@ -171,7 +182,7 @@ export const prepareChecklistTask = defineTask('prepare-checklist', (args, taskC
   description: 'Create testing checklist for deliverables',
 
   agent: {
-    name: 'uat-preparer',
+    name: 'gsd-verifier',
     prompt: {
       role: 'senior QA engineer and test coordinator',
       task: 'Create comprehensive user acceptance testing checklist',
@@ -227,7 +238,7 @@ export const diagnoseIssuesTask = defineTask('diagnose-issues', (args, taskCtx) 
   description: 'Automated diagnosis of reported issues',
 
   agent: {
-    name: 'issue-diagnostician',
+    name: 'gsd-debugger',
     prompt: {
       role: 'expert debugging engineer',
       task: 'Diagnose root causes of reported issues',
@@ -285,7 +296,7 @@ export const createFixPlansTask = defineTask('create-fix-plans', (args, taskCtx)
   description: 'Generate plans to fix diagnosed issues',
 
   agent: {
-    name: 'fix-planner',
+    name: 'gsd-planner',
     prompt: {
       role: 'senior software engineer',
       task: 'Create specific fix plans for each diagnosed issue',
@@ -342,7 +353,7 @@ export const executeFixTask = defineTask('execute-fix', (args, taskCtx) => ({
   description: 'Execute fix plan',
 
   agent: {
-    name: 'fix-executor',
+    name: 'gsd-executor',
     prompt: {
       role: 'senior software engineer',
       task: 'Execute the fix plan completely',

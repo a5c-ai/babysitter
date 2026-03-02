@@ -15,6 +15,16 @@ import { defineTask } from '@a5c-ai/babysitter-sdk';
  * Creates 2-3 atomic task plans with XML structure
  * Each plan is verified against requirements before approval
  *
+ * Agents referenced from agents/ directory:
+ *   - gsd-phase-researcher: Targeted implementation research
+ *   - gsd-planner: Generates atomic task plans with XML structure
+ *   - gsd-plan-checker: Verifies plans satisfy requirements
+ *
+ * Skills referenced from skills/ directory:
+ *   - gsd-tools: Config and path utilities
+ *   - template-scaffolding: Plan and research document templates
+ *   - verification-suite: Plan verification patterns
+ *
  * @param {Object} inputs - Process inputs
  * @param {string} inputs.phaseId - Phase identifier
  * @param {string} inputs.phaseName - Phase name
@@ -148,7 +158,7 @@ export const targetedResearchTask = defineTask('targeted-research', (args, taskC
   description: 'Targeted research for implementation approach',
 
   agent: {
-    name: 'implementation-researcher',
+    name: 'gsd-phase-researcher',
     prompt: {
       role: 'senior software engineer and researcher',
       task: 'Research implementation approaches informed by phase context and preferences',
@@ -217,7 +227,7 @@ export const generatePlansTask = defineTask('generate-plans', (args, taskCtx) =>
   description: 'Create atomic task plans with XML structure',
 
   agent: {
-    name: 'task-planner',
+    name: 'gsd-planner',
     prompt: {
       role: 'senior technical lead and planner',
       task: 'Create 2-3 atomic task plans for the phase using XML structure',
@@ -282,7 +292,7 @@ export const verifyPlansTask = defineTask('verify-plans', (args, taskCtx) => ({
   description: 'Verify plans satisfy requirements',
 
   agent: {
-    name: 'plan-verifier',
+    name: 'gsd-plan-checker',
     prompt: {
       role: 'senior QA engineer and requirements analyst',
       task: 'Verify that task plans completely satisfy phase requirements',

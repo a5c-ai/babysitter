@@ -7,6 +7,14 @@
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
 
+/**
+ * Agents referenced from agents/ directory:
+ *   - gsd-verifier: Comprehensive milestone audit against definition-of-done
+ *
+ * Skills referenced from skills/ directory:
+ *   - verification-suite: Milestone verification patterns
+ *   - template-scaffolding: Audit report templates
+ */
 export async function process(inputs, ctx) {
   const { milestoneId, milestoneName, phases = [] } = inputs;
 
@@ -44,7 +52,7 @@ export const auditMilestoneTask = defineTask('audit-milestone', (args, taskCtx) 
   kind: 'agent',
   title: `Audit: ${args.milestoneName}`,
   agent: {
-    name: 'milestone-auditor',
+    name: 'gsd-verifier',
     prompt: {
       role: 'principal engineer and quality auditor',
       task: 'Comprehensive milestone audit against definition-of-done',

@@ -19,6 +19,14 @@ import { defineTask } from '@a5c-ai/babysitter-sdk';
  * - Technology choices within the stack
  * - Testing strategies
  *
+ * Agents referenced from agents/ directory:
+ *   - gsd-project-researcher: Identifies decision points and captures preferences
+ *   - gsd-planner: Generates implementation context from decisions
+ *
+ * Skills referenced from skills/ directory:
+ *   - context-engineering: Context document generation and management
+ *   - template-scaffolding: Phase context document templates
+ *
  * @param {Object} inputs - Process inputs
  * @param {string} inputs.phaseId - Phase identifier
  * @param {string} inputs.phaseName - Phase name
@@ -111,7 +119,7 @@ export const identifyDecisionPointsTask = defineTask('identify-decision-points',
   description: 'Analyze requirements to find gray areas and decision points',
 
   agent: {
-    name: 'decision-analyst',
+    name: 'gsd-project-researcher',
     prompt: {
       role: 'senior product manager and UX architect',
       task: 'Identify implementation decision points that need user preferences',
@@ -188,7 +196,7 @@ export const capturePreferencesTask = defineTask('capture-preferences', (args, t
   description: 'Gather implementation preferences from decision points',
 
   agent: {
-    name: 'preference-capturer',
+    name: 'gsd-project-researcher',
     prompt: {
       role: 'product manager facilitating technical decisions',
       task: 'Present decision points and capture user preferences in a structured format',
@@ -258,7 +266,7 @@ export const generateContextTask = defineTask('generate-context', (args, taskCtx
   description: 'Create context document with decisions and preferences',
 
   agent: {
-    name: 'context-generator',
+    name: 'gsd-planner',
     prompt: {
       role: 'technical writer and documentation specialist',
       task: 'Generate comprehensive phase context document that will guide planning',
