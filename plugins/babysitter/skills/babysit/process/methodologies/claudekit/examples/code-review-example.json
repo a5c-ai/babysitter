@@ -1,0 +1,19 @@
+{
+  "name": "ClaudeKit Code Review - 6-Agent Parallel",
+  "description": "Run 6-agent parallel code review against main branch with confidence-gated reporting",
+  "processId": "methodologies/claudekit/claudekit-code-review",
+  "inputs": {
+    "target": "src/",
+    "projectRoot": ".",
+    "baseRef": "main",
+    "confidenceThreshold": 80
+  },
+  "expectedOutcomes": {
+    "phases": [
+      "detect changed files",
+      "parallel: architecture + security + performance + testing + quality + docs review",
+      "aggregate results with weighted scoring",
+      "human review if critical issues found"
+    ]
+  }
+}

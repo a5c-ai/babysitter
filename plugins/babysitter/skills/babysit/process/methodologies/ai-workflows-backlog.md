@@ -22,7 +22,7 @@
 
 [x] https://github.com/huytieu/COG-second-brain
 
-[ ] https://github.com/carlrannaberg/claudekit
+[x] https://github.com/carlrannaberg/claudekit
 
 [ ] https://github.com/OthmanAdi/planning-with-files
 

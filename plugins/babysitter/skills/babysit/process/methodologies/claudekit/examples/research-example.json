@@ -1,0 +1,20 @@
+{
+  "name": "ClaudeKit Research - Parallel Multi-Agent",
+  "description": "Run parallel research with 7 agents for comprehensive codebase investigation",
+  "processId": "methodologies/claudekit/claudekit-research",
+  "inputs": {
+    "query": "How does the authentication middleware handle token refresh and session management?",
+    "projectRoot": ".",
+    "depth": "medium",
+    "sources": ["codebase", "documentation", "configuration"]
+  },
+  "expectedOutcomes": {
+    "phases": [
+      "plan research strategy (decompose into 7 sub-queries)",
+      "dispatch 7 research agents in parallel",
+      "synthesize findings (consensus, conflicts, gaps)",
+      "validate findings against codebase",
+      "human review if confidence < 70%"
+    ]
+  }
+}

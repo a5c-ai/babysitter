@@ -1,0 +1,18 @@
+{
+  "name": "ClaudeKit Spec Creation - Feature Specification",
+  "description": "Create a comprehensive specification from codebase research for a new feature",
+  "processId": "methodologies/claudekit/claudekit-spec-workflow",
+  "inputs": {
+    "mode": "create",
+    "feature": "user-notification-system",
+    "projectRoot": ".",
+    "qualityThreshold": 80
+  },
+  "expectedOutcomes": {
+    "phases": [
+      "research codebase for patterns and constraints",
+      "create specification with requirements and acceptance criteria",
+      "human review of generated specification"
+    ]
+  }
+}

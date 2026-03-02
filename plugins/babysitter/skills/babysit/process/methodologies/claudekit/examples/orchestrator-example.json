@@ -1,0 +1,25 @@
+{
+  "name": "ClaudeKit Orchestrator - Full Session Setup",
+  "description": "Initialize ClaudeKit session with hooks, file-guard, codebase mapping, and dispatch a code review",
+  "processId": "methodologies/claudekit/claudekit-orchestrator",
+  "inputs": {
+    "request": "/code-review src/",
+    "projectRoot": ".",
+    "hookConfig": {},
+    "enableFileGuard": true,
+    "thinkingLevel": 2,
+    "maxCheckpoints": 10
+  },
+  "expectedOutcomes": {
+    "phases": [
+      "initialize codebase map + configure hooks (parallel)",
+      "configure file-guard + thinking-level (parallel)",
+      "create initial checkpoint",
+      "human review of pipeline config",
+      "dispatch /code-review command",
+      "run safety checks + profile hooks (parallel)",
+      "convergence loop if safety checks fail",
+      "create final checkpoint"
+    ]
+  }
+}
