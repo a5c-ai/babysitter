@@ -28,6 +28,8 @@ Primary commands:
 
 - /babysitter:plan [input] - generate a detailed plan for a babysitter process without executing it, allowing the user to review and modify the plan before execution (e.g. /babysitter:plan build a todo list app)
 
+- /babysitter:forever [input] - start a babysitter process in forever mode, where the babysitter will run indefinitely. good for periodic and ongoing tasks like monitoring, maintenance, or continuous improvement (e.g. /babysitter:forever monitor my server uptime and performance)
+
 Secondary commands:
 
 - /babysitter:doctor [issue] - Diagnose and troubleshoot issues in the current run, process, or babysitter environment.
