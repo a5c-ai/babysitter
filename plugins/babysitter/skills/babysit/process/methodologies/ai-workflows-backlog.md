@@ -1,6 +1,6 @@
 # AI Workflows Backlog for assimilating external methodologies into babysitter processes library
 
-[ ] https://github.com/pcvelz/superpowers
+[x] https://github.com/pcvelz/superpowers
 
 [ ] https://github.com/bmad-code-org/BMAD-METHOD 
 

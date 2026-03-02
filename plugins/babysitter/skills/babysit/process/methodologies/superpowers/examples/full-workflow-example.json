@@ -1,0 +1,23 @@
+{
+  "name": "Full Superpowers Workflow - Feature Development",
+  "description": "Complete lifecycle: brainstorm -> plan -> execute -> verify -> finish",
+  "processId": "methodologies/superpowers/superpowers-workflow",
+  "inputs": {
+    "task": "Add user authentication with JWT tokens and role-based access control",
+    "mode": "full",
+    "skipBrainstorm": false,
+    "executionMode": "subagent",
+    "qualityThreshold": 85,
+    "batchSize": 3
+  },
+  "expectedOutcomes": {
+    "phases": [
+      "brainstorming (design approval)",
+      "writing-plans (task plan with TDD steps)",
+      "workspace setup (git worktree)",
+      "execution (subagent per task, two-stage review)",
+      "verification (all tests pass, requirements met)",
+      "finishing (merge/PR/keep/discard)"
+    ]
+  }
+}

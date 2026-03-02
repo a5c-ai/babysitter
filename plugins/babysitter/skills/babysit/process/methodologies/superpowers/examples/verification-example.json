@@ -1,0 +1,26 @@
+{
+  "name": "Verification Before Completion",
+  "description": "Evidence-based verification of all completion claims",
+  "processId": "methodologies/superpowers/verification-before-completion",
+  "inputs": {
+    "claims": [
+      "All tests pass",
+      "Build succeeds",
+      "Linter clean",
+      "All requirements from plan met"
+    ],
+    "testCommand": "npm test",
+    "requirements": [
+      "JWT token generation and validation",
+      "Role-based access control middleware",
+      "Token refresh endpoint",
+      "Logout with token invalidation"
+    ],
+    "planPath": "docs/plans/2026-01-15-auth-feature.md"
+  },
+  "expectedOutcomes": {
+    "eachClaim": "verified with fresh command output",
+    "requirements": "checked line by line against plan",
+    "evidence": "actual command output, not assumptions"
+  }
+}

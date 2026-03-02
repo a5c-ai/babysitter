@@ -1,0 +1,16 @@
+{
+  "name": "Executing Plans - Batch Mode",
+  "description": "Execute plan in batches of 3 with human checkpoints",
+  "processId": "methodologies/superpowers/executing-plans",
+  "inputs": {
+    "planPath": "docs/plans/2026-01-15-auth-feature.md",
+    "batchSize": 3,
+    "resumeFromTask": 0
+  },
+  "expectedOutcomes": {
+    "batches": "tasks grouped in batches of 3",
+    "checkpoints": "human review between each batch",
+    "persistence": ".tasks.json synced after every status change",
+    "finishing": "branch completion options after all tasks"
+  }
+}

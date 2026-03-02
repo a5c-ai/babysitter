@@ -1,0 +1,19 @@
+{
+  "name": "Systematic Debugging - Flaky Test Investigation",
+  "description": "Four-phase root cause debugging for intermittent test failures",
+  "processId": "methodologies/superpowers/systematic-debugging",
+  "inputs": {
+    "issue": "Integration tests in auth.test.ts pass locally but fail intermittently in CI with timeout errors",
+    "errorMessage": "Timeout - Async callback was not invoked within the 5000ms timeout",
+    "stackTrace": "at Timeout._onTimeout (node_modules/jest-jasmine2/build/queueRunner.js:68:21)",
+    "maxFixAttempts": 3
+  },
+  "expectedOutcomes": {
+    "phases": [
+      "Root Cause Investigation (read errors, reproduce, check changes, gather evidence)",
+      "Pattern Analysis (find working examples, compare)",
+      "Hypothesis (form and test single hypothesis)",
+      "Implementation (regression test, single fix, verify)"
+    ]
+  }
+}
