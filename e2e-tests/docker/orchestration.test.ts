@@ -318,7 +318,16 @@ describe.skipIf(!HAS_API_KEY)("Orchestration lifecycle verification", () => {
 
     const events = readJournalEvents(runDir);
     expect(events.length).toBeGreaterThan(0);
-    expect(events[events.length - 1].type).toBe("RUN_COMPLETED");
+    // RUN_COMPLETED must exist. The stop hook may append a STOP_HOOK_INVOKED
+    // event after completion, so RUN_COMPLETED might not be the very last entry.
+    const completedIdx = events.findIndex((e) => e.type === "RUN_COMPLETED");
+    expect(completedIdx).toBeGreaterThanOrEqual(0);
+    // Only post-completion housekeeping events (like STOP_HOOK_INVOKED) may
+    // appear after RUN_COMPLETED — no new effect or run lifecycle events.
+    const postCompletionEvents = events.slice(completedIdx + 1);
+    for (const e of postCompletionEvents) {
+      expect(["STOP_HOOK_INVOKED"]).toContain(e.type);
+    }
   });
 
   test("journal events follow correct lifecycle order", () => {
@@ -328,13 +337,16 @@ describe.skipIf(!HAS_API_KEY)("Orchestration lifecycle verification", () => {
     const events = readJournalEvents(runDir);
     const types = events.map((e) => e.type);
 
-    // First must be RUN_CREATED, last must be RUN_COMPLETED
+    // First must be RUN_CREATED, RUN_COMPLETED must exist
     expect(types[0]).toBe("RUN_CREATED");
-    expect(types[types.length - 1]).toBe("RUN_COMPLETED");
+    const completedIdx = types.indexOf("RUN_COMPLETED");
+    expect(completedIdx).toBeGreaterThan(0);
 
-    // No events after RUN_COMPLETED
-    const completedIdx = types.lastIndexOf("RUN_COMPLETED");
-    expect(completedIdx).toBe(types.length - 1);
+    // Only post-completion housekeeping events may appear after RUN_COMPLETED
+    const postTypes = types.slice(completedIdx + 1);
+    for (const t of postTypes) {
+      expect(["STOP_HOOK_INVOKED"]).toContain(t);
+    }
 
     // EFFECT_RESOLVED events must come after their corresponding EFFECT_REQUESTED
     for (const event of events) {
