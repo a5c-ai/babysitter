@@ -31,14 +31,18 @@ export function Footer({
   return (
     <footer
       className={cn(
-        "border-t border-[var(--color-border-default)] bg-[var(--color-canvas-default)]",
+        "bg-[#0a0a0f]",
         className
       )}
+      style={{
+        borderTop: "1px solid rgba(0, 223, 223, 0.2)",
+        boxShadow: "0 -1px 8px rgba(0, 223, 223, 0.05)",
+      }}
     >
       <div className="container mx-auto max-w-7xl px-4 py-6 md:py-0">
         <div className="flex flex-col items-center justify-between gap-4 md:h-14 md:flex-row">
           {/* Copyright */}
-          <p className="text-center text-sm leading-loose text-[var(--color-fg-muted)] md:text-left">
+          <p className="text-center text-sm leading-loose text-[rgba(255,255,255,0.4)] md:text-left">
             {copyright}
           </p>
 
@@ -46,7 +50,7 @@ export function Footer({
           <div className="flex items-center gap-4">
             {links.map((link) => {
               const linkClasses =
-                "text-sm text-[var(--color-fg-muted)] transition-colors hover:text-[var(--color-fg-default)]";
+                "text-sm text-[rgba(255,255,255,0.4)] transition-all duration-200 hover:text-[var(--scifi-cyan)] border-b-0";
 
               if (link.external) {
                 return (
@@ -87,7 +91,7 @@ export function Footer({
               href="https://github.com/a5c-ai/babysitter"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-[var(--color-fg-muted)] transition-colors hover:text-[var(--color-fg-default)]"
+              className="text-[rgba(255,255,255,0.4)] transition-colors hover:text-[var(--scifi-cyan)] border-b-0"
               aria-label="GitHub Repository"
             >
               <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
@@ -98,9 +102,9 @@ export function Footer({
         </div>
 
         {/* Additional Info */}
-        <div className="border-t border-[var(--color-border-muted)] py-4 text-center md:hidden">
-          <p className="text-xs text-[var(--color-fg-muted)]">
-            Built with Next.js and GitHub Primer design system
+        <div className="py-4 text-center md:hidden" style={{ borderTop: "1px solid rgba(0, 223, 223, 0.1)" }}>
+          <p className="text-xs text-[rgba(255,255,255,0.3)]">
+            Built with Next.js -- Sci-Fi Interface
           </p>
         </div>
       </div>

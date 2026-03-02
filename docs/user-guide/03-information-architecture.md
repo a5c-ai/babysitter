@@ -201,14 +201,6 @@ docs/
 |   |   +-- customize-scoring.md          # Adjust quality scoring criteria
 |   |   +-- debug-quality-issues.md       # When quality doesn't converge
 |   |
-|   +-- breakpoints/                      # Breakpoint How-tos
-|   |   +-- index.md                      # Breakpoints overview
-|   |   +-- configure-breakpoint-service.md # Set up the web UI
-|   |   +-- approve-via-web.md            # Approve breakpoints in browser
-|   |   +-- setup-telegram.md             # Mobile notifications setup
-|   |   +-- configure-ngrok.md            # Expose service externally
-|   |   +-- create-approval-policies.md   # Define when approval is needed
-|   |
 |   +-- integration/                      # Integration How-tos
 |   |   +-- index.md                      # Integration overview
 |   |   +-- github-actions.md             # GitHub Actions CI/CD
@@ -398,14 +390,6 @@ Quality Management
   - Customize Scoring
   - Debug Quality Issues
 
-Breakpoints
-  - Overview
-  - Configure Service
-  - Approve via Web
-  - Setup Telegram
-  - Configure ngrok
-  - Create Approval Policies
-
 Integration
   - Overview
   - GitHub Actions
@@ -588,7 +572,6 @@ TUTORIALS
 |   +-- L1.2 Installation
 |   |   +-- SDK installation
 |   |   +-- Plugin installation
-|   |   +-- Breakpoints service
 |   |   +-- Verification steps
 |   |
 |   +-- L1.3 Your First Run
@@ -706,31 +689,6 @@ HOW-TO GUIDES
 |       +-- Iteration review
 |       +-- Target adjustment
 |
-+-- Breakpoints
-|   +-- Configure Breakpoint Service
-|   |   +-- Service startup
-|   |   +-- Port configuration
-|   |   +-- Authentication setup
-|   |
-|   +-- Approve via Web
-|   |   +-- Accessing the UI
-|   |   +-- Review interface
-|   |   +-- Approval workflow
-|   |
-|   +-- Setup Telegram
-|   |   +-- Bot creation
-|   |   +-- Token configuration
-|   |   +-- Notification settings
-|   |
-|   +-- Configure ngrok
-|   |   +-- ngrok installation
-|   |   +-- Tunnel setup
-|   |   +-- Security considerations
-|   |
-|   +-- Create Approval Policies
-|       +-- Policy definition
-|       +-- Trigger conditions
-|       +-- Escalation rules
 |
 +-- Integration
 |   +-- GitHub Actions

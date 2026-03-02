@@ -1,0 +1,164 @@
+name: Staging Publish
+
+on:
+  push:
+    branches:
+      - staging
+
+permissions:
+  contents: write
+  id-token: write
+
+concurrency:
+  group: staging-publish
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    if: ${{ !contains(github.event.head_commit.message, '[skip staging]') }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          # Workaround: npm ci on Windows-generated lockfile may miss linux optional deps
+          npm install --no-save @rollup/rollup-linux-x64-gnu 2>/dev/null || true
+
+      - name: Prepare artifacts directory
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/logs
+
+      - name: Verify metadata
+        run: |
+          set -euo pipefail
+          npm run verify:metadata 2>&1 | tee artifacts/logs/metadata.log
+
+      - name: Build SDK
+        run: |
+          set -euo pipefail
+          npm run build:sdk 2>&1 | tee artifacts/logs/build.log
+
+      - name: Lint SDK
+        run: |
+          set -euo pipefail
+          npm run lint --workspace=@a5c-ai/babysitter-sdk 2>&1 | tee artifacts/logs/lint.log
+
+      - name: SDK tests
+        run: |
+          set -euo pipefail
+          npm run test:sdk 2>&1 | tee artifacts/logs/sdk-tests.log
+
+      - name: Upload build logs
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-logs
+          path: artifacts/logs
+          if-no-files-found: warn
+
+  publish_staging:
+    if: ${{ !contains(github.event.head_commit.message, '[skip staging]') }}
+    needs: validate
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          registry-url: https://registry.npmjs.org/
+          always-auth: true
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          # Workaround: npm ci on Windows-generated lockfile may miss linux optional deps
+          npm install --no-save @rollup/rollup-linux-x64-gnu 2>/dev/null || true
+
+      - name: Set staging prerelease version
+        id: version
+        run: |
+          set -euo pipefail
+          BASE=$(node -e "console.log(require('./packages/sdk/package.json').version)")
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$BASE"
+          NEXT_PATCH=$((PATCH + 1))
+          SHORT_SHA=$(git rev-parse --short HEAD)
+          STAGING_VERSION="${MAJOR}.${MINOR}.${NEXT_PATCH}-staging.${SHORT_SHA}"
+          echo "staging_version=$STAGING_VERSION" >> "$GITHUB_OUTPUT"
+          echo "Setting staging version: $STAGING_VERSION"
+          # Write prerelease version into package.json files (for npm publish)
+          node -e "
+            const fs = require('fs');
+            const pkgs = [
+              'package.json',
+              'packages/sdk/package.json',
+              'packages/babysitter/package.json'
+            ];
+            for (const p of pkgs) {
+              const data = JSON.parse(fs.readFileSync(p, 'utf8'));
+              data.version = '${STAGING_VERSION}';
+              fs.writeFileSync(p, JSON.stringify(data, null, 2) + '\n');
+            }
+          "
+          # Write sdkVersion into internal plugin manifest (will be committed)
+          # Note: .claude-plugin/plugin.json is NOT updated with sdkVersion
+          # because Claude Code's plugin validator rejects unrecognized keys
+          node -e "
+            const fs = require('fs');
+            const data = JSON.parse(fs.readFileSync('plugins/babysitter/plugin.json', 'utf8'));
+            data.sdkVersion = '${STAGING_VERSION}';
+            fs.writeFileSync('plugins/babysitter/plugin.json', JSON.stringify(data, null, 2) + '\n');
+          "
+
+      - name: Commit sdkVersion to staging branch
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add plugins/babysitter/plugin.json
+          if git diff --cached --quiet; then
+            echo "No sdkVersion changes to commit."
+          else
+            git commit -m "chore: set sdkVersion to ${{ steps.version.outputs.staging_version }} [skip staging]"
+            git push origin HEAD:staging
+          fi
+
+      - name: Build SDK
+        run: |
+          set -euo pipefail
+          npm run build:sdk
+
+      - name: Publish SDK to npm (staging tag)
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          set -euo pipefail
+          npm publish --workspace=@a5c-ai/babysitter-sdk --access public --tag staging
+
+      - name: Publish babysitter metapackage to npm (staging tag)
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          set -euo pipefail
+          npm publish --access public --tag staging
+        working-directory: packages/babysitter

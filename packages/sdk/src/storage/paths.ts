@@ -1,4 +1,5 @@
 import path from "path";
+import { DEFAULTS } from "../config/defaults";
 
 export const JOURNAL_DIR = "journal";
 export const TASKS_DIR = "tasks";
@@ -11,7 +12,11 @@ export const INPUTS_FILE = "inputs.json";
 export const LOCK_FILE = "run.lock";
 export const STATE_FILE = "state.json";
 
-export const DEFAULT_LAYOUT_VERSION = "2026.01-storage-preview";
+/**
+ * Default storage layout version.
+ * @see DEFAULTS.layoutVersion for the centralized default
+ */
+export const DEFAULT_LAYOUT_VERSION = DEFAULTS.layoutVersion;
 
 export function getRunDir(runsRoot: string, runId: string): string {
   return path.join(runsRoot, runId);

@@ -40,7 +40,7 @@ Successfully verified and updated the babysitter plugin commands and hooks to re
 - ✅ References correct script: `setup-babysitter-run-resume.sh` (created in this update)
 - ✅ Explains resume workflow with run:status checks
 - ✅ Documents access to previous work (journal, state, files)
-- ✅ Includes completion secret instructions (emitted only on completion)
+- ✅ Includes completion proof instructions (emitted only on completion)
 
 ---
 
@@ -56,7 +56,7 @@ Successfully verified and updated the babysitter plugin commands and hooks to re
 - ✅ Comprehensive help text (--help flag)
 - ✅ Error handling and validation
 - ✅ Creates state file for stop hook to read
-- ✅ Displays iteration info and completion-secret requirements
+- ✅ Displays iteration info and completion-proof requirements
 
 **State File Format:**
 ```yaml
@@ -80,7 +80,7 @@ started_at: "2026-01-20T..."
 - ✅ Uses CLI to check run status (run:status --json)
 - ✅ Prevents resuming completed runs
 - ✅ Supports --max-iterations override
-- ✅ Creates same state file format as setup-babysitter-run.sh (no completion promise)
+- ✅ Creates same state file format as setup-babysitter-run.sh (no completion proof)
 - ✅ Comprehensive help text and error messages
 - ✅ Made executable (chmod +x)
 
@@ -159,7 +159,7 @@ fi
 - ✅ Parses markdown frontmatter (YAML)
 - ✅ Validates numeric fields before arithmetic
 - ✅ Checks max_iterations limit
-- ✅ Checks completionSecret (exact match with <promise> tags)
+- ✅ Checks completionProof (exact match with <promise> tags)
 - ✅ Extracts last assistant message from transcript
 - ✅ Increments iteration counter
 - ✅ Feeds prompt back to continue loop
@@ -312,7 +312,7 @@ echo '{"session_id":"test-123"}' | ./plugins/babysitter/hooks/babysitter-session
 - State files use CLAUDE_SESSION_ID to prevent cross-session interference
 - Each session has isolated state in `$CLAUDE_PLUGIN_ROOT/state/${SESSION_ID}.md`
 
-### ✅ Completion Promise Security
+### ✅ Completion Proof Security
 - Uses exact string matching (not pattern matching)
 - Prevents glob pattern exploitation (*, ?, [ characters)
 - Requires <promise> XML tags

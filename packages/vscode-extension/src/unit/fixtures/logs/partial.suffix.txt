@@ -1,3 +1,0 @@
-rest
-line 3
-

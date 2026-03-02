@@ -59,7 +59,6 @@ A workflow pauses at a breakpoint while you review and approve changes.
 # Workflow reaches breakpoint and pauses
 # "Waiting for approval at breakpoint: Plan Review"
 
-# Later, after reviewing and approving via web UI or Telegram:
 claude "/babysitter:call resume the babysitter run for the auth feature"
 ```
 
@@ -72,7 +71,8 @@ One team member starts work during the day, another continues overnight.
 babysitter run:create \
   --process-id feature/auth \
   --entry ./code/main.js#process \
-  --inputs ./inputs.json
+  --inputs ./inputs.json \
+  --prompt "Implement auth feature for the platform"
 
 # Developer B (evening): Continues the run
 claude "/babysitter:call resume --run-id feature-auth-20260125"

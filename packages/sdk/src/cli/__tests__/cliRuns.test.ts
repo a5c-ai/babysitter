@@ -10,7 +10,7 @@ import { createRunDir } from "../../storage/createRunDir";
 import { createStateCacheSnapshot, writeStateCache } from "../../runtime/replay/stateCache";
 import * as orchestrateIterationModule from "../../runtime/orchestrateIteration";
 import * as runFilesModule from "../../storage/runFiles";
-import { deriveCompletionSecret } from "../completionSecret";
+import { deriveCompletionProof } from "../completionProof";
 
 const realReadRunMetadata = readRunMetadata;
 
@@ -170,6 +170,61 @@ describe("babysitter run:create CLI", () => {
     expect(await listRunDirs()).toHaveLength(0);
   });
 
+  it("accepts --prompt flag and persists prompt in metadata and journal", async () => {
+    const entryFile = await writeEntrypoint("processes/prompted.mjs", `export async function process() {\n  return "prompted";\n}\n`);
+
+    const cli = createBabysitterCli();
+    const exitCode = await cli.run([
+      "run:create",
+      "--runs-dir",
+      runsRoot,
+      "--process-id",
+      "ci/prompted",
+      "--entry",
+      `${entryFile}#process`,
+      "--prompt",
+      "Build a REST API with user authentication",
+    ]);
+
+    expect(exitCode).toBe(0);
+
+    const runDir = await expectSingleRunDir();
+    const metadata = await readRunMetadata(runDir);
+    expect(metadata.prompt).toBe("Build a REST API with user authentication");
+    expect(metadata.processId).toBe("ci/prompted");
+
+    const journal = await loadJournal(runDir);
+    expect(journal).toHaveLength(1);
+    expect(journal[0].type).toBe("RUN_CREATED");
+    expect(journal[0].data.prompt).toBe("Build a REST API with user authentication");
+  });
+
+  it("omits prompt from metadata and journal when --prompt is not provided", async () => {
+    const entryFile = await writeEntrypoint("processes/noprompt.mjs", `export async function process() {\n  return "no-prompt";\n}\n`);
+
+    const cli = createBabysitterCli();
+    const exitCode = await cli.run([
+      "run:create",
+      "--runs-dir",
+      runsRoot,
+      "--process-id",
+      "ci/noprompt",
+      "--entry",
+      `${entryFile}#process`,
+    ]);
+
+    expect(exitCode).toBe(0);
+
+    const runDir = await expectSingleRunDir();
+    const metadata = await readRunMetadata(runDir);
+    expect(metadata.prompt).toBeUndefined();
+
+    const journal = await loadJournal(runDir);
+    expect(journal).toHaveLength(1);
+    expect(journal[0].type).toBe("RUN_CREATED");
+    expect(journal[0].data.prompt).toBeUndefined();
+  });
+
   it("fails fast when required flags are missing", async () => {
     const cli = createBabysitterCli();
     const exitCode = await cli.run(["run:create", "--entry", "./process.mjs"]);
@@ -260,7 +315,7 @@ describe("run lifecycle inspection commands", () => {
       expect(payload.lastEvent.path).toMatch(/^journal\//);
     });
 
-    it("derives a completion secret for completed runs without stored metadata", async () => {
+    it("derives a completion proof for completed runs without stored metadata", async () => {
       const runId = "run-complete";
       const runDir = await createRunSkeleton(runId);
       await appendEvent({
@@ -274,7 +329,7 @@ describe("run lifecycle inspection commands", () => {
       expect(exitCode).toBe(0);
       const payload = readLastJson(logSpy);
       expect(payload.state).toBe("completed");
-      expect(payload.completionSecret).toBe(deriveCompletionSecret(runId));
+      expect(payload.completionProof).toBe(deriveCompletionProof(runId));
     });
 
     it("includes iteration metadata in JSON output", async () => {
@@ -338,6 +393,57 @@ describe("run lifecycle inspection commands", () => {
       const line = findSingleLine(logSpy, (entry) => entry.startsWith("[run:status]"));
       expect(line).toContain("state=created");
       expect(line).toContain("pending[total]=0");
+    });
+
+    it("includes pendingEffectsSummary with zero totals and needsMoreIterations=false for a fresh run", async () => {
+      const runDir = await createRunSkeleton("run-fresh-summary");
+
+      const exitCode = await cli.run(["run:status", runDir, "--json"]);
+
+      expect(exitCode).toBe(0);
+      const payload = readLastJson(logSpy);
+      expect(payload.state).toBe("created");
+      expect(payload.pendingEffectsSummary).toEqual({
+        totalPending: 0,
+        countsByKind: {},
+        autoRunnableCount: 0,
+      });
+      expect(payload.needsMoreIterations).toBe(false);
+    });
+
+    it("includes pendingEffectsSummary with autoRunnableCount > 0 and needsMoreIterations=true when node effects are pending", async () => {
+      const runDir = await createRunWithPendingEffects();
+
+      const exitCode = await cli.run(["run:status", runDir, "--json"]);
+
+      expect(exitCode).toBe(0);
+      const payload = readLastJson(logSpy);
+      expect(payload.state).toBe("waiting");
+      expect(payload.pendingEffectsSummary.totalPending).toBe(2);
+      expect(payload.pendingEffectsSummary.countsByKind).toEqual({ breakpoint: 1, node: 1 });
+      expect(payload.pendingEffectsSummary.autoRunnableCount).toBe(1);
+      expect(payload.needsMoreIterations).toBe(true);
+    });
+
+    it("reports needsMoreIterations=false for a completed run", async () => {
+      const runId = "run-completed-iterations";
+      const runDir = await createRunSkeleton(runId);
+      await appendRequestedEffect(runDir, "ef-node-done", "node", "build");
+      await appendResolvedEffect(runDir, "ef-node-done");
+      await appendEvent({
+        runDir,
+        eventType: "RUN_COMPLETED",
+        event: { outputRef: "state/output.json" },
+      });
+
+      const exitCode = await cli.run(["run:status", runDir, "--json"]);
+
+      expect(exitCode).toBe(0);
+      const payload = readLastJson(logSpy);
+      expect(payload.state).toBe("completed");
+      expect(payload.pendingEffectsSummary.totalPending).toBe(0);
+      expect(payload.pendingEffectsSummary.autoRunnableCount).toBe(0);
+      expect(payload.needsMoreIterations).toBe(false);
     });
 
     it("honors terminal RUN_* events even if pending work remains", async () => {

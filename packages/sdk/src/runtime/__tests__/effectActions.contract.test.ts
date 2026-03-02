@@ -22,7 +22,7 @@ describe("EffectAction contract", () => {
     const processDir = path.join(tmpRoot, "processes");
     await fs.mkdir(processDir, { recursive: true });
     const processPath = path.join(processDir, "parallelSleep.mjs");
-    const sleepIso = "2026-02-01T00:00:00.000Z";
+    const sleepIso = "2099-01-01T00:00:00.000Z";
 
     await fs.writeFile(
       processPath,

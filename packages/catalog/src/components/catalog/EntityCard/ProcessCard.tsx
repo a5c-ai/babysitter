@@ -32,7 +32,7 @@ export function ProcessCard({
   const cardContent = (
     <Card
       className={cn(
-        "h-full hover:border-[var(--color-accent-fg)] hover:shadow-md",
+        "h-full hover:border-[rgba(0,223,223,0.5)]",
         isCompact ? "p-3" : ""
       )}
     >
@@ -54,7 +54,7 @@ export function ProcessCard({
             )}
           </div>
           {/* Process icon */}
-          <div className="shrink-0 rounded-md bg-[var(--color-accent-subtle)] p-1.5 text-[var(--color-accent-fg)]">
+          <div className="shrink-0 rounded-sm bg-[rgba(0,223,223,0.1)] p-1.5 text-[var(--scifi-cyan)]" style={{ border: '1px solid rgba(0, 223, 223, 0.2)' }}>
             <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
                 strokeLinecap="round"
@@ -80,8 +80,8 @@ export function ProcessCard({
 
       <CardFooter
         className={cn(
-          "flex items-center justify-between text-xs text-[var(--color-fg-muted)]",
-          isCompact ? "p-0 pt-2 border-t border-[var(--color-border-default)]" : ""
+          "flex items-center justify-between text-xs text-[rgba(255,255,255,0.4)]",
+          isCompact ? "p-0 pt-2 border-t border-[rgba(255,0,224,0.1)]" : ""
         )}
       >
         {/* Task count */}
@@ -100,7 +100,7 @@ export function ProcessCard({
         )}
 
         {/* Updated time */}
-        <time dateTime={process.updatedAt} className="text-[var(--color-fg-muted)]">
+        <time dateTime={process.updatedAt} className="text-[rgba(255,255,255,0.4)]">
           {formatRelativeTime(process.updatedAt)}
         </time>
       </CardFooter>

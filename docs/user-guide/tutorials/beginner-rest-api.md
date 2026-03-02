@@ -28,7 +28,6 @@ Before starting this tutorial, please ensure you have:
 - [ ] **Node.js v20+** installed ([download here](https://nodejs.org/))
 - [ ] **Claude Code** installed and configured ([setup guide](https://code.claude.com/docs))
 - [ ] **Babysitter SDK and plugin** installed (see [Installation Guide](../getting-started/installation.md))
-- [ ] **Breakpoints service running** on `http://localhost:3184`
 - [ ] A **new empty project directory** for this tutorial
 - [ ] Basic familiarity with **JavaScript** and **REST APIs**
 
@@ -57,26 +56,9 @@ Babysitter has two modes for handling breakpoints (approval prompts):
 
 1. **Interactive Mode (Claude Code)**: When running in Claude Code, breakpoints are handled directly in the chat - Claude asks you questions and you respond. **No setup required!**
 
-2. **Non-Interactive Mode**: For CI/CD or headless automation, you need the breakpoints service.
+2. **Non-Interactive Mode**: For CI/CD or headless automation, breakpoints are disabled.
 
 **For this tutorial, we'll use interactive mode** - just respond to Claude's questions in the chat. No additional service needed!
-
-<details>
-<summary>Optional: Start breakpoints service for non-interactive mode</summary>
-
-```bash
-# In a separate terminal (only if using non-interactive mode)
-npx -y @a5c-ai/babysitter-breakpoints@latest start
-```
-
-You should see:
-```
-Babysitter Breakpoints Service started on http://localhost:3184
-```
-
-</details>
-
-If any verification commands don't work, please revisit the installation guide before continuing.
 
 ---
 
@@ -741,9 +723,7 @@ claude plugin enable --scope user babysitter@a5c.ai
 3. If the session timed out, resume with `/babysitter:call resume`
 
 **Solution (Non-Interactive Mode):**
-1. Ensure the breakpoints service is running: `npx -y @a5c-ai/babysitter-breakpoints@latest start`
-2. Check if you can access `http://localhost:3184` in your browser
-3. Look for pending breakpoints in the UI
+1. Breakpoints are disabled in non-interactive mode
 
 ### Issue: "Quality target never reached"
 

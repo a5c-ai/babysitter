@@ -1,6 +1,6 @@
 requirements:
 
-based on the SDKs in this repo in the packages/sdk (npm @a5c-ai/babysitter-sdk) and the breakpoints SDK (npm @a5c-ai/babysitter-breakpoints) and claude plugin (REPO_ROOT/plugins/babysitter). look at sdk.md and BABYSITTER_PLUGIN_SPECIFICATION.md for more information.
+based on the SDK in this repo in the packages/sdk (npm @a5c-ai/babysitter-sdk) and claude plugin (REPO_ROOT/plugins/babysitter). look at sdk.md and BABYSITTER_PLUGIN_SPECIFICATION.md for more information.
 
 create a UX for the system that will be used for:
 1. observability of the runs, tasks, and breakpoints.
@@ -15,7 +15,7 @@ can dispatch claude code slash commands (claude "/...")
 
 requirements:
   - should be a web app in nextjs without a database
-  - should use the babiesitter-sdk and babysitter-breakpoints sdk as npm package dependencies.
+  - should use the babysitter-sdk as an npm package dependency.
 
 methodology:
     - research and create specs (iterative, quality gated) with more than what is described here as requirements - what would be convenient for the user to have in the ux in terms of controls, observability, breakpoint management, tracking, monitoring, functionality, feedback, process understanding, review and control, error handling, etc.

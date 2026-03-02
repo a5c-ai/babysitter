@@ -29,7 +29,6 @@ Before starting this tutorial, please ensure you have:
 - [ ] Understanding of **JavaScript async/await** patterns
 - [ ] Familiarity with **Jest** or similar testing frameworks
 - [ ] **Babysitter SDK** installed globally (`npm install -g @a5c-ai/babysitter-sdk@latest`)
-- [ ] **Breakpoints service** running on `http://localhost:3184`
 - [ ] A project where you want to implement a custom build and deploy workflow
 
 ### Verify Prerequisites
@@ -43,11 +42,7 @@ npx @a5c-ai/babysitter-sdk@latest --version
 
 **Interactive Mode (Claude Code)**: When running in Claude Code, breakpoints are handled directly in the chat - no service needed!
 
-**Non-Interactive Mode**: For CI/CD or headless automation, you need the breakpoints service:
-```bash
-# Only needed for non-interactive mode
-curl http://localhost:3184/health
-```
+**Non-Interactive Mode**: For CI/CD or headless automation, breakpoints are disabled:
 
 ---
 
@@ -1012,19 +1007,6 @@ Now that you've mastered custom process definitions, here are paths to continue:
      ctx.task(task2, {}),
    ]);
    ```
-
-### Issue: "Breakpoint not appearing"
-
-**Symptom:** Process is waiting but no breakpoint prompt appears.
-
-**Solution (Interactive Mode - Claude Code):**
-1. Look for Claude's question in the chat - scroll up if needed
-2. If the session disconnected, resume with `/babysitter:call resume`
-
-**Solution (Non-Interactive Mode):**
-1. Verify breakpoints service is running: `curl http://localhost:3184/health`
-2. Check browser console for errors
-3. Try refreshing the breakpoints UI at http://localhost:3184
 
 ### Issue: "Task timeout"
 

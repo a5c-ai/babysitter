@@ -1,5 +1,0 @@
-node_modules
-dist
-.vscode-test
-src/unit/fixtures/state/invalid.json
-

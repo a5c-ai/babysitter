@@ -321,16 +321,6 @@ Processes for research methodologies, analysis frameworks, and academic workflow
 
 Babysitter will find the `nextjs-fullstack-app` process and configure it based on your request.
 
-### Handle Breakpoints
-
-The process will pause at breakpoints for human review. When a breakpoint triggers:
-
-1. Open **http://localhost:3184** in your browser
-2. Review the context files and question
-3. Click **Approve** to continue or **Reject** to halt
-
-See [Breakpoints](./breakpoints.md) for detailed instructions on setting up the breakpoints service.
-
 ## Methodologies Reference
 
 The library includes 38+ development methodologies that can be applied to any project.

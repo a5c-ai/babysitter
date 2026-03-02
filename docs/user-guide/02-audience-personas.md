@@ -711,12 +711,6 @@ Week 1-2: Workflow Mastery
 |   +-- Spec-Kit for specification-driven work
 |   +-- Choosing the right methodology (decision guide)
 |
-+-- Advanced Breakpoints
-|   |
-|   +-- Breakpoint service configuration
-|   +-- Context file patterns
-|   +-- Approval workflows
-|   +-- Telegram integration for mobile
 |
 +-- Session Management
     |

@@ -4,6 +4,7 @@ import { appendEvent } from "../storage/journal";
 import { writeRunOutput } from "../storage/runFiles";
 import { withRunLock } from "../storage/lock";
 import { createReplayEngine, type ReplayEngine } from "./replay/createReplayEngine";
+import { rebuildStateCache } from "./replay/stateCache";
 import { withProcessContext } from "./processContext";
 import {
   EffectPendingError,
@@ -79,6 +80,11 @@ export async function orchestrateIteration(options: OrchestrateOptions): Promise
         },
       });
 
+      // Rebuild state cache so it includes the terminal event.
+      // Without this, the cache's journalHead would be 1 behind for completed runs
+      // since there's no subsequent iteration to trigger an automatic rebuild.
+      await rebuildStateCache(options.runDir, { reason: "post_completion" });
+
       // Call on-run-complete hook
       await callRuntimeHook(
         "on-run-complete",
@@ -113,6 +119,9 @@ export async function orchestrateIteration(options: OrchestrateOptions): Promise
         eventType: "RUN_FAILED",
         event: { error: failure },
       });
+
+      // Rebuild state cache so it includes the terminal event.
+      await rebuildStateCache(options.runDir, { reason: "post_failure" });
 
       // Call on-run-fail hook
       await callRuntimeHook(

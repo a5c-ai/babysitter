@@ -246,7 +246,8 @@ babysitter run:create \
   --process-id my-workflow \
   --entry ./code/main.js#process \
   --inputs ./inputs.json \
-  --run-id "run-$(date -u +%Y%m%d-%H%M%S)"
+  --run-id "run-$(date -u +%Y%m%d-%H%M%S)" \
+  --prompt "Run my custom workflow"
 ```
 
 ### Step 5: Execute the Run

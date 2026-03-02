@@ -36,14 +36,14 @@ export function AgentCard({
   const cardContent = (
     <Card
       className={cn(
-        "h-full hover:border-[var(--color-accent-fg)] hover:shadow-md",
+        "h-full hover:border-[rgba(0,223,223,0.5)]",
         isCompact ? "p-3" : ""
       )}
     >
       <CardHeader className={isCompact ? "p-0 pb-2" : ""}>
         <div className="flex items-start gap-3">
           {/* Agent avatar/icon */}
-          <div className="shrink-0 rounded-full bg-[var(--color-attention-subtle)] p-2 text-[var(--color-attention-fg)]">
+          <div className="shrink-0 rounded-full bg-[rgba(255,215,0,0.1)] p-2 text-[var(--scifi-yellow)]" style={{ border: '1px solid rgba(255, 215, 0, 0.2)' }}>
             <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
                 strokeLinecap="round"
@@ -63,7 +63,7 @@ export function AgentCard({
               {agent.name}
             </CardTitle>
             {agent.role && (
-              <p className="text-xs text-[var(--color-fg-muted)] mt-0.5">
+              <p className="text-xs text-[rgba(255,255,255,0.4)] mt-0.5">
                 {agent.role}
               </p>
             )}
@@ -95,7 +95,7 @@ export function AgentCard({
         {showExpertise && agent.expertise && agent.expertise.length > 0 && (
           <div className="space-y-1">
             {!isCompact && (
-              <p className="text-xs font-medium text-[var(--color-fg-muted)]">Expertise:</p>
+              <p className="text-xs font-medium text-[rgba(255,255,255,0.4)]">Expertise:</p>
             )}
             <div className="flex flex-wrap gap-1">
               {agent.expertise.slice(0, maxExpertise).map((exp, index) => (
@@ -115,8 +115,8 @@ export function AgentCard({
 
       <CardFooter
         className={cn(
-          "flex items-center justify-between text-xs text-[var(--color-fg-muted)]",
-          isCompact ? "p-0 pt-2 border-t border-[var(--color-border-default)]" : ""
+          "flex items-center justify-between text-xs text-[rgba(255,255,255,0.4)]",
+          isCompact ? "p-0 pt-2 border-t border-[rgba(255,0,224,0.1)]" : ""
         )}
       >
         {/* Expertise count */}

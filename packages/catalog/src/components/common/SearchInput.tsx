@@ -143,11 +143,11 @@ export function SearchInput({
     }
   };
 
-  // Steampunk brass magnifying glass icon
+  // Sci-fi neon search icon
   const defaultSearchIcon = (
     <svg
       className={cn(iconSizeClasses[size])}
-      style={{ color: '#B8860B' }}
+      style={{ color: 'var(--scifi-cyan, #00DFDF)' }}
       fill="none"
       stroke="currentColor"
       strokeWidth={2}
@@ -170,7 +170,7 @@ export function SearchInput({
         {searchIcon || defaultSearchIcon}
       </span>
 
-      {/* Input - Steampunk parchment style */}
+      {/* Input - Sci-fi dark surface style */}
       <input
         type="text"
         id={id}
@@ -188,11 +188,11 @@ export function SearchInput({
           sizeClasses[size]
         )}
         style={{
-          backgroundColor: '#F5E6C8',
-          border: '2px solid #B8860B',
-          color: '#4A3728',
-          fontFamily: 'Georgia, serif',
-          boxShadow: 'inset 0 1px 3px rgba(61, 43, 31, 0.1)',
+          backgroundColor: 'var(--scifi-surface, #1a1a2e)',
+          border: '1px solid var(--scifi-border-neon, rgba(255, 0, 224, 0.2))',
+          color: 'var(--scifi-text-primary, #ffffff)',
+          fontFamily: 'var(--font-body, var(--font-scifi-body))',
+          boxShadow: 'inset 0 1px 3px rgba(0, 0, 0, 0.3)',
         }}
       />
 
@@ -206,7 +206,7 @@ export function SearchInput({
         {isLoading && (
           <svg
             className="h-4 w-4 animate-spin"
-            style={{ color: '#B8860B' }}
+            style={{ color: 'var(--scifi-cyan, #00DFDF)' }}
             fill="none"
             viewBox="0 0 24 24"
           >
@@ -231,7 +231,7 @@ export function SearchInput({
             type="button"
             onClick={handleClear}
             className="rounded-sm p-0.5"
-            style={{ color: '#6B5744' }}
+            style={{ color: 'var(--scifi-text-muted, rgba(255,255,255,0.4))' }}
             aria-label="Clear search"
           >
             <svg
@@ -344,14 +344,14 @@ export function SearchInputWithSuggestions({
         {...props}
       />
 
-      {/* Suggestions Dropdown - Steampunk styled */}
+      {/* Suggestions Dropdown - Sci-fi styled */}
       {isOpen && hasSuggestions && (
         <div
           className="absolute top-full z-50 mt-1 w-full rounded-md py-1 shadow-lg"
           style={{
-            backgroundColor: '#F9F0DC',
-            border: '1px solid #A67C00',
-            boxShadow: '0 4px 12px rgba(61, 43, 31, 0.2)',
+            backgroundColor: 'var(--scifi-card, #12121a)',
+            border: '1px solid var(--scifi-border-neon, rgba(255, 0, 224, 0.2))',
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.5)',
           }}
         >
           {filteredSuggestions.map((suggestion, index) => (
@@ -363,9 +363,9 @@ export function SearchInputWithSuggestions({
                 "w-full px-3 py-2 text-left text-sm transition-colors"
               )}
               style={{
-                fontFamily: 'Georgia, serif',
-                color: index === selectedIndex ? '#B8860B' : '#4A3728',
-                backgroundColor: index === selectedIndex ? 'rgba(212, 175, 55, 0.15)' : 'transparent',
+                fontFamily: 'var(--font-body, var(--font-scifi-body))',
+                color: index === selectedIndex ? 'var(--scifi-cyan, #00DFDF)' : 'var(--scifi-text-secondary, rgba(255,255,255,0.7))',
+                backgroundColor: index === selectedIndex ? 'rgba(0, 223, 223, 0.1)' : 'transparent',
               }}
             >
               {suggestion}

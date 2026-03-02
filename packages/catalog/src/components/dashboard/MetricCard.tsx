@@ -63,9 +63,9 @@ function AnimatedValue({ value }: { value: number | string }) {
 
 function TrendIndicator({ direction, value }: { direction: TrendDirection; value: string }) {
   const colors = {
-    up: "text-green-600 dark:text-green-400",
-    down: "text-red-600 dark:text-red-400",
-    neutral: "text-gray-500 dark:text-gray-400",
+    up: "text-[#00FF88]",
+    down: "text-[#FF3366]",
+    neutral: "text-[rgba(255,255,255,0.4)]",
   };
 
   const icons = {
@@ -107,22 +107,32 @@ export function MetricCard({
   const content = (
     <Card className={cn(
       "transition-all duration-200",
-      href && "cursor-pointer hover:border-primary/50 hover:shadow-md",
+      href && "cursor-pointer hover:border-[rgba(0,223,223,0.5)]",
       className
-    )}>
+    )}
+    style={{
+      boxShadow: href ? undefined : '0 0 12px rgba(0, 0, 0, 0.3), 0 0 4px rgba(255, 0, 224, 0.05)',
+    }}
+    >
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium text-muted-foreground">
+        <CardTitle className="text-sm font-medium text-[rgba(255,255,255,0.4)]" style={{ fontFamily: 'var(--font-body, var(--font-scifi-body))' }}>
           {title}
         </CardTitle>
         {icon && (
-          <div className="text-muted-foreground">
+          <div className="text-[var(--scifi-cyan)]" style={{ filter: 'drop-shadow(0 0 3px rgba(0, 223, 223, 0.3))' }}>
             {icon}
           </div>
         )}
       </CardHeader>
       <CardContent>
         <div className="flex items-baseline gap-2">
-          <div className="text-2xl font-bold">
+          <div
+            className="text-2xl font-bold text-[var(--scifi-cyan)]"
+            style={{
+              fontFamily: 'var(--font-header, var(--font-scifi-header))',
+              textShadow: '0 0 8px rgba(0, 223, 223, 0.3)',
+            }}
+          >
             {animate ? <AnimatedValue value={value} /> : value}
           </div>
           {trend && (
@@ -130,7 +140,7 @@ export function MetricCard({
           )}
         </div>
         {subtitle && (
-          <p className="mt-1 text-xs text-muted-foreground">{subtitle}</p>
+          <p className="mt-1 text-xs text-[rgba(255,255,255,0.3)]">{subtitle}</p>
         )}
       </CardContent>
     </Card>

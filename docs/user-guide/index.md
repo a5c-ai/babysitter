@@ -145,8 +145,6 @@ Deep dives into Babysitter's core capabilities.
 | [Journal System](./features/journal-system.md) | Event-sourced audit trail and state reconstruction |
 | [Run Resumption](./features/run-resumption.md) | Continue interrupted workflows from any point |
 | [Parallel Execution](./features/parallel-execution.md) | Concurrent task execution for faster results |
-| [VSCode Extension](./features/vscode-extension.md) | Monitor, dispatch, and interact with runs from VSCode |
-| [Telegram Integration](./features/telegram-integration.md) | Mobile notifications and breakpoint approvals via Telegram |
 
 > **Highlight:** The Process Library contains ready-to-use orchestration for virtually any development task - from React components to machine learning pipelines to business process modeling. [Explore the library →](./features/process-library.md)
 

@@ -11,19 +11,22 @@ import type {
   HookResult,
   HookExecutionResult,
 } from "./types";
+import { DEFAULTS } from "../config/defaults";
+import { getAdapter } from "../harness";
 
 /**
  * Find `plugins/babysitter/hooks/hook-dispatcher.sh` by walking up from cwd.
  * This allows running from nested projects/fixtures inside a mono-repo.
  *
+ * First checks the active harness adapter for a harness-specific path
+ * (e.g. CLAUDE_PLUGIN_ROOT), then falls back to walking up the directory tree.
+ *
  * @internal
  */
 export function findHookDispatcherPath(startCwd: string): string | null {
-  const claudePluginRoot = process.env.CLAUDE_PLUGIN_ROOT;
-  if (claudePluginRoot) {
-    const candidate = path.join(path.resolve(claudePluginRoot), "hooks", "hook-dispatcher.sh");
-    if (existsSync(candidate)) return candidate;
-  }
+  // Try harness-specific path first (e.g. CLAUDE_PLUGIN_ROOT)
+  const harnessPath = getAdapter().findHookDispatcherPath(startCwd);
+  if (harnessPath) return harnessPath;
 
   let current = path.resolve(startCwd);
   // Guard against infinite loops: stop once we stop making progress.
@@ -47,7 +50,7 @@ export async function callHook(
     hookType,
     payload,
     cwd = process.cwd(),
-    timeout = 30000,
+    timeout = DEFAULTS.hookTimeout,
     throwOnFailure = false,
   } = options;
 

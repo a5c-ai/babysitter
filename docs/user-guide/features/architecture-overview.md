@@ -14,7 +14,7 @@ Think of it like this:
 - **The Plugin** is the receptionist - it takes your requests and routes them to the right department
 - **The SDK** is the operations team - it actually does the work
 - **The Journal** is the filing cabinet - it keeps a record of everything
-- **The Breakpoints Service** is the approval desk - it pauses for human review when needed
+- **The AskUserQuestion Tool** is the approval desk - it pauses for human review when needed
 
 **Tip for beginners:** You don't need to understand the architecture to use Babysitter. This document is for those who want to understand how it works under the hood, or who are building custom processes.
 
@@ -51,7 +51,7 @@ Babysitter uses a modular architecture designed for reliability, debuggability, 
 |                           |                                      |
 |                           v                                      |
 |  +-----------------------------------------------------------+  |
-|  |  Breakpoints Service (human approval)                     |  |
+|  |  AskUserQuestion Tool (human approval)                     |  |
 |  +-----------------------------------------------------------+  |
 +-----------------------------------------------------------------+
 ```
@@ -197,7 +197,6 @@ For more details on creating processes, see [Process Definitions](./process-defi
 | **Skill** | Claude Code | Code operations | Refactoring, search |
 | **Node** | Node.js | Scripts and tools | Build, test, deploy |
 | **Shell** | System shell | Commands | git, npm, docker |
-| **Breakpoint** | Breakpoints service | Human approval | Review, approve |
 
 **Execution Flow:**
 
@@ -261,61 +260,6 @@ For more details on parallel execution, see [Parallel Execution](./parallel-exec
 
 ---
 
-### 6. Breakpoints Service
-
-**Package:** `@a5c-ai/babysitter-breakpoints`
-
-**Architecture:**
-
-```
-+--------------------------------------------------------+
-| Web UI (http://localhost:3184)                         |
-| - View pending breakpoints                             |
-| - Approve/reject with comments                         |
-| - Review context and history                           |
-+-----------------+--------------------------------------+
-                  |
-                  v
-+--------------------------------------------------------+
-| REST API                                               |
-| - POST /api/breakpoints      Create breakpoint         |
-| - GET /api/breakpoints       List breakpoints          |
-| - POST /api/breakpoints/:id  Approve/reject            |
-| - GET /health                Health check              |
-+-----------------+--------------------------------------+
-                  |
-                  v
-+--------------------------------------------------------+
-| In-Memory State                                        |
-| - Active breakpoints                                   |
-| - Pending approvals                                    |
-| - Response handlers                                    |
-+-----------------+--------------------------------------+
-                  |
-                  v
-+--------------------------------------------------------+
-| Notification Integrations (Optional)                   |
-| - Telegram bot                                         |
-| - Email                                                |
-| - Slack (future)                                       |
-+--------------------------------------------------------+
-```
-
-**Communication Flow:**
-
-1. **Request**: Task executor creates breakpoint via POST
-2. **Poll**: Task executor polls for response (long-polling)
-3. **Notify**: Service sends notification (Telegram/email)
-4. **Review**: Human reviews context in UI
-5. **Respond**: Human approves/rejects
-6. **Resume**: Task executor receives response, continues
-
-**Technology:** Node.js, Express, WebSockets (optional)
-
-For more details on breakpoints, see [Breakpoints](./breakpoints.md).
-
----
-
 ## Data Flow
 
 **Complete Request Flow:**
@@ -345,7 +289,6 @@ For more details on breakpoints, see [Breakpoints](./breakpoints.md).
                        |    |
                        |    +--> ctx.breakpoint() -> Wait for approval
                        |         |
-                       |         +-- POST to breakpoints service
                        |         +-- Append EFFECT_REQUESTED (kind: breakpoint)
                        |         +-- Poll for response
                        |         +-- Append EFFECT_RESOLVED
@@ -449,7 +392,6 @@ For more details on hooks, see [Hooks](./hooks.md).
 | **SDK** | TypeScript + Node.js | Core orchestration engine |
 | **Process Definitions** | JavaScript/TypeScript | User workflow logic |
 | **Journal** | Individual JSON files | Event persistence |
-| **Breakpoints Service** | Node.js + Express | Human approval UI/API |
 | **CLI** | Commander.js | Command-line interface |
 
 ---
@@ -496,6 +438,6 @@ Babysitter's architecture is built on these key principles:
 - **Event Sourcing**: The journal provides a complete, replayable audit trail
 - **Two-Layer State**: Journal for truth, cache for performance
 - **Extensibility**: Hooks and custom tasks enable integration with any system
-- **Human-in-the-Loop**: Breakpoints service enables approval workflows
+- **Human-in-the-Loop**: Breakpoints enables approval workflows
 
 This architecture enables reliable, debuggable, and auditable AI-powered workflows that can be paused, resumed, and replayed at any point.

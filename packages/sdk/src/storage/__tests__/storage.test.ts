@@ -8,6 +8,7 @@ import { snapshotState } from "../../storage/snapshotState";
 import { storeTaskArtifacts } from "../../storage/storeTaskArtifacts";
 import { getDiskUsage, findOrphanedBlobs } from "../../storage/cleanup";
 import { acquireRunLock, releaseRunLock } from "../../storage/lock";
+import { readRunMetadata } from "../../storage/runFiles";
 
 let tmpRoot: string;
 
@@ -120,5 +121,53 @@ describe("storage primitives", () => {
     await expect(acquireRunLock(runDir, "other")).rejects.toThrow(/run.lock already held/);
     await releaseRunLock(runDir);
     await acquireRunLock(runDir, "test-owner-2");
+  });
+
+  test("createRunDir writes prompt to run.json when provided", async () => {
+    const { runDir } = await createRunDir({
+      runsRoot: tmpRoot,
+      runId: "run-prompt",
+      request: "prompt-test",
+      processPath: ".a5c/processes/foo.js",
+      prompt: "Build a REST API for user management",
+    });
+    const runJson = JSON.parse(await fs.readFile(path.join(runDir, "run.json"), "utf8"));
+    expect(runJson.prompt).toBe("Build a REST API for user management");
+  });
+
+  test("createRunDir omits prompt from run.json when not provided", async () => {
+    const { runDir } = await createRunDir({
+      runsRoot: tmpRoot,
+      runId: "run-no-prompt",
+      request: "no-prompt-test",
+      processPath: ".a5c/processes/foo.js",
+    });
+    const runJson = JSON.parse(await fs.readFile(path.join(runDir, "run.json"), "utf8"));
+    expect(runJson.prompt).toBeUndefined();
+    expect("prompt" in runJson).toBe(false);
+  });
+
+  test("readRunMetadata returns prompt field from run.json", async () => {
+    const { runDir } = await createRunDir({
+      runsRoot: tmpRoot,
+      runId: "run-read-prompt",
+      request: "read-prompt-test",
+      processPath: ".a5c/processes/foo.js",
+      prompt: "Implement TDD workflow for payment service",
+    });
+    const metadata = await readRunMetadata(runDir);
+    expect(metadata.prompt).toBe("Implement TDD workflow for payment service");
+    expect(metadata.runId).toBe("run-read-prompt");
+  });
+
+  test("readRunMetadata returns undefined prompt when not persisted", async () => {
+    const { runDir } = await createRunDir({
+      runsRoot: tmpRoot,
+      runId: "run-read-no-prompt",
+      request: "read-no-prompt-test",
+      processPath: ".a5c/processes/foo.js",
+    });
+    const metadata = await readRunMetadata(runDir);
+    expect(metadata.prompt).toBeUndefined();
   });
 });

@@ -164,7 +164,7 @@ export function FilterPanel({
       {/* Entity Type Filters */}
       {showEntityTypes && (
         <div>
-          <h4 className="mb-3 text-sm font-medium text-[var(--color-fg-default)]">Entity Type</h4>
+          <h4 className="mb-3 text-sm font-medium text-white">Entity Type</h4>
           <div className="space-y-2">
             {entityTypeOptions.map((option) => {
               const isChecked = filters.entityTypes?.includes(option.value) || false;
@@ -172,17 +172,17 @@ export function FilterPanel({
                 <label
                   key={option.value}
                   className={cn(
-                    "flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 transition-colors",
+                    "flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 transition-colors",
                     isChecked
-                      ? "bg-[var(--color-accent-subtle)] text-[var(--color-accent-fg)]"
-                      : "hover:bg-[var(--color-canvas-subtle)]"
+                      ? "bg-[rgba(0,223,223,0.1)] text-[var(--scifi-cyan)]"
+                      : "text-[rgba(255,255,255,0.5)] hover:bg-[var(--scifi-surface)]"
                   )}
                 >
                   <input
                     type="checkbox"
                     checked={isChecked}
                     onChange={() => handleEntityTypeToggle(option.value)}
-                    className="h-4 w-4 rounded border-[var(--color-border-default)] text-[var(--color-accent-fg)] focus:ring-[var(--color-accent-fg)]"
+                    className="h-4 w-4 rounded border-[rgba(0,223,223,0.3)] bg-[var(--scifi-surface)] text-[var(--scifi-cyan)] focus:ring-[var(--scifi-cyan)]"
                   />
                   {option.icon}
                   <span className="text-sm">{option.label}</span>
@@ -196,11 +196,14 @@ export function FilterPanel({
       {/* Domain Filter */}
       {showDomain && domains.length > 0 && (
         <div>
-          <h4 className="mb-3 text-sm font-medium text-[var(--color-fg-default)]">Domain</h4>
+          <h4 className="mb-3 text-sm font-medium text-white">Domain</h4>
           <select
             value={filters.domain || ""}
             onChange={(e) => handleDomainChange(e.target.value)}
-            className="w-full rounded-md border border-[var(--color-border-default)] bg-[var(--color-canvas-default)] px-3 py-2 text-sm text-[var(--color-fg-default)] focus:border-[var(--color-accent-fg)] focus:outline-none focus:ring-1 focus:ring-[var(--color-accent-fg)]"
+            className="w-full rounded-sm bg-[var(--scifi-surface)] px-3 py-2 text-sm text-white focus:outline-none"
+            style={{
+              border: '1px solid rgba(0, 223, 223, 0.2)',
+            }}
           >
             <option value="">All Domains</option>
             {domains.map((domain) => (
@@ -215,11 +218,14 @@ export function FilterPanel({
       {/* Category Filter */}
       {showCategory && categories.length > 0 && (
         <div>
-          <h4 className="mb-3 text-sm font-medium text-[var(--color-fg-default)]">Category</h4>
+          <h4 className="mb-3 text-sm font-medium text-white">Category</h4>
           <select
             value={filters.category || ""}
             onChange={(e) => handleCategoryChange(e.target.value)}
-            className="w-full rounded-md border border-[var(--color-border-default)] bg-[var(--color-canvas-default)] px-3 py-2 text-sm text-[var(--color-fg-default)] focus:border-[var(--color-accent-fg)] focus:outline-none focus:ring-1 focus:ring-[var(--color-accent-fg)]"
+            className="w-full rounded-sm bg-[var(--scifi-surface)] px-3 py-2 text-sm text-white focus:outline-none"
+            style={{
+              border: '1px solid rgba(0, 223, 223, 0.2)',
+            }}
           >
             <option value="">All Categories</option>
             {categories.map((category) => (
@@ -234,7 +240,7 @@ export function FilterPanel({
       {/* Expertise Multi-Select */}
       {showExpertise && expertiseOptions.length > 0 && (
         <div>
-          <h4 className="mb-3 text-sm font-medium text-[var(--color-fg-default)]">Expertise</h4>
+          <h4 className="mb-3 text-sm font-medium text-white">Expertise</h4>
           <div className="flex flex-wrap gap-1.5">
             {expertiseOptions.map((exp) => {
               const isSelected = filters.expertise?.includes(exp) || false;
@@ -244,7 +250,7 @@ export function FilterPanel({
                   variant={isSelected ? "default" : "outline"}
                   className={cn(
                     "cursor-pointer transition-colors",
-                    isSelected && "bg-[var(--color-accent-emphasis)]"
+                    isSelected && "bg-[rgba(0,223,223,0.15)] border-[rgba(0,223,223,0.4)]"
                   )}
                   onClick={() => handleExpertiseToggle(exp)}
                 >
@@ -257,7 +263,7 @@ export function FilterPanel({
       )}
 
       {/* Action Buttons */}
-      <div className="flex gap-2 border-t border-[var(--color-border-default)] pt-4">
+      <div className="flex gap-2 pt-4" style={{ borderTop: '1px solid rgba(255, 0, 224, 0.1)' }}>
         <Button
           variant="outline"
           size="sm"
@@ -273,17 +279,23 @@ export function FilterPanel({
 
   if (collapsible) {
     return (
-      <div className={cn("rounded-lg border border-[var(--color-border-default)] bg-[var(--color-canvas-default)]", className)}>
+      <div
+        className={cn("rounded-sm", className)}
+        style={{
+          background: 'var(--scifi-card)',
+          border: '1px solid rgba(255, 0, 224, 0.15)',
+        }}
+      >
         <button
           type="button"
           onClick={() => setIsCollapsed(!isCollapsed)}
           className="flex w-full items-center justify-between p-4 text-left"
         >
           <div className="flex items-center gap-2">
-            <svg className="h-5 w-5 text-[var(--color-fg-muted)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="h-5 w-5 text-[var(--scifi-cyan)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
             </svg>
-            <span className="font-medium text-[var(--color-fg-default)]">Filters</span>
+            <span className="font-medium text-white">Filters</span>
             {activeFilterCount > 0 && (
               <Badge variant="accent" className="ml-1">
                 {activeFilterCount}
@@ -292,7 +304,7 @@ export function FilterPanel({
           </div>
           <svg
             className={cn(
-              "h-5 w-5 text-[var(--color-fg-muted)] transition-transform",
+              "h-5 w-5 text-[rgba(255,255,255,0.4)] transition-transform",
               isCollapsed ? "" : "rotate-180"
             )}
             fill="none"
@@ -302,18 +314,28 @@ export function FilterPanel({
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
           </svg>
         </button>
-        {!isCollapsed && <div className="border-t border-[var(--color-border-default)] p-4">{panelContent}</div>}
+        {!isCollapsed && (
+          <div className="p-4" style={{ borderTop: '1px solid rgba(255, 0, 224, 0.1)' }}>
+            {panelContent}
+          </div>
+        )}
       </div>
     );
   }
 
   return (
-    <div className={cn("rounded-lg border border-[var(--color-border-default)] bg-[var(--color-canvas-default)] p-4", className)}>
+    <div
+      className={cn("rounded-sm p-4", className)}
+      style={{
+        background: 'var(--scifi-card)',
+        border: '1px solid rgba(255, 0, 224, 0.15)',
+      }}
+    >
       <div className="mb-4 flex items-center gap-2">
-        <svg className="h-5 w-5 text-[var(--color-fg-muted)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="h-5 w-5 text-[var(--scifi-cyan)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
         </svg>
-        <h3 className="font-medium text-[var(--color-fg-default)]">Filters</h3>
+        <h3 className="font-medium text-white">Filters</h3>
         {activeFilterCount > 0 && (
           <Badge variant="accent" className="ml-1">
             {activeFilterCount}

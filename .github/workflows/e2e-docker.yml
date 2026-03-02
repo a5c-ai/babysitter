@@ -1,0 +1,99 @@
+name: E2E Docker Tests
+
+on:
+  pull_request:
+    paths:
+      - 'Dockerfile'
+      - 'docker-entrypoint.sh'
+      - 'docker-compose.yml'
+      - 'packages/sdk/**'
+      - 'plugins/babysitter/**'
+      - 'e2e-tests/**'
+      - '.github/workflows/e2e-docker.yml'
+  push:
+    branches:
+      - staging
+      - develop
+    paths:
+      - 'Dockerfile'
+      - 'docker-entrypoint.sh'
+      - 'docker-compose.yml'
+      - 'packages/sdk/**'
+      - 'plugins/babysitter/**'
+      - 'e2e-tests/**'
+      - '.github/workflows/e2e-docker.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: e2e-docker-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  docker-e2e-tests:
+    name: Docker E2E Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          # Workaround: npm ci on Windows-generated lockfile may miss linux optional deps
+          npm install --no-save @rollup/rollup-linux-x64-gnu 2>/dev/null || true
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Prepare artifact directories
+        run: |
+          set -euo pipefail
+          mkdir -p e2e-artifacts
+
+      - name: Run structural, SDK & stop-hook tests (no API key)
+        run: |
+          set -euo pipefail
+          npx vitest run --config e2e-tests/docker/vitest.config.ts \
+            --reporter=default --reporter=json \
+            --outputFile.json=e2e-artifacts/test-results-structural.json \
+            e2e-tests/docker/structural.test.ts \
+            e2e-tests/docker/sdk-cli.test.ts \
+            e2e-tests/docker/stop-hook.test.ts \
+            2>&1 | tee e2e-artifacts/structural-tests.log
+
+      - name: Run fixture & E2E orchestration tests
+        if: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
+        # E2E orchestration requires valid credentials (Foundry or Anthropic API key).
+        run: |
+          set -euo pipefail
+          npx vitest run --config e2e-tests/docker/vitest.config.ts \
+            --reporter=default --reporter=json \
+            --outputFile.json=e2e-artifacts/test-results-e2e.json \
+            e2e-tests/docker/orchestration.test.ts \
+            2>&1 | tee e2e-artifacts/e2e-tests.log
+        env:
+          CLAUDE_CODE_USE_FOUNDRY: ${{ secrets.CLAUDE_CODE_USE_FOUNDRY }}
+          ANTHROPIC_FOUNDRY_RESOURCE: ${{ secrets.ANTHROPIC_FOUNDRY_RESOURCE }}
+          ANTHROPIC_FOUNDRY_API_KEY: ${{ secrets.ANTHROPIC_FOUNDRY_API_KEY }}
+          ANTHROPIC_DEFAULT_SONNET_MODEL: ${{ secrets.ANTHROPIC_DEFAULT_SONNET_MODEL }}
+          ANTHROPIC_DEFAULT_HAIKU_MODEL: ${{ secrets.ANTHROPIC_DEFAULT_HAIKU_MODEL }}
+          ANTHROPIC_DEFAULT_OPUS_MODEL: ${{ secrets.ANTHROPIC_DEFAULT_OPUS_MODEL }}
+        timeout-minutes: 35
+
+      - name: Upload test artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-test-artifacts
+          path: e2e-artifacts/
+          include-hidden-files: true
+          if-no-files-found: warn
+          retention-days: 14

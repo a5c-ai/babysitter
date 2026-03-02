@@ -12,7 +12,6 @@ This catalog provides comprehensive documentation of Babysitter error messages, 
 
 - [Installation Errors](#installation-errors)
 - [Plugin Errors](#plugin-errors)
-- [Breakpoints Service Errors](#breakpoints-service-errors)
 - [Run Execution Errors](#run-execution-errors)
 - [Task Execution Errors](#task-execution-errors)
 - [Quality and Scoring Errors](#quality-and-scoring-errors)
@@ -78,7 +77,7 @@ npm ERR! EACCES: permission denied, mkdir '/usr/local/lib/node_modules/...'
    ```
 2. Retry installation:
    ```bash
-   npm install -g @a5c-ai/babysitter@latest @a5c-ai/babysitter-sdk@latest @a5c-ai/babysitter-breakpoints@latest
+   npm install -g @a5c-ai/babysitter-sdk@latest
    ```
 
 ---
@@ -100,7 +99,7 @@ npm ERR! Could not resolve dependency: @a5c-ai/babysitter-sdk@^0.0.120
 **Solutions:**
 1. Update all packages together:
    ```bash
-   npm install -g @a5c-ai/babysitter@latest @a5c-ai/babysitter-sdk@latest @a5c-ai/babysitter-breakpoints@latest
+   npm install -g @a5c-ai/babysitter-sdk@latest
    ```
 2. Clear npm cache if needed:
    ```bash
@@ -196,97 +195,6 @@ Error loading plugin babysitter@a5c.ai: [details]
    ```bash
    claude plugin update babysitter@a5c.ai
    ```
-
----
-
-## Breakpoints Service Errors
-
-### EADDRINUSE: address already in use :::3184
-
-```
-Error: listen EADDRINUSE: address already in use :::3184
-```
-
-**Meaning:** Port 3184 is already being used by another process.
-
-**Causes:**
-- Previous breakpoints service still running
-- Another application using port 3184
-- Service didn't shut down cleanly
-
-**Solutions:**
-1. Find and kill existing process:
-   ```bash
-   lsof -i :3184
-   kill <PID>
-   ```
-2. Use different port:
-   ```bash
-   npx @a5c-ai/babysitter-breakpoints start --port 3185
-   ```
-3. Kill all breakpoints processes:
-   ```bash
-   pkill -f "babysitter-breakpoints"
-   ```
-
----
-
-### Breakpoint timed out
-
-```
-Error: Breakpoint bp-001 timed out
-Waiting for breakpoint approval...
-Timeout after 300s
-```
-
-**Meaning:** A breakpoint was not approved within the timeout period.
-
-**Causes:**
-- Breakpoints service not running
-- Service not accessible
-- Approval not given in time
-
-**Solutions:**
-1. Check service status:
-   ```bash
-   curl http://localhost:3184/health
-   ```
-2. Start service if not running:
-   ```bash
-   npx -y @a5c-ai/babysitter-breakpoints@latest start
-   ```
-3. Approve pending breakpoints at http://localhost:3184
-4. Resume the run:
-   ```bash
-   /babysitter:call resume --run-id <runId>
-   ```
-
----
-
-### ECONNREFUSED: Connection refused
-
-```
-Error: connect ECONNREFUSED 127.0.0.1:3184
-```
-
-**Meaning:** Cannot connect to the breakpoints service.
-
-**Causes:**
-- Service not running
-- Service on different port
-- Firewall blocking connection
-
-**Solutions:**
-1. Start the service:
-   ```bash
-   npx -y @a5c-ai/babysitter-breakpoints@latest start
-   ```
-2. Check correct port:
-   ```bash
-   curl http://localhost:3184/health
-   curl http://localhost:3185/health  # if using different port
-   ```
-3. Check firewall settings
 
 ---
 

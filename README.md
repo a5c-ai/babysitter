@@ -54,23 +54,16 @@ Babysitter is an orchestration framework for Claude Code that enables determinis
 
 ## Installation
 
-### 1. Install the SDK
-
-```bash
-npm install -g @a5c-ai/babysitter@latest @a5c-ai/babysitter-sdk@latest @a5c-ai/babysitter-breakpoints@latest
-```
-
-### 2. Install the Plugin
+### 1. Install the Plugin
 
 ```bash
 claude plugin marketplace add a5c-ai/babysitter
 claude plugin install --scope user babysitter@a5c.ai
-claude plugin enable --scope user babysitter@a5c.ai
 ```
 
 Then restart Claude Code.
 
-### 3. Verify Installation
+### 2. Verify Installation
 
 Type `/skills` in Claude Code to verify "babysit" appears.
 

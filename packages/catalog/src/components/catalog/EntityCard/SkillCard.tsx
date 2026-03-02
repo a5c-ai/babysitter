@@ -35,7 +35,7 @@ export function SkillCard({
   const cardContent = (
     <Card
       className={cn(
-        "h-full hover:border-[var(--color-accent-fg)] hover:shadow-md",
+        "h-full hover:border-[rgba(0,223,223,0.5)]",
         isCompact ? "p-3" : ""
       )}
     >
@@ -57,7 +57,7 @@ export function SkillCard({
             )}
           </div>
           {/* Skill icon */}
-          <div className="shrink-0 rounded-md bg-[var(--color-success-subtle)] p-1.5 text-[var(--color-success-fg)]">
+          <div className="shrink-0 rounded-sm bg-[rgba(0,255,136,0.1)] p-1.5 text-[#00FF88]" style={{ border: '1px solid rgba(0, 255, 136, 0.2)' }}>
             <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
                 strokeLinecap="round"
@@ -89,7 +89,7 @@ export function SkillCard({
         {showTools && skill.allowedTools && skill.allowedTools.length > 0 && (
           <div className="space-y-1">
             {!isCompact && (
-              <p className="text-xs font-medium text-[var(--color-fg-muted)]">Tools:</p>
+              <p className="text-xs font-medium text-[rgba(255,255,255,0.4)]">Tools:</p>
             )}
             <TagGroup
               tags={skill.allowedTools.slice(0, maxTools).map((tool) => ({
@@ -100,7 +100,7 @@ export function SkillCard({
               maxTags={maxTools}
             />
             {skill.allowedTools.length > maxTools && (
-              <span className="text-xs text-[var(--color-fg-muted)]">
+              <span className="text-xs text-[rgba(255,255,255,0.4)]">
                 +{skill.allowedTools.length - maxTools} more
               </span>
             )}
@@ -110,8 +110,8 @@ export function SkillCard({
 
       <CardFooter
         className={cn(
-          "flex items-center justify-between text-xs text-[var(--color-fg-muted)]",
-          isCompact ? "p-0 pt-2 border-t border-[var(--color-border-default)]" : ""
+          "flex items-center justify-between text-xs text-[rgba(255,255,255,0.4)]",
+          isCompact ? "p-0 pt-2 border-t border-[rgba(255,0,224,0.1)]" : ""
         )}
       >
         {/* Tools count */}

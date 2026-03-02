@@ -1,8 +1,9 @@
 #!/usr/bin/env node
-import { promises as fs } from "node:fs";
+import { promises as fs, existsSync } from "node:fs";
 import * as path from "node:path";
 import { pathToFileURL } from "node:url";
 import * as crypto from "node:crypto";
+import { collapseDoubledA5cRuns as _sharedCollapseDoubledA5cRuns, resolveInputPath } from "./resolveInputPath";
 import { commitEffectResult } from "../runtime/commitEffectResult";
 import { createRun } from "../runtime/createRun";
 import { buildEffectIndex } from "../runtime/replay/effectIndex";
@@ -16,18 +17,66 @@ import { loadJournal } from "../storage/journal";
 import { readRunMetadata } from "../storage/runFiles";
 import type { JournalEvent, RunMetadata, StoredTaskResult } from "../storage/types";
 import { runIterate } from "./commands/runIterate";
-import { resolveCompletionSecret } from "./completionSecret";
+import { runExecuteTasks } from "./commands/runExecuteTasks";
+import { handleHealthCommand } from "./commands/health";
+import { handleConfigureCommand } from "./commands/configure";
+import {
+  handleSessionInit,
+  handleSessionAssociate,
+  handleSessionResume,
+  handleSessionState,
+  handleSessionUpdate,
+  handleSessionCheckIteration,
+  handleSessionLastMessage,
+  handleSessionIterationMessage,
+} from "./commands/session";
+import { handleSkillDiscover, handleSkillFetchRemote, discoverSkillsInternal, discoverFromProcessFile } from "./commands/skill";
+import { handleHookLog } from "./commands/hookLog";
+import { handleHookRun } from "./commands/hookRun";
+import { handleProfileCommand } from "./commands/profile";
+import type { ProfileCommandArgs } from "./commands/profile";
+import { resolveCompletionProof } from "./completionProof";
+import { getAdapter, getAdapterByName } from "../harness";
+import type { SessionBindResult } from "../harness";
+import {
+  BabysitterRuntimeError,
+  ErrorCategory,
+  formatErrorWithContext,
+  toStructuredError,
+  suggestCommand,
+  isBabysitterError,
+} from "../runtime/exceptions";
+import { CONFIG_ENV_VARS, DEFAULTS } from "../config/defaults";
 
 const USAGE = `Usage:
-  babysitter run:create --process-id <id> --entry <path#export> [--runs-dir <dir>] [--inputs <file>] [--run-id <id>] [--process-revision <rev>] [--request <id>] [--json] [--dry-run]
+  babysitter run:create --process-id <id> --entry <path#export> [--runs-dir <dir>] [--inputs <file>] [--run-id <id>] [--process-revision <rev>] [--request <id>] [--prompt <text>] [--harness <name>] [--session-id <id>] [--plugin-root <dir>] [--json] [--dry-run]
   babysitter run:status <runDir> [--runs-dir <dir>] [--json]
   babysitter run:events <runDir> [--runs-dir <dir>] [--json] [--limit <n>] [--reverse] [--filter-type <type>]
   babysitter run:rebuild-state <runDir> [--runs-dir <dir>] [--json] [--dry-run]
   babysitter run:repair-journal <runDir> [--runs-dir <dir>] [--json] [--dry-run]
   babysitter run:iterate <runDir> [--runs-dir <dir>] [--json] [--verbose] [--iteration <n>]
+  babysitter run:execute-tasks <runDir> [--runs-dir <dir>] [--json] [--verbose] [--dry-run] [--max-tasks <n>] [--kind <kind>] [--timeout <ms>]
   babysitter task:post <runDir> <effectId> --status <ok|error> [--runs-dir <dir>] [--json] [--dry-run] [--value <file>] [--error <file>] [--stdout-ref <ref>] [--stderr-ref <ref>] [--stdout-file <file>] [--stderr-file <file>] [--started-at <iso8601>] [--finished-at <iso8601>] [--metadata <file>] [--invocation-key <key>]
   babysitter task:list <runDir> [--runs-dir <dir>] [--pending] [--kind <kind>] [--json]
   babysitter task:show <runDir> <effectId> [--runs-dir <dir>] [--json]
+  babysitter session:init --session-id <id> --state-dir <dir> [--max-iterations <n>] [--run-id <id>] [--prompt <text>] [--json]
+  babysitter session:associate --session-id <id> --state-dir <dir> --run-id <id> [--json]
+  babysitter session:resume --session-id <id> --state-dir <dir> --run-id <id> [--max-iterations <n>] [--runs-dir <dir>] [--json]
+  babysitter session:state --session-id <id> --state-dir <dir> [--json]
+  babysitter session:update --session-id <id> --state-dir <dir> [--iteration <n>] [--last-iteration-at <iso8601>] [--iteration-times <csv>] [--delete] [--json]
+  babysitter session:check-iteration --session-id <id> --state-dir <dir> [--json]
+  babysitter session:last-message --transcript-path <file> [--json]
+  babysitter session:iteration-message --iteration <n> [--run-id <id>] [--runs-dir <dir>] [--plugin-root <dir>] [--json]
+  babysitter skill:discover --plugin-root <dir> [--run-id <id>] [--cache-ttl <seconds>] [--runs-dir <dir>] [--include-remote] [--summary-only] [--process-path <path>] [--json]
+  babysitter hook:log --hook-type <type> --log-file <path> [--json]
+  babysitter hook:run --hook-type <stop|session-start> [--harness <claude-code>] [--plugin-root <dir>] [--state-dir <dir>] [--runs-dir <dir>] [--json] [--verbose]
+  babysitter skill:fetch-remote --source-type <github|well-known> --url <url> [--json]
+  babysitter profile:read --user|--project [--dir <dir>] [--json]
+  babysitter profile:write --user|--project --input <file> [--dir <dir>] [--json]
+  babysitter profile:merge --user|--project --input <file> [--dir <dir>] [--json]
+  babysitter profile:render --user|--project [--dir <dir>] [--json]
+  babysitter health [--json] [--verbose]
+  babysitter configure [show|validate|paths] [--json] [--defaults-only]
   babysitter version
 
 Global flags:
@@ -35,6 +84,7 @@ Global flags:
   --json             Emit JSON output when supported by the command.
   --dry-run          Describe planned mutations without changing on-disk state.
   --verbose          Log resolved paths and options to stderr for debugging.
+  --show-config      Show current configuration before executing command.
   --help, -h         Show this help text.
   --version, -v      Show CLI version.`;
 
@@ -70,6 +120,39 @@ interface ParsedArgs {
   processRevision?: string;
   requestId?: string;
   iteration?: number;
+  showConfig: boolean;
+  defaultsOnly: boolean;
+  configureSubcommand?: string;
+  // Session command args
+  sessionId?: string;
+  stateDir?: string;
+  maxIterations?: number;
+  prompt?: string;
+  lastIterationAt?: string;
+  iterationTimes?: string;
+  deleteSession?: boolean;
+  // run:execute-tasks args
+  maxTasks?: number;
+  timeout?: number;
+  // session:last-message args
+  transcriptPath?: string;
+  // Hook command args
+  hookType?: string;
+  harness?: string;
+  logFile?: string;
+  // Skill command args
+  pluginRoot?: string;
+  cacheTtl?: number;
+  sourceType?: "github" | "well-known";
+  url?: string;
+  includeRemote?: boolean;
+  summaryOnly?: boolean;
+  processPath?: string;
+  // Profile command flags
+  profileUser?: boolean;
+  profileProject?: boolean;
+  profileInputPath?: string;
+  profileDir?: string;
 }
 
 interface ActionSummary {
@@ -95,19 +178,25 @@ interface TaskListEntry {
   resolvedAt?: string;
 }
 
-const LARGE_RESULT_PREVIEW_LIMIT = 1024 * 1024; // 1 MiB
+/**
+ * Maximum size for inline result preview.
+ * @see DEFAULTS.largeResultPreviewLimit for the centralized default
+ */
+const LARGE_RESULT_PREVIEW_LIMIT = DEFAULTS.largeResultPreviewLimit;
 
 function parseArgs(argv: string[]): ParsedArgs {
   const [initialCommand, ...rest] = argv;
   const parsed: ParsedArgs = {
     command: initialCommand,
-    runsDir: ".a5c/runs",
+    runsDir: process.env[CONFIG_ENV_VARS.RUNS_DIR] ?? DEFAULTS.runsDir,
     json: false,
     dryRun: false,
     verbose: false,
     helpRequested: false,
     pendingOnly: false,
     reverseOrder: false,
+    showConfig: false,
+    defaultsOnly: false,
   };
   if (parsed.command === "--help" || parsed.command === "-h") {
     parsed.command = undefined;
@@ -242,6 +331,122 @@ function parseArgs(argv: string[]): ParsedArgs {
       parsed.requestId = expectFlagValue(rest, ++i, "--request");
       continue;
     }
+    if (arg === "--show-config") {
+      parsed.showConfig = true;
+      continue;
+    }
+    if (arg === "--defaults-only") {
+      parsed.defaultsOnly = true;
+      continue;
+    }
+    // Session command flags
+    if (arg === "--session-id") {
+      parsed.sessionId = expectFlagValue(rest, ++i, "--session-id");
+      continue;
+    }
+    if (arg === "--state-dir") {
+      parsed.stateDir = expectFlagValue(rest, ++i, "--state-dir");
+      continue;
+    }
+    if (arg === "--max-iterations") {
+      const raw = expectFlagValue(rest, ++i, "--max-iterations");
+      parsed.maxIterations = parsePositiveInteger(raw, "--max-iterations");
+      continue;
+    }
+    if (arg === "--prompt") {
+      parsed.prompt = expectFlagValue(rest, ++i, "--prompt");
+      continue;
+    }
+    if (arg === "--last-iteration-at") {
+      parsed.lastIterationAt = expectFlagValue(rest, ++i, "--last-iteration-at");
+      continue;
+    }
+    if (arg === "--iteration-times") {
+      parsed.iterationTimes = expectFlagValue(rest, ++i, "--iteration-times");
+      continue;
+    }
+    if (arg === "--max-tasks") {
+      const raw = expectFlagValue(rest, ++i, "--max-tasks");
+      parsed.maxTasks = parsePositiveInteger(raw, "--max-tasks");
+      continue;
+    }
+    if (arg === "--timeout") {
+      const raw = expectFlagValue(rest, ++i, "--timeout");
+      parsed.timeout = parsePositiveInteger(raw, "--timeout");
+      continue;
+    }
+    if (arg === "--delete") {
+      parsed.deleteSession = true;
+      continue;
+    }
+    if (arg === "--transcript-path") {
+      parsed.transcriptPath = expectFlagValue(rest, ++i, "--transcript-path");
+      continue;
+    }
+    // Hook command flags
+    if (arg === "--hook-type") {
+      parsed.hookType = expectFlagValue(rest, ++i, "--hook-type");
+      continue;
+    }
+    if (arg === "--harness") {
+      parsed.harness = expectFlagValue(rest, ++i, "--harness");
+      continue;
+    }
+    if (arg === "--log-file") {
+      parsed.logFile = expectFlagValue(rest, ++i, "--log-file");
+      continue;
+    }
+    // Skill command flags
+    if (arg === "--plugin-root") {
+      parsed.pluginRoot = expectFlagValue(rest, ++i, "--plugin-root");
+      continue;
+    }
+    if (arg === "--cache-ttl") {
+      const raw = expectFlagValue(rest, ++i, "--cache-ttl");
+      parsed.cacheTtl = parsePositiveInteger(raw, "--cache-ttl");
+      continue;
+    }
+    if (arg === "--source-type") {
+      const raw = expectFlagValue(rest, ++i, "--source-type");
+      if (raw !== "github" && raw !== "well-known") {
+        throw new Error(`--source-type must be "github" or "well-known" (received: ${raw})`);
+      }
+      parsed.sourceType = raw;
+      continue;
+    }
+    if (arg === "--url") {
+      parsed.url = expectFlagValue(rest, ++i, "--url");
+      continue;
+    }
+    if (arg === "--include-remote") {
+      parsed.includeRemote = true;
+      continue;
+    }
+    if (arg === "--summary-only") {
+      parsed.summaryOnly = true;
+      continue;
+    }
+    if (arg === "--process-path") {
+      parsed.processPath = expectFlagValue(rest, ++i, "--process-path");
+      continue;
+    }
+    // Profile command flags
+    if (arg === "--user") {
+      parsed.profileUser = true;
+      continue;
+    }
+    if (arg === "--project") {
+      parsed.profileProject = true;
+      continue;
+    }
+    if (arg === "--input") {
+      parsed.profileInputPath = expectFlagValue(rest, ++i, "--input");
+      continue;
+    }
+    if (arg === "--dir") {
+      parsed.profileDir = expectFlagValue(rest, ++i, "--dir");
+      continue;
+    }
     positionals.push(arg);
   }
   if (parsed.command === "task:post") {
@@ -256,18 +461,67 @@ function parseArgs(argv: string[]): ParsedArgs {
     [parsed.runDirArg] = positionals;
   } else if (parsed.command === "run:events") {
     [parsed.runDirArg] = positionals;
+  } else if (parsed.command === "run:execute-tasks") {
+    [parsed.runDirArg] = positionals;
   } else if (parsed.command === "run:rebuild-state") {
     [parsed.runDirArg] = positionals;
   } else if (parsed.command === "run:repair-journal") {
     [parsed.runDirArg] = positionals;
+  } else if (parsed.command === "configure") {
+    [parsed.configureSubcommand] = positionals;
   }
   return parsed;
 }
 
+/**
+ * Resolve a run directory from a base directory and a user-provided argument.
+ *
+ * Handles several common edge cases:
+ *  - Absolute paths are used directly (no base dir prepended).
+ *  - If the arg already contains the base dir prefix (e.g. ".a5c/runs/01RUN"
+ *    when base is ".a5c/runs"), it is resolved from CWD to avoid doubling.
+ *  - Doubled ".a5c/runs" segments in the final path are collapsed.
+ *  - If the resolved path doesn't exist, falls back to resolving from CWD.
+ */
 function resolveRunDir(baseDir: string, runDirArg?: string): string {
   if (!runDirArg) throw new Error("Run directory argument is required.");
-  return path.resolve(baseDir, runDirArg);
+
+  // Absolute path → use directly
+  if (path.isAbsolute(runDirArg)) {
+    return collapseDoubledA5cRuns(path.normalize(runDirArg));
+  }
+
+  // Detect if arg already starts with the base dir prefix to avoid
+  // ".a5c/runs" + ".a5c/runs/01RUN" → ".a5c/runs/.a5c/runs/01RUN"
+  const normalBase = normalizePosix(baseDir);
+  const normalArg = normalizePosix(runDirArg);
+  if (normalBase && (normalArg === normalBase || normalArg.startsWith(normalBase + "/"))) {
+    return collapseDoubledA5cRuns(path.resolve(runDirArg));
+  }
+
+  // Standard resolution: baseDir + arg
+  const standard = collapseDoubledA5cRuns(path.resolve(baseDir, runDirArg));
+
+  // Fallback: if the standard path doesn't exist, try from CWD
+  try {
+    if (!existsSync(standard)) {
+      const fromCwd = path.resolve(runDirArg);
+      if (existsSync(fromCwd)) return collapseDoubledA5cRuns(fromCwd);
+    }
+  } catch {
+    // Ignore filesystem errors during resolution
+  }
+
+  return standard;
 }
+
+/** Normalize a path to forward slashes with no trailing slash (for prefix comparison). */
+function normalizePosix(p: string): string {
+  return path.normalize(p).replace(/\\/g, "/").replace(/\/+$/, "");
+}
+
+/** Collapse doubled ".a5c/runs" segments — delegates to shared utility. */
+const collapseDoubledA5cRuns = _sharedCollapseDoubledA5cRuns;
 
 function expectFlagValue(args: string[], index: number, flag: string): string {
   const value = args[index];
@@ -486,7 +740,7 @@ function listModuleExports(mod: ModuleExports): string {
 }
 
 async function validateProcessEntrypoint(importPath: string, exportName?: string): Promise<void> {
-  const resolvedPath = path.isAbsolute(importPath) ? importPath : path.resolve(importPath);
+  const resolvedPath = path.isAbsolute(importPath) ? importPath : resolveInputPath(importPath);
   try {
     await fs.access(resolvedPath);
   } catch (error) {
@@ -530,7 +784,7 @@ async function validateProcessEntrypoint(importPath: string, exportName?: string
 }
 
 async function readInputsFile(filePath: string): Promise<unknown> {
-  const absolute = path.resolve(filePath);
+  const absolute = resolveInputPath(filePath);
   let contents: string;
   try {
     contents = await fs.readFile(absolute, "utf8");
@@ -545,6 +799,7 @@ async function readInputsFile(filePath: string): Promise<unknown> {
     );
   }
 }
+
 
 async function handleRunCreate(parsed: ParsedArgs): Promise<number> {
   if (!parsed.processId) {
@@ -564,7 +819,7 @@ async function handleRunCreate(parsed: ParsedArgs): Promise<number> {
     console.error(error instanceof Error ? error.message : String(error));
     return 1;
   }
-  const runsDir = path.resolve(parsed.runsDir);
+  const runsDir = collapseDoubledA5cRuns(path.resolve(parsed.runsDir));
   const absoluteImportPath = path.resolve(entrypoint.importPath);
   const resolvedEntry = formatResolvedEntrypoint(absoluteImportPath, entrypoint.exportName);
   logVerbose("run:create", parsed, {
@@ -574,6 +829,7 @@ async function handleRunCreate(parsed: ParsedArgs): Promise<number> {
     dryRun: parsed.dryRun,
     json: parsed.json,
     request: parsed.requestId,
+    prompt: parsed.prompt,
     processRevision: parsed.processRevision,
     runId: parsed.runIdOverride,
     inputsPath: parsed.inputsPath ? path.resolve(parsed.inputsPath) : undefined,
@@ -599,7 +855,7 @@ async function handleRunCreate(parsed: ParsedArgs): Promise<number> {
       inputsPath: parsed.inputsPath ? path.resolve(parsed.inputsPath) : null,
     };
     if (parsed.json) {
-      console.log(JSON.stringify(summary));
+      console.log(JSON.stringify(summary, null, 2));
     } else {
       const parts = [
         "[run:create] dry-run",
@@ -625,6 +881,7 @@ async function handleRunCreate(parsed: ParsedArgs): Promise<number> {
     runsDir,
     runId: parsed.runIdOverride,
     request: parsed.requestId,
+    prompt: parsed.prompt,
     processRevision: parsed.processRevision,
     process: {
       processId: parsed.processId,
@@ -634,10 +891,101 @@ async function handleRunCreate(parsed: ParsedArgs): Promise<number> {
     inputs,
   });
   const entrySpec = formatEntrypointSpecifier(result.metadata.entrypoint);
+
+  // --- Harness-specific session binding ---
+  // When --harness is explicitly specified, use that adapter directly.
+  // Otherwise auto-detect from env vars (CLAUDE_SESSION_ID, CLAUDE_ENV_FILE).
+  const adapter = parsed.harness
+    ? getAdapterByName(parsed.harness)
+    : getAdapter();
+
+  let sessionBound: SessionBindResult | undefined;
+
+  if (adapter) {
+    const sessionId = adapter.resolveSessionId(parsed);
+
+    if (sessionId) {
+      sessionBound = await adapter.bindSession({
+        sessionId,
+        runId: result.runId,
+        runDir: result.runDir,
+        pluginRoot: adapter.resolvePluginRoot(parsed),
+        stateDir: parsed.stateDir,
+        maxIterations: parsed.maxIterations,
+        prompt: parsed.prompt ?? "",
+        verbose: parsed.verbose,
+        json: parsed.json,
+      });
+    } else if (parsed.harness) {
+      // --harness was specified but no session ID could be resolved
+      sessionBound = {
+        harness: parsed.harness,
+        sessionId: "",
+        error: "No session ID provided. Use --session-id or set CLAUDE_SESSION_ID.",
+      };
+    }
+  } else if (parsed.harness) {
+    // --harness was specified but the adapter name is unknown
+    sessionBound = {
+      harness: parsed.harness,
+      sessionId: "",
+      error: `Unsupported harness: ${parsed.harness}`,
+    };
+  }
+
+  // Discover available skills and agents for the new run
+  // Try process-driven discovery first (reads @skill/@agent markers from process file)
+  let discoveredSkills: Array<{ name: string; file?: string }> | undefined;
+  let discoveredAgents: Array<{ name: string; file?: string }> | undefined;
+  const discoverPluginRoot = adapter?.resolvePluginRoot(parsed) ?? getAdapter().resolvePluginRoot(parsed);
+  if (discoverPluginRoot) {
+    try {
+      const processDiscovery = discoverFromProcessFile({
+        processFilePath: absoluteImportPath,
+        pluginRoot: discoverPluginRoot,
+      });
+
+      if (processDiscovery) {
+        discoveredSkills = processDiscovery.skills;
+        discoveredAgents = processDiscovery.agents;
+      } else {
+        // Fallback to generic scan
+        const discoverResult = await discoverSkillsInternal({
+          pluginRoot: discoverPluginRoot,
+          runId: result.runId,
+          runsDir: parsed.runsDir,
+          processPath: absoluteImportPath,
+        });
+        discoveredSkills = discoverResult.skills.map(s => ({ name: s.name, file: s.file }));
+        discoveredAgents = discoverResult.agents.map(a => ({ name: a.name, file: a.file }));
+      }
+    } catch {
+      // Non-fatal
+    }
+  }
+
   if (parsed.json) {
-    console.log(JSON.stringify({ runId: result.runId, runDir: result.runDir, entry: entrySpec }));
+    const compactSkills = discoveredSkills
+      ? { count: discoveredSkills.length, names: discoveredSkills.map(s => s.name) }
+      : undefined;
+    const compactAgents = discoveredAgents
+      ? { count: discoveredAgents.length, names: discoveredAgents.map(a => a.name) }
+      : undefined;
+    console.log(JSON.stringify({
+      runId: result.runId,
+      runDir: result.runDir,
+      entry: entrySpec,
+      session: sessionBound ?? undefined,
+      discoveredSkills: parsed.verbose ? discoveredSkills : compactSkills,
+      discoveredAgents: parsed.verbose ? discoveredAgents : compactAgents,
+    }, null, 2));
   } else {
     console.log(`[run:create] runId=${result.runId} runDir=${result.runDir} entry=${entrySpec}`);
+    if (sessionBound?.error) {
+      console.error(`[run:create] Session binding error: ${sessionBound.error}`);
+    } else if (sessionBound) {
+      console.log(`[run:create] session=${sessionBound.sessionId} bound via ${sessionBound.harness} stateFile=${sessionBound.stateFile}`);
+    }
   }
   return 0;
 }
@@ -676,22 +1024,33 @@ async function handleRunStatus(parsed: ParsedArgs): Promise<number> {
   const lastLifecycleEvent = findLastLifecycleEvent(journal);
   const state = deriveRunState(lastLifecycleEvent?.type, pendingTotal);
   const lastSummary = formatLastEventSummary(lastEvent);
+
+  const autoRunnableCount = pendingRecords.filter(r => r.kind === "node").length;
+  const pendingEffectsSummary = {
+    totalPending: pendingTotal,
+    countsByKind: pendingByKind,
+    autoRunnableCount,
+  };
+  const needsMoreIterations = state === "waiting" && autoRunnableCount > 0;
+
   if (parsed.json) {
-    const completionSecret = state === "completed" ? resolveCompletionSecret(metadata) : null;
+    const completionProof = state === "completed" ? resolveCompletionProof(metadata) : null;
     console.log(
       JSON.stringify({
         state,
         lastEvent: lastEvent ? serializeJournalEvent(lastEvent, runDir) : null,
         pendingByKind,
+        pendingEffectsSummary,
+        needsMoreIterations,
         metadata: formattedMetadata.jsonMetadata ?? null,
-        completionSecret,
+        completionProof,
       })
     );
     return 0;
   }
   const suffix = formattedMetadata.textParts.length ? ` ${formattedMetadata.textParts.join(" ")}` : "";
-  const completionSecret = state === "completed" ? resolveCompletionSecret(metadata) : undefined;
-  const secretSuffix = completionSecret ? ` completionSecret=${completionSecret}` : "";
+  const completionProof = state === "completed" ? resolveCompletionProof(metadata) : undefined;
+  const secretSuffix = completionProof ? ` completionProof=${completionProof}` : "";
   console.log(`[run:status] state=${state} last=${lastSummary}${suffix}${secretSuffix}`);
   return 0;
 }
@@ -722,9 +1081,10 @@ async function handleRunIterate(parsed: ParsedArgs): Promise<number> {
     } else {
       const countInfo = result.count ? ` count=${result.count}` : "";
       const actionInfo = result.action ? ` action=${result.action}` : "";
-      console.log(`[run:iterate] iteration=${result.iteration} status=${result.status}${actionInfo}${countInfo} reason=${result.reason}`);
-      if (result.status === "completed" && result.completionSecret) {
-        console.log(`[run:iterate] completionSecret=${result.completionSecret}`);
+      const progressInfo = result.iterationCount > 0 ? ` (${result.iterationCount} completed)` : "";
+      console.log(`[run:iterate] iteration=${result.iteration}${progressInfo} status=${result.status}${actionInfo}${countInfo} reason=${result.reason}`);
+      if (result.status === "completed" && result.completionProof) {
+        console.log(`[run:iterate] completionProof=${result.completionProof}`);
       }
 
       if (result.status === "waiting" && result.until) {
@@ -735,6 +1095,53 @@ async function handleRunIterate(parsed: ParsedArgs): Promise<number> {
     return 0;
   } catch (error) {
     console.error(`[run:iterate] Error: ${error instanceof Error ? error.message : String(error)}`);
+    return 1;
+  }
+}
+
+async function handleRunExecuteTasks(parsed: ParsedArgs): Promise<number> {
+  if (!parsed.runDirArg) {
+    console.error(USAGE);
+    return 1;
+  }
+  const runDir = resolveRunDir(parsed.runsDir, parsed.runDirArg);
+  logVerbose("run:execute-tasks", parsed, {
+    runDir,
+    maxTasks: parsed.maxTasks,
+    kind: parsed.kindFilter,
+    timeout: parsed.timeout,
+    dryRun: parsed.dryRun,
+    json: parsed.json,
+    verbose: parsed.verbose,
+  });
+
+  try {
+    const result = await runExecuteTasks({
+      runDir,
+      maxTasks: parsed.maxTasks,
+      kind: parsed.kindFilter,
+      timeout: parsed.timeout,
+      verbose: parsed.verbose,
+      json: parsed.json,
+      dryRun: parsed.dryRun,
+    });
+
+    if (parsed.json) {
+      console.log(JSON.stringify(result, null, 2));
+    } else {
+      const taskSummary = result.tasks.length > 0
+        ? ` tasks=[${result.tasks.map((t) => `${t.effectId}:${t.status}`).join(",")}]`
+        : "";
+      console.log(
+        `[run:execute-tasks] action=${result.action} count=${result.count} reason=${result.reason}${taskSummary}`
+      );
+    }
+
+    return 0;
+  } catch (error) {
+    console.error(
+      `[run:execute-tasks] Error: ${error instanceof Error ? error.message : String(error)}`
+    );
     return 1;
   }
 }
@@ -806,7 +1213,7 @@ async function handleRunRebuildState(parsed: ParsedArgs): Promise<number> {
   if (parsed.dryRun) {
     const plan = { dryRun: true, runDir, plan: "rebuild_state_cache", reason: "cli_manual" };
     if (parsed.json) {
-      console.log(JSON.stringify(plan));
+      console.log(JSON.stringify(plan, null, 2));
     } else {
       console.log(`[run:rebuild-state] dry-run runDir=${runDir} plan=${plan.plan} reason=${plan.reason}`);
     }
@@ -822,7 +1229,7 @@ async function handleRunRebuildState(parsed: ParsedArgs): Promise<number> {
   };
   const formatted = formatIterationMetadata(metadata);
   if (parsed.json) {
-    console.log(JSON.stringify({ runDir, metadata: formatted.jsonMetadata ?? null }));
+    console.log(JSON.stringify({ runDir, metadata: formatted.jsonMetadata ?? null }, null, 2));
     return 0;
   }
   const suffix = formatted.textParts.length ? ` ${formatted.textParts.join(" ")}` : "";
@@ -904,7 +1311,7 @@ async function handleRunRepairJournal(parsed: ParsedArgs): Promise<number> {
 
   if (parsed.dryRun) {
     if (parsed.json) {
-      console.log(JSON.stringify({ dryRun: true, ...summary }));
+      console.log(JSON.stringify({ dryRun: true, ...summary }, null, 2));
     } else {
       console.log(
         `[run:repair-journal] dry-run originalFiles=${files.length} keptEvents=${kept.length} droppedRequested=${droppedRequested} droppedResolved=${droppedResolved}`
@@ -937,7 +1344,7 @@ async function handleRunRepairJournal(parsed: ParsedArgs): Promise<number> {
   await fs.rename(repairedDir, journalDir);
 
   if (parsed.json) {
-    console.log(JSON.stringify({ ...summary, backupDir, repaired: true }));
+    console.log(JSON.stringify({ ...summary, backupDir, repaired: true }, null, 2));
   } else {
     console.log(
       `[run:repair-journal] repaired originalFiles=${files.length} keptEvents=${kept.length} droppedRequested=${droppedRequested} droppedResolved=${droppedResolved} backupDir=${backupDir}`
@@ -1056,7 +1463,7 @@ async function handleTaskPost(parsed: ParsedArgs): Promise<number> {
 
   if (parsed.dryRun) {
     if (parsed.json) {
-      console.log(JSON.stringify({ status: "skipped", dryRun: true, plan }));
+      console.log(JSON.stringify({ status: "skipped", dryRun: true, plan }, null, 2));
     } else {
       console.log(`[task:post] status=skipped`);
       console.error(`[task:post] dry-run plan ${JSON.stringify(plan)}`);
@@ -1142,7 +1549,7 @@ async function handleTaskList(parsed: ParsedArgs): Promise<number> {
   const entries = records.map((record) => toTaskListEntry(record, runDir));
 
   if (parsed.json) {
-    console.log(JSON.stringify({ tasks: entries }));
+    console.log(JSON.stringify({ tasks: entries }, null, 2));
     return 0;
   }
 
@@ -1494,11 +1901,142 @@ async function readCliVersion(): Promise<string> {
   return parsed.version ?? "unknown";
 }
 
+/**
+ * Checks if stdout/stderr supports colors
+ */
+function supportsColors(): boolean {
+  // Check NO_COLOR environment variable (https://no-color.org/)
+  if (process.env.NO_COLOR !== undefined) {
+    return false;
+  }
+  // Check FORCE_COLOR environment variable
+  if (process.env.FORCE_COLOR !== undefined) {
+    return true;
+  }
+  // Check if running in a TTY
+  if (process.stderr && typeof process.stderr.isTTY === "boolean") {
+    return process.stderr.isTTY;
+  }
+  return false;
+}
+
+/**
+ * Valid CLI commands
+ */
+const VALID_COMMANDS = [
+  "run:create",
+  "run:status",
+  "run:iterate",
+  "run:events",
+  "run:rebuild-state",
+  "run:repair-journal",
+  "run:execute-tasks",
+  "task:post",
+  "task:list",
+  "task:show",
+  "session:init",
+  "session:associate",
+  "session:resume",
+  "session:state",
+  "session:update",
+  "session:check-iteration",
+  "session:last-message",
+  "session:iteration-message",
+  "hook:log",
+  "hook:run",
+  "skill:discover",
+  "skill:fetch-remote",
+  "profile:read",
+  "profile:write",
+  "profile:merge",
+  "profile:render",
+  "health",
+  "configure",
+  "version",
+];
+
+/**
+ * Handles unknown commands with suggestions
+ */
+function handleUnknownCommand(command: string, json: boolean): number {
+  const suggestion = suggestCommand(command);
+  const suggestions = suggestion ? [`Did you mean: ${suggestion}?`] : [];
+  const nextSteps = ["Run with --help to see all available commands"];
+
+  const error = new BabysitterRuntimeError("UnknownCommandError", `Unknown command: ${command}`, {
+    category: ErrorCategory.Validation,
+    suggestions,
+    nextSteps,
+    details: { command, validCommands: VALID_COMMANDS },
+  });
+
+  if (json) {
+    console.error(JSON.stringify(toStructuredError(error), null, 2));
+  } else {
+    const colors = supportsColors();
+    console.error(formatErrorWithContext(error, { colors }));
+  }
+
+  return 1;
+}
+
+/**
+ * Shows configuration before executing a command when --show-config is provided
+ */
+async function showConfigBeforeCommand(parsed: ParsedArgs): Promise<void> {
+  const { configureShow } = await import("./commands/configure");
+  const result = configureShow({ json: parsed.json, defaultsOnly: false });
+
+  if (parsed.json) {
+    console.error(JSON.stringify({ showConfig: result }, null, 2));
+  } else {
+    console.error("[show-config] Current effective configuration:");
+    for (const item of result.values) {
+      const sourceTag = item.source === "env" ? " (env)" : "";
+      console.error(`  ${item.key}=${formatVerboseValue(item.value)}${sourceTag}`);
+    }
+    console.error("");
+  }
+}
+
+/**
+ * Formats and outputs an error in the appropriate format
+ */
+function outputError(error: Error, options: { json: boolean; verbose?: boolean }): void {
+  const { json, verbose = false } = options;
+
+  if (json) {
+    console.error(JSON.stringify(toStructuredError(error, verbose)));
+  } else {
+    const colors = supportsColors();
+
+    if (isBabysitterError(error)) {
+      console.error(formatErrorWithContext(error, { colors, includeStack: verbose }));
+    } else {
+      // For non-babysitter errors, wrap them with basic formatting
+      const wrappedError = new BabysitterRuntimeError(error.name || "Error", error.message, {
+        category: ErrorCategory.Internal,
+        nextSteps: ["If this error persists, please report it as a bug"],
+      });
+      console.error(formatErrorWithContext(wrappedError, { colors, includeStack: verbose }));
+    }
+  }
+}
+
+// Exported for unit testing
+export { resolveRunDir as _resolveRunDir, collapseDoubledA5cRuns as _collapseDoubledA5cRuns };
+
 export function createBabysitterCli() {
   return {
     async run(argv: string[] = process.argv.slice(2)): Promise<number> {
+      let parsedJson = false;
+      let parsedVerbose = false;
+
       try {
         const parsed = parseArgs(argv);
+        parsedJson = parsed.json;
+        parsedVerbose = parsed.verbose;
+
         if (parsed.command === "version") {
           console.log(await readCliVersion());
           return 0;
@@ -1507,6 +2045,17 @@ export function createBabysitterCli() {
           console.log(USAGE);
           return 0;
         }
+
+        // Show config if --show-config flag is provided
+        if (parsed.showConfig) {
+          await showConfigBeforeCommand(parsed);
+        }
+
+        // Check for valid commands and provide suggestions for unknown ones
+        if (!VALID_COMMANDS.includes(parsed.command)) {
+          return handleUnknownCommand(parsed.command, parsed.json);
+        }
+
         if (parsed.command === "run:create") {
           return await handleRunCreate(parsed);
         }
@@ -1522,6 +2071,9 @@ export function createBabysitterCli() {
         if (parsed.command === "run:iterate") {
           return await handleRunIterate(parsed);
         }
+        if (parsed.command === "run:execute-tasks") {
+          return await handleRunExecuteTasks(parsed);
+        }
         if (parsed.command === "run:events") {
           return await handleRunEvents(parsed);
         }
@@ -1534,10 +2086,156 @@ export function createBabysitterCli() {
         if (parsed.command === "task:show") {
           return await handleTaskShow(parsed);
         }
-        console.error(USAGE);
-        return 1;
+        // Session commands
+        if (parsed.command === "session:init") {
+          return await handleSessionInit({
+            sessionId: parsed.sessionId,
+            stateDir: parsed.stateDir,
+            maxIterations: parsed.maxIterations,
+            runId: parsed.runIdOverride,
+            prompt: parsed.prompt,
+            json: parsed.json,
+          });
+        }
+        if (parsed.command === "session:associate") {
+          return await handleSessionAssociate({
+            sessionId: parsed.sessionId,
+            stateDir: parsed.stateDir,
+            runId: parsed.runIdOverride,
+            json: parsed.json,
+          });
+        }
+        if (parsed.command === "session:resume") {
+          return await handleSessionResume({
+            sessionId: parsed.sessionId,
+            stateDir: parsed.stateDir,
+            runId: parsed.runIdOverride,
+            maxIterations: parsed.maxIterations,
+            runsDir: parsed.runsDir,
+            json: parsed.json,
+          });
+        }
+        if (parsed.command === "session:state") {
+          return await handleSessionState({
+            sessionId: parsed.sessionId,
+            stateDir: parsed.stateDir,
+            json: parsed.json,
+          });
+        }
+        if (parsed.command === "session:update") {
+          return await handleSessionUpdate({
+            sessionId: parsed.sessionId,
+            stateDir: parsed.stateDir,
+            iteration: parsed.iteration,
+            lastIterationAt: parsed.lastIterationAt,
+            iterationTimes: parsed.iterationTimes,
+            delete: parsed.deleteSession,
+            json: parsed.json,
+          });
+        }
+        if (parsed.command === "session:check-iteration") {
+          return await handleSessionCheckIteration({
+            sessionId: parsed.sessionId,
+            stateDir: parsed.stateDir,
+            json: parsed.json,
+          });
+        }
+        if (parsed.command === "session:last-message") {
+          if (!parsed.transcriptPath) {
+            console.error("--transcript-path is required for session:last-message");
+            console.error(USAGE);
+            return 1;
+          }
+          return handleSessionLastMessage({
+            transcriptPath: parsed.transcriptPath,
+            json: parsed.json,
+          });
+        }
+        if (parsed.command === "session:iteration-message") {
+          return await handleSessionIterationMessage({
+            iteration: parsed.iteration,
+            runId: parsed.runIdOverride,
+            runsDir: parsed.runsDir,
+            pluginRoot: parsed.pluginRoot,
+            json: parsed.json,
+          });
+        }
+        // Hook commands
+        if (parsed.command === "hook:log") {
+          return await handleHookLog({
+            hookType: parsed.hookType ?? "",
+            logFile: parsed.logFile ?? "",
+            json: parsed.json,
+          });
+        }
+        if (parsed.command === "hook:run") {
+          return await handleHookRun({
+            hookType: parsed.hookType ?? "",
+            harness: parsed.harness ?? "claude-code",
+            pluginRoot: parsed.pluginRoot,
+            stateDir: parsed.stateDir,
+            runsDir: parsed.runsDir,
+            json: parsed.json,
+            verbose: parsed.verbose,
+          });
+        }
+        // Skill commands
+        if (parsed.command === "skill:discover") {
+          return await handleSkillDiscover({
+            pluginRoot: parsed.pluginRoot,
+            runId: parsed.runIdOverride,
+            cacheTtl: parsed.cacheTtl,
+            runsDir: parsed.runsDir,
+            json: parsed.json,
+            includeRemote: parsed.includeRemote,
+            summaryOnly: parsed.summaryOnly,
+            processPath: parsed.processPath,
+          });
+        }
+        if (parsed.command === "skill:fetch-remote") {
+          return await handleSkillFetchRemote({
+            sourceType: parsed.sourceType,
+            url: parsed.url,
+            json: parsed.json,
+          });
+        }
+        // Profile commands
+        if (
+          parsed.command === "profile:read" ||
+          parsed.command === "profile:write" ||
+          parsed.command === "profile:merge" ||
+          parsed.command === "profile:render"
+        ) {
+          const subcommand = parsed.command.split(":")[1];
+          const profileArgs: ProfileCommandArgs = {
+            subcommand: subcommand as ProfileCommandArgs["subcommand"],
+            user: parsed.profileUser ?? false,
+            project: parsed.profileProject ?? false,
+            inputPath: parsed.profileInputPath,
+            dir: parsed.profileDir,
+            json: parsed.json,
+          };
+          return await handleProfileCommand(subcommand, profileArgs);
+        }
+        if (parsed.command === "health") {
+          return await handleHealthCommand({
+            json: parsed.json,
+            verbose: parsed.verbose,
+          });
+        }
+        if (parsed.command === "configure") {
+          const args = parsed.configureSubcommand ? [parsed.configureSubcommand] : [];
+          return await handleConfigureCommand(args, {
+            json: parsed.json,
+            defaultsOnly: parsed.defaultsOnly,
+          });
+        }
+
+        // This should not be reached due to the VALID_COMMANDS check above
+        return handleUnknownCommand(parsed.command, parsed.json);
       } catch (error) {
-        console.error(error instanceof Error ? error.message : String(error));
+        const err = error instanceof Error ? error : new Error(String(error));
+        outputError(err, { json: parsedJson, verbose: parsedVerbose });
         return 1;
       }
     },
@@ -1548,5 +2246,13 @@ export function createBabysitterCli() {
 }
 
 if (require.main === module) {
-  void createBabysitterCli().run();
+  createBabysitterCli()
+    .run()
+    .then((code) => {
+      process.exitCode = code;
+    })
+    .catch((err) => {
+      console.error(err);
+      process.exitCode = 1;
+    });
 }

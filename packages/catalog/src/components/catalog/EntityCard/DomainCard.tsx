@@ -35,7 +35,7 @@ export function DomainCard({
   const cardContent = (
     <Card
       className={cn(
-        "h-full hover:border-[var(--color-accent-fg)] hover:shadow-md",
+        "h-full hover:border-[rgba(0,223,223,0.5)]",
         isCompact ? "p-3" : ""
       )}
     >
@@ -57,7 +57,7 @@ export function DomainCard({
             )}
           </div>
           {/* Domain icon */}
-          <div className="shrink-0 rounded-md bg-[var(--color-done-subtle)] p-1.5 text-[var(--color-done-fg)]">
+          <div className="shrink-0 rounded-sm bg-[rgba(123,97,255,0.1)] p-1.5 text-[#7B61FF]" style={{ border: '1px solid rgba(123, 97, 255, 0.2)' }}>
             <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
                 strokeLinecap="round"
@@ -74,23 +74,23 @@ export function DomainCard({
         <CardContent className={cn("space-y-3", isCompact ? "p-0 py-2" : "")}>
           {/* Entity counts */}
           <div className="grid grid-cols-3 gap-2 text-center">
-            <div className="rounded-md bg-[var(--color-canvas-subtle)] p-2">
-              <p className="text-lg font-semibold text-[var(--color-fg-default)]">
+            <div className="rounded-md bg-[var(--scifi-surface)] p-2">
+              <p className="text-lg font-semibold text-white">
                 {domain.specializationCount}
               </p>
-              <p className="text-xs text-[var(--color-fg-muted)]">Specializations</p>
+              <p className="text-xs text-[rgba(255,255,255,0.4)]">Specializations</p>
             </div>
-            <div className="rounded-md bg-[var(--color-canvas-subtle)] p-2">
-              <p className="text-lg font-semibold text-[var(--color-fg-default)]">
+            <div className="rounded-md bg-[var(--scifi-surface)] p-2">
+              <p className="text-lg font-semibold text-white">
                 {domain.skillCount}
               </p>
-              <p className="text-xs text-[var(--color-fg-muted)]">Skills</p>
+              <p className="text-xs text-[rgba(255,255,255,0.4)]">Skills</p>
             </div>
-            <div className="rounded-md bg-[var(--color-canvas-subtle)] p-2">
-              <p className="text-lg font-semibold text-[var(--color-fg-default)]">
+            <div className="rounded-md bg-[var(--scifi-surface)] p-2">
+              <p className="text-lg font-semibold text-white">
                 {domain.agentCount}
               </p>
-              <p className="text-xs text-[var(--color-fg-muted)]">Agents</p>
+              <p className="text-xs text-[rgba(255,255,255,0.4)]">Agents</p>
             </div>
           </div>
 
@@ -105,8 +105,8 @@ export function DomainCard({
 
       <CardFooter
         className={cn(
-          "flex items-center justify-between text-xs text-[var(--color-fg-muted)]",
-          isCompact ? "p-0 pt-2 border-t border-[var(--color-border-default)]" : ""
+          "flex items-center justify-between text-xs text-[rgba(255,255,255,0.4)]",
+          isCompact ? "p-0 pt-2 border-t border-[rgba(255,0,224,0.1)]" : ""
         )}
       >
         {/* Total entities */}

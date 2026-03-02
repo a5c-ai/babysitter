@@ -46,11 +46,7 @@ This tutorial involves team collaboration breakpoints. How they work depends on 
 
 **Interactive Mode (Claude Code)**: Breakpoints are handled directly in the chat. Great for single-developer workflows.
 
-**Non-Interactive Mode (Team Collaboration)**: For team approval workflows, start the breakpoints service:
-```bash
-# For team approval workflows with authentication
-npx -y @a5c-ai/babysitter-breakpoints@latest start --auth-required
-```
+**Non-Interactive Mode (Team Collaboration)**: For team approval workflows, breakpoints are disabled.
 
 Choose the mode that fits your workflow. For learning, interactive mode (no setup) is easiest.
 
@@ -1479,12 +1475,6 @@ You have completed the advanced tutorials. Here are paths to continue your exper
 1. Look for Claude's question in the chat - scroll up if needed
 2. If the session disconnected, resume with `/babysitter:call resume`
 3. Ensure you respond to the question to continue
-
-**Solution (Non-Interactive Mode):**
-1. Check breakpoints service is running
-2. Verify approvers have access to breakpoints UI at http://localhost:3184
-3. Consider adding timeout configuration
-4. Check network/firewall settings
 
 ### Issue: "Parallel tasks failing intermittently"
 

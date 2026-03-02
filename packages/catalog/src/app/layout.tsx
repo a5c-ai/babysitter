@@ -1,28 +1,21 @@
 import type { Metadata } from "next";
-import { Playfair_Display, EB_Garamond, Cinzel_Decorative } from "next/font/google";
+import { Inter, Orbitron } from "next/font/google";
 import "./globals.css";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 
-const playfair = Playfair_Display({
+const inter = Inter({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-body",
+  weight: ["300", "400", "500", "600", "700"],
+});
+
+const orbitron = Orbitron({
   subsets: ["latin"],
   display: "swap",
   variable: "--font-header",
   weight: ["400", "500", "600", "700", "800", "900"],
-});
-
-const garamond = EB_Garamond({
-  subsets: ["latin"],
-  display: "swap",
-  variable: "--font-body",
-  weight: ["400", "500", "600", "700"],
-});
-
-const cinzelDecorative = Cinzel_Decorative({
-  subsets: ["latin"],
-  display: "swap",
-  variable: "--font-victorian",
-  weight: ["400", "700", "900"],
 });
 
 export const metadata: Metadata = {
@@ -53,7 +46,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${playfair.variable} ${garamond.variable} ${cinzelDecorative.variable} min-h-screen antialiased`}>
+      <body className={`${orbitron.variable} ${inter.variable} min-h-screen antialiased`}>
         <div className="relative flex min-h-screen flex-col">
           <Header />
           <main className="flex-1">{children}</main>

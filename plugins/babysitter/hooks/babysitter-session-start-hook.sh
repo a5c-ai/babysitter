@@ -1,49 +1,54 @@
 #!/bin/bash
+# Babysitter Session Start Hook - delegates to SDK CLI
+# Ensures the babysitter CLI is installed (from plugin.json sdkVersion),
+# then delegates to the TypeScript handler.
 
-# Babysitter Session Start Hook
-# Extracts session_id from hook input and persists it as CLAUDE_SESSION_ID
-# This makes the session ID available to command scripts via environment variable
-# Also captures project context for use across the session
+PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(cd "$(dirname "$0")/.." && pwd)}"
+MARKER_FILE="${PLUGIN_ROOT}/.babysitter-install-attempted"
 
-set -euo pipefail
+LOG_DIR="${BABYSITTER_LOG_DIR:-.a5c/logs}"
+LOG_FILE="$LOG_DIR/babysitter-session-start-hook.log"
+mkdir -p "$LOG_DIR" 2>/dev/null
 
-# Read hook input from stdin
-HOOK_INPUT=$(cat)
+echo "[INFO] $(date -u +%Y-%m-%dT%H:%M:%SZ) Hook script invoked" >> "$LOG_FILE" 2>/dev/null
+echo "[INFO] $(date -u +%Y-%m-%dT%H:%M:%SZ) PLUGIN_ROOT=$PLUGIN_ROOT" >> "$LOG_FILE" 2>/dev/null
 
-# Extract session_id from hook input
-SESSION_ID=$(echo "$HOOK_INPUT" | jq -r '.session_id // empty')
-
-if [[ -z "$SESSION_ID" ]]; then
-  # No session ID available - this shouldn't happen but exit gracefully
-  exit 0
+# Install babysitter CLI if not available (only attempt once per plugin install)
+if ! command -v babysitter &>/dev/null; then
+  if [ ! -f "$MARKER_FILE" ]; then
+    SDK_VERSION=$(node -e "try{console.log(JSON.parse(require('fs').readFileSync('${PLUGIN_ROOT}/plugin.json','utf8')).sdkVersion||'latest')}catch{console.log('latest')}" 2>/dev/null || echo "latest")
+    # Try global install first, fall back to user-local if permissions fail
+    if npm i -g "@a5c-ai/babysitter-sdk@${SDK_VERSION}" --loglevel=error 2>/dev/null; then
+      echo "[INFO] $(date -u +%Y-%m-%dT%H:%M:%SZ) Installed SDK globally (${SDK_VERSION})" >> "$LOG_FILE" 2>/dev/null
+    else
+      # Global install failed (permissions) — try user-local prefix
+      npm i -g "@a5c-ai/babysitter-sdk@${SDK_VERSION}" --prefix "$HOME/.local" --loglevel=error 2>/dev/null && \
+        export PATH="$HOME/.local/bin:$PATH"
+      echo "[INFO] $(date -u +%Y-%m-%dT%H:%M:%SZ) Installed SDK to user prefix (${SDK_VERSION})" >> "$LOG_FILE" 2>/dev/null
+    fi
+    echo "$SDK_VERSION" > "$MARKER_FILE" 2>/dev/null
+  fi
+  # If still not available after install attempt, try npx as last resort
+  if ! command -v babysitter &>/dev/null; then
+    SDK_VERSION=${SDK_VERSION:-$(node -e "try{console.log(JSON.parse(require('fs').readFileSync('${PLUGIN_ROOT}/plugin.json','utf8')).sdkVersion||'latest')}catch{console.log('latest')}" 2>/dev/null || echo "latest")}
+    echo "[INFO] $(date -u +%Y-%m-%dT%H:%M:%SZ) CLI not found after install, using npx fallback" >> "$LOG_FILE" 2>/dev/null
+    babysitter() { npx -y "@a5c-ai/babysitter-sdk@${SDK_VERSION}" "$@"; }
+    export -f babysitter
+  fi
 fi
 
-# Detect project context
-# PROJECT_ROOT=$(git rev-parse --show-toplevel 2>/dev/null || echo "$PWD")
-# PROJECT_NAME=$(basename "$PROJECT_ROOT")
-# PROJECT_BRANCH=$(git branch --show-current 2>/dev/null || echo "")
+# Capture stdin to a temp file so the CLI receives a clean EOF
+# (piping /dev/stdin directly can keep the Node.js event loop alive)
+INPUT_FILE=$(mktemp 2>/dev/null || echo "/tmp/hook-session-start-$$.json")
+cat > "$INPUT_FILE"
 
-# # CLAUDE_ENV_FILE is provided by Claude Code for SessionStart hooks
-# # Writing to this file persists environment variables for the session
-if [[ -n "${CLAUDE_ENV_FILE:-}" ]]; then
-  # Session identity
-  echo "export CLAUDE_SESSION_ID=\"$SESSION_ID\"" >> "$CLAUDE_ENV_FILE"
+echo "[INFO] $(date -u +%Y-%m-%dT%H:%M:%SZ) Hook input received ($(wc -c < "$INPUT_FILE") bytes)" >> "$LOG_FILE" 2>/dev/null
 
-  # Project context
-  # echo "export PROJECT_ROOT=\"$PROJECT_ROOT\"" >> "$CLAUDE_ENV_FILE"
-  # echo "export PROJECT_NAME=\"$PROJECT_NAME\"" >> "$CLAUDE_ENV_FILE"
-  # [[ -n "$PROJECT_BRANCH" ]] && echo "export PROJECT_BRANCH=\"$PROJECT_BRANCH\"" >> "$CLAUDE_ENV_FILE"
+RESULT=$(babysitter hook:run --hook-type session-start --harness claude-code --plugin-root "$PLUGIN_ROOT" --json < "$INPUT_FILE" 2>"$LOG_DIR/babysitter-session-start-hook-stderr.log")
+EXIT_CODE=$?
 
-  # Inherit from wrapper if present (e.g., mycc wrapper)
-  # [[ -n "${myccpid:-}" ]] && echo "export myccpid=\"$myccpid\"" >> "$CLAUDE_ENV_FILE"
-  # [[ -n "${ai_model:-}" ]] && echo "export ai_model=\"$ai_model\"" >> "$CLAUDE_ENV_FILE"
-fi
+echo "[INFO] $(date -u +%Y-%m-%dT%H:%M:%SZ) CLI exit code=$EXIT_CODE" >> "$LOG_FILE" 2>/dev/null
 
-# Log session start (optional, can be disabled)
-if [[ "${BABYSITTER_VERBOSE:-}" == "true" ]]; then
-  echo "Babysitter session started: $SESSION_ID" >&2
-  # echo "Project: $PROJECT_NAME ($PROJECT_ROOT)" >&2
-  # [[ -n "$PROJECT_BRANCH" ]] && echo "Branch: $PROJECT_BRANCH" >&2
-fi
-
-exit 0
+rm -f "$INPUT_FILE" 2>/dev/null
+printf '%s\n' "$RESULT"
+exit $EXIT_CODE

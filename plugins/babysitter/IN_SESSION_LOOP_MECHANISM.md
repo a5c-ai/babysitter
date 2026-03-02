@@ -457,7 +457,7 @@ Extract last assistant message (JSONL format):
   grep '"role":"assistant"' | tail -1 | jq '.message.content'
          │
          ▼
-Check completion secret (from run:status):
+Check completion proof (from run:status):
   Does output contain <promise>SECRET</promise>? NO
          │
          ▼
@@ -502,7 +502,7 @@ Stop hook triggered
 Load state file
          │
          ▼
-Read run:status completionSecret
+Read run:status completionProof
          │
          ▼
 Extract last assistant message
@@ -779,7 +779,7 @@ exit 0
 
 **Example:**
 ```
-Run completes; CLI emits completionSecret: "b1c2..."
+Run completes; CLI emits completionProof: "b1c2..."
 
 Claude outputs:
 <promise>b1c2...</promise>
@@ -958,21 +958,21 @@ fi
 - No state leakage between sessions
 - Clean separation of concerns
 
-### 9.2 Completion Secret Security
+### 9.2 Completion Proof Security
 
 **Threat:** Malicious or accidental glob pattern exploitation
 
 **Example Attack:**
 ```bash
 # If using == (glob matching):
-completion_secret: "DONE"
+completion_proof: "DONE"
 claude_output: "<promise>D*</promise>"  # Would match!
 ```
 
 **Mitigation:**
 ```bash
 # Use = (literal string comparison, not ==)
-if [[ "$PROMISE_TEXT" = "$COMPLETION_SECRET" ]]; then
+if [[ "$PROMISE_TEXT" = "$COMPLETION_PROOF" ]]; then
   # Only exact match
 fi
 ```
@@ -1045,7 +1045,7 @@ rm "$BABYSITTER_STATE_FILE"
 🛑 Babysitter run: Max iterations (10) reached.
 ```
 
-### 10.2 Task with Completion Secret
+### 10.2 Task with Completion Proof
 
 **Command:**
 ```bash
@@ -1059,13 +1059,13 @@ rm "$BABYSITTER_STATE_FILE"
 3. Iterations 11-15: Claude adds tests
 4. Iterations 16-20: Claude fixes test failures
 5. Iteration 21: All tests pass!
-6. CLI emits completionSecret on completion
-7. Claude outputs: `<promise><completionSecret></promise>`
+6. CLI emits completionProof on completion
+7. Claude outputs: `<promise><completionProof></promise>`
 8. Loop exits
 
 **Output:**
 ```
-✅ Babysitter run: Detected <promise><completionSecret></promise>
+✅ Babysitter run: Detected <promise><completionProof></promise>
 ```
 
 ### 10.3 Infinite Loop (No Limits)

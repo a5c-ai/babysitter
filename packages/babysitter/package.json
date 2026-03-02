@@ -12,8 +12,7 @@
     "README.md"
   ],
   "dependencies": {
-    "@a5c-ai/babysitter-sdk": "latest",
-    "@a5c-ai/babysitter-breakpoints": "latest"
+    "@a5c-ai/babysitter-sdk": "latest"
   },
   "repository": {
     "type": "git",

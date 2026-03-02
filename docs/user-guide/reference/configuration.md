@@ -12,7 +12,6 @@ Complete reference for all Babysitter configuration options, environment variabl
 - [Overview](#overview)
 - [Environment Variables](#environment-variables)
   - [SDK Variables](#sdk-variables)
-  - [Breakpoints Service Variables](#breakpoints-service-variables)
   - [Worker Variables](#worker-variables)
   - [Debug Variables](#debug-variables)
   - [Session Variables](#session-variables)
@@ -81,15 +80,6 @@ babysitter run:create --process-id dev/build --entry ./main.js#process
 babysitter run:create --runs-dir .a5c/runs --process-id dev/build --entry ./main.js#process
 ```
 
-#### REPO_ROOT
-
-Used by the breakpoints service to resolve relative file paths for context rendering.
-
-```bash
-export REPO_ROOT=/home/user/myproject
-breakpoints start
-```
-
 #### BABYSITTER_LOG_LEVEL
 
 Controls the verbosity of log output.
@@ -118,96 +108,13 @@ BABYSITTER_ALLOW_SECRET_LOGS=true babysitter task:show run-123 ef-abc --json --v
 
 ---
 
-### Breakpoints Service Variables
-
-| Variable | Description | Default | Example |
-|----------|-------------|---------|---------|
-| `PORT` | API server port | `3185` | `4185` |
-| `WEB_PORT` | Web UI port | `3184` | `4184` |
-| `DB_PATH` | SQLite database path | `~/.a5c/breakpoints/db/breakpoints.db` | `/data/breakpoints.db` |
-| `REPO_ROOT` | Repository root for file serving | Current directory | `/home/user/project` |
-| `AGENT_TOKEN` | Authentication token for agents | None | `secret-agent-token` |
-| `HUMAN_TOKEN` | Authentication token for humans | None | `secret-human-token` |
-
-#### PORT and WEB_PORT
-
-Configure the ports for the API server and web UI.
-
-```bash
-export PORT=4185
-export WEB_PORT=4184
-breakpoints start
-# API at http://localhost:4185
-# Web UI at http://localhost:4184
-```
-
-Or via CLI flags:
-```bash
-breakpoints start --port 4185 --web-port 4184
-```
-
-#### DB_PATH
-
-Specifies the SQLite database location for breakpoints persistence.
-
-```bash
-export DB_PATH=/var/lib/babysitter/breakpoints.db
-breakpoints start
-```
-
-#### Authentication Tokens
-
-Optional tokens for securing the API.
-
-```bash
-export AGENT_TOKEN=agent-secret-xyz
-export HUMAN_TOKEN=human-secret-abc
-breakpoints start
-```
-
-API usage with tokens:
-```bash
-# Agent creating breakpoint
-curl -X POST http://localhost:3185/api/breakpoints \
-  -H "Authorization: Bearer $AGENT_TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{"question": "Approve?", "title": "Review"}'
-
-# Human providing feedback
-curl -X POST http://localhost:3185/api/breakpoints/<id>/feedback \
-  -H "Authorization: Bearer $HUMAN_TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{"author": "reviewer", "comment": "Approved", "release": true}'
-```
-
----
-
-### Worker Variables
-
-| Variable | Description | Default | Example |
-|----------|-------------|---------|---------|
-| `WORKER_POLL_MS` | Poll interval in milliseconds | `2000` | `5000` |
-| `WORKER_BATCH_SIZE` | Number of jobs per batch | `10` | `20` |
-
-```bash
-export WORKER_POLL_MS=5000
-export WORKER_BATCH_SIZE=20
-breakpoints start
-```
-
----
-
 ### Debug Variables
 
 | Variable | Description | Default | Example |
 |----------|-------------|---------|---------|
-| `TELEGRAM_DEBUG` | Enable Telegram extension debugging | `false` | `1` |
 | `DEBUG` | Node.js debug namespaces | None | `babysitter:*` |
 
 ```bash
-# Enable Telegram debugging
-export TELEGRAM_DEBUG=1
-breakpoints start
 
 # Enable Node.js debug output
 export DEBUG=babysitter:*
@@ -307,7 +214,6 @@ plugins/babysitter/
 │   └── babysit/
 │       ├── SKILL.md      # Skill instructions
 │       ├── scripts/
-│       │   ├── setup-babysitter-run.sh
 │       │   └── setup-babysitter-run-resume.sh
 │       ├── reference/
 │       │   └── *.md
@@ -351,7 +257,8 @@ Created by `run:create`. Contains immutable run metadata.
     "entry": ".a5c/processes/build/main.js#buildProcess",
     "revision": "1.0.0"
   },
-  "request": "Build the authentication module"
+  "request": "Build the authentication module",
+  "prompt": "Build the authentication module with JWT tokens and role-based access control"
 }
 ```
 
@@ -363,6 +270,7 @@ Created by `run:create`. Contains immutable run metadata.
 | `process.entry` | string | Entry point `<path>#<export>` |
 | `process.revision` | string | Optional version/revision |
 | `request` | string | Optional human-readable description |
+| `prompt` | string | Optional initial user prompt (persisted for context recovery) |
 
 ---
 
@@ -671,16 +579,6 @@ await ctx.breakpoint({
 | Max iterations | 100 (in testing harness) |
 | Task timeout | None (process-defined) |
 
-### Breakpoints Service Defaults
-
-| Setting | Default Value |
-|---------|---------------|
-| API port | `3185` |
-| Web UI port | `3184` |
-| Database path | `~/.a5c/breakpoints/db/breakpoints.db` |
-| Worker poll interval | `2000` ms |
-| Worker batch size | `10` |
-
 ### In-Session Loop Defaults
 
 | Setting | Default Value |
@@ -722,7 +620,6 @@ babysitter run:create --runs-dir /custom/runs --process-id dev/build
 # .envrc or .env
 export RUNS_DIR=.a5c/runs
 export BABYSITTER_LOG_LEVEL=debug
-export TELEGRAM_DEBUG=1
 ```
 
 ### CI/CD Environment
@@ -735,28 +632,12 @@ env:
   BABYSITTER_ALLOW_SECRET_LOGS: false
 ```
 
-### Production Breakpoints Service
-
-```bash
-# Secure configuration
-export PORT=3185
-export WEB_PORT=3184
-export DB_PATH=/var/lib/babysitter/breakpoints.db
-export AGENT_TOKEN=secure-agent-token-here
-export HUMAN_TOKEN=secure-human-token-here
-export REPO_ROOT=/app
-
-# Start with restricted binding
-breakpoints start --host 127.0.0.1
-```
-
 ### Security Recommendations
 
 1. **Never commit tokens** - Use environment variables or secrets management
 2. **Restrict network binding** - Use `--host 127.0.0.1` for local-only access
-3. **Use HTTPS** - Put ngrok or reverse proxy in front for external access
-4. **Enable authentication** - Set `AGENT_TOKEN` and `HUMAN_TOKEN`
-5. **Audit logs** - Keep `BABYSITTER_ALLOW_SECRET_LOGS=false` in production
+3. **Enable authentication** - Set `AGENT_TOKEN` and `HUMAN_TOKEN`
+4. **Audit logs** - Keep `BABYSITTER_ALLOW_SECRET_LOGS=false` in production
 
 ---
 

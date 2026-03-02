@@ -1,9 +1,7 @@
 
-# Node / VS Code extension
+# Node
 node_modules/
 dist/
-*.vsix
-.vscode-test/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
@@ -33,3 +31,5 @@ e2e-tests/fixtures/*/**
 **/.a5c/**
 **/.playwright-mcp/*
 
+test-machine.sh
+bug.task.md

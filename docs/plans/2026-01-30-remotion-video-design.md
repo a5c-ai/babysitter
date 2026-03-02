@@ -132,7 +132,7 @@ text-shadow: 0 0 10px #FF00E0, 0 0 20px #FF00E0, 0 0 40px #FF00E0;
 **Visual:**
 1. a5c.ai logo fades in with neon magenta glow
 2. "babysitter" text below logo
-3. Install command appears: `npm i -g @a5c-ai/babysitter`
+3. Install command appears
 
 **End card:** Logo + URL remain for final frames
 

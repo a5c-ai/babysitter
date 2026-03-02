@@ -27,7 +27,6 @@ babysitter --help
 This metapackage installs:
 
 - **@a5c-ai/babysitter-sdk** - Core SDK with CLI for managing babysitter workflows
-- **@a5c-ai/babysitter-breakpoints** - Breakpoint management system
 
 ## CLI Entry Point
 

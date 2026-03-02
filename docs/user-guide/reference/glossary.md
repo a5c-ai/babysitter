@@ -111,11 +111,10 @@ Any file produced during a run, stored in the `artifacts/` directory. Common art
 The orchestration framework for Claude Code that enables deterministic, event-sourced workflow management. Babysitter provides structured multi-step workflows with quality gates, human approval checkpoints, and session persistence.
 
 **Components:**
-- SDK (`@a5c-ai/babysitter-sdk`) - Core runtime and CLI
+- SDK (`@a5c-ai/babysitter-sdk`) - Core runtime, CLI
 - Plugin (`babysitter@a5c.ai`) - Claude Code integration
-- Breakpoints (`@a5c-ai/babysitter-breakpoints`) - Human approval system
 
-**Related:** [SDK](#sdk), [Plugin](#plugin), [Breakpoints Service](#breakpoints-service)
+**Related:** [SDK](#sdk), [Plugin](#plugin)
 
 ---
 
@@ -156,30 +155,7 @@ await ctx.breakpoint({
 });
 ```
 
-**Related:** [Breakpoints Service](#breakpoints-service), [Human-in-the-Loop](#human-in-the-loop)
-
 **See Also:** [Breakpoints Feature](../features/breakpoints.md)
-
----
-
-### Breakpoints Service
-
-The external service providing human approval UI and API. Consists of a web UI (port 3184), REST API (port 3185), and worker for job processing.
-
-**Package:** `@a5c-ai/babysitter-breakpoints`
-
-**Start Command:**
-```bash
-npx -y @a5c-ai/babysitter-breakpoints@latest start
-```
-
-**Ports:**
-- `3184` - Web UI (open in browser: http://localhost:3184)
-- `3185` - REST API (for programmatic access)
-
-**Note:** The REST API on port 3185 is used for programmatic breakpoint operations. See [CLI Reference](./cli-reference.md) for API usage details.
-
-**Related:** [Breakpoint](#breakpoint)
 
 ---
 
@@ -204,17 +180,17 @@ npm install -g @a5c-ai/babysitter-sdk
 
 ### Completion Promise
 
-A special XML tag that signals the end of an in-session loop. When Claude outputs `<promise>TEXT</promise>` where TEXT matches the completion secret, the loop exits.
+A special XML tag that signals the end of an in-session loop. When Claude outputs `<promise>TEXT</promise>` where TEXT matches the completion proof, the loop exits.
 
-**Format:** `<promise>COMPLETION_SECRET</promise>`
+**Format:** `<promise>COMPLETION_PROOF</promise>`
 
 **Usage:** Only output when the run status is `completed`.
 
-**Related:** [In-Session Loop](#in-session-loop), [Completion Secret](#completion-secret)
+**Related:** [In-Session Loop](#in-session-loop), [Completion Proof](#completion-proof)
 
 ---
 
-### Completion Secret
+### Completion Proof
 
 A unique string emitted by `run:iterate` and `run:status` when a run completes successfully. Used with the completion promise to exit the in-session loop.
 
@@ -222,7 +198,7 @@ A unique string emitted by `run:iterate` and `run:status` when a run completes s
 ```json
 {
   "status": "completed",
-  "completionSecret": "run-abc123-completed-xyz789"
+  "completionProof": "run-abc123-completed-xyz789"
 }
 ```
 
@@ -405,8 +381,6 @@ A workflow pattern that includes human approval checkpoints. Implemented through
 A mechanism for continuous iteration within a single Claude Code session. The stop hook intercepts exit attempts and continues the loop until completion or max iterations reached.
 
 **Components:**
-- Setup script: `setup-babysitter-run.sh`
-- Stop hook: `babysitter-stop-hook.sh`
 - State file: `$CLAUDE_PLUGIN_ROOT/state/${SESSION_ID}.md`
 
 **Invocation:**
@@ -1085,19 +1059,6 @@ See [TDD Quality Convergence](#tdd-quality-convergence).
 
 ---
 
-### Telegram Integration
-
-An optional extension for receiving breakpoint notifications via Telegram.
-
-**Setup:**
-```bash
-breakpoints extension enable telegram --token <bot-token> --username <your-username>
-```
-
-**Related:** [Breakpoints Service](#breakpoints-service)
-
----
-
 ## U
 
 ### ULID (Universally Unique Lexicographically Sortable Identifier)
@@ -1132,18 +1093,6 @@ $CLI task:post <runId> <effectId> --status ok --value output.json
 A run status indicating a blocking effect (breakpoint or sleep) is active. Orchestration pauses until the effect is resolved.
 
 **Related:** [Breakpoint](#breakpoint), [Sleep](#sleep), [Iteration](#iteration)
-
----
-
-### Worker
-
-A background process that handles asynchronous jobs like TTL expiration and notifications in the breakpoints service.
-
-**Configuration:**
-- `WORKER_POLL_MS` - Poll interval (default: 2000)
-- `WORKER_BATCH_SIZE` - Batch size (default: 10)
-
-**Related:** [Breakpoints Service](#breakpoints-service)
 
 ---
 

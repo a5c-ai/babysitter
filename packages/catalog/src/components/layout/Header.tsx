@@ -78,28 +78,39 @@ export function Header({
   return (
     <header
       className={cn(
-        "sticky top-0 z-50 w-full border-b border-[var(--color-border-default)] bg-[var(--color-canvas-default)]/95 backdrop-blur supports-[backdrop-filter]:bg-[var(--color-canvas-default)]/60",
+        "sticky top-0 z-50 w-full bg-[#0a0a0f]/95 backdrop-blur supports-[backdrop-filter]:bg-[#0a0a0f]/80",
         className
       )}
+      style={{
+        borderBottom: "1px solid rgba(0, 223, 223, 0.3)",
+        boxShadow: "0 1px 12px rgba(0, 223, 223, 0.1), 0 1px 3px rgba(0, 0, 0, 0.3)",
+      }}
     >
       <div className="container mx-auto flex h-14 max-w-7xl items-center px-4">
         {/* Logo and Title */}
         <div className="mr-4 flex items-center">
-          <Link href={"/" as Route} className="mr-6 flex items-center space-x-2">
+          <Link href={"/" as Route} className="mr-6 flex items-center space-x-2 group">
             {logo || (
               <svg
-                className="h-6 w-6 text-[var(--color-accent-fg)]"
+                className="h-6 w-6 text-[var(--scifi-cyan)]"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
                 strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
+                style={{ filter: "drop-shadow(0 0 4px rgba(0, 223, 223, 0.5))" }}
               >
                 <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20" />
               </svg>
             )}
-            <span className="hidden font-bold text-[var(--color-fg-default)] sm:inline-block">
+            <span
+              className="hidden font-bold text-white sm:inline-block tracking-wider uppercase text-sm"
+              style={{
+                fontFamily: 'var(--font-header, var(--font-scifi-header))',
+                textShadow: "0 0 8px rgba(0, 223, 223, 0.4)",
+              }}
+            >
               {title}
             </span>
           </Link>
@@ -112,11 +123,14 @@ export function Header({
               key={String(item.href)}
               href={item.href as Route}
               className={cn(
-                "transition-colors hover:text-[var(--color-fg-default)]",
+                "transition-all duration-200 uppercase tracking-wider text-xs",
                 activePath === item.href
-                  ? "text-[var(--color-fg-default)]"
-                  : "text-[var(--color-fg-muted)]"
+                  ? "text-[var(--scifi-cyan)]"
+                  : "text-[rgba(255,255,255,0.5)] hover:text-[var(--scifi-cyan)]"
               )}
+              style={activePath === item.href ? {
+                textShadow: "0 0 8px rgba(0, 223, 223, 0.5)",
+              } : undefined}
             >
               {item.label}
             </Link>
@@ -129,10 +143,11 @@ export function Header({
           <form onSubmit={handleSearchSubmit} className="hidden md:block">
             <div className="relative">
               <svg
-                className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--color-fg-muted)]"
+                className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--scifi-cyan)]"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
+                style={{ filter: "drop-shadow(0 0 2px rgba(0, 223, 223, 0.4))" }}
               >
                 <circle cx="11" cy="11" r="8" />
                 <path d="m21 21-4.3-4.3" />
@@ -143,9 +158,21 @@ export function Header({
                 placeholder="Search catalog..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="h-9 w-40 rounded-md border border-[var(--color-border-default)] bg-[var(--color-canvas-default)] pl-9 pr-12 text-sm text-[var(--color-fg-default)] placeholder:text-[var(--color-fg-muted)] focus:border-[var(--color-accent-fg)] focus:outline-none focus:ring-1 focus:ring-[var(--color-accent-fg)] lg:w-64"
+                className="h-9 w-40 rounded-sm bg-[var(--scifi-surface)] pl-9 pr-12 text-sm text-white placeholder:text-[rgba(255,255,255,0.3)] focus:outline-none lg:w-64"
+                style={{
+                  border: "1px solid rgba(0, 223, 223, 0.2)",
+                  transition: "all 0.2s ease",
+                }}
+                onFocus={(e) => {
+                  e.currentTarget.style.borderColor = "rgba(0, 223, 223, 0.5)";
+                  e.currentTarget.style.boxShadow = "0 0 8px rgba(0, 223, 223, 0.2)";
+                }}
+                onBlur={(e) => {
+                  e.currentTarget.style.borderColor = "rgba(0, 223, 223, 0.2)";
+                  e.currentTarget.style.boxShadow = "none";
+                }}
               />
-              <kbd className="pointer-events-none absolute right-2 top-1/2 hidden h-5 -translate-y-1/2 select-none items-center gap-1 rounded border border-[var(--color-border-default)] bg-[var(--color-canvas-subtle)] px-1.5 font-mono text-[10px] font-medium text-[var(--color-fg-muted)] sm:flex">
+              <kbd className="pointer-events-none absolute right-2 top-1/2 hidden h-5 -translate-y-1/2 select-none items-center gap-1 rounded border border-[rgba(0,223,223,0.2)] bg-[var(--scifi-surface)] px-1.5 font-mono text-[10px] font-medium text-[rgba(255,255,255,0.4)] sm:flex">
                 <span className="text-xs">Ctrl</span>K
               </kbd>
             </div>
@@ -156,7 +183,7 @@ export function Header({
             href="https://github.com/a5c-ai/babysitter"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex h-9 w-9 items-center justify-center rounded-md text-[var(--color-fg-muted)] transition-colors hover:bg-[var(--color-canvas-subtle)] hover:text-[var(--color-fg-default)]"
+            className="inline-flex h-9 w-9 items-center justify-center rounded-md text-[rgba(255,255,255,0.4)] transition-colors hover:text-[var(--scifi-cyan)]"
           >
             <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
               <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
@@ -168,7 +195,7 @@ export function Header({
           <Button
             variant="ghost"
             size="icon"
-            className="md:hidden"
+            className="md:hidden text-[rgba(255,255,255,0.5)] hover:text-[var(--scifi-cyan)]"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             aria-label={isMenuOpen ? "Close menu" : "Open menu"}
           >
@@ -207,13 +234,16 @@ export function Header({
 
       {/* Mobile Menu */}
       {isMenuOpen && (
-        <div className="border-t border-[var(--color-border-default)] bg-[var(--color-canvas-default)] md:hidden">
+        <div
+          className="bg-[#0a0a0f] md:hidden"
+          style={{ borderTop: "1px solid rgba(0, 223, 223, 0.15)" }}
+        >
           <div className="container mx-auto px-4 py-4">
             {/* Mobile Search */}
             <form onSubmit={handleSearchSubmit} className="mb-4">
               <div className="relative">
                 <svg
-                  className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--color-fg-muted)]"
+                  className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--scifi-cyan)]"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -226,7 +256,10 @@ export function Header({
                   placeholder="Search catalog..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="h-10 w-full rounded-md border border-[var(--color-border-default)] bg-[var(--color-canvas-default)] pl-9 pr-4 text-sm text-[var(--color-fg-default)] placeholder:text-[var(--color-fg-muted)] focus:border-[var(--color-accent-fg)] focus:outline-none focus:ring-1 focus:ring-[var(--color-accent-fg)]"
+                  className="h-10 w-full rounded-sm bg-[var(--scifi-surface)] pl-9 pr-4 text-sm text-white placeholder:text-[rgba(255,255,255,0.3)] focus:outline-none"
+                  style={{
+                    border: "1px solid rgba(0, 223, 223, 0.2)",
+                  }}
                 />
               </div>
             </form>
@@ -239,10 +272,10 @@ export function Header({
                   href={item.href as Route}
                   onClick={() => setIsMenuOpen(false)}
                   className={cn(
-                    "rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                    "rounded-md px-3 py-2 text-sm font-medium transition-colors uppercase tracking-wider",
                     activePath === item.href
-                      ? "bg-[var(--color-accent-subtle)] text-[var(--color-accent-fg)]"
-                      : "text-[var(--color-fg-muted)] hover:bg-[var(--color-canvas-subtle)] hover:text-[var(--color-fg-default)]"
+                      ? "bg-[rgba(0,223,223,0.1)] text-[var(--scifi-cyan)]"
+                      : "text-[rgba(255,255,255,0.5)] hover:bg-[var(--scifi-surface)] hover:text-[var(--scifi-cyan)]"
                   )}
                 >
                   {item.label}

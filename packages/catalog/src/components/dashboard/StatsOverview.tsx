@@ -34,12 +34,25 @@ interface StatItemProps {
 function StatItem({ icon, label, value }: StatItemProps) {
   return (
     <div className="flex items-center gap-3">
-      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+      <div
+        className="flex h-10 w-10 items-center justify-center rounded-sm text-[var(--scifi-cyan)]"
+        style={{
+          background: 'rgba(0, 223, 223, 0.08)',
+          border: '1px solid rgba(0, 223, 223, 0.15)',
+        }}
+      >
         {icon}
       </div>
       <div>
-        <p className="text-sm font-medium leading-none">{value}</p>
-        <p className="mt-1 text-xs text-muted-foreground">{label}</p>
+        <p
+          className="text-sm font-medium leading-none text-white"
+          style={{
+            fontFamily: 'var(--font-header, var(--font-scifi-header))',
+          }}
+        >
+          {value}
+        </p>
+        <p className="mt-1 text-xs text-[rgba(255,255,255,0.4)]">{label}</p>
       </div>
     </div>
   );
@@ -55,9 +68,14 @@ export function StatsOverview({
   return (
     <div
       className={cn(
-        "grid gap-6 rounded-lg border bg-card p-6 sm:grid-cols-2 lg:grid-cols-4",
+        "grid gap-6 rounded-sm p-6 sm:grid-cols-2 lg:grid-cols-4",
         className
       )}
+      style={{
+        background: 'var(--scifi-card)',
+        border: '1px solid rgba(255, 0, 224, 0.15)',
+        boxShadow: '0 0 12px rgba(0, 0, 0, 0.3), 0 0 4px rgba(255, 0, 224, 0.05)',
+      }}
     >
       <StatItem
         icon={

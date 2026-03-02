@@ -163,8 +163,6 @@ Getting Babysitter running involves three steps:
 
 1. **Install the Babysitter plugin** (via Claude Code's plugin system)
 2. **Install the CLI packages** (npm global install for orchestration commands)
-3. **Start the breakpoints service** (optional, for human approval features)
-
 **Estimated time:** 5-10 minutes
 
 Ready? Head to the [Installation Guide](./installation.md) for step-by-step instructions.
@@ -277,7 +275,6 @@ Coverage: 92%
 |---------|----------|
 | "command not found: babysitter" | Run `npm install -g @a5c-ai/babysitter-sdk` |
 | Plugin not appearing | Restart Claude Code after installation |
-| Breakpoint not resolving | Start the breakpoints service |
 
 ---
 
@@ -299,10 +296,6 @@ claude "/babysitter:call <your request>"
 
 # Resume an existing run
 claude "/babysitter:call resume the babysitter run"
-
-# Start breakpoints service
-npx -y @a5c-ai/babysitter-breakpoints@latest start
-
 # Check available skills
 /skills
 

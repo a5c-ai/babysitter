@@ -42,32 +42,6 @@ npx -y @a5c-ai/babysitter-sdk@latest --version
 
 You should see a version number. If not, revisit the [installation guide](./installation.md).
 
-### Breakpoints Service (Optional)
-
-**Good news!** If you're using Claude Code interactively (which you probably are), **you don't need to start any service**. Breakpoints will be handled directly in the chat.
-
-**Only start the breakpoints service if:**
-- You're running workflows in CI/CD pipelines
-- You need team members to approve via web UI
-- You want mobile notifications via Telegram
-
-<details>
-<summary>Click to see breakpoints service setup (optional)</summary>
-
-Open a **new terminal window** and run:
-
-```bash
-npx -y @a5c-ai/babysitter-breakpoints@latest start
-```
-
-Keep this terminal open. You should see:
-```
-Babysitter Breakpoints Service
-Listening on http://localhost:3184
-```
-
-</details>
-
 ### Open Your Project
 
 Navigate to your project directory (or create a new one):
@@ -407,19 +381,11 @@ No work lost!
 
 ### "Breakpoint timeout" error
 
-**Cause (Interactive Mode):** You may have missed the question in the chat or the session timed out.
+**Cause:** You may have missed the question in the chat or the session timed out.
 
-**Solution (Interactive Mode):**
+**Solution:**
 - Scroll up to find the breakpoint question and respond
 - Or resume the run: `claude "/babysitter:call resume the babysitter run"`
-
-**Cause (Non-Interactive Mode):** Breakpoints service not running.
-
-**Solution (Non-Interactive Mode):**
-```bash
-# In a separate terminal
-npx -y @a5c-ai/babysitter-breakpoints@latest start
-```
 
 ### Quality score not reaching target
 
@@ -432,15 +398,11 @@ npx -y @a5c-ai/babysitter-breakpoints@latest start
 
 ### Run seems stuck
 
-**Cause:** Waiting for breakpoint approval (if breakpoints are configured).
+**Cause:** Waiting for breakpoint approval.
 
-**Solution (Interactive Mode):**
+**Solution:**
 - Look for a question from Claude in your chat
 - Respond to approve and continue the workflow
-
-**Solution (Non-Interactive Mode):**
-- Open http://localhost:3184 to check for pending approvals
-- Approve the breakpoint to continue
 
 ---
 
@@ -489,9 +451,6 @@ ls .a5c/runs/<runId>/journal/*.json
 
 # List all runs
 ls .a5c/runs/
-
-# (Optional) Start breakpoints service for non-interactive/CI mode
-npx -y @a5c-ai/babysitter-breakpoints@latest start
 ```
 
 ---

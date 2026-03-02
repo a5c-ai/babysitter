@@ -1,5 +1,0 @@
-{"type":"run_started","ts":"2026-01-05T01:02:06Z","runId":"run-20260105-010206"}
-{"type":"log","level":"info","message":"hello"}
-
-{"type":"run_completed","status":"completed"}
-

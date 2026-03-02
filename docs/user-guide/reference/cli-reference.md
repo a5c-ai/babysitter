@@ -23,11 +23,6 @@ Complete reference documentation for the Babysitter command-line interface.
   - [task:list](#tasklist)
   - [task:show](#taskshow)
   - [task:post](#taskpost)
-- [Breakpoints Commands](#breakpoints-commands)
-  - [breakpoints start](#breakpoints-start)
-  - [breakpoint create](#breakpoint-create)
-  - [breakpoint status](#breakpoint-status)
-  - [breakpoint wait](#breakpoint-wait)
 - [Exit Codes](#exit-codes)
 - [Output Formats](#output-formats)
 - [Examples](#examples)
@@ -120,6 +115,7 @@ babysitter run:create \
   [--run-id <id>] \
   [--process-revision <rev>] \
   [--request <description>] \
+  [--prompt <text>] \
   [--json]
 ```
 
@@ -133,6 +129,7 @@ babysitter run:create \
 | `--run-id <id>` | No | Custom run ID (auto-generated if omitted) |
 | `--process-revision <rev>` | No | Process revision/version |
 | `--request <description>` | No | Human-readable request description |
+| `--prompt <text>` | No | Initial user prompt to persist in run metadata and journal |
 
 #### Output (Human)
 
@@ -167,13 +164,15 @@ babysitter run:create \
   --entry .a5c/processes/tdd/main.js#tddProcess \
   --inputs ./inputs.json \
   --run-id "run-$(date -u +%Y%m%d-%H%M%S)-auth-feature" \
+  --prompt "Implement auth feature with TDD" \
   --json
 
 # With request description
 babysitter run:create \
   --process-id dev/api \
   --entry ./process.js#apiProcess \
-  --request "Build REST API with authentication"
+  --request "Build REST API with authentication" \
+  --prompt "Build REST API with authentication"
 ```
 
 ---
@@ -217,7 +216,7 @@ babysitter run:status <runId> [--json]
       "node": 2
     }
   },
-  "completionSecret": "..." // Only present when state=completed
+  "completionProof": "..." // Only present when state=completed
 }
 ```
 
@@ -350,7 +349,7 @@ babysitter run:iterate <runId> \
     "hookStatus": "executed",
     "stateVersion": 45
   },
-  "completionSecret": "..." // Only present when status=completed
+  "completionProof": "..." // Only present when status=completed
 }
 ```
 
@@ -640,167 +639,6 @@ babysitter task:post run-20260125-143012 ef-build-001 \
 
 ---
 
-## Breakpoints Commands
-
-The breakpoints commands are provided by the `@a5c-ai/babysitter-breakpoints` package.
-
-> **Note on Breakpoint Modes:**
->
-> Babysitter supports two modes for handling breakpoints:
->
-> | Mode | When Used | Service Required |
-> |------|-----------|-----------------|
-> | **Interactive** | Claude Code sessions | No - breakpoints handled via AskUserQuestion in chat |
-> | **Non-Interactive** | CI/CD, scripts, team workflows | Yes - use commands below |
->
-> **If you're using Claude Code interactively, you don't need these commands** - breakpoints are handled directly in the chat. These commands are for non-interactive automation scenarios.
-
-### breakpoints start
-
-Starts the full breakpoints service (API + Web UI + Worker). **Only needed for non-interactive mode.**
-
-#### Synopsis
-
-```bash
-breakpoints start [--host <host>] [--port <port>] [--web-port <port>]
-```
-
-Or via npx:
-
-```bash
-npx -y @a5c-ai/babysitter-breakpoints@latest start
-```
-
-#### Options
-
-| Option | Description | Default |
-|--------|-------------|---------|
-| `--host <host>` | Bind address | `127.0.0.1` |
-| `--port <port>` | API port | `3185` |
-| `--web-port <port>` | Web UI port | `3184` |
-
-#### Examples
-
-```bash
-# Start with defaults
-breakpoints start
-
-# Custom ports
-breakpoints start --port 4185 --web-port 4184
-
-# Expose to network (caution!)
-breakpoints start --host 0.0.0.0
-```
-
----
-
-### breakpoint create
-
-Creates a new breakpoint for human approval.
-
-#### Synopsis
-
-```bash
-breakpoints breakpoint create \
-  --question <question> \
-  [--title <title>] \
-  [--run-id <runId>] \
-  [--tag <tag>] \
-  [--file <path,format[,language][,label]>]...
-```
-
-#### Options
-
-| Option | Required | Description |
-|--------|----------|-------------|
-| `--question <question>` | Yes | Question to present to human |
-| `--title <title>` | No | Breakpoint title |
-| `--run-id <runId>` | No | Associated run ID |
-| `--tag <tag>` | No | Tag for filtering (repeatable) |
-| `--file <spec>` | No | Context file (repeatable) |
-
-#### File Specification Format
-
-```
-<path>,<format>[,<language>][,<label>]
-```
-
-- `path` - File path relative to repo root
-- `format` - `markdown`, `code`, `json`, `text`
-- `language` - (Optional) Syntax highlighting language
-- `label` - (Optional) Display label
-
-#### Examples
-
-```bash
-# Simple breakpoint
-breakpoints breakpoint create \
-  --question "Approve the deployment?" \
-  --title "Production Deployment"
-
-# With context files
-breakpoints breakpoint create \
-  --question "Approve the plan?" \
-  --title "Plan Review" \
-  --run-id run-20260125-143012 \
-  --file ".a5c/runs/run-20260125-143012/artifacts/plan.md,markdown" \
-  --file ".a5c/runs/run-20260125-143012/code/main.js,code,javascript"
-```
-
----
-
-### breakpoint status
-
-Checks the status of a breakpoint.
-
-#### Synopsis
-
-```bash
-breakpoints breakpoint status <id>
-```
-
-#### Output
-
-```json
-{
-  "id": "bp-abc123",
-  "status": "waiting",
-  "title": "Plan Review",
-  "question": "Approve the plan?",
-  "createdAt": "2026-01-25T14:30:12.123Z"
-}
-```
-
----
-
-### breakpoint wait
-
-Waits for a breakpoint to be released.
-
-#### Synopsis
-
-```bash
-breakpoints breakpoint wait <id> [--interval <seconds>]
-```
-
-#### Options
-
-| Option | Description | Default |
-|--------|-------------|---------|
-| `--interval <seconds>` | Poll interval | `5` |
-
-#### Examples
-
-```bash
-# Wait with default interval
-breakpoints breakpoint wait bp-abc123
-
-# Custom interval
-breakpoints breakpoint wait bp-abc123 --interval 3
-```
-
----
-
 ## Exit Codes
 
 | Code | Meaning |
@@ -878,6 +716,7 @@ RESULT=$($CLI run:create \
   --process-id "$PROCESS_ID" \
   --entry "$ENTRY" \
   --inputs inputs.json \
+  --prompt "Build feature with TDD" \
   --json)
 
 RUN_ID=$(echo "$RESULT" | jq -r '.runId')
@@ -956,36 +795,6 @@ echo "$TASKS" | jq -c '.tasks[]' | while read -r task; do
 done
 ```
 
-### Breakpoint Integration
-
-```bash
-#!/bin/bash
-RUN_ID="$1"
-
-# Check for pending breakpoints
-TASKS=$($CLI task:list "$RUN_ID" --pending --kind breakpoint --json)
-
-echo "$TASKS" | jq -c '.tasks[]' | while read -r bp; do
-  EFFECT_ID=$(echo "$bp" | jq -r '.effectId')
-
-  # Create breakpoint in service
-  BP_ID=$(breakpoints breakpoint create \
-    --question "$(echo "$bp" | jq -r '.task.breakpoint.question')" \
-    --title "$(echo "$bp" | jq -r '.task.breakpoint.title')" \
-    --run-id "$RUN_ID" \
-    --json | jq -r '.id')
-
-  # Wait for release
-  breakpoints breakpoint wait "$BP_ID"
-
-  # Post result
-  echo '{"approved": true}' > "tasks/$EFFECT_ID/output.json"
-  $CLI task:post "$RUN_ID" "$EFFECT_ID" \
-    --status ok \
-    --value "tasks/$EFFECT_ID/output.json"
-done
-```
-
 ---
 
 ## Quick Reference Card
@@ -994,7 +803,7 @@ done
 
 ```bash
 # Create
-babysitter run:create --process-id <id> --entry <path>#<export> --json
+babysitter run:create --process-id <id> --entry <path>#<export> [--prompt <text>] --json
 
 # Status
 babysitter run:status <runId> --json
@@ -1021,21 +830,6 @@ babysitter task:show <runId> <effectId> --json
 # Post result
 babysitter task:post <runId> <effectId> --status ok --value <file> --json
 ```
-
-### Breakpoints Commands (Non-Interactive Mode Only)
-
-```bash
-# Start service (not needed for Claude Code interactive mode)
-breakpoints start
-
-# Create breakpoint
-breakpoints breakpoint create --question "..." --title "..."
-
-# Wait for release
-breakpoints breakpoint wait <id>
-```
-
-**Note:** If using Claude Code interactively, breakpoints are handled automatically in the chat - no commands needed!
 
 ---
 

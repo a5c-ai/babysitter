@@ -12,7 +12,8 @@ This guide walks through a realistic flow that exercises the `babysitter` CLI an
 babysitter run:create \
   --process-id dev/build \
   --entry processes/build/process.mjs#process \
-  --inputs examples/inputs/build.json
+  --inputs examples/inputs/build.json \
+  --prompt "Build all workspace packages"
 ```
 
 Typical JSON response (`--json`):

@@ -610,7 +610,6 @@ Now that you understand what happened in your first run, you're ready to explore
 
 - [ ] Read [TDD Methodology Deep Dive](../features/quality-convergence.md)
 - [ ] Try the [GSD Methodology](../features/process-library.md) for faster prototyping
-- [ ] Set up [Telegram Notifications](../features/breakpoints.md#telegram-setup) for mobile approvals
 
 ### Coming Up
 
@@ -642,7 +641,7 @@ CHECK STATUS:
 
 BREAKPOINTS:
   Interactive (Claude Code): Handled in chat - no setup!
-  Non-Interactive: npx -y @a5c-ai/babysitter-breakpoints@latest start
+  Non-Interactive: npx -y @a5c-ai/babysitter-sdk@latest breakpoints:start
   Web UI (non-interactive): http://localhost:3184
 
 LIST ALL RUNS:

@@ -71,10 +71,6 @@ This document defines the navigation structure for the Babysitter User Guide doc
       path: /features/run-resumption.md
     - title: Parallel Execution
       path: /features/parallel-execution.md
-    - title: VSCode Extension
-      path: /features/vscode-extension.md
-    - title: Telegram Integration
-      path: /features/telegram-integration.md
 ```
 
 ### Tutorials
@@ -154,9 +150,7 @@ For documentation platforms that use JSON configuration (e.g., Docusaurus, ViteP
           { "label": "Process Definitions", "to": "/features/process-definitions" },
           { "label": "Journal System", "to": "/features/journal-system" },
           { "label": "Run Resumption", "to": "/features/run-resumption" },
-          { "label": "Parallel Execution", "to": "/features/parallel-execution" },
-          { "label": "VSCode Extension", "to": "/features/vscode-extension" },
-          { "label": "Telegram Integration", "to": "/features/telegram-integration" }
+          { "label": "Parallel Execution", "to": "/features/parallel-execution" }
         ]
       },
       {
@@ -219,9 +213,7 @@ For documentation platforms that use JSON configuration (e.g., Docusaurus, ViteP
           "features/process-definitions",
           "features/journal-system",
           "features/run-resumption",
-          "features/parallel-execution",
-          "features/vscode-extension",
-          "features/telegram-integration"
+          "features/parallel-execution"
         ]
       },
       {
@@ -307,7 +299,6 @@ For documentation platforms that use JSON configuration (e.g., Docusaurus, ViteP
 | Best Practices Guide | `Docs > Features > Best Practices Guide` |
 | Breakpoints | `Docs > Features > Breakpoints` |
 | Hooks | `Docs > Features > Hooks` |
-| Telegram Integration | `Docs > Features > Telegram Integration` |
 | REST API Tutorial | `Docs > Tutorials > Build a REST API` |
 | CLI Reference | `Docs > Reference > CLI Reference` |
 | Glossary | `Docs > Reference > Glossary` |

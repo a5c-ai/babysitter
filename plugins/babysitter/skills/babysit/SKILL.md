@@ -11,15 +11,18 @@ Orchestrate `.a5c/runs/<runId>/` through iterative execution. Use the SDK CLI to
 ## Dependencies
 
 ### Babysitter SDK and CLI
-make sure you have the latest version of the cli:
+
+Read the SDK version from the plugin manifest to ensure version compatibility:
 
 ```bash
-npm i -g @a5c-ai/babysitter@latest @a5c-ai/babysitter-sdk@latest @a5c-ai/babysitter-breakpoints@latest
+SDK_VERSION=$(node -e "try{console.log(JSON.parse(require('fs').readFileSync('${CLAUDE_PLUGIN_ROOT}/plugin.json','utf8')).sdkVersion||'latest')}catch{console.log('latest')}")
+sudo npm i -g @a5c-ai/babysitter-sdk@$SDK_VERSION
+# sudo is depending on the env and system
 ```
 
 then use the CLI alias: CLI="babysitter"
 
-**Alternatively, use the CLI alias:** `CLI="npx -y @a5c-ai/babysitter-sdk@latest"`
+**Alternatively, use the CLI alias:** `CLI="npx -y @a5c-ai/babysitter-sdk@$SDK_VERSION"`
 
 ### jq
 
@@ -40,53 +43,114 @@ The babysitter workflow has 4 steps:
 
 #### Interview phase
 
-interview the user for the intent, requirements, goal, scope, etc.
-using AskUserQuestion tool (or breakpoint if running in non-interactive mode) -  (before setting the in-session loop).
+##### Interactive mode (default)
 
-a multi-step phase to understand the intent and perspecitve to approach the process building after researching the repo, short research online if needed, short research in the target repo, additional instructions, intent and library (processes, specializations, skills, subagents, methodologies, references, etc.) / guide for methodology building. (clarifications regarding the intent, requirements, goal, scope, etc.) - the library is at [skill-root]/process/specializations/**/**/** and [skill-root]/process/methodologies/ 
+Interview the user for the intent, requirements, goal, scope, etc.
+using AskUserQuestion tool (before setting the in-session loop).
 
-the first step should be the look at the state of the repo, then find the most relevant processes, specializations, skills, subagents, methodologies, references, etc. to use as a reference.
+A multi-step phase to understand the intent and perspective to approach the process building after researching the repo, short research online if needed, short research in the target repo, additional instructions, intent and library (processes, specializations, skills, subagents, methodologies, references, etc.) / guide for methodology building. (clarifications regarding the intent, requirements, goal, scope, etc.) - the library is at [skill-root]/process/specializations/**/**/** and [skill-root]/process/methodologies/ and under [skill-root]/process/contrib/[contributer-username]/]
 
-then this phase can have: research online, research the repo, user questions, and other steps one after the other until the intent, requirements, goal, scope, etc. are clear and the user is satisfied with the understanding. after each step, decide the type of next step to take. do not plan more than 1 step ahead in this phase. and the same step type can be used more than once in this phase.
+The first step should be the look at the state of the repo, then find the most relevant processes, specializations, skills, subagents, methodologies, references, etc. to use as a reference. use the babysitter cli discover command to find the relevant processes, skills, subagents, etc at various stages.
+
+Then this phase can have: research online, research the repo, user questions, and other steps one after the other until the intent, requirements, goal, scope, etc. are clear and the user is satisfied with the understanding. after each step, decide the type of next step to take. do not plan more than 1 step ahead in this phase. and the same step type can be used more than once in this phase.
+
+##### Non-interactive mode (running with -p flag or no AskUserQuestion tool)
+
+When running non-interactively, skip the interview phase entirely. Instead:
+1. Parse the initial prompt to extract intent, scope, and requirements.
+2. Research the repo structure to understand the codebase.
+3. Search the process library for the most relevant specialization/methodology.
+4. Proceed directly to the process creation phase using the extracted requirements.
+
+#### User Profile Integration
+
+Before building the process, check for an existing user profile to personalize the orchestration:
+
+1. **Read user profile**: Run `babysitter profile:read --user --json` to load the user profile from `~/.a5c/user-profile.json`. **Always use the CLI for profile operations — never import or call SDK profile functions directly.**
+
+2. **Pre-fill context**: Use the profile to understand the user's specialties, expertise levels, preferences, and communication style. This informs how you conduct the interview (skip questions the profile already answers) and how you build the process.
+
+3. **Breakpoint density**: Use the `breakpointTolerance` field to calibrate breakpoint placement in the generated process:
+   - `minimal`/`low` (expert users): Fewer breakpoints — only at critical decision points (architecture choices, deployment, destructive operations)
+   - `moderate` (intermediate users): Standard breakpoints at phase boundaries
+   - `high`/`maximum` (novice users): More breakpoints — add review gates after each implementation step, before each integration, and at every quality gate
+   - Always respect `alwaysBreakOn` for operations that must always pause (e.g., destructive-git, deploy)
+   - If `skipBreakpointsForKnownPatterns` is true, reduce breakpoints for operations the user has previously approved
+
+4. **Tool preferences**: Use `toolPreferences` and `installedSkills`/`installedAgents` to prioritize which agents and skills to use in the process. Prefer tools the user is familiar with.
+
+5. **Communication style**: Adapt process descriptions and breakpoint questions to match the user's `communicationStyle` preferences (tone, explanationDepth, preferredResponseFormat).
+
+6. **If no profile exists**: Proceed normally with the interview phase. Consider suggesting the user run `/user-install` first to create a profile for better personalization.
+
+7. **CLI profile commands (mandatory)**: **All profile operations MUST use the babysitter CLI — never import SDK profile functions directly.** This applies to the babysit skill itself, all generated processes, and all agent task instructions:
+   - `babysitter profile:read --user --json` — Read user profile as JSON
+   - `babysitter profile:read --project --json` — Read project profile as JSON
+   - `babysitter profile:write --user --input <file> --json` — Write user profile from file
+   - `babysitter profile:write --project --input <file> --json` — Write project profile from file
+   - `babysitter profile:merge --user --input <file> --json` — Merge partial updates into user profile
+   - `babysitter profile:merge --project --input <file> --json` — Merge partial updates into project profile
+   - `babysitter profile:render --user` — Render user profile as readable markdown
+   - `babysitter profile:render --project` — Render project profile as readable markdown
+
+   Use `--dir <dir>` to override the default profile directory when needed.
 
 #### Process creation phase
 
-after the interview phase, create the complete custom process files (js and jsons) for the run according to the Process Creation Guidelines and methodologies section. also install the babysitter-sdk inside .a5c if it is not already installed. (install it in .a5c/package.json if it is not already installed. make sure )
+after the interview phase, create the complete custom process files (js and jsons) for the run according to the Process Creation Guidelines and methodologies section. also install the babysitter-sdk inside .a5c if it is not already installed. (install it in .a5c/package.json if it is not already installed, make sure to use the latest version)
 you must abide the syntax and structure of the process files from the process library.
 
-After the process is created and before setting up the session, describe the process in high level (not the code or implementation details) to the user and ask for confirmation to use it. if the user is not satisfied with the process, go back to the process creation phase and modify the process according to the feedback of the user until the user is satisfied with the process.
+**User profile awareness**: If a user profile was loaded in the User Profile Integration step, use it to inform process design — adjust breakpoint density per the user's tolerance level, select agents/skills the user prefers, and match the process complexity to the user's expertise.
 
-### 2. Setup session:
+**IMPORTANT — Profile I/O in processes**: When generating process files, all profile read/write/merge operations MUST use the babysitter CLI commands (`babysitter profile:read`, `profile:write`, `profile:merge`, `profile:render`). Never instruct agents to import or call SDK profile functions (`readUserProfile`, `writeUserProfile`, etc.) directly. The CLI handles atomic writes, directory creation, and markdown generation automatically.
+
+After the process is created and before creating the run:
+- **Interactive mode**: describe the process at high level (not the code or implementation details) to the user and ask for confirmation to use it, also generate it as a [process-name].diagram.md and [process-name].process.md file. If the user is not satisfied with the process, go back to the process creation phase and modify the process according to the feedback of the user until the user is satisfied with the process.
+- **Non-interactive mode**: proceed directly to creating the run without user confirmation.
+
+### 2. Create run and bind session (single command):
 
 **For new runs:**
 
-1. Setup in-session loop:
 ```bash
-bash "${CLAUDE_PLUGIN_ROOT}/skills/babysit/scripts/setup-babysitter-run.sh" --claude-session-id "${CLAUDE_SESSION_ID}" $PROMPT
+$CLI run:create \
+  --process-id <id> \
+  --entry <path>#<export> \
+  --inputs <file> \
+  --prompt "$PROMPT" \
+  --harness claude-code \
+  --session-id "${CLAUDE_SESSION_ID}" \
+  --plugin-root "${CLAUDE_PLUGIN_ROOT}" \
+  --json
 ```
 
-2. Create the run:
-```bash
-$CLI run:create --process-id <id> --entry <path> --inputs <file> --json
-```
+**Required flags:**
+- `--process-id <id>` — unique identifier for the process definition
+- `--entry <path>#<export>` — path to the process JS file and its named export (e.g., `./my-process.js#process`)
+- `--prompt "$PROMPT"` — the user's initial prompt/request text
+- `--harness claude-code` — activates Claude Code session binding (init + associate in one step)
+- `--session-id "${CLAUDE_SESSION_ID}"` — the current Claude Code session ID (available as env var)
+- `--plugin-root "${CLAUDE_PLUGIN_ROOT}"` — plugin root directory for state file resolution
 
-3. Associate session with run:
-```bash
-bash "${CLAUDE_PLUGIN_ROOT}/skills/babysit/scripts/associate-session-with-run.sh" \
-  --run-id <runId-from-step-2> \
-  --claude-session-id "${CLAUDE_SESSION_ID}"
-```
+**Optional flags:**
+- `--inputs <file>` — path to a JSON file with process inputs
+- `--run-id <id>` — override auto-generated run ID
+- `--runs-dir <dir>` — override runs directory (default: `.a5c/runs`)
+
+This single command creates the run AND binds the session (initializing the stop-hook loop). The JSON output includes `runId`, `runDir`, and `session` binding status.
 
 **For resuming existing runs:**
 
 ```bash
-bash "${CLAUDE_PLUGIN_ROOT}/skills/babysit/scripts/setup-babysitter-run-resume.sh" --claude-session-id "${CLAUDE_SESSION_ID}" --run-id RUN_ID"
+$CLI session:resume --session-id "${CLAUDE_SESSION_ID}" \
+  --state-dir "${CLAUDE_PLUGIN_ROOT}/skills/babysit/state" \
+  --run-id <runId> --runs-dir .a5c/runs --json
 ```
 
 ### 3. Run Iteration
 
 ```bash
-$CLI run:iterate .a5c/runs/<runId> --json --iteration <n>
+$CLI run:iterate .a5c/runs/<runId> --json --iteration <n> --plugin-root "${CLAUDE_PLUGIN_ROOT}"
 ```
 
 **Output:**
@@ -97,7 +161,7 @@ $CLI run:iterate .a5c/runs/<runId> --json --iteration <n>
   "action": "executed-tasks|waiting|none",
   "reason": "auto-runnable-tasks|breakpoint-waiting|terminal-state",
   "count": 3,
-  "completionSecret": "only-present-when-completed",
+  "completionProof": "only-present-when-completed",
   "metadata": { "runId": "...", "processId": "..." }
 }
 ```
@@ -108,6 +172,12 @@ $CLI run:iterate .a5c/runs/<runId> --json --iteration <n>
 - `"completed"` - Run finished successfully
 - `"failed"` - Run failed with error
 - `"none"` - No pending effects
+
+  **Common mistake to avoid:**
+  ❌ WRONG: Calling run:iterate, performing the effect, posting the result,
+     then calling run:iterate again in the same session
+  ✅ CORRECT: Calling run:iterate, performing the effect, posting the result,
+     then STOPPING the session so the hook triggers the next iteration
 
 ### 4. Get Effects
 
@@ -155,17 +225,15 @@ If running in interactive mode, use AskUserQuestion tool to ask the user the bre
 
 After receiving an explicit approval or rejection from the user, post the result of the breakpoint to the run by calling `task:post`.
 
+Breakpoints are meant for human approval. NEVER prompt directly and never release or approve breakpoints yourself. Once the user responds via the AskUserQuestion tool, post the result of the breakpoint to the run by calling `task:post` when the breakpoint is resolved.
+
+Never user AskUserQuestion tool to offer an options like: "chat about this" or "i'll provide an answer in the chat" or anything that implies that the user will provide the answer in the chat. use either explicit options (and optionally one open option that the user can just write a free text answer to).
+
 Otherwise:
 
 ##### 5.1.2 Non-interactive mode
 
-if running in non-interactive mode, use the breakpoint create command to create the breakpoint and get the answer from the user:
-
-```bash
-npx @a5c-ai/babysitter-breakpoints breakpoint create --tag <tag> --question "<question>" --title "<title>" --run-id <runId> --file <file,format,language,label> --file <file,format,language,label> --file <file,format,language,label> ...
-```
-
- to create the breakpoint and get the answer from the user. breakpoint are meant for human approval through the breakpoint tool. NEVER prompt directly and never release or approve this breakpoint yourself. but you may need to post the result of the breakpoint to the run by calling `task:post` when the breakpoint is resolved.
+If running in non-interactive mode, skip the AskUserQuestion tool as it is not available. resolve the breakpoint by selecting the best option according to the context and the intent of the user. then post the result of the breakpoint to the run by calling `task:post` when the breakpoint is resolved.
 
 ### 6. Results Posting
 
@@ -215,14 +283,18 @@ $CLI task:post <runId> <effectId> --status ok
 echo '{"score": 85}' > tasks/<effectId>/output.json
 $CLI task:post <runId> <effectId> --status ok --value tasks/<effectId>/output.json
 ```
-
 ---
 
-### 7. repeat the orchestration loop as needed.
+### 7. STOP after every phase — the hook drives the loop, not you.
 
-Repeat orchestration loop by calling run:iterate or doing the next right thing.
+you will be called by the stop-hook and you will be asked to repeat the orchestration loop or exit the loop by posting the completion proof. Repeat orchestration loop by calling run:iterate or doing the next right thing.
 
-In case you don't follow this step, you will be called by the stop-hook and you will be asked to repeat the orchestration loop or exit the loop by posting the completion secret.
+### 8. Completion Proof
+
+When the run is completed, the CLI will emit a `completionProof` value in the output of `run:iterate` and `run:status`. You must return that exact value wrapped in a `<promise>...</promise>` tag to signal completion to the stop-hook loop.
+
+### Progressing Between The Phases 
+After you ran run:create, progress through the phases above by Stopping the session, which will trigger the stop-hook and call you with the next phase. After you finish each phase after run:create, stop the session and return the control to the user until you are called again by the hook.
 
 ## Task Kinds
 
@@ -237,7 +309,7 @@ In case you don't follow this step, you will be called by the stop-hook and you 
 
 ### Agent Task Example
 
-Important: Check which subagents and agents are actually available before assigning the name. if none, pass the general-purpose subagent.
+Important: Check which subagents and agents are actually available before assigning the name. if none, pass the general-purpose subagent. check the subagents and agents in the plugin (in nested folders) and to find relevant subagents and agents to use as a reference. specifically check subagents and agents in folders next to the reference process file.
 when executing the agent task, use the Task tool. never use the Babysitter skill or agent to execute the task. if the subagent or agent is not installed for the project before running the process, install it first.
 
 ```javascript
@@ -268,8 +340,9 @@ export const agentTask = defineTask('agent-scorer', (args, taskCtx) => ({
 
 ### Skill Task Example
 
-Important: Check which skills are actually available before assigning the name. 
-Never use the Babysitter skill or agent to execute the task. if the skill or subagent is not installed for the project before running the process, install it first.
+Important: Check which skills are actually available before assigning the skill name. check the skills in the plugin (in nested folders) and to find relevant skills to use as a reference. specifically check skills in folders next to the reference process file.
+
+Never use the Babysitter skill or agent to execute the task. if the skill or subagent is not installed for the project before running the process, install it first. skills are prefered over subagents for executing tasks, especially if you can find the right skill for the task. you can convert a agent call to a skill call even if the reference process mentions an agent call.
 
 ```javascript
 export const skillTask = defineTask('analyzer-skill', (args, taskCtx) => ({
@@ -304,9 +377,11 @@ export const skillTask = defineTask('analyzer-skill', (args, taskCtx) => ({
 
 ## Quick Commands Reference
 
-**Create run:**
+**Create run (with session binding):**
 ```bash
-$CLI run:create --process-id <id> --entry <path>#<export> --inputs <path> --run-id <id>
+$CLI run:create --process-id <id> --entry <path>#<export> --inputs <file> \
+  --prompt "$PROMPT" --harness claude-code \
+  --session-id "${CLAUDE_SESSION_ID}" --plugin-root "${CLAUDE_PLUGIN_ROOT}" --json
 ```
 
 **Check status:**
@@ -314,7 +389,7 @@ $CLI run:create --process-id <id> --entry <path>#<export> --inputs <path> --run-
 $CLI run:status <runId> --json
 ```
 
-When the run completes, `run:iterate` and `run:status` emit `completionSecret`. Use that exact value in a `<promise>...</promise>` tag to end the loop.
+When the run completes, `run:iterate` and `run:status` emit `completionProof`. Use that exact value in a `<promise>...</promise>` tag to end the loop.
 
 **View events:**
 ```bash
@@ -333,7 +408,7 @@ $CLI task:post <runId> <effectId> --status <ok|error> --json
 
 **Iterate:**
 ```bash
-$CLI run:iterate <runId> --json --iteration <n>
+$CLI run:iterate <runId> --json --iteration <n> --plugin-root "${CLAUDE_PLUGIN_ROOT}"
 ```
 ---
 
@@ -353,7 +428,31 @@ If at any point the run fails due to SDK issues or corrupted state or journal. a
 
 - include verification and refinement steps (and loops) for planning phases and integration phases, debugging phases, refactoring phases, etc. as well.
 
-- Create the process with the available skills and subagents. 
+- Create the process with the available skills and subagents.
+
+### Process File Discovery Markers
+
+When creating process files, include `@skill` and `@agent` markers in the JSDoc header listing the skills and agents relevant to this process. The SDK reads these markers to provide targeted discovery results instead of scanning all available skills.
+
+**Format** (one per line, path relative to process root `pluginRoot/skills/babysit/process/`):
+```javascript
+/**
+ * @process specializations/web-development/react-app-development
+ * @description React app development with TDD
+ * @skill frontend-design specializations/web-development/skills/frontend-design/SKILL.md
+ * @skill visual-diff-scorer specializations/web-development/skills/visual-diff-scorer/SKILL.md
+ * @agent frontend-architect specializations/web-development/agents/frontend-architect/AGENT.md
+ * @agent fullstack-architect specializations/web-development/agents/fullstack-architect/AGENT.md
+ */
+```
+
+**Steps during process creation:**
+1. Use `babysitter skill:discover --process-path <path> --plugin-root ... --json` to find relevant skills/agents in the specialization directory
+2. Select the ones actually needed by the process tasks
+3. Add them as `@skill`/`@agent` markers in the JSDoc header
+4. Use full relative path from the process root (`pluginRoot/skills/babysit/process/`)
+
+When these markers are present, `run:create` and `run:iterate` will return only the marked skills/agents (with full file paths) instead of scanning the entire plugin tree. Without markers, the SDK falls back to scanning ALL specializations, which can return dozens of irrelevant results (e.g., AI agent skills surfaced for a simple file-writing task) and degrade orchestration quality.
 
 - Unless otherwise specified, prefer processes that close the widest loop in the quality gates (for example e2e tests with a full browser or emulator/vm if it a mobile or desktop app) AND gates that make sure the work is accurate against the user request (all the specs is covered and no extra stuff was added unless permitted by the intent of the user).
 
@@ -378,16 +477,13 @@ prefer processes that have the following characteristics unless otherwise specif
     - plugins/babysitter/skills/babysit/process/specializations/[rnd-specialization-name-slugified]/ (rnd specializations)
     - plugins/babysitter/skills/babysit/process/specializations/domains/[domain-name-slugified]/[specialization-name-slugified]/ (non rnd specializations)
     - plugins/babysitter/skills/babysit/process/methodologies/ (methodologies)
+    - When creating the process file, add `@skill` and `@agent` JSDoc markers for the relevant skills and agents found during this search (see "Process File Discovery Markers" above). This ensures only the needed dependencies are surfaced during orchestration instead of scanning all available specializations.
 
 ## Critical Rules
 
-CRITICAL RULE: The completion secret is emitted only when the run is completed. You may ONLY output `<promise>SECRET</promise>` when the run is completely and unequivocally DONE (completed status from the orchestration CLI). Do not output false promises to escape the run, and do not mention the secret to the user.
+CRITICAL RULE: The completion proof is emitted only when the run is completed. You may ONLY output `<promise>SECRET</promise>` when the run is completely and unequivocally DONE (completed status from the orchestration CLI). Do not output false promises to escape the run, and do not mention the secret to the user.
 
 CRITICAL RULE: in interactive mode, NEVER auto-approve breakpoints. If AskUserQuestion returns empty, no selection, or is dismissed, treat it as NOT approved and re-ask. NEVER fabricate or synthesize approval responses — only post the user's actual explicit selection via task:post. An empty response is NOT approval.
-
-CRITICAL RULE: in non-interactive mode, never approve breakpoints through the CLI by yourself. only create them and wait for them. they will always be resolved externally.
-
-CRITICAL RULE: in non-interactive mode, if a breakpoint is still waiting. monitor it for approval until it is resolved. do not return prompt to the user. just wait for the breakpoint to be resolved.
 
 CRITICAL RULE: if a run is broken/failed/at unknown state, when of the way to recover is to remove last bad entries in the journal and rebuild the state. in interactive mode, use the AskUserQuestion tool if you need to ask the user for a question about the recovery and you exhausted all other options.
 
@@ -397,7 +493,9 @@ CRITICAL RULE: do not use the babysit skill inside the delegated tasks. if you a
 
 CRITICAL RULE: Never build a wrapper, python or helper scripts to orchestrate the runs. Use the CLI to drive the orchestration loop and never loop programmatically.
 
-CRITICAL RULE: Never fallback to simpler execution if the user activated this skill. persist in executing the orchestration itself rather than simplifying the execution by bypassing the process above - you must create a valid process js file, create a run and associate it with the session, then iterate the run until it is completed.
+CRITICAL RULE: Never fallback to simpler execution if the user activated this skill. persist in executing the orchestration itself rather than simplifying the execution by bypassing the process above - you must create a valid process js file, create a run (with --harness claude-code --session-id to bind the session), then iterate the run until it is completed.
+
+CRITICAL RULE: After run:create and after each effect is posted, you MUST stop the session and return control. Do NOT proceed to the next run:iterate in the same session turn. The stop-hook will call you back to continue. Running multiple iterations in a single session turn bypasses the hook loop and breaks the orchestration model. non-interactive mode only skips AskUserQuestion — it does not skip the stop-hook loop.
 
 ## See Also
 - `process/tdd-quality-convergence.js` - TDD quality convergence example - read and look for relevant processes and methodolies before creating the code process for a new run (create the run using the CLI, then use these process as a reference)

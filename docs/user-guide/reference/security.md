@@ -11,7 +11,6 @@ Comprehensive security guidelines for using Babysitter in development and produc
 
 - [Overview](#overview)
 - [General Security](#general-security)
-- [Breakpoints Service Security](#breakpoints-service-security)
   - [Production Setup](#production-setup)
   - [Authentication Configuration](#authentication-configuration)
 - [Credential Management](#credential-management)
@@ -53,7 +52,6 @@ Babysitter handles code generation, execution, and may interact with credentials
 **DON'T:**
 - Commit `.a5c/` directories with sensitive data
 - Run untrusted process definitions without review
-- Expose breakpoints service publicly without authentication
 - Store credentials in journal files
 
 ### .gitignore Configuration
@@ -73,77 +71,6 @@ Ensure your `.gitignore` includes:
 *.pem
 *.key
 credentials.json
-```
-
----
-
-## Breakpoints Service Security
-
-The breakpoints service provides a web UI and API for human-in-the-loop interactions. When exposing this service externally, proper security measures are essential.
-
-### Production Setup
-
-**1. Use HTTPS with ngrok/tunneling:**
-
-```bash
-# Bad: HTTP exposed publicly
-ngrok http 3184
-
-# Better: Use authentication
-ngrok http 3184 --basic-auth "user:secure-password"
-```
-
-**2. Or use Telegram notifications:**
-- No public endpoint needed
-- Notifications via Telegram bot
-- Configure in breakpoints UI
-- More secure for production
-
-**3. Firewall rules:**
-- Restrict access to known IPs
-- Use VPN for team access
-- Don't expose to 0.0.0.0 in production
-
-### Example Production Setup
-
-```bash
-# Start with localhost only
-npx -y @a5c-ai/babysitter-breakpoints@latest start --host 127.0.0.1
-
-# Use SSH tunnel for remote access
-ssh -L 3184:localhost:3184 production-server
-
-# Or use Telegram (recommended)
-# Configure in UI at http://localhost:3184
-```
-
-### Authentication Configuration
-
-Configure authentication tokens for API access:
-
-```bash
-# Set authentication tokens
-export AGENT_TOKEN=secure-agent-token-here
-export HUMAN_TOKEN=secure-human-token-here
-
-# Start the service
-breakpoints start --host 127.0.0.1
-```
-
-API usage with tokens:
-
-```bash
-# Agent creating breakpoint
-curl -X POST http://localhost:3185/api/breakpoints \
-  -H "Authorization: Bearer $AGENT_TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{"question": "Approve?", "title": "Review"}'
-
-# Human providing feedback
-curl -X POST http://localhost:3185/api/breakpoints/<id>/feedback \
-  -H "Authorization: Bearer $HUMAN_TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{"author": "reviewer", "comment": "Approved", "release": true}'
 ```
 
 ---
@@ -240,8 +167,8 @@ const security = await ctx.task(securityScanTask, {
 
 ### For Distributed Teams
 
-1. **Use VPN** for breakpoints service access
-2. **Implement authentication** on breakpoints UI
+1. **Use VPN** for secure access
+2. **Implement authentication** on all services
 3. **Use HTTPS** for all external connections
 4. **Audit access logs** regularly
 
@@ -250,9 +177,7 @@ const security = await ctx.task(securityScanTask, {
 | Requirement | Implementation |
 |-------------|----------------|
 | Local-only binding | `--host 127.0.0.1` |
-| Encrypted transport | HTTPS via reverse proxy or ngrok |
-| Authentication | `AGENT_TOKEN` and `HUMAN_TOKEN` |
-| Access logging | Review breakpoints service logs |
+| Access logging | Review service logs |
 | Firewall rules | Restrict to known IPs/VPN |
 
 ---

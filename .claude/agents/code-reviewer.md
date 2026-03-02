@@ -28,12 +28,6 @@ Review code changes for quality and consistency across the babysitter monorepo.
 - [ ] Backwards compatibility maintained for public APIs
 - [ ] Event sourcing patterns followed for state changes
 
-### VS Code Extension Patterns
-- [ ] Commands registered properly
-- [ ] Disposables tracked and cleaned up
-- [ ] Extension context used correctly
-- [ ] Tree view providers follow existing patterns
-
 ### Error Handling
 - [ ] Errors have meaningful messages
 - [ ] Async errors properly caught/propagated

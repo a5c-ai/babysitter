@@ -903,12 +903,6 @@ await ctx.breakpoint({
 });
 ```
 
-**Multi-platform notification:**
-
-- **Web UI**: http://localhost:3184 for browser-based review
-- **Telegram**: Mobile notifications for on-the-go approvals
-- **Hooks**: Custom notifications to Slack, email, etc.
-
 ---
 
 ## Performance Optimization
@@ -1214,7 +1208,6 @@ while (iteration < maxIterations && quality < targetQuality) {
 
 | Pitfall | Symptom | Solution |
 |---------|---------|----------|
-| Breakpoint not resolving | Workflow hangs | Verify breakpoints service is running |
 | Context files not displaying | Missing content | Write files before calling breakpoint |
 | Automated pipeline blocking | Pipeline hangs | Use conditional breakpoints or auto-approve |
 | Too many breakpoints | Slow workflow | Only use for high-value decisions |
@@ -1278,7 +1271,6 @@ if (process.env.BABYSITTER_AUTO_APPROVE !== 'true') {
 
 - [ ] Validated input file contents
 - [ ] Verified process code is stable (no pending changes)
-- [ ] Ensured breakpoints service is running (if using breakpoints)
 - [ ] Used descriptive run ID
 
 ### During Execution

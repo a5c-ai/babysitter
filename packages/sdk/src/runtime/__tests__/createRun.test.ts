@@ -87,4 +87,62 @@ describe("createRun", () => {
       inputsRef: "inputs.json",
     });
   });
+
+  test("includes prompt in RUN_CREATED event payload and run.json metadata", async () => {
+    vi.spyOn(ulids, "nextUlid").mockReturnValue("01HZWPROMPTRUNID");
+    const entryFile = path.join(tmpRoot, "processes", "prompted.mjs");
+    await fs.mkdir(path.dirname(entryFile), { recursive: true });
+    await fs.writeFile(entryFile, "export async function process() { return 'prompted'; }");
+
+    const result = await createRun({
+      runsDir: tmpRoot,
+      request: "prompt-request",
+      prompt: "Build a REST API with authentication",
+      process: {
+        processId: "ci/prompted",
+        importPath: entryFile,
+        exportName: "process",
+      },
+    });
+
+    expect(result.runId).toBe("01HZWPROMPTRUNID");
+
+    // Verify prompt is in run.json metadata
+    const metadata = await readRunMetadata(result.runDir);
+    expect(metadata.prompt).toBe("Build a REST API with authentication");
+    expect(metadata.processId).toBe("ci/prompted");
+
+    // Verify prompt is in RUN_CREATED journal event
+    const journal = await loadJournal(result.runDir);
+    expect(journal).toHaveLength(1);
+    expect(journal[0].type).toBe("RUN_CREATED");
+    expect(journal[0].data.prompt).toBe("Build a REST API with authentication");
+  });
+
+  test("omits prompt from RUN_CREATED event and run.json when not provided", async () => {
+    vi.spyOn(ulids, "nextUlid").mockReturnValue("01HZWNOPROMPTRUN");
+    const entryFile = path.join(tmpRoot, "processes", "noprompt.mjs");
+    await fs.mkdir(path.dirname(entryFile), { recursive: true });
+    await fs.writeFile(entryFile, "export async function handler() { return 'ok'; }");
+
+    const result = await createRun({
+      runsDir: tmpRoot,
+      process: {
+        processId: "ci/noprompt",
+        importPath: entryFile,
+        exportName: "handler",
+      },
+    });
+
+    // Verify prompt is NOT in run.json metadata
+    const metadata = await readRunMetadata(result.runDir);
+    expect(metadata.prompt).toBeUndefined();
+
+    // Verify prompt is NOT in RUN_CREATED journal event
+    const journal = await loadJournal(result.runDir);
+    expect(journal).toHaveLength(1);
+    expect(journal[0].type).toBe("RUN_CREATED");
+    expect(journal[0].data.prompt).toBeUndefined();
+    expect("prompt" in journal[0].data).toBe(false);
+  });
 });

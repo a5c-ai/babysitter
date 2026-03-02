@@ -1,3 +1,0 @@
-{"type":"event","event":"run_started","timestamp":"2026-01-05T01:02:06Z","id":"0","data":{"runId":"run-20260105-010206"}}
-{"type":"event","event":"breakpoint","timestamp":"2026-01-05T01:02:07Z","id":"1","data":{"prompt":"Please clarify the desired behavior."}}
-

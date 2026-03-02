@@ -46,10 +46,9 @@ Babysitter is an **event-sourced orchestration framework** for Claude Code that 
 
 ### 1.3 Key Components
 
-1. **Babysitter SDK** (`@a5c-ai/babysitter-sdk`) - Core orchestration runtime and CLI
+1. **Babysitter SDK** (`@a5c-ai/babysitter-sdk`) - Core orchestration runtime, CLI
 2. **Babysitter Plugin** (`babysitter@a5c.ai`) - Claude Code integration
-3. **Breakpoints Service** (`@a5c-ai/babysitter-breakpoints`) - Human approval UI and API
-4. **Process Library** - Built-in methodologies (TDD, Spec-Kit, GSD, etc.)
+3. **Process Library** - Built-in methodologies (TDD, Spec-Kit, GSD, etc.)
 
 ### 1.4 Architecture Summary
 
@@ -123,9 +122,7 @@ User Request --> Claude Code --> Babysitter Skill --> SDK CLI
 | Requirement | Purpose | Notes |
 |-------------|---------|-------|
 | **Git** | Version control | Required for cloning, recommended for workflows |
-| **ngrok** | Expose breakpoints service | Alternative: Telegram integration |
 | **jq** | JSON processing | Helpful for CLI output parsing |
-| **Telegram** | Mobile notifications | Optional alternative to ngrok |
 
 ### 3.3 Knowledge Prerequisites
 
@@ -141,7 +138,6 @@ User Request --> Claude Code --> Babysitter Skill --> SDK CLI
 
 - **Claude API access** (via Claude Code subscription)
 - **GitHub account** (for plugin marketplace access)
-- **Telegram account** (optional, for mobile notifications)
 
 ---
 
@@ -151,7 +147,7 @@ User Request --> Claude Code --> Babysitter Skill --> SDK CLI
 
 **Step 1: Install SDK and Packages**
 ```bash
-npm install -g @a5c-ai/babysitter@latest @a5c-ai/babysitter-sdk@latest @a5c-ai/babysitter-breakpoints@latest
+npm install -g @a5c-ai/babysitter-sdk@latest
 ```
 
 **Step 2: Install Claude Code Plugin**
@@ -177,24 +173,17 @@ babysitter --version
 /skills  # Should list "babysit"
 ```
 
-**Step 5: Start Breakpoints Service**
-```bash
-npx -y @a5c-ai/babysitter-breakpoints@latest start
-# Service runs at http://localhost:3184
-```
-
 ### 4.2 Installation Verification Checklist
 
 - [ ] `babysitter --version` returns version number
 - [ ] Claude Code `/skills` command shows "babysit"
-- [ ] `http://localhost:3184` displays breakpoints UI
 - [ ] Can create a test run with `babysitter run:create --help`
 
 ### 4.3 Keeping Updated
 
 ```bash
 # Update SDK packages
-npm update -g @a5c-ai/babysitter @a5c-ai/babysitter-sdk @a5c-ai/babysitter-breakpoints
+npm update -g @a5c-ai/babysitter-sdk@latest
 
 # Update Claude Code plugin
 claude plugin marketplace update a5c.ai
@@ -242,36 +231,12 @@ claude "/babysitter:call implement a simple calculator module with TDD and 80% q
 - No work is lost
 - Journal shows complete history
 
-### 5.3 Third Quick Win: Human Approval Workflow (5-10 minutes)
-
-**Goal:** Experience the human-in-the-loop breakpoint system.
-
-**Setup:** Ensure breakpoints service is running at `http://localhost:3184`
-
-**Command:**
-```bash
-claude "/babysitter:call refactor the auth module with breakpoint approval before changes"
-```
-
-**What Happens:**
-1. Babysitter creates refactoring plan
-2. Breakpoint triggers for human approval
-3. Open `http://localhost:3184` to review and approve
-4. Refactoring proceeds after approval
-
-**Success Criteria:**
-- Breakpoint appears in web UI
-- Can review context files
-- Approval releases the workflow
-- Changes applied after approval
-
 ### 5.4 Quick Win Difficulty Progression
 
 | Scenario | Time | Complexity | Prerequisites |
 |----------|------|------------|---------------|
 | Simple TDD feature | 10-15 min | Low | Basic installation |
 | Resume interrupted work | 5 min | Low | Completed first scenario |
-| Human approval workflow | 5-10 min | Medium | Breakpoints service running |
 | Custom process definition | 30+ min | High | JavaScript knowledge |
 | CI/CD integration | 60+ min | High | DevOps experience |
 
@@ -293,8 +258,6 @@ Level 2: Regular Use (Week 1-2)
     |
     +---> Use TDD methodology for features
     +---> Experience session resumption
-    +---> Configure breakpoints service
-    +---> Approve breakpoints via web UI
     |
 Level 3: Proficient Use (Month 1)
     |
@@ -440,7 +403,6 @@ Level 5: Expert Use (Ongoing)
 
 | Issue | Cause | Solution |
 |-------|-------|----------|
-| Breakpoint not resolving | Breakpoints service not running | Start with `npx @a5c-ai/babysitter-breakpoints@latest start` |
 | Session ended unexpectedly | Network issue, Claude Code crash | Resume with `/babysitter:call resume --run-id <id>` |
 | Quality score not improving | Unrealistic target or blocking issues | Lower target, review iteration logs |
 | Agent task timeout | Large context, API issues | Reduce task scope, check API status |
