@@ -331,11 +331,11 @@ describe("Stop hook iteration safety limits", () => {
     );
 
     // Runaway detection triggers after iteration >= 5 and when the average of
-    // the last 3 iteration times is <= 15 seconds.
-    // Set iteration=6 with fast previous times and a very recent last-iteration-at.
+    // the last 10 iteration times is <= 15 seconds.
+    // Set iteration=15 with 10 fast previous times and a very recent last-iteration-at.
     const recentTime = new Date(Date.now() - 2000).toISOString().replace(/\.\d{3}Z$/, "Z");
     dockerExec(
-      `babysitter session:update --session-id ${sid} --state-dir ${STATE_DIR} --iteration 6 --iteration-times "1,1" --last-iteration-at "${recentTime}" --json`,
+      `babysitter session:update --session-id ${sid} --state-dir ${STATE_DIR} --iteration 15 --iteration-times "1,1,1,1,1,1,1,1,1" --last-iteration-at "${recentTime}" --json`,
     );
     createTranscript(transcriptFile, "fast output");
 
@@ -513,7 +513,7 @@ describe("Stop hook run state handling", () => {
     expect(String(parsed!.systemMessage)).toContain("Failed");
   });
 
-  test("allows exit when run directory is misconfigured (empty state)", () => {
+  test("allows exit when run directory is misconfigured (empty state) but preserves session file for recovery", () => {
     const sid = "badrun-" + Date.now();
     const transcriptFile = "/tmp/hook-transcript-badrun.jsonl";
 
@@ -525,7 +525,12 @@ describe("Stop hook run state handling", () => {
     const result = runHook(sid, transcriptFile);
 
     assertAllowsExit(result);
-    assertSessionDeleted(sid);
+    // Session file is intentionally preserved when run state is unknown
+    // so that doctor/session:associate can re-bind and recover.
+    const stateOut = dockerExec(
+      `babysitter session:state --session-id ${sid} --state-dir ${STATE_DIR} --json`,
+    ).trim();
+    expect(JSON.parse(stateOut).found).toBe(true);
   });
 });
 
