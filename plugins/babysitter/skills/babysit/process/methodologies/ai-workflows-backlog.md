@@ -28,7 +28,7 @@
 
 [x] https://github.com/github/spec-kit
 
-[ ] https://github.com/AutoMaker-Org/automaker
+[x] https://github.com/AutoMaker-Org/automaker
 
 [ ] https://github.com/affaan-m/everything-claude-code
 
