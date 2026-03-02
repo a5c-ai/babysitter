@@ -10,7 +10,7 @@
 
 [x] https://github.com/romiluz13/cc10x
 
-[ ] https://github.com/dsifry/metaswarm
+[x] https://github.com/dsifry/metaswarm
 
 [ ] https://github.com/SnapdragonPartners/maestro
 

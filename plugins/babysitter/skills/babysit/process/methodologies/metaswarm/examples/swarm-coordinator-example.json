@@ -1,0 +1,31 @@
+{
+  "name": "Metaswarm Swarm Coordinator - Multi-Issue Sprint",
+  "description": "Coordinate parallel issue execution across multiple worktrees with conflict detection",
+  "processId": "methodologies/metaswarm/metaswarm-swarm-coordinator",
+  "inputs": {
+    "issues": [
+      { "id": "#45", "title": "Add rate limiting middleware", "priority": "P1", "labels": ["agent-ready"] },
+      { "id": "#46", "title": "Implement webhook delivery system", "priority": "P2", "labels": ["agent-ready"] },
+      { "id": "#47", "title": "Fix session expiry race condition", "priority": "P0", "labels": ["agent-ready", "bug"] },
+      { "id": "#48", "title": "Add OpenTelemetry tracing", "priority": "P3", "labels": ["agent-ready"] }
+    ],
+    "worktrees": ["/worktree-1", "/worktree-2", "/worktree-3"],
+    "maxConcurrent": 3,
+    "priorityRules": {
+      "P0": "critical - preempt all lower",
+      "P1": "high - preempt P2+",
+      "P2": "medium - standard queue",
+      "P3": "low - fill idle capacity",
+      "P4": "backlog - only when nothing else"
+    }
+  },
+  "expectedOutcomes": {
+    "steps": [
+      "scan-prioritize (P0 #47 first, then P1 #45, P2 #46, P3 #48)",
+      "allocate-worktrees (3 worktrees, P3 #48 queued)",
+      "detect-conflicts (check for file/schema overlaps between issues)",
+      "spawn-orchestrators (one per assigned issue)",
+      "monitor-rebalance (health checks, >80% utilization target)"
+    ]
+  }
+}
