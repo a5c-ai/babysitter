@@ -4,7 +4,7 @@
 
 [x] https://github.com/bmad-code-org/BMAD-METHOD
 
-[ ] https://github.com/steveyegge/gastown 
+[x] https://github.com/steveyegge/gastown
 
 [ ] https://github.com/bostonaholic/rpikit 
 

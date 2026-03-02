@@ -1,0 +1,21 @@
+{
+  "name": "Gas Town Patrol - Active Monitoring",
+  "description": "Deacon patrol cycle for monitoring agent health during convoy execution",
+  "processId": "methodologies/gastown/gastown-patrol",
+  "inputs": {
+    "townId": "project-alpha",
+    "patrolInterval": 300,
+    "maxCycles": 5,
+    "recoveryMode": "reassign",
+    "activeAgents": ["crew-lead-1", "polecat-1", "polecat-2", "polecat-3"],
+    "activeConvoys": ["convoy-auth", "convoy-api"]
+  },
+  "expectedOutcomes": {
+    "phases": [
+      "health-check (all agents and convoys)",
+      "detect-stuck (heartbeat analysis)",
+      "recovery-action (reassign stuck beads)",
+      "patrol-report (trend analysis)"
+    ]
+  }
+}

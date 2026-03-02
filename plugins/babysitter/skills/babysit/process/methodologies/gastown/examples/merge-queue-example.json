@@ -1,0 +1,30 @@
+{
+  "name": "Gas Town Merge Queue - Convoy Landing",
+  "description": "Refinery merge queue processing for landing a completed convoy",
+  "processId": "methodologies/gastown/gastown-merge-queue",
+  "inputs": {
+    "convoyId": "convoy-api-endpoints",
+    "branches": [
+      "bead/create-user-endpoint",
+      "bead/read-user-endpoint",
+      "bead/update-user-endpoint",
+      "bead/delete-user-endpoint"
+    ],
+    "targetBranch": "main",
+    "conflictStrategy": "auto",
+    "verifyTests": true,
+    "testSuites": ["unit", "integration", "e2e"],
+    "qualityCriteria": {
+      "minScore": 85
+    }
+  },
+  "expectedOutcomes": {
+    "phases": [
+      "collect-changes (gather all bead branches)",
+      "detect-conflicts (cross-branch analysis)",
+      "resolve-conflicts (auto-resolve where possible)",
+      "merge-changes (dependency-ordered merge)",
+      "verify-integration (full test suite)"
+    ]
+  }
+}

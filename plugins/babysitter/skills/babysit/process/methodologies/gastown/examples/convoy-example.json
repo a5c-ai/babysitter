@@ -1,0 +1,27 @@
+{
+  "name": "Gas Town Convoy - API Endpoints",
+  "description": "Convoy lifecycle for implementing a set of related API endpoints",
+  "processId": "methodologies/gastown/gastown-convoy",
+  "inputs": {
+    "goal": "Build REST API endpoints for user CRUD operations",
+    "agentPool": ["polecat", "polecat", "polecat"],
+    "trackingMode": "active",
+    "landingStrategy": "squash",
+    "baseBranch": "main",
+    "qualityCriteria": {
+      "testsPass": true,
+      "lintClean": true,
+      "coverageMin": 80
+    }
+  },
+  "expectedOutcomes": {
+    "phases": [
+      "decompose-work (goal -> beads + wisps)",
+      "create-beads (git branches per bead)",
+      "assign-to-agents (Polecats for each endpoint)",
+      "track-progress (active monitoring)",
+      "verify-completion (tests and lint)",
+      "land-convoy (squash merge)"
+    ]
+  }
+}

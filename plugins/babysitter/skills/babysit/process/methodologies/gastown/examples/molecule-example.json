@@ -1,0 +1,30 @@
+{
+  "name": "Gas Town Molecule - CI/CD Pipeline Workflow",
+  "description": "Durable molecule workflow from a formula template for CI/CD setup",
+  "processId": "methodologies/gastown/gastown-molecule",
+  "inputs": {
+    "formulaSpec": {
+      "name": "ci-cd-setup",
+      "steps": [
+        { "id": "lint-config", "action": "create-lint-config", "inputs": { "style": "strict" } },
+        { "id": "test-config", "action": "create-test-config", "inputs": { "framework": "vitest" } },
+        { "id": "build-pipeline", "action": "create-build-pipeline", "inputs": { "target": "node" } },
+        { "id": "deploy-config", "action": "create-deploy-config", "inputs": { "provider": "github-actions" } }
+      ]
+    },
+    "variables": {
+      "projectName": "my-service",
+      "nodeVersion": "20"
+    },
+    "checkpointInterval": 1
+  },
+  "expectedOutcomes": {
+    "phases": [
+      "define-formula (validate TOML spec)",
+      "cook-protomolecule (resolve variables, freeze)",
+      "instantiate-molecule (create durable instance)",
+      "execute-steps (4 steps with checkpoints)",
+      "complete-workflow (collect artifacts)"
+    ]
+  }
+}
