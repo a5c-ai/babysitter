@@ -52,7 +52,7 @@ jobs:
       - name: Unit tests
         run: |
           set -euo pipefail
-          npm run test:unit:compiled 2>&1 | tee artifacts/logs/unit-tests.log
+          npm run test:sdk 2>&1 | tee artifacts/logs/unit-tests.log
 
       - name: Upload build logs
         uses: actions/upload-artifact@v4
@@ -124,15 +124,10 @@ jobs:
             git push origin HEAD:$TARGET_BRANCH
           fi
 
-      - name: Build npm package
-        run: |
-          set -euo pipefail
-          npm run build
-
       - name: Build SDK package
         run: |
           set -euo pipefail
-          npm run --workspace=@a5c-ai/babysitter-sdk build
+          npm run build:sdk
 
       - name: Pack npm artifacts
         run: |
