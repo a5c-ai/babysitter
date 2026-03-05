@@ -1,0 +1,175 @@
+<!--
+  Node Template Reference
+
+  This file contains template patterns for adding shapes to DrawIO diagrams.
+  Copy and customize these patterns, replacing placeholder values.
+
+  Placeholders:
+  - {ID}           : Unique identifier (e.g., "run1", "bq1", "storage1")
+  - {LABEL}        : Display text (e.g., "Cloud Run", "data transfer")
+  - {PARENT}       : Parent cell ID ("1" for root, or container ID)
+  - {X}, {Y}       : Position in pixels
+  - {WIDTH}, {HEIGHT} : Dimensions in pixels
+  - {SERVICE}      : GCP service shape name (e.g., "cloud_run", "bigquery")
+-->
+
+<!-- ============================================
+     GCP SERVICE ICON (Standard)
+     ============================================ -->
+<mxCell id="{ID}"
+  value="{LABEL}"
+  style="sketch=0;html=1;fillColor=#4285F4;strokeColor=none;verticalAlign=top;labelPosition=center;verticalLabelPosition=bottom;align=center;spacingTop=-6;fontSize=11;fontStyle=0;fontColor=#424242;shape=mxgraph.gcp2.{SERVICE}"
+  vertex="1"
+  parent="{PARENT}">
+  <mxGeometry x="{X}" y="{Y}" width="50" height="50" as="geometry" />
+</mxCell>
+
+
+<!-- ============================================
+     GCP SERVICE ICON (Larger - 60x60)
+     ============================================ -->
+<mxCell id="{ID}"
+  value="{LABEL}"
+  style="sketch=0;html=1;fillColor=#4285F4;strokeColor=none;verticalAlign=top;labelPosition=center;verticalLabelPosition=bottom;align=center;spacingTop=-6;fontSize=12;fontStyle=0;fontColor=#424242;shape=mxgraph.gcp2.{SERVICE}"
+  vertex="1"
+  parent="{PARENT}">
+  <mxGeometry x="{X}" y="{Y}" width="60" height="60" as="geometry" />
+</mxCell>
+
+
+<!-- ============================================
+     CONTAINER: VPC-SC (Light Green)
+     ============================================ -->
+<mxCell id="{ID}"
+  value="VPC Service Controls"
+  style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#4CAF50;strokeWidth=2;dashed=0;verticalAlign=top;fontSize=13;fontStyle=1;fontColor=#2E7D32;align=center;arcSize=5;container=1;collapsible=0;recursiveResize=0;"
+  vertex="1"
+  parent="1">
+  <mxGeometry x="{X}" y="{Y}" width="{WIDTH}" height="{HEIGHT}" as="geometry" />
+</mxCell>
+
+
+<!-- ============================================
+     CONTAINER: GCP Project Zone (Two-Cell Pattern)
+     IMPORTANT: This uses TWO cells — a plain rectangle
+     container + a small child cell with the GCP logo.
+     Do NOT add shape= to the container cell.
+     ============================================ -->
+<!-- Cell 1: Container rectangle -->
+<mxCell id="{ID}"
+  value="&lt;b&gt;Google &lt;/b&gt;Cloud Platform&lt;br&gt;{LABEL}"
+  style="fillColor=#F6F6F6;strokeColor=none;shadow=0;gradientColor=none;fontSize=14;align=left;spacing=10;fontColor=#717171;verticalAlign=top;spacingTop=-4;fontStyle=0;spacingLeft=40;html=1;whiteSpace=wrap;container=1;collapsible=0;recursiveResize=0;"
+  vertex="1"
+  parent="1">
+  <mxGeometry x="{X}" y="{Y}" width="{WIDTH}" height="{HEIGHT}" as="geometry" />
+</mxCell>
+<!-- Cell 2: GCP logo icon (child of container) -->
+<mxCell id="{ID}_logo"
+  value=""
+  style="shape=mxgraph.gcp2.google_cloud_platform;fillColor=#F6F6F6;strokeColor=none;shadow=0;gradientColor=none;"
+  vertex="1"
+  parent="{ID}">
+  <mxGeometry width="23" height="20" relative="1" as="geometry">
+    <mxPoint x="20" y="10" as="offset" />
+  </mxGeometry>
+</mxCell>
+
+
+<!-- ============================================
+     CONTAINER: Logical Group (Dashed - "Same Instance")
+     ============================================ -->
+<mxCell id="{ID}"
+  value="{LABEL}"
+  style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#757575;strokeWidth=1;dashed=1;dashPattern=5 5;verticalAlign=top;fontSize=11;fontStyle=2;fontColor=#424242;align=center;container=1;collapsible=0;recursiveResize=0;"
+  vertex="1"
+  parent="{PARENT}">
+  <mxGeometry x="{X}" y="{Y}" width="{WIDTH}" height="{HEIGHT}" as="geometry" />
+</mxCell>
+
+
+<!-- ============================================
+     CONTAINER: Logical Group (Solid)
+     ============================================ -->
+<mxCell id="{ID}"
+  value="{LABEL}"
+  style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FAFAFA;strokeColor=#9E9E9E;strokeWidth=1;dashed=0;verticalAlign=top;fontSize=11;fontStyle=0;align=center;container=1;collapsible=0;recursiveResize=0;"
+  vertex="1"
+  parent="{PARENT}">
+  <mxGeometry x="{X}" y="{Y}" width="{WIDTH}" height="{HEIGHT}" as="geometry" />
+</mxCell>
+
+
+<!-- ============================================
+     CONTAINER: Region
+     ============================================ -->
+<mxCell id="{ID}"
+  value="{LABEL}"
+  style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1976D2;strokeWidth=2;dashed=1;verticalAlign=top;fontSize=12;fontStyle=1;align=left;spacingLeft=10;container=1;collapsible=0;recursiveResize=0;"
+  vertex="1"
+  parent="{PARENT}">
+  <mxGeometry x="{X}" y="{Y}" width="{WIDTH}" height="{HEIGHT}" as="geometry" />
+</mxCell>
+
+
+<!-- ============================================
+     EXTERNAL SYSTEM
+     ============================================ -->
+<mxCell id="{ID}"
+  value="{LABEL}"
+  style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F3E5F5;strokeColor=#9C27B0;strokeWidth=2;dashed=0;verticalAlign=top;fontSize=12;fontStyle=1;align=center;container=1;collapsible=0;recursiveResize=0;"
+  vertex="1"
+  parent="1">
+  <mxGeometry x="{X}" y="{Y}" width="{WIDTH}" height="{HEIGHT}" as="geometry" />
+</mxCell>
+
+
+<!-- ============================================
+     GENERIC TEXT LABEL
+     ============================================ -->
+<mxCell id="{ID}"
+  value="{LABEL}"
+  style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontColor=#333333;"
+  vertex="1"
+  parent="{PARENT}">
+  <mxGeometry x="{X}" y="{Y}" width="{WIDTH}" height="30" as="geometry" />
+</mxCell>
+
+
+<!-- ============================================
+     COMMON GCP SERVICES - Ready to Use
+     ============================================ -->
+
+<!-- Cloud Run -->
+<mxCell id="cloudrun1" value="Cloud Run" style="sketch=0;html=1;fillColor=#4285F4;strokeColor=none;verticalAlign=top;labelPosition=center;verticalLabelPosition=bottom;align=center;spacingTop=-6;fontSize=11;fontStyle=0;fontColor=#424242;shape=mxgraph.gcp2.cloud_run" vertex="1" parent="1">
+  <mxGeometry x="100" y="100" width="50" height="50" as="geometry" />
+</mxCell>
+
+<!-- BigQuery -->
+<mxCell id="bigquery1" value="BigQuery" style="sketch=0;html=1;fillColor=#4285F4;strokeColor=none;verticalAlign=top;labelPosition=center;verticalLabelPosition=bottom;align=center;spacingTop=-6;fontSize=11;fontStyle=0;fontColor=#424242;shape=mxgraph.gcp2.bigquery" vertex="1" parent="1">
+  <mxGeometry x="200" y="100" width="50" height="50" as="geometry" />
+</mxCell>
+
+<!-- Cloud Storage -->
+<mxCell id="storage1" value="Cloud Storage" style="sketch=0;html=1;fillColor=#4285F4;strokeColor=none;verticalAlign=top;labelPosition=center;verticalLabelPosition=bottom;align=center;spacingTop=-6;fontSize=11;fontStyle=0;fontColor=#424242;shape=mxgraph.gcp2.cloud_storage" vertex="1" parent="1">
+  <mxGeometry x="300" y="100" width="50" height="50" as="geometry" />
+</mxCell>
+
+<!-- Cloud Scheduler -->
+<mxCell id="scheduler1" value="Cloud Scheduler" style="sketch=0;html=1;fillColor=#4285F4;strokeColor=none;verticalAlign=top;labelPosition=center;verticalLabelPosition=bottom;align=center;spacingTop=-6;fontSize=11;fontStyle=0;fontColor=#424242;shape=mxgraph.gcp2.cloud_scheduler" vertex="1" parent="1">
+  <mxGeometry x="400" y="100" width="50" height="50" as="geometry" />
+</mxCell>
+
+<!-- Vertex AI -->
+<mxCell id="vertexai1" value="Vertex AI" style="sketch=0;html=1;fillColor=#4285F4;strokeColor=none;verticalAlign=top;labelPosition=center;verticalLabelPosition=bottom;align=center;spacingTop=-6;fontSize=11;fontStyle=0;fontColor=#424242;shape=mxgraph.gcp2.cloud_machine_learning" vertex="1" parent="1">
+  <mxGeometry x="500" y="100" width="50" height="50" as="geometry" />
+</mxCell>
+
+<!-- Pub/Sub -->
+<mxCell id="pubsub1" value="Pub/Sub" style="sketch=0;html=1;fillColor=#4285F4;strokeColor=none;verticalAlign=top;labelPosition=center;verticalLabelPosition=bottom;align=center;spacingTop=-6;fontSize=11;fontStyle=0;fontColor=#424242;shape=mxgraph.gcp2.cloud_pubsub" vertex="1" parent="1">
+  <mxGeometry x="600" y="100" width="50" height="50" as="geometry" />
+</mxCell>
+
+<!-- Apigee (uses non-standard orange fill) -->
+<mxCell id="apigee" value="Apigee" style="sketch=0;html=1;fillColor=#FF6D00;strokeColor=none;verticalAlign=top;labelPosition=center;verticalLabelPosition=bottom;align=center;spacingTop=-6;fontSize=11;fontStyle=0;fontColor=#424242;shape=mxgraph.gcp2.apigee_api_platform" vertex="1" parent="1">
+  <mxGeometry x="700" y="100" width="50" height="50" as="geometry" />
+</mxCell>

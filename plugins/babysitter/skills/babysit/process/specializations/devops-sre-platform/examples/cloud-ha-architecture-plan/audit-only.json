@@ -1,0 +1,41 @@
+{
+  "projectIdentifier": "my-startup-prod",
+  "cloudProvider": "gcp",
+  "targetRegion": "europe-west1",
+  "slaTarget": "99.9%",
+  "budgetCeiling": 30,
+  "currentArchitecture": {
+    "description": "Startup SaaS running on Cloud Run with Firestore. Minimal infrastructure, need to understand HA gaps before investing in improvements.",
+    "services": [
+      {
+        "name": "web-app",
+        "type": "Cloud Run",
+        "region": "us-central1",
+        "memory": "256Mi",
+        "cpu": 1,
+        "minInstances": 0,
+        "maxInstances": 5
+      },
+      {
+        "name": "background-worker",
+        "type": "Cloud Run",
+        "region": "us-central1",
+        "memory": "512Mi",
+        "cpu": 1,
+        "minInstances": 0,
+        "maxInstances": 3
+      },
+      {
+        "name": "app-database",
+        "type": "Firestore Native",
+        "region": "us-central1",
+        "mode": "REGIONAL",
+        "backups": false
+      }
+    ]
+  },
+  "diagramConfig": {
+    "enabled": false
+  },
+  "compositionPattern": "audit-only"
+}

@@ -1,0 +1,204 @@
+<!--
+  Node Template Reference (AWS)
+
+  This file contains template patterns for adding shapes to DrawIO diagrams.
+  Copy and customize these patterns, replacing placeholder values.
+
+  Placeholders:
+  - {ID}             : Unique identifier using full service name (e.g., "lambda_processor", "s3_static_assets")
+  - {LABEL}          : Display text (e.g., "AWS Lambda", "Amazon S3")
+  - {PARENT}         : Parent cell ID ("1" for root, or container ID)
+  - {X}, {Y}         : Position in pixels
+  - {WIDTH}, {HEIGHT} : Dimensions in pixels (containers only)
+  - {CATEGORY_COLOR} : Category fill color (e.g., "#ED7100" for Compute)
+  - {SHAPE_NAME}     : AWS shape name using UNDERSCORES for multi-word (e.g., "lambda", "s3", "step_functions")
+
+  CRITICAL: Always use resourceIcon/resIcon, NEVER productIcon/prIcon.
+  CRITICAL: Multi-word names use UNDERSCORES: "step_functions", NOT "step functions".
+-->
+
+<!-- ============================================
+     AWS SERVICE ICON (with colored square background)
+     Use when labeling the AWS service itself.
+     Example labels: "AWS Lambda", "Amazon S3", "Amazon RDS"
+     strokeColor=#ffffff matches DrawIO stencil default — enables internal white line artwork.
+     ============================================ -->
+<mxCell id="{ID}"
+  value="{LABEL}"
+  style="sketch=0;points=[[0,0,0],[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0,0],[0,1,0],[0.25,1,0],[0.5,1,0],[0.75,1,0],[1,1,0],[0,0.25,0],[0,0.5,0],[0,0.75,0],[1,0.25,0],[1,0.5,0],[1,0.75,0]];outlineConnect=0;fontColor=#232F3E;fillColor={CATEGORY_COLOR};strokeColor=#ffffff;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.{SHAPE_NAME}"
+  vertex="1"
+  parent="{PARENT}">
+  <mxGeometry x="{X}" y="{Y}" width="64" height="64" as="geometry" />
+</mxCell>
+
+
+<!-- ============================================
+     AWS INSTANCE ICON (bare icon, no background)
+     Use when representing a specific resource/instance.
+     Example labels: "Order Processor", "User Auth", "ECS Task 1"
+     strokeColor=none (no background square to outline).
+     ============================================ -->
+<mxCell id="{ID}"
+  value="{LABEL}"
+  style="sketch=0;outlineConnect=0;fontColor=#232F3E;fillColor={CATEGORY_COLOR};strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.{SHAPE_NAME}"
+  vertex="1"
+  parent="{PARENT}">
+  <mxGeometry x="{X}" y="{Y}" width="64" height="64" as="geometry" />
+</mxCell>
+
+
+<!-- ============================================
+     AWS CONTAINER: AWS Cloud (Gray border)
+     ============================================ -->
+<mxCell id="{ID}"
+  value="AWS Cloud"
+  style="points=[[0,0],[0.25,0],[0.5,0],[0.75,0],[1,0],[1,0.25],[1,0.5],[1,0.75],[1,1],[0.75,1],[0.5,1],[0.25,1],[0,1],[0,0.75],[0,0.5],[0,0.25]];outlineConnect=0;gradientColor=none;html=1;whiteSpace=wrap;fontSize=12;fontStyle=0;shape=mxgraph.aws4.group;grIcon=mxgraph.aws4.group_aws_cloud;strokeColor=#AAB7B8;fillColor=none;verticalAlign=top;align=left;spacingLeft=30;fontColor=#AAB7B8;dashed=0;container=1;collapsible=0;recursiveResize=0;"
+  vertex="1"
+  parent="1">
+  <mxGeometry x="{X}" y="{Y}" width="{WIDTH}" height="{HEIGHT}" as="geometry" />
+</mxCell>
+
+
+<!-- ============================================
+     AWS CONTAINER: VPC (Purple border)
+     ============================================ -->
+<mxCell id="{ID}"
+  value="VPC"
+  style="points=[[0,0],[0.25,0],[0.5,0],[0.75,0],[1,0],[1,0.25],[1,0.5],[1,0.75],[1,1],[0.75,1],[0.5,1],[0.25,1],[0,1],[0,0.75],[0,0.5],[0,0.25]];outlineConnect=0;gradientColor=none;html=1;whiteSpace=wrap;fontSize=12;fontStyle=1;fontColor=#AAB7B8;shape=mxgraph.aws4.group;grIcon=mxgraph.aws4.group_vpc2;strokeColor=#8C4FFF;fillColor=none;verticalAlign=top;align=left;spacingLeft=30;dashed=0;container=1;collapsible=0;recursiveResize=0;"
+  vertex="1"
+  parent="{PARENT}">
+  <mxGeometry x="{X}" y="{Y}" width="{WIDTH}" height="{HEIGHT}" as="geometry" />
+</mxCell>
+
+
+<!-- ============================================
+     AWS CONTAINER: Public Subnet (Green, filled)
+     ============================================ -->
+<mxCell id="{ID}"
+  value="Public subnet"
+  style="points=[[0,0],[0.25,0],[0.5,0],[0.75,0],[1,0],[1,0.25],[1,0.5],[1,0.75],[1,1],[0.75,1],[0.5,1],[0.25,1],[0,1],[0,0.75],[0,0.5],[0,0.25]];outlineConnect=0;gradientColor=none;html=1;whiteSpace=wrap;fontSize=12;fontStyle=1;fontColor=#248814;shape=mxgraph.aws4.group;grIcon=mxgraph.aws4.group_security_group;grStroke=0;strokeColor=#248814;fillColor=#E9F3E6;verticalAlign=top;align=left;spacingLeft=30;dashed=0;container=1;collapsible=0;recursiveResize=0;"
+  vertex="1"
+  parent="{PARENT}">
+  <mxGeometry x="{X}" y="{Y}" width="{WIDTH}" height="{HEIGHT}" as="geometry" />
+</mxCell>
+
+
+<!-- ============================================
+     AWS CONTAINER: Private Subnet (Blue, filled)
+     ============================================ -->
+<mxCell id="{ID}"
+  value="Private subnet"
+  style="points=[[0,0],[0.25,0],[0.5,0],[0.75,0],[1,0],[1,0.25],[1,0.5],[1,0.75],[1,1],[0.75,1],[0.5,1],[0.25,1],[0,1],[0,0.75],[0,0.5],[0,0.25]];outlineConnect=0;gradientColor=none;html=1;whiteSpace=wrap;fontSize=12;fontStyle=1;fontColor=#147EBA;shape=mxgraph.aws4.group;grIcon=mxgraph.aws4.group_security_group;grStroke=0;strokeColor=#147EBA;fillColor=#E6F2F8;verticalAlign=top;align=left;spacingLeft=30;dashed=0;container=1;collapsible=0;recursiveResize=0;"
+  vertex="1"
+  parent="{PARENT}">
+  <mxGeometry x="{X}" y="{Y}" width="{WIDTH}" height="{HEIGHT}" as="geometry" />
+</mxCell>
+
+
+<!-- ============================================
+     AWS CONTAINER: Availability Zone (Teal, dashed)
+     ============================================ -->
+<mxCell id="{ID}"
+  value="Availability Zone"
+  style="points=[[0,0],[0.25,0],[0.5,0],[0.75,0],[1,0],[1,0.25],[1,0.5],[1,0.75],[1,1],[0.75,1],[0.5,1],[0.25,1],[0,1],[0,0.75],[0,0.5],[0,0.25]];outlineConnect=0;gradientColor=none;html=1;whiteSpace=wrap;fontSize=12;fontStyle=0;shape=mxgraph.aws4.group;grIcon=mxgraph.aws4.group_availability_zone;strokeColor=#00A4A6;fillColor=none;verticalAlign=top;align=left;spacingLeft=30;fontColor=#00A4A6;dashed=1;container=1;collapsible=0;recursiveResize=0;"
+  vertex="1"
+  parent="{PARENT}">
+  <mxGeometry x="{X}" y="{Y}" width="{WIDTH}" height="{HEIGHT}" as="geometry" />
+</mxCell>
+
+
+<!-- ============================================
+     AWS CONTAINER: Security Group (Red, filled)
+     ============================================ -->
+<mxCell id="{ID}"
+  value="Security Group"
+  style="points=[[0,0],[0.25,0],[0.5,0],[0.75,0],[1,0],[1,0.25],[1,0.5],[1,0.75],[1,1],[0.75,1],[0.5,1],[0.25,1],[0,1],[0,0.75],[0,0.5],[0,0.25]];outlineConnect=0;gradientColor=none;html=1;whiteSpace=wrap;fontSize=12;fontStyle=1;fontColor=#DD3522;shape=mxgraph.aws4.group;grIcon=mxgraph.aws4.group_security_group;strokeColor=#DD3522;fillColor=#F2DEDE;verticalAlign=top;align=left;spacingLeft=30;dashed=0;container=1;collapsible=0;recursiveResize=0;"
+  vertex="1"
+  parent="{PARENT}">
+  <mxGeometry x="{X}" y="{Y}" width="{WIDTH}" height="{HEIGHT}" as="geometry" />
+</mxCell>
+
+
+<!-- ============================================
+     GENERIC TEXT LABEL
+     ============================================ -->
+<mxCell id="{ID}"
+  value="{LABEL}"
+  style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontColor=#232F3E;"
+  vertex="1"
+  parent="{PARENT}">
+  <mxGeometry x="{X}" y="{Y}" width="{WIDTH}" height="30" as="geometry" />
+</mxCell>
+
+
+<!-- ============================================
+     COMMON AWS SERVICES - Ready to Use
+     ============================================ -->
+
+<!-- AWS Lambda (Compute - Orange) -->
+<mxCell id="lambda1" value="AWS Lambda" style="outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#ED7100;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;pointerEvents=1;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.lambda" vertex="1" parent="1">
+  <mxGeometry x="100" y="100" width="64" height="64" as="geometry" />
+</mxCell>
+
+<!-- Amazon S3 (Storage - Green) -->
+<mxCell id="s3_1" value="Amazon S3" style="outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#3F8624;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;pointerEvents=1;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.s3" vertex="1" parent="1">
+  <mxGeometry x="284" y="100" width="64" height="64" as="geometry" />
+</mxCell>
+
+<!-- Amazon DynamoDB (Databases - Purple) -->
+<mxCell id="dynamodb1" value="Amazon DynamoDB" style="outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#C925D1;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;pointerEvents=1;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.dynamodb" vertex="1" parent="1">
+  <mxGeometry x="468" y="100" width="64" height="64" as="geometry" />
+</mxCell>
+
+<!-- Amazon EC2 (Compute - Orange) -->
+<mxCell id="ec2_1" value="Amazon EC2" style="outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#ED7100;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;pointerEvents=1;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.ec2" vertex="1" parent="1">
+  <mxGeometry x="652" y="100" width="64" height="64" as="geometry" />
+</mxCell>
+
+<!-- Amazon API Gateway (Application Integration - Pink) -->
+<mxCell id="api_gateway" value="Amazon&#xa;API Gateway" style="outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#E7157B;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;pointerEvents=1;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.api_gateway" vertex="1" parent="1">
+  <mxGeometry x="100" y="264" width="64" height="64" as="geometry" />
+</mxCell>
+
+<!-- Amazon SQS (Application Integration - Pink) -->
+<mxCell id="sqs1" value="Amazon SQS" style="outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#E7157B;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;pointerEvents=1;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.sqs" vertex="1" parent="1">
+  <mxGeometry x="284" y="264" width="64" height="64" as="geometry" />
+</mxCell>
+
+
+<!-- ============================================
+     INSTANCE ICONS - Ready to Use (no background)
+
+     Use sub-resource shapes (lambda_function, ec2_instance, etc.)
+     when representing a SPECIFIC named resource.
+     Use the bare service shape (lambda, ec2) only for generic instances
+     where no dedicated sub-resource shape exists.
+
+     NEVER use shape=mxgraph.aws4.lambda for a specific function —
+     use shape=mxgraph.aws4.lambda_function instead.
+     ============================================ -->
+
+<!-- Lambda FUNCTION Instance (Compute - Orange, no background)
+     shape=lambda_function is the correct sub-resource icon for a specific Lambda function.
+     DO NOT use shape=lambda here — that is the bare service icon, not a function instance. -->
+<mxCell id="lambda_order_processor" value="Order&#xa;Processor" style="outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#ED7100;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;pointerEvents=1;shape=mxgraph.aws4.lambda_function" vertex="1" parent="1">
+  <mxGeometry x="100" y="428" width="64" height="64" as="geometry" />
+</mxCell>
+
+<!-- EC2 Instance (Compute - Orange, no background) -->
+<mxCell id="ec2_web_server" value="Web Server" style="outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#ED7100;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;pointerEvents=1;shape=mxgraph.aws4.ec2_instance" vertex="1" parent="1">
+  <mxGeometry x="284" y="428" width="64" height="64" as="geometry" />
+</mxCell>
+
+<!-- DynamoDB Table Instance (Databases - Purple, no background) -->
+<mxCell id="dynamodb_users_table" value="Users Table" style="outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#C925D1;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;pointerEvents=1;shape=mxgraph.aws4.dynamodb" vertex="1" parent="1">
+  <mxGeometry x="468" y="428" width="64" height="64" as="geometry" />
+</mxCell>
+
+<!-- S3 Bucket Instance (Storage - Green, no background)
+     Use shape=mxgraph.aws4.bucket for a generic S3 bucket instance.
+     shape=mxgraph.aws4.bucket_with_objects — bucket containing objects.
+     NOTE: s3_bucket is NOT a valid shape name — use "bucket" instead. -->
+<mxCell id="s3_logs_bucket" value="Logs Bucket" style="sketch=0;outlineConnect=0;fontColor=#232F3E;fillColor=#3F8624;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.bucket" vertex="1" parent="1">
+  <mxGeometry x="652" y="428" width="64" height="64" as="geometry" />
+</mxCell>

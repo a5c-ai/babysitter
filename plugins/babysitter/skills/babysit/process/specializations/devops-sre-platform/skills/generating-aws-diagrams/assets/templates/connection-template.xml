@@ -1,0 +1,134 @@
+<!--
+  Connection Template Reference (AWS)
+
+  This file contains template patterns for adding connections between shapes.
+  Copy and customize these patterns, replacing placeholder values.
+
+  Placeholders:
+  - {ID}      : Unique identifier for the connection (e.g., "conn1", "edge1")
+  - {LABEL}   : Optional label text on the connection
+  - {SOURCE}  : ID of the source shape
+  - {TARGET}  : ID of the target shape (can be a container ID for consolidated connections)
+  - {PARENT}  : Parent cell ID (usually "1")
+
+  Important:
+  - source and target must reference existing mxCell IDs with vertex="1"
+  - Connections are added AFTER all shapes in the XML
+  - ALWAYS include labelBackgroundColor=#FFFFFF on labeled connections
+  - When 3+ connections cross the same corridor, consolidate them into
+    a single connection targeting the container group instead of individual nodes
+
+  Best Practices:
+  - Use labelBackgroundColor=#FFFFFF;fontSize=10;fontColor=#232F3E; on all labeled edges
+  - Avoid 3+ parallel connectors between the same pair of groups
+  - Consolidate parallel connections: e.g. "write / load" instead of separate "write" and "load"
+  - Connections CAN target container cells directly to reduce clutter
+-->
+
+<!-- ============================================
+     AWS STANDARD ARROW (Default)
+     Open arrow, 2pt stroke, orthogonal routing
+     ============================================ -->
+<mxCell id="{ID}"
+  value="{LABEL}"
+  style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#232F3E;strokeWidth=2;endArrow=open;endSize=4;labelBackgroundColor=#FFFFFF;fontSize=10;fontColor=#232F3E;"
+  edge="1"
+  parent="{PARENT}"
+  source="{SOURCE}"
+  target="{TARGET}">
+  <mxGeometry relative="1" as="geometry" />
+</mxCell>
+
+
+<!-- ============================================
+     AWS STANDARD ARROW (No Label)
+     ============================================ -->
+<mxCell id="{ID}"
+  style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#232F3E;strokeWidth=2;endArrow=open;endSize=4;"
+  edge="1"
+  parent="{PARENT}"
+  source="{SOURCE}"
+  target="{TARGET}">
+  <mxGeometry relative="1" as="geometry" />
+</mxCell>
+
+
+<!-- ============================================
+     AWS DASHED ARROW
+     Optional flows, async operations
+     ============================================ -->
+<mxCell id="{ID}"
+  value="{LABEL}"
+  style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#232F3E;strokeWidth=2;dashed=1;endArrow=open;endSize=4;labelBackgroundColor=#FFFFFF;fontSize=10;fontColor=#232F3E;"
+  edge="1"
+  parent="{PARENT}"
+  source="{SOURCE}"
+  target="{TARGET}">
+  <mxGeometry relative="1" as="geometry" />
+</mxCell>
+
+
+<!-- ============================================
+     AWS BIDIRECTIONAL ARROW
+     Two-way communication, sync, read/write
+     ============================================ -->
+<mxCell id="{ID}"
+  value="{LABEL}"
+  style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#232F3E;strokeWidth=2;endArrow=open;endSize=4;startArrow=open;startSize=4;labelBackgroundColor=#FFFFFF;fontSize=10;fontColor=#232F3E;"
+  edge="1"
+  parent="{PARENT}"
+  source="{SOURCE}"
+  target="{TARGET}">
+  <mxGeometry relative="1" as="geometry" />
+</mxCell>
+
+
+<!-- ============================================
+     AWS LINE (No Arrow)
+     Association, relationship
+     ============================================ -->
+<mxCell id="{ID}"
+  value="{LABEL}"
+  style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#232F3E;strokeWidth=2;endArrow=none;endFill=0;"
+  edge="1"
+  parent="{PARENT}"
+  source="{SOURCE}"
+  target="{TARGET}">
+  <mxGeometry relative="1" as="geometry" />
+</mxCell>
+
+
+<!-- ============================================
+     AWS CONNECTION WITH WAYPOINTS
+     For complex routing around obstacles
+     ============================================ -->
+<mxCell id="{ID}"
+  value="{LABEL}"
+  style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#232F3E;strokeWidth=2;endArrow=open;endSize=4;labelBackgroundColor=#FFFFFF;fontSize=10;fontColor=#232F3E;"
+  edge="1"
+  parent="{PARENT}"
+  source="{SOURCE}"
+  target="{TARGET}">
+  <mxGeometry relative="1" as="geometry">
+    <Array as="points">
+      <mxPoint x="200" y="150" />
+      <mxPoint x="200" y="250" />
+    </Array>
+  </mxGeometry>
+</mxCell>
+
+
+<!-- ============================================
+     AWS CONSOLIDATED CONNECTION (Target Container)
+     Use when multiple connections cross the same
+     corridor to reduce visual clutter
+     ============================================ -->
+<mxCell id="{ID}"
+  value="write / load"
+  style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#232F3E;strokeWidth=2;endArrow=open;endSize=4;labelBackgroundColor=#FFFFFF;fontSize=10;fontColor=#232F3E;"
+  edge="1"
+  parent="{PARENT}"
+  source="{SOURCE}"
+  target="{TARGET_CONTAINER}">
+  <mxGeometry relative="1" as="geometry" />
+</mxCell>
