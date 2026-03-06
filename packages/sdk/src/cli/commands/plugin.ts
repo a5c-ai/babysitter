@@ -2,9 +2,9 @@
  * plugin:* commands — Manage plugins and marketplaces.
  *
  * Marketplace commands:
- *   plugin:add-marketplace      --marketplace-url <url> --scope global|project [--json]
- *   plugin:update-marketplace   --marketplace-name <name> --scope global|project [--json]
- *   plugin:list-plugins         --marketplace-name <name> --scope global|project [--json]
+ *   plugin:add-marketplace      --marketplace-url <url> [--global|--project] [--json]
+ *   plugin:update-marketplace   --marketplace-name <name> [--global|--project] [--json]
+ *   plugin:list-plugins         --marketplace-name <name> [--global|--project] [--json]
  *
  * Plugin commands:
  *   plugin:install, plugin:uninstall, plugin:update, plugin:configure,
@@ -97,7 +97,7 @@ function requireScope(
   json: boolean
 ): scope is PluginScope {
   if (!validateScope(scope)) {
-    const msg = `[${command}] --scope (global|project) is required`;
+    const msg = `[${command}] --global or --project is required`;
     if (json) {
       console.log(JSON.stringify({ error: "missing_argument", message: msg }));
     } else {

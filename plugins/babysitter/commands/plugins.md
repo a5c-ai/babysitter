@@ -12,8 +12,8 @@ babysitter plugin:add-marketplace --marketplace-url https://github.com/a5c-ai/ba
 ```
 
 Plugins can be installed at two scopes:
-- **global** (`--scope global`): stored under `~/.a5c/`, available for all projects
-- **project** (`--scope project`): stored under `<projectDir>/.a5c/`, project-specific
+- **global** (`--global`): stored under `~/.a5c/`, available for all projects
+- **project** (`--project`): stored under `<projectDir>/.a5c/`, project-specific
 
 ## Marketplace Management
 
@@ -28,7 +28,7 @@ The marketplace name is derived from the git URL's last path segment (stripping 
 ### Adding a marketplace
 
 ```bash
-babysitter plugin:add-marketplace --marketplace-url <url> [--marketplace-path <relative-path>] [--marketplace-branch <ref>] [--force] --scope global|project [--json]
+babysitter plugin:add-marketplace --marketplace-url <url> [--marketplace-path <relative-path>] [--marketplace-branch <ref>] [--force] --global|--project [--json]
 ```
 
 Clones the marketplace repository to the local marketplaces directory. Use `--marketplace-path` to specify the relative path to `marketplace.json` within the repo (for monorepos or repos where the manifest is not at the root). Use `--marketplace-branch` to clone a specific branch, tag, or ref (defaults to the repo's default branch). Use `--force` to replace an existing marketplace clone (deletes and re-clones).
@@ -36,7 +36,7 @@ Clones the marketplace repository to the local marketplaces directory. Use `--ma
 ### Updating a marketplace
 
 ```bash
-babysitter plugin:update-marketplace --marketplace-name <name> [--marketplace-branch <ref>] --scope global|project [--json]
+babysitter plugin:update-marketplace --marketplace-name <name> [--marketplace-branch <ref>] --global|--project [--json]
 ```
 
 Runs `git pull` on the local marketplace clone to fetch latest changes. Use `--marketplace-branch` to switch to a different branch before pulling (works even with shallow clones).
@@ -44,7 +44,7 @@ Runs `git pull` on the local marketplace clone to fetch latest changes. Use `--m
 ### Listing plugins in a marketplace
 
 ```bash
-babysitter plugin:list-plugins --marketplace-name <name> --scope global|project [--json]
+babysitter plugin:list-plugins --marketplace-name <name> --global|--project [--json]
 ```
 
 Reads the `marketplace.json` manifest and returns all available plugins sorted alphabetically by name. Each entry includes: name, description, latestVersion, versions array, packagePath, tags, and author.
@@ -55,12 +55,12 @@ Reads the `marketplace.json` manifest and returns all available plugins sorted a
 
 ### Flow
 
-1. Update the marketplace: `babysitter plugin:update-marketplace --marketplace-name <name> --scope global|project`
-2. Check current state: `babysitter plugin:list-installed --scope global|project` to see installed plugins and versions
+1. Update the marketplace: `babysitter plugin:update-marketplace --marketplace-name <name> --global|--project`
+2. Check current state: `babysitter plugin:list-installed --global|--project` to see installed plugins and versions
 3. Install the plugin:
 
 ```bash
-babysitter plugin:install --plugin-name <name> [--marketplace-name <mp>] --scope global|project [--json]
+babysitter plugin:install --plugin-name <name> [--marketplace-name <mp>] --global|--project [--json]
 ```
 
 This command resolves the plugin package path from the marketplace manifest, reads `install.md` from the plugin package directory, and returns the installation instructions. If an `install-process.js` file exists, the instructions may reference it as an automated install process.
@@ -69,13 +69,13 @@ This command resolves the plugin package path from the marketplace manifest, rea
 5. The agent updates the registry:
 
 ```bash
-babysitter plugin:update-registry --plugin-name <name> --plugin-version <ver> --marketplace-name <mp> --scope global|project [--json]
+babysitter plugin:update-registry --plugin-name <name> --plugin-version <ver> --marketplace-name <mp> --global|--project [--json]
 ```
 
 ## Plugin Update (with migrations)
 
 ```bash
-babysitter plugin:update --plugin-name <name> --marketplace-name <mp> --scope global|project [--json]
+babysitter plugin:update --plugin-name <name> --marketplace-name <mp> --global|--project [--json]
 ```
 
 This command:
@@ -93,25 +93,25 @@ This command:
 After performing the migration steps, update the registry:
 
 ```bash
-babysitter plugin:update-registry --plugin-name <name> --plugin-version <new-ver> --marketplace-name <mp> --scope global|project [--json]
+babysitter plugin:update-registry --plugin-name <name> --plugin-version <new-ver> --marketplace-name <mp> --global|--project [--json]
 ```
 
 ## Plugin Uninstallation
 
 ```bash
-babysitter plugin:uninstall --plugin-name <name> --marketplace-name <mp> --scope global|project [--json]
+babysitter plugin:uninstall --plugin-name <name> --marketplace-name <mp> --global|--project [--json]
 ```
 
 Reads `uninstall.md` from the plugin package directory and returns the uninstall instructions. After performing the uninstall steps, remove from registry:
 
 ```bash
-babysitter plugin:remove-from-registry --plugin-name <name> --scope global|project [--json]
+babysitter plugin:remove-from-registry --plugin-name <name> --global|--project [--json]
 ```
 
 ## Plugin Configuration
 
 ```bash
-babysitter plugin:configure --plugin-name <name> --marketplace-name <mp> --scope global|project [--json]
+babysitter plugin:configure --plugin-name <name> --marketplace-name <mp> --global|--project [--json]
 ```
 
 Reads `configure.md` from the plugin package directory and returns configuration instructions.
@@ -127,7 +127,7 @@ The plugin registry (`plugin-registry.json`) tracks installed plugins with schem
 ### List installed plugins
 
 ```bash
-babysitter plugin:list-installed --scope global|project [--json]
+babysitter plugin:list-installed --global|--project [--json]
 ```
 
 Returns all installed plugins sorted alphabetically. In `--json` mode, returns an array of registry entries. In human mode, displays a formatted table with name, version, marketplace, and timestamps.
@@ -135,7 +135,7 @@ Returns all installed plugins sorted alphabetically. In `--json` mode, returns a
 ### Remove from registry
 
 ```bash
-babysitter plugin:remove-from-registry --plugin-name <name> --scope global|project [--json]
+babysitter plugin:remove-from-registry --plugin-name <name> --global|--project [--json]
 ```
 
 Removes a plugin entry from the registry. Returns error if the plugin is not present.
@@ -227,17 +227,17 @@ my-plugin/
 
 ## All CLI Commands Summary
 
-All commands accept `--json` for machine-readable output and `--scope global|project`.
+All commands accept `--json` for machine-readable output and `--global|--project`.
 
 | Command | Required Flags | Description |
 |---------|---------------|-------------|
-| `plugin:add-marketplace` | `--marketplace-url`, `--scope` [`--marketplace-path`, `--marketplace-branch`, `--force`] | Clone a marketplace repository |
-| `plugin:update-marketplace` | `--marketplace-name`, `--scope` [`--marketplace-branch`] | Pull latest marketplace changes (optionally switch branch) |
-| `plugin:list-plugins` | `--marketplace-name`, `--scope` | List available plugins in a marketplace |
-| `plugin:install` | `--plugin-name`, `--marketplace-name`, `--scope` | Get install instructions for a plugin |
-| `plugin:uninstall` | `--plugin-name`, `--marketplace-name`, `--scope` | Get uninstall instructions for a plugin |
-| `plugin:update` | `--plugin-name`, `--marketplace-name`, `--scope` | Resolve migration chain and get update instructions |
-| `plugin:configure` | `--plugin-name`, `--marketplace-name`, `--scope` | Get configuration instructions for a plugin |
-| `plugin:list-installed` | `--scope` | List all installed plugins |
-| `plugin:update-registry` | `--plugin-name`, `--plugin-version`, `--marketplace-name`, `--scope` | Register or update a plugin entry |
-| `plugin:remove-from-registry` | `--plugin-name`, `--scope` | Remove a plugin entry from the registry |
+| `plugin:add-marketplace` | `--marketplace-url`, `--global\|--project` [`--marketplace-path`, `--marketplace-branch`, `--force`] | Clone a marketplace repository |
+| `plugin:update-marketplace` | `--marketplace-name`, `--global\|--project` [`--marketplace-branch`] | Pull latest marketplace changes (optionally switch branch) |
+| `plugin:list-plugins` | `--marketplace-name`, `--global\|--project` | List available plugins in a marketplace |
+| `plugin:install` | `--plugin-name`, `--marketplace-name`, `--global\|--project` | Get install instructions for a plugin |
+| `plugin:uninstall` | `--plugin-name`, `--marketplace-name`, `--global\|--project` | Get uninstall instructions for a plugin |
+| `plugin:update` | `--plugin-name`, `--marketplace-name`, `--global\|--project` | Resolve migration chain and get update instructions |
+| `plugin:configure` | `--plugin-name`, `--marketplace-name`, `--global\|--project` | Get configuration instructions for a plugin |
+| `plugin:list-installed` | `--global\|--project` | List all installed plugins |
+| `plugin:update-registry` | `--plugin-name`, `--plugin-version`, `--marketplace-name`, `--global\|--project` | Register or update a plugin entry |
+| `plugin:remove-from-registry` | `--plugin-name`, `--global\|--project` | Remove a plugin entry from the registry |

@@ -127,7 +127,7 @@ describe("handlePluginAddMarketplace missing args via requireArg", () => {
     });
     expect(result).toBe(1);
     expect(errorSpy).toHaveBeenCalledWith(
-      expect.stringContaining("--scope (global|project) is required")
+      expect.stringContaining("--global or --project is required")
     );
   });
 });
@@ -160,7 +160,7 @@ describe("handlePluginUpdateMarketplace missing args via requireArg", () => {
     });
     expect(result).toBe(1);
     expect(errorSpy).toHaveBeenCalledWith(
-      expect.stringContaining("--scope (global|project) is required")
+      expect.stringContaining("--global or --project is required")
     );
   });
 });
@@ -193,7 +193,7 @@ describe("handlePluginListPlugins missing args via requireArg", () => {
     });
     expect(result).toBe(1);
     expect(errorSpy).toHaveBeenCalledWith(
-      expect.stringContaining("--scope (global|project) is required")
+      expect.stringContaining("--global or --project is required")
     );
   });
 });

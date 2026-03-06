@@ -112,7 +112,7 @@ describe("plugin lifecycle commands", () => {
 
       expect(result).toBe(1);
       expect(console.error).toHaveBeenCalledWith(
-        "[plugin:install] --scope (global|project) is required"
+        "[plugin:install] --global or --project is required"
       );
     });
 
@@ -309,7 +309,7 @@ describe("plugin lifecycle commands", () => {
 
       expect(result).toBe(1);
       expect(console.error).toHaveBeenCalledWith(
-        "[plugin:uninstall] --scope (global|project) is required"
+        "[plugin:uninstall] --global or --project is required"
       );
     });
 
@@ -491,7 +491,7 @@ describe("plugin lifecycle commands", () => {
 
       expect(result).toBe(1);
       expect(console.error).toHaveBeenCalledWith(
-        "[plugin:update] --scope (global|project) is required"
+        "[plugin:update] --global or --project is required"
       );
     });
 
@@ -784,7 +784,7 @@ describe("plugin lifecycle commands", () => {
 
       expect(result).toBe(1);
       expect(console.error).toHaveBeenCalledWith(
-        "[plugin:configure] --scope (global|project) is required"
+        "[plugin:configure] --global or --project is required"
       );
     });
 

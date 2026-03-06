@@ -81,7 +81,7 @@ describe("marketplace CLI command handlers", () => {
 
       expect(result).toBe(1);
       expect(errorSpy).toHaveBeenCalledWith(
-        expect.stringContaining("--scope (global|project) is required")
+        expect.stringContaining("--global or --project is required")
       );
     });
 
@@ -94,7 +94,7 @@ describe("marketplace CLI command handlers", () => {
       expect(result).toBe(1);
       const output = JSON.parse(logSpy.mock.calls[0][0]);
       expect(output.error).toBe("missing_argument");
-      expect(output.message).toContain("--scope");
+      expect(output.message).toContain("--global or --project");
     });
 
     it("calls cloneMarketplace with correct args and returns 0 on success", async () => {
@@ -225,7 +225,7 @@ describe("marketplace CLI command handlers", () => {
 
       expect(result).toBe(1);
       expect(errorSpy).toHaveBeenCalledWith(
-        expect.stringContaining("--scope (global|project) is required")
+        expect.stringContaining("--global or --project is required")
       );
     });
 
@@ -350,7 +350,7 @@ describe("marketplace CLI command handlers", () => {
 
       expect(result).toBe(1);
       expect(errorSpy).toHaveBeenCalledWith(
-        expect.stringContaining("--scope (global|project) is required")
+        expect.stringContaining("--global or --project is required")
       );
     });
 

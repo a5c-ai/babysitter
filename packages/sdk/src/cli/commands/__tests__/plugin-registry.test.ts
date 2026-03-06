@@ -100,7 +100,7 @@ describe("handlePluginListInstalled", () => {
     const code = await handlePluginListInstalled({ json: false });
     expect(code).toBe(1);
     expect(errorSpy).toHaveBeenCalledWith(
-      expect.stringContaining("--scope")
+      expect.stringContaining("--global or --project")
     );
   });
 
@@ -225,7 +225,7 @@ describe("handlePluginUpdateRegistry", () => {
     });
     expect(code).toBe(1);
     expect(errorSpy).toHaveBeenCalledWith(
-      expect.stringContaining("--scope")
+      expect.stringContaining("--global or --project")
     );
   });
 
@@ -363,7 +363,7 @@ describe("handlePluginRemoveFromRegistry", () => {
     });
     expect(code).toBe(1);
     expect(errorSpy).toHaveBeenCalledWith(
-      expect.stringContaining("--scope")
+      expect.stringContaining("--global or --project")
     );
   });
 
