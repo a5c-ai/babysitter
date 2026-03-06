@@ -1,0 +1,26 @@
+{
+  "name": "marketplace",
+  "description": "Official a5c.ai plugin marketplace for babysitter",
+  "url": "https://github.com/a5c-ai/babysitter.git",
+  "owner": "a5c-ai",
+  "plugins": {
+    "basic-security": {
+      "name": "basic-security",
+      "description": "Install security processes, skills, agents and commands from the babysitter security-compliance library into your project. Includes post-install codebase security scan.",
+      "latestVersion": "1.0.0",
+      "versions": ["1.0.0"],
+      "packagePath": "plugins/basic-security",
+      "tags": ["security", "compliance", "audit", "sast", "vulnerability-management"],
+      "author": "a5c-ai"
+    },
+    "sound-hooks": {
+      "name": "sound-hooks",
+      "description": "Play sound effects on babysitter hook events — searches and downloads themed mp3 files for run start, complete, fail, and task events",
+      "latestVersion": "1.0.0",
+      "versions": ["1.0.0"],
+      "packagePath": "plugins/sound-hooks",
+      "tags": ["hooks", "sound", "notifications", "ux"],
+      "author": "a5c-ai"
+    }
+  }
+}
