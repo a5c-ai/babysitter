@@ -886,13 +886,18 @@ export async function handlePluginUpdateRegistry(
   try {
     const registry = await readPluginRegistry(scope, projectDir);
 
-    // Resolve the plugin package path for the registry entry
-    const packagePath = await resolvePluginPackagePath(
-      marketplaceName!,
-      pluginName!,
-      scope,
-      projectDir
-    );
+    // Try to resolve the plugin package path, but don't fail if marketplace is unavailable
+    let packagePath = "";
+    try {
+      packagePath = await resolvePluginPackagePath(
+        marketplaceName!,
+        pluginName!,
+        scope,
+        projectDir
+      );
+    } catch {
+      // Marketplace may not exist or plugin may not be listed yet — that's OK
+    }
 
     const now = new Date().toISOString();
     const existingEntry = getPluginEntry(registry, pluginName!);

@@ -313,6 +313,61 @@ describe("handlePluginUpdateRegistry", () => {
     expect(upsertCall.installedAt <= after).toBe(true);
   });
 
+  it("succeeds when marketplace is unavailable (resolvePluginPackagePath fails)", async () => {
+    const registry = emptyRegistry();
+
+    mockReadPluginRegistry.mockResolvedValue(registry);
+    mockGetPluginEntry.mockReturnValue(undefined);
+    mockResolvePluginPackagePath.mockRejectedValue(
+      new Error('Marketplace manifest not found at /nonexistent. Is "mp" a valid marketplace?')
+    );
+    mockUpsertPluginEntry.mockReturnValue(registry);
+    mockWritePluginRegistry.mockResolvedValue(undefined);
+
+    const code = await handlePluginUpdateRegistry({
+      pluginName: "my-plugin",
+      pluginVersion: "1.0.0",
+      marketplaceName: "mp",
+      scope: "global",
+      json: false,
+    });
+
+    // Should succeed even though marketplace resolution failed
+    expect(code).toBe(0);
+    expect(mockUpsertPluginEntry).toHaveBeenCalledWith(
+      registry,
+      expect.objectContaining({
+        name: "my-plugin",
+        version: "1.0.0",
+        marketplace: "mp",
+      })
+    );
+    expect(mockWritePluginRegistry).toHaveBeenCalled();
+  });
+
+  it("uses empty string as packagePath when marketplace is unavailable", async () => {
+    const registry = emptyRegistry();
+
+    mockReadPluginRegistry.mockResolvedValue(registry);
+    mockGetPluginEntry.mockReturnValue(undefined);
+    mockResolvePluginPackagePath.mockRejectedValue(
+      new Error("Plugin not found in marketplace")
+    );
+    mockUpsertPluginEntry.mockReturnValue(registry);
+    mockWritePluginRegistry.mockResolvedValue(undefined);
+
+    await handlePluginUpdateRegistry({
+      pluginName: "my-plugin",
+      pluginVersion: "1.0.0",
+      marketplaceName: "mp",
+      scope: "global",
+      json: true,
+    });
+
+    const upsertCall = mockUpsertPluginEntry.mock.calls[0][1];
+    expect(upsertCall.packagePath).toBe("");
+  });
+
   it("outputs the upserted entry as JSON", async () => {
     const registry = emptyRegistry();
 
