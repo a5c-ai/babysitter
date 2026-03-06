@@ -247,26 +247,37 @@ export const gatherEnvironmentInfoTask = defineTask('gather-environment-info', (
         component: args.component
       },
       instructions: [
-        'Run `babysitter --version` to get the SDK version',
+        'Run `babysitter --version` to get the SDK/CLI version',
         'Run `node --version` to get the Node.js version',
         'Run `npm --version` to get the npm version',
-        'Detect the OS and platform',
-        'Check if running in a git repository',
-        'If component is cli or sdk, check the installed package version in node_modules',
+        'Detect the OS with specifics: run `uname -a` or equivalent to get OS name, version, and architecture (e.g. "Windows 11 x86_64 (MINGW64)", "macOS 15.2 arm64", "Ubuntu 24.04 x86_64")',
+        'Detect the shell: run `echo $SHELL` or check $0 (e.g. "bash 5.2", "zsh 5.9", "fish 3.7")',
+        'Detect the AI coding harness being used. Check for environment variables or context clues:',
+        '  - CLAUDE_CODE_VERSION or similar env vars -> "Claude Code <version>"',
+        '  - CODEX_VERSION or codex CLI -> "Codex <version>"',
+        '  - Check if running inside Cursor, Windsurf, VS Code terminal, or other IDE',
+        '  - If unclear, report "unknown"',
+        'Check if running in a git repository and report the git version',
+        'If component is cli or sdk, check the installed package version: `npm ls @a5c-ai/babysitter-sdk` and whether it is globally or locally installed',
+        'Check if babysitter is installed globally (`npm ls -g @a5c-ai/babysitter`) vs locally',
         'Return structured environment info'
       ],
-      outputFormat: 'JSON with sdkVersion (string), nodeVersion (string), npmVersion (string), os (string), platform (string), shell (string)'
+      outputFormat: 'JSON with sdkVersion (string), nodeVersion (string), npmVersion (string), os (string -- detailed e.g. "Windows 11 26200 x86_64 MINGW64"), platform (string -- e.g. "win32", "darwin", "linux"), arch (string -- e.g. "x64", "arm64"), shell (string -- e.g. "bash 5.2"), harness (string -- e.g. "Claude Code 1.0.12", "Codex 0.1", "unknown"), gitVersion (string), installType (string -- "global" or "local")'
     },
     outputSchema: {
       type: 'object',
-      required: ['sdkVersion', 'nodeVersion', 'os'],
+      required: ['sdkVersion', 'nodeVersion', 'os', 'harness'],
       properties: {
         sdkVersion: { type: 'string' },
         nodeVersion: { type: 'string' },
         npmVersion: { type: 'string' },
         os: { type: 'string' },
         platform: { type: 'string' },
-        shell: { type: 'string' }
+        arch: { type: 'string' },
+        shell: { type: 'string' },
+        harness: { type: 'string' },
+        gitVersion: { type: 'string' },
+        installType: { type: 'string' }
       }
     }
   },
@@ -347,9 +358,13 @@ export const composeIssueTask = defineTask('compose-issue', (args, taskCtx) => (
         '  <numbered steps>',
         '  ',
         '  ## Environment',
-        '  - SDK Version: ...',
-        '  - Node.js: ...',
-        '  - OS: ...',
+        '  - Babysitter SDK: <version> (<global/local install>)',
+        '  - AI Harness: <harness name and version, e.g. Claude Code 1.0.12, Codex 0.1>',
+        '  - OS: <detailed, e.g. Windows 11 26200 x86_64 (MINGW64), macOS 15.2 arm64>',
+        '  - Node.js: <version>',
+        '  - npm: <version>',
+        '  - Shell: <shell and version>',
+        '  - Git: <version>',
         '  ',
         '  ## Additional Context',
         '  <any extra info>',

@@ -526,6 +526,11 @@ export const submitPrTask = defineTask('submit-pr', (args, taskCtx) => ({
         '  - Lint: PASS/FAIL',
         '  ## Files Changed',
         '  <list of files>',
+        '  ## Environment',
+        '  - Babysitter SDK: <run `babysitter --version`> (<global/local>)',
+        '  - AI Harness: <detect harness -- Claude Code, Codex, etc. with version>',
+        '  - OS: <run `uname -a` for detailed OS info>',
+        '  - Node.js: <run `node --version`>',
         'Use a heredoc for the body',
         'Capture the PR URL and number',
         'Return the PR submission result'
