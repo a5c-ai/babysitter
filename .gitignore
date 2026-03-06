@@ -48,3 +48,12 @@ e2e-tests/fixtures/*/**
 
 test-machine.sh
 bug.task.md
+.claude/settings.json
+.claude/sound-hooks/config.json
+.claude/sound-hooks/scripts/play.sh
+.claude/sound-hooks/sounds/notification.mp3
+.claude/sound-hooks/sounds/session-start.mp3
+.claude/sound-hooks/sounds/stop.mp3
+.claude/sound-hooks/sounds/tool-failure.mp3
+.claude/sound-hooks/sounds/tool-success.mp3
+.claude/sound-hooks/sounds/user-prompt.mp3

@@ -11,7 +11,7 @@ Edit `.claude/settings.json` and remove all sound-hooks entries from the `hooks`
 Remove any hook entries whose `command` contains `.claude/sound-hooks/` from these event arrays:
 - `SessionStart`
 - `Stop`
-- `PostToolUse`
+- `PostToolUse` (may have multiple per-tool entries -- remove all of them)
 - `PostToolUseFailure`
 - `Notification`
 - `UserPromptSubmit`
@@ -36,7 +36,7 @@ rm -rf .claude/sound-hooks/
 
 This removes:
 - `scripts/` -- the play script
-- `sounds/` -- all the downloaded mp3 files
+- `sounds/` -- all downloaded audio files (WAV and MP3)
 - `config.json` -- the plugin configuration
 
 ---
@@ -46,8 +46,10 @@ This removes:
 Unregister the plugin from babysitter's plugin registry:
 
 ```bash
-babysitter plugin:remove-from-registry --plugin-name sound-hooks --project --json
+babysitter plugin:remove-from-registry --plugin-name sound-hooks --global|--project --json
 ```
+
+Use `--global` or `--project` matching the scope the plugin was installed at.
 
 ---
 
