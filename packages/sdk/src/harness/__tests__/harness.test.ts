@@ -12,6 +12,7 @@
 import * as path from "node:path";
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { createClaudeCodeAdapter } from "../claudeCode";
+import { createCodexAdapter } from "../codex";
 import { createNullAdapter } from "../nullAdapter";
 import {
   detectAdapter,
@@ -26,7 +27,15 @@ import {
 // Env cleanup helper
 // ---------------------------------------------------------------------------
 
-const ENV_KEYS = ["CLAUDE_SESSION_ID", "CLAUDE_ENV_FILE", "CLAUDE_PLUGIN_ROOT"];
+const ENV_KEYS = [
+  "CLAUDE_SESSION_ID",
+  "CLAUDE_ENV_FILE",
+  "CLAUDE_PLUGIN_ROOT",
+  "CODEX_THREAD_ID",
+  "CODEX_SESSION_ID",
+  "CODEX_ENV_FILE",
+  "CODEX_PLUGIN_ROOT",
+];
 let savedEnv: Record<string, string | undefined>;
 
 beforeEach(() => {
@@ -152,6 +161,62 @@ describe("ClaudeCodeAdapter", () => {
 });
 
 // ---------------------------------------------------------------------------
+// CodexAdapter
+// ---------------------------------------------------------------------------
+
+describe("CodexAdapter", () => {
+  it("has name 'codex'", () => {
+    const adapter = createCodexAdapter();
+    expect(adapter.name).toBe("codex");
+  });
+
+  describe("isActive", () => {
+    it("returns false when no Codex env vars are set", () => {
+      const adapter = createCodexAdapter();
+      expect(adapter.isActive()).toBe(false);
+    });
+
+    it("returns true when CODEX_THREAD_ID is set", () => {
+      process.env.CODEX_THREAD_ID = "test-session";
+      const adapter = createCodexAdapter();
+      expect(adapter.isActive()).toBe(true);
+    });
+  });
+
+  describe("resolveSessionId", () => {
+    it("returns parsed.sessionId first", () => {
+      process.env.CODEX_THREAD_ID = "env-session";
+      const adapter = createCodexAdapter();
+      expect(adapter.resolveSessionId({ sessionId: "explicit" })).toBe("explicit");
+    });
+
+    it("falls back to CODEX_THREAD_ID env", () => {
+      process.env.CODEX_THREAD_ID = "env-session";
+      const adapter = createCodexAdapter();
+      expect(adapter.resolveSessionId({})).toBe("env-session");
+    });
+
+    it("falls back to legacy CODEX_SESSION_ID env", () => {
+      process.env.CODEX_SESSION_ID = "legacy-session";
+      const adapter = createCodexAdapter();
+      expect(adapter.resolveSessionId({})).toBe("legacy-session");
+    });
+  });
+
+  describe("resolveStateDir", () => {
+    it("returns explicit stateDir first", () => {
+      const adapter = createCodexAdapter();
+      expect(adapter.resolveStateDir({ stateDir: "/custom/state" })).toBe(path.resolve("/custom/state"));
+    });
+
+    it("defaults to .a5c when no values are provided", () => {
+      const adapter = createCodexAdapter();
+      expect(adapter.resolveStateDir({})).toBe(path.resolve(".a5c"));
+    });
+  });
+});
+
+// ---------------------------------------------------------------------------
 // NullAdapter
 // ---------------------------------------------------------------------------
 
@@ -214,6 +279,7 @@ describe("Registry", () => {
   it("listSupportedHarnesses includes claude-code", () => {
     const harnesses = listSupportedHarnesses();
     expect(harnesses).toContain("claude-code");
+    expect(harnesses).toContain("codex");
   });
 
   it("getAdapterByName returns adapter for claude-code", () => {
@@ -227,6 +293,12 @@ describe("Registry", () => {
   });
 
   describe("detectAdapter", () => {
+    it("returns codex adapter when codex env vars are set", () => {
+      process.env.CODEX_THREAD_ID = "session-123";
+      const adapter = detectAdapter();
+      expect(adapter.name).toBe("codex");
+    });
+
     it("returns claude-code adapter when env vars are set", () => {
       process.env.CLAUDE_SESSION_ID = "session-123";
       const adapter = detectAdapter();

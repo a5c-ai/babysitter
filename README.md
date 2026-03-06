@@ -67,6 +67,14 @@ Then restart Claude Code.
 
 Type `/skills` in Claude Code to verify "babysit" appears.
 
+### Codex CLI Integration (babysitter-codex)
+
+Codex support is available as a dedicated plugin bundle in:
+
+`plugins/babysitter-codex`
+
+It includes Codex hook wiring, slash command dispatch, and orchestration harness scripts compatible with the Babysitter SDK.
+
 ---
 
 ## Quick Start

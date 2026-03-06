@@ -82,7 +82,7 @@ const USAGE = `Usage:
   babysitter session:iteration-message --iteration <n> [--run-id <id>] [--runs-dir <dir>] [--plugin-root <dir>] [--json]
   babysitter skill:discover --plugin-root <dir> [--run-id <id>] [--cache-ttl <seconds>] [--runs-dir <dir>] [--include-remote] [--summary-only] [--process-path <path>] [--json]
   babysitter hook:log --hook-type <type> --log-file <path> [--json]
-  babysitter hook:run --hook-type <stop|session-start> [--harness <claude-code>] [--plugin-root <dir>] [--state-dir <dir>] [--runs-dir <dir>] [--json] [--verbose]
+  babysitter hook:run --hook-type <stop|session-start> [--harness <claude-code|codex|gemini-cli>] [--plugin-root <dir>] [--state-dir <dir>] [--runs-dir <dir>] [--json] [--verbose]
   babysitter skill:fetch-remote --source-type <github|well-known> --url <url> [--json]
   babysitter profile:read --user|--project [--dir <dir>] [--json]
   babysitter profile:write --user|--project --input <file> [--dir <dir>] [--json]
