@@ -30,6 +30,15 @@
       "packagePath": "plugins/github-actions-cicd",
       "tags": ["cicd", "github-actions", "automation", "devops", "workflows"],
       "author": "a5c-ai"
+    },
+    "rate-limit-handler": {
+      "name": "rate-limit-handler",
+      "description": "Configure Claude Code hooks to detect and handle API rate limit errors with exponential backoff, jitter, and automatic retry. Prevents sessions from getting stuck on rate limits.",
+      "latestVersion": "1.0.0",
+      "versions": ["1.0.0"],
+      "packagePath": "plugins/rate-limit-handler",
+      "tags": ["rate-limit", "hooks", "retry", "backoff", "resilience", "claude-code"],
+      "author": "a5c-ai"
     }
   }
 }
