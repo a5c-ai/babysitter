@@ -41,6 +41,9 @@ import type {
   SessionBindResult,
   HookHandlerArgs,
 } from "./types";
+import { loadCompressionConfig } from "../compression/config-loader";
+import { densityFilterText, estimateTokens } from "../compression/density-filter";
+import { getOrCompressFile, findLibraryFiles } from "../compression/library-cache";
 
 // ---------------------------------------------------------------------------
 // Structured file logger (moved from hookRun.ts)
@@ -565,7 +568,17 @@ async function handleStopHookImpl(args: HookHandlerArgs): Promise<number> {
     iterationContext = `Babysitter iteration ${nextIteration} | Continue orchestration (run:iterate).`;
   }
 
+  // Load compression config once — used for both sdkContextHook and processLibraryCache.
+  // Failures are non-fatal: both hooks fall back to uncompressed content.
+  let compressionCfg: ReturnType<typeof loadCompressionConfig> | null = null;
+  try {
+    compressionCfg = loadCompressionConfig(process.cwd());
+  } catch {
+    // Best-effort
+  }
+
   // 9. Try to resolve skill/agent context relevant to the process
+  let librarySection = "";
   if (resolvedPluginRoot) {
     try {
       const discoverResult = await discoverSkillsInternal({
@@ -597,13 +610,43 @@ async function handleStopHookImpl(args: HookHandlerArgs): Promise<number> {
       if (items.length > 0) {
         iterationContext = `${iterationContext} | Discovered: ${items.join(", ")}`;
       }
+
+      // processLibraryCache: inject compressed skill/agent content inline so
+      // Claude has it without needing to read each file separately.
+      const cacheLayer = compressionCfg?.layers.processLibraryCache;
+      if (compressionCfg?.enabled && cacheLayer?.enabled) {
+        const cacheDir = path.join(process.cwd(), ".a5c", "cache", "compression");
+        const sections: string[] = [];
+        const libraryItems = [
+          ...relevantSkills.slice(0, 4).map((s) => ({ kind: "Skill" as const, name: s.name, file: s.file })),
+          ...relevantAgents.slice(0, 2).map((a) => ({ kind: "Agent" as const, name: a.name, file: a.file })),
+        ];
+        for (const item of libraryItems) {
+          if (!item.file) continue;
+          const content = getOrCompressFile(item.file, cacheLayer.targetReduction, cacheLayer.ttlHours, cacheDir);
+          if (content) {
+            sections.push(`### ${item.kind}: ${item.name}\n${content}`);
+          }
+        }
+        if (sections.length > 0) {
+          librarySection = "\n\n---\n## Available Skills & Agents\n" + sections.join("\n\n---\n");
+        }
+      }
     } catch {
       // Skill discovery failure is non-fatal
     }
   }
 
-  // reason = what Claude sees; combine iteration context with the original prompt
-  const reason = `${iterationContext}\n\n${prompt}`;
+  // reason = what Claude sees; combine iteration context with the original prompt.
+  // sdkContextHook: compress the run prompt if enabled and long enough.
+  let effectivePrompt = prompt;
+  if (compressionCfg?.enabled && compressionCfg.layers.sdkContextHook.enabled) {
+    const sdkLayer = compressionCfg.layers.sdkContextHook;
+    if (estimateTokens(prompt) > sdkLayer.minCompressionTokens) {
+      effectivePrompt = densityFilterText(prompt, sdkLayer.targetReduction);
+    }
+  }
+  const reason = `${iterationContext}\n\n${effectivePrompt}${librarySection}`;
 
   // systemMessage = short user-facing status (not sent to Claude)
   let systemMessage: string;
@@ -739,13 +782,37 @@ async function handleSessionStartHookImpl(
     }
   }
 
+  // 4. Pre-warm processLibraryCache for all SKILL.md / AGENT.md files in the plugin root.
+  // This runs at session start (once per TTL period) so the stop hook can serve
+  // compressed content from cache at zero re-compression cost.
+  if (resolvedPluginRoot) {
+    try {
+      const compressionCfg = loadCompressionConfig(process.cwd());
+      const cacheLayer = compressionCfg.layers.processLibraryCache;
+      if (compressionCfg.enabled && cacheLayer.enabled) {
+        const cacheDir = path.join(process.cwd(), ".a5c", "cache", "compression");
+        const libraryFiles = findLibraryFiles(resolvedPluginRoot);
+        for (const file of libraryFiles) {
+          getOrCompressFile(file, cacheLayer.targetReduction, cacheLayer.ttlHours, cacheDir);
+        }
+        if (verbose) {
+          process.stderr.write(
+            `[hook:run session-start] Pre-warmed processLibraryCache for ${libraryFiles.length} file(s)\n`,
+          );
+        }
+      }
+    } catch {
+      // Best-effort: cache pre-warming must never break session start
+    }
+  }
+
   if (verbose) {
     process.stderr.write(
       `Babysitter session started: ${sessionId}\n`,
     );
   }
 
-  // 4. Output empty object
+  // 5. Output empty object
   process.stdout.write("{}\n");
   return 0;
 }

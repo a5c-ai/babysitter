@@ -113,6 +113,112 @@ function getStdout(): string {
 // Tests
 // ---------------------------------------------------------------------------
 
+describe("handleHookRun user-prompt-submit", () => {
+  it("passes through payload below token threshold", async () => {
+    const payload = JSON.stringify({ prompt: "Short prompt." });
+    const code = await callWithStdin(payload, {
+      hookType: "user-prompt-submit",
+      harness: "claude-code",
+      json: false,
+    });
+    expect(code).toBe(0);
+    const out = JSON.parse(getStdout());
+    expect(out.prompt).toBe("Short prompt.");
+  });
+
+  it("compresses payload above token threshold", async () => {
+    // Build a long prompt: 80 varied sentences, well above default threshold of 500 tokens
+    const sentences = Array.from({ length: 80 }, (_, i) =>
+      `Sentence ${i} covers topic ${i % 10} with details about subject matter and relevant context.`
+    );
+    const prompt = sentences.join(" ");
+    const payload = JSON.stringify({ prompt });
+    const code = await callWithStdin(payload, {
+      hookType: "user-prompt-submit",
+      harness: "claude-code",
+      json: false,
+    });
+    expect(code).toBe(0);
+    const out = JSON.parse(getStdout());
+    expect(typeof out.prompt).toBe("string");
+    expect(out.prompt.length).toBeLessThan(prompt.length);
+  });
+
+  it("preserves non-prompt fields in payload", async () => {
+    const sentences = Array.from({ length: 80 }, (_, i) =>
+      `Sentence ${i} covers topic ${i % 10} with details about subject matter and relevant context.`
+    );
+    const payload = JSON.stringify({ prompt: sentences.join(" "), session_id: "abc123", extra: 42 });
+    await callWithStdin(payload, {
+      hookType: "user-prompt-submit",
+      harness: "claude-code",
+      json: false,
+    });
+    const out = JSON.parse(getStdout());
+    expect(out.session_id).toBe("abc123");
+    expect(out.extra).toBe(42);
+  });
+
+  it("passes through invalid JSON unchanged", async () => {
+    const raw = "not-json";
+    const code = await callWithStdin(raw, {
+      hookType: "user-prompt-submit",
+      harness: "claude-code",
+      json: false,
+    });
+    expect(code).toBe(0);
+    expect(getStdout()).toBe("not-json");
+  });
+
+  it("passes through when compression disabled via env var", async () => {
+    const sentences = Array.from({ length: 80 }, (_, i) =>
+      `Sentence ${i} covers topic ${i % 10} with details about subject matter and relevant context.`
+    );
+    const prompt = sentences.join(" ");
+    const payload = JSON.stringify({ prompt });
+
+    const prev = process.env["BABYSITTER_COMPRESSION_ENABLED"];
+    process.env["BABYSITTER_COMPRESSION_ENABLED"] = "false";
+    try {
+      const code = await callWithStdin(payload, {
+        hookType: "user-prompt-submit",
+        harness: "claude-code",
+        json: false,
+      });
+      expect(code).toBe(0);
+      const out = JSON.parse(getStdout());
+      expect(out.prompt).toBe(prompt);
+    } finally {
+      if (prev !== undefined) process.env["BABYSITTER_COMPRESSION_ENABLED"] = prev;
+      else delete process.env["BABYSITTER_COMPRESSION_ENABLED"];
+    }
+  });
+
+  it("passes through when user prompt layer disabled via env var", async () => {
+    const sentences = Array.from({ length: 80 }, (_, i) =>
+      `Sentence ${i} covers topic ${i % 10} with details about subject matter and relevant context.`
+    );
+    const prompt = sentences.join(" ");
+    const payload = JSON.stringify({ prompt });
+
+    const prev = process.env["BABYSITTER_COMPRESSION_USER_PROMPT"];
+    process.env["BABYSITTER_COMPRESSION_USER_PROMPT"] = "0";
+    try {
+      const code = await callWithStdin(payload, {
+        hookType: "user-prompt-submit",
+        harness: "claude-code",
+        json: false,
+      });
+      expect(code).toBe(0);
+      const out = JSON.parse(getStdout());
+      expect(out.prompt).toBe(prompt);
+    } finally {
+      if (prev !== undefined) process.env["BABYSITTER_COMPRESSION_USER_PROMPT"] = prev;
+      else delete process.env["BABYSITTER_COMPRESSION_USER_PROMPT"];
+    }
+  });
+});
+
 describe("handleHookRun dispatcher", () => {
   it("rejects missing hook type", async () => {
     const code = await callWithStdin("{}", {
