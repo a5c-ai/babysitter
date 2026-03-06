@@ -11,6 +11,7 @@ vi.mock("../../../plugins/marketplace", () => ({
   readMarketplaceManifest: vi.fn(),
   cloneMarketplace: vi.fn(),
   listMarketplacePlugins: vi.fn(),
+  listMarketplaces: vi.fn().mockResolvedValue([]),
 }));
 
 vi.mock("../../../plugins/registry", () => ({
@@ -144,6 +145,7 @@ describe("plugin lifecycle commands", () => {
       expect(updateMarketplace).toHaveBeenCalledWith(
         "test-marketplace",
         "global",
+        undefined,
         undefined
       );
       expect(resolvePluginPackagePath).toHaveBeenCalledWith(

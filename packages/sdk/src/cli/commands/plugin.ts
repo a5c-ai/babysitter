@@ -17,6 +17,7 @@ import {
   cloneMarketplace,
   updateMarketplace,
   listMarketplacePlugins,
+  listMarketplaces,
   resolvePluginPackagePath,
   readMarketplaceManifest,
 } from "../../plugins/marketplace";
@@ -59,6 +60,7 @@ export interface PluginCommandArgs {
   json: boolean;
   verbose?: boolean;
   runsDir?: string;
+  force?: boolean;
 }
 
 // ============================================================================
@@ -106,6 +108,22 @@ function requireScope(
   return true;
 }
 
+/**
+ * Resolves the marketplace name when not explicitly provided.
+ * If only one marketplace is cloned for the given scope, returns its name.
+ * Otherwise returns null (caller should require the flag).
+ */
+async function autoResolveMarketplace(
+  scope: PluginScope,
+  projectDir?: string
+): Promise<string | null> {
+  const marketplaces = await listMarketplaces(scope, projectDir);
+  if (marketplaces.length === 1) {
+    return marketplaces[0];
+  }
+  return null;
+}
+
 // ============================================================================
 // Marketplace Handlers
 // ============================================================================
@@ -118,7 +136,7 @@ function requireScope(
 export async function handlePluginAddMarketplace(
   args: PluginCommandArgs
 ): Promise<number> {
-  const { marketplaceUrl, marketplacePath, marketplaceBranch, scope, json } = args;
+  const { marketplaceUrl, marketplacePath, marketplaceBranch, scope, json, force } = args;
 
   const url = requireArg(
     marketplaceUrl,
@@ -133,7 +151,7 @@ export async function handlePluginAddMarketplace(
   const projectDir = scope === "project" ? process.cwd() : undefined;
 
   try {
-    const targetDir = await cloneMarketplace(marketplaceUrl!, scope, projectDir, marketplacePath, marketplaceBranch);
+    const targetDir = await cloneMarketplace(marketplaceUrl!, scope, projectDir, marketplacePath, marketplaceBranch, force);
 
     if (json) {
       console.log(
@@ -175,7 +193,7 @@ export async function handlePluginAddMarketplace(
 export async function handlePluginUpdateMarketplace(
   args: PluginCommandArgs
 ): Promise<number> {
-  const { marketplaceName, scope, json } = args;
+  const { marketplaceName, marketplaceBranch, scope, json } = args;
 
   const name = requireArg(
     marketplaceName,
@@ -190,7 +208,7 @@ export async function handlePluginUpdateMarketplace(
   const projectDir = scope === "project" ? process.cwd() : undefined;
 
   try {
-    await updateMarketplace(marketplaceName!, scope, projectDir);
+    await updateMarketplace(marketplaceName!, scope, projectDir, marketplaceBranch);
 
     if (json) {
       console.log(
@@ -199,14 +217,16 @@ export async function handlePluginUpdateMarketplace(
             success: true,
             marketplace: marketplaceName,
             scope,
+            ...(marketplaceBranch ? { branch: marketplaceBranch } : {}),
           },
           null,
           2
         )
       );
     } else {
+      const branchInfo = marketplaceBranch ? ` (branch: ${marketplaceBranch})` : "";
       console.log(
-        `Marketplace "${marketplaceName}" updated successfully (scope: ${scope}).`
+        `Marketplace "${marketplaceName}" updated successfully${branchInfo} (scope: ${scope}).`
       );
     }
     return 0;
@@ -231,7 +251,17 @@ export async function handlePluginUpdateMarketplace(
 export async function handlePluginListPlugins(
   args: PluginCommandArgs
 ): Promise<number> {
-  const { marketplaceName, scope, json } = args;
+  const { scope, json } = args;
+  let { marketplaceName } = args;
+
+  if (!requireScope(scope, "plugin:list-plugins", json)) return 1;
+
+  const projectDir = scope === "project" ? process.cwd() : undefined;
+
+  // Auto-resolve marketplace when not provided and only one exists
+  if (!marketplaceName) {
+    marketplaceName = await autoResolveMarketplace(scope, projectDir) ?? undefined;
+  }
 
   const name = requireArg(
     marketplaceName,
@@ -240,10 +270,6 @@ export async function handlePluginListPlugins(
     json
   );
   if (!name) return 1;
-
-  if (!requireScope(scope, "plugin:list-plugins", json)) return 1;
-
-  const projectDir = scope === "project" ? process.cwd() : undefined;
 
   try {
     const plugins: MarketplacePluginEntry[] = await listMarketplacePlugins(
@@ -318,10 +344,20 @@ export async function handlePluginListPlugins(
 export async function handlePluginInstall(
   args: PluginCommandArgs
 ): Promise<number> {
-  const { pluginName, marketplaceName, scope, pluginVersion, json } = args;
+  const { pluginName, marketplaceBranch, scope, pluginVersion, json } = args;
+  let { marketplaceName } = args;
 
   const plugin = requireArg(pluginName, "--plugin-name", "plugin:install", json);
   if (!plugin) return 1;
+
+  if (!requireScope(scope, "plugin:install", json)) return 1;
+
+  const projectDir = scope === "project" ? process.cwd() : undefined;
+
+  // Auto-resolve marketplace when not provided and only one exists
+  if (!marketplaceName) {
+    marketplaceName = await autoResolveMarketplace(scope, projectDir) ?? undefined;
+  }
 
   const marketplace = requireArg(
     marketplaceName,
@@ -331,13 +367,9 @@ export async function handlePluginInstall(
   );
   if (!marketplace) return 1;
 
-  if (!requireScope(scope, "plugin:install", json)) return 1;
-
-  const projectDir = scope === "project" ? process.cwd() : undefined;
-
   try {
-    // Update marketplace to ensure latest
-    await updateMarketplace(marketplaceName!, scope, projectDir);
+    // Update marketplace to ensure latest (and optionally switch branch)
+    await updateMarketplace(marketplaceName!, scope, projectDir, marketplaceBranch);
 
     // Determine version: use provided or read latestVersion from manifest
     let version = pluginVersion;
@@ -508,10 +540,20 @@ export async function handlePluginUninstall(
 export async function handlePluginUpdate(
   args: PluginCommandArgs
 ): Promise<number> {
-  const { pluginName, marketplaceName, scope, pluginVersion, json } = args;
+  const { pluginName, marketplaceBranch, scope, pluginVersion, json } = args;
+  let { marketplaceName } = args;
 
   const plugin = requireArg(pluginName, "--plugin-name", "plugin:update", json);
   if (!plugin) return 1;
+
+  if (!requireScope(scope, "plugin:update", json)) return 1;
+
+  const projectDir = scope === "project" ? process.cwd() : undefined;
+
+  // Auto-resolve marketplace when not provided and only one exists
+  if (!marketplaceName) {
+    marketplaceName = await autoResolveMarketplace(scope, projectDir) ?? undefined;
+  }
 
   const marketplace = requireArg(
     marketplaceName,
@@ -520,10 +562,6 @@ export async function handlePluginUpdate(
     json
   );
   if (!marketplace) return 1;
-
-  if (!requireScope(scope, "plugin:update", json)) return 1;
-
-  const projectDir = scope === "project" ? process.cwd() : undefined;
 
   try {
     // Read registry to get currently installed version
@@ -536,8 +574,8 @@ export async function handlePluginUpdate(
     }
     const installedVersion = entry.version;
 
-    // Update marketplace to get latest
-    await updateMarketplace(marketplaceName!, scope, projectDir);
+    // Update marketplace to get latest (and optionally switch branch)
+    await updateMarketplace(marketplaceName!, scope, projectDir, marketplaceBranch);
 
     // Determine target version
     let targetVersion = pluginVersion;
@@ -649,7 +687,8 @@ export async function handlePluginUpdate(
 export async function handlePluginConfigure(
   args: PluginCommandArgs
 ): Promise<number> {
-  const { pluginName, marketplaceName, scope, json } = args;
+  const { pluginName, scope, json } = args;
+  let { marketplaceName } = args;
 
   const plugin = requireArg(
     pluginName,
@@ -659,6 +698,15 @@ export async function handlePluginConfigure(
   );
   if (!plugin) return 1;
 
+  if (!requireScope(scope, "plugin:configure", json)) return 1;
+
+  const projectDir = scope === "project" ? process.cwd() : undefined;
+
+  // Auto-resolve marketplace when not provided and only one exists
+  if (!marketplaceName) {
+    marketplaceName = await autoResolveMarketplace(scope, projectDir) ?? undefined;
+  }
+
   const marketplace = requireArg(
     marketplaceName,
     "--marketplace-name",
@@ -666,10 +714,6 @@ export async function handlePluginConfigure(
     json
   );
   if (!marketplace) return 1;
-
-  if (!requireScope(scope, "plugin:configure", json)) return 1;
-
-  const projectDir = scope === "project" ? process.cwd() : undefined;
 
   try {
     // Resolve plugin package path

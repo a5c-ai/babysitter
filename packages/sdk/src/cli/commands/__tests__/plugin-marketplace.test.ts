@@ -13,6 +13,7 @@ vi.mock("../../../plugins/marketplace", () => ({
   cloneMarketplace: vi.fn(),
   updateMarketplace: vi.fn(),
   listMarketplacePlugins: vi.fn(),
+  listMarketplaces: vi.fn().mockResolvedValue([]),
   resolvePluginPackagePath: vi.fn(),
   readMarketplaceManifest: vi.fn(),
 }));
@@ -111,6 +112,7 @@ describe("marketplace CLI command handlers", () => {
         "global",
         undefined,
         undefined,
+        undefined,
         undefined
       );
       expect(logSpy).toHaveBeenCalledWith(
@@ -132,6 +134,7 @@ describe("marketplace CLI command handlers", () => {
         "https://github.com/example/marketplace",
         "project",
         process.cwd(),
+        undefined,
         undefined,
         undefined
       );
@@ -239,6 +242,7 @@ describe("marketplace CLI command handlers", () => {
       expect(mockedUpdate).toHaveBeenCalledWith(
         "my-marketplace",
         "global",
+        undefined,
         undefined
       );
       expect(logSpy).toHaveBeenCalledWith(

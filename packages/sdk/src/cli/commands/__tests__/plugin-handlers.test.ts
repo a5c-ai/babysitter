@@ -11,6 +11,7 @@ vi.mock("../../../plugins/marketplace", () => ({
   cloneMarketplace: vi.fn(),
   updateMarketplace: vi.fn(),
   listMarketplacePlugins: vi.fn(),
+  listMarketplaces: vi.fn().mockResolvedValue([]),
   resolvePluginPackagePath: vi.fn(),
   readMarketplaceManifest: vi.fn(),
 }));
@@ -221,6 +222,7 @@ describe("handlePluginAddMarketplace success path", () => {
       "global",
       undefined,
       undefined,
+      undefined,
       undefined
     );
     const output = JSON.parse(logSpy.mock.calls[0][0] as string);
@@ -267,6 +269,7 @@ describe("handlePluginUpdateMarketplace success path", () => {
     expect(mockedUpdateMarketplace).toHaveBeenCalledWith(
       "my-mp",
       "global",
+      undefined,
       undefined
     );
     const output = JSON.parse(logSpy.mock.calls[0][0] as string);

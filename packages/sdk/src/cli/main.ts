@@ -94,8 +94,8 @@ const USAGE = `Usage:
   babysitter plugin:configure [<pluginName>] [--plugin-name <name>] [--global|--project] [--json] [--verbose]
   babysitter plugin:list-installed [--global|--project] [--json] [--verbose]
   babysitter plugin:list-plugins --marketplace-name <name> [--global|--project] [--json] [--verbose]
-  babysitter plugin:add-marketplace --marketplace-url <url> [--marketplace-path <path>] [--marketplace-branch <ref>] [--global|--project] [--json] [--verbose]
-  babysitter plugin:update-marketplace --marketplace-name <name> [--global|--project] [--json] [--verbose]
+  babysitter plugin:add-marketplace --marketplace-url <url> [--marketplace-path <path>] [--marketplace-branch <ref>] [--force] [--global|--project] [--json] [--verbose]
+  babysitter plugin:update-marketplace --marketplace-name <name> [--marketplace-branch <ref>] [--global|--project] [--json] [--verbose]
   babysitter plugin:update-registry [<pluginName>] [--plugin-name <name>] [--plugin-version <ver>] [--global|--project] [--json] [--verbose]
   babysitter plugin:remove-from-registry [<pluginName>] [--plugin-name <name>] [--global|--project] [--json] [--verbose]
   babysitter health [--json] [--verbose]
@@ -184,6 +184,7 @@ interface ParsedArgs {
   marketplacePath?: string;
   marketplaceBranch?: string;
   pluginScope?: "global" | "project";
+  pluginForce?: boolean;
 }
 
 interface ActionSummary {
@@ -502,6 +503,10 @@ function parseArgs(argv: string[]): ParsedArgs {
     }
     if (arg === "--marketplace-branch") {
       parsed.marketplaceBranch = expectFlagValue(rest, ++i, "--marketplace-branch");
+      continue;
+    }
+    if (arg === "--force") {
+      parsed.pluginForce = true;
       continue;
     }
     if (arg === "--global") {
@@ -2303,6 +2308,7 @@ export function createBabysitterCli() {
             marketplaceBranch: parsed.marketplaceBranch,
             pluginVersion: parsed.pluginVersion,
             scope: parsed.pluginScope,
+            force: parsed.pluginForce,
             json: parsed.json,
             verbose: parsed.verbose,
             runsDir: parsed.runsDir,

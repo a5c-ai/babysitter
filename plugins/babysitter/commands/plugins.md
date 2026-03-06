@@ -28,18 +28,18 @@ The marketplace name is derived from the git URL's last path segment (stripping 
 ### Adding a marketplace
 
 ```bash
-babysitter plugin:add-marketplace --marketplace-url <url> [--marketplace-path <relative-path>] [--marketplace-branch <ref>] --scope global|project [--json]
+babysitter plugin:add-marketplace --marketplace-url <url> [--marketplace-path <relative-path>] [--marketplace-branch <ref>] [--force] --scope global|project [--json]
 ```
 
-Clones the marketplace repository to the local marketplaces directory. Use `--marketplace-path` to specify the relative path to `marketplace.json` within the repo (for monorepos or repos where the manifest is not at the root). Use `--marketplace-branch` to clone a specific branch, tag, or ref (defaults to the repo's default branch).
+Clones the marketplace repository to the local marketplaces directory. Use `--marketplace-path` to specify the relative path to `marketplace.json` within the repo (for monorepos or repos where the manifest is not at the root). Use `--marketplace-branch` to clone a specific branch, tag, or ref (defaults to the repo's default branch). Use `--force` to replace an existing marketplace clone (deletes and re-clones).
 
 ### Updating a marketplace
 
 ```bash
-babysitter plugin:update-marketplace --marketplace-name <name> --scope global|project [--json]
+babysitter plugin:update-marketplace --marketplace-name <name> [--marketplace-branch <ref>] --scope global|project [--json]
 ```
 
-Runs `git pull` on the local marketplace clone to fetch latest changes.
+Runs `git pull` on the local marketplace clone to fetch latest changes. Use `--marketplace-branch` to switch to a different branch before pulling (works even with shallow clones).
 
 ### Listing plugins in a marketplace
 
@@ -51,6 +51,8 @@ Reads the `marketplace.json` manifest and returns all available plugins sorted a
 
 ## Plugin Installation
 
+**Note:** For `plugin:install`, `plugin:update`, `plugin:configure`, and `plugin:list-plugins`, the `--marketplace-name` flag is auto-detected when only one marketplace is cloned for the given scope. You can omit it if there's only one marketplace.
+
 ### Flow
 
 1. Update the marketplace: `babysitter plugin:update-marketplace --marketplace-name <name> --scope global|project`
@@ -58,7 +60,7 @@ Reads the `marketplace.json` manifest and returns all available plugins sorted a
 3. Install the plugin:
 
 ```bash
-babysitter plugin:install --plugin-name <name> --marketplace-name <mp> --scope global|project [--json]
+babysitter plugin:install --plugin-name <name> [--marketplace-name <mp>] --scope global|project [--json]
 ```
 
 This command resolves the plugin package path from the marketplace manifest, reads `install.md` from the plugin package directory, and returns the installation instructions. If an `install-process.js` file exists, the instructions may reference it as an automated install process.
@@ -229,8 +231,8 @@ All commands accept `--json` for machine-readable output and `--scope global|pro
 
 | Command | Required Flags | Description |
 |---------|---------------|-------------|
-| `plugin:add-marketplace` | `--marketplace-url`, `--scope` [`--marketplace-path`, `--marketplace-branch`] | Clone a marketplace repository |
-| `plugin:update-marketplace` | `--marketplace-name`, `--scope` | Pull latest marketplace changes |
+| `plugin:add-marketplace` | `--marketplace-url`, `--scope` [`--marketplace-path`, `--marketplace-branch`, `--force`] | Clone a marketplace repository |
+| `plugin:update-marketplace` | `--marketplace-name`, `--scope` [`--marketplace-branch`] | Pull latest marketplace changes (optionally switch branch) |
 | `plugin:list-plugins` | `--marketplace-name`, `--scope` | List available plugins in a marketplace |
 | `plugin:install` | `--plugin-name`, `--marketplace-name`, `--scope` | Get install instructions for a plugin |
 | `plugin:uninstall` | `--plugin-name`, `--marketplace-name`, `--scope` | Get uninstall instructions for a plugin |

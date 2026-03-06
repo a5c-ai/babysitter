@@ -54,6 +54,7 @@ export function deriveMarketplaceName(url: string): string {
  * @param projectDir - Required when scope is 'project'
  * @param manifestPath - Optional relative path to marketplace.json within the repo
  * @param branch - Optional git branch/tag/ref to clone (defaults to the repo's default branch)
+ * @param force - If true, removes existing clone and re-clones
  * @returns The directory the marketplace was cloned into
  */
 export async function cloneMarketplace(
@@ -61,7 +62,8 @@ export async function cloneMarketplace(
   scope: PluginScope,
   projectDir?: string,
   manifestPath?: string,
-  branch?: string
+  branch?: string,
+  force?: boolean
 ): Promise<string> {
   const name = deriveMarketplaceName(url);
   const marketplacesDir = getMarketplacesDir(scope, projectDir);
@@ -73,9 +75,13 @@ export async function cloneMarketplace(
   // Check if already cloned
   try {
     await fs.access(targetDir);
-    throw new Error(
-      `Marketplace "${name}" already exists at ${targetDir}. Use updateMarketplace() to refresh.`
-    );
+    if (force) {
+      await fs.rm(targetDir, { recursive: true, force: true });
+    } else {
+      throw new Error(
+        `Marketplace "${name}" already exists at ${targetDir}. Use --force to replace or plugin:update-marketplace to refresh.`
+      );
+    }
   } catch (error: unknown) {
     if (!isNodeError(error) || error.code !== "ENOENT") {
       throw error;
@@ -111,15 +117,19 @@ export async function cloneMarketplace(
 
 /**
  * Updates a previously cloned marketplace by pulling latest changes.
+ * When a branch is specified, switches to that branch first (fetching it
+ * even in shallow clones).
  *
  * @param marketplaceName - Name of the marketplace directory
  * @param scope - Whether to look in global or project marketplaces dir
  * @param projectDir - Required when scope is 'project'
+ * @param branch - Optional branch/tag/ref to switch to before pulling
  */
 export async function updateMarketplace(
   marketplaceName: string,
   scope: PluginScope,
-  projectDir?: string
+  projectDir?: string,
+  branch?: string
 ): Promise<void> {
   const dir = getMarketplaceDir(marketplaceName, scope, projectDir);
 
@@ -132,6 +142,23 @@ export async function updateMarketplace(
   }
 
   try {
+    if (branch) {
+      // Fetch the specific branch (works with shallow clones)
+      await execFile("git", ["-C", dir, "fetch", "--depth", "1", "origin", branch]);
+      // Switch to the branch, creating it locally if needed
+      try {
+        await execFile("git", ["-C", dir, "checkout", branch]);
+      } catch {
+        // Branch doesn't exist locally — create from FETCH_HEAD
+        // Stash any local changes first (e.g. .babysitter-manifest-path)
+        try {
+          await execFile("git", ["-C", dir, "stash"]);
+        } catch {
+          // Nothing to stash
+        }
+        await execFile("git", ["-C", dir, "checkout", "-B", branch, "FETCH_HEAD"]);
+      }
+    }
     await execFile("git", ["-C", dir, "pull", "--ff-only"]);
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : String(error);
