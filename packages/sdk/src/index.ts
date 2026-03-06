@@ -9,3 +9,4 @@ export * from "./hooks";
 export * from "./harness";
 export * from "./config";
 export * from "./profiles";
+export * from "./plugins";

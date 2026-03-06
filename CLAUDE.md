@@ -28,6 +28,21 @@ cd packages/sdk && npx vitest run src/runtime/__tests__/someFile.test.ts  # Sing
 cd packages/sdk && npm run smoke:cli                # CLI smoke test
 ```
 
+### Plugin Management
+
+```bash
+babysitter plugin:install <plugin-name> --marketplace-name <name> --global|--project [--plugin-version <ver>] [--json]
+babysitter plugin:uninstall <plugin-name> --global|--project [--json]
+babysitter plugin:update <plugin-name> --marketplace-name <name> --global|--project [--plugin-version <ver>] [--json]
+babysitter plugin:configure <plugin-name> --marketplace-name <name> --global|--project [--json]
+babysitter plugin:list-installed --global|--project [--json]
+babysitter plugin:list-plugins --marketplace-name <name> --global|--project [--json]
+babysitter plugin:add-marketplace --marketplace-url <url> --global|--project [--json]
+babysitter plugin:update-marketplace --marketplace-name <name> --global|--project [--json]
+babysitter plugin:update-registry <plugin-name> --plugin-version <ver> --marketplace-name <name> --global|--project [--json]
+babysitter plugin:remove-from-registry <plugin-name> --global|--project [--json]
+```
+
 ### Catalog (`packages/catalog` / `process-library-catalog`)
 
 ```bash
@@ -65,11 +80,12 @@ Config: `testTimeout: 30000`, `hookTimeout: 300000`, `fileParallelism: false`, J
 - **`runtime/`** — `createRun`, `orchestrateIteration`, `commitEffectResult`, replay engine (`runtime/replay/`), `ReplayCursor` (generates sequential step IDs `S000001`, `S000002`... for deterministic replay positioning), processContext (`createProcessContext`, `withProcessContext`, `getActiveProcessContext`, `requireProcessContext` — AsyncLocalStorage-based), exceptions (`EffectRequestedError`, `EffectPendingError`, `ParallelPendingError`, `RunFailedError`), error utilities (`BabysitterRuntimeError`, `ErrorCategory` enum: Configuration/Validation/Runtime/External/Internal, `formatErrorWithContext`, `toStructuredError`, `suggestCommand`), state cache helpers (`STATE_CACHE_SCHEMA_VERSION`, `createStateCacheSnapshot`, `readStateCache`, `writeStateCache`, `rebuildStateCache`, `journalHeadsEqual`, `normalizeJournalHead`, `normalizeSnapshot`), `hashInvocationKey`, `replaySchemaVersion`.
 - **`storage/`** — `createRunDir`, `appendEvent`, `loadJournal`, `snapshotState`, `storeTaskArtifacts`, run locking (`acquireRunLock`/`releaseRunLock`/`readRunLock`), run file I/O (`readRunMetadata`, `readRunInputs`, `writeRunOutput`), task file I/O (`writeTaskDefinition`, `readTaskDefinition`, `readTaskResult`, `writeTaskResult`), `getDiskUsage`/`findOrphanedBlobs`, atomic writes.
 - **`tasks/`** — `defineTask<TArgs, TResult>(id, impl, options)`. `TaskDef` descriptor with `kind`, `title`, `labels`, `io`, built-in kinds: `node`, `breakpoint`, `orchestrator_task`, `sleep`. Custom kinds extensible via `[key: string]: unknown`. `TaskBuildContext` provides `effectId`, `invocationKey`, `taskId`, `runId`, `runDir`, `taskDir`, `createBlobRef`, `toTaskRelativePath`. Sub-modules: **serializer** (`TASK_SCHEMA_VERSION: '2026.01.tasks-v1'`, `RESULT_SCHEMA_VERSION: '2026.01.results-v1'`, `BLOB_THRESHOLD_BYTES: 1 MiB` — payloads over 1 MiB are stored as blobs), **registry** (`RegisteredTaskDefinition`, `RegistryEffectRecord`), **batching** (`buildParallelBatch` deduplicates effects by effectId, `ParallelBatch`, `BatchedEffectSummary`).
-- **`cli/`** — Commands: `run:create|status|events|rebuild-state|repair-journal|iterate`, `task:post|list|show`, `session:init|associate|resume|state|update|check-iteration`, `skill:discover|fetch-remote`, `health`, `configure`, `version`. Global flags: `--runs-dir`, `--json`, `--dry-run`, `--verbose`, `--show-config`, `--help`/`-h`, `--version`/`-v`.
+- **`plugins/`** — Plugin management: **types** (`PluginScope`, `PluginRegistryEntry`, `PluginRegistry`, `MarketplaceManifest`, `MarketplacePluginEntry`, `MigrationDescriptor`, `PluginPackageInfo`, `PLUGIN_REGISTRY_SCHEMA_VERSION`), **paths** (`getRegistryPath`, `getMarketplacesDir`, `getMarketplaceDir`), **registry** (`readPluginRegistry`, `writePluginRegistry`, `getPluginEntry`, `upsertPluginEntry`, `removePluginEntry`, `listPluginEntries`), **marketplace** (`cloneMarketplace`, `updateMarketplace`, `readMarketplaceManifest`, `listMarketplacePlugins`, `resolvePluginPackagePath`, `deriveMarketplaceName`, `listMarketplaces`), **packageReader** (`readPluginPackage`, `readInstallInstructions`, `readUninstallInstructions`, `readConfigureInstructions`, `listMigrations`, `readMigration`), **migrations** (`parseMigrationFilename`, `buildMigrationGraph`, `findMigrationPath`, `resolveMigrationChain` — BFS shortest-path migration chain resolution).
+- **`cli/`** — Commands: `run:create|status|events|rebuild-state|repair-journal|iterate`, `task:post|list|show`, `session:init|associate|resume|state|update|check-iteration`, `skill:discover|fetch-remote`, `plugin:install|uninstall|update|configure|list-installed|list-plugins|add-marketplace|update-marketplace|update-registry|remove-from-registry`, `health`, `configure`, `version`. Global flags: `--runs-dir`, `--json`, `--dry-run`, `--verbose`, `--show-config`, `--help`/`-h`, `--version`/`-v`.
 - **`hooks/`** — 13 hook types: `on-run-start`, `on-run-complete`, `on-run-fail`, `on-task-start`, `on-task-complete`, `on-step-dispatch`, `on-iteration-start`, `on-iteration-end`, `on-breakpoint`, `pre-commit`, `pre-branch`, `post-planning`, `on-score`. Dispatcher: `callHook(hookType, payload, options)`.
 - **`testing/`** — `runHarness` for deterministic execution with snapshots.
 - **`config/`** — Environment variable resolution with defaults.
-- **`index.ts`** — Public API re-exports: `runtime`, `runtime/types`, `storage`, `storage/types`, `tasks`, `cli/main`, `testing`, `hooks`, `config`.
+- **`index.ts`** — Public API re-exports: `runtime`, `runtime/types`, `storage`, `storage/types`, `tasks`, `cli/main`, `testing`, `hooks`, `config`, `plugins`.
 
 ## Orchestration Flow (cross-file pattern)
 

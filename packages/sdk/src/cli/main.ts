@@ -35,6 +35,19 @@ import { handleHookLog } from "./commands/hookLog";
 import { handleHookRun } from "./commands/hookRun";
 import { handleProfileCommand } from "./commands/profile";
 import type { ProfileCommandArgs } from "./commands/profile";
+import {
+  handlePluginAddMarketplace,
+  handlePluginUpdateMarketplace,
+  handlePluginListPlugins,
+  handlePluginInstall,
+  handlePluginUninstall,
+  handlePluginUpdate,
+  handlePluginConfigure,
+  handlePluginListInstalled,
+  handlePluginUpdateRegistry,
+  handlePluginRemoveFromRegistry,
+} from "./commands/plugin";
+import type { PluginCommandArgs } from "./commands/plugin";
 import { resolveCompletionProof } from "./completionProof";
 import { getAdapter, getAdapterByName } from "../harness";
 import type { SessionBindResult } from "../harness";
@@ -75,6 +88,16 @@ const USAGE = `Usage:
   babysitter profile:write --user|--project --input <file> [--dir <dir>] [--json]
   babysitter profile:merge --user|--project --input <file> [--dir <dir>] [--json]
   babysitter profile:render --user|--project [--dir <dir>] [--json]
+  babysitter plugin:install [<pluginName>] [--plugin-name <name>] [--plugin-version <ver>] [--global|--project] [--json] [--verbose]
+  babysitter plugin:uninstall [<pluginName>] [--plugin-name <name>] [--global|--project] [--json] [--verbose]
+  babysitter plugin:update [<pluginName>] [--plugin-name <name>] [--plugin-version <ver>] [--global|--project] [--json] [--verbose]
+  babysitter plugin:configure [<pluginName>] [--plugin-name <name>] [--global|--project] [--json] [--verbose]
+  babysitter plugin:list-installed [--global|--project] [--json] [--verbose]
+  babysitter plugin:list-plugins --marketplace-name <name> [--global|--project] [--json] [--verbose]
+  babysitter plugin:add-marketplace --marketplace-url <url> [--global|--project] [--json] [--verbose]
+  babysitter plugin:update-marketplace --marketplace-name <name> [--global|--project] [--json] [--verbose]
+  babysitter plugin:update-registry [<pluginName>] [--plugin-name <name>] [--plugin-version <ver>] [--global|--project] [--json] [--verbose]
+  babysitter plugin:remove-from-registry [<pluginName>] [--plugin-name <name>] [--global|--project] [--json] [--verbose]
   babysitter health [--json] [--verbose]
   babysitter configure [show|validate|paths] [--json] [--defaults-only]
   babysitter version
@@ -153,6 +176,12 @@ interface ParsedArgs {
   profileProject?: boolean;
   profileInputPath?: string;
   profileDir?: string;
+  // Plugin command flags
+  pluginName?: string;
+  pluginVersion?: string;
+  marketplaceName?: string;
+  marketplaceUrl?: string;
+  pluginScope?: "global" | "project";
 }
 
 interface ActionSummary {
@@ -437,6 +466,7 @@ function parseArgs(argv: string[]): ParsedArgs {
     }
     if (arg === "--project") {
       parsed.profileProject = true;
+      parsed.pluginScope = "project";
       continue;
     }
     if (arg === "--input") {
@@ -445,6 +475,27 @@ function parseArgs(argv: string[]): ParsedArgs {
     }
     if (arg === "--dir") {
       parsed.profileDir = expectFlagValue(rest, ++i, "--dir");
+      continue;
+    }
+    // Plugin command flags
+    if (arg === "--plugin-name") {
+      parsed.pluginName = expectFlagValue(rest, ++i, "--plugin-name");
+      continue;
+    }
+    if (arg === "--plugin-version") {
+      parsed.pluginVersion = expectFlagValue(rest, ++i, "--plugin-version");
+      continue;
+    }
+    if (arg === "--marketplace-name") {
+      parsed.marketplaceName = expectFlagValue(rest, ++i, "--marketplace-name");
+      continue;
+    }
+    if (arg === "--marketplace-url") {
+      parsed.marketplaceUrl = expectFlagValue(rest, ++i, "--marketplace-url");
+      continue;
+    }
+    if (arg === "--global") {
+      parsed.pluginScope = "global";
       continue;
     }
     positionals.push(arg);
@@ -469,6 +520,11 @@ function parseArgs(argv: string[]): ParsedArgs {
     [parsed.runDirArg] = positionals;
   } else if (parsed.command === "configure") {
     [parsed.configureSubcommand] = positionals;
+  } else if (parsed.command?.startsWith("plugin:")) {
+    // First positional is plugin name for plugin commands
+    if (positionals.length > 0 && !parsed.pluginName) {
+      parsed.pluginName = positionals[0];
+    }
   }
   return parsed;
 }
@@ -1950,6 +2006,16 @@ const VALID_COMMANDS = [
   "profile:write",
   "profile:merge",
   "profile:render",
+  "plugin:install",
+  "plugin:uninstall",
+  "plugin:update",
+  "plugin:configure",
+  "plugin:list-installed",
+  "plugin:list-plugins",
+  "plugin:add-marketplace",
+  "plugin:update-marketplace",
+  "plugin:update-registry",
+  "plugin:remove-from-registry",
   "health",
   "configure",
   "version",
@@ -2216,6 +2282,49 @@ export function createBabysitterCli() {
             json: parsed.json,
           };
           return await handleProfileCommand(subcommand, profileArgs);
+        }
+        // Plugin commands
+        if (parsed.command?.startsWith("plugin:")) {
+          const pluginArgs: PluginCommandArgs = {
+            pluginName: parsed.pluginName,
+            marketplaceName: parsed.marketplaceName,
+            marketplaceUrl: parsed.marketplaceUrl,
+            pluginVersion: parsed.pluginVersion,
+            scope: parsed.pluginScope,
+            json: parsed.json,
+            verbose: parsed.verbose,
+            runsDir: parsed.runsDir,
+          };
+          if (parsed.command === "plugin:add-marketplace") {
+            return await handlePluginAddMarketplace(pluginArgs);
+          }
+          if (parsed.command === "plugin:update-marketplace") {
+            return await handlePluginUpdateMarketplace(pluginArgs);
+          }
+          if (parsed.command === "plugin:list-plugins") {
+            return await handlePluginListPlugins(pluginArgs);
+          }
+          if (parsed.command === "plugin:install") {
+            return await handlePluginInstall(pluginArgs);
+          }
+          if (parsed.command === "plugin:uninstall") {
+            return await handlePluginUninstall(pluginArgs);
+          }
+          if (parsed.command === "plugin:update") {
+            return await handlePluginUpdate(pluginArgs);
+          }
+          if (parsed.command === "plugin:configure") {
+            return await handlePluginConfigure(pluginArgs);
+          }
+          if (parsed.command === "plugin:list-installed") {
+            return await handlePluginListInstalled(pluginArgs);
+          }
+          if (parsed.command === "plugin:update-registry") {
+            return await handlePluginUpdateRegistry(pluginArgs);
+          }
+          if (parsed.command === "plugin:remove-from-registry") {
+            return await handlePluginRemoveFromRegistry(pluginArgs);
+          }
         }
         if (parsed.command === "health") {
           return await handleHealthCommand({
