@@ -1,9 +1,12 @@
 ---
 description: manage babysitter plugins. use this command to see the list of installed babysitter plugins, their status, and manage them (install, update, uninstall, list from marketplace, add marketplace, configure plugin, create new plugin, etc).
-argument-hint: Specific instructions for the run.
+argument-hint: Specific instructions.
 ---
 
 This command installs and manages plugins for babysitter. A plugin is a version-managed package of contextual instructions (for install, uninstall, configure, and update/migrate between versions), not a conventional software plugin.
+
+if the command is run without arguments, it lists all installed plugins with their name, version, marketplace, installation date, and last update date. as well as marketplaces added to the system. and instructions on how to install new plugins from marketplaces.
+if there are not marketplaces added, add the marketplace from the repo a5c-a5c/babyistter  path: /plugins/a5c/marketplace/marketplace.json
 
 Plugins can be installed at two scopes:
 - **global** (`--scope global`): stored under `~/.a5c/`, available for all projects

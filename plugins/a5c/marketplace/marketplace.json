@@ -39,6 +39,24 @@
       "packagePath": "plugins/rate-limit-handler",
       "tags": ["rate-limit", "hooks", "retry", "backoff", "resilience", "claude-code"],
       "author": "a5c-ai"
+    },
+    "project-deployment": {
+      "name": "project-deployment",
+      "description": "Set up deployment infrastructure, CI/CD pipelines, and cloud provisioning. Supports Terraform+K8s+Helm on AWS/GCP/Azure, Vercel/Cloudflare+Supabase, Docker containers, and serverless. Copies relevant devops-sre-platform processes from the library.",
+      "latestVersion": "1.0.0",
+      "versions": ["1.0.0"],
+      "packagePath": "plugins/project-deployment",
+      "tags": ["deployment", "cicd", "terraform", "kubernetes", "helm", "aws", "gcp", "azure", "vercel", "cloudflare", "docker", "serverless", "infrastructure"],
+      "author": "a5c-ai"
+    },
+    "testing-suite": {
+      "name": "testing-suite",
+      "description": "Set up comprehensive testing infrastructure — unit, integration, Storybook component tests in browser, E2E, visual regression, and coverage enforcement in CI/CD. Flexible framework selection based on stack. Copies QA testing processes from the library.",
+      "latestVersion": "1.0.0",
+      "versions": ["1.0.0"],
+      "packagePath": "plugins/testing-suite",
+      "tags": ["testing", "unit-tests", "integration-tests", "e2e", "storybook", "coverage", "playwright", "vitest", "tdd", "quality"],
+      "author": "a5c-ai"
     }
   }
 }
