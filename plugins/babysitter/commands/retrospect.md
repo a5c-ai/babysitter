@@ -18,4 +18,18 @@ implementations notes (for the process):
     - Analysis of the process that was followed, including what steps were taken, what tools were used, and how effective they were.
     - Suggestions for improvements, optimizations, and fixes for both the run and the process.
     - Implementing the improvements, optimizations, and fixes, and tracking the changes made over time.
-    - Ending by asking the user to run /contrib if the improvement is in the process library (processes, skills, subagents, etc.) or in the babysitter codebase (core or plugins) which will guide them through the contribution process (forking the repo, making the changes, submitting a PR, etc.)
+    - Ending by explicitly prompting the user to contribute back -- even just reporting an issue is valuable, they don't need to implement the fix themselves. After analysis, display a clear call-to-action:
+
+      "You've identified [specific insight/improvement]. This could help other babysitter users too. Run `/babysitter:contrib` to share it upstream -- you can either report it as an issue or submit a PR with the fix."
+
+      Route to the specific contrib workflow based on what the user wants to do:
+
+      **Just reporting (no code changes needed):**
+      - Found a bug or weakness in a process -> `/babysitter:contrib bug report: [description of what went wrong]`
+      - Found missing or confusing documentation -> `/babysitter:contrib documentation question: [what was unclear]`
+      - Have an idea for improvement but don't want to implement it -> `/babysitter:contrib feature request: [description]`
+
+      **Contributing code changes:**
+      - Process/skill/agent improvements -> `/babysitter:contrib library contribution: [description]`
+      - Bug fixes in SDK or CLI -> `/babysitter:contrib bugfix: [description]`
+      - Plugin instruction improvements -> `/babysitter:contrib library contribution: improved [plugin-name] [install|configure|uninstall] instructions`

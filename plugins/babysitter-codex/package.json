@@ -1,0 +1,36 @@
+{
+  "name": "babysitter-codex",
+  "version": "2.1.0",
+  "description": "Babysitter orchestration plugin for OpenAI Codex CLI — multi-step AI workflows with quality convergence, lifecycle hooks, and 11 slash commands",
+  "scripts": {
+    "test": "node test/integration.test.js && node test/harness.test.js && node test/plugin.test.js",
+    "test:unit": "node test/harness.test.js",
+    "test:integration": "node test/integration.test.js",
+    "test:plugin": "node test/plugin.test.js",
+    "test:scenario": "node test/full-session-scenario.js",
+    "test:long-scenario": "powershell -ExecutionPolicy Bypass -File ./test/full-session-long-run.ps1",
+    "lint": "find .codex -name '*.js' | xargs -I{} node --check {}",
+    "postinstall": "node bin/postinstall.js",
+    "preuninstall": "node bin/uninstall.js"
+  },
+  "files": [
+    "SKILL.md",
+    "CHANGELOG.md",
+    "agents/",
+    ".codex/",
+    "bin/",
+    "test/",
+    "README.md"
+  ],
+  "keywords": ["babysitter", "codex", "orchestration", "ai-agent", "sdk-integration", "codex-skill"],
+  "author": "a5c.ai",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/a5c-ai/babysitter-codex"
+  },
+  "homepage": "https://github.com/a5c-ai/babysitter-codex#readme",
+  "dependencies": {
+    "@a5c-ai/babysitter-sdk": "^0.0.173"
+  }
+}

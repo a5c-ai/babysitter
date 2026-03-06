@@ -394,3 +394,30 @@ OVERALL HEALTH: <HEALTHY | WARNING | CRITICAL>
 - **CRITICAL**: At least one check is FAIL.
 
 Present the full detailed findings for each check BEFORE the summary table, so the user can see the evidence. End with the summary table and recommendations. Also, create a single HTML report file with all the findings that uses the arwes UI framework and open it for the user in the browser.
+
+---
+
+## Escalation: Claude /debug
+
+If any check results in FAIL and the root cause is unclear after your own analysis -- especially for environment issues, hook execution failures, CLI availability problems, or permission errors that may relate to the Claude Code runtime itself -- invoke the built-in Claude `/debug` command to get additional diagnostic context from the Claude Code environment. This is particularly useful for:
+- Hook scripts that should be running but show no evidence of execution (check 10)
+- Permission or path resolution issues that don't match expected behavior
+- Unexpected CLI behavior that might be a Claude Code environment issue rather than a babysitter issue
+
+Call `/debug` with a summary of the failing check and what you've already ruled out, so it can focus on environment-level causes.
+
+---
+
+## After Diagnosis: Contribute Back
+
+After diagnosing issues, prompt the user to report or fix what was found -- they don't need to fix the bug themselves, just reporting it is valuable. Suggest `/babysitter:contrib` based on the situation:
+
+- **Found a bug but didn't fix it**: `/babysitter:contrib bug report: [what the doctor found, e.g. "state cache rebuild silently drops EFFECT_RESOLVED events when journal has duplicate invocation keys"]`
+- **Found and fixed a bug**: `/babysitter:contrib bugfix: [description of the fix]`
+- **Found confusing or missing docs that made diagnosis harder**: `/babysitter:contrib documentation question: [what was unclear or missing]`
+- **Found an issue in a plugin**: `/babysitter:contrib bug report: [plugin-name] [description]`
+- **Improved a process or skill during diagnosis**: `/babysitter:contrib library contribution: [description]`
+
+Example prompt after diagnosis:
+
+> "Diagnosis found a stale lock -- process 12847 crashed without cleanup. This is a known edge case in the orchestration loop. Even if you don't want to fix it yourself, reporting it helps: run `/babysitter:contrib bug report: orchestration loop doesn't release lock on unhandled rejection` to open an issue."

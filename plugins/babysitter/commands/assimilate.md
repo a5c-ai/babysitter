@@ -19,3 +19,13 @@ During the interview phase, determine which assimilation workflow to use based o
 - If the target is a **harness name** (e.g. codex, opencode, antigravity) → use the matching harness process
 - If the target is a **specification or other source** → adapt the methodology-assimilation workflow for the spec format
 - If unclear, ask the user to clarify the assimilation target and type
+
+## After Assimilation: Contribute Back
+
+After successfully assimilating a methodology or harness integration, prompt the user to share it with the community. The assimilated process definitions, skills, and agents could benefit other babysitter users:
+
+- **Completed a methodology assimilation**: `/babysitter:contrib library contribution: assimilated [methodology-name] into babysitter process definitions`
+- **Completed a harness integration**: `/babysitter:contrib library contribution: [harness-name] harness integration`
+- **Hit issues during assimilation** (e.g. unsupported patterns, missing SDK features): `/babysitter:contrib bug report: assimilation of [target] failed because [description]` or `/babysitter:contrib feature request: [what the SDK needs to support]`
+
+Even just reporting that an assimilation didn't work well helps improve babysitter for everyone.

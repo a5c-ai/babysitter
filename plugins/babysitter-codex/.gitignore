@@ -1,0 +1,12 @@
+node_modules/
+.a5c/runs/
+.a5c/logs/
+.a5c/processes/
+.a5c/artifacts/
+.a5c/session.json
+.a5c/current-run.json
+.a5c/observer.json
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+.DS_Store

@@ -1,0 +1,62 @@
+{
+  "name": "marketplace",
+  "description": "Official a5c.ai plugin marketplace for babysitter",
+  "url": "https://github.com/a5c-ai/babysitter.git",
+  "owner": "a5c-ai",
+  "plugins": {
+    "basic-security": {
+      "name": "basic-security",
+      "description": "Install security processes, skills, agents and commands from the babysitter security-compliance library into your project. Includes post-install codebase security scan.",
+      "latestVersion": "1.0.0",
+      "versions": ["1.0.0"],
+      "packagePath": "plugins/basic-security",
+      "tags": ["security", "compliance", "audit", "sast", "vulnerability-management"],
+      "author": "a5c-ai"
+    },
+    "sound-hooks": {
+      "name": "sound-hooks",
+      "description": "Play sound effects on Claude Code lifecycle events via hooks in .claude/settings.json — searches and downloads themed mp3 files for session start, tool use, errors, and notifications. Optional babysitter hooks integration.",
+      "latestVersion": "1.0.0",
+      "versions": ["1.0.0"],
+      "packagePath": "plugins/sound-hooks",
+      "tags": ["hooks", "sound", "notifications", "ux", "claude-code"],
+      "author": "a5c-ai"
+    },
+    "github-actions-cicd": {
+      "name": "github-actions-cicd",
+      "description": "Set up babysitter-powered GitHub Actions workflows with triggers on issue comments, PR events, labels, schedules, and manual dispatch. Based on docs/github-actions-setup.md.",
+      "latestVersion": "1.0.0",
+      "versions": ["1.0.0"],
+      "packagePath": "plugins/github-actions-cicd",
+      "tags": ["cicd", "github-actions", "automation", "devops", "workflows"],
+      "author": "a5c-ai"
+    },
+    "rate-limit-handler": {
+      "name": "rate-limit-handler",
+      "description": "Configure Claude Code hooks to detect and handle API rate limit errors with exponential backoff, jitter, and automatic retry. Prevents sessions from getting stuck on rate limits.",
+      "latestVersion": "1.0.0",
+      "versions": ["1.0.0"],
+      "packagePath": "plugins/rate-limit-handler",
+      "tags": ["rate-limit", "hooks", "retry", "backoff", "resilience", "claude-code"],
+      "author": "a5c-ai"
+    },
+    "project-deployment": {
+      "name": "project-deployment",
+      "description": "Set up deployment infrastructure, CI/CD pipelines, and cloud provisioning. Supports Terraform+K8s+Helm on AWS/GCP/Azure, Vercel/Cloudflare+Supabase, Docker containers, and serverless. Copies relevant devops-sre-platform processes from the library.",
+      "latestVersion": "1.0.0",
+      "versions": ["1.0.0"],
+      "packagePath": "plugins/project-deployment",
+      "tags": ["deployment", "cicd", "terraform", "kubernetes", "helm", "aws", "gcp", "azure", "vercel", "cloudflare", "docker", "serverless", "infrastructure"],
+      "author": "a5c-ai"
+    },
+    "testing-suite": {
+      "name": "testing-suite",
+      "description": "Set up comprehensive testing infrastructure — unit, integration, Storybook component tests in browser, E2E, visual regression, and coverage enforcement in CI/CD. Flexible framework selection based on stack. Copies QA testing processes from the library.",
+      "latestVersion": "1.0.0",
+      "versions": ["1.0.0"],
+      "packagePath": "plugins/testing-suite",
+      "tags": ["testing", "unit-tests", "integration-tests", "e2e", "storybook", "coverage", "playwright", "vitest", "tdd", "quality"],
+      "author": "a5c-ai"
+    }
+  }
+}

@@ -5,6 +5,28 @@
     "context7@claude-plugins-official": true
   },
   "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/sound-hooks/scripts/play.sh .claude/sound-hooks/sounds/session-start.mp3"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/sound-hooks/scripts/play.sh .claude/sound-hooks/sounds/stop.mp3"
+          }
+        ]
+      }
+    ],
     "PostToolUse": [
       {
         "matcher": "Edit|Write",
@@ -16,6 +38,17 @@
         ]
       }
     ],
+    "PostToolUseFailure": [
+      {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/sound-hooks/scripts/play.sh .claude/sound-hooks/sounds/tool-failure.mp3"
+          }
+        ]
+      }
+    ],
     "PreToolUse": [
       {
         "matcher": "Edit|Write",
@@ -23,6 +56,17 @@
           {
             "type": "command",
             "command": "bash -c 'if [[ \"$TOOL_INPUT\" =~ (package-lock\\.json|pnpm-lock\\.yaml)$ ]]; then echo \"BLOCK: Lock files should not be edited directly. Use npm/pnpm commands instead.\" && exit 1; fi'"
+          }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/sound-hooks/scripts/play.sh .claude/sound-hooks/sounds/notification.mp3"
           }
         ]
       }
