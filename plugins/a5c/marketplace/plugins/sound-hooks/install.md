@@ -51,7 +51,73 @@ This gives us:
 
 ---
 
-## Step 3: Search and Download Sound Files
+## Step 3: Ensure Audio Player is Available
+
+The play script needs an audio player that can play mp3 files from the command line. Check what's available and install if needed:
+
+### Windows (Git Bash / MSYS2 / WSL)
+
+**mpv** is the recommended player on Windows -- lightweight, fast, CLI-friendly, and plays mp3 natively with no GUI popup.
+
+Check if mpv is available:
+
+```bash
+command -v mpv &>/dev/null && echo "mpv is installed" || echo "mpv not found"
+```
+
+If mpv is not found, install it using one of these methods (try in order):
+
+```bash
+# Option 1: winget (built into Windows 10+)
+winget install mpv-player.mpv
+
+# Option 2: scoop
+scoop install mpv
+
+# Option 3: chocolatey (run from elevated terminal)
+choco install mpv
+```
+
+After installing, verify mpv is in PATH:
+
+```bash
+mpv --version
+```
+
+If `mpv` is not in PATH after install, add its install directory. Common locations:
+- winget: `C:\Users\<user>\AppData\Local\Microsoft\WinGet\Packages\mpv-player.mpv_*\mpv\`
+- scoop: `C:\Users\<user>\scoop\apps\mpv\current\`
+- choco: `C:\ProgramData\chocolatey\bin\`
+
+### macOS
+
+`afplay` is built-in -- no install needed. Falls back to `mpg123` if needed:
+
+```bash
+# Only if afplay doesn't work for some reason:
+brew install mpg123
+```
+
+### Linux
+
+Most distributions have `paplay` (PulseAudio) or `aplay` (ALSA) built-in. For mp3 support:
+
+```bash
+# Ubuntu/Debian
+sudo apt install mpv
+# or
+sudo apt install mpg123
+
+# Fedora/RHEL
+sudo dnf install mpv
+
+# Arch
+sudo pacman -S mpv
+```
+
+---
+
+## Step 4: Search and Download Sound Files
 
 Based on the chosen theme, search the web for **royalty-free** or **Creative Commons** licensed mp3 sound effects. For each hook event, find and download an appropriate sound.
 
@@ -99,7 +165,7 @@ If a download fails or a suitable sound can't be found, note the missing sound i
 
 ---
 
-## Step 4: Create the Play Script
+## Step 5: Create the Play Script
 
 Create `.claude/sound-hooks/scripts/play.sh`:
 
@@ -110,6 +176,7 @@ Create `.claude/sound-hooks/scripts/play.sh`:
 #
 # Plays the sound in the background (non-blocking) using whatever
 # audio player is available on the system.
+# Priority: mpv > afplay > paplay > aplay > mpg123 > powershell
 
 SOUND="$1"
 
@@ -119,20 +186,23 @@ if [ ! -f "$SOUND" ]; then
 fi
 
 # Play the sound in the background (non-blocking, platform-appropriate)
-if command -v afplay &>/dev/null; then
-  # macOS
+if command -v mpv &>/dev/null; then
+  # Cross-platform (recommended on Windows, also works on macOS/Linux)
+  mpv --no-video --really-quiet "$SOUND" &
+elif command -v afplay &>/dev/null; then
+  # macOS built-in
   afplay "$SOUND" &
 elif command -v paplay &>/dev/null; then
   # Linux (PulseAudio)
   paplay "$SOUND" &
 elif command -v aplay &>/dev/null; then
-  # Linux (ALSA)
+  # Linux (ALSA) -- note: aplay only supports wav, not mp3
   aplay "$SOUND" &
 elif command -v mpg123 &>/dev/null; then
-  # Linux/macOS (mpg123)
+  # Linux/macOS fallback
   mpg123 -q "$SOUND" &
 elif command -v powershell.exe &>/dev/null; then
-  # Windows (WSL or Git Bash)
+  # Windows last resort (slower startup, blocks briefly)
   powershell.exe -c "(New-Object Media.SoundPlayer '$SOUND').PlaySync()" &
 fi
 
@@ -147,7 +217,7 @@ chmod +x .claude/sound-hooks/scripts/play.sh
 
 ---
 
-## Step 5: Create Configuration
+## Step 6: Create Configuration
 
 Write the configuration file at `.claude/sound-hooks/config.json`:
 
@@ -172,7 +242,7 @@ Replace `<selected-theme>` with the theme chosen in Step 1 (e.g., `"tv-shows"`, 
 
 ---
 
-## Step 6: Configure Claude Code Hooks
+## Step 7: Configure Claude Code Hooks
 
 Add hooks to the project's `.claude/settings.json`. Read the existing file first, then merge these hook entries into the `hooks` object.
 
@@ -264,7 +334,7 @@ Optionally, if the user enabled `PostToolUse` or `UserPromptSubmit`, add those t
 
 ---
 
-## Step 7: Register Plugin
+## Step 8: Register Plugin
 
 Register the plugin with babysitter so it knows sound-hooks is installed:
 
@@ -274,7 +344,7 @@ babysitter plugin:update-registry --plugin-name sound-hooks --plugin-version 1.0
 
 ---
 
-## Step 8: Verify
+## Step 9: Verify
 
 Test the setup by playing a sound manually:
 
@@ -282,7 +352,12 @@ Test the setup by playing a sound manually:
 bash .claude/sound-hooks/scripts/play.sh .claude/sound-hooks/sounds/session-start.mp3
 ```
 
-If you hear the sound, you're all set. If not, check that an audio player is available on your system (`afplay`, `paplay`, `mpg123`, or `powershell.exe`).
+If you hear the sound, you're all set. If not, troubleshoot:
+
+1. **Check player**: Run `mpv --version` (Windows) or `afplay --help` (macOS) to confirm the player works
+2. **Check file**: Run `file .claude/sound-hooks/sounds/session-start.mp3` to verify it's a valid audio file
+3. **Try directly**: Run `mpv --no-video --really-quiet .claude/sound-hooks/sounds/session-start.mp3` to test the player with the file
+4. **Windows PATH**: If mpv was just installed, you may need to restart your terminal for PATH changes to take effect
 
 ---
 
