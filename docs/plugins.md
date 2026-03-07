@@ -6,7 +6,7 @@ Most plugin systems work like this: there's a host application with predefined e
 
 Babysitter plugins don't work like that.
 
-A babysitter plugin is a **set of natural language instructions** -- markdown files -- that an AI agent reads and executes. The SDK doesn't "run" the plugin. It stores, versions, and distributes the instructions. The AI agent is the runtime.
+A babysitter plugin is a **set of natural language instructions** (markdown files) or **deterministic coded processes** (js files) -- that an AI agent reads and executes to install or configure a modular set of capabilities. The SDK doesn't "run" the plugin. It stores, versions, and distributes the instructions. The AI agent is the runtime.
 
 This means a plugin can do *anything an AI agent can do*:
 
@@ -15,7 +15,7 @@ This means a plugin can do *anything an AI agent can do*:
 - **Modify your workflow** -- copy babysitter processes, skills, and agents into your project so future babysitter runs use them
 - **Research and adapt** -- web search for theme resources, analyze your codebase to pick the right testing framework, detect your cloud provider from existing configs
 
-There are no predefined extension points, no plugin API, no sandboxing. The `install.md` for a plugin is a prompt. The "integration" is whatever the AI agent does after reading it.
+There are no predefined extension points, no plugin API, no sandboxing. The `install.md` (or `install.js`) for a plugin is a prompt or autonomous process. The "integration" is whatever the AI agent does after reading it.
 
 ### What the SDK Actually Manages
 
@@ -136,12 +136,6 @@ Sets up babysitter-powered GitHub Actions workflows.
 Configures hooks to detect and handle API rate limits with exponential backoff.
 
 **What the AI agent does:** Interviews you about backoff strategy (exponential-jitter, linear, fixed), creates detection and retry scripts, integrates them as Claude Code hooks that trigger on PostToolUseFailure and Notification events.
-
-### sound-hooks
-
-Plays themed sound effects on Claude Code lifecycle events.
-
-**What the AI agent does:** Asks you to pick a theme (TV Shows, Movies, Video Games, etc.), detects your audio player, downloads matching sound effects, creates a cross-platform playback script, and wires hooks into `.claude/settings.json`. A simpler version of themes -- sounds only, no design system or personality.
 
 ---
 
