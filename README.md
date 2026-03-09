@@ -11,7 +11,7 @@ https://a5c.ai
 [![GitHub issues](https://img.shields.io/github/issues/a5c-ai/babysitter.svg)](https://github.com/a5c-ai/babysitter/issues)
 [![GitHub stars](https://img.shields.io/github/stars/a5c-ai/babysitter.svg)](https://github.com/a5c-ai/babysitter/stargazers)
 
-> **Orchestrate complex, multi-step workflows with human-in-the-loop approval, iterative refinement, and quality convergence.**
+> **Orchestrate complex, multi-step workflows with process-driven execution, human-in-the-loop approval, and quality gates.**
 
 [Getting Started](#installation) | [Documentation](#documentation) | [Community](#community-and-support)
 
@@ -41,7 +41,7 @@ https://github.com/user-attachments/assets/8c3b0078-9396-48e8-aa43-5f40da30c20b
 
 ## What is Babysitter?
 
-Babysitter is an orchestration framework for Claude Code that enables deterministic, event-sourced workflow management. It allows you to build complex, multi-step development processes with built-in quality gates, human approval checkpoints, and automatic iteration until quality targets are met. Babysitter works seamlessly with your existing subagents, skills, and tools, orchestrating them into sophisticated workflows.
+Babysitter is an orchestration framework for Claude Code that enables deterministic, process-driven workflow management. Define your workflow in code, and Babysitter enforces every step - quality gates must pass before progression, breakpoints require human approval, and every decision is recorded in an immutable journal. Babysitter works seamlessly with your existing subagents, skills, and tools, orchestrating them into sophisticated workflows.
 
 ---
 
