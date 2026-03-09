@@ -144,6 +144,16 @@ Claude will create an orchestration run, execute tasks step-by-step, handle qual
 | `/babysitter:doctor` | Diagnose run health and issues |
 | `/babysitter:observe` | Launch real-time monitoring dashboard |
 | `/babysitter:resume` | Continue an interrupted run |
+| `/babysitter:retrospect` | Analyze completed runs, improve processes |
+| `/babysitter:help` | Documentation and usage help |
+
+### Advanced Commands
+
+| Command | Purpose |
+|---------|----------|
+| `/babysitter:assimilate` | Import external methodologies as babysitter processes |
+| `/babysitter:plugins` | Manage plugins and marketplaces |
+| `/babysitter:contrib` | Submit bug reports, features, or PRs |
 
 ---
 
