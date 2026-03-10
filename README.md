@@ -155,20 +155,22 @@ Claude will create an orchestration run, execute tasks step-by-step, handle qual
 |                         /babysitter:call                                    |
 +=============================================================================+
 |                                                                             |
-|   YOUR PROCESS DEFINITION (JavaScript)        This is the AUTHORITY         |
+|   YOUR PROCESS (JavaScript)                   This is the AUTHORITY         |
 |   +----------------------------------------+                                |
-|   | defineProcess('tdd-api', {             |  Not a template.              |
-|   |   phases: [                            |  Not a guide.                 |
-|   |     'research',                        |  This IS the contract.        |
-|   |     'implement',                       |                                |
-|   |     'verify'                           |  The orchestrator can ONLY    |
-|   |   ],                                   |  do what this code permits.   |
-|   |   gates: {                             |                                |
-|   |     implement: { specsApproved: true },|                                |
-|   |     verify: { coverage: 80 }           |                                |
-|   |   },                                   |                                |
-|   |   onGateFail: 'refine'                 |                                |
-|   | })                                     |                                |
+|   | async function process(inputs, ctx) {  |  Real code, not config.       |
+|   |                                        |  The orchestrator can ONLY    |
+|   |   await ctx.task(plan, { ... });       |  do what this code permits.   |
+|   |                                        |                                |
+|   |   await ctx.breakpoint({               |  Breakpoints = human gates    |
+|   |     question: 'Approve plan?'          |  (enforced, not optional)     |
+|   |   });                                  |                                |
+|   |                                        |                                |
+|   |   await ctx.task(implement, { ... });  |  Tasks = executable work      |
+|   |                                        |                                |
+|   |   const score = await ctx.task(verify);|  Quality gates = code logic   |
+|   |   if (score < 80)                      |  (not config, real checks)    |
+|   |     await ctx.task(refine, { ... });   |                                |
+|   | }                                      |                                |
 |   +-------------------+--------------------+                                |
 |                       |                                                     |
 |                       | governs                                             |
@@ -176,9 +178,6 @@ Claude will create an orchestration run, execute tasks step-by-step, handle qual
 |   +---------------------------------------------------------------------+   |
 |   |                      ENFORCEMENT MECHANISM                          |   |
 |   |                                                                     |   |
-|   |   Session executes task                                             |   |
-|   |          |                                                          |   |
-|   |          v                                                          |   |
 |   |   +-------------+     +------------------+     +-----------------+  |   |
 |   |   | MANDATORY   |---->| PROCESS CHECK    |---->| DECISION        |  |   |
 |   |   | STOP        |     | What does the    |     |                 |  |   |
@@ -186,21 +185,17 @@ Claude will create an orchestration run, execute tasks step-by-step, handle qual
 |   |   |  by hook)   |     | next?            |     | task assigned   |  |   |
 |   |   +-------------+     +------------------+     |                 |  |   |
 |   |                              |                 | Blocked: halt   |  |   |
-|   |                              |                 | or refine per   |  |   |
-|   |                              v                 | process rules   |  |   |
-|   |                       +--------------+        +-----------------+  |   |
-|   |                       | Gate check   |                              |   |
-|   |                       | (from code)  |                              |   |
+|   |                              v                 | until gate      |  |   |
+|   |                       +--------------+        | passes          |  |   |
+|   |                       | Gate/task    |        +-----------------+  |   |
+|   |                       | from code    |                              |   |
 |   |                       +--------------+                              |   |
 |   +---------------------------------------------------------------------+   |
 |                       |                                                     |
 |                       | records every decision                              |
 |                       v                                                     |
 |   +---------------------------------------------------------------------+   |
-|   |   JOURNAL (Event-Sourced)                                           |   |
-|   |                                                                     |   |
-|   |   Every task, every gate, every decision - immutable record         |   |
-|   |   Deterministic replay: same process = same execution               |   |
+|   |   JOURNAL: Every task, gate, decision - immutable, replayable       |   |
 |   +---------------------------------------------------------------------+   |
 |                                                                             |
 +=============================================================================+
