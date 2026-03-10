@@ -223,6 +223,33 @@ If running in interactive mode, use AskUserQuestion tool to ask the user the bre
 - NEVER fabricate, synthesize, or infer approval text. Only pass through the user's actual selected response verbatim.
 - NEVER assume approval from ambiguous, empty, or missing responses. When in doubt, the answer is "not approved".
 
+**CRITICAL: Breakpoint rejection posting rules:**
+- Breakpoint rejection MUST be posted with `--status ok` and a value of `{"approved": false, "response": "..."}`. NEVER use `--status error` for a user rejection — that signals a task execution failure and will trigger `RUN_FAILED`, requiring manual journal surgery to recover.
+- Only use `--status error` if the `AskUserQuestion` tool itself throws an error.
+
+**Breakpoint posting examples:**
+
+```bash
+# ✅ CORRECT: User approved the breakpoint
+echo '{"approved": true, "response": "Looks good, proceed"}' > tasks/<effectId>/output.json
+$CLI task:post <runId> <effectId> --status ok --value tasks/<effectId>/output.json
+
+# ✅ CORRECT: User rejected the breakpoint
+echo '{"approved": false, "response": "Stop here"}' > tasks/<effectId>/output.json
+$CLI task:post <runId> <effectId> --status ok --value tasks/<effectId>/output.json
+
+# ❌ WRONG: Posting rejection as error — causes RUN_FAILED
+$CLI task:post <runId> <effectId> --status error
+```
+
+**Breakpoint value payload schema:**
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `approved` | `boolean` | Yes | Whether the user approved the breakpoint |
+| `response` | `string` | No | The user's response text or selected option |
+| `feedback` | `string` | No | Additional feedback from the user |
+
 After receiving an explicit approval or rejection from the user, post the result of the breakpoint to the run by calling `task:post`.
 
 Breakpoints are meant for human approval. NEVER prompt directly and never release or approve breakpoints yourself. Once the user responds via the AskUserQuestion tool, post the result of the breakpoint to the run by calling `task:post` when the breakpoint is resolved.
@@ -233,7 +260,20 @@ Otherwise:
 
 ##### 5.1.2 Non-interactive mode
 
-If running in non-interactive mode, skip the AskUserQuestion tool as it is not available. resolve the breakpoint by selecting the best option according to the context and the intent of the user. then post the result of the breakpoint to the run by calling `task:post` when the breakpoint is resolved.
+If running in non-interactive mode, skip the AskUserQuestion tool as it is not available. Resolve the breakpoint by selecting the best option according to the context and the intent of the user, then post the result via `task:post`.
+
+**CRITICAL:** When rejecting a breakpoint in non-interactive mode, always use `--status ok` with `{"approved": false}` in the value payload. Never use `--status error` for rejections — it will fail the entire run.
+
+**Non-interactive breakpoint posting:**
+```bash
+# Approve: proceed with the action
+echo '{"approved": true, "response": "Auto-approved based on context"}' > tasks/<effectId>/output.json
+$CLI task:post <runId> <effectId> --status ok --value tasks/<effectId>/output.json
+
+# Reject: skip but keep the run alive
+echo '{"approved": false, "response": "Skipped — not applicable in current context"}' > tasks/<effectId>/output.json
+$CLI task:post <runId> <effectId> --status ok --value tasks/<effectId>/output.json
+```
 
 ### 6. Results Posting
 
@@ -283,6 +323,21 @@ $CLI task:post <runId> <effectId> --status ok
 echo '{"score": 85}' > tasks/<effectId>/output.json
 $CLI task:post <runId> <effectId> --status ok --value tasks/<effectId>/output.json
 ```
+
+**Breakpoint-specific posting:**
+
+Breakpoints use the same `task:post` workflow but require a specific value payload with an `approved` field:
+
+```bash
+# Breakpoint approval
+echo '{"approved": true, "response": "User approved"}' > tasks/<effectId>/output.json
+$CLI task:post <runId> <effectId> --status ok --value tasks/<effectId>/output.json
+
+# Breakpoint rejection (ALWAYS use --status ok, not --status error)
+echo '{"approved": false, "response": "User rejected"}' > tasks/<effectId>/output.json
+$CLI task:post <runId> <effectId> --status ok --value tasks/<effectId>/output.json
+```
+
 ---
 
 ### 7. STOP after every phase after run-session association — the hook drives the loop, not you.
