@@ -1,7 +1,7 @@
 {
   "name": "babysitter-observer",
   "displayName": "Babysitter Observer",
-  "description": "Monitor babysitter orchestration runs in your workspace",
+  "description": "Monitor and observe babysitter orchestration runs in your workspace",
   "version": "0.1.0",
   "publisher": "a5c-ai",
   "license": "MIT",
