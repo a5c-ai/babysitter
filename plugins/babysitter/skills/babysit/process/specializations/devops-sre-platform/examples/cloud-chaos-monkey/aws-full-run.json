@@ -1,0 +1,19 @@
+{
+  "provider": "aws",
+  "projectIdentifier": "123456789012",
+  "region": "us-east-1",
+  "chaosPrefix": "chaos",
+  "faultDomains": ["service-crashes", "network-latency", "data-layer", "external-apis"],
+  "executionMode": "hybrid",
+  "safetyControls": {
+    "autoAbort": true,
+    "maxErrorRatePercent": 40,
+    "rollbackTimeoutSeconds": 180
+  },
+  "healthCheckConfig": {
+    "sampleCount": 10,
+    "timeoutSeconds": 15
+  },
+  "reportOutputPath": "docs/chaos-report.html",
+  "reportTheme": "dark"
+}

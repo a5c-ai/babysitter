@@ -2,7 +2,7 @@
  * @process cradle/project-install
  * @description Set up babysitter for a project - research repo, process mining, interview, build profile, install tools, configure CI/CD, update CLAUDE.md
  * @inputs { projectRoot?: string, isNewProject?: boolean, additionalContext?: string }
- * @outputs { success: boolean, profile: object, toolsInstalled: array, claudeMdUpdated: boolean }
+ * @outputs { success: boolean, profile: object, toolsInstalled: array, claudeMdUpdated: boolean, gitignoreConfigured: boolean }
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
@@ -24,6 +24,7 @@ import { defineTask } from '@a5c-ai/babysitter-sdk';
  * 7.  CI/CD Integration (conditional) - Optionally configure CI/CD integration
  * 8.  CLAUDE.md Updates - Add babysitter processes and instructions to CLAUDE.md
  * 9.  New Project Handling (conditional) - Scaffold new/empty projects with vision capture
+ * 9d. Gitignore Configuration - Let user choose which .a5c paths to add to .gitignore
  * 10. Review Breakpoint - Show complete profile for approval
  * 11. Save - Write profile to .a5c/project-profile.json and .a5c/project-profile.md
  *
@@ -254,6 +255,36 @@ export async function process(inputs, ctx) {
   });
 
   // ============================================================================
+  // PHASE 9d: GITIGNORE CONFIGURATION
+  // ============================================================================
+
+  await ctx.breakpoint({
+    question: [
+      '**Configure .gitignore for babysitter files**',
+      '',
+      'Babysitter generates run metadata, logs, and process files in the `.a5c/` directory.',
+      'Would you like to add these to `.gitignore` to keep your repository clean?',
+      '',
+      'Options (each level includes the previous):',
+      '- **Nothing** — Do not modify .gitignore (only add credential exclusions for security)',
+      '- **Logs only** (Recommended) — Ignore `.a5c/logs/`',
+      '- **Logs + Runs** — Ignore `.a5c/logs/` and `.a5c/runs/`',
+      '- **Entire .a5c** — Ignore the entire `.a5c/` directory',
+      '',
+      'Note: `.a5c/creds.env` and `.a5c/creds.env.tmp.*` are always added to `.gitignore` for security, regardless of your choice.'
+    ].join('\n'),
+    title: '.gitignore Configuration',
+    context: {
+      runId: ctx.runId,
+      currentGitignore: 'Will be read during task execution'
+    }
+  });
+
+  const gitignoreResult = await ctx.task(configureGitignoreTask, {
+    projectRoot
+  });
+
+  // ============================================================================
   // PHASE 10: REVIEW BREAKPOINT
   // ============================================================================
 
@@ -272,6 +303,7 @@ export async function process(inputs, ctx) {
       `**Recommended Processes**: ${(toolSelection.recommendedProcesses || []).join(', ') || 'Default set'}`,
       `**CI/CD Configured**: ${cicdResult ? (cicdResult.configured ? 'Yes' : 'Skipped') : 'Skipped'}`,
       `**CLAUDE.md Updated**: ${claudeMdResult?.updated ? 'Yes' : 'No'}`,
+      `**Gitignore Configured**: ${gitignoreResult ? (gitignoreResult.configured ? gitignoreResult.level : 'Skipped') : 'Skipped'}`,
       detectedNewProject ? `**New Project Scaffolding**: ${newProjectResult ? 'Applied' : 'Pending'}` : '',
       '',
       `**Profile Path**: ${projectRoot || '.'}/.a5c/project-profile.json`,
@@ -308,6 +340,7 @@ export async function process(inputs, ctx) {
     profile: saveResult.savedProfile,
     toolsInstalled: toolSelection.recommendedSkills || [],
     claudeMdUpdated: claudeMdResult?.updated || false,
+    gitignoreConfigured: gitignoreResult?.configured || false,
     cicdConfigured: cicdResult?.configured || false,
     isNewProject: detectedNewProject,
     isUpdate: !!existingSetup.existingProfile,
@@ -1224,6 +1257,83 @@ export const initializeA5cInfraTask = defineTask('initialize-a5c-infra', (args, 
   },
 
   labels: ['agent', 'cradle', 'infrastructure', 'quality-gates']
+}));
+
+/**
+ * Configure Gitignore Task
+ * Add babysitter-related entries to .gitignore based on user preference
+ */
+export const configureGitignoreTask = defineTask('configure-gitignore', (args, taskCtx) => ({
+  kind: 'agent',
+  title: 'Configure .gitignore for babysitter files',
+  description: 'Read the user gitignore preference from the Phase 9d breakpoint and update the project .gitignore accordingly. Always adds credential exclusions for security.',
+
+  agent: {
+    name: 'general-purpose',
+    prompt: {
+      role: 'DevOps engineer configuring version control exclusions',
+      task: 'Update the project .gitignore file based on the user selection from the .gitignore configuration breakpoint (Phase 9d). Add babysitter entries idempotently under a managed section.',
+      context: {
+        projectRoot: args.projectRoot,
+        entriesMap: {
+          nothing: ['.a5c/creds.env', '.a5c/creds.env.tmp.*'],
+          logs: ['.a5c/creds.env', '.a5c/creds.env.tmp.*', '.a5c/logs/'],
+          'logs-runs': ['.a5c/creds.env', '.a5c/creds.env.tmp.*', '.a5c/logs/', '.a5c/runs/'],
+          'logs-runs-processes': ['.a5c/creds.env', '.a5c/creds.env.tmp.*', '.a5c/logs/', '.a5c/runs/', '.a5c/processes/'],
+          entire: ['.a5c/']
+        },
+        sectionMarkerStart: '# --- babysitter managed ---',
+        sectionMarkerEnd: '# --- end babysitter managed ---'
+      },
+      instructions: [
+        'Read the breakpoint response from Phase 9d to determine the user\'s gitignore preference.',
+        'Map the user response to a level:',
+        '  - "Nothing" or similar → level "nothing"',
+        '  - "Logs only" or similar → level "logs"',
+        '  - "Logs + Runs" or "Recommended" or similar → level "logs-runs"',
+        '  - "Logs + Runs + Processes" or similar → level "logs-runs-processes"',
+        '  - "Entire .a5c" or similar → level "entire"',
+        '  - If the response is unclear, default to "logs-runs" (the recommended option)',
+        '',
+        'Read the existing .gitignore file at the project root (or note its absence)',
+        '',
+        'Build the new managed section:',
+        '  1. Start with the section marker: "# --- babysitter managed ---"',
+        '  2. Add the entries for the selected level from the entriesMap',
+        '  3. End with the section marker: "# --- end babysitter managed ---"',
+        '',
+        'Update the .gitignore file:',
+        '  - If the file exists and already contains the managed section markers, REPLACE the entire section (from start marker to end marker, inclusive) with the new section',
+        '  - If the file exists but has no managed section, APPEND the new section at the end (with a blank line separator)',
+        '  - If the file does not exist, CREATE it with the new section',
+        '  - PRESERVE all existing content outside the managed section',
+        '  - Do NOT add duplicate entries that already exist outside the managed section',
+        '',
+        'After writing, read back the .gitignore to verify the section was written correctly',
+        'Report the level selected and entries added'
+      ],
+      outputFormat: 'JSON with configured (boolean), level (string: nothing|logs|logs-runs|logs-runs-processes|entire), entriesAdded (array of strings), gitignorePath (string), existedBefore (boolean), sectionReplaced (boolean)'
+    },
+    outputSchema: {
+      type: 'object',
+      required: ['configured', 'level', 'entriesAdded'],
+      properties: {
+        configured: { type: 'boolean' },
+        level: { type: 'string' },
+        entriesAdded: { type: 'array', items: { type: 'string' } },
+        gitignorePath: { type: 'string' },
+        existedBefore: { type: 'boolean' },
+        sectionReplaced: { type: 'boolean' }
+      }
+    }
+  },
+
+  io: {
+    inputJsonPath: `tasks/${taskCtx.effectId}/input.json`,
+    outputJsonPath: `tasks/${taskCtx.effectId}/result.json`
+  },
+
+  labels: ['agent', 'cradle', 'gitignore', 'configuration']
 }));
 
 /**
