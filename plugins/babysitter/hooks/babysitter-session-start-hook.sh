@@ -13,28 +13,53 @@ mkdir -p "$LOG_DIR" 2>/dev/null
 echo "[INFO] $(date -u +%Y-%m-%dT%H:%M:%SZ) Hook script invoked" >> "$LOG_FILE" 2>/dev/null
 echo "[INFO] $(date -u +%Y-%m-%dT%H:%M:%SZ) PLUGIN_ROOT=$PLUGIN_ROOT" >> "$LOG_FILE" 2>/dev/null
 
-# Install babysitter CLI if not available (only attempt once per plugin install)
-if ! command -v babysitter &>/dev/null; then
-  if [ ! -f "$MARKER_FILE" ]; then
-    SDK_VERSION=$(node -e "try{console.log(JSON.parse(require('fs').readFileSync('${PLUGIN_ROOT}/versions.json','utf8')).sdkVersion||'latest')}catch{console.log('latest')}" 2>/dev/null || echo "latest")
-    # Try global install first, fall back to user-local if permissions fail
-    if npm i -g "@a5c-ai/babysitter-sdk@${SDK_VERSION}" --loglevel=error 2>/dev/null; then
-      echo "[INFO] $(date -u +%Y-%m-%dT%H:%M:%SZ) Installed SDK globally (${SDK_VERSION})" >> "$LOG_FILE" 2>/dev/null
-    else
-      # Global install failed (permissions) — try user-local prefix
-      npm i -g "@a5c-ai/babysitter-sdk@${SDK_VERSION}" --prefix "$HOME/.local" --loglevel=error 2>/dev/null && \
-        export PATH="$HOME/.local/bin:$PATH"
-      echo "[INFO] $(date -u +%Y-%m-%dT%H:%M:%SZ) Installed SDK to user prefix (${SDK_VERSION})" >> "$LOG_FILE" 2>/dev/null
+# Get required SDK version from versions.json
+SDK_VERSION=$(node -e "try{console.log(JSON.parse(require('fs').readFileSync('${PLUGIN_ROOT}/versions.json','utf8')).sdkVersion||'latest')}catch{console.log('latest')}" 2>/dev/null || echo "latest")
+
+# Function to install/upgrade SDK
+install_sdk() {
+  local target_version="$1"
+  # Try global install first, fall back to user-local if permissions fail
+  if npm i -g "@a5c-ai/babysitter-sdk@${target_version}" --loglevel=error 2>/dev/null; then
+    echo "[INFO] $(date -u +%Y-%m-%dT%H:%M:%SZ) Installed SDK globally (${target_version})" >> "$LOG_FILE" 2>/dev/null
+    return 0
+  else
+    # Global install failed (permissions) — try user-local prefix
+    if npm i -g "@a5c-ai/babysitter-sdk@${target_version}" --prefix "$HOME/.local" --loglevel=error 2>/dev/null; then
+      export PATH="$HOME/.local/bin:$PATH"
+      echo "[INFO] $(date -u +%Y-%m-%dT%H:%M:%SZ) Installed SDK to user prefix (${target_version})" >> "$LOG_FILE" 2>/dev/null
+      return 0
     fi
-    echo "$SDK_VERSION" > "$MARKER_FILE" 2>/dev/null
   fi
-  # If still not available after install attempt, try npx as last resort
-  if ! command -v babysitter &>/dev/null; then
-    SDK_VERSION=${SDK_VERSION:-$(node -e "try{console.log(JSON.parse(require('fs').readFileSync('${PLUGIN_ROOT}/versions.json','utf8')).sdkVersion||'latest')}catch{console.log('latest')}" 2>/dev/null || echo "latest")}
-    echo "[INFO] $(date -u +%Y-%m-%dT%H:%M:%SZ) CLI not found after install, using npx fallback" >> "$LOG_FILE" 2>/dev/null
-    babysitter() { npx -y "@a5c-ai/babysitter-sdk@${SDK_VERSION}" "$@"; }
-    export -f babysitter
+  return 1
+}
+
+# Check if babysitter CLI exists and if version matches
+NEEDS_INSTALL=false
+if command -v babysitter &>/dev/null; then
+  CURRENT_VERSION=$(babysitter --version 2>/dev/null || echo "unknown")
+  if [ "$CURRENT_VERSION" != "$SDK_VERSION" ]; then
+    echo "[INFO] $(date -u +%Y-%m-%dT%H:%M:%SZ) SDK version mismatch: installed=${CURRENT_VERSION}, required=${SDK_VERSION}" >> "$LOG_FILE" 2>/dev/null
+    NEEDS_INSTALL=true
+  else
+    echo "[INFO] $(date -u +%Y-%m-%dT%H:%M:%SZ) SDK version OK: ${CURRENT_VERSION}" >> "$LOG_FILE" 2>/dev/null
   fi
+else
+  echo "[INFO] $(date -u +%Y-%m-%dT%H:%M:%SZ) SDK CLI not found, will install" >> "$LOG_FILE" 2>/dev/null
+  NEEDS_INSTALL=true
+fi
+
+# Install/upgrade if needed (only attempt once per plugin version)
+if [ "$NEEDS_INSTALL" = true ] && [ ! -f "$MARKER_FILE" ]; then
+  install_sdk "$SDK_VERSION"
+  echo "$SDK_VERSION" > "$MARKER_FILE" 2>/dev/null
+fi
+
+# If still not available after install attempt, try npx as last resort
+if ! command -v babysitter &>/dev/null; then
+  echo "[INFO] $(date -u +%Y-%m-%dT%H:%M:%SZ) CLI not found after install, using npx fallback" >> "$LOG_FILE" 2>/dev/null
+  babysitter() { npx -y "@a5c-ai/babysitter-sdk@${SDK_VERSION}" "$@"; }
+  export -f babysitter
 fi
 
 # Capture stdin to a temp file so the CLI receives a clean EOF
