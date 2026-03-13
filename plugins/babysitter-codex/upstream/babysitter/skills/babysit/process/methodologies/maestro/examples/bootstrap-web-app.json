@@ -1,0 +1,12 @@
+{
+  "projectName": "TaskBoard Pro",
+  "projectType": "fullstack",
+  "techStack": {
+    "frontend": "react",
+    "backend": "node",
+    "database": "postgresql",
+    "packageManager": "npm"
+  },
+  "projectRoot": ".",
+  "qualityThreshold": 80
+}

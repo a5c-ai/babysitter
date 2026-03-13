@@ -1,0 +1,29 @@
+{
+  "description": "E-commerce shopping cart checkout - ATDD/TDD example",
+  "feature": "Shopping cart checkout process",
+  "acceptanceCriteria": [
+    "Given a cart with valid items, when user proceeds to checkout, then order is created with correct totals",
+    "Given a cart with items, when payment processing succeeds, then order is confirmed and cart is cleared",
+    "Given a cart with items, when payment processing fails, then order is not created, error message is shown, and cart is preserved",
+    "Given a cart with out-of-stock items, when user checks out, then out-of-stock items are flagged and checkout is blocked",
+    "Given a cart with discount code, when user applies valid code, then discount is applied to total",
+    "Given a cart with discount code, when user applies invalid code, then error is shown and no discount applied",
+    "Given a completed order, when user views order history, then order appears with correct details and status"
+  ],
+  "testFramework": "jest",
+  "iterationCount": 20,
+  "includeIntegrationTests": true,
+  "existingCode": {
+    "cartService": "./src/services/cart.js",
+    "paymentGateway": "./src/gateways/payment.js",
+    "inventoryService": "./src/services/inventory.js",
+    "orderRepository": "./src/repositories/order.js",
+    "discountEngine": "./src/services/discounts.js"
+  },
+  "notes": [
+    "Complex business logic with multiple integration points",
+    "Demonstrates ATDD for end-to-end business process",
+    "TDD will ensure edge cases and error handling",
+    "Integration tests critical for payment and inventory verification"
+  ]
+}

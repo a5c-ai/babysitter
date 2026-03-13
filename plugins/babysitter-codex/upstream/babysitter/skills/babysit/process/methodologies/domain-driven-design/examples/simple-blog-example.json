@@ -1,0 +1,74 @@
+{
+  "name": "Simple Blog Platform - Full DDD",
+  "description": "Domain-driven design for a simple blogging platform (demonstrates DDD for simpler domains)",
+  "inputs": {
+    "projectName": "Blog Publishing Platform",
+    "domainDescription": "A blogging platform where authors can write and publish articles. Authors create posts with title, content, and tags. Readers can view posts, leave comments, and subscribe to authors. The platform supports draft/published workflow, comment moderation, and basic analytics on post views and engagement.",
+    "complexity": "simple",
+    "phase": "full",
+    "generateImplementation": true
+  },
+  "expectedOutcomes": {
+    "subdomains": {
+      "core": [
+        "Content Publishing"
+      ],
+      "supporting": [
+        "Comment Management",
+        "Engagement Analytics"
+      ],
+      "generic": [
+        "User Authentication",
+        "Email Notifications"
+      ]
+    },
+    "boundedContexts": [
+      "Publishing Context",
+      "Engagement Context",
+      "Identity Context"
+    ],
+    "aggregates": [
+      {
+        "name": "Post",
+        "root": "Post",
+        "members": ["PostContent", "PublicationStatus", "Tags"],
+        "invariants": [
+          "Published posts must have title and content",
+          "Cannot unpublish a post with active subscriptions"
+        ]
+      },
+      {
+        "name": "Comment",
+        "root": "Comment",
+        "members": ["CommentContent", "ModerationStatus"],
+        "invariants": [
+          "Comments require non-empty content",
+          "Moderated comments cannot be edited"
+        ]
+      }
+    ],
+    "entities": [
+      "Post",
+      "Comment",
+      "Author",
+      "Reader"
+    ],
+    "valueObjects": [
+      "PostContent (title, body, excerpt)",
+      "Tag (name, slug)",
+      "PublicationStatus (draft, published, archived)",
+      "ModerationStatus (pending, approved, rejected)"
+    ],
+    "domainServices": [
+      "PublicationService (validates and publishes posts)",
+      "CommentModerationService (approves/rejects comments)"
+    ],
+    "domainEvents": [
+      "PostPublished",
+      "PostUpdated",
+      "CommentAdded",
+      "CommentModerated",
+      "ReaderSubscribed"
+    ]
+  }
+}

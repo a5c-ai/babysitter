@@ -1,0 +1,38 @@
+{
+  "description": "Collection of Example Mapping inputs for various scenarios",
+  "examples": [
+    {
+      "name": "basic-search",
+      "file": "./basic-example.json",
+      "difficulty": "simple",
+      "expectedDuration": "15-20 minutes",
+      "learningFocus": "Basic Example Mapping flow"
+    },
+    {
+      "name": "discount-codes",
+      "file": "./discount-code-example.json",
+      "difficulty": "medium",
+      "expectedDuration": "20-25 minutes",
+      "learningFocus": "Multiple rules, edge cases, business questions"
+    },
+    {
+      "name": "password-reset",
+      "file": "./password-reset-example.json",
+      "difficulty": "medium-complex",
+      "expectedDuration": "25-30 minutes",
+      "learningFocus": "Security considerations, compliance, rate limiting"
+    },
+    {
+      "name": "complex-settings",
+      "file": "./complex-example.json",
+      "difficulty": "complex",
+      "expectedDuration": "30+ minutes",
+      "learningFocus": "Story splitting, scope management"
+    }
+  ],
+  "usage": {
+    "description": "Run these examples to learn Example Mapping methodology",
+    "command": "await process(require('./examples/basic-example.json').inputs, ctx)",
+    "recommendation": "Start with basic-search, then progress to more complex scenarios"
+  }
+}

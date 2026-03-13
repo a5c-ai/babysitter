@@ -1,0 +1,27 @@
+{
+  "name": "ECC Continuous Learning - Post-Session Extraction",
+  "description": "Extract patterns from a development session and convert to reusable skills",
+  "processId": "methodologies/everything-claude-code/ecc-continuous-learning",
+  "inputs": {
+    "sessionData": {
+      "plan": "Implemented user API with Zod validation",
+      "codeChanges": ["src/routes/users.ts", "src/middleware/validate.ts"],
+      "reviewFindings": "3 medium issues, all remediated",
+      "testResults": "24 tests, 92% coverage"
+    },
+    "projectRoot": ".",
+    "patternSources": ["code", "tests", "reviews", "architecture", "debugging"],
+    "confidenceThreshold": 75,
+    "exportEnabled": false,
+    "compactionEnabled": true
+  },
+  "expectedOutcomes": {
+    "phases": [
+      "extract-patterns (analyze session data, assign confidence scores)",
+      "evaluate-patterns (generalizability, reliability, impact scoring)",
+      "parallel: create-skills + compaction-analysis",
+      "organize-skills (categorize, resolve conflicts)",
+      "breakpoint: review new skills"
+    ]
+  }
+}

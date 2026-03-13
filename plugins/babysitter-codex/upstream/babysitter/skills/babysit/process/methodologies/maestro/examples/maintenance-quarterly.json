@@ -1,0 +1,6 @@
+{
+  "projectRoot": ".",
+  "qualityThreshold": 70,
+  "skipCleanup": false,
+  "focusAreas": ["branches", "knowledge", "docs", "todos", "coverage", "dependencies"]
+}

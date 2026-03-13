@@ -1,0 +1,23 @@
+{
+  "projectRoot": ".",
+  "operation": "full-cycle",
+  "newPatterns": [
+    {
+      "name": "repository-pattern",
+      "description": "Data access abstraction layer isolating business logic from storage",
+      "context": { "layer": "data-access", "benefits": ["testability", "flexibility"] },
+      "examples": ["src/repositories/UserRepository.ts"],
+      "relatedDecisions": ["ADR-003-data-access"]
+    }
+  ],
+  "newDecisions": [
+    {
+      "title": "Use PostgreSQL for primary data store",
+      "context": "Need ACID transactions, complex queries, and JSON support",
+      "decision": "PostgreSQL 16 with pg driver",
+      "rationale": "Best balance of relational integrity, JSON support, and ecosystem maturity",
+      "alternatives": ["MongoDB", "MySQL", "SQLite"],
+      "consequences": ["Requires managed database service", "Schema migrations needed"]
+    }
+  ]
+}

@@ -1,0 +1,69 @@
+{
+  "projectIdentifier": "my-saas-app-prod",
+  "cloudProvider": "gcp",
+  "targetRegion": "me-west1",
+  "slaTarget": "99.9%",
+  "budgetCeiling": 50,
+  "currentArchitecture": {
+    "description": "Finance SaaS app with React frontend on Firebase Hosting, Cloud Functions gen2 for chat API, Cloud Run for MCP server and LiteLLM proxy, Firestore Native for data. Compute is in us-central1 but Firestore is in me-west1, causing ~200ms cross-region latency. All services scale to zero (cold starts). No automated backups. No monitoring or alerting configured.",
+    "services": [
+      {
+        "name": "web-frontend",
+        "type": "Firebase Hosting",
+        "region": "global",
+        "details": "React 18 SPA, global CDN"
+      },
+      {
+        "name": "chat-api",
+        "type": "Cloud Function gen2",
+        "region": "us-central1",
+        "runtime": "nodejs20",
+        "minInstances": 0,
+        "maxInstances": 100,
+        "timeout": "55s"
+      },
+      {
+        "name": "mcp-server",
+        "type": "Cloud Run",
+        "region": "us-central1",
+        "memory": "512Mi",
+        "cpu": 1,
+        "minInstances": 0,
+        "maxInstances": 10,
+        "timeout": "300s"
+      },
+      {
+        "name": "llm-proxy",
+        "type": "Cloud Run",
+        "region": "us-central1",
+        "minInstances": 0
+      },
+      {
+        "name": "main-database",
+        "type": "Firestore Native",
+        "region": "me-west1",
+        "mode": "REGIONAL",
+        "backups": false,
+        "pitr": false
+      },
+      {
+        "name": "auth",
+        "type": "Firebase Auth",
+        "region": "global"
+      },
+      {
+        "name": "secrets",
+        "type": "Secret Manager",
+        "region": "global",
+        "secretCount": 5
+      }
+    ]
+  },
+  "diagramConfig": {
+    "enabled": true,
+    "outputDir": "docs/architecture",
+    "generateCurrentState": true,
+    "generateTargetState": true
+  },
+  "compositionPattern": "full-pipeline"
+}

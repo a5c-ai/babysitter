@@ -1,0 +1,17 @@
+{
+  "stories": [
+    { "id": "FEAT-001", "title": "User authentication with OAuth2", "priority": "high", "type": "feature" },
+    { "id": "FEAT-002", "title": "Dashboard with real-time metrics", "priority": "high", "type": "feature" },
+    { "id": "FEAT-003", "title": "REST API for task CRUD operations", "priority": "medium", "type": "feature" },
+    { "id": "FEAT-004", "title": "WebSocket notification system", "priority": "medium", "type": "feature" },
+    { "id": "FEAT-005", "title": "File upload and attachment handling", "priority": "low", "type": "feature" }
+  ],
+  "techSpec": {
+    "stack": { "backend": "node/express", "frontend": "react", "database": "postgresql" },
+    "patterns": ["repository-pattern", "event-driven", "rest-api"],
+    "testFramework": "vitest"
+  },
+  "projectRoot": ".",
+  "coderCount": 3,
+  "qualityThreshold": 80
+}

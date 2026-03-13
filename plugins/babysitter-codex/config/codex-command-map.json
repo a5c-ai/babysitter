@@ -1,0 +1,83 @@
+{
+  "version": 1,
+  "upstreamPlugin": "upstream/babysitter/plugin.json",
+  "processLibraryRoot": "upstream/babysitter/skills/babysit/process",
+  "referenceRoot": "upstream/babysitter/skills/babysit/reference",
+  "commandMappings": [
+    {
+      "codexCommand": "babysitter:call",
+      "upstreamCommandDoc": "upstream/babysitter/commands/call.md",
+      "skillFile": ".codex/skills/babysitter/call/SKILL.md"
+    },
+    {
+      "codexCommand": "babysitter:yolo",
+      "upstreamCommandDoc": "upstream/babysitter/commands/yolo.md",
+      "skillFile": ".codex/skills/babysitter/yolo/SKILL.md"
+    },
+    {
+      "codexCommand": "babysitter:resume",
+      "upstreamCommandDoc": "upstream/babysitter/commands/resume.md",
+      "skillFile": ".codex/skills/babysitter/resume/SKILL.md"
+    },
+    {
+      "codexCommand": "babysitter:plan",
+      "upstreamCommandDoc": "upstream/babysitter/commands/plan.md",
+      "skillFile": ".codex/skills/babysitter/plan/SKILL.md"
+    },
+    {
+      "codexCommand": "babysitter:forever",
+      "upstreamCommandDoc": "upstream/babysitter/commands/forever.md",
+      "skillFile": ".codex/skills/babysitter/forever/SKILL.md"
+    },
+    {
+      "codexCommand": "babysitter:doctor",
+      "upstreamCommandDoc": "upstream/babysitter/commands/doctor.md",
+      "skillFile": ".codex/skills/babysitter/doctor/SKILL.md"
+    },
+    {
+      "codexCommand": "babysitter:observe",
+      "upstreamCommandDoc": "upstream/babysitter/commands/observe.md",
+      "skillFile": ".codex/skills/babysitter/observe/SKILL.md"
+    },
+    {
+      "codexCommand": "babysitter:help",
+      "upstreamCommandDoc": "upstream/babysitter/commands/help.md",
+      "skillFile": ".codex/skills/babysitter/help/SKILL.md"
+    },
+    {
+      "codexCommand": "babysitter:project-install",
+      "upstreamCommandDoc": "upstream/babysitter/commands/project-install.md",
+      "skillFile": ".codex/skills/babysitter/project-install/SKILL.md"
+    },
+    {
+      "codexCommand": "babysitter:user-install",
+      "upstreamCommandDoc": "upstream/babysitter/commands/user-install.md",
+      "skillFile": ".codex/skills/babysitter/user-install/SKILL.md"
+    },
+    {
+      "codexCommand": "babysitter:assimilate",
+      "upstreamCommandDoc": "upstream/babysitter/commands/assimilate.md",
+      "skillFile": ".codex/skills/babysitter/assimilate/SKILL.md"
+    },
+    {
+      "codexCommand": "babysitter:retrospect",
+      "upstreamCommandDoc": "upstream/babysitter/commands/retrospect.md",
+      "skillFile": ".codex/skills/babysitter/retrospect/SKILL.md"
+    },
+    {
+      "codexCommand": "babysitter:model",
+      "upstreamCommandDoc": null,
+      "skillFile": ".codex/skills/babysitter/model/SKILL.md"
+    },
+    {
+      "codexCommand": "babysitter:issue",
+      "upstreamCommandDoc": null,
+      "skillFile": ".codex/skills/babysitter/issue/SKILL.md"
+    },
+    {
+      "codexCommand": "babysitter:team-install",
+      "upstreamCommandDoc": null,
+      "skillFile": ".codex/skills/babysitter/team-install/SKILL.md"
+    }
+  ]
+}

@@ -1,0 +1,34 @@
+{
+  "projectName": "FinanceTracker",
+  "featureName": "expense-categorization",
+  "prd": {
+    "vision": "Automatic expense categorization using ML that learns from user corrections",
+    "userStories": [
+      {
+        "id": "US-001",
+        "title": "Auto-categorize transactions",
+        "acceptanceCriteria": [
+          "Given a new transaction, When it is imported, Then it is auto-categorized with >85% accuracy",
+          "Given a miscategorized transaction, When the user corrects it, Then the model learns from the correction"
+        ]
+      },
+      {
+        "id": "US-002",
+        "title": "Custom category management",
+        "acceptanceCriteria": [
+          "Given a user, When they create a custom category, Then it appears in the categorization options",
+          "Given a custom category, When transactions match its rules, Then they are auto-assigned"
+        ]
+      }
+    ],
+    "successCriteria": [
+      "Auto-categorization accuracy >85% after 100 transactions",
+      "User correction improves accuracy by >5% within 50 corrections"
+    ]
+  },
+  "existingCodebase": {
+    "framework": "Next.js 15",
+    "database": "PostgreSQL with Prisma ORM",
+    "existingModules": ["auth", "transactions", "reports"]
+  }
+}

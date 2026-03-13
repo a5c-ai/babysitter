@@ -1,0 +1,26 @@
+{
+  "description": "FDA-regulated medical device software - Cleanroom for high-reliability patient safety",
+  "projectName": "Insulin Pump Control Software",
+  "systemDescription": "Embedded software for automatic insulin delivery pump (closed-loop system). Monitors continuous glucose monitor (CGM) readings, calculates insulin dosage using control algorithm, and controls pump motor. Includes safety limits (max bolus, basal rate limits, low glucose suspend), battery monitoring, alarm system, and wireless connectivity for healthcare provider monitoring. Must comply with FDA 21 CFR Part 820 and IEC 62304 Class C (death or serious injury possible).",
+  "reliabilityTarget": 50000,
+  "criticalComponents": [
+    "glucose-reading-validation",
+    "dosage-calculation-algorithm",
+    "safety-limit-enforcement",
+    "pump-motor-control",
+    "alarm-system"
+  ],
+  "usageProfile": "typical-user",
+  "incrementCount": 7,
+  "includeProofOfCorrectness": true,
+  "statisticalConfidence": 0.95,
+  "notes": [
+    "FDA requires formal risk analysis and mitigation",
+    "IEC 62304 Class C requires formal verification activities",
+    "Dosage algorithm must be mathematically proven correct",
+    "Safety limits must be verified to never be violated",
+    "Usage profile based on typical patient daily routines",
+    "MTTF target reflects balance between reliability and regulatory practicality",
+    "Statistical testing demonstrates safety in realistic usage scenarios"
+  ]
+}

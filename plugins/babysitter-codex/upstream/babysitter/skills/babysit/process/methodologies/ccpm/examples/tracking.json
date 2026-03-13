@@ -1,0 +1,22 @@
+{
+  "projectName": "InventorySystem",
+  "featureName": "stock-alerts",
+  "githubRepo": "myorg/inventory-system",
+  "reportType": "dashboard",
+  "tasks": [
+    { "id": "T-001", "title": "Alert threshold configuration", "status": "completed" },
+    { "id": "T-002", "title": "Stock level monitoring service", "status": "in-progress" },
+    { "id": "T-003", "title": "Email notification integration", "status": "blocked", "blockReason": "Waiting for SMTP credentials" },
+    { "id": "T-004", "title": "Alert dashboard UI", "status": "open" },
+    { "id": "T-005", "title": "Alert history and analytics", "status": "open" }
+  ],
+  "executionResults": [
+    {
+      "streamName": "api",
+      "results": [
+        { "taskId": "T-001", "status": "completed", "quality": { "score": 92, "passes": true } },
+        { "taskId": "T-002", "status": "in-progress", "quality": { "score": 65, "passes": false } }
+      ]
+    }
+  ]
+}

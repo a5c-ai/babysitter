@@ -1,0 +1,19 @@
+{
+  "description": "Implement real-time collaborative document editing with operational transforms",
+  "targetQuality": 85,
+  "maxIterations": 4,
+  "skipPlanReview": false,
+  "context": {
+    "frontend": "React 19 with TypeScript",
+    "stateManagement": "Zustand",
+    "transport": "WebSocket via Socket.IO",
+    "existingModels": ["Document", "User", "Permission"],
+    "requirements": [
+      "Multiple users can edit the same document simultaneously",
+      "Operational Transform algorithm for conflict resolution",
+      "Cursor presence indicators showing other users",
+      "Undo/redo support that respects OT transformations",
+      "Offline editing with sync-on-reconnect"
+    ]
+  }
+}

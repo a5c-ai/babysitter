@@ -1,0 +1,26 @@
+{
+  "name": "CC10X Router - Build Feature",
+  "description": "Route a feature build request through the CC10X orchestration system",
+  "processId": "methodologies/cc10x/cc10x-router",
+  "inputs": {
+    "request": "Build a user authentication system with JWT tokens and refresh token rotation",
+    "projectRoot": ".",
+    "memoryDir": ".claude/cc10x",
+    "maxRemediationCycles": 2
+  },
+  "expectedOutcomes": {
+    "workflow": "BUILD",
+    "phases": [
+      "load-memory (session context from .claude/cc10x/)",
+      "detect-intent (BUILD workflow selected)",
+      "clarify-requirements (acceptance criteria defined)",
+      "tdd-red (failing auth tests, exit code 1)",
+      "tdd-green (minimal JWT implementation, exit code 0)",
+      "tdd-refactor (pattern alignment)",
+      "parallel-review (code-reviewer + silent-failure-hunter)",
+      "integration-verify (E2E with exit code evidence)",
+      "validate-contract (Router Contract: PASS)",
+      "update-memory (persist learnings)"
+    ]
+  }
+}

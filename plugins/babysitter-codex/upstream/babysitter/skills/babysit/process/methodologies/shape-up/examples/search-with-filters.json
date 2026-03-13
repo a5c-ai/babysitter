@@ -1,0 +1,117 @@
+{
+  "projectName": "MarketPlace Pro",
+  "workDescription": "Add advanced search functionality with multiple filter types (category, price range, location, ratings) and sort options. Users currently struggle to find specific items in the growing catalog.",
+  "appetite": "big-batch",
+  "cycleWeeks": 6,
+  "teamSize": "one-designer-two-programmers",
+  "phase": "full-cycle",
+  "includeCoolDown": true,
+  "context": {
+    "userProblem": "Catalog has grown to 50,000+ items. Basic keyword search returns too many results. Users give up and leave site.",
+    "businessValue": "Reduce search abandonment rate from 40% to 20%. Increase conversion rate by 15%.",
+    "currentState": "Simple keyword search only. No filters. Sort by relevance only.",
+    "stakeholders": [
+      "Buyers (need to find items quickly)",
+      "Sellers (want their items found)",
+      "Product team",
+      "Search/data team"
+    ]
+  },
+  "scopeConsiderations": {
+    "inScope": [
+      "Category filter (multi-select)",
+      "Price range slider",
+      "Location filter (city/region)",
+      "Rating filter (4+ stars, etc.)",
+      "Sort options (price, date, popularity, rating)",
+      "Filter chips showing active filters",
+      "Clear all filters option",
+      "Filter persistence in URL",
+      "Mobile-friendly filter UI"
+    ],
+    "outOfScope": [
+      "Saved searches",
+      "Search suggestions/autocomplete",
+      "Advanced boolean search",
+      "Custom filter combinations",
+      "Filter analytics/tracking",
+      "Personalized result ranking",
+      "Related items suggestions",
+      "Search history"
+    ],
+    "rabbitHoles": [
+      "Search performance with multiple active filters",
+      "Filter combination logic and edge cases",
+      "Mobile filter UI patterns",
+      "Real-time result count updates",
+      "Filter state management (URL, local storage)",
+      "Handling empty result sets gracefully",
+      "Filter option ordering and relevance"
+    ],
+    "noGos": [
+      "Don't rebuild the search backend",
+      "Don't add new search index",
+      "Don't do semantic search or NLP",
+      "Don't redesign the entire results page",
+      "Don't add seller-specific features yet"
+    ]
+  },
+  "expectedScopes": [
+    "Filter UI components and layout",
+    "Filter application and search integration",
+    "Sort functionality",
+    "URL state management",
+    "Mobile filter experience",
+    "Performance optimization"
+  ],
+  "successCriteria": [
+    "Users can combine 3+ filters easily",
+    "Search results update in under 2 seconds",
+    "Filter UI works well on mobile",
+    "No empty result surprise (show counts before applying)",
+    "Clear indication of active filters",
+    "Reduce search abandonment by 50%"
+  ],
+  "technicalConsiderations": {
+    "searchBackend": "Elasticsearch (existing)",
+    "constraints": [
+      "Can't change search index structure mid-cycle",
+      "Must maintain current search performance",
+      "Filter queries must be efficient"
+    ],
+    "approach": [
+      "Use existing search API with filter parameters",
+      "Client-side filter UI state management",
+      "Progressive enhancement for mobile",
+      "Cache filter options to reduce API calls"
+    ]
+  },
+  "designConsiderations": {
+    "desktopPattern": "Sidebar filters (collapsed on narrow screens)",
+    "mobilePattern": "Bottom sheet or full-screen filter modal",
+    "interactions": [
+      "Instant filter chip feedback",
+      "Show result counts per filter option",
+      "Clear visual hierarchy"
+    ],
+    "fatMarkerSketches": [
+      "Desktop layout with sidebar filters",
+      "Mobile filter modal",
+      "Active filter chips above results"
+    ]
+  },
+  "rolloutStrategy": {
+    "phase1": "Release to 10% of users for 1 week",
+    "phase2": "Expand to 50% if metrics improve",
+    "phase3": "Full rollout after validation",
+    "fallback": "Feature flag to roll back if needed"
+  },
+  "notes": [
+    "Shows complete 6-week cycle with typical e-commerce feature",
+    "Demonstrates balancing user experience and technical constraints",
+    "Good example of scoping with performance considerations",
+    "Illustrates mobile-first design challenges",
+    "Shows graduated rollout within cycle (de-risking)",
+    "Practical example of working with existing infrastructure"
+  ]
+}

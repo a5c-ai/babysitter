@@ -1,0 +1,7 @@
+{
+  "vaultPath": "./cog-vault",
+  "mode": "daily-brief",
+  "userName": "Alex",
+  "rolePack": "engineer",
+  "targetQuality": 80
+}

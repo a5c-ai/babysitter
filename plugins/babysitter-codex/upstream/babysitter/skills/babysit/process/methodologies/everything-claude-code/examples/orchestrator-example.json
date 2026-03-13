@@ -1,0 +1,29 @@
+{
+  "name": "ECC Orchestrator - REST API Feature",
+  "description": "Full lifecycle implementation of a REST API feature with TDD, security scanning, and continuous learning",
+  "processId": "methodologies/everything-claude-code/ecc-orchestrator",
+  "inputs": {
+    "request": "Add a PATCH /api/users/:id endpoint with field-level validation, audit logging, and rate limiting",
+    "projectRoot": ".",
+    "mode": "dev",
+    "securityEnabled": true,
+    "learningEnabled": true,
+    "maxRemediationCycles": 2,
+    "confidenceThreshold": 80
+  },
+  "expectedOutcomes": {
+    "phases": [
+      "context-detection (detect TypeScript, Express, vitest)",
+      "planning (research-first, 3+ alternatives, phased plan)",
+      "architecture (component boundaries, interfaces, data flow)",
+      "breakpoint: review plan and architecture",
+      "tdd (RED: failing tests, GREEN: minimal impl, REFACTOR: quality)",
+      "parallel: code-review + security-scan",
+      "remediation (address critical/high findings, max 2 cycles)",
+      "e2e-verification (Playwright POM tests)",
+      "deployment-readiness (go/no-go recommendation)",
+      "breakpoint: deployment approval",
+      "continuous-learning (extract patterns, create skills)"
+    ]
+  }
+}

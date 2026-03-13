@@ -1,0 +1,22 @@
+{
+  "name": "RPIKit Implement - Database Migration Execution",
+  "description": "Implementation phase executing an approved plan with step verification and phase checkpoints",
+  "processId": "methodologies/rpikit/rpikit-implement",
+  "inputs": {
+    "topic": "database-migration",
+    "planDocPath": "docs/plans/2026-03-01-database-migration-plan.md",
+    "projectRoot": ".",
+    "useWorktree": true
+  },
+  "expectedOutcomes": {
+    "phases": [
+      "load-plan (validate approved plan exists)",
+      "setup-worktree (git worktree for high-stakes isolation)",
+      "execute-steps (read-modify-verify loop per step)",
+      "phase-checkpoints (human approval between phases)",
+      "code-review (APPROVE / APPROVE_WITH_NITS / REQUEST_CHANGES)",
+      "security-review (halt if vulnerabilities found)",
+      "completion-summary (all success criteria met)"
+    ]
+  }
+}

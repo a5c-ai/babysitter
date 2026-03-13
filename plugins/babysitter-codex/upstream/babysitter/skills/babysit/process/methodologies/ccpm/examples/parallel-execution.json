@@ -1,0 +1,24 @@
+{
+  "projectName": "BlogPlatform",
+  "featureName": "comment-system",
+  "tasks": [
+    { "id": "T-001", "title": "Create comments table and migrations", "stream": "database", "streamType": "database", "effort": "M" },
+    { "id": "T-002", "title": "Implement comment CRUD API endpoints", "stream": "api", "streamType": "api", "effort": "M" },
+    { "id": "T-003", "title": "Build comment thread UI component", "stream": "ui", "streamType": "ui", "effort": "L" },
+    { "id": "T-004", "title": "Write comment system test suite", "stream": "testing", "streamType": "testing", "effort": "M" },
+    { "id": "T-005", "title": "Document comment API endpoints", "stream": "docs", "streamType": "docs", "effort": "S" },
+    { "id": "T-006", "title": "Add nested reply support to schema", "stream": "database", "streamType": "database", "effort": "S" },
+    { "id": "T-007", "title": "Implement comment moderation API", "stream": "api", "streamType": "api", "effort": "M" },
+    { "id": "T-008", "title": "Build moderation dashboard UI", "stream": "ui", "streamType": "ui", "effort": "L" }
+  ],
+  "streams": [
+    { "name": "database", "type": "database", "scope": "Schema and data layer", "priority": 1 },
+    { "name": "api", "type": "api", "scope": "REST endpoints and business logic", "priority": 2 },
+    { "name": "ui", "type": "ui", "scope": "React components and forms", "priority": 3 },
+    { "name": "testing", "type": "testing", "scope": "Test suites and validation", "priority": 4 },
+    { "name": "docs", "type": "docs", "scope": "API and user documentation", "priority": 5 }
+  ],
+  "githubRepo": "myorg/blog-platform",
+  "qualityThreshold": 80,
+  "maxParallel": 5
+}

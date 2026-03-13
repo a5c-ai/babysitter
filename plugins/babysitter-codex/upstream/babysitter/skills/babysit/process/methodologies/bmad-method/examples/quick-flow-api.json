@@ -1,0 +1,6 @@
+{
+  "projectName": "Invoice API",
+  "projectDescription": "REST API for invoice generation with PDF export, email delivery, and Stripe payment integration",
+  "techStack": "Node.js, Express, PostgreSQL, Stripe SDK",
+  "storyCount": 6
+}

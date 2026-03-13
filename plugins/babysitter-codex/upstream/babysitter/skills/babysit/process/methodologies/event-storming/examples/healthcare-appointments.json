@@ -1,0 +1,115 @@
+{
+  "name": "Healthcare Appointment System Event Storm",
+  "description": "Event storming for healthcare appointment scheduling and patient management system",
+  "inputs": {
+    "projectName": "healthcare-appointment-system",
+    "domainDescription": "Healthcare platform for managing patient appointments, medical records, doctor schedules, and billing. Supports online booking, reminders, telemedicine, and insurance claims processing.",
+    "sessionType": "full",
+    "skipVisualization": false
+  },
+  "expectedBigPicture": {
+    "keyEvents": [
+      "Patient Registered",
+      "Insurance Information Provided",
+      "Doctor Schedule Published",
+      "Appointment Requested",
+      "Slot Reserved",
+      "Appointment Confirmed",
+      "Reminder Sent",
+      "Patient Checked In",
+      "Vitals Recorded",
+      "Doctor Consultation Started",
+      "Diagnosis Recorded",
+      "Prescription Issued",
+      "Lab Test Ordered",
+      "Test Results Received",
+      "Follow-up Scheduled",
+      "Consultation Completed",
+      "Invoice Generated",
+      "Insurance Claim Submitted",
+      "Payment Processed",
+      "Medical Record Updated"
+    ],
+    "actors": [
+      "Patient",
+      "Doctor",
+      "Nurse",
+      "Receptionist",
+      "Medical Biller",
+      "Lab Technician"
+    ],
+    "externalSystems": [
+      "Insurance Provider API",
+      "Lab Information System",
+      "Electronic Health Records (EHR)",
+      "Telemedicine Platform",
+      "SMS/Email Service",
+      "Payment Gateway"
+    ],
+    "hotSpots": [
+      "Double booking prevention",
+      "Emergency appointment handling",
+      "Insurance verification latency",
+      "HIPAA compliance for data sharing",
+      "No-show and cancellation policies",
+      "Telemedicine vs in-person workflows"
+    ]
+  },
+  "expectedAggregates": [
+    "Appointment",
+    "Patient",
+    "Doctor",
+    "MedicalRecord",
+    "Prescription",
+    "Invoice",
+    "InsuranceClaim"
+  ],
+  "expectedBoundedContexts": [
+    {
+      "name": "Scheduling",
+      "aggregates": ["Appointment", "Doctor"],
+      "responsibility": "Manage appointment booking and doctor availability"
+    },
+    {
+      "name": "Clinical",
+      "aggregates": ["MedicalRecord", "Prescription"],
+      "responsibility": "Handle patient care, diagnosis, and treatment"
+    },
+    {
+      "name": "Billing",
+      "aggregates": ["Invoice", "InsuranceClaim"],
+      "responsibility": "Process payments and insurance claims"
+    },
+    {
+      "name": "Patient Management",
+      "aggregates": ["Patient"],
+      "responsibility": "Manage patient information and records"
+    }
+  ],
+  "expectedContextRelationships": [
+    {
+      "upstream": "Scheduling",
+      "downstream": "Clinical",
+      "pattern": "customer-supplier",
+      "integration": "events"
+    },
+    {
+      "upstream": "Clinical",
+      "downstream": "Billing",
+      "pattern": "customer-supplier",
+      "integration": "events"
+    },
+    {
+      "upstream": "Patient Management",
+      "downstream": "Scheduling",
+      "pattern": "open-host-service",
+      "integration": "api"
+    },
+    {
+      "upstream": "Patient Management",
+      "downstream": "Clinical",
+      "pattern": "shared-kernel",
+      "integration": "shared-db"
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "name": "Parallel Agents - Multi-Subsystem Failures",
+  "description": "Dispatch parallel agents for independent test failures across subsystems",
+  "processId": "methodologies/superpowers/dispatching-parallel-agents",
+  "inputs": {
+    "problems": [
+      {
+        "description": "agent-tool-abort.test.ts: 3 failures - timing issues in abort flow",
+        "scope": "src/agents/agent-tool-abort.test.ts",
+        "constraints": ["Do not modify production code outside abort module"]
+      },
+      {
+        "description": "batch-completion-behavior.test.ts: 2 failures - tools not executing",
+        "scope": "src/batch/batch-completion-behavior.test.ts",
+        "constraints": ["Do not modify abort module"]
+      },
+      {
+        "description": "tool-approval-race-conditions.test.ts: 1 failure - execution count is 0",
+        "scope": "src/tools/tool-approval-race-conditions.test.ts",
+        "constraints": ["Do not modify batch or abort modules"]
+      }
+    ],
+    "verifyIntegration": true
+  },
+  "expectedOutcomes": {
+    "parallelAgents": 3,
+    "eachAgentScope": "one test file",
+    "integrationCheck": "full test suite after all agents complete"
+  }
+}

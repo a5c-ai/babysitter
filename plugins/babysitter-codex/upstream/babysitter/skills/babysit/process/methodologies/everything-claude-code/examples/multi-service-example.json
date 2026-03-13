@@ -1,0 +1,31 @@
+{
+  "name": "ECC Multi-Service - Monorepo Build and Deploy",
+  "description": "Multi-service orchestration with PM2, cascade execution, and cross-service testing",
+  "processId": "methodologies/everything-claude-code/ecc-multi-service",
+  "inputs": {
+    "services": [
+      { "name": "shared-lib", "path": "packages/shared", "type": "library" },
+      { "name": "api-server", "path": "packages/api", "type": "backend" },
+      { "name": "web-app", "path": "packages/web", "type": "frontend" },
+      { "name": "worker", "path": "packages/worker", "type": "backend" }
+    ],
+    "projectRoot": ".",
+    "executionMode": "auto",
+    "parallelLimit": 4,
+    "pm2Config": {
+      "instances": 2,
+      "maxRestarts": 3,
+      "restartDelay": 1000
+    }
+  },
+  "expectedOutcomes": {
+    "phases": [
+      "discover-services (dependency graph, topological order)",
+      "build (cascade: shared-lib -> parallel: [api-server, web-app, worker])",
+      "breakpoint if build failures",
+      "pm2-setup (ecosystem.config.js, start in order)",
+      "cross-service-tests (API contracts, event flows)",
+      "health-monitoring (endpoints, resources, connectivity)"
+    ]
+  }
+}

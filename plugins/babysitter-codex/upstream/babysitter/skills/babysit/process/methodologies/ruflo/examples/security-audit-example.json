@@ -1,0 +1,25 @@
+{
+  "name": "Ruflo Security Audit - Elevated Security Pipeline",
+  "description": "AIDefence multi-layered security audit with STRIDE threat modeling and OWASP compliance",
+  "processId": "methodologies/ruflo/ruflo-security-audit",
+  "inputs": {
+    "target": "src/api/auth/",
+    "targetType": "component",
+    "projectRoot": ".",
+    "securityLevel": "elevated",
+    "scanScope": "directory"
+  },
+  "expectedOutcomes": {
+    "steps": [
+      "prompt-injection-check (scan auth component for injection vectors)",
+      "input-validation (validate API parameters, check path traversal)",
+      "static-analysis (SAST scan for CWE matches in auth code)",
+      "output-sanitization (redact any secrets/tokens in findings)",
+      "threat-modeling (STRIDE analysis of authentication attack surface)",
+      "compliance-check (OWASP Top 10 verification for auth patterns)",
+      "report-generation (executive summary with risk score and remediation plan)"
+    ],
+    "securityLevel": "elevated",
+    "layers": "SAST + validation + sanitization + threat modeling + compliance"
+  }
+}

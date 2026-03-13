@@ -1,0 +1,80 @@
+{
+  "projectIdentifier": "123456789012",
+  "cloudProvider": "aws",
+  "targetRegion": "us-east-1",
+  "slaTarget": "99.95%",
+  "budgetCeiling": 200,
+  "currentArchitecture": {
+    "description": "E-commerce platform with React frontend on CloudFront/S3, API Gateway + Lambda for backend, RDS PostgreSQL for orders database, DynamoDB for session/cart, ElastiCache Redis for caching. Running in us-east-1 single-AZ. RDS has no Multi-AZ, no automated snapshots beyond 1 day. No CloudWatch alarms configured. Lambda concurrency not reserved. No WAF configured.",
+    "services": [
+      {
+        "name": "storefront-cdn",
+        "type": "CloudFront",
+        "region": "global",
+        "details": "S3 origin, React SPA, OAI configured"
+      },
+      {
+        "name": "storefront-assets",
+        "type": "S3",
+        "region": "us-east-1",
+        "versioning": false
+      },
+      {
+        "name": "api-gateway",
+        "type": "API Gateway",
+        "region": "us-east-1",
+        "apiType": "REST",
+        "throttling": "10000 rps"
+      },
+      {
+        "name": "orders-api",
+        "type": "Lambda",
+        "region": "us-east-1",
+        "runtime": "nodejs20.x",
+        "memory": 512,
+        "timeout": 30,
+        "reservedConcurrency": 0
+      },
+      {
+        "name": "payment-processor",
+        "type": "Lambda",
+        "region": "us-east-1",
+        "runtime": "nodejs20.x",
+        "memory": 256,
+        "timeout": 60,
+        "reservedConcurrency": 0
+      },
+      {
+        "name": "orders-db",
+        "type": "RDS PostgreSQL",
+        "region": "us-east-1",
+        "instanceClass": "db.t3.medium",
+        "multiAZ": false,
+        "backupRetention": 1,
+        "storageEncrypted": true
+      },
+      {
+        "name": "session-store",
+        "type": "DynamoDB",
+        "region": "us-east-1",
+        "billingMode": "PAY_PER_REQUEST",
+        "pitr": false
+      },
+      {
+        "name": "cache-cluster",
+        "type": "ElastiCache Redis",
+        "region": "us-east-1",
+        "nodeType": "cache.t3.micro",
+        "numNodes": 1,
+        "multiAZ": false
+      }
+    ]
+  },
+  "diagramConfig": {
+    "enabled": true,
+    "outputDir": "docs/architecture",
+    "generateCurrentState": true,
+    "generateTargetState": true
+  },
+  "compositionPattern": "full-pipeline"
+}

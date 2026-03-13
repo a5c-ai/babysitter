@@ -1,0 +1,6 @@
+{
+  "vaultPath": "./cog-vault",
+  "captureType": "braindump",
+  "content": "Sprint retro went well - team velocity is up 15% since we adopted trunk-based development. Need to write up the architecture decision for microservices migration. Personal goal: finish the distributed systems book by end of month. Interesting article on event sourcing: https://example.com/event-sourcing-patterns. The CI/CD pipeline is too slow - should investigate Nx caching. Meditation practice is helping with focus during deep work sessions.",
+  "targetQuality": 85
+}

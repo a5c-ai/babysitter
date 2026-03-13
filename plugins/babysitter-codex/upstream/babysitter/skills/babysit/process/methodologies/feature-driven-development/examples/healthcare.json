@@ -1,0 +1,259 @@
+{
+  "projectName": "Patient Management System",
+  "domainDescription": "Healthcare platform for managing patient records, appointments, prescriptions, lab results, billing, and clinical documentation. HIPAA compliant with role-based access control.",
+  "iterationWeeks": 2,
+  "teamSize": 10,
+  "chiefProgrammers": 3,
+  "features": [
+    {
+      "id": "f-001",
+      "title": "Register patient in system",
+      "action": "Register",
+      "result": "patient",
+      "object": "system",
+      "priority": "high",
+      "estimatedDays": 3,
+      "dependencies": []
+    },
+    {
+      "id": "f-002",
+      "title": "Verify insurance of patient",
+      "action": "Verify",
+      "result": "insurance",
+      "object": "patient",
+      "priority": "high",
+      "estimatedDays": 4,
+      "dependencies": ["f-001"]
+    },
+    {
+      "id": "f-003",
+      "title": "Schedule appointment of patient",
+      "action": "Schedule",
+      "result": "appointment",
+      "object": "patient",
+      "priority": "high",
+      "estimatedDays": 3,
+      "dependencies": ["f-001"]
+    },
+    {
+      "id": "f-004",
+      "title": "Cancel appointment of patient",
+      "action": "Cancel",
+      "result": "appointment",
+      "object": "patient",
+      "priority": "high",
+      "estimatedDays": 1,
+      "dependencies": ["f-003"]
+    },
+    {
+      "id": "f-005",
+      "title": "Send reminder of appointment",
+      "action": "Send",
+      "result": "reminder",
+      "object": "appointment",
+      "priority": "medium",
+      "estimatedDays": 2,
+      "dependencies": ["f-003"]
+    },
+    {
+      "id": "f-006",
+      "title": "Check in patient for visit",
+      "action": "Check in",
+      "result": "patient",
+      "object": "visit",
+      "priority": "high",
+      "estimatedDays": 2,
+      "dependencies": ["f-003"]
+    },
+    {
+      "id": "f-007",
+      "title": "Record vitals of patient",
+      "action": "Record",
+      "result": "vitals",
+      "object": "patient",
+      "priority": "high",
+      "estimatedDays": 2,
+      "dependencies": ["f-006"]
+    },
+    {
+      "id": "f-008",
+      "title": "Document encounter of physician",
+      "action": "Document",
+      "result": "encounter",
+      "object": "physician",
+      "priority": "high",
+      "estimatedDays": 4,
+      "dependencies": ["f-006"]
+    },
+    {
+      "id": "f-009",
+      "title": "Prescribe medication for patient",
+      "action": "Prescribe",
+      "result": "medication",
+      "object": "patient",
+      "priority": "high",
+      "estimatedDays": 3,
+      "dependencies": ["f-008"]
+    },
+    {
+      "id": "f-010",
+      "title": "Check interactions of medications",
+      "action": "Check",
+      "result": "interactions",
+      "object": "medications",
+      "priority": "high",
+      "estimatedDays": 4,
+      "dependencies": ["f-009"]
+    },
+    {
+      "id": "f-011",
+      "title": "Send prescription to pharmacy",
+      "action": "Send",
+      "result": "prescription",
+      "object": "pharmacy",
+      "priority": "high",
+      "estimatedDays": 3,
+      "dependencies": ["f-009"]
+    },
+    {
+      "id": "f-012",
+      "title": "Order lab test for patient",
+      "action": "Order",
+      "result": "lab test",
+      "object": "patient",
+      "priority": "high",
+      "estimatedDays": 3,
+      "dependencies": ["f-008"]
+    },
+    {
+      "id": "f-013",
+      "title": "Record results of lab test",
+      "action": "Record",
+      "result": "results",
+      "object": "lab test",
+      "priority": "high",
+      "estimatedDays": 2,
+      "dependencies": ["f-012"]
+    },
+    {
+      "id": "f-014",
+      "title": "Alert physician of abnormal results",
+      "action": "Alert",
+      "result": "physician",
+      "object": "abnormal results",
+      "priority": "high",
+      "estimatedDays": 2,
+      "dependencies": ["f-013"]
+    },
+    {
+      "id": "f-015",
+      "title": "Display history of patient",
+      "action": "Display",
+      "result": "history",
+      "object": "patient",
+      "priority": "high",
+      "estimatedDays": 3,
+      "dependencies": ["f-008"]
+    },
+    {
+      "id": "f-016",
+      "title": "Generate bill for visit",
+      "action": "Generate",
+      "result": "bill",
+      "object": "visit",
+      "priority": "high",
+      "estimatedDays": 4,
+      "dependencies": ["f-008"]
+    },
+    {
+      "id": "f-017",
+      "title": "Submit claim to insurance",
+      "action": "Submit",
+      "result": "claim",
+      "object": "insurance",
+      "priority": "high",
+      "estimatedDays": 5,
+      "dependencies": ["f-016", "f-002"]
+    },
+    {
+      "id": "f-018",
+      "title": "Process payment of patient",
+      "action": "Process",
+      "result": "payment",
+      "object": "patient",
+      "priority": "high",
+      "estimatedDays": 3,
+      "dependencies": ["f-016"]
+    },
+    {
+      "id": "f-019",
+      "title": "Record allergy of patient",
+      "action": "Record",
+      "result": "allergy",
+      "object": "patient",
+      "priority": "high",
+      "estimatedDays": 2,
+      "dependencies": ["f-001"]
+    },
+    {
+      "id": "f-020",
+      "title": "Check allergies before prescription",
+      "action": "Check",
+      "result": "allergies",
+      "object": "prescription",
+      "priority": "high",
+      "estimatedDays": 2,
+      "dependencies": ["f-019", "f-009"]
+    },
+    {
+      "id": "f-021",
+      "title": "Grant access to medical record",
+      "action": "Grant",
+      "result": "access",
+      "object": "medical record",
+      "priority": "high",
+      "estimatedDays": 3,
+      "dependencies": ["f-001"]
+    },
+    {
+      "id": "f-022",
+      "title": "Audit access to patient data",
+      "action": "Audit",
+      "result": "access",
+      "object": "patient data",
+      "priority": "high",
+      "estimatedDays": 4,
+      "dependencies": ["f-021"]
+    },
+    {
+      "id": "f-023",
+      "title": "Export records for transfer",
+      "action": "Export",
+      "result": "records",
+      "object": "transfer",
+      "priority": "medium",
+      "estimatedDays": 3,
+      "dependencies": ["f-015"]
+    },
+    {
+      "id": "f-024",
+      "title": "Import records from external system",
+      "action": "Import",
+      "result": "records",
+      "object": "external system",
+      "priority": "medium",
+      "estimatedDays": 5,
+      "dependencies": ["f-001"]
+    },
+    {
+      "id": "f-025",
+      "title": "Generate report of quality metrics",
+      "action": "Generate",
+      "result": "report",
+      "object": "quality metrics",
+      "priority": "medium",
+      "estimatedDays": 5,
+      "dependencies": ["f-008", "f-013"]
+    }
+  ]
+}

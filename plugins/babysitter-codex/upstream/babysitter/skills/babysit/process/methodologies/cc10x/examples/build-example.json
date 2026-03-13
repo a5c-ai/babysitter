@@ -1,0 +1,25 @@
+{
+  "name": "CC10X BUILD - API Endpoint Implementation",
+  "description": "TDD-enforced implementation of a REST API endpoint with parallel review",
+  "processId": "methodologies/cc10x/cc10x-build",
+  "inputs": {
+    "request": "Add a PATCH /api/users/:id endpoint with field-level validation and audit logging",
+    "projectRoot": ".",
+    "planFile": "docs/plans/user-api-plan.md",
+    "memory": {
+      "activeContext": "Working on user management API",
+      "patterns": "Project uses Zod for validation, Winston for logging"
+    },
+    "confidenceThreshold": 80
+  },
+  "expectedOutcomes": {
+    "phases": [
+      "clarify-requirements (read plan file, define acceptance criteria)",
+      "tdd-red (write failing endpoint tests, exit code 1)",
+      "tdd-green (implement endpoint with Zod validation, exit code 0)",
+      "tdd-refactor (align with project patterns)",
+      "parallel: code-review + silent-failure-hunt",
+      "integration-verify (full test suite, exit code 0)"
+    ]
+  }
+}

@@ -1,0 +1,132 @@
+{
+  "name": "Industrial IoT Platform",
+  "description": "Cloud-based platform for managing and analyzing data from industrial IoT sensors and devices",
+  "inputs": {
+    "projectName": "IndustryConnect IoT Platform",
+    "projectVision": "Scalable IoT platform for industrial manufacturing. Connect 100,000+ sensors and devices, collect real-time data, perform edge processing, provide predictive maintenance analytics, and enable remote device management. Support for multiple protocols (MQTT, CoAP, OPC-UA).",
+    "iterationsPerPhase": {
+      "inception": 1,
+      "elaboration": 3,
+      "construction": 5,
+      "transition": 1
+    },
+    "teamSize": 14,
+    "useCaseSource": "customer-discovery",
+    "architectureStyle": "event-driven",
+    "predefinedUseCases": [
+      {
+        "id": "UC-001",
+        "name": "Connect IoT Device",
+        "actors": ["IoT Device", "Platform Admin"],
+        "priority": "critical"
+      },
+      {
+        "id": "UC-002",
+        "name": "Ingest Sensor Data",
+        "actors": ["IoT Device", "Data Pipeline"],
+        "priority": "critical"
+      },
+      {
+        "id": "UC-003",
+        "name": "Monitor Device Health",
+        "actors": ["Operations Manager", "Alert System"],
+        "priority": "high"
+      },
+      {
+        "id": "UC-004",
+        "name": "Perform Predictive Maintenance",
+        "actors": ["Maintenance Technician", "ML Model"],
+        "priority": "high"
+      },
+      {
+        "id": "UC-005",
+        "name": "Configure Device Remotely",
+        "actors": ["Platform Admin"],
+        "priority": "medium"
+      }
+    ],
+    "predefinedRisks": [
+      {
+        "id": "RISK-001",
+        "category": "technical",
+        "description": "Ingesting 1M+ data points per second",
+        "probability": "high",
+        "impact": "high"
+      },
+      {
+        "id": "RISK-002",
+        "category": "technical",
+        "description": "Real-time edge processing on resource-constrained devices",
+        "probability": "high",
+        "impact": "medium"
+      },
+      {
+        "id": "RISK-003",
+        "category": "technical",
+        "description": "Multi-protocol support (MQTT, CoAP, OPC-UA)",
+        "probability": "medium",
+        "impact": "medium"
+      },
+      {
+        "id": "RISK-004",
+        "category": "business",
+        "description": "Industrial customers require on-premise deployment option",
+        "probability": "medium",
+        "impact": "medium"
+      }
+    ]
+  },
+  "expectedPhases": [
+    {
+      "phase": "Inception",
+      "iterations": 1,
+      "keyDeliverables": [
+        "Vision for industrial IoT platform",
+        "Business case with market opportunity analysis",
+        "Use case model for device management and analytics",
+        "Risk assessment for high-volume data ingestion",
+        "Initial architecture concepts (cloud + edge)"
+      ]
+    },
+    {
+      "phase": "Elaboration",
+      "iterations": 3,
+      "keyDeliverables": [
+        "Event-driven architecture with message streaming",
+        "Edge processing architecture for devices",
+        "Multi-protocol gateway design (MQTT, CoAP, OPC-UA)",
+        "Time-series database design for sensor data",
+        "ML pipeline architecture for predictive maintenance",
+        "Prototype validating data ingestion at scale",
+        "Detailed device lifecycle use cases"
+      ]
+    },
+    {
+      "phase": "Construction",
+      "iterations": 5,
+      "keyDeliverables": [
+        "Iteration 1: Device connectivity and protocol gateways",
+        "Iteration 2: Data ingestion pipeline and storage",
+        "Iteration 3: Real-time monitoring and alerting",
+        "Iteration 4: Predictive maintenance ML models",
+        "Iteration 5: Device management and remote configuration",
+        "Edge agent software for industrial devices",
+        "Cloud platform with auto-scaling",
+        "Analytics dashboard for operations teams"
+      ]
+    },
+    {
+      "phase": "Transition",
+      "iterations": 1,
+      "keyDeliverables": [
+        "Pilot deployment at 3 manufacturing facilities",
+        "Cloud production deployment",
+        "On-premise deployment option for enterprise customers",
+        "Training for industrial engineers and operators",
+        "Documentation for device integration",
+        "24/7 monitoring and support"
+      ]
+    }
+  ],
+  "rationale": "IoT platforms have complex architecture requirements (cloud + edge, real-time processing, scalability). Three Elaboration iterations validate architecture with prototypes addressing high technical risks. Five Construction iterations deliver device management, data pipeline, analytics, and ML features incrementally. RUP's risk-driven approach ensures scalability is proven early."
+}

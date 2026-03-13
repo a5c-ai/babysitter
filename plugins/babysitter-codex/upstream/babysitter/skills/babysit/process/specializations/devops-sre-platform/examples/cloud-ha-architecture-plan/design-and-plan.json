@@ -1,0 +1,67 @@
+{
+  "projectIdentifier": "my-api-platform-prod",
+  "cloudProvider": "gcp",
+  "targetRegion": "europe-west1",
+  "slaTarget": "99.95%",
+  "budgetCeiling": 150,
+  "currentArchitecture": {
+    "description": "B2B API platform serving 50+ enterprise clients. Cloud Run API gateway, Cloud SQL PostgreSQL for core data, Memorystore Redis for rate limiting and caching, Pub/Sub for async processing, Cloud Storage for file uploads. All in us-central1. Need HA design and IaC scripts but will create our own documentation and diagrams.",
+    "services": [
+      {
+        "name": "api-gateway",
+        "type": "Cloud Run",
+        "region": "us-central1",
+        "memory": "1Gi",
+        "cpu": 2,
+        "minInstances": 0,
+        "maxInstances": 50,
+        "timeout": "60s"
+      },
+      {
+        "name": "async-worker",
+        "type": "Cloud Run",
+        "region": "us-central1",
+        "memory": "2Gi",
+        "cpu": 2,
+        "minInstances": 0,
+        "maxInstances": 20,
+        "timeout": "900s"
+      },
+      {
+        "name": "core-database",
+        "type": "Cloud SQL PostgreSQL",
+        "region": "us-central1",
+        "tier": "db-custom-2-7680",
+        "highAvailability": false,
+        "backups": true,
+        "backupRetention": 7,
+        "pointInTimeRecovery": false
+      },
+      {
+        "name": "cache-and-ratelimit",
+        "type": "Memorystore Redis",
+        "region": "us-central1",
+        "tier": "BASIC",
+        "memorySizeGb": 1,
+        "highAvailability": false
+      },
+      {
+        "name": "async-events",
+        "type": "Pub/Sub",
+        "region": "global",
+        "subscriptionCount": 4
+      },
+      {
+        "name": "file-storage",
+        "type": "Cloud Storage",
+        "region": "us-central1",
+        "storageClass": "STANDARD",
+        "versioning": false
+      }
+    ]
+  },
+  "diagramConfig": {
+    "enabled": false
+  },
+  "compositionPattern": "design-and-plan"
+}

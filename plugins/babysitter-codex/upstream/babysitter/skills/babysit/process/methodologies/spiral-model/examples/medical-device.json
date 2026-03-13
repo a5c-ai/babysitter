@@ -1,0 +1,35 @@
+{
+  "projectName": "AI-Assisted Diagnostic Imaging System",
+  "projectDescription": "FDA Class III medical device software for AI-assisted diagnostic imaging (CT, MRI, X-ray analysis) with automated anomaly detection, radiologist workflow integration, and full HIPAA compliance. Must meet FDA 21 CFR Part 11 and IEC 62304 standards.",
+  "maxSpirals": 7,
+  "convergenceCriteria": "all-risks-resolved",
+  "stakeholders": [
+    {
+      "name": "Dr. Sarah Mitchell",
+      "role": "Chief Medical Officer",
+      "department": "Medical Affairs",
+      "email": "smitchell@medtech.example.com"
+    },
+    {
+      "name": "David Kumar",
+      "role": "Regulatory Affairs Manager",
+      "department": "Regulatory",
+      "email": "dkumar@medtech.example.com"
+    },
+    {
+      "name": "Dr. Emily Zhang",
+      "role": "Lead Radiologist",
+      "department": "Clinical",
+      "email": "ezhang@hospital.example.com"
+    },
+    {
+      "name": "Michael O'Brien",
+      "role": "Quality Assurance Director",
+      "department": "Quality",
+      "email": "mobrien@medtech.example.com"
+    }
+  ],
+  "riskTolerance": "low",
+  "initialRisks": "FDA approval pathway uncertainty, AI model accuracy and false positives, patient data security, clinical validation, radiologist acceptance",
+  "generateVisualizations": true
+}

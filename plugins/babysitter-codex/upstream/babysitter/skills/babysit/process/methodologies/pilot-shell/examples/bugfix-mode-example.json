@@ -1,0 +1,19 @@
+{
+  "description": "Race condition in WebSocket reconnection causes duplicate event handlers and memory leak",
+  "reproSteps": [
+    "Connect to WebSocket server",
+    "Kill the server process",
+    "Restart the server within 2 seconds",
+    "Observe that the client registers duplicate message handlers",
+    "Each subsequent reconnection adds another set of handlers",
+    "Memory usage grows linearly with reconnection count"
+  ],
+  "targetQuality": 90,
+  "context": {
+    "affectedFile": "src/transport/websocket-client.ts",
+    "symptom": "Memory leak and duplicate event processing after reconnection",
+    "frequency": "100% reproducible on network interruption",
+    "impact": "Production users experience increasing latency after network blips",
+    "relatedTests": "src/transport/__tests__/websocket-client.test.ts"
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "description": "Basic V-Model example for a standard web application",
+  "inputs": {
+    "projectRequirements": "Build a task management web application with the following features:\n\n1. User Authentication\n   - Users can register with email and password\n   - Users can log in and log out\n   - Password reset via email\n\n2. Task Management\n   - Create tasks with title, description, due date, and priority\n   - Edit existing tasks\n   - Mark tasks as complete\n   - Delete tasks\n   - Filter tasks by status (all, active, completed)\n   - Sort tasks by due date or priority\n\n3. Task Lists/Projects\n   - Organize tasks into projects\n   - Create, edit, and delete projects\n   - View all tasks in a project\n\n4. User Interface\n   - Responsive design for desktop and mobile\n   - Clean, intuitive interface\n   - Real-time updates\n\n5. Non-Functional Requirements\n   - Page load time < 2 seconds\n   - Support 100 concurrent users\n   - 99.5% uptime\n   - Data encrypted in transit and at rest",
+    "safetyLevel": "standard",
+    "traceabilityRequired": true,
+    "testingRigor": "thorough"
+  },
+  "expectedOutputs": {
+    "requirements": {
+      "functional": "12-15 functional requirements",
+      "nonFunctional": "4-6 non-functional requirements"
+    },
+    "design": {
+      "components": "4-6 major components (Auth, TaskManager, ProjectManager, UI)",
+      "modules": "10-15 modules"
+    },
+    "testing": {
+      "unitTests": "80-120 test cases",
+      "integrationTests": "30-40 test cases",
+      "systemTests": "20-30 test cases",
+      "acceptanceTests": "15-20 test cases"
+    },
+    "traceability": {
+      "coverage": "95-100% requirements coverage expected",
+      "gaps": "Should be minimal to none"
+    }
+  },
+  "learningPoints": [
+    "Standard V-Model flow for web applications",
+    "Parallel test design at each level",
+    "Requirements-to-tests traceability",
+    "Code reviews and static analysis",
+    "Testing pyramid: Unit → Integration → System → Acceptance"
+  ]
+}

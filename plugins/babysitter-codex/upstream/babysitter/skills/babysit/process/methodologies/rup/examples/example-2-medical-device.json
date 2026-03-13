@@ -1,0 +1,97 @@
+{
+  "name": "Medical Device Control Software",
+  "description": "Safety-critical software for medical imaging device with FDA regulatory requirements",
+  "inputs": {
+    "projectName": "RadiologyPro Control System",
+    "projectVision": "Real-time control software for advanced radiology imaging device. Must meet FDA 21 CFR Part 11 and IEC 62304 medical device software standards. High reliability, safety-critical system with extensive traceability and documentation requirements.",
+    "iterationsPerPhase": {
+      "inception": 1,
+      "elaboration": 3,
+      "construction": 4,
+      "transition": 2
+    },
+    "teamSize": 10,
+    "useCaseSource": "regulatory-requirements",
+    "architectureStyle": "layered",
+    "predefinedRisks": [
+      {
+        "id": "RISK-001",
+        "category": "business",
+        "description": "FDA approval delays due to documentation gaps",
+        "probability": "high",
+        "impact": "high"
+      },
+      {
+        "id": "RISK-002",
+        "category": "technical",
+        "description": "Real-time performance requirements for image processing",
+        "probability": "medium",
+        "impact": "high"
+      },
+      {
+        "id": "RISK-003",
+        "category": "technical",
+        "description": "Safety-critical error handling and failsafes",
+        "probability": "medium",
+        "impact": "high"
+      },
+      {
+        "id": "RISK-004",
+        "category": "organizational",
+        "description": "Team lacks medical device software experience",
+        "probability": "medium",
+        "impact": "medium"
+      }
+    ]
+  },
+  "expectedPhases": [
+    {
+      "phase": "Inception",
+      "iterations": 1,
+      "keyDeliverables": [
+        "Vision document aligned with FDA requirements",
+        "Business case including regulatory approval costs",
+        "Initial use case model mapped to IEC 62304 requirements",
+        "Comprehensive risk list including safety hazards",
+        "Project plan accounting for FDA submission timeline"
+      ]
+    },
+    {
+      "phase": "Elaboration",
+      "iterations": 3,
+      "keyDeliverables": [
+        "Layered architecture with safety-critical design patterns",
+        "Detailed use cases with full traceability to requirements",
+        "Architecture prototype validating real-time performance",
+        "Risk mitigation including FMEA (Failure Mode and Effects Analysis)",
+        "Software Development Plan (SDP) per IEC 62304",
+        "Requirements traceability matrix"
+      ]
+    },
+    {
+      "phase": "Construction",
+      "iterations": 4,
+      "keyDeliverables": [
+        "Safety-critical code with full code reviews",
+        "Extensive unit testing with 95%+ coverage",
+        "Integration testing with hardware simulators",
+        "System testing including safety scenarios",
+        "Software Requirements Specification (SRS) updates",
+        "Design History File (DHF) documentation"
+      ]
+    },
+    {
+      "phase": "Transition",
+      "iterations": 2,
+      "keyDeliverables": [
+        "Validation testing per FDA requirements",
+        "Clinical beta testing at partner hospitals",
+        "FDA 510(k) submission package",
+        "Operator training program and certification",
+        "Post-market surveillance plan",
+        "Technical documentation for regulatory approval"
+      ]
+    }
+  ],
+  "rationale": "RUP is ideal for medical device software due to its emphasis on documentation, traceability, and risk management. Three Elaboration iterations address complex safety and performance requirements. Heavy documentation aligns with FDA/IEC requirements. Extensive Transition phase handles regulatory approval and clinical validation."
+}

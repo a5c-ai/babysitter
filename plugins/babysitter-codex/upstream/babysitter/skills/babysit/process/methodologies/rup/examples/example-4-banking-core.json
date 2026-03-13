@@ -1,0 +1,109 @@
+{
+  "name": "Core Banking System Modernization",
+  "description": "Replace legacy mainframe banking system with modern cloud-based architecture",
+  "inputs": {
+    "projectName": "NextGen Core Banking Platform",
+    "projectVision": "Modern cloud-native core banking system to replace 40-year-old mainframe. Support retail banking operations including accounts, transactions, loans, deposits, and regulatory reporting. Must handle 10M+ customers and 100M+ daily transactions with zero data loss.",
+    "iterationsPerPhase": {
+      "inception": 2,
+      "elaboration": 3,
+      "construction": 8,
+      "transition": 3
+    },
+    "teamSize": 25,
+    "useCaseSource": "legacy-system-analysis",
+    "architectureStyle": "microservices",
+    "predefinedRisks": [
+      {
+        "id": "RISK-001",
+        "category": "technical",
+        "description": "Data migration from legacy mainframe",
+        "probability": "high",
+        "impact": "high"
+      },
+      {
+        "id": "RISK-002",
+        "category": "business",
+        "description": "Regulatory compliance (Basel III, SOX, etc.)",
+        "probability": "high",
+        "impact": "high"
+      },
+      {
+        "id": "RISK-003",
+        "category": "technical",
+        "description": "Real-time transaction processing at scale",
+        "probability": "high",
+        "impact": "high"
+      },
+      {
+        "id": "RISK-004",
+        "category": "organizational",
+        "description": "Resistance to change from mainframe-trained staff",
+        "probability": "medium",
+        "impact": "high"
+      },
+      {
+        "id": "RISK-005",
+        "category": "schedule",
+        "description": "Integration with hundreds of existing systems",
+        "probability": "high",
+        "impact": "medium"
+      }
+    ]
+  },
+  "expectedPhases": [
+    {
+      "phase": "Inception",
+      "iterations": 2,
+      "keyDeliverables": [
+        "Vision for cloud-native banking platform",
+        "Business case with TCO analysis vs mainframe",
+        "Initial use case model from legacy system analysis",
+        "Comprehensive risk assessment for banking transformation",
+        "Migration strategy: phased vs big-bang",
+        "Regulatory compliance roadmap"
+      ]
+    },
+    {
+      "phase": "Elaboration",
+      "iterations": 3,
+      "keyDeliverables": [
+        "Microservices architecture for banking domains",
+        "Data migration architecture and ETL design",
+        "Event-driven transaction processing design",
+        "Security and compliance architecture",
+        "Executable prototype validating transaction throughput",
+        "Integration architecture with existing systems",
+        "Detailed use cases for core banking workflows"
+      ]
+    },
+    {
+      "phase": "Construction",
+      "iterations": 8,
+      "keyDeliverables": [
+        "Iteration 1-2: Account management and customer data",
+        "Iteration 3-4: Transaction processing and ledger",
+        "Iteration 5-6: Loans and deposits",
+        "Iteration 7: Regulatory reporting",
+        "Iteration 8: Analytics and dashboards",
+        "Data migration tools and batch processes",
+        "2000+ automated tests including stress tests",
+        "Comprehensive audit trails and logging"
+      ]
+    },
+    {
+      "phase": "Transition",
+      "iterations": 3,
+      "keyDeliverables": [
+        "Pilot deployment at 5 branch offices",
+        "Phased migration of customer data",
+        "Production cutover with parallel run",
+        "Training for 1000+ bank employees",
+        "Go-live support for 6 months",
+        "Performance tuning under production load",
+        "Regulatory audit and approval"
+      ]
+    }
+  ],
+  "rationale": "Banking system modernization is perfect for RUP. Two Inception iterations handle complex stakeholder analysis. Three Elaboration iterations address high technical risks (data migration, transaction processing, compliance). Eight Construction iterations enable phased implementation of banking domains. Three Transition iterations manage complex cutover and training."
+}

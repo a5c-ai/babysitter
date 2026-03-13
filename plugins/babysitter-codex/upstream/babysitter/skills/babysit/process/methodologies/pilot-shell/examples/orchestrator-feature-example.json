@@ -1,0 +1,18 @@
+{
+  "description": "Add OAuth2 authentication with Google and GitHub providers",
+  "mode": "feature",
+  "targetQuality": 90,
+  "maxIterations": 5,
+  "context": {
+    "existingAuth": "JWT-based session tokens",
+    "framework": "Express.js with Passport",
+    "database": "PostgreSQL with Prisma ORM",
+    "requirements": [
+      "Support Google OAuth2 login flow",
+      "Support GitHub OAuth2 login flow",
+      "Link OAuth accounts to existing user records",
+      "Handle first-time OAuth users with account creation",
+      "Store OAuth tokens securely with encryption at rest"
+    ]
+  }
+}

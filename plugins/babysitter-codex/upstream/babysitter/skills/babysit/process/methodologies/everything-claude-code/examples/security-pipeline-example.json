@@ -1,0 +1,19 @@
+{
+  "name": "ECC Security Pipeline - Pre-Deployment Audit",
+  "description": "AgentShield security audit across all 5 categories with optional red team simulation",
+  "processId": "methodologies/everything-claude-code/ecc-security-pipeline",
+  "inputs": {
+    "projectRoot": ".",
+    "scanCategories": ["secrets", "permissions", "hooks", "mcp", "agent-config"],
+    "redTeamEnabled": true,
+    "confidenceThreshold": 80
+  },
+  "expectedOutcomes": {
+    "phases": [
+      "parallel-scan (5 categories scanned concurrently)",
+      "breakpoint if critical findings",
+      "red-team (simulate attacks against found vulnerabilities)",
+      "synthesize-report (unified report, score, remediation plan)"
+    ]
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "userName": "Alex",
+  "rolePack": "engineer",
+  "vaultPath": "./cog-vault",
+  "integrations": {
+    "github": { "org": "my-org", "repos": ["frontend", "backend", "infra"] },
+    "linear": { "team": "engineering", "project": "Q1-2026" },
+    "slack": { "channels": ["engineering", "product", "incidents"] },
+    "posthog": { "project": "main-app" }
+  },
+  "cycleMode": "full",
+  "targetQuality": 80
+}

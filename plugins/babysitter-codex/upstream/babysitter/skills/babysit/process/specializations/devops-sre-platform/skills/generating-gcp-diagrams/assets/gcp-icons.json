@@ -1,0 +1,1369 @@
+{
+  "metadata": {
+    "version": "1.0.0",
+    "provider": "gcp",
+    "description": "GCP service icons for DrawIO using built-in mxgraph.gcp2 library",
+    "total_services": 46,
+    "last_updated": "2026-01-31"
+  },
+  "services": [
+    {
+      "service_name": "Cloud Run",
+      "service_id": "cloud_run",
+      "provider": "gcp",
+      "category": "compute",
+      "visual_signatures": {
+        "icon_description": "Hexagonal container icon with right-pointing arrow",
+        "icon_color": "#4285F4",
+        "background_color": "#FFFFFF",
+        "border_color": "#E0E0E0"
+      },
+      "drawio_shape": {
+        "library": "mxgraph.gcp2",
+        "shape_name": "cloud_run",
+        "full_style": "sketch=0;html=1;fillColor=#4285F4;strokeColor=none;verticalAlign=top;labelPosition=center;verticalLabelPosition=bottom;align=center;spacingTop=-6;fontSize=11;fontStyle=0;fontColor=#424242;shape=mxgraph.gcp2.cloud_run"
+      },
+      "recognition_keywords": [
+        "cloud run",
+        "serverless container",
+        "run"
+      ],
+      "default_size": {
+        "width": 50,
+        "height": 50
+      }
+    },
+    {
+      "service_name": "Compute Engine",
+      "service_id": "compute_engine",
+      "provider": "gcp",
+      "category": "compute",
+      "visual_signatures": {
+        "icon_description": "VM/server icon",
+        "icon_color": "#4285F4",
+        "background_color": "#FFFFFF",
+        "border_color": "#E0E0E0"
+      },
+      "drawio_shape": {
+        "library": "mxgraph.gcp2",
+        "shape_name": "compute_engine",
+        "full_style": "sketch=0;html=1;fillColor=#4285F4;strokeColor=none;verticalAlign=top;labelPosition=center;verticalLabelPosition=bottom;align=center;spacingTop=-6;fontSize=11;fontStyle=0;fontColor=#424242;shape=mxgraph.gcp2.compute_engine"
+      },
+      "recognition_keywords": [
+        "compute engine",
+        "vm",
+        "virtual machine",
+        "gce"
+      ],
+      "default_size": {
+        "width": 50,
+        "height": 50
+      }
+    },
+    {
+      "service_name": "Google Kubernetes Engine",
+      "service_id": "google_kubernetes_engine",
+      "provider": "gcp",
+      "category": "compute",
+      "visual_signatures": {
+        "icon_description": "Kubernetes wheel/helm icon",
+        "icon_color": "#4285F4",
+        "background_color": "#FFFFFF",
+        "border_color": "#E0E0E0"
+      },
+      "drawio_shape": {
+        "library": "mxgraph.gcp2",
+        "shape_name": "container_engine",
+        "full_style": "sketch=0;html=1;fillColor=#4285F4;strokeColor=none;verticalAlign=top;labelPosition=center;verticalLabelPosition=bottom;align=center;spacingTop=-6;fontSize=11;fontStyle=0;fontColor=#424242;shape=mxgraph.gcp2.container_engine"
+      },
+      "recognition_keywords": [
+        "gke",
+        "kubernetes",
+        "k8s",
+        "container orchestration"
+      ],
+      "default_size": {
+        "width": 50,
+        "height": 50
+      }
+    },
+    {
+      "service_name": "Cloud Functions",
+      "service_id": "cloud_functions",
+      "provider": "gcp",
+      "category": "compute",
+      "visual_signatures": {
+        "icon_description": "Function/lambda icon with brackets",
+        "icon_color": "#4285F4",
+        "background_color": "#FFFFFF",
+        "border_color": "#E0E0E0"
+      },
+      "drawio_shape": {
+        "library": "mxgraph.gcp2",
+        "shape_name": "cloud_functions",
+        "full_style": "sketch=0;html=1;fillColor=#4285F4;strokeColor=none;verticalAlign=top;labelPosition=center;verticalLabelPosition=bottom;align=center;spacingTop=-6;fontSize=11;fontStyle=0;fontColor=#424242;shape=mxgraph.gcp2.cloud_functions"
+      },
+      "recognition_keywords": [
+        "cloud functions",
+        "serverless",
+        "function",
+        "faas"
+      ],
+      "default_size": {
+        "width": 50,
+        "height": 50
+      }
+    },
+    {
+      "service_name": "App Engine",
+      "service_id": "app_engine",
+      "provider": "gcp",
+      "category": "compute",
+      "visual_signatures": {
+        "icon_description": "App platform icon",
+        "icon_color": "#4285F4",
+        "background_color": "#FFFFFF",
+        "border_color": "#E0E0E0"
+      },
+      "drawio_shape": {
+        "library": "mxgraph.gcp2",
+        "shape_name": "app_engine",
+        "full_style": "sketch=0;html=1;fillColor=#4285F4;strokeColor=none;verticalAlign=top;labelPosition=center;verticalLabelPosition=bottom;align=center;spacingTop=-6;fontSize=11;fontStyle=0;fontColor=#424242;shape=mxgraph.gcp2.app_engine"
+      },
+      "recognition_keywords": [
+        "app engine",
+        "gae",
+        "platform"
+      ],
+      "default_size": {
+        "width": 50,
+        "height": 50
+      }
+    },
+    {
+      "service_name": "BigQuery",
+      "service_id": "bigquery",
+      "provider": "gcp",
+      "category": "database",
+      "visual_signatures": {
+        "icon_description": "Data warehouse icon with magnifying glass",
+        "icon_color": "#4285F4",
+        "background_color": "#FFFFFF",
+        "border_color": "#E0E0E0"
+      },
+      "drawio_shape": {
+        "library": "mxgraph.gcp2",
+        "shape_name": "bigquery",
+        "full_style": "sketch=0;html=1;fillColor=#4285F4;strokeColor=none;verticalAlign=top;labelPosition=center;verticalLabelPosition=bottom;align=center;spacingTop=-6;fontSize=11;fontStyle=0;fontColor=#424242;shape=mxgraph.gcp2.bigquery"
+      },
+      "recognition_keywords": [
+        "bigquery",
+        "data warehouse",
+        "analytics",
+        "bq"
+      ],
+      "default_size": {
+        "width": 50,
+        "height": 50
+      }
+    },
+    {
+      "service_name": "Cloud SQL",
+      "service_id": "cloud_sql",
+      "provider": "gcp",
+      "category": "database",
+      "visual_signatures": {
+        "icon_description": "Relational database icon",
+        "icon_color": "#4285F4",
+        "background_color": "#FFFFFF",
+        "border_color": "#E0E0E0"
+      },
+      "drawio_shape": {
+        "library": "mxgraph.gcp2",
+        "shape_name": "cloud_sql",
+        "full_style": "sketch=0;html=1;fillColor=#4285F4;strokeColor=none;verticalAlign=top;labelPosition=center;verticalLabelPosition=bottom;align=center;spacingTop=-6;fontSize=11;fontStyle=0;fontColor=#424242;shape=mxgraph.gcp2.cloud_sql"
+      },
+      "recognition_keywords": [
+        "cloud sql",
+        "mysql",
+        "postgres",
+        "sql server",
+        "relational"
+      ],
+      "default_size": {
+        "width": 50,
+        "height": 50
+      }
+    },
+    {
+      "service_name": "Cloud Firestore",
+      "service_id": "cloud_firestore",
+      "provider": "gcp",
+      "category": "database",
+      "visual_signatures": {
+        "icon_description": "Document database icon with flame",
+        "icon_color": "#FFCA28",
+        "background_color": "#FFFFFF",
+        "border_color": "#E0E0E0"
+      },
+      "drawio_shape": {
+        "library": "mxgraph.gcp2",
+        "shape_name": "cloud_firestore",
+        "full_style": "sketch=0;html=1;fillColor=#FFCA28;strokeColor=none;verticalAlign=top;labelPosition=center;verticalLabelPosition=bottom;align=center;spacingTop=-6;fontSize=11;fontStyle=0;fontColor=#424242;shape=mxgraph.gcp2.cloud_firestore"
+      },
+      "recognition_keywords": [
+        "firestore",
+        "document db",
+        "nosql",
+        "firebase"
+      ],
+      "default_size": {
+        "width": 50,
+        "height": 50
+      }
+    },
+    {
+      "service_name": "Cloud Spanner",
+      "service_id": "cloud_spanner",
+      "provider": "gcp",
+      "category": "database",
+      "visual_signatures": {
+        "icon_description": "Globally distributed database icon",
+        "icon_color": "#4285F4",
+        "background_color": "#FFFFFF",
+        "border_color": "#E0E0E0"
+      },
+      "drawio_shape": {
+        "library": "mxgraph.gcp2",
+        "shape_name": "cloud_spanner",
+        "full_style": "sketch=0;html=1;fillColor=#4285F4;strokeColor=none;verticalAlign=top;labelPosition=center;verticalLabelPosition=bottom;align=center;spacingTop=-6;fontSize=11;fontStyle=0;fontColor=#424242;shape=mxgraph.gcp2.cloud_spanner"
+      },
+      "recognition_keywords": [
+        "spanner",
+        "global database",
+        "distributed sql"
+      ],
+      "default_size": {
+        "width": 50,
+        "height": 50
+      }
+    },
+    {
+      "service_name": "Cloud Bigtable",
+      "service_id": "cloud_bigtable",
+      "provider": "gcp",
+      "category": "database",
+      "visual_signatures": {
+        "icon_description": "Wide-column database icon",
+        "icon_color": "#4285F4",
+        "background_color": "#FFFFFF",
+        "border_color": "#E0E0E0"
+      },
+      "drawio_shape": {
+        "library": "mxgraph.gcp2",
+        "shape_name": "cloud_bigtable",
+        "full_style": "sketch=0;html=1;fillColor=#4285F4;strokeColor=none;verticalAlign=top;labelPosition=center;verticalLabelPosition=bottom;align=center;spacingTop=-6;fontSize=11;fontStyle=0;fontColor=#424242;shape=mxgraph.gcp2.cloud_bigtable"
+      },
+      "recognition_keywords": [
+        "bigtable",
+        "wide column",
+        "nosql",
+        "hbase"
+      ],
+      "default_size": {
+        "width": 50,
+        "height": 50
+      }
+    },
+    {
+      "service_name": "Memorystore",
+      "service_id": "memorystore",
+      "provider": "gcp",
+      "category": "database",
+      "visual_signatures": {
+        "icon_description": "In-memory cache icon",
+        "icon_color": "#4285F4",
+        "background_color": "#FFFFFF",
+        "border_color": "#E0E0E0"
+      },
+      "drawio_shape": {
+        "library": "mxgraph.gcp2",
+        "shape_name": "cloud_memorystore",
+        "full_style": "sketch=0;html=1;fillColor=#4285F4;strokeColor=none;verticalAlign=top;labelPosition=center;verticalLabelPosition=bottom;align=center;spacingTop=-6;fontSize=11;fontStyle=0;fontColor=#424242;shape=mxgraph.gcp2.cloud_memorystore"
+      },
+      "recognition_keywords": [
+        "memorystore",
+        "redis",
+        "memcached",
+        "cache"
+      ],
+      "default_size": {
+        "width": 50,
+        "height": 50
+      }
+    },
+    {
+      "service_name": "Cloud Storage",
+      "service_id": "cloud_storage",
+      "provider": "gcp",
+      "category": "storage",
+      "visual_signatures": {
+        "icon_description": "Bucket icon for object storage",
+        "icon_color": "#4285F4",
+        "background_color": "#FFFFFF",
+        "border_color": "#E0E0E0"
+      },
+      "drawio_shape": {
+        "library": "mxgraph.gcp2",
+        "shape_name": "cloud_storage",
+        "full_style": "sketch=0;html=1;fillColor=#4285F4;strokeColor=none;verticalAlign=top;labelPosition=center;verticalLabelPosition=bottom;align=center;spacingTop=-6;fontSize=11;fontStyle=0;fontColor=#424242;shape=mxgraph.gcp2.cloud_storage"
+      },
+      "recognition_keywords": [
+        "cloud storage",
+        "gcs",
+        "bucket",
+        "object storage",
+        "blob"
+      ],
+      "default_size": {
+        "width": 50,
+        "height": 50
+      }
+    },
+    {
+      "service_name": "Filestore",
+      "service_id": "filestore",
+      "provider": "gcp",
+      "category": "storage",
+      "visual_signatures": {
+        "icon_description": "File storage/NFS icon",
+        "icon_color": "#4285F4",
+        "background_color": "#FFFFFF",
+        "border_color": "#E0E0E0"
+      },
+      "drawio_shape": {
+        "library": "mxgraph.gcp2",
+        "shape_name": "cloud_filestore",
+        "full_style": "sketch=0;html=1;fillColor=#4285F4;strokeColor=none;verticalAlign=top;labelPosition=center;verticalLabelPosition=bottom;align=center;spacingTop=-6;fontSize=11;fontStyle=0;fontColor=#424242;shape=mxgraph.gcp2.cloud_filestore"
+      },
+      "recognition_keywords": [
+        "filestore",
+        "nfs",
+        "file storage",
+        "shared storage"
+      ],
+      "default_size": {
+        "width": 50,
+        "height": 50
+      }
+    },
+    {
+      "service_name": "Persistent Disk",
+      "service_id": "persistent_disk",
+      "provider": "gcp",
+      "category": "storage",
+      "visual_signatures": {
+        "icon_description": "Block storage disk icon",
+        "icon_color": "#4285F4",
+        "background_color": "#FFFFFF",
+        "border_color": "#E0E0E0"
+      },
+      "drawio_shape": {
+        "library": "mxgraph.gcp2",
+        "shape_name": "persistent_disk",
+        "full_style": "sketch=0;html=1;fillColor=#4285F4;strokeColor=none;verticalAlign=top;labelPosition=center;verticalLabelPosition=bottom;align=center;spacingTop=-6;fontSize=11;fontStyle=0;fontColor=#424242;shape=mxgraph.gcp2.persistent_disk"
+      },
+      "recognition_keywords": [
+        "persistent disk",
+        "block storage",
+        "ssd",
+        "hdd"
+      ],
+      "default_size": {
+        "width": 50,
+        "height": 50
+      }
+    },
+    {
+      "service_name": "Virtual Private Cloud",
+      "service_id": "virtual_private_cloud",
+      "provider": "gcp",
+      "category": "networking",
+      "visual_signatures": {
+        "icon_description": "Network/VPC icon",
+        "icon_color": "#4285F4",
+        "background_color": "#FFFFFF",
+        "border_color": "#E0E0E0"
+      },
+      "drawio_shape": {
+        "library": "mxgraph.gcp2",
+        "shape_name": "virtual_private_cloud",
+        "full_style": "sketch=0;html=1;fillColor=#4285F4;strokeColor=none;verticalAlign=top;labelPosition=center;verticalLabelPosition=bottom;align=center;spacingTop=-6;fontSize=11;fontStyle=0;fontColor=#424242;shape=mxgraph.gcp2.virtual_private_cloud"
+      },
+      "recognition_keywords": [
+        "vpc",
+        "virtual private cloud",
+        "network"
+      ],
+      "default_size": {
+        "width": 50,
+        "height": 50
+      }
+    },
+    {
+      "service_name": "Cloud Load Balancing",
+      "service_id": "cloud_load_balancing",
+      "provider": "gcp",
+      "category": "networking",
+      "visual_signatures": {
+        "icon_description": "Load balancer icon with arrows",
+        "icon_color": "#4285F4",
+        "background_color": "#FFFFFF",
+        "border_color": "#E0E0E0"
+      },
+      "drawio_shape": {
+        "library": "mxgraph.gcp2",
+        "shape_name": "cloud_load_balancing",
+        "full_style": "sketch=0;html=1;fillColor=#4285F4;strokeColor=none;verticalAlign=top;labelPosition=center;verticalLabelPosition=bottom;align=center;spacingTop=-6;fontSize=11;fontStyle=0;fontColor=#424242;shape=mxgraph.gcp2.cloud_load_balancing"
+      },
+      "recognition_keywords": [
+        "load balancer",
+        "lb",
+        "load balancing",
+        "glb"
+      ],
+      "default_size": {
+        "width": 50,
+        "height": 50
+      }
+    },
+    {
+      "service_name": "Cloud CDN",
+      "service_id": "cloud_cdn",
+      "provider": "gcp",
+      "category": "networking",
+      "visual_signatures": {
+        "icon_description": "CDN/edge caching icon",
+        "icon_color": "#4285F4",
+        "background_color": "#FFFFFF",
+        "border_color": "#E0E0E0"
+      },
+      "drawio_shape": {
+        "library": "mxgraph.gcp2",
+        "shape_name": "cloud_cdn",
+        "full_style": "sketch=0;html=1;fillColor=#4285F4;strokeColor=none;verticalAlign=top;labelPosition=center;verticalLabelPosition=bottom;align=center;spacingTop=-6;fontSize=11;fontStyle=0;fontColor=#424242;shape=mxgraph.gcp2.cloud_cdn"
+      },
+      "recognition_keywords": [
+        "cdn",
+        "content delivery",
+        "edge",
+        "caching"
+      ],
+      "default_size": {
+        "width": 50,
+        "height": 50
+      }
+    },
+    {
+      "service_name": "Cloud DNS",
+      "service_id": "cloud_dns",
+      "provider": "gcp",
+      "category": "networking",
+      "visual_signatures": {
+        "icon_description": "DNS resolution icon",
+        "icon_color": "#4285F4",
+        "background_color": "#FFFFFF",
+        "border_color": "#E0E0E0"
+      },
+      "drawio_shape": {
+        "library": "mxgraph.gcp2",
+        "shape_name": "cloud_dns",
+        "full_style": "sketch=0;html=1;fillColor=#4285F4;strokeColor=none;verticalAlign=top;labelPosition=center;verticalLabelPosition=bottom;align=center;spacingTop=-6;fontSize=11;fontStyle=0;fontColor=#424242;shape=mxgraph.gcp2.cloud_dns"
+      },
+      "recognition_keywords": [
+        "dns",
+        "domain",
+        "name resolution"
+      ],
+      "default_size": {
+        "width": 50,
+        "height": 50
+      }
+    },
+    {
+      "service_name": "Cloud Armor",
+      "service_id": "cloud_armor",
+      "provider": "gcp",
+      "category": "networking",
+      "visual_signatures": {
+        "icon_description": "Security/WAF shield icon",
+        "icon_color": "#4285F4",
+        "background_color": "#FFFFFF",
+        "border_color": "#E0E0E0"
+      },
+      "drawio_shape": {
+        "library": "mxgraph.gcp2",
+        "shape_name": "cloud_armor",
+        "full_style": "sketch=0;html=1;fillColor=#4285F4;strokeColor=none;verticalAlign=top;labelPosition=center;verticalLabelPosition=bottom;align=center;spacingTop=-6;fontSize=11;fontStyle=0;fontColor=#424242;shape=mxgraph.gcp2.cloud_armor"
+      },
+      "recognition_keywords": [
+        "armor",
+        "waf",
+        "ddos",
+        "security",
+        "firewall"
+      ],
+      "default_size": {
+        "width": 50,
+        "height": 50
+      }
+    },
+    {
+      "service_name": "Vertex AI",
+      "service_id": "vertex_ai",
+      "provider": "gcp",
+      "category": "ai_ml",
+      "visual_signatures": {
+        "icon_description": "AI/ML platform icon with neural network",
+        "icon_color": "#4285F4",
+        "background_color": "#FFFFFF",
+        "border_color": "#E0E0E0"
+      },
+      "drawio_shape": {
+        "library": "mxgraph.gcp2",
+        "shape_name": "cloud_machine_learning",
+        "full_style": "sketch=0;html=1;fillColor=#4285F4;strokeColor=none;verticalAlign=top;labelPosition=center;verticalLabelPosition=bottom;align=center;spacingTop=-6;fontSize=11;fontStyle=0;fontColor=#424242;shape=mxgraph.gcp2.cloud_machine_learning"
+      },
+      "recognition_keywords": [
+        "vertex ai",
+        "ml",
+        "machine learning",
+        "ai platform",
+        "vector db"
+      ],
+      "default_size": {
+        "width": 50,
+        "height": 50
+      }
+    },
+    {
+      "service_name": "AI Platform",
+      "service_id": "ai_platform",
+      "provider": "gcp",
+      "category": "ai_ml",
+      "visual_signatures": {
+        "icon_description": "AI platform training icon",
+        "icon_color": "#4285F4",
+        "background_color": "#FFFFFF",
+        "border_color": "#E0E0E0"
+      },
+      "drawio_shape": {
+        "library": "mxgraph.gcp2",
+        "shape_name": "cloud_machine_learning",
+        "full_style": "sketch=0;html=1;fillColor=#4285F4;strokeColor=none;verticalAlign=top;labelPosition=center;verticalLabelPosition=bottom;align=center;spacingTop=-6;fontSize=11;fontStyle=0;fontColor=#424242;shape=mxgraph.gcp2.cloud_machine_learning"
+      },
+      "recognition_keywords": [
+        "ai platform",
+        "ml training",
+        "prediction"
+      ],
+      "default_size": {
+        "width": 50,
+        "height": 50
+      }
+    },
+    {
+      "service_name": "Vision AI",
+      "service_id": "vision_ai",
+      "provider": "gcp",
+      "category": "ai_ml",
+      "visual_signatures": {
+        "icon_description": "Image/vision analysis icon with eye",
+        "icon_color": "#4285F4",
+        "background_color": "#FFFFFF",
+        "border_color": "#E0E0E0"
+      },
+      "drawio_shape": {
+        "library": "mxgraph.gcp2",
+        "shape_name": "cloud_vision_api",
+        "full_style": "sketch=0;html=1;fillColor=#4285F4;strokeColor=none;verticalAlign=top;labelPosition=center;verticalLabelPosition=bottom;align=center;spacingTop=-6;fontSize=11;fontStyle=0;fontColor=#424242;shape=mxgraph.gcp2.cloud_vision_api"
+      },
+      "recognition_keywords": [
+        "vision",
+        "image recognition",
+        "ocr",
+        "vision api"
+      ],
+      "default_size": {
+        "width": 50,
+        "height": 50
+      }
+    },
+    {
+      "service_name": "Natural Language AI",
+      "service_id": "natural_language_ai",
+      "provider": "gcp",
+      "category": "ai_ml",
+      "visual_signatures": {
+        "icon_description": "Text/NLP analysis icon",
+        "icon_color": "#4285F4",
+        "background_color": "#FFFFFF",
+        "border_color": "#E0E0E0"
+      },
+      "drawio_shape": {
+        "library": "mxgraph.gcp2",
+        "shape_name": "cloud_natural_language_api",
+        "full_style": "sketch=0;html=1;fillColor=#4285F4;strokeColor=none;verticalAlign=top;labelPosition=center;verticalLabelPosition=bottom;align=center;spacingTop=-6;fontSize=11;fontStyle=0;fontColor=#424242;shape=mxgraph.gcp2.cloud_natural_language_api"
+      },
+      "recognition_keywords": [
+        "natural language",
+        "nlp",
+        "text analysis",
+        "sentiment"
+      ],
+      "default_size": {
+        "width": 50,
+        "height": 50
+      }
+    },
+    {
+      "service_name": "Speech-to-Text",
+      "service_id": "speech_to_text",
+      "provider": "gcp",
+      "category": "ai_ml",
+      "visual_signatures": {
+        "icon_description": "Audio transcription icon with microphone",
+        "icon_color": "#4285F4",
+        "background_color": "#FFFFFF",
+        "border_color": "#E0E0E0"
+      },
+      "drawio_shape": {
+        "library": "mxgraph.gcp2",
+        "shape_name": "cloud_speech_api",
+        "full_style": "sketch=0;html=1;fillColor=#4285F4;strokeColor=none;verticalAlign=top;labelPosition=center;verticalLabelPosition=bottom;align=center;spacingTop=-6;fontSize=11;fontStyle=0;fontColor=#424242;shape=mxgraph.gcp2.cloud_speech_api"
+      },
+      "recognition_keywords": [
+        "speech to text",
+        "transcription",
+        "audio",
+        "stt"
+      ],
+      "default_size": {
+        "width": 50,
+        "height": 50
+      }
+    },
+    {
+      "service_name": "Pub/Sub",
+      "service_id": "pubsub",
+      "provider": "gcp",
+      "category": "integration",
+      "visual_signatures": {
+        "icon_description": "Message queue icon with arrows",
+        "icon_color": "#4285F4",
+        "background_color": "#FFFFFF",
+        "border_color": "#E0E0E0"
+      },
+      "drawio_shape": {
+        "library": "mxgraph.gcp2",
+        "shape_name": "cloud_pubsub",
+        "full_style": "sketch=0;html=1;fillColor=#4285F4;strokeColor=none;verticalAlign=top;labelPosition=center;verticalLabelPosition=bottom;align=center;spacingTop=-6;fontSize=11;fontStyle=0;fontColor=#424242;shape=mxgraph.gcp2.cloud_pubsub"
+      },
+      "recognition_keywords": [
+        "pub/sub",
+        "pubsub",
+        "messaging",
+        "queue",
+        "events"
+      ],
+      "default_size": {
+        "width": 50,
+        "height": 50
+      }
+    },
+    {
+      "service_name": "Cloud Tasks",
+      "service_id": "cloud_tasks",
+      "provider": "gcp",
+      "category": "integration",
+      "visual_signatures": {
+        "icon_description": "Task queue icon",
+        "icon_color": "#4285F4",
+        "background_color": "#FFFFFF",
+        "border_color": "#E0E0E0"
+      },
+      "drawio_shape": {
+        "library": "mxgraph.gcp2",
+        "shape_name": "cloud_tasks",
+        "full_style": "sketch=0;html=1;fillColor=#4285F4;strokeColor=none;verticalAlign=top;labelPosition=center;verticalLabelPosition=bottom;align=center;spacingTop=-6;fontSize=11;fontStyle=0;fontColor=#424242;shape=mxgraph.gcp2.cloud_tasks"
+      },
+      "recognition_keywords": [
+        "cloud tasks",
+        "task queue",
+        "async tasks"
+      ],
+      "default_size": {
+        "width": 50,
+        "height": 50
+      }
+    },
+    {
+      "service_name": "Workflows",
+      "service_id": "workflows",
+      "provider": "gcp",
+      "category": "integration",
+      "visual_signatures": {
+        "icon_description": "Workflow orchestration icon with flow arrows",
+        "icon_color": "#4285F4",
+        "background_color": "#FFFFFF",
+        "border_color": "#E0E0E0"
+      },
+      "drawio_shape": {
+        "library": "mxgraph.gcp2",
+        "shape_name": "workflows",
+        "full_style": "sketch=0;html=1;fillColor=#4285F4;strokeColor=none;verticalAlign=top;labelPosition=center;verticalLabelPosition=bottom;align=center;spacingTop=-6;fontSize=11;fontStyle=0;fontColor=#424242;shape=mxgraph.gcp2.workflows"
+      },
+      "recognition_keywords": [
+        "workflows",
+        "orchestration",
+        "workflow"
+      ],
+      "default_size": {
+        "width": 50,
+        "height": 50
+      }
+    },
+    {
+      "service_name": "Eventarc",
+      "service_id": "eventarc",
+      "provider": "gcp",
+      "category": "integration",
+      "visual_signatures": {
+        "icon_description": "Event routing icon",
+        "icon_color": "#4285F4",
+        "background_color": "#FFFFFF",
+        "border_color": "#E0E0E0"
+      },
+      "drawio_shape": {
+        "library": "mxgraph.gcp2",
+        "shape_name": "eventarc",
+        "full_style": "sketch=0;html=1;fillColor=#4285F4;strokeColor=none;verticalAlign=top;labelPosition=center;verticalLabelPosition=bottom;align=center;spacingTop=-6;fontSize=11;fontStyle=0;fontColor=#424242;shape=mxgraph.gcp2.eventarc"
+      },
+      "recognition_keywords": [
+        "eventarc",
+        "event routing",
+        "event driven"
+      ],
+      "default_size": {
+        "width": 50,
+        "height": 50
+      }
+    },
+    {
+      "service_name": "Cloud Scheduler",
+      "service_id": "cloud_scheduler",
+      "provider": "gcp",
+      "category": "integration",
+      "visual_signatures": {
+        "icon_description": "Cron/scheduler icon with clock",
+        "icon_color": "#4285F4",
+        "background_color": "#FFFFFF",
+        "border_color": "#E0E0E0"
+      },
+      "drawio_shape": {
+        "library": "mxgraph.gcp2",
+        "shape_name": "cloud_scheduler",
+        "full_style": "sketch=0;html=1;fillColor=#4285F4;strokeColor=none;verticalAlign=top;labelPosition=center;verticalLabelPosition=bottom;align=center;spacingTop=-6;fontSize=11;fontStyle=0;fontColor=#424242;shape=mxgraph.gcp2.cloud_scheduler"
+      },
+      "recognition_keywords": [
+        "scheduler",
+        "cron",
+        "scheduled jobs",
+        "timer"
+      ],
+      "default_size": {
+        "width": 50,
+        "height": 50
+      }
+    },
+    {
+      "service_name": "Cloud Logging",
+      "service_id": "cloud_logging",
+      "provider": "gcp",
+      "category": "operations",
+      "visual_signatures": {
+        "icon_description": "Logging/log viewer icon",
+        "icon_color": "#4285F4",
+        "background_color": "#FFFFFF",
+        "border_color": "#E0E0E0"
+      },
+      "drawio_shape": {
+        "library": "mxgraph.gcp2",
+        "shape_name": "logging",
+        "full_style": "sketch=0;html=1;fillColor=#4285F4;strokeColor=none;verticalAlign=top;labelPosition=center;verticalLabelPosition=bottom;align=center;spacingTop=-6;fontSize=11;fontStyle=0;fontColor=#424242;shape=mxgraph.gcp2.logging"
+      },
+      "recognition_keywords": [
+        "logging",
+        "logs",
+        "stackdriver logging"
+      ],
+      "default_size": {
+        "width": 50,
+        "height": 50
+      }
+    },
+    {
+      "service_name": "Cloud Monitoring",
+      "service_id": "cloud_monitoring",
+      "provider": "gcp",
+      "category": "operations",
+      "visual_signatures": {
+        "icon_description": "Monitoring/metrics icon with graph",
+        "icon_color": "#4285F4",
+        "background_color": "#FFFFFF",
+        "border_color": "#E0E0E0"
+      },
+      "drawio_shape": {
+        "library": "mxgraph.gcp2",
+        "shape_name": "cloud_monitoring",
+        "full_style": "sketch=0;html=1;fillColor=#4285F4;strokeColor=none;verticalAlign=top;labelPosition=center;verticalLabelPosition=bottom;align=center;spacingTop=-6;fontSize=11;fontStyle=0;fontColor=#424242;shape=mxgraph.gcp2.cloud_monitoring"
+      },
+      "recognition_keywords": [
+        "monitoring",
+        "metrics",
+        "stackdriver",
+        "observability"
+      ],
+      "default_size": {
+        "width": 50,
+        "height": 50
+      }
+    },
+    {
+      "service_name": "Cloud Trace",
+      "service_id": "cloud_trace",
+      "provider": "gcp",
+      "category": "operations",
+      "visual_signatures": {
+        "icon_description": "Distributed tracing icon",
+        "icon_color": "#4285F4",
+        "background_color": "#FFFFFF",
+        "border_color": "#E0E0E0"
+      },
+      "drawio_shape": {
+        "library": "mxgraph.gcp2",
+        "shape_name": "trace",
+        "full_style": "sketch=0;html=1;fillColor=#4285F4;strokeColor=none;verticalAlign=top;labelPosition=center;verticalLabelPosition=bottom;align=center;spacingTop=-6;fontSize=11;fontStyle=0;fontColor=#424242;shape=mxgraph.gcp2.trace"
+      },
+      "recognition_keywords": [
+        "trace",
+        "tracing",
+        "distributed tracing",
+        "latency"
+      ],
+      "default_size": {
+        "width": 50,
+        "height": 50
+      }
+    },
+    {
+      "service_name": "Error Reporting",
+      "service_id": "error_reporting",
+      "provider": "gcp",
+      "category": "operations",
+      "visual_signatures": {
+        "icon_description": "Error tracking icon with exclamation",
+        "icon_color": "#EA4335",
+        "background_color": "#FFFFFF",
+        "border_color": "#E0E0E0"
+      },
+      "drawio_shape": {
+        "library": "mxgraph.gcp2",
+        "shape_name": "error_reporting",
+        "full_style": "sketch=0;html=1;fillColor=#EA4335;strokeColor=none;verticalAlign=top;labelPosition=center;verticalLabelPosition=bottom;align=center;spacingTop=-6;fontSize=11;fontStyle=0;fontColor=#424242;shape=mxgraph.gcp2.error_reporting"
+      },
+      "recognition_keywords": [
+        "error reporting",
+        "errors",
+        "exceptions",
+        "crash"
+      ],
+      "default_size": {
+        "width": 50,
+        "height": 50
+      }
+    },
+    {
+      "service_name": "Apigee",
+      "service_id": "apigee",
+      "provider": "gcp",
+      "category": "api_management",
+      "visual_signatures": {
+        "icon_description": "API management platform icon",
+        "icon_color": "#FF6D00",
+        "background_color": "#FFFFFF",
+        "border_color": "#E0E0E0"
+      },
+      "drawio_shape": {
+        "library": "mxgraph.gcp2",
+        "shape_name": "apigee_api_platform",
+        "full_style": "sketch=0;html=1;fillColor=#FF6D00;strokeColor=none;verticalAlign=top;labelPosition=center;verticalLabelPosition=bottom;align=center;spacingTop=-6;fontSize=11;fontStyle=0;fontColor=#424242;shape=mxgraph.gcp2.apigee_api_platform"
+      },
+      "recognition_keywords": [
+        "apigee",
+        "api management",
+        "api gateway",
+        "api proxy"
+      ],
+      "default_size": {
+        "width": 50,
+        "height": 50
+      }
+    },
+    {
+      "service_name": "API Gateway",
+      "service_id": "api_gateway",
+      "provider": "gcp",
+      "category": "api_management",
+      "visual_signatures": {
+        "icon_description": "API gateway icon",
+        "icon_color": "#4285F4",
+        "background_color": "#FFFFFF",
+        "border_color": "#E0E0E0"
+      },
+      "drawio_shape": {
+        "library": "mxgraph.gcp2",
+        "shape_name": "gateway",
+        "full_style": "sketch=0;html=1;fillColor=#4285F4;strokeColor=none;verticalAlign=top;labelPosition=center;verticalLabelPosition=bottom;align=center;spacingTop=-6;fontSize=11;fontStyle=0;fontColor=#424242;shape=mxgraph.gcp2.gateway"
+      },
+      "recognition_keywords": [
+        "api gateway",
+        "gateway",
+        "api"
+      ],
+      "default_size": {
+        "width": 50,
+        "height": 50
+      }
+    },
+    {
+      "service_name": "Cloud Dataflow",
+      "service_id": "cloud_dataflow",
+      "provider": "gcp",
+      "category": "data_analytics",
+      "visual_signatures": {
+        "icon_description": "Stream/batch data processing pipeline icon",
+        "icon_color": "#4285F4",
+        "background_color": "#FFFFFF",
+        "border_color": "#E0E0E0"
+      },
+      "drawio_shape": {
+        "library": "mxgraph.gcp2",
+        "shape_name": "cloud_dataflow",
+        "full_style": "sketch=0;html=1;fillColor=#4285F4;strokeColor=none;verticalAlign=top;labelPosition=center;verticalLabelPosition=bottom;align=center;spacingTop=-6;fontSize=11;fontStyle=0;fontColor=#424242;shape=mxgraph.gcp2.cloud_dataflow"
+      },
+      "recognition_keywords": [
+        "dataflow",
+        "stream processing",
+        "batch processing",
+        "apache beam"
+      ],
+      "default_size": {
+        "width": 50,
+        "height": 50
+      }
+    },
+    {
+      "service_name": "Cloud Dataproc",
+      "service_id": "cloud_dataproc",
+      "provider": "gcp",
+      "category": "data_analytics",
+      "visual_signatures": {
+        "icon_description": "Managed Spark/Hadoop cluster icon",
+        "icon_color": "#4285F4",
+        "background_color": "#FFFFFF",
+        "border_color": "#E0E0E0"
+      },
+      "drawio_shape": {
+        "library": "mxgraph.gcp2",
+        "shape_name": "cloud_dataproc",
+        "full_style": "sketch=0;html=1;fillColor=#4285F4;strokeColor=none;verticalAlign=top;labelPosition=center;verticalLabelPosition=bottom;align=center;spacingTop=-6;fontSize=11;fontStyle=0;fontColor=#424242;shape=mxgraph.gcp2.cloud_dataproc"
+      },
+      "recognition_keywords": [
+        "dataproc",
+        "spark",
+        "hadoop",
+        "big data"
+      ],
+      "default_size": {
+        "width": 50,
+        "height": 50
+      }
+    },
+    {
+      "service_name": "Cloud Composer",
+      "service_id": "cloud_composer",
+      "provider": "gcp",
+      "category": "data_analytics",
+      "visual_signatures": {
+        "icon_description": "Managed Apache Airflow icon",
+        "icon_color": "#4285F4",
+        "background_color": "#FFFFFF",
+        "border_color": "#E0E0E0"
+      },
+      "drawio_shape": {
+        "library": "mxgraph.gcp2",
+        "shape_name": "cloud_composer",
+        "full_style": "sketch=0;html=1;fillColor=#4285F4;strokeColor=none;verticalAlign=top;labelPosition=center;verticalLabelPosition=bottom;align=center;spacingTop=-6;fontSize=11;fontStyle=0;fontColor=#424242;shape=mxgraph.gcp2.cloud_composer"
+      },
+      "recognition_keywords": [
+        "composer",
+        "airflow",
+        "orchestration",
+        "dag"
+      ],
+      "default_size": {
+        "width": 50,
+        "height": 50
+      }
+    },
+    {
+      "service_name": "Cloud Build",
+      "service_id": "cloud_build",
+      "provider": "gcp",
+      "category": "devops",
+      "visual_signatures": {
+        "icon_description": "CI/CD build service icon",
+        "icon_color": "#4285F4",
+        "background_color": "#FFFFFF",
+        "border_color": "#E0E0E0"
+      },
+      "drawio_shape": {
+        "library": "mxgraph.gcp2",
+        "shape_name": "container_builder",
+        "full_style": "sketch=0;html=1;fillColor=#4285F4;strokeColor=none;verticalAlign=top;labelPosition=center;verticalLabelPosition=bottom;align=center;spacingTop=-6;fontSize=11;fontStyle=0;fontColor=#424242;shape=mxgraph.gcp2.container_builder"
+      },
+      "recognition_keywords": [
+        "cloud build",
+        "ci/cd",
+        "build",
+        "container builder"
+      ],
+      "default_size": {
+        "width": 50,
+        "height": 50
+      }
+    },
+    {
+      "service_name": "Artifact Registry",
+      "service_id": "artifact_registry",
+      "provider": "gcp",
+      "category": "devops",
+      "visual_signatures": {
+        "icon_description": "Container/artifact repository icon",
+        "icon_color": "#4285F4",
+        "background_color": "#FFFFFF",
+        "border_color": "#E0E0E0"
+      },
+      "drawio_shape": {
+        "library": "mxgraph.gcp2",
+        "shape_name": "container_registry",
+        "full_style": "sketch=0;html=1;fillColor=#4285F4;strokeColor=none;verticalAlign=top;labelPosition=center;verticalLabelPosition=bottom;align=center;spacingTop=-6;fontSize=11;fontStyle=0;fontColor=#424242;shape=mxgraph.gcp2.container_registry",
+        "fallback": true,
+        "fallback_reason": "Artifact Registry not in gcp2 stencil; uses Container Registry icon"
+      },
+      "recognition_keywords": [
+        "artifact registry",
+        "docker registry",
+        "container images",
+        "artifacts"
+      ],
+      "default_size": {
+        "width": 50,
+        "height": 50
+      }
+    },
+    {
+      "service_name": "Container Registry",
+      "service_id": "container_registry",
+      "provider": "gcp",
+      "category": "devops",
+      "visual_signatures": {
+        "icon_description": "Container image registry icon",
+        "icon_color": "#4285F4",
+        "background_color": "#FFFFFF",
+        "border_color": "#E0E0E0"
+      },
+      "drawio_shape": {
+        "library": "mxgraph.gcp2",
+        "shape_name": "container_registry",
+        "full_style": "sketch=0;html=1;fillColor=#4285F4;strokeColor=none;verticalAlign=top;labelPosition=center;verticalLabelPosition=bottom;align=center;spacingTop=-6;fontSize=11;fontStyle=0;fontColor=#424242;shape=mxgraph.gcp2.container_registry"
+      },
+      "recognition_keywords": [
+        "container registry",
+        "gcr",
+        "docker",
+        "container images"
+      ],
+      "default_size": {
+        "width": 50,
+        "height": 50
+      }
+    },
+    {
+      "service_name": "Cloud Deploy",
+      "service_id": "cloud_deploy",
+      "provider": "gcp",
+      "category": "devops",
+      "visual_signatures": {
+        "icon_description": "Continuous delivery service icon",
+        "icon_color": "#4285F4",
+        "background_color": "#FFFFFF",
+        "border_color": "#E0E0E0"
+      },
+      "drawio_shape": {
+        "library": "mxgraph.gcp2",
+        "shape_name": "container_builder",
+        "full_style": "sketch=0;html=1;fillColor=#4285F4;strokeColor=none;verticalAlign=top;labelPosition=center;verticalLabelPosition=bottom;align=center;spacingTop=-6;fontSize=11;fontStyle=0;fontColor=#424242;shape=mxgraph.gcp2.container_builder",
+        "fallback": true,
+        "fallback_reason": "Cloud Deploy not in gcp2 stencil; uses Cloud Build (container_builder) icon"
+      },
+      "recognition_keywords": [
+        "cloud deploy",
+        "continuous delivery",
+        "deployment pipeline",
+        "cd"
+      ],
+      "default_size": {
+        "width": 50,
+        "height": 50
+      }
+    },
+    {
+      "service_name": "Cloud KMS",
+      "service_id": "cloud_kms",
+      "provider": "gcp",
+      "category": "security",
+      "visual_signatures": {
+        "icon_description": "Key management service icon with key symbol",
+        "icon_color": "#4285F4",
+        "background_color": "#FFFFFF",
+        "border_color": "#E0E0E0"
+      },
+      "drawio_shape": {
+        "library": "mxgraph.gcp2",
+        "shape_name": "key_management_service",
+        "full_style": "sketch=0;html=1;fillColor=#4285F4;strokeColor=none;verticalAlign=top;labelPosition=center;verticalLabelPosition=bottom;align=center;spacingTop=-6;fontSize=11;fontStyle=0;fontColor=#424242;shape=mxgraph.gcp2.key_management_service"
+      },
+      "recognition_keywords": [
+        "kms",
+        "key management",
+        "encryption keys",
+        "cmek"
+      ],
+      "default_size": {
+        "width": 50,
+        "height": 50
+      }
+    },
+    {
+      "service_name": "Secret Manager",
+      "service_id": "secret_manager",
+      "provider": "gcp",
+      "category": "security",
+      "visual_signatures": {
+        "icon_description": "Secrets management icon",
+        "icon_color": "#4285F4",
+        "background_color": "#FFFFFF",
+        "border_color": "#E0E0E0"
+      },
+      "drawio_shape": {
+        "library": "mxgraph.gcp2",
+        "shape_name": "key_management_service",
+        "full_style": "sketch=0;html=1;fillColor=#4285F4;strokeColor=none;verticalAlign=top;labelPosition=center;verticalLabelPosition=bottom;align=center;spacingTop=-6;fontSize=11;fontStyle=0;fontColor=#424242;shape=mxgraph.gcp2.key_management_service",
+        "fallback": true,
+        "fallback_reason": "Secret Manager not in gcp2 stencil; uses KMS icon"
+      },
+      "recognition_keywords": [
+        "secret manager",
+        "secrets",
+        "credentials",
+        "api keys"
+      ],
+      "default_size": {
+        "width": 50,
+        "height": 50
+      }
+    },
+    {
+      "service_name": "Identity Platform",
+      "service_id": "identity_platform",
+      "provider": "gcp",
+      "category": "security",
+      "visual_signatures": {
+        "icon_description": "Authentication and identity management icon",
+        "icon_color": "#4285F4",
+        "background_color": "#FFFFFF",
+        "border_color": "#E0E0E0"
+      },
+      "drawio_shape": {
+        "library": "mxgraph.gcp2",
+        "shape_name": "gateway",
+        "full_style": "sketch=0;html=1;fillColor=#4285F4;strokeColor=none;verticalAlign=top;labelPosition=center;verticalLabelPosition=bottom;align=center;spacingTop=-6;fontSize=11;fontStyle=0;fontColor=#424242;shape=mxgraph.gcp2.gateway",
+        "fallback": true,
+        "fallback_reason": "Identity Platform not in gcp2 stencil; uses API Gateway icon"
+      },
+      "recognition_keywords": [
+        "identity platform",
+        "authentication",
+        "firebase auth",
+        "identity"
+      ],
+      "default_size": {
+        "width": 50,
+        "height": 50
+      }
+    },
+    {
+      "service_name": "Cloud NAT",
+      "service_id": "cloud_nat",
+      "provider": "gcp",
+      "category": "networking",
+      "visual_signatures": {
+        "icon_description": "Network address translation icon",
+        "icon_color": "#4285F4",
+        "background_color": "#FFFFFF",
+        "border_color": "#E0E0E0"
+      },
+      "drawio_shape": {
+        "library": "mxgraph.gcp2",
+        "shape_name": "cloud_nat",
+        "full_style": "sketch=0;html=1;fillColor=#4285F4;strokeColor=none;verticalAlign=top;labelPosition=center;verticalLabelPosition=bottom;align=center;spacingTop=-6;fontSize=11;fontStyle=0;fontColor=#424242;shape=mxgraph.gcp2.cloud_nat"
+      },
+      "recognition_keywords": [
+        "cloud nat",
+        "nat",
+        "network address translation",
+        "egress"
+      ],
+      "default_size": {
+        "width": 50,
+        "height": 50
+      }
+    }
+  ],
+  "categories": {
+    "compute": {
+      "name": "Compute",
+      "color": "#4285F4",
+      "services": [
+        "cloud_run",
+        "compute_engine",
+        "google_kubernetes_engine",
+        "cloud_functions",
+        "app_engine"
+      ]
+    },
+    "database": {
+      "name": "Databases",
+      "color": "#4285F4",
+      "services": [
+        "bigquery",
+        "cloud_sql",
+        "cloud_firestore",
+        "cloud_spanner",
+        "cloud_bigtable",
+        "memorystore"
+      ]
+    },
+    "storage": {
+      "name": "Storage",
+      "color": "#4285F4",
+      "services": [
+        "cloud_storage",
+        "filestore",
+        "persistent_disk"
+      ]
+    },
+    "networking": {
+      "name": "Networking",
+      "color": "#4285F4",
+      "services": [
+        "virtual_private_cloud",
+        "cloud_load_balancing",
+        "cloud_cdn",
+        "cloud_dns",
+        "cloud_armor",
+        "cloud_nat"
+      ]
+    },
+    "ai_ml": {
+      "name": "AI & Machine Learning",
+      "color": "#4285F4",
+      "services": [
+        "vertex_ai",
+        "ai_platform",
+        "vision_ai",
+        "natural_language_ai",
+        "speech_to_text"
+      ]
+    },
+    "integration": {
+      "name": "Integration & Messaging",
+      "color": "#4285F4",
+      "services": [
+        "pubsub",
+        "cloud_tasks",
+        "workflows",
+        "eventarc",
+        "cloud_scheduler"
+      ]
+    },
+    "operations": {
+      "name": "Operations & Monitoring",
+      "color": "#4285F4",
+      "services": [
+        "cloud_logging",
+        "cloud_monitoring",
+        "cloud_trace",
+        "error_reporting"
+      ]
+    },
+    "api_management": {
+      "name": "API Management",
+      "color": "#4285F4",
+      "services": [
+        "apigee",
+        "api_gateway"
+      ]
+    },
+    "data_analytics": {
+      "name": "Data & Analytics",
+      "color": "#4285F4",
+      "services": [
+        "cloud_dataflow",
+        "cloud_dataproc",
+        "cloud_composer"
+      ]
+    },
+    "devops": {
+      "name": "DevOps & CI/CD",
+      "color": "#4285F4",
+      "services": [
+        "cloud_build",
+        "artifact_registry",
+        "container_registry",
+        "cloud_deploy"
+      ]
+    },
+    "security": {
+      "name": "Security",
+      "color": "#4285F4",
+      "services": [
+        "cloud_kms",
+        "secret_manager",
+        "identity_platform"
+      ]
+    }
+  }
+}

@@ -1,0 +1,83 @@
+{
+  "projectName": "FitTracker Mobile",
+  "workDescription": "Add push notification system for daily workout goals and achievement celebrations. Users forget to log their workouts and miss their streaks. Timely reminders and positive reinforcement will increase engagement.",
+  "appetite": "big-batch",
+  "cycleWeeks": 6,
+  "teamSize": "one-designer-two-programmers",
+  "phase": "full-cycle",
+  "includeCoolDown": true,
+  "context": {
+    "userProblem": "Users start strong but lose momentum. 60% of new users drop off after 2 weeks because they forget to engage.",
+    "businessValue": "Increase 2-week retention from 40% to 55%. Boost daily active users by 20%.",
+    "currentState": "No push notification capability. Email reminders only (low open rate).",
+    "stakeholders": [
+      "Product manager (user engagement)",
+      "iOS and Android developers",
+      "Growth team",
+      "UX designer"
+    ]
+  },
+  "scopeConsiderations": {
+    "inScope": [
+      "Daily workout reminder (user sets time)",
+      "Achievement celebration (streaks, milestones)",
+      "Notification preferences in settings",
+      "Basic notification content (text + icon)",
+      "Deep linking to relevant screens",
+      "Respect system notification permissions"
+    ],
+    "outOfScope": [
+      "Custom reminder schedules (multiple per day)",
+      "Rich notifications with images/videos",
+      "Notification history/inbox",
+      "Social notifications (friend activity)",
+      "Smart timing based on usage patterns",
+      "A/B testing different notification copy"
+    ],
+    "rabbitHoles": [
+      "Notification scheduling across time zones",
+      "Notification grouping and priorities",
+      "Handling app in background vs. foreground",
+      "Testing notification delivery reliably",
+      "Platform differences (iOS vs. Android)"
+    ],
+    "noGos": [
+      "Don't build a full messaging system",
+      "Don't add social features yet",
+      "Don't do ML-based send time optimization",
+      "Don't rebuild the settings screen"
+    ]
+  },
+  "expectedScopes": [
+    "Push notification infrastructure (FCM/APNS integration)",
+    "Daily goal reminder with user-selected time",
+    "Achievement celebration triggers and content",
+    "Notification preferences UI",
+    "Deep linking from notifications",
+    "Testing and polish"
+  ],
+  "successCriteria": [
+    "Users can enable/disable notifications easily",
+    "Daily reminder sends reliably at chosen time",
+    "Achievement celebrations appear immediately",
+    "Deep links open correct screens",
+    "Notifications respect Do Not Disturb",
+    "Works on both iOS and Android"
+  ],
+  "technicalConsiderations": {
+    "platforms": ["iOS", "Android"],
+    "services": ["Firebase Cloud Messaging", "Apple Push Notification Service"],
+    "challenges": [
+      "Time zone handling",
+      "Background task scheduling",
+      "Notification permission prompting",
+      "Cross-platform testing"
+    ]
+  },
+  "notes": [
+    "Example shows infrastructure work within 6-week appetite",
+    "Demonstrates handling platform differences",
+    "Good example of cutting scope (no custom schedules)",
+    "Shows how to fit complex feature in big-batch cycle"
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "description": "Ultra-reliable flight control system - Cleanroom for safety-critical aviation software",
+  "projectName": "Autopilot Flight Control System",
+  "systemDescription": "Real-time flight control system for commercial aircraft autopilot. Includes altitude hold, heading control, auto-throttle, and auto-land capabilities. Must meet DO-178C Level A (catastrophic failure conditions). System interfaces with aircraft sensors (altimeter, gyroscope, GPS, airspeed) and actuators (elevators, ailerons, rudder, throttle). Required to maintain flight envelope under all normal and degraded sensor conditions.",
+  "reliabilityTarget": 100000,
+  "criticalComponents": [
+    "altitude-control-loop",
+    "heading-control-loop",
+    "auto-land-sequencer",
+    "sensor-fusion-module",
+    "flight-envelope-protection"
+  ],
+  "usageProfile": "worst-case",
+  "incrementCount": 8,
+  "includeProofOfCorrectness": true,
+  "statisticalConfidence": 0.99,
+  "notes": [
+    "DO-178C Level A requires formal methods and exhaustive testing",
+    "All critical control loops require mathematical correctness proofs",
+    "Usage model based on worst-case flight scenarios (turbulence, sensor failures)",
+    "MTTF target extremely high due to catastrophic failure consequences",
+    "Formal verification essential for certification",
+    "Incremental development allows proving correctness of each control loop independently"
+  ]
+}

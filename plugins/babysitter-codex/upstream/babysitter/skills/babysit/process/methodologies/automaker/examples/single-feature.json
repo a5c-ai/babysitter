@@ -1,0 +1,43 @@
+{
+  "projectName": "ShopFront",
+  "featurePlan": {
+    "featureId": "feat-100",
+    "featureTitle": "Shopping Cart with Stripe Checkout",
+    "tasks": [
+      {
+        "id": "task-1",
+        "title": "Cart State Management",
+        "description": "Create React context + reducer for cart state. Support add, remove, update quantity, and clear operations.",
+        "files": ["src/context/CartContext.tsx", "src/reducers/cartReducer.ts"]
+      },
+      {
+        "id": "task-2",
+        "title": "Cart UI Components",
+        "description": "Build CartDrawer, CartItem, and CartSummary components with responsive design.",
+        "files": ["src/components/cart/CartDrawer.tsx", "src/components/cart/CartItem.tsx", "src/components/cart/CartSummary.tsx"]
+      },
+      {
+        "id": "task-3",
+        "title": "Stripe Checkout Integration",
+        "description": "Server-side Stripe checkout session creation and client-side redirect. Handle success and cancel callbacks.",
+        "files": ["src/api/checkout.ts", "src/pages/CheckoutSuccess.tsx", "src/pages/CheckoutCancel.tsx"]
+      },
+      {
+        "id": "task-4",
+        "title": "Cart Persistence",
+        "description": "Persist cart to localStorage with hydration on page load. Sync with server for authenticated users.",
+        "files": ["src/utils/cartStorage.ts", "src/api/cartSync.ts"]
+      }
+    ],
+    "testStrategy": {
+      "unit": "Vitest tests for reducer, context, and storage utils",
+      "e2e": "Playwright tests for add-to-cart, checkout flow, and persistence"
+    },
+    "branchName": "feature/feat-100",
+    "complexity": "medium"
+  },
+  "baseBranch": "main",
+  "testFramework": "both",
+  "maxRetries": 3,
+  "streamUpdates": true
+}

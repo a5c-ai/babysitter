@@ -1,0 +1,35 @@
+{
+  "projectName": "Department of Transportation Asset Management System",
+  "projectDescription": "Comprehensive asset management system for tracking, maintaining, and optimizing transportation infrastructure including roads, bridges, traffic signals, and public transit assets. Fixed-price government contract with firm requirements and deliverable schedule.",
+  "stakeholders": [
+    {
+      "name": "Colonel Mark Stevens",
+      "role": "Program Manager",
+      "department": "Department of Transportation",
+      "email": "mark.stevens@dot.gov"
+    },
+    {
+      "name": "Patricia Morrison",
+      "role": "Contracting Officer",
+      "department": "Procurement",
+      "email": "patricia.morrison@dot.gov"
+    },
+    {
+      "name": "Daniel Lee",
+      "role": "Technical Director",
+      "department": "IT Systems",
+      "email": "daniel.lee@contractor.com"
+    },
+    {
+      "name": "Catherine Walsh",
+      "role": "Quality Manager",
+      "department": "Quality Assurance",
+      "email": "catherine.walsh@contractor.com"
+    }
+  ],
+  "requirementsSource": "rfp-requirements-and-contract-specifications",
+  "testingStrategy": "comprehensive",
+  "deploymentTarget": "government-secure-cloud",
+  "includeVModel": true,
+  "regulatoryCompliance": "FISMA-FedRAMP-Section-508"
+}

@@ -1,0 +1,21 @@
+{
+  "processId": "methodologies/spec-kit/spec-kit-orchestrator",
+  "description": "Full pipeline for a new web application feature (greenfield mode)",
+  "inputs": {
+    "projectName": "TaskFlow",
+    "featureDescription": "Build a collaborative task management dashboard where teams can create, assign, and track tasks with real-time updates, priority levels, due dates, and progress visualization.",
+    "projectType": "web",
+    "mode": "greenfield",
+    "constraints": {
+      "performance": {
+        "initialLoadTime": "< 2s",
+        "interactionLatency": "< 100ms"
+      },
+      "security": {
+        "authentication": "required",
+        "authorization": "role-based"
+      },
+      "accessibility": "WCAG 2.1 AA"
+    }
+  }
+}

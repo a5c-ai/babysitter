@@ -1,0 +1,16 @@
+{
+  "task": "Add a loading spinner component to the dashboard page that shows while data is being fetched",
+  "mode": "standard",
+  "options": {
+    "full": false,
+    "skipVerify": false
+  },
+  "context": {
+    "projectPath": ".",
+    "relevantFiles": [
+      "src/components/Dashboard.tsx",
+      "src/hooks/useDashboardData.ts"
+    ],
+    "notes": "Use the existing Spinner component from the UI library, just wire it up to the loading state"
+  }
+}

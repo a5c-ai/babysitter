@@ -1,0 +1,8 @@
+{
+  "projectName": "E-Commerce Platform",
+  "projectDescription": "A modern e-commerce platform with product catalog, shopping cart, checkout, and order management. Built with React frontend and Node.js backend.",
+  "featureName": "user-authentication",
+  "githubRepo": "myorg/ecommerce-platform",
+  "parallelAgents": 5,
+  "qualityThreshold": 80
+}

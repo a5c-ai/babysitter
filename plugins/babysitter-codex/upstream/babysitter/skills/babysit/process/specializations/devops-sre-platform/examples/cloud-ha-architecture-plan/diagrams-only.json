@@ -1,0 +1,64 @@
+{
+  "projectIdentifier": "analytics-platform-prod",
+  "cloudProvider": "aws",
+  "targetRegion": "us-west-2",
+  "slaTarget": "99.9%",
+  "budgetCeiling": 100,
+  "currentArchitecture": {
+    "description": "Data analytics platform with API Gateway, Lambda functions, Step Functions for ETL orchestration, S3 data lake, Redshift for analytics, and CloudFront for dashboard delivery. Architecture already documented but need professional DrawIO diagrams for stakeholder presentation.",
+    "services": [
+      {
+        "name": "dashboard-cdn",
+        "type": "CloudFront",
+        "region": "global"
+      },
+      {
+        "name": "dashboard-app",
+        "type": "S3",
+        "region": "us-west-2",
+        "details": "React dashboard SPA"
+      },
+      {
+        "name": "analytics-api",
+        "type": "API Gateway",
+        "region": "us-west-2"
+      },
+      {
+        "name": "query-handler",
+        "type": "Lambda",
+        "region": "us-west-2",
+        "runtime": "python3.12"
+      },
+      {
+        "name": "etl-pipeline",
+        "type": "Step Functions",
+        "region": "us-west-2"
+      },
+      {
+        "name": "data-lake",
+        "type": "S3",
+        "region": "us-west-2",
+        "details": "Raw + processed data partitioned by date"
+      },
+      {
+        "name": "analytics-warehouse",
+        "type": "Redshift",
+        "region": "us-west-2",
+        "nodeType": "ra3.xlplus",
+        "nodes": 2
+      },
+      {
+        "name": "event-bus",
+        "type": "EventBridge",
+        "region": "us-west-2"
+      }
+    ]
+  },
+  "diagramConfig": {
+    "enabled": true,
+    "outputDir": "docs/diagrams",
+    "generateCurrentState": true,
+    "generateTargetState": false
+  },
+  "compositionPattern": "diagrams-only"
+}

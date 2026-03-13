@@ -1,0 +1,44 @@
+{
+  "name": "Banking System - Strategic Design Only",
+  "description": "Strategic design for a banking domain (subdomains and bounded contexts)",
+  "inputs": {
+    "projectName": "Digital Banking Platform",
+    "domainDescription": "A modern digital banking platform providing core banking services including account management, fund transfers, bill payments, and loan processing. The system handles customer onboarding with KYC verification, maintains account balances and transaction history, processes internal and external transfers, manages loan applications and approvals, and provides real-time fraud detection and compliance monitoring.",
+    "complexity": "complex",
+    "phase": "strategic"
+  },
+  "expectedOutcomes": {
+    "subdomains": {
+      "core": [
+        "Account Management",
+        "Transaction Processing",
+        "Loan Origination",
+        "Fraud Detection"
+      ],
+      "supporting": [
+        "Customer Onboarding",
+        "Compliance Monitoring",
+        "Reporting & Analytics"
+      ],
+      "generic": [
+        "Authentication & Authorization",
+        "Notification Services",
+        "Document Management"
+      ]
+    },
+    "boundedContexts": [
+      "Account Context",
+      "Transaction Context",
+      "Lending Context",
+      "Risk Management Context",
+      "Customer Context",
+      "Compliance Context"
+    ],
+    "contextPatterns": [
+      "Account → Transaction: Customer/Supplier",
+      "Transaction → Risk Management: Published Language (transaction events)",
+      "Lending → Account: Anti-Corruption Layer",
+      "All Contexts → Compliance: Open Host Service"
+    ]
+  }
+}

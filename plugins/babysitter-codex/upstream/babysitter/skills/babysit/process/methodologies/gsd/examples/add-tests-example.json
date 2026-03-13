@@ -1,0 +1,21 @@
+{
+  "phaseId": "phase-1-auth",
+  "phaseName": "User Authentication & Authorization",
+  "testTypes": ["unit", "e2e"],
+  "options": {
+    "framework": "vitest",
+    "e2eFramework": "playwright",
+    "coverageTarget": 80,
+    "includeEdgeCases": true
+  },
+  "context": {
+    "projectPath": ".",
+    "uatFile": ".planning/phases/phase-1-auth/UAT.md",
+    "summaryFile": ".planning/phases/phase-1-auth/SUMMARY.md",
+    "existingTestPatterns": {
+      "unitTestDir": "src/__tests__/",
+      "e2eTestDir": "e2e/",
+      "namingConvention": "*.test.ts"
+    }
+  }
+}

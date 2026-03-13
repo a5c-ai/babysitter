@@ -1,0 +1,49 @@
+name: CI
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: Plugin Matrix (os=${{ matrix.os }}, node=${{ matrix.node }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-13, windows-2022]
+        node: [20, 22]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Compatibility policy check
+        run: npm run check:compat
+
+      - name: Mapping contract check
+        run: npm run check:mapping
+
+      - name: Content manifest verification
+        run: npm run manifest:verify
+
+      - name: Team install smoke test
+        run: npm run team:install
+
+      - name: Integration and unit tests
+        run: npm test
+
+      - name: Core scenario
+        run: npm run test:scenario
+
+      - name: Long scenario
+        run: npm run test:long-scenario

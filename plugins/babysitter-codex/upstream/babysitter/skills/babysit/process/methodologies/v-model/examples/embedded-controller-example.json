@@ -1,0 +1,63 @@
+{
+  "description": "Embedded system controller V-Model example",
+  "inputs": {
+    "projectRequirements": "Develop firmware for a Smart Thermostat Controller:\n\n1. Temperature Control\n   - Read temperature from sensor (±0.5°C accuracy)\n   - Control HVAC system (heating, cooling, fan)\n   - Maintain target temperature with ±1°C tolerance\n   - Support multiple control modes (heat, cool, auto, off)\n   - PID control algorithm for smooth temperature regulation\n\n2. Sensor Interface\n   - Temperature sensor via I2C (sampling rate: 1 Hz)\n   - Humidity sensor via I2C (optional)\n   - Occupancy sensor (PIR motion detector)\n   - Window/door open sensors (contact switches)\n\n3. HVAC Control Interface\n   - Relay control for heating system (24V AC)\n   - Relay control for cooling system (24V AC)\n   - Relay control for fan (24V AC)\n   - Minimum run time: 3 minutes per cycle\n   - Minimum off time: 5 minutes between cycles\n   - Prevent short cycling\n\n4. User Interface\n   - LCD display (current temp, target temp, mode, time)\n   - Physical buttons for up/down/mode/menu\n   - Backlight control with auto-dim\n   - Configuration menu for settings\n\n5. Scheduling\n   - 7-day programmable schedule\n   - Up to 4 time periods per day\n   - Different schedules for weekdays/weekends\n   - Temporary hold/override mode\n   - Real-time clock with battery backup\n\n6. Smart Features\n   - Wi-Fi connectivity (ESP32 module)\n   - Mobile app control via REST API\n   - Cloud sync for schedules and settings\n   - Firmware over-the-air (OTA) updates\n   - Energy usage tracking and reporting\n\n7. Energy Saving\n   - Occupancy-based control (away mode)\n   - Adaptive learning of heating/cooling patterns\n   - Eco mode with wider temperature tolerance\n   - Display energy consumption statistics\n\n8. Safety Features\n   - Over-temperature protection (>90°C shutdown)\n   - Sensor failure detection and safe mode\n   - Watchdog timer (reset on hang)\n   - Power failure recovery with settings retention\n   - Freeze protection (<5°C emergency heat)\n\n9. Configuration\n   - Temperature units (Celsius/Fahrenheit)\n   - HVAC system type (heat pump, furnace, boiler)\n   - Swing/tolerance settings\n   - Calibration offset for temperature sensor\n   - Wi-Fi credentials and network settings\n\n10. Non-Functional Requirements\n    - Response time to sensor reading: <1 second\n    - UI response to button press: <200ms\n    - Power consumption: <5W active, <1W standby\n    - Operating temperature: -10°C to +50°C\n    - Memory footprint: <256KB flash, <64KB RAM\n    - Battery backup for RTC: 48 hours\n    - MTBF: >50,000 hours",
+    "safetyLevel": "high",
+    "traceabilityRequired": true,
+    "testingRigor": "thorough",
+    "existingArtifacts": {
+      "hardware": ["ESP32_module", "temperature_sensor", "relay_board", "LCD_display"],
+      "interfaces": ["I2C", "GPIO", "SPI", "WiFi"]
+    }
+  },
+  "expectedOutputs": {
+    "requirements": {
+      "functional": "30-40 functional requirements",
+      "nonFunctional": "12-16 non-functional requirements"
+    },
+    "design": {
+      "components": "8-12 components (Temperature Control, Sensor Manager, HVAC Driver, UI Controller, Scheduler, Network Manager, Safety Monitor)",
+      "modules": "20-28 modules"
+    },
+    "testing": {
+      "unitTests": "120-180 test cases including hardware abstraction layer",
+      "integrationTests": "50-70 test cases including sensor/actuator integration",
+      "systemTests": "40-50 test cases including thermal testing",
+      "acceptanceTests": "25-35 test cases including field scenarios"
+    },
+    "traceability": {
+      "coverage": "95-100% requirements coverage",
+      "hardwareSoftware": "Complete traceability for hardware interfaces"
+    }
+  },
+  "learningPoints": [
+    "Embedded system V-Model with hardware integration",
+    "Real-time constraints and timing requirements",
+    "Hardware abstraction layer design and testing",
+    "Interrupt handling and concurrency",
+    "Power management and low-power modes",
+    "Watchdog and fault recovery mechanisms",
+    "Hardware-in-the-loop (HIL) testing"
+  ],
+  "testingConsiderations": [
+    "Hardware simulation for unit tests (mock I2C, GPIO)",
+    "Integration testing with real sensors and actuators",
+    "Thermal chamber testing for temperature control accuracy",
+    "Long-duration testing for stability and MTBF",
+    "Power cycle testing and settings retention",
+    "Electromagnetic compatibility (EMC) testing",
+    "Safety testing: over-temperature, sensor failure scenarios"
+  ],
+  "embeddedSpecifics": {
+    "processor": "ESP32 (Xtensa dual-core 32-bit LX6)",
+    "rtos": "FreeRTOS",
+    "flash": "4MB",
+    "ram": "520KB",
+    "interfaces": ["I2C", "GPIO", "Wi-Fi", "SPI"],
+    "development": {
+      "ide": "ESP-IDF / Arduino IDE",
+      "debugger": "JTAG",
+      "testFramework": "Unity + CMock"
+    }
+  }
+}

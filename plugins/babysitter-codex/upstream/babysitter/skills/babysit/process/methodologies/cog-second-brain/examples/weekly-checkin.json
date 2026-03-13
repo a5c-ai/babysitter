@@ -1,0 +1,7 @@
+{
+  "vaultPath": "./cog-vault",
+  "mode": "weekly-checkin",
+  "userName": "Alex",
+  "rolePack": "engineer",
+  "targetQuality": 80
+}

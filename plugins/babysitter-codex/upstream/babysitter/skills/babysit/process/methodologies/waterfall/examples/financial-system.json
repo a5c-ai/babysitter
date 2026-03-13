@@ -1,0 +1,35 @@
+{
+  "projectName": "Core Banking Transaction Processing System",
+  "projectDescription": "Mission-critical transaction processing system for retail banking operations including account management, deposits, withdrawals, transfers, and real-time balance tracking. Must support 10,000 concurrent users with 99.99% uptime and comply with SOX, PCI-DSS, and GLBA regulations.",
+  "stakeholders": [
+    {
+      "name": "Jennifer Park",
+      "role": "VP of Technology",
+      "department": "Information Technology",
+      "email": "jennifer.park@bank.com"
+    },
+    {
+      "name": "Thomas Greene",
+      "role": "Compliance Officer",
+      "department": "Legal & Compliance",
+      "email": "thomas.greene@bank.com"
+    },
+    {
+      "name": "Amanda Foster",
+      "role": "Chief Architect",
+      "department": "Enterprise Architecture",
+      "email": "amanda.foster@bank.com"
+    },
+    {
+      "name": "Kevin Patel",
+      "role": "Security Director",
+      "department": "Information Security",
+      "email": "kevin.patel@bank.com"
+    }
+  ],
+  "requirementsSource": "regulatory-requirements-and-business-analysis",
+  "testingStrategy": "comprehensive",
+  "deploymentTarget": "production-with-dr-site",
+  "includeVModel": true,
+  "regulatoryCompliance": "SOX-PCI-DSS-GLBA"
+}

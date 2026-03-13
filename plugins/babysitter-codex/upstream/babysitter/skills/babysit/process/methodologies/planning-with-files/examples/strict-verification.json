@@ -1,0 +1,5 @@
+{
+  "taskDescription": "Migrate CI/CD pipeline from Jenkins to GitHub Actions with full test coverage verification",
+  "projectPath": "./planning",
+  "qualityThreshold": 95
+}

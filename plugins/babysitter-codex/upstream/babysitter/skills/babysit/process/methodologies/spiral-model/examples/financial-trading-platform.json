@@ -1,0 +1,35 @@
+{
+  "projectName": "High-Frequency Trading Platform",
+  "projectDescription": "Ultra-low-latency algorithmic trading platform with microsecond execution times, real-time market data processing, risk management, regulatory compliance (MiFID II, SEC), and multi-exchange connectivity. Handles millions of transactions per second.",
+  "maxSpirals": 6,
+  "convergenceCriteria": "all-risks-resolved",
+  "stakeholders": [
+    {
+      "name": "Richard Blackwood",
+      "role": "Head of Quantitative Trading",
+      "department": "Trading",
+      "email": "rblackwood@trading.example.com"
+    },
+    {
+      "name": "Jennifer Lee",
+      "role": "Chief Risk Officer",
+      "department": "Risk Management",
+      "email": "jlee@trading.example.com"
+    },
+    {
+      "name": "Thomas Anderson",
+      "role": "Head of Technology",
+      "department": "Technology",
+      "email": "tanderson@trading.example.com"
+    },
+    {
+      "name": "Patricia Morgan",
+      "role": "Compliance Director",
+      "department": "Compliance",
+      "email": "pmorgan@trading.example.com"
+    }
+  ],
+  "riskTolerance": "medium",
+  "initialRisks": "Latency requirements (<100 microseconds), market data accuracy, order execution reliability, system stability under load, regulatory compliance complexity",
+  "generateVisualizations": true
+}

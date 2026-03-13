@@ -1,0 +1,49 @@
+{
+  "projectName": "ShopFront",
+  "featureBranches": [
+    {
+      "featureId": "feat-100",
+      "featureTitle": "Shopping Cart with Stripe Checkout",
+      "branch": "feature/feat-100",
+      "changedFiles": [
+        "src/context/CartContext.tsx",
+        "src/reducers/cartReducer.ts",
+        "src/components/cart/CartDrawer.tsx",
+        "src/components/cart/CartItem.tsx",
+        "src/components/cart/CartSummary.tsx",
+        "src/api/checkout.ts",
+        "src/pages/CheckoutSuccess.tsx",
+        "src/pages/CheckoutCancel.tsx",
+        "src/utils/cartStorage.ts",
+        "src/api/cartSync.ts"
+      ],
+      "testResults": {
+        "allPassed": true,
+        "totalTests": 42,
+        "passed": 42,
+        "failed": 0
+      }
+    },
+    {
+      "featureId": "feat-101",
+      "featureTitle": "Product Search with Filters",
+      "branch": "feature/feat-101",
+      "changedFiles": [
+        "src/components/search/SearchBar.tsx",
+        "src/components/search/FilterPanel.tsx",
+        "src/api/search.ts",
+        "src/hooks/useSearch.ts"
+      ],
+      "testResults": {
+        "allPassed": true,
+        "totalTests": 28,
+        "passed": 28,
+        "failed": 0
+      }
+    }
+  ],
+  "baseBranch": "main",
+  "reviewPolicy": "hybrid",
+  "deployTarget": "staging",
+  "qualityThreshold": 80
+}

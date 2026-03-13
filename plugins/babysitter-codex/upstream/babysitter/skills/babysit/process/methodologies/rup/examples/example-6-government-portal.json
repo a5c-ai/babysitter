@@ -1,0 +1,134 @@
+{
+  "name": "Citizen Services Portal",
+  "description": "Government citizen services portal for online applications, permits, and payments",
+  "inputs": {
+    "projectName": "CitizenConnect Portal",
+    "projectVision": "Unified online portal for citizens to access government services. Apply for permits and licenses, pay taxes and fees, schedule appointments, track application status, and access public records. Must integrate with 50+ legacy government systems and meet strict accessibility and security standards.",
+    "iterationsPerPhase": {
+      "inception": 1,
+      "elaboration": 2,
+      "construction": 4,
+      "transition": 2
+    },
+    "teamSize": 10,
+    "useCaseSource": "citizen-focus-groups",
+    "architectureStyle": "layered",
+    "predefinedUseCases": [
+      {
+        "id": "UC-001",
+        "name": "Apply for Building Permit",
+        "actors": ["Citizen", "Permit System"],
+        "priority": "critical"
+      },
+      {
+        "id": "UC-002",
+        "name": "Pay Property Tax",
+        "actors": ["Citizen", "Payment Gateway", "Tax System"],
+        "priority": "critical"
+      },
+      {
+        "id": "UC-003",
+        "name": "Schedule DMV Appointment",
+        "actors": ["Citizen", "DMV System"],
+        "priority": "high"
+      },
+      {
+        "id": "UC-004",
+        "name": "Track Application Status",
+        "actors": ["Citizen"],
+        "priority": "high"
+      },
+      {
+        "id": "UC-005",
+        "name": "Access Public Records",
+        "actors": ["Citizen", "Records System"],
+        "priority": "medium"
+      }
+    ],
+    "predefinedRisks": [
+      {
+        "id": "RISK-001",
+        "category": "technical",
+        "description": "Integration with 50+ legacy government systems",
+        "probability": "high",
+        "impact": "high"
+      },
+      {
+        "id": "RISK-002",
+        "category": "business",
+        "description": "WCAG 2.1 AA accessibility compliance",
+        "probability": "high",
+        "impact": "high"
+      },
+      {
+        "id": "RISK-003",
+        "category": "business",
+        "description": "Security: FedRAMP/StateRAMP authorization",
+        "probability": "medium",
+        "impact": "high"
+      },
+      {
+        "id": "RISK-004",
+        "category": "organizational",
+        "description": "Coordination across 10+ government departments",
+        "probability": "high",
+        "impact": "medium"
+      }
+    ]
+  },
+  "expectedPhases": [
+    {
+      "phase": "Inception",
+      "iterations": 1,
+      "keyDeliverables": [
+        "Vision for unified citizen portal",
+        "Business case with cost savings from digital services",
+        "Use case model from citizen focus groups",
+        "Risk assessment for legacy integration and compliance",
+        "Stakeholder analysis across government departments",
+        "Project charter with executive sponsorship"
+      ]
+    },
+    {
+      "phase": "Elaboration",
+      "iterations": 2,
+      "keyDeliverables": [
+        "Layered architecture with integration layer",
+        "Enterprise service bus for legacy system integration",
+        "Accessibility-first design patterns (WCAG 2.1 AA)",
+        "Security architecture for FedRAMP compliance",
+        "Identity and access management design (SSO, MFA)",
+        "Prototype validating integration with key legacy systems",
+        "Detailed use cases with accessibility considerations"
+      ]
+    },
+    {
+      "phase": "Construction",
+      "iterations": 4,
+      "keyDeliverables": [
+        "Iteration 1: User authentication and profile management",
+        "Iteration 2: Permit applications (building, business)",
+        "Iteration 3: Payment processing for taxes and fees",
+        "Iteration 4: Appointment scheduling and public records",
+        "Integration adapters for 50+ legacy systems",
+        "Responsive UI with full accessibility compliance",
+        "Multi-language support (English, Spanish, Vietnamese)",
+        "Comprehensive accessibility testing"
+      ]
+    },
+    {
+      "phase": "Transition",
+      "iterations": 2,
+      "keyDeliverables": [
+        "Beta testing with 500 citizens",
+        "Phased rollout by service type (permits first, then payments)",
+        "Production deployment to government cloud (FedRAMP authorized)",
+        "Training for 200+ government staff across departments",
+        "Call center support for citizens",
+        "Public awareness campaign",
+        "Security audit and compliance certification"
+      ]
+    }
+  ],
+  "rationale": "Government projects benefit from RUP's structured approach and emphasis on documentation. Complex legacy integration requires architecture validation in Elaboration. Accessibility and security compliance are addressed throughout. Two Transition iterations handle phased rollout and extensive training across multiple departments. Use-case driven approach ensures citizen needs are met."
+}

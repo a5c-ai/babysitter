@@ -1,0 +1,340 @@
+{
+  "name": "Healthcare Patient Portal - Complete Double Diamond",
+  "description": "Full Double Diamond for improving healthcare patient portal usability with focus on health information comprehension and empowerment",
+  "inputs": {
+    "projectName": "MedConnect Patient Portal Redesign",
+    "context": "Healthcare provider's patient portal has low adoption (35% of patients) and poor satisfaction. Patients struggle to understand medical information, book appointments, and manage prescriptions. Goal: increase portal usage to 70% and improve patient health outcomes through better engagement",
+    "initialResearch": "Patient interviews (n=40), healthcare provider interviews (n=15), usability testing sessions, analysis of support tickets and abandonment points",
+    "phase": "full"
+  },
+  "expectedOutcomes": {
+    "discovery": {
+      "userInsights": [
+        {
+          "insight": "Patients can't understand medical terminology in test results and notes",
+          "source": "Patient interviews, support tickets",
+          "evidence": "78% of patients report not understanding their test results. Most common support request is 'What does this mean?'",
+          "userQuote": "My cholesterol is 185. Is that good? Bad? The note says 'within normal limits' but I don't know what's normal",
+          "significance": "high",
+          "theme": "Health Literacy"
+        },
+        {
+          "insight": "Booking appointments requires too many steps and medical knowledge patients don't have",
+          "source": "Usability testing, analytics",
+          "evidence": "62% appointment booking abandonment rate. Users stuck on 'select visit type' dropdown with 30 medical options",
+          "userQuote": "I don't know if I need a 'consultation' or an 'evaluation' or a 'follow-up visit'. I just want to see my doctor about my knee pain",
+          "significance": "high",
+          "theme": "Complexity"
+        },
+        {
+          "insight": "Patients feel disempowered and confused by medical system, portal reinforces this",
+          "source": "Patient interviews",
+          "evidence": "Patients describe feeling 'stupid', 'overwhelmed', 'like an outsider' when using portal",
+          "userQuote": "The portal makes me feel like I'm not smart enough to understand my own health. It's written for doctors, not for me",
+          "significance": "high",
+          "theme": "Empowerment"
+        }
+      ],
+      "problemAreas": [
+        {
+          "area": "Medical Information Comprehension",
+          "description": "Medical jargon and clinical language makes information inaccessible to patients",
+          "userImpact": "Patients can't make informed decisions, feel anxious, call provider for explanations, disengage from portal",
+          "frequency": "constant",
+          "severity": "critical",
+          "affectedUsers": ["all patients", "especially elderly", "low health literacy populations"]
+        },
+        {
+          "area": "Task Complexity",
+          "description": "Common tasks like booking appointments require medical knowledge patients lack",
+          "userImpact": "High abandonment rates, patients call instead of using portal, frustration",
+          "frequency": "frequent",
+          "severity": "high",
+          "affectedUsers": ["new patients", "occasional users", "elderly patients"]
+        },
+        {
+          "area": "Patient Empowerment",
+          "description": "Portal design reinforces power imbalance between patients and medical system",
+          "userImpact": "Low engagement, patients feel disempowered, reduced health outcomes",
+          "frequency": "constant",
+          "severity": "high",
+          "affectedUsers": ["all patients"]
+        }
+      ]
+    },
+    "definition": {
+      "problemStatement": {
+        "statement": "Patients using healthcare portals struggle to understand their medical information and take action on their health because portals use clinical language designed for providers rather than patients, resulting in disengagement, anxiety, unnecessary phone calls, and worse health outcomes",
+        "who": "Patients of all health literacy levels",
+        "what": "Struggle to understand medical information and take health actions",
+        "why": "Clinical language and provider-centric design creates comprehension barriers",
+        "where": "Throughout patient portal experience, especially test results and appointment booking",
+        "when": "Every time patients access their health information",
+        "impact": "35% portal adoption, 78% don't understand results, 62% appointment booking abandonment"
+      },
+      "designPrinciples": [
+        {
+          "principle": "Plain Language First, Technical Second",
+          "rationale": "Patients need to understand before they can act. Start with plain language, offer technical details for those who want them",
+          "examples": [
+            "'Your cholesterol is healthy' before 'LDL: 95 mg/dL'",
+            "Explain medical terms in tooltips and expandable sections",
+            "Use 6th-8th grade reading level for primary content"
+          ],
+          "tradeoffs": "May oversimplify for medically sophisticated patients, but they can access details"
+        },
+        {
+          "principle": "Empower, Don't Gatekeep",
+          "rationale": "Patients own their health data. Design should empower action, not create barriers",
+          "examples": [
+            "Ask 'What brings you in?' not 'Select visit type: Consultation vs. Evaluation'",
+            "Proactive suggestions: 'Based on your results, you might want to...'",
+            "Remove unnecessary medical jargon from action items"
+          ],
+          "tradeoffs": "Requires more sophisticated routing logic and provider workflow changes"
+        },
+        {
+          "principle": "Context Over Data",
+          "rationale": "Numbers without context are meaningless. Always explain what data means for the patient",
+          "examples": [
+            "Show test results on visual scale: Low ← Healthy → High",
+            "Compare to patient's previous results and trends",
+            "Explain 'what this means for you' for every result"
+          ],
+          "tradeoffs": "More screen space needed, more complex data presentation"
+        }
+      ],
+      "successCriteria": [
+        {
+          "criterion": "Portal adoption rate",
+          "measurement": "% of patients who have logged in within past 90 days",
+          "target": "70% (up from 35%)",
+          "type": "behavioral"
+        },
+        {
+          "criterion": "Self-reported comprehension",
+          "measurement": "Post-viewing survey: 'I understood my test results'",
+          "target": "85% agree or strongly agree (up from 22%)",
+          "type": "qualitative"
+        },
+        {
+          "criterion": "Appointment booking completion",
+          "measurement": "% who start booking and complete",
+          "target": "80% completion (up from 38%)",
+          "type": "behavioral"
+        },
+        {
+          "criterion": "Support call reduction",
+          "measurement": "Calls asking 'What does this result mean?'",
+          "target": "50% reduction",
+          "type": "business-outcome"
+        }
+      ]
+    },
+    "development": {
+      "concepts": [
+        {
+          "name": "Visual Health Timeline",
+          "description": "Replace tables of test results with visual timeline showing health trends and milestones",
+          "approach": "transformative",
+          "howItWorks": "Test results displayed on visual timeline with trend lines, color coding (healthy/attention needed), and plain language explanations. Timeline shows health journey over time",
+          "keyFeatures": [
+            "Visual timeline interface",
+            "Trend visualization for key metrics",
+            "Plain language status indicators",
+            "Drill down to detailed data"
+          ],
+          "strengths": [
+            "Makes trends obvious at a glance",
+            "Visual communication more accessible",
+            "Tells story of patient's health journey"
+          ],
+          "weaknesses": [
+            "Complex for multi-condition patients",
+            "Requires sophisticated data visualization",
+            "May not work well on mobile"
+          ]
+        },
+        {
+          "name": "Plain Language Layer",
+          "description": "Two-layer system: plain language default with medical details available via toggle",
+          "approach": "incremental",
+          "howItWorks": "Primary view shows plain language explanations. Toggle switch reveals medical terminology and clinical details. Patients choose their preferred view",
+          "keyFeatures": [
+            "Plain language as default",
+            "Medical toggle for detail",
+            "Contextual tooltips",
+            "Reading level optimization"
+          ],
+          "strengths": [
+            "Serves all literacy levels",
+            "Patients control detail level",
+            "Works with existing data structure"
+          ],
+          "weaknesses": [
+            "Double content maintenance burden",
+            "Toggle might be missed by users",
+            "Oversimplification risk"
+          ]
+        },
+        {
+          "name": "Intelligent Appointment Assistant",
+          "description": "Conversational interface asks plain language questions to route appointment booking",
+          "approach": "transformative",
+          "howItWorks": "Instead of medical dropdowns, ask: 'What brings you in today?' System interprets and routes to appropriate visit type and provider. Confirms understanding",
+          "keyFeatures": [
+            "Natural language input",
+            "Intelligent routing",
+            "Confirmation and explanation",
+            "Learning from patterns"
+          ],
+          "strengths": [
+            "No medical knowledge required",
+            "Natural interaction",
+            "Reduces booking abandonment"
+          ],
+          "weaknesses": [
+            "NLP complexity",
+            "May misroute",
+            "Requires training data"
+          ]
+        },
+        {
+          "name": "Personalized Health Coach",
+          "description": "AI coach explains test results, suggests actions, answers questions in plain language",
+          "approach": "radical",
+          "howItWorks": "Virtual health coach reviews results with patient, explains in plain language, suggests follow-up actions, answers questions. Available 24/7 via chat",
+          "keyFeatures": [
+            "AI chat interface",
+            "Plain language explanations",
+            "Personalized recommendations",
+            "Available on-demand"
+          ],
+          "strengths": [
+            "Highly personalized",
+            "Available anytime",
+            "Can answer follow-up questions"
+          ],
+          "weaknesses": [
+            "AI accuracy and liability concerns",
+            "May feel impersonal",
+            "Complex to implement"
+          ]
+        }
+      ],
+      "ideationSummary": {
+        "totalConceptsGenerated": 4,
+        "ideationTechniquesUsed": ["Brainstorming", "Analogies (financial apps, education platforms)"],
+        "conceptThemes": ["Visual communication", "Plain language", "Conversational interfaces", "AI assistance"],
+        "mostPromisingConcepts": ["Visual Health Timeline", "Plain Language Layer", "Intelligent Appointment Assistant"]
+      }
+    },
+    "delivery": {
+      "selectedSolution": {
+        "name": "Patient-First Portal",
+        "description": "Combined solution using visual health timeline, plain language layer, and intelligent appointment assistant to make portal accessible and empowering",
+        "basedOnConcepts": ["Visual Health Timeline", "Plain Language Layer", "Intelligent Appointment Assistant"],
+        "rationale": "Combines visual communication, plain language, and smart routing to address comprehension and empowerment problems. Visual timeline makes trends obvious, plain language removes barriers, intelligent assistant eliminates medical jargon from booking",
+        "valueProposition": "Understand your health and take action, without needing a medical degree",
+        "differentiators": [
+          "Only portal with visual health journey timeline",
+          "Plain language as default, not afterthought",
+          "Book appointments by describing your problem, not medical codes"
+        ]
+      },
+      "specification": {
+        "keyFeatures": [
+          {
+            "feature": "Visual Health Timeline",
+            "description": "Primary view of test results as visual timeline with trend lines, color-coded status, and plain language summaries",
+            "priority": "must-have",
+            "userBenefit": "See health trends at a glance without interpreting numbers",
+            "technicalRequirements": [
+              "Data visualization framework",
+              "Historical data aggregation",
+              "Trend analysis algorithms",
+              "Responsive design for mobile"
+            ]
+          },
+          {
+            "feature": "Plain Language Explanations",
+            "description": "Every test result includes plain language explanation of what it means and what to do",
+            "priority": "must-have",
+            "userBenefit": "Understand results without medical background",
+            "technicalRequirements": [
+              "Plain language content database",
+              "Medical term glossary",
+              "Contextual tooltip system",
+              "Reading level optimization"
+            ]
+          },
+          {
+            "feature": "Intelligent Appointment Booking",
+            "description": "Natural language interface for appointment booking - describe problem, system routes appropriately",
+            "priority": "must-have",
+            "userBenefit": "Book appointments without medical terminology knowledge",
+            "technicalRequirements": [
+              "NLP model for intent recognition",
+              "Routing logic to visit types",
+              "Confirmation and explanation flow",
+              "Integration with scheduling system"
+            ]
+          }
+        ]
+      },
+      "implementationSteps": [
+        {
+          "step": "Phase 1: Plain Language Foundation",
+          "description": "Implement plain language layer across all portal content",
+          "deliverables": [
+            "Plain language content for common test results",
+            "Medical term glossary",
+            "Tooltip system",
+            "Content management workflow"
+          ],
+          "estimatedEffort": "3 weeks",
+          "successCriteria": ["All common results have plain language explanations", "85% comprehension rate"]
+        },
+        {
+          "step": "Phase 2: Visual Health Timeline",
+          "description": "Build visual timeline interface for test results",
+          "deliverables": [
+            "Timeline visualization component",
+            "Trend analysis logic",
+            "Mobile-responsive design",
+            "Integration with lab data"
+          ],
+          "estimatedEffort": "4 weeks",
+          "successCriteria": ["Users can view health trends visually", "Positive usability test results"]
+        },
+        {
+          "step": "Phase 3: Intelligent Appointment Assistant",
+          "description": "Deploy NLP-based appointment booking",
+          "deliverables": [
+            "NLP model for symptom interpretation",
+            "Routing logic to visit types",
+            "Confirmation interface",
+            "Fallback to human routing"
+          ],
+          "estimatedEffort": "5 weeks",
+          "successCriteria": ["80% booking completion rate", "95% routing accuracy"]
+        }
+      ],
+      "qualityAssurance": {
+        "testingStrategy": "Extensive usability testing with diverse patient populations including elderly, low health literacy, and disabled patients",
+        "userTesting": [
+          "Usability testing with 40 patients across literacy levels",
+          "Comprehension testing of plain language content",
+          "A/B test visual timeline vs. table view",
+          "Appointment booking task completion testing"
+        ],
+        "successMetrics": [
+          "70% portal adoption",
+          "85% comprehension of test results",
+          "80% appointment booking completion",
+          "50% reduction in support calls"
+        ]
+      }
+    }
+  }
+}
