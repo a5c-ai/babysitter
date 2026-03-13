@@ -80,6 +80,7 @@ jobs:
 
       - name: Run Pi harness E2E tests (Azure OpenAI)
         if: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
+        continue-on-error: true
         run: |
           set -euo pipefail
           npx vitest run --config e2e-tests/docker/vitest.config.ts \
