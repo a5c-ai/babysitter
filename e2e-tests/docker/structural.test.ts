@@ -116,10 +116,10 @@ describe("Plugin installation", () => {
 describe("Entrypoint validation", () => {
   test("rejects missing API key", () => {
     const result = dockerExec(
-      "ANTHROPIC_API_KEY= ANTHROPIC_FOUNDRY_API_KEY= bash /entrypoint.sh 2>&1 || true",
+      "ANTHROPIC_API_KEY= ANTHROPIC_FOUNDRY_API_KEY= AZURE_OPENAI_API_KEY= bash /entrypoint.sh 2>&1 || true",
     );
     expect(result).toContain(
-      "ANTHROPIC_API_KEY or ANTHROPIC_FOUNDRY_API_KEY environment variable is required",
+      "environment variable is required",
     );
   });
 });
