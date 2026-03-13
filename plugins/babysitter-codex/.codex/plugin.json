@@ -1,7 +1,7 @@
 {
     "name":  "babysitter",
     "version":  "4.0.149",
-    "description":  "Babysitter orchestration plugin for Codex CLI with full upstream process/skill library mapping and Codex-native slash commands",
+    "description":  "Babysitter orchestration plugin for Codex CLI with full upstream process/skill library mapping and command-phrase activation",
     "author":  "a5c.ai",
     "license":  "MIT",
     "hooks":  {
@@ -116,7 +116,7 @@
                      "workflow",
                      "codex",
                      "babysitter",
-                     "slash-commands",
+                     "command-phrases",
                      "plugin"
                  ]
 }

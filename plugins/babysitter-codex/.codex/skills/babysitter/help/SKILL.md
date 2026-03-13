@@ -43,7 +43,7 @@ If an argument is provided:
 1. **Command help**: Read the SKILL.md for that command from `.codex/skills/babysitter/<name>/SKILL.md` and display its content
 2. **Process help**: Read the process .js file from `.a5c/processes/<name>.js` and describe it
    - Also search bundled upstream process library at `upstream/babysitter/skills/babysit/process`
-3. **Skill/agent help**: Use `babysitter skill:discover --json` to find it and display its description
+3. **Skill/agent help**: Use wrapper discovery helpers; if invoking SDK CLI directly use `babysitter skill:discover --plugin-root "$CODEX_PLUGIN_ROOT" --json`
 4. **Methodology help**: Search the process library for matching methodology
 
 Use the skill-loader module to resolve command names:

@@ -1,9 +1,9 @@
 {
   "name": "@yaniv-tg/babysitter-codex",
   "version": "0.1.5",
-  "description": "Babysitter orchestration plugin for OpenAI Codex CLI - multi-step AI workflows with full upstream process library, 15 slash commands, and BOM-safe SKILL installation",
+  "description": "Babysitter orchestration plugin for OpenAI Codex CLI - multi-step AI workflows with full upstream process library, 15 orchestration modes, and BOM-safe SKILL installation",
   "scripts": {
-    "test": "node test/integration.test.js && node test/harness.test.js && node test/plugin.test.js && node test/features-1-10.test.js",
+    "test": "node test/integration.test.js && node test/harness.test.js && node test/plugin.test.js && node test/features-1-10.test.js && node test/process-mining.test.js",
     "test:unit": "node test/harness.test.js",
     "test:integration": "node test/integration.test.js",
     "test:plugin": "node test/plugin.test.js",
@@ -15,6 +15,7 @@
     "manifest:verify": "node scripts/verify-content-manifest.js",
     "team:install": "node scripts/team-install.js",
     "check:compat": "node scripts/check-compat.js",
+    "mine:process": "node scripts/mine-process.js",
     "sync:upstream": "node scripts/sync-from-upstream.js",
     "check:upstream": "node scripts/check-upstream-parity.js",
     "lint": "find .codex -name '*.js' | xargs -I{} node --check {}",
@@ -25,6 +26,7 @@
     "SKILL.md",
     "CHANGELOG.md",
     "agents/",
+    "commands/",
     ".codex/",
     "bin/",
     "config/",

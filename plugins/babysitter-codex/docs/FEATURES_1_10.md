@@ -60,7 +60,7 @@ Tasks can use `task.repoAlias`/`task.repo` to route execution.
 
 ## 5) Mid-session model switching + routing
 
-Use command: `/babysitter:model set plan=gpt-5 execute=gpt-5-codex`
+Use command phrase: `babysitter model set plan=gpt-5 execute=gpt-5-codex`
 
 Persisted file: `.a5c/config/model-policy.json`
 
@@ -86,7 +86,7 @@ Persisted file: `.a5c/config/model-policy.json`
 
 ## 8) MCP reliability + auth toolkit
 
-`/babysitter:doctor mcp` checks:
+`babysitter doctor mcp` checks:
 - codex config file presence
 - OAuth env
 - transport env
@@ -96,7 +96,7 @@ Persisted file: `.a5c/config/model-policy.json`
 
 ## 9) Native GitHub issue/PR workflow
 
-`/babysitter:issue` now supports:
+`babysitter issue` now supports:
 - `--apply` (generate apply-mode prompt)
 - `--pr <number>` (post plan comment to PR)
 - `--open-pr` (attempt `gh pr create --fill`)

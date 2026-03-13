@@ -16,7 +16,9 @@ Same as `/babysitter:call`:
 - Research the repo structure
 - Search the process library for relevant specializations/methodologies
 - Gather user intent, requirements, goals, and scope
-- Use `babysitter skill:discover` to find available skills and agents
+- Use wrapper discovery helpers to find available skills/agents.
+- If invoking SDK CLI directly, use:
+  `babysitter skill:discover --plugin-root "$CODEX_PLUGIN_ROOT" --json`
 
 ### 2. Process Creation
 

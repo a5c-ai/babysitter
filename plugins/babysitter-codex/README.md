@@ -37,6 +37,7 @@ This project was created by Babysitter already running on Codex.
 - See [docs/FEATURES_1_10.md](./docs/FEATURES_1_10.md) for implementation notes of the prioritized feature set.
 - See [docs/CODEX_MAPPING.md](./docs/CODEX_MAPPING.md) for upstream-to-codex command/process mapping.
 - See [docs/ARCHITECTURE_UPGRADES_1_8.md](./docs/ARCHITECTURE_UPGRADES_1_8.md) for lock/install/rules/index/integrity architecture.
+- See [commands/README.md](./commands/README.md) for per-command reference docs (upstream-style structure adapted for Codex).
 
 ## Full Test Scenarios
 
@@ -65,11 +66,18 @@ Default process-library root for Codex mapping:
 Override with:
 - `BABYSITTER_PROCESS_LIBRARY_ROOT=<path>`
 
-## Important: No Native /babysitter Slash Commands
+## Important: Use Command Phrases (Not Slash Commands)
 
-Codex does not have built-in `/babysitter:*` commands.
+Codex does not execute custom plugin commands from `/...` input. If you type
+`/babysitter:call`, Codex will reject it as an unrecognized built-in command.
 
-Babysitter is external and activated by this skill using natural-language triggers (for example: `babysitter`, `orchestrate`, `yolo`, `resume`, `doctor`).
+Use babysitter command phrases in chat instead:
+
+- `babysitter call ...`
+- `babysitter yolo ...`
+- `babysitter resume ...`
+- `babysitter doctor ...`
+- `babysitter help`
 
 ## Requirements
 
@@ -86,6 +94,13 @@ Install from the scoped package:
 - `@yaniv-tg/babysitter-codex`
 
 The unscoped `babysitter-codex` name is currently a security placeholder on npm and is not used for this project.
+
+### npm Status (2026-03-12)
+
+- Published and installable from npm as:
+  - `@yaniv-tg/babysitter-codex@0.1.5`
+- Recommended install command:
+  - `npm install -g @yaniv-tg/babysitter-codex`
 
 ## Installation (Windows)
 

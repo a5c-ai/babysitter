@@ -341,7 +341,7 @@ async function main() {
   }
 
   // Discover available skills
-  const discovered = discoverSkills({ pluginRoot: args.pluginRoot || process.env.CLAUDE_PLUGIN_ROOT || path.join(repoRoot, '.codex') });
+  const discovered = discoverSkills({ pluginRoot: args.pluginRoot, repoRoot });
 
   // Fire on-run-start hook
   fireHook('on-run-start', { runId, processId: args.processId });

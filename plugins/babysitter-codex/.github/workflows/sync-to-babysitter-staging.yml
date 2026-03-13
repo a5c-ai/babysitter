@@ -85,7 +85,7 @@ jobs:
           fi
 
           git commit -m "chore(sync): update babysitter-codex from ${SOURCE_REPO}@${SOURCE_SHA:0:7}"
-          git push --force-with-lease origin "${SYNC_BRANCH}"
+          git push --force-with-lease origin "${SYNC_BRANCH}" || git push --force origin "${SYNC_BRANCH}"
 
           PR_BODY="$(mktemp)"
           cat > "${PR_BODY}" <<EOF
@@ -119,12 +119,47 @@ jobs:
               --body-file "${PR_BODY}"
             echo "Updated PR #${EXISTING_PR}"
           else
-            gh pr create \
+            set +e
+            CREATE_OUT="$(gh pr create \
               --repo "${UPSTREAM_REPO}" \
               --base "${UPSTREAM_BASE}" \
               --head "${HEAD_OWNER}:${SYNC_BRANCH}" \
               --title "${PR_TITLE}" \
-              --body-file "${PR_BODY}"
-            echo "Created new PR"
-          fi
+              --body-file "${PR_BODY}" 2>&1)"
+            CREATE_CODE=$?
+            set -e
 
+            if [ ${CREATE_CODE} -eq 0 ]; then
+              echo "${CREATE_OUT}"
+              echo "Created new PR"
+            elif echo "${CREATE_OUT}" | grep -qi "already exists"; then
+              # gh can return non-zero while still telling us the existing PR URL.
+              EXISTING_URL="$(echo "${CREATE_OUT}" | grep -Eo 'https://github.com/[^ ]+/pull/[0-9]+' | tail -1)"
+              if [ -n "${EXISTING_URL}" ]; then
+                EXISTING_PR="${EXISTING_URL##*/}"
+              else
+                EXISTING_PR="$(gh pr list \
+                  --repo "${UPSTREAM_REPO}" \
+                  --base "${UPSTREAM_BASE}" \
+                  --head "${HEAD_OWNER}:${SYNC_BRANCH}" \
+                  --state all \
+                  --json number \
+                  --jq '.[0].number // empty')"
+              fi
+
+              if [ -n "${EXISTING_PR}" ]; then
+                gh pr edit "${EXISTING_PR}" \
+                  --repo "${UPSTREAM_REPO}" \
+                  --title "${PR_TITLE}" \
+                  --body-file "${PR_BODY}"
+                echo "Updated existing PR #${EXISTING_PR} after create conflict"
+              else
+                echo "${CREATE_OUT}"
+                echo "Failed to resolve existing PR after create conflict"
+                exit 1
+              fi
+            else
+              echo "${CREATE_OUT}"
+              exit ${CREATE_CODE}
+            fi
+          fi

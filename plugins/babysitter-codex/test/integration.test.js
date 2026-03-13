@@ -50,6 +50,7 @@ function testRequire() {
     '.codex/codex-mapping.js',
     '.codex/process-library.js',
     '.codex/process-index.js',
+    '.codex/process-mining.js',
     '.codex/rules-resolver.js',
     '.codex/mode-handlers.js',
     '.codex/prompt-shrinker.js',
