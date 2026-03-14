@@ -1,0 +1,43 @@
+# Post-Processing Cloud Run Job
+# Combines all 7 PP services into a single container
+
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# System dependencies for spacy, pycryptodome, etc.
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc g++ libpq-dev curl && \
+    rm -rf /var/lib/apt/lists/*
+
+# Copy all PP service directories
+COPY pp-group-translation/ /app/pp-group-translation/
+COPY pp-group-member-blacklist/ /app/pp-group-member-blacklist/
+COPY pp-group-ai-summary/ /app/pp-group-ai-summary/
+COPY pp-group-data-inheritance/ /app/pp-group-data-inheritance/
+COPY pp-group-callerapi-enrichment/ /app/pp-group-callerapi-enrichment/
+COPY pp-group-activity-timestamp/ /app/pp-group-activity-timestamp/
+COPY pp-group-membership-verify/ /app/pp-group-membership-verify/
+
+# Copy entry point
+COPY pp_job_main.py /app/pp_job_main.py
+
+# Merge and install all requirements
+COPY requirements.txt /app/requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Download spacy model (needed by AI summary)
+RUN python -m spacy download en_core_web_sm 2>/dev/null || true
+
+# Environment variables for PP service directories
+ENV PP_TRANSLATION_DIR=/app/pp-group-translation
+ENV PP_BLACKLIST_DIR=/app/pp-group-member-blacklist
+ENV PP_AI_SUMMARY_DIR=/app/pp-group-ai-summary
+ENV PP_DATA_INHERITANCE_DIR=/app/pp-group-data-inheritance
+ENV PP_CALLERAPI_DIR=/app/pp-group-callerapi-enrichment
+ENV PP_TIMESTAMP_DIR=/app/pp-group-activity-timestamp
+ENV PP_MEMBERSHIP_VERIFY_DIR=/app/pp-group-membership-verify
+ENV INGESTION_BASE=/app
+ENV PYTHONUNBUFFERED=1
+
+CMD ["python", "pp_job_main.py"]

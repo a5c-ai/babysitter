@@ -1,0 +1,56 @@
+{
+    "environment_type": "production",
+    "default_config": "stagingV2_db_config",
+    "local": {
+        "stagingV2_db_config": {
+            "db_host": "34.165.252.46",
+            "db_port": 5432,
+            "db_user": "postgres",
+            "db_password": "IrlRJHwT8Pqj@3x",
+            "db_name": "iris_db",
+            "connect_timeout": 60
+        },
+        "staging_db_config": {
+            "db_host": "34.165.188.177",
+            "db_port": 5432,
+            "db_user": "postgres",
+            "db_password": "{(BlO^7zIp)22B05",
+            "db_name": "iris_db",
+            "connect_timeout": 60
+        },
+        "ingestion_db_config": {
+            "db_host": "35.202.120.195",
+            "db_port": 5432,
+            "db_user": "postgres",
+            "db_password": "ki#}#1R>#-kAHtXk",
+            "db_name": "iris_db",
+            "connect_timeout": 60
+        }
+    },
+    "production": {
+        "stagingV2_db_config": {
+            "db_host": "/cloudsql/veritas-452309:me-west1:iris-devp2-database",
+            "db_port": 5432,
+            "db_user": "postgres",
+            "db_password": "IrlRJHwT8Pqj@3x",
+            "db_name": "iris_db",
+            "connect_timeout": 60
+        },
+        "staging_db_config": {
+            "db_host": "/cloudsql/veritas-452309:me-west1:iris-devp-database",
+            "db_port": 5432,
+            "db_user": "postgres",
+            "db_password": "{(BlO^7zIp)22B05",
+            "db_name": "iris_db",
+            "connect_timeout": 60
+        },
+        "ingestion_db_config": {
+            "db_host": "/cloudsql/veritas-452309:us-central1:iris-ingestion-db",
+            "db_port": 5432,
+            "db_user": "postgres",
+            "db_password": "ki#}#1R>#-kAHtXk",
+            "db_name": "iris_db",
+            "connect_timeout": 60
+        }
+    }
+}
