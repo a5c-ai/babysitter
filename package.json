@@ -1,6 +1,6 @@
 {
   "name": "babysitter",
-  "version": "0.0.180",
+  "version": "0.0.181",
   "private": true,
   "workspaces": [
     "packages/*"
@@ -9,6 +9,7 @@
     "verify:metadata": "node ./scripts/check-package-metadata.cjs",
     "test:sdk": "npm run test --workspace=@a5c-ai/babysitter-sdk",
     "test:e2e:docker": "vitest run --config e2e-tests/docker/vitest.config.ts",
-    "build:sdk": "npm run build --workspace=@a5c-ai/babysitter-sdk"
+    "build:sdk": "npm run build --workspace=@a5c-ai/babysitter-sdk",
+    "token:eval": "bash scripts/eval-compression.sh"
   }
 }
