@@ -17,6 +17,7 @@ import { loadJournal, appendEvent } from "../storage/journal";
 import { readRunMetadata } from "../storage/runFiles";
 import { buildEffectIndex } from "../runtime/replay/effectIndex";
 import { resolveCompletionProof } from "../cli/completionProof";
+import { collapseDoubledA5cRuns } from "../cli/resolveInputPath";
 import type { EffectRecord } from "../runtime/types";
 import { discoverSkillsInternal } from "../cli/commands/skill";
 import {
@@ -258,7 +259,7 @@ async function handleStopHookImpl(args: HookHandlerArgs): Promise<number> {
   log.info(`Resolved pluginRoot: ${resolvedPluginRoot || "(empty)"}`);
   log.info(`Resolved stateDir: ${stateDir}`);
 
-  const runsDir = args.runsDir || ".a5c/runs";
+  const runsDir = collapseDoubledA5cRuns(path.resolve(args.runsDir || ".a5c/runs"));
 
   // 3. Check iteration — try primary stateDir, then fallback to .a5c/state/
   let filePath = getSessionFilePath(stateDir, sessionId);

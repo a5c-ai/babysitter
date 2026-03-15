@@ -1,0 +1,11 @@
+{
+  "vaultPath": "./cog-vault",
+  "captureType": "url-dump",
+  "urls": [
+    "https://example.com/distributed-systems-patterns",
+    "https://blog.example.com/react-19-server-components",
+    "https://example.com/event-sourcing-guide",
+    "https://example.com/passkey-authentication-2026"
+  ],
+  "targetQuality": 80
+}

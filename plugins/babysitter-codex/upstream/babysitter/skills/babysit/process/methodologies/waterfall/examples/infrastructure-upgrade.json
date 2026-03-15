@@ -1,0 +1,35 @@
+{
+  "projectName": "Legacy ERP System Modernization",
+  "projectDescription": "Complete modernization of 20-year-old legacy ERP system including migration from mainframe to cloud-based architecture, database modernization, and API development. Must maintain business continuity during transition with zero data loss and minimal downtime.",
+  "stakeholders": [
+    {
+      "name": "Susan Mitchell",
+      "role": "CIO",
+      "department": "Information Technology",
+      "email": "susan.mitchell@corporation.com"
+    },
+    {
+      "name": "Richard Brown",
+      "role": "Enterprise Architect",
+      "department": "Architecture",
+      "email": "richard.brown@corporation.com"
+    },
+    {
+      "name": "Nicole Adams",
+      "role": "Migration Lead",
+      "department": "Infrastructure",
+      "email": "nicole.adams@corporation.com"
+    },
+    {
+      "name": "Christopher Davis",
+      "role": "Business Continuity Manager",
+      "department": "Risk Management",
+      "email": "christopher.davis@corporation.com"
+    }
+  ],
+  "requirementsSource": "gap-analysis-and-stakeholder-workshops",
+  "testingStrategy": "comprehensive",
+  "deploymentTarget": "hybrid-cloud",
+  "includeVModel": true,
+  "regulatoryCompliance": null
+}

@@ -1,0 +1,27 @@
+{
+  "name": "ECC TDD Workflow - Authentication Module",
+  "description": "Test-driven development of an authentication module with coverage convergence",
+  "processId": "methodologies/everything-claude-code/ecc-tdd-workflow",
+  "inputs": {
+    "request": "Implement JWT authentication middleware with refresh token rotation",
+    "projectRoot": ".",
+    "testFramework": "vitest",
+    "coverageThreshold": 80,
+    "maxIterations": 3,
+    "architecture": {
+      "components": ["auth-middleware", "token-service", "refresh-store"],
+      "interfaces": ["verifyToken", "rotateRefresh", "revokeToken"]
+    }
+  },
+  "expectedOutcomes": {
+    "phases": [
+      "analyze-strategy (test pyramid, mocking boundaries, coverage targets)",
+      "red (write failing tests for all components, exit code 1)",
+      "green (minimal implementation, exit code 0)",
+      "refactor (SOLID, clean code, tests still green)",
+      "coverage-check (measure against 80% threshold)",
+      "gap-closure (iterate until threshold met, max 3 rounds)",
+      "breakpoint if coverage not met"
+    ]
+  }
+}

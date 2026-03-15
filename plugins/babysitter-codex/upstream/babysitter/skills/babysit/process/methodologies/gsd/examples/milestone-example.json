@@ -1,0 +1,21 @@
+{
+  "milestoneId": "milestone-1-mvp",
+  "milestoneName": "MVP Launch",
+  "phases": [
+    "phase-1-auth",
+    "phase-2-tasks",
+    "phase-3-teams"
+  ],
+  "definitionOfDone": [
+    "All v1 requirements implemented and tested",
+    "Authentication system fully functional",
+    "Users can create and manage tasks",
+    "Basic team collaboration features working",
+    "Mobile-responsive UI complete",
+    "E2E tests passing",
+    "Security audit passed",
+    "Performance benchmarks met",
+    "Documentation complete",
+    "Deployment pipeline functional"
+  ]
+}

@@ -31,13 +31,36 @@ The result will include:
 
 ## Before You Begin
 
-### Verify Installation
+### Step 1: Set Up Your Profile (First Time Only)
+
+If you haven't already, configure your personal preferences:
+
+```bash
+/babysitter:user-install
+```
+
+This personalizes Babysitter for your workflow - breakpoint frequency, communication style, and expertise areas.
+
+### Step 2: Set Up Your Project
+
+In your project directory:
+
+```bash
+/babysitter:project-install
+```
+
+This analyzes your codebase and configures project-specific settings.
+
+### Step 3: Verify Installation
 
 Quick check that everything is working:
 
 ```bash
 # In your terminal
 npx -y @a5c-ai/babysitter-sdk@latest --version
+
+# Or run diagnostics
+/babysitter:doctor
 ```
 
 You should see a version number. If not, revisit the [installation guide](./installation.md).

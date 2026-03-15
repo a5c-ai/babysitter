@@ -2,7 +2,7 @@
 
 This scenario validates end-to-end Babysitter behavior in Codex, including:
 
-- All 11 Babysitter modes (`call`, `yolo`, `resume`, `plan`, `forever`, `doctor`, `observe`, `help`, `project-install`, `user-install`, `assimilate`)
+- All 15 Babysitter modes (`call`, `yolo`, `resume`, `plan`, `forever`, `doctor`, `observe`, `retrospect`, `model`, `issue`, `help`, `project-install`, `team-install`, `user-install`, `assimilate`)
 - Process creation and execution
 - Breakpoint generation and breakpoint output acceptance by the run
 - Core SDK orchestration flow (`run:create`, `run:iterate`, `task:list`, `task:post`, `run:status`)
@@ -36,16 +36,16 @@ node test/full-session-scenario.js --upstream-url https://github.com/a5c-ai/baby
 
 This is the strict end-to-end test that builds a simple artifact and enforces a perfect score.
 
-Run:
-
-```powershell
-powershell -ExecutionPolicy Bypass -File ./test/full-session-long-run.ps1
-```
-
-or:
+Run (cross-platform):
 
 ```bash
 npm run test:long-scenario
+```
+
+Windows-only legacy runner (optional):
+
+```powershell
+powershell -ExecutionPolicy Bypass -File ./test/full-session-long-run.ps1
 ```
 
 ### Long-run guarantees
@@ -71,6 +71,8 @@ Run these prompts in a Codex session and verify expected behavior.
 | forever | `babysitter forever monitor run health every 30m` | Looping periodic process created with sleep gates |
 | doctor | `babysitter doctor latest run` | Health diagnostics output with pass/warn/fail checks |
 | observe | `babysitter observe workspace` | Observer dashboard starts (or clear unsupported message) |
+| model | `babysitter model set execute=gpt-5` | Model routing policy is shown/updated |
+| issue | `babysitter issue 123 --repo owner/repo` | Issue context is fetched and converted to execution plan |
 | project-install | `babysitter project-install this repo` | Project profile/setup flow executes |
 | user-install | `babysitter user-install for backend work` | User profile/setup flow executes |
 | assimilate | `babysitter assimilate https://github.com/a5c-ai/babysitter.git` | Assimilation flow starts; generated process/skills/agents or clear fallback message |

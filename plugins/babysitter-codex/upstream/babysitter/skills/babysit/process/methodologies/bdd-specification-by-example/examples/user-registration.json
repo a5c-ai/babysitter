@@ -1,0 +1,18 @@
+{
+  "projectName": "SocialApp",
+  "feature": "User registration with email verification and password strength validation",
+  "stakeholders": [
+    "Product Manager",
+    "Frontend Developer",
+    "Backend Developer",
+    "QA Engineer",
+    "Security Team"
+  ],
+  "testFramework": "cypress",
+  "developmentPhase": "greenfield",
+  "generateTests": true,
+  "createDocumentation": true,
+  "existingFeatures": [],
+  "existingScenarios": [],
+  "existingSteps": []
+}

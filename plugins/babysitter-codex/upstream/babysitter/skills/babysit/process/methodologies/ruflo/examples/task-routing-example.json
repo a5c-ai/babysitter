@@ -1,0 +1,27 @@
+{
+  "name": "Ruflo Task Routing - Smart Complexity-Based Routing",
+  "description": "Q-Learning router assesses complexity and routes to optimal tier (Booster/Medium/Complex)",
+  "processId": "methodologies/ruflo/ruflo-task-routing",
+  "inputs": {
+    "task": "Convert all var declarations to const in src/utils/*.ts files",
+    "taskType": "refactor",
+    "projectRoot": ".",
+    "costBudget": 0.5,
+    "latencyTarget": "fast",
+    "routingHistory": [
+      { "task": "add-types", "tier": "agent-booster", "quality": 95, "cost": 0 },
+      { "task": "refactor-auth", "tier": "complex", "quality": 88, "cost": 0.8 }
+    ]
+  },
+  "expectedOutcomes": {
+    "steps": [
+      "complexity-analysis (simple: var-to-const is a deterministic transform)",
+      "boost-check (eligible: var-to-const is a supported Agent Booster transform)",
+      "execute-boost (WASM fast-path: <1ms execution, $0 cost, 352x speedup)",
+      "router-update (Q-value updated with reward=1.0 for successful boost)"
+    ],
+    "expectedTier": "agent-booster",
+    "expectedLatency": "<1ms",
+    "expectedCost": 0
+  }
+}

@@ -1,0 +1,70 @@
+{
+  "projectName": "Acme CRM",
+  "workDescription": "Add ability to select multiple customer records and edit common fields in bulk. Sales team currently wastes hours editing customers one-by-one when updating territories, account managers, or tags. Need to save them time while maintaining data integrity.",
+  "appetite": "big-batch",
+  "cycleWeeks": 6,
+  "teamSize": "one-designer-two-programmers",
+  "phase": "full-cycle",
+  "includeCoolDown": true,
+  "context": {
+    "userProblem": "Sales managers need to reassign 50+ customers to new territories monthly. Currently takes 2-3 hours of repetitive clicking.",
+    "businessValue": "Save 10+ hours per month per sales manager. Reduce errors from manual editing.",
+    "currentWorkaround": "Export to CSV, edit in Excel, re-import. Clunky and error-prone.",
+    "stakeholders": [
+      "Sales managers",
+      "Sales operations",
+      "Customer success team"
+    ]
+  },
+  "scopeConsiderations": {
+    "inScope": [
+      "Select multiple customers from list view",
+      "Edit common fields: territory, account manager, tags, status",
+      "Validation before applying changes",
+      "Permission checks (can only edit customers you have access to)",
+      "Clear confirmation of what will change",
+      "Error handling for partial failures"
+    ],
+    "outOfScope": [
+      "Bulk create new customers",
+      "Edit all fields (just common ones)",
+      "Advanced filtering (use existing filters)",
+      "Undo/redo after bulk edit",
+      "Scheduled bulk edits",
+      "Audit trail (existing system handles this)"
+    ],
+    "rabbitHoles": [
+      "Complex field-level permissions (stick to record-level)",
+      "Handling customers locked by other users",
+      "Optimistic locking and conflict resolution",
+      "Real-time validation of all selected records"
+    ],
+    "noGos": [
+      "Don't rebuild the entire list view",
+      "Don't add new filter types",
+      "Don't create bulk delete (too dangerous)",
+      "Don't touch the import/export system"
+    ]
+  },
+  "expectedScopes": [
+    "Selection mechanism in list view",
+    "Bulk edit dialog with field selection",
+    "Field validation and conflict detection",
+    "Permission checks for selected records",
+    "Apply changes with error handling",
+    "Success/error feedback to user"
+  ],
+  "successCriteria": [
+    "Sales manager can update 50 customers in under 2 minutes",
+    "Clear feedback on what will change before committing",
+    "Graceful handling of permission issues",
+    "No data corruption from partial failures",
+    "Works on both desktop and tablet"
+  ],
+  "notes": [
+    "This is a full-cycle example showing all Shape Up phases",
+    "Demonstrates typical SaaS feature development",
+    "Good example of appetite-driven scope setting",
+    "Shows how to handle common rabbit holes"
+  ]
+}

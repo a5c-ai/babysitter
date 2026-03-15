@@ -1,0 +1,27 @@
+{
+  "description": "Nuclear reactor safety system - Cleanroom for ultra-critical safety interlock",
+  "projectName": "Nuclear Reactor Safety Interlock System",
+  "systemDescription": "Software-based safety system for nuclear reactor that monitors reactor parameters (temperature, pressure, neutron flux, coolant flow) and automatically initiates emergency shutdown (SCRAM) if safety limits are exceeded. Implements redundant monitoring with 2-out-of-3 voting logic. Provides continuous self-diagnostics and fault detection. Interfaces with physical SCRAM mechanisms (control rod insertion). Must meet NRC 10 CFR Part 50 Appendix A and IEEE 603 (safety systems in nuclear power plants). Zero tolerance for failures that could prevent reactor shutdown.",
+  "reliabilityTarget": 1000000,
+  "criticalComponents": [
+    "parameter-monitoring",
+    "voting-logic-2-of-3",
+    "scram-initiation",
+    "self-diagnostics",
+    "redundancy-management"
+  ],
+  "usageProfile": "worst-case",
+  "incrementCount": 6,
+  "includeProofOfCorrectness": true,
+  "statisticalConfidence": 0.999,
+  "notes": [
+    "NRC requires highest level of software quality assurance",
+    "Formal methods mandatory for safety-critical nuclear applications",
+    "2-out-of-3 voting logic requires formal proof of correctness",
+    "Worst-case usage profile includes all possible failure scenarios",
+    "MTTF target of 1 million hours reflects nuclear safety requirements",
+    "Statistical confidence of 99.9% provides very high assurance",
+    "Every line of code must be formally verified",
+    "Cleanroom ideal methodology for this ultra-high reliability requirement"
+  ]
+}

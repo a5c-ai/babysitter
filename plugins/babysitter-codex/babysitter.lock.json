@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "generatedAt": "2026-03-11T00:00:00.000Z",
+  "runtime": {
+    "name": "@a5c/babysitter-codex-runtime",
+    "version": "0.1.4"
+  },
+  "content": {
+    "name": "@a5c/babysitter-codex-content",
+    "version": "0.1.4",
+    "upstream": {
+      "repo": "https://github.com/a5c-ai/babysitter",
+      "path": "plugins/babysitter",
+      "snapshotCommit": "unknown"
+    }
+  },
+  "integrity": {
+    "manifestPath": "config/content-manifest.json",
+    "algorithm": "sha256"
+  }
+}

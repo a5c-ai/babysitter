@@ -1,0 +1,13 @@
+{
+  "type": "RUN_CREATED",
+  "recordedAt": "2026-03-10T09:00:00.000Z",
+  "data": {
+    "runId": "failed-run",
+    "processId": "failed-process",
+    "entrypoint": "process.js",
+    "inputs": {
+      "testInput": "failed"
+    }
+  },
+  "checksum": "failed123"
+}

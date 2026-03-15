@@ -1,0 +1,31 @@
+{
+  "phaseId": "phase-4-notifications",
+  "phaseName": "Real-time Notification System",
+  "researchFocus": [
+    "WebSocket vs SSE vs polling for notification delivery",
+    "Push notification service providers (FCM, APNs, OneSignal)",
+    "Notification queue architecture (Redis, RabbitMQ, SQS)",
+    "Notification preference management patterns",
+    "Rate limiting and batching strategies"
+  ],
+  "options": {
+    "depth": "standard",
+    "includeLibraryEvaluation": true,
+    "includeRiskAssessment": true,
+    "overwriteExisting": false
+  },
+  "context": {
+    "projectPath": ".",
+    "existingStack": {
+      "framework": "Next.js",
+      "database": "PostgreSQL",
+      "hosting": "Vercel",
+      "currentTransport": "REST with fetch"
+    },
+    "constraints": [
+      "Must work on Vercel serverless",
+      "Budget-friendly (no expensive third-party services)",
+      "Support mobile push notifications in future"
+    ]
+  }
+}

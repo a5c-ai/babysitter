@@ -1,0 +1,14 @@
+{
+  "projectName": "TaskMaster Pro",
+  "projectType": "web",
+  "initialIdea": "A modern task management application with team collaboration features, real-time updates, and smart prioritization",
+  "context": {
+    "targetAudience": "Small to medium teams (5-50 people)",
+    "keyDifferentiator": "AI-powered task prioritization and smart scheduling",
+    "constraints": [
+      "Must work offline with sync when online",
+      "Mobile-responsive design required",
+      "Budget-friendly hosting"
+    ]
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "vaultPath": "./cog-vault",
+  "captureType": "meeting-transcript",
+  "transcriptPath": "./meeting-2026-03-02.txt",
+  "meetingTitle": "Sprint Planning Q1 W9",
+  "participants": ["Alex", "Jordan", "Sam", "Taylor"],
+  "targetQuality": 80
+}

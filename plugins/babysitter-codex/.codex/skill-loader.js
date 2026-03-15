@@ -18,6 +18,38 @@ function loadPlugin() {
 }
 
 /**
+ * Resolve plugin root for SDK commands that require --plugin-root.
+ * Resolution order:
+ * 1) explicit options.pluginRoot
+ * 2) CODEX_PLUGIN_ROOT env
+ * 3) CLAUDE_PLUGIN_ROOT env
+ * 4) this package's own .codex directory (if plugin.json exists)
+ * 5) current working directory .codex (if plugin.json exists)
+ *
+ * @param {Object} [options]
+ * @param {string} [options.pluginRoot]
+ * @returns {string|null}
+ */
+function resolvePluginRoot(options = {}) {
+  const explicit = options.pluginRoot && String(options.pluginRoot).trim();
+  if (explicit) return path.resolve(explicit);
+
+  const fromCodexEnv = process.env.CODEX_PLUGIN_ROOT && String(process.env.CODEX_PLUGIN_ROOT).trim();
+  if (fromCodexEnv) return path.resolve(fromCodexEnv);
+
+  const fromClaudeEnv = process.env.CLAUDE_PLUGIN_ROOT && String(process.env.CLAUDE_PLUGIN_ROOT).trim();
+  if (fromClaudeEnv) return path.resolve(fromClaudeEnv);
+
+  const packageCodexDir = CODEX_DIR;
+  if (fs.existsSync(path.join(packageCodexDir, 'plugin.json'))) return packageCodexDir;
+
+  const cwdCodexDir = path.join(process.cwd(), '.codex');
+  if (fs.existsSync(path.join(cwdCodexDir, 'plugin.json'))) return cwdCodexDir;
+
+  return null;
+}
+
+/**
  * Build alias map: alias → canonical command name.
  */
 function buildAliasMap() {
@@ -156,6 +188,7 @@ function suggestCommand(input) {
 
 module.exports = {
   loadPlugin,
+  resolvePluginRoot,
   resolveCommand,
   resolveCommandName,
   getSkillPath,

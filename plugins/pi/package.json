@@ -1,0 +1,39 @@
+{
+  "name": "babysitter-pi",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Babysitter SDK deep integration for oh-my-pi - makes babysitter a mandatory first-class orchestration layer with session auto-binding, task interception, TUI widgets, and harness adapter",
+  "keywords": ["pi-package", "omp", "babysitter", "orchestration", "ai-agent"],
+  "omp": {
+    "extensions": ["./extensions"],
+    "skills": ["./skills"],
+    "tools": ["./tools"]
+  },
+  "dependencies": {
+    "@a5c-ai/babysitter-sdk": "^0.0.180"
+  },
+  "peerDependencies": {
+    "@mariozechner/pi-coding-agent": "*"
+  },
+  "scripts": {
+    "test": "node --test test/integration.test.js && npx tsx --test test/harness.test.js && npx tsx --test test/tui.test.js",
+    "test:integration": "node --test test/integration.test.js",
+    "test:harness": "npx tsx --test test/harness.test.js",
+    "test:tui": "npx tsx --test test/tui.test.js",
+    "postinstall": "node scripts/postinstall.cjs",
+    "preuninstall": "node scripts/preuninstall.cjs"
+  },
+  "files": [
+    "extensions/",
+    "tools/",
+    "skills/",
+    "commands/",
+    "scripts/",
+    "test/",
+    "docs/",
+    "AGENTS.md",
+    "README.md"
+  ],
+  "author": "a5c.ai",
+  "license": "MIT"
+}

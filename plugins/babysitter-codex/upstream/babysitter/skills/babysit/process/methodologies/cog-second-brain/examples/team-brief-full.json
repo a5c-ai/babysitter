@@ -1,0 +1,13 @@
+{
+  "vaultPath": "./cog-vault",
+  "mode": "team-brief",
+  "userName": "Alex",
+  "rolePack": "engineering-lead",
+  "integrations": {
+    "github": { "org": "my-org", "repos": ["frontend", "backend"] },
+    "linear": { "team": "engineering" },
+    "slack": { "channels": ["engineering", "product"] },
+    "posthog": { "project": "main-app" }
+  },
+  "targetQuality": 80
+}

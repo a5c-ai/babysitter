@@ -27,6 +27,7 @@ import {
 } from "../types";
 import { emitRuntimeMetric } from "../instrumentation";
 import { createTaskBuildContext } from "../../tasks/context";
+import { collapseDoubledA5cRuns } from "../../cli/resolveInputPath";
 import { globalTaskRegistry } from "../../tasks/registry";
 import { serializeAndWriteTaskDefinition } from "../../tasks/serializer";
 
@@ -248,7 +249,7 @@ function extractSleepTarget(taskDef: TaskDef): number | undefined {
 }
 
 function normalizeRef(runDir: string, ref: string) {
-  return path.isAbsolute(ref) ? ref : path.join(runDir, ref);
+  return path.isAbsolute(ref) ? ref : collapseDoubledA5cRuns(path.join(runDir, ref));
 }
 
 async function resolveStoredResultValue(runDir: string, stored: StoredTaskResult): Promise<unknown> {

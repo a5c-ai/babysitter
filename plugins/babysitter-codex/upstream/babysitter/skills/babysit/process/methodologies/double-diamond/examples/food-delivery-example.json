@@ -1,0 +1,441 @@
+{
+  "name": "Food Delivery App Redesign - Complete Double Diamond",
+  "description": "Full Double Diamond process for redesigning a food delivery app with focus on reducing decision fatigue and improving delivery predictability",
+  "inputs": {
+    "projectName": "QuickBite Food Delivery Redesign",
+    "context": "QuickBite is a food delivery app with 2M active users but declining satisfaction scores (3.2/5). Key complaints: unpredictable delivery times, overwhelming menu choices, food quality doesn't match photos. Business goal: increase repeat orders by 40% and improve rating to 4.5+",
+    "initialResearch": "User surveys (n=500), in-depth interviews (n=25), session recordings analysis, competitor analysis of DoorDash, UberEats, Grubhub",
+    "phase": "full"
+  },
+  "expectedOutcomes": {
+    "discovery": {
+      "userInsights": [
+        {
+          "insight": "Users experience decision paralysis when presented with 200+ restaurant options",
+          "source": "User interviews and session recordings",
+          "evidence": "Average time-to-order: 18 minutes. 40% of users browse for 10+ minutes then abandon",
+          "userQuote": "I spend 20 minutes scrolling through restaurants, can't decide, then just order from the same place as always",
+          "significance": "high",
+          "theme": "Decision Fatigue"
+        },
+        {
+          "insight": "Delivery time estimates are consistently inaccurate, creating anxiety and planning problems",
+          "source": "User interviews, support tickets",
+          "evidence": "60% of deliveries arrive 15+ minutes later than estimated. Top support complaint.",
+          "userQuote": "The tracker says '10 minutes away' for 45 minutes. I can't plan my lunch break around this",
+          "significance": "high",
+          "theme": "Unreliability"
+        },
+        {
+          "insight": "Food quality expectations don't match reality due to professional photography",
+          "source": "User reviews, interviews",
+          "evidence": "35% of 1-star reviews mention 'food looks nothing like the photo'",
+          "userQuote": "The photos look amazing but what arrives is a soggy mess. I feel deceived",
+          "significance": "high",
+          "theme": "Expectation Mismatch"
+        },
+        {
+          "insight": "Users have learned to over-tip to potentially get faster service",
+          "source": "Behavioral data analysis, interviews",
+          "evidence": "25% increase in tip amounts over 2 years. Users report tipping strategically",
+          "userQuote": "I tip 30% hoping my order gets prioritized, but I have no idea if it makes a difference",
+          "significance": "medium",
+          "theme": "System Opacity"
+        }
+      ],
+      "problemAreas": [
+        {
+          "area": "Decision-Making Process",
+          "description": "Too many choices with insufficient guidance leads to decision paralysis and wasted time",
+          "userImpact": "18-minute average browse time, 40% browse-abandon rate, default to same restaurant",
+          "frequency": "constant",
+          "severity": "high",
+          "affectedUsers": ["all users", "especially new users", "time-constrained professionals"]
+        },
+        {
+          "area": "Delivery Predictability",
+          "description": "Inaccurate ETAs make it impossible for users to plan their time",
+          "userImpact": "Anxiety, missed meetings, wasted time waiting, food arriving at wrong times",
+          "frequency": "frequent",
+          "severity": "critical",
+          "affectedUsers": ["professionals with scheduled breaks", "parents with kid schedules", "all users"]
+        },
+        {
+          "area": "Quality Expectations",
+          "description": "Professional photos create unrealistic expectations leading to disappointment",
+          "userImpact": "Disappointment, feeling deceived, low ratings, reduced repeat orders",
+          "frequency": "frequent",
+          "severity": "high",
+          "affectedUsers": ["quality-conscious users", "first-time restaurant orders"]
+        }
+      ]
+    },
+    "definition": {
+      "problemStatement": {
+        "statement": "Busy professionals using food delivery apps struggle to make confident ordering decisions and manage their time effectively because delivery estimates are unreliable and the abundance of options creates decision paralysis, resulting in anxiety, wasted time, disappointment, and reduced trust",
+        "who": "Busy professionals and time-constrained users",
+        "what": "Struggle to make confident ordering decisions and manage their time",
+        "why": "Unreliable delivery estimates and decision paralysis from too many options",
+        "where": "During lunch breaks, busy evenings, when planning around schedules",
+        "when": "Every time they need to order food delivery",
+        "impact": "18-minute decision time, 40% browse abandonment, 3.2/5 satisfaction, declining repeat orders"
+      },
+      "designPrinciples": [
+        {
+          "principle": "Predictable over Optimistic",
+          "rationale": "Users prefer realistic expectations over wishful thinking. Better to over-deliver than under-deliver",
+          "examples": [
+            "Show 45-minute ETA if uncertain, not aspirational 25 minutes",
+            "Display historical delivery times for each restaurant",
+            "Alert users immediately if delays occur"
+          ],
+          "tradeoffs": "May show longer ETAs than competitors, but build trust through accuracy"
+        },
+        {
+          "principle": "Guide Decisions, Don't Overwhelm",
+          "rationale": "Choice overload reduces satisfaction. Guide users to good options rather than showing everything",
+          "examples": [
+            "Smart suggestions based on preferences and context",
+            "Default to curated subset unless user opts for full catalog",
+            "Progressive disclosure: start narrow, allow expansion"
+          ],
+          "tradeoffs": "Some users may feel limited, but majority will appreciate simplicity"
+        },
+        {
+          "principle": "Set Accurate Expectations",
+          "rationale": "Match experience to promise. Disappointment comes from expectation mismatch",
+          "examples": [
+            "Real customer photos alongside professional ones",
+            "Quality ratings based on delivery condition, not just taste",
+            "Clear communication about what's in user's control vs. not"
+          ],
+          "tradeoffs": "Less appealing marketing imagery, but higher satisfaction"
+        }
+      ],
+      "successCriteria": [
+        {
+          "criterion": "Delivery time accuracy",
+          "measurement": "% of deliveries arriving within 5 minutes of ETA",
+          "target": "90% within 5 minutes (up from current 40%)",
+          "type": "user-outcome"
+        },
+        {
+          "criterion": "Decision time",
+          "measurement": "Average time from app open to order submission",
+          "target": "Under 8 minutes (down from 18 minutes)",
+          "type": "behavioral"
+        },
+        {
+          "criterion": "User satisfaction",
+          "measurement": "Average app rating",
+          "target": "4.5+ stars (up from 3.2)",
+          "type": "qualitative"
+        },
+        {
+          "criterion": "Repeat orders",
+          "measurement": "% of users ordering 2+ times per month",
+          "target": "40% increase in repeat orders",
+          "type": "business-outcome"
+        }
+      ]
+    },
+    "development": {
+      "concepts": [
+        {
+          "name": "Time-First Ordering",
+          "description": "Flip the ordering flow: choose desired delivery time first, then see only restaurants that can reliably deliver by that time",
+          "approach": "transformative",
+          "howItWorks": "User selects 'I want to eat at 12:30pm' → System shows only restaurants with 90%+ on-time delivery rate for that timeframe → Simplified choice set",
+          "keyFeatures": [
+            "Time selector as first step",
+            "Filter restaurants by delivery reliability for chosen time",
+            "Calendar integration to suggest times based on schedule"
+          ],
+          "strengths": [
+            "Solves predictability problem directly",
+            "Reduces choice overload by filtering",
+            "Aligns with user's actual need (eating at specific time)"
+          ],
+          "weaknesses": [
+            "May exclude popular restaurants with poor delivery times",
+            "Requires accurate historical delivery data",
+            "Different mental model from current apps"
+          ]
+        },
+        {
+          "name": "AI Meal Recommender",
+          "description": "Personal AI assistant learns preferences and suggests 3 meals based on context, time, weather, previous orders",
+          "approach": "transformative",
+          "howItWorks": "System analyzes user history, time of day, weather, location → Suggests 3 specific meals with 1-tap ordering → User can explore more if desired",
+          "keyFeatures": [
+            "Contextual AI recommendations",
+            "1-tap reorder of suggestions",
+            "Learning from selections and rejections",
+            "Explain why each meal was suggested"
+          ],
+          "strengths": [
+            "Eliminates decision fatigue for repeat users",
+            "Fast ordering for time-constrained users",
+            "Can surface new restaurants user will like"
+          ],
+          "weaknesses": [
+            "Cold start problem for new users",
+            "Privacy concerns about data usage",
+            "May feel limiting or creepy to some users"
+          ]
+        },
+        {
+          "name": "Transparent Kitchen View",
+          "description": "Live transparency into food preparation and delivery status with real-time updates and actual driver location",
+          "approach": "incremental",
+          "howItWorks": "After ordering → Live view of kitchen (order received, preparing, quality check, packaged) → Live driver location with accurate ETA → Proactive alerts if delays",
+          "keyFeatures": [
+            "Kitchen status updates from restaurant POS integration",
+            "Actual driver GPS location",
+            "Accurate ETA recalculation",
+            "Proactive delay notifications"
+          ],
+          "strengths": [
+            "Reduces anxiety through visibility",
+            "Accurate ETAs based on actual data",
+            "Users can adjust plans if delays occur"
+          ],
+          "weaknesses": [
+            "Requires restaurant POS integration",
+            "May expose inefficiencies restaurants don't want shown",
+            "Complex technical implementation"
+          ]
+        },
+        {
+          "name": "Quality Guarantee with Real Photos",
+          "description": "Replace professional photos with real customer photos and offer instant refund if food doesn't match description",
+          "approach": "incremental",
+          "howItWorks": "Show recent customer photos alongside menu → Set clear quality expectations → If food doesn't match, instant refund via app → Build trust through accountability",
+          "keyFeatures": [
+            "User-submitted photo gallery for each dish",
+            "Photo verification system",
+            "Instant refund button with photo upload",
+            "Restaurant quality score based on delivery condition"
+          ],
+          "strengths": [
+            "Sets realistic expectations",
+            "Builds trust through accountability",
+            "Incentivizes restaurants to maintain quality"
+          ],
+          "weaknesses": [
+            "Less attractive marketing",
+            "May discourage some restaurant partnerships",
+            "Potential for refund abuse"
+          ]
+        },
+        {
+          "name": "Subscription Favorites",
+          "description": "Pre-schedule favorite meals at specific times (e.g., Tuesday lunch = Thai curry, Thursday dinner = pizza)",
+          "approach": "incremental",
+          "howItWorks": "User sets up meal schedule → Automatic ordering at scheduled times with notification to confirm/skip → Predictable routine, zero decision time",
+          "keyFeatures": [
+            "Meal scheduling interface",
+            "Confirm-or-skip notifications",
+            "Subscription pricing (slight discount)",
+            "Easy schedule editing"
+          ],
+          "strengths": [
+            "Zero decision time for scheduled meals",
+            "Predictable for user and restaurant",
+            "Revenue predictability for business"
+          ],
+          "weaknesses": [
+            "Only works for routine-oriented users",
+            "Doesn't address variety seekers",
+            "Inflexible for spontaneous changes"
+          ]
+        }
+      ],
+      "ideationSummary": {
+        "totalConceptsGenerated": 5,
+        "ideationTechniquesUsed": ["Brainstorming", "How Might We questions", "SCAMPER"],
+        "conceptThemes": ["Time-centric", "Decision assistance", "Transparency", "Quality assurance", "Routine optimization"],
+        "mostPromisingConcepts": ["Time-First Ordering", "AI Meal Recommender", "Transparent Kitchen View"],
+        "conceptsRequiringValidation": ["AI Meal Recommender (privacy concerns)", "Quality Guarantee (refund abuse potential)"]
+      }
+    },
+    "delivery": {
+      "selectedSolution": {
+        "name": "Confident Ordering",
+        "description": "Combined solution that helps users order confidently through time-centric flow, smart suggestions, live transparency, and quality assurance",
+        "basedOnConcepts": [
+          "Time-First Ordering",
+          "AI Meal Recommender",
+          "Transparent Kitchen View",
+          "Quality Guarantee with Real Photos"
+        ],
+        "rationale": "Combines best elements to address both decision-making and predictability problems. Time-first flow reduces choices, AI suggestions eliminate decision fatigue, transparency provides accurate ETAs, quality guarantee sets realistic expectations",
+        "valueProposition": "Order food with confidence in 3 minutes or less, with accurate delivery times and realistic quality expectations",
+        "differentiators": [
+          "Only app that lets you choose time first",
+          "Most accurate delivery ETAs through live tracking",
+          "Real expectations through customer photos and quality guarantee"
+        ]
+      },
+      "specification": {
+        "overview": "Confident Ordering reimagines food delivery around user's actual need: eating at a specific time with confidence in quality and timing",
+        "keyFeatures": [
+          {
+            "feature": "Time-First Ordering Flow",
+            "description": "Primary entry point asks 'When do you want to eat?' before showing any restaurants",
+            "priority": "must-have",
+            "userBenefit": "Only see restaurants that can reliably deliver by desired time",
+            "technicalRequirements": [
+              "Historical delivery time data by restaurant and time-of-day",
+              "Predictive ETA algorithm",
+              "Restaurant capacity API integration"
+            ]
+          },
+          {
+            "feature": "Smart 3-Meal Suggestions",
+            "description": "AI recommends 3 specific meals (not restaurants) based on preferences, context, and delivery time",
+            "priority": "must-have",
+            "userBenefit": "Order in 1 tap without browsing, or use as starting point for exploration",
+            "technicalRequirements": [
+              "Recommendation ML model",
+              "User preference learning",
+              "Contextual signals (time, weather, location)"
+            ]
+          },
+          {
+            "feature": "Live Preparation & Delivery Tracking",
+            "description": "Real-time visibility into food preparation stages and actual driver location with continuously updated ETA",
+            "priority": "must-have",
+            "userBenefit": "Know exactly when food will arrive, adjust plans if needed",
+            "technicalRequirements": [
+              "Restaurant POS integration for kitchen status",
+              "Driver GPS tracking",
+              "ETA recalculation algorithm",
+              "Proactive notification system"
+            ]
+          },
+          {
+            "feature": "Quality Guarantee",
+            "description": "Real customer photos alongside menu, instant refund if food doesn't match description/photos",
+            "priority": "should-have",
+            "userBenefit": "Realistic expectations, trust through accountability",
+            "technicalRequirements": [
+              "User photo upload and moderation",
+              "Photo verification system",
+              "Instant refund processing",
+              "Restaurant quality scoring"
+            ]
+          }
+        ]
+      },
+      "implementationSteps": [
+        {
+          "step": "Phase 1: Time-First Flow",
+          "description": "Implement time-selection interface and filter restaurants by delivery reliability",
+          "deliverables": [
+            "Time picker UI",
+            "Historical delivery time database",
+            "Restaurant filtering algorithm",
+            "A/B test framework"
+          ],
+          "dependencies": [],
+          "estimatedEffort": "2 weeks",
+          "risks": ["Need reliable historical data", "May reduce available restaurant options"],
+          "successCriteria": ["Users can select desired time", "See only reliable restaurants for that time"]
+        },
+        {
+          "step": "Phase 2: Accurate ETA System",
+          "description": "Build predictive ETA algorithm and live tracking infrastructure",
+          "deliverables": [
+            "ETA prediction model",
+            "Driver GPS integration",
+            "Real-time ETA updates",
+            "Proactive delay notifications"
+          ],
+          "dependencies": ["Phase 1 for historical data"],
+          "estimatedEffort": "3 weeks",
+          "risks": ["Complex ML modeling", "Driver GPS accuracy", "Restaurant integration"],
+          "successCriteria": ["90% of deliveries within 5 minutes of ETA"]
+        },
+        {
+          "step": "Phase 3: Smart Suggestions",
+          "description": "Develop AI meal recommendation system",
+          "deliverables": [
+            "Recommendation ML model",
+            "User preference learning",
+            "3-meal suggestion UI",
+            "Explanation system"
+          ],
+          "dependencies": ["Phase 1 for user behavior data"],
+          "estimatedEffort": "3 weeks",
+          "risks": ["Cold start for new users", "Privacy concerns", "Model accuracy"],
+          "successCriteria": ["60% of users order from suggestions", "Average decision time under 3 minutes"]
+        },
+        {
+          "step": "Phase 4: Live Transparency",
+          "description": "Implement kitchen status tracking and live order view",
+          "deliverables": [
+            "Restaurant POS integration SDK",
+            "Kitchen status UI",
+            "Live tracking view",
+            "Status update notifications"
+          ],
+          "dependencies": ["Phase 2 for tracking infrastructure"],
+          "estimatedEffort": "2 weeks",
+          "risks": ["Restaurant POS integration complexity", "Real-time infrastructure scaling"],
+          "successCriteria": ["Live status updates for 80% of orders"]
+        },
+        {
+          "step": "Phase 5: Quality Guarantee",
+          "description": "Launch customer photo system and instant refund process",
+          "deliverables": [
+            "Photo upload and moderation",
+            "Instant refund system",
+            "Restaurant quality scoring",
+            "Quality guarantee UI"
+          ],
+          "dependencies": ["Phase 1-4 complete for baseline quality data"],
+          "estimatedEffort": "2 weeks",
+          "risks": ["Photo moderation scaling", "Refund abuse", "Restaurant pushback"],
+          "successCriteria": ["Customer photos for 50% of dishes", "Refund rate under 5%"]
+        }
+      ],
+      "deliveryTimeline": {
+        "phases": [
+          {
+            "phase": "Foundation (Phase 1-2)",
+            "duration": "5 weeks",
+            "milestones": ["Time-first flow live", "Accurate ETAs deployed"]
+          },
+          {
+            "phase": "Intelligence (Phase 3)",
+            "duration": "3 weeks",
+            "milestones": ["Smart suggestions live for all users"]
+          },
+          {
+            "phase": "Transparency & Trust (Phase 4-5)",
+            "duration": "4 weeks",
+            "milestones": ["Live tracking live", "Quality guarantee launched"]
+          }
+        ],
+        "criticalPath": ["Historical data collection", "ETA model accuracy", "Restaurant POS integrations"]
+      },
+      "qualityAssurance": {
+        "testingStrategy": "Phased rollout with A/B testing at each phase. Beta test with 5% of users, expand to 25%, then 100%",
+        "userTesting": [
+          "Usability testing of time-first flow (n=20)",
+          "A/B test time-first vs. traditional flow",
+          "Measure ETA accuracy in real-world conditions",
+          "User interviews on suggestion quality and trust"
+        ],
+        "successMetrics": [
+          "Delivery time accuracy: 90% within 5 minutes",
+          "Decision time: Under 8 minutes (target: 3 minutes)",
+          "App rating: 4.5+ stars",
+          "Repeat orders: 40% increase"
+        ],
+        "iterationPlan": "Monthly reviews of metrics. Plan iteration diamond after 3 months to address learnings and emerging user needs"
+      }
+    }
+  }
+}

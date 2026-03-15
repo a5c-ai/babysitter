@@ -131,8 +131,8 @@ npx -y @a5c-ai/babysitter-sdk@0.0.173 profile:render
 ### Skill discovery commands
 
 ```bash
-# Discover skills under the default or custom plugin root
-npx -y @a5c-ai/babysitter-sdk@0.0.173 skill:discover --json
+# Discover skills (pass plugin root explicitly for SDK builds that require it)
+npx -y @a5c-ai/babysitter-sdk@0.0.173 skill:discover --plugin-root "$CODEX_PLUGIN_ROOT" --json
 npx -y @a5c-ai/babysitter-sdk@0.0.173 skill:discover --plugin-root ./my-plugins --json
 
 # Fetch a remotely hosted skill

@@ -1,0 +1,13 @@
+{
+  "projectName": "TaskMaster Pro",
+  "featureName": "smart-scheduling",
+  "projectDescription": "AI-powered task management with smart scheduling that learns from user patterns to suggest optimal task ordering and time allocation.",
+  "targetAudience": "Knowledge workers and small team leads (5-20 people)",
+  "constraints": [
+    "Must integrate with Google Calendar and Outlook",
+    "Privacy-first: no data sent to third parties for learning",
+    "Response time under 200ms for scheduling suggestions"
+  ],
+  "qualityThreshold": 85,
+  "maxRefinements": 3
+}

@@ -1,0 +1,25 @@
+{
+  "projectName": "DataPipeline",
+  "epics": {
+    "epics": [
+      {
+        "id": "E1",
+        "name": "Data Ingestion",
+        "stories": [
+          { "id": "S1", "title": "CSV file upload endpoint", "storyPoints": 3, "acceptanceCriteria": ["Upload CSV up to 100MB", "Validate schema", "Return upload ID"] },
+          { "id": "S2", "title": "S3 bucket integration", "storyPoints": 5, "acceptanceCriteria": ["Read from S3 bucket", "Support parquet format", "Handle access errors"] }
+        ]
+      },
+      {
+        "id": "E2",
+        "name": "Data Transformation",
+        "stories": [
+          { "id": "S3", "title": "Column mapping engine", "storyPoints": 8, "acceptanceCriteria": ["Map source to target columns", "Support type coercion", "Log transformation errors"] },
+          { "id": "S4", "title": "Data validation rules", "storyPoints": 5, "acceptanceCriteria": ["Define validation rules via config", "Generate validation report", "Support custom validators"] }
+        ]
+      }
+    ]
+  },
+  "sprintCount": 2,
+  "definitionOfDone": "Code reviewed, tests passing, documentation updated, deployed to staging"
+}

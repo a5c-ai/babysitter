@@ -1,0 +1,13 @@
+{
+  "type": "RUN_CREATED",
+  "recordedAt": "2026-03-10T11:00:00.000Z",
+  "data": {
+    "runId": "breakpoint-run",
+    "processId": "breakpoint-process",
+    "entrypoint": "process.js",
+    "inputs": {
+      "testInput": "breakpoint"
+    }
+  },
+  "checksum": "breakpoint123"
+}

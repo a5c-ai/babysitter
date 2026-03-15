@@ -1,0 +1,10 @@
+{
+  "projectName": "MicroShop",
+  "topic": "Should we use microservices or monolith architecture for our e-commerce platform?",
+  "participants": ["analyst", "architect", "developer", "scrum-master", "qa"],
+  "sessionType": "decision",
+  "artifact": {
+    "type": "architecture-proposal",
+    "description": "Proposed microservices architecture with 5 services: auth, catalog, cart, orders, payments"
+  }
+}

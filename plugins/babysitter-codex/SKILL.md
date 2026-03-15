@@ -1,4 +1,4 @@
-﻿---
+---
 name: babysitter-codex
 description: >-
   Orchestrate complex, multi-step AI workflows with quality convergence loops,
@@ -30,8 +30,12 @@ directory) and follow its instructions.
 | Start a never-ending periodic run | forever | `forever/SKILL.md` |
 | Diagnose run health | doctor | `doctor/SKILL.md` |
 | Launch observer dashboard | observe | `observe/SKILL.md` |
+| Analyze previous run improvements | retrospect | `retrospect/SKILL.md` |
+| Set or view model routing policy | model | `model/SKILL.md` |
+| Work directly from a GitHub issue | issue | `issue/SKILL.md` |
 | Help and documentation | help | `help/SKILL.md` |
 | Onboard a project | project-install | `project-install/SKILL.md` |
+| Install team-pinned setup | team-install | `team-install/SKILL.md` |
 | Set up user profile | user-install | `user-install/SKILL.md` |
 | Assimilate external methodology | assimilate | `assimilate/SKILL.md` |
 
@@ -58,7 +62,7 @@ Compatibility levels:
 If advanced commands are missing, continue in `compat-core` mode and do not
 block orchestration.
 
-### Canonical argument shapes (SDK 0.0.173)
+### Canonical argument shapes (current Babysitter SDK)
 
 - `run:status <runDir> --json`
 - `task:list <runDir> --json`

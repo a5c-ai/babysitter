@@ -186,9 +186,10 @@ $inputs = @{
 Write-Utf8NoBom -Path $inputsPath -Content ($inputs | ConvertTo-Json)
 
 function Run-Babysitter([string[]]$commandArgs) {
+  $sdkPackage = if ($env:BABYSITTER_SDK_PACKAGE) { $env:BABYSITTER_SDK_PACKAGE } else { "@a5c-ai/babysitter-sdk@0.0.173" }
   $prev = $ErrorActionPreference
   $ErrorActionPreference = "Continue"
-  $result = & npx.cmd -y @a5c-ai/babysitter-sdk@0.0.173 @commandArgs 2>&1
+  $result = & npx.cmd -y $sdkPackage @commandArgs 2>&1
   $ErrorActionPreference = $prev
   if ($LASTEXITCODE -ne 0) {
     Fail "Command failed: babysitter $($commandArgs -join ' ')`n$result"
@@ -212,7 +213,7 @@ function Parse-JsonFromText([string]$Text) {
 
 Write-Info "Checking skill library..."
 $skillBase = Join-Path $repoRoot ".codex/skills/babysitter"
-$expectedSkills = @("call","yolo","resume","plan","forever","doctor","observe","help","project-install","user-install","assimilate")
+$expectedSkills = @("call","yolo","resume","plan","forever","doctor","observe","retrospect","model","issue","help","project-install","team-install","user-install","assimilate")
 $missingSkills = @()
 foreach ($s in $expectedSkills) {
   $skillPath = Join-Path $skillBase "$s/SKILL.md"
@@ -430,7 +431,7 @@ $simMinutes = [int]($simMinutesRaw)
 if ($simMinutes -ge 60) { $score += 20; $details += "20/20 long-session target met ($simMinutes minutes)" } else { $details += "0/20 long-session target failed ($simMinutes minutes)" }
 
 $processFiles = Get-ChildItem -Path $processDir -Filter *.js -ErrorAction SilentlyContinue
-if ($expectedSkills.Count -eq 11 -and $processFiles.Count -ge 1) { $score += 20; $details += "20/20 process+skill library checks passed" } else { $details += "0/20 process+skill library checks failed" }
+if ($expectedSkills.Count -eq 15 -and $processFiles.Count -ge 1) { $score += 20; $details += "20/20 process+skill library checks passed" } else { $details += "0/20 process+skill library checks failed" }
 
 Write-Info "Score: $score/100"
 $details | ForEach-Object { Write-Host " - $_" }

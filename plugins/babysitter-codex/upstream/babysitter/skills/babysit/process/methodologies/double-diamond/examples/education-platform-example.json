@@ -1,0 +1,290 @@
+{
+  "name": "Educational Platform for Teachers - Iterative Double Diamond",
+  "description": "Complete Double Diamond showing iteration: first diamond too broad, second diamond zoomed into specific problem area (grading workflow)",
+  "inputs": {
+    "projectName": "TeachAssist Classroom Management Platform",
+    "context": "EdTech platform for K-12 teachers. First diamond explored entire classroom management workflow (planning, instruction, assessment, communication). Discovery revealed grading as critical pain point. Second diamond zoomed into grading workflow specifically",
+    "initialResearch": "Teacher interviews (n=50), classroom observations (n=20), time-tracking study of teacher workflows",
+    "phase": "full"
+  },
+  "expectedOutcomes": {
+    "firstDiamond": {
+      "discovery": {
+        "keyInsight": "Teachers overwhelmed by non-teaching tasks. Grading identified as single biggest time drain and source of stress",
+        "evidence": "Teachers spend 12 hours/week grading (vs. 8 hours planning, 25 hours teaching). 89% say grading is 'overwhelming' or 'unsustainable'",
+        "scopeTooLarge": "Initial discovery covered entire classroom workflow. Too broad to converge on actionable problem"
+      },
+      "definition": {
+        "initialProblemStatement": "Teachers struggle to manage all aspects of classroom workflow due to time constraints",
+        "issueWithStatement": "Too broad. Could lead to unfocused solution trying to solve everything",
+        "iterationDecision": "Zoom in on grading workflow for second diamond. Highest impact, most clearly defined problem"
+      }
+    },
+    "secondDiamond": {
+      "discovery": {
+        "userInsights": [
+          {
+            "insight": "Grading writing assignments is time-consuming not because of scoring, but because of providing meaningful feedback",
+            "source": "Time-tracking study, interviews",
+            "evidence": "Teachers spend average 12 minutes per essay: 2 min scoring, 10 min writing feedback comments",
+            "userQuote": "I can tell if it's an A or B paper in 30 seconds. But then I spend 10 minutes writing comments to help them improve. That's where the time goes",
+            "significance": "high",
+            "theme": "Feedback is the Bottleneck"
+          },
+          {
+            "insight": "Teachers have internalized grading rubrics and criteria but spend time articulating feedback",
+            "source": "Think-aloud protocol observations",
+            "evidence": "Teachers identify issues instantly ('weak thesis', 'needs evidence') but spend minutes crafting constructive comment",
+            "userQuote": "I know immediately what the problems are. But I need to write it in a way that's encouraging and specific enough to help them improve",
+            "significance": "high",
+            "theme": "Articulation Gap"
+          },
+          {
+            "insight": "Teachers want to provide feedback but worry AI grading will devalue their expertise",
+            "source": "Teacher interviews",
+            "evidence": "75% interested in time-saving tools, 68% concerned about AI replacing teaching judgment",
+            "userQuote": "I don't want a robot grading my students' essays. But if it could help me give better feedback faster, I'm interested",
+            "significance": "high",
+            "theme": "Automation Anxiety"
+          },
+          {
+            "insight": "Same feedback comments get written over and over across different students",
+            "source": "Analysis of graded assignments",
+            "evidence": "65% of feedback comments are variations on 20 common themes ('needs stronger thesis', 'add evidence', etc.)",
+            "userQuote": "I feel like I'm writing the same comments over and over. But I can't just copy-paste - each student needs personalized feedback",
+            "significance": "medium",
+            "theme": "Repetitive Work"
+          }
+        ],
+        "problemAreas": [
+          {
+            "area": "Feedback Articulation",
+            "description": "Teachers spend disproportionate time articulating feedback they've already identified",
+            "userImpact": "10+ hours/week writing feedback, evening and weekend work, burnout",
+            "frequency": "constant",
+            "severity": "critical",
+            "affectedUsers": ["all teachers", "especially those teaching writing-heavy subjects"]
+          }
+        ]
+      },
+      "definition": {
+        "problemStatement": {
+          "statement": "K-12 teachers providing feedback on student writing assignments struggle to sustain the time commitment because articulating constructive, personalized feedback for each student takes 10+ minutes per paper, resulting in evening/weekend work, burnout, and reduced feedback quality as teachers fall behind",
+          "who": "K-12 teachers, especially in writing-heavy subjects (English, History)",
+          "what": "Struggle to provide timely, quality feedback on writing assignments",
+          "why": "Articulating feedback is time-consuming despite teachers identifying issues quickly",
+          "where": "Grading writing assignments (essays, reports, analyses)",
+          "when": "After every major assignment, several times per month",
+          "impact": "12 hours/week grading, burnout, delayed feedback, less writing assigned"
+        },
+        "designPrinciples": [
+          {
+            "principle": "Augment Teacher Judgment, Don't Replace It",
+            "rationale": "Teachers must remain in control of grading decisions. Technology assists but doesn't decide",
+            "examples": [
+              "AI suggests feedback, teacher reviews and edits",
+              "Teacher approves all scores and comments",
+              "Clear attribution: 'Assisted by AI, reviewed by [teacher name]'"
+            ],
+            "tradeoffs": "Slower than full automation, but maintains teacher agency and trust"
+          },
+          {
+            "principle": "Personal Over Perfect",
+            "rationale": "Imperfect personalized feedback beats perfect generic feedback",
+            "examples": [
+              "Customize AI-suggested feedback with student name and specific examples",
+              "Reference student's previous work and growth",
+              "Maintain teacher's voice and encouragement style"
+            ],
+            "tradeoffs": "Requires student history and teacher voice modeling"
+          },
+          {
+            "principle": "Save Time, Improve Quality",
+            "rationale": "Time savings should enable better feedback, not just less time grading",
+            "examples": [
+              "Use saved time to add more specific examples",
+              "Provide feedback on more aspects of writing",
+              "Spend time on encouraging comments alongside critique"
+            ],
+            "tradeoffs": "Must measure quality improvement, not just time savings"
+          }
+        ],
+        "successCriteria": [
+          {
+            "criterion": "Time per paper",
+            "measurement": "Minutes spent grading one essay",
+            "target": "6 minutes (down from 12 minutes)",
+            "type": "behavioral"
+          },
+          {
+            "criterion": "Feedback quality",
+            "measurement": "Student surveys on feedback usefulness + expert review",
+            "target": "4.5/5 usefulness rating (maintain or improve from current 4.2)",
+            "type": "user-outcome"
+          },
+          {
+            "criterion": "Teacher satisfaction",
+            "measurement": "Teacher survey on grading sustainability",
+            "target": "75% say grading is 'manageable' (up from 11%)",
+            "type": "qualitative"
+          },
+          {
+            "criterion": "More writing assigned",
+            "measurement": "Number of writing assignments per semester",
+            "target": "20% increase in assignments given",
+            "type": "business-outcome"
+          }
+        ]
+      },
+      "development": {
+        "concepts": [
+          {
+            "name": "Feedback Phrase Library",
+            "description": "Library of teacher's own feedback comments, searchable and customizable for quick insertion",
+            "approach": "incremental",
+            "howItWorks": "System learns teacher's common feedback phrases. When grading, teacher searches library ('thesis') and selects relevant phrase, then customizes for specific student",
+            "strengths": ["Uses teacher's own words", "Simple to understand", "Quick adoption"],
+            "weaknesses": ["Still manual work", "Doesn't help identify issues", "Limited time savings"]
+          },
+          {
+            "name": "AI Feedback Suggestions",
+            "description": "AI analyzes student writing and suggests feedback comments for teacher to review and approve",
+            "approach": "transformative",
+            "howItWorks": "AI identifies writing issues (weak thesis, needs evidence, etc.) and generates feedback suggestions based on teacher's style. Teacher reviews, edits, approves",
+            "strengths": ["Significant time savings", "Learns teacher's voice", "Improves consistency"],
+            "weaknesses": ["AI accuracy concerns", "Teacher trust barrier", "Complex to implement"]
+          },
+          {
+            "name": "Collaborative Grading Sessions",
+            "description": "Teachers grade together in real-time sessions, sharing feedback and building collective library",
+            "approach": "incremental",
+            "howItWorks": "Department teachers grade together, can see each other's feedback (anonymized students), build shared feedback library, maintain consistency",
+            "strengths": ["Maintains human judgment", "Professional development", "Consistency across teachers"],
+            "weaknesses": ["Doesn't save individual time", "Scheduling challenges", "Not scalable"]
+          },
+          {
+            "name": "Rubric-Based Auto-Feedback",
+            "description": "Teacher defines detailed rubric, system generates feedback based on rubric scores",
+            "approach": "incremental",
+            "howItWorks": "Teacher scores student on detailed rubric (thesis: 3/5, evidence: 4/5, etc.). System generates feedback explaining each score with improvement suggestions",
+            "strengths": ["Clear connection to scores", "Consistent feedback", "Works with existing rubrics"],
+            "weaknesses": ["Generic feedback", "Rubric creation burden", "Loses teacher voice"]
+          },
+          {
+            "name": "Smart Feedback Assistant (Hybrid)",
+            "description": "Combines AI suggestions with teacher phrase library and rubric alignment",
+            "approach": "transformative",
+            "howItWorks": "AI analyzes writing and suggests issues + feedback. Teacher can accept AI suggestion, pull from personal library, or write custom. All feedback tagged to rubric criteria for transparency",
+            "strengths": ["Flexible", "Best of multiple approaches", "Maintains teacher control"],
+            "weaknesses": ["Complex UX", "Requires all systems", "Steeper learning curve"]
+          }
+        ],
+        "ideationSummary": {
+          "mostPromisingConcepts": ["AI Feedback Suggestions", "Smart Feedback Assistant"],
+          "conceptRequiringValidation": "Teacher trust in AI feedback quality and accuracy"
+        }
+      },
+      "delivery": {
+        "selectedSolution": {
+          "name": "Smart Feedback Assistant",
+          "description": "AI-assisted feedback system that suggests comments for teacher review, learns teacher's voice, and aligns with rubrics while maintaining teacher control and judgment",
+          "basedOnConcepts": ["AI Feedback Suggestions", "Feedback Phrase Library", "Rubric-Based Auto-Feedback"],
+          "rationale": "Balances automation benefits with teacher control. AI handles time-consuming articulation, teacher maintains judgment and personalization. Hybrid approach addresses automation anxiety",
+          "valueProposition": "Grade essays in half the time while improving feedback quality and maintaining your teaching voice"
+        },
+        "specification": {
+          "keyFeatures": [
+            {
+              "feature": "AI-Powered Issue Detection",
+              "description": "AI analyzes student writing and identifies specific areas for improvement aligned with rubric",
+              "priority": "must-have",
+              "userBenefit": "Instantly see what needs feedback rather than reading to identify issues"
+            },
+            {
+              "feature": "Smart Feedback Suggestions",
+              "description": "AI generates feedback comment suggestions in teacher's style for each identified issue",
+              "priority": "must-have",
+              "userBenefit": "Start with draft feedback to edit rather than writing from scratch"
+            },
+            {
+              "feature": "Teacher Review and Edit",
+              "description": "Teacher reviews AI suggestions, edits for personalization, approves final feedback",
+              "priority": "must-have",
+              "userBenefit": "Maintain control and add personal touches to ensure quality"
+            },
+            {
+              "feature": "Personal Phrase Library",
+              "description": "System learns teacher's feedback style and common phrases for better suggestions",
+              "priority": "should-have",
+              "userBenefit": "AI suggestions sound like you, not generic robot feedback"
+            },
+            {
+              "feature": "Student-Specific Personalization",
+              "description": "Reference student's previous work, growth trajectory, and learning goals in feedback",
+              "priority": "should-have",
+              "userBenefit": "Feedback shows you know the student, not just their current paper"
+            }
+          ]
+        },
+        "implementationSteps": [
+          {
+            "step": "Phase 1: Teacher Trust Building",
+            "description": "Pilot with enthusiastic teachers, gather feedback quality data, build trust",
+            "deliverables": [
+              "Pilot with 20 teachers",
+              "AI model trained on teacher feedback samples",
+              "Quality validation study",
+              "Teacher testimonials"
+            ],
+            "estimatedEffort": "8 weeks",
+            "successCriteria": ["AI feedback quality rated 4+ by teachers", "Teachers willing to recommend"]
+          },
+          {
+            "step": "Phase 2: Core Feedback Assistant",
+            "description": "Deploy issue detection and feedback suggestions with teacher review workflow",
+            "deliverables": [
+              "Issue detection AI",
+              "Feedback generation AI",
+              "Teacher review interface",
+              "Edit and approval workflow"
+            ],
+            "estimatedEffort": "12 weeks",
+            "successCriteria": ["6-minute average grading time", "4.5/5 feedback quality maintained"]
+          },
+          {
+            "step": "Phase 3: Personalization Layer",
+            "description": "Add voice learning and student-specific personalization",
+            "deliverables": [
+              "Teacher voice model",
+              "Student history integration",
+              "Personalization suggestions",
+              "Growth trajectory tracking"
+            ],
+            "estimatedEffort": "6 weeks",
+            "successCriteria": ["90% of AI suggestions require minimal editing", "Students report feedback feels personal"]
+          }
+        ],
+        "qualityAssurance": {
+          "teacherInvolvement": "Teachers are primary QA. Co-design with teachers throughout. Monthly teacher advisory board reviews",
+          "successMetrics": [
+            "6-minute grading time (50% reduction)",
+            "4.5/5 feedback quality (maintained)",
+            "75% teachers say grading is manageable",
+            "20% increase in writing assignments"
+          ]
+        }
+      }
+    },
+    "iterationLearnings": {
+      "whyIterationNeeded": "First diamond was too broad - 'classroom management' encompassed too many distinct problems. Couldn't converge on actionable solution",
+      "howScopeChanged": "Zoomed in from 'entire classroom workflow' to 'grading writing assignments specifically'",
+      "benefitsOfIteration": [
+        "Clearer problem statement",
+        "More specific design principles",
+        "Focused solution addressing concrete pain point",
+        "Measurable success criteria"
+      ],
+      "whenToIterate": "When problem statement is too broad to generate focused solutions, when discovery reveals one area has disproportionate impact, when stakeholders can't align on priorities"
+    }
+  }
+}

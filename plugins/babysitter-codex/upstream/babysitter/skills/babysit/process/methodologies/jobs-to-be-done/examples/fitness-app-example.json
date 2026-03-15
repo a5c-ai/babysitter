@@ -1,0 +1,52 @@
+{
+  "name": "Fitness App - JTBD Job Discovery",
+  "description": "Jobs to Be Done discovery phase for a fitness tracking app",
+  "inputs": {
+    "projectName": "FitProgress Tracker",
+    "context": "Mobile fitness app in a crowded market. Competing with MyFitnessPal, Strava, Apple Fitness. Looking for differentiation through better understanding of customer jobs.",
+    "researchData": "User interviews and surveys (n=50): 1) 70% download fitness apps but stop using within 2 weeks, 2) Logging food is 'too much work', 3) Progress feels invisible day-to-day, 4) Motivation drops when results plateau, 5) Social comparison demotivates more than motivates, 6) Want accountability without judgment, 7) Exercise alone feels boring and hard to sustain.",
+    "phase": "discovery"
+  },
+  "expectedOutcomes": {
+    "mainJobs": [
+      "Stay motivated to exercise when progress feels invisible",
+      "Hold myself accountable without feeling judged or compared",
+      "Make exercise feel less boring and isolating"
+    ],
+    "relatedJobs": [
+      "Track progress to see if my efforts are working",
+      "Get credit for small wins that aren't reflected on the scale",
+      "Find workout buddies with similar goals and schedules"
+    ],
+    "struggles": [
+      "Scale doesn't move even though I'm working hard - feels demotivating",
+      "Logging everything I eat feels like homework",
+      "Comparing my progress to fitness influencers makes me want to quit",
+      "Hard to stay motivated when exercising alone",
+      "Don't know if my workout routine is actually working"
+    ],
+    "switchingTriggers": [
+      "Plateau: 'I've been working out for a month but scale hasn't moved'",
+      "Comparison: 'Seeing everyone's perfect gym selfies makes me feel worse'",
+      "Isolation: 'I need someone to hold me accountable but don't have anyone'",
+      "Complexity: 'Logging every meal is too much work - I just stopped'"
+    ],
+    "jobClusters": [
+      {
+        "clusterName": "Visible Progress",
+        "jobs": ["Stay motivated", "Track progress", "Get credit for small wins"],
+        "theme": "Making invisible progress visible"
+      },
+      {
+        "clusterName": "Supportive Accountability",
+        "jobs": ["Hold myself accountable", "Find workout buddies"],
+        "theme": "Accountability without judgment"
+      },
+      {
+        "clusterName": "Sustainable Engagement",
+        "jobs": ["Make exercise less boring", "Stay motivated long-term"],
+        "theme": "Making fitness sustainable and enjoyable"
+      }
+    ]
+  }
+}

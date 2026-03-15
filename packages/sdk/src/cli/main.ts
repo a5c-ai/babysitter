@@ -31,6 +31,7 @@ import {
   handleSessionIterationMessage,
 } from "./commands/session";
 import { handleSkillDiscover, handleSkillFetchRemote, discoverSkillsInternal, discoverFromProcessFile } from "./commands/skill";
+import { handleMcpServe } from "./commands/mcpServe";
 import { handleHookLog } from "./commands/hookLog";
 import { handleHookRun } from "./commands/hookRun";
 import { handleProfileCommand } from "./commands/profile";
@@ -110,6 +111,7 @@ const USAGE = `Usage:
   babysitter compression:toggle <layer> <on|off> [--json]
   babysitter compression:set <layer.key> <value> [--json]
   babysitter compression:reset [--json]
+  babysitter mcp:serve [--json]
   babysitter health [--json] [--verbose]
   babysitter configure [show|validate|paths] [--json] [--defaults-only]
   babysitter version
@@ -395,7 +397,13 @@ function parseArgs(argv: string[]): ParsedArgs {
     }
     // Session command flags
     if (arg === "--session-id") {
-      parsed.sessionId = expectFlagValue(rest, ++i, "--session-id");
+      // Tolerate empty/missing value — the harness adapter can auto-detect
+      // session ID from CLAUDE_ENV_FILE or CLAUDE_SESSION_ID env var.
+      const next = rest[i + 1];
+      if (next && !next.startsWith("-")) {
+        parsed.sessionId = next;
+        i++;
+      }
       continue;
     }
     if (arg === "--state-dir") {
@@ -791,7 +799,7 @@ function resolveArtifactAbsolutePath(runDir: string, ref?: string | null): strin
     return candidates[0].absolute;
   }
 
-  return path.join(absoluteRunDir, normalized);
+  return collapseDoubledA5cRuns(path.join(absoluteRunDir, normalized));
 }
 
 type ArtifactCandidate = { absolute: string; relative: string; outsideRun: boolean };
@@ -805,7 +813,7 @@ function collectArtifactCandidates(runDir: string, ref: string): ArtifactCandida
     seen.set(normalizedAbs, { absolute: normalizedAbs, relative, outsideRun });
   };
 
-  pushCandidate(path.join(runDir, ref));
+  pushCandidate(collapseDoubledA5cRuns(path.join(runDir, ref)));
   pushCandidate(path.resolve(ref));
 
   return Array.from(seen.values());
@@ -2076,6 +2084,7 @@ const VALID_COMMANDS = [
   "plugin:update-marketplace",
   "plugin:update-registry",
   "plugin:remove-from-registry",
+  "mcp:serve",
   "health",
   "configure",
   "tokens:stats",
@@ -2218,7 +2227,19 @@ export function createBabysitterCli() {
         if (parsed.command === "task:show") {
           return await handleTaskShow(parsed);
         }
-        // Session commands
+        // Session commands — auto-resolve sessionId via harness adapter if not
+        // explicitly provided (e.g. from CLAUDE_ENV_FILE written by session-start hook).
+        if (!parsed.sessionId && parsed.command?.startsWith("session:")) {
+          const sessionAdapter = parsed.harness
+            ? getAdapterByName(parsed.harness)
+            : getAdapter();
+          if (sessionAdapter) {
+            const resolved = sessionAdapter.resolveSessionId(parsed);
+            if (resolved) {
+              parsed.sessionId = resolved;
+            }
+          }
+        }
         if (parsed.command === "session:init") {
           return await handleSessionInit({
             sessionId: parsed.sessionId,
@@ -2394,6 +2415,9 @@ export function createBabysitterCli() {
           if (parsed.command === "plugin:remove-from-registry") {
             return await handlePluginRemoveFromRegistry(pluginArgs);
           }
+        }
+        if (parsed.command === "mcp:serve") {
+          return await handleMcpServe({ json: parsed.json });
         }
         if (parsed.command === "health") {
           return await handleHealthCommand({

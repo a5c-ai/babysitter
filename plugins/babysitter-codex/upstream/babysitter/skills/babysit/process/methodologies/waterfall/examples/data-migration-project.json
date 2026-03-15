@@ -1,0 +1,35 @@
+{
+  "projectName": "Enterprise Data Warehouse Migration and Consolidation",
+  "projectDescription": "Consolidation of five disparate data warehouses into unified enterprise data platform with ETL pipeline development, data quality framework, and business intelligence layer. Migration includes 500TB of historical data with full validation and reconciliation.",
+  "stakeholders": [
+    {
+      "name": "Victoria Chang",
+      "role": "Chief Data Officer",
+      "department": "Data & Analytics",
+      "email": "victoria.chang@enterprise.com"
+    },
+    {
+      "name": "Andrew Martinez",
+      "role": "Data Architecture Lead",
+      "department": "Data Engineering",
+      "email": "andrew.martinez@enterprise.com"
+    },
+    {
+      "name": "Rebecca Turner",
+      "role": "Data Quality Manager",
+      "department": "Data Governance",
+      "email": "rebecca.turner@enterprise.com"
+    },
+    {
+      "name": "Samuel Wright",
+      "role": "BI Platform Owner",
+      "department": "Business Intelligence",
+      "email": "samuel.wright@enterprise.com"
+    }
+  ],
+  "requirementsSource": "data-profiling-and-stakeholder-requirements",
+  "testingStrategy": "comprehensive",
+  "deploymentTarget": "cloud-data-platform",
+  "includeVModel": true,
+  "regulatoryCompliance": "GDPR-CCPA"
+}

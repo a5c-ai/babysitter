@@ -1,0 +1,20 @@
+{
+  "name": "RPIKit Brainstorm - Notification System Design",
+  "description": "Brainstorming phase clarifying vague requirements for a notification system",
+  "processId": "methodologies/rpikit/rpikit-brainstorm",
+  "inputs": {
+    "topic": "We need some kind of notification system for users",
+    "constraints": {
+      "budget": "No paid third-party services",
+      "timeline": "MVP within 2 weeks"
+    },
+    "priorDiscussions": []
+  },
+  "expectedOutcomes": {
+    "phases": [
+      "explore-problem (clarifying questions about channels, triggers, preferences)",
+      "generate-options (email-only vs push vs in-app vs multi-channel)",
+      "synthesize-requirements (clear scope and requirements for research)"
+    ]
+  }
+}

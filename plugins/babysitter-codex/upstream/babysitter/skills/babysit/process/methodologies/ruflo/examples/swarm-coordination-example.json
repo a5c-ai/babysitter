@@ -1,0 +1,33 @@
+{
+  "name": "Ruflo Swarm Coordination - Parallel Subtask Execution",
+  "description": "Coordinate a swarm of agents across decomposed subtasks with topology-aware execution and consensus",
+  "processId": "methodologies/ruflo/ruflo-swarm-coordination",
+  "inputs": {
+    "agents": [
+      { "id": "queen-1", "type": "tactical-queen", "capabilities": ["coordination", "scheduling"] },
+      { "id": "coder-1", "type": "coder", "capabilities": ["typescript", "react"] },
+      { "id": "coder-2", "type": "coder", "capabilities": ["typescript", "node"] },
+      { "id": "tester-1", "type": "tester", "capabilities": ["vitest", "e2e"] },
+      { "id": "reviewer-1", "type": "reviewer", "capabilities": ["code-quality", "security"] }
+    ],
+    "taskDecomposition": [
+      { "id": "wu-1", "goal": "Implement CRDT data structures", "dependencies": [] },
+      { "id": "wu-2", "goal": "Build WebSocket sync layer", "dependencies": ["wu-1"] },
+      { "id": "wu-3", "goal": "Create conflict resolution UI", "dependencies": ["wu-1"] },
+      { "id": "wu-4", "goal": "Integration tests for sync", "dependencies": ["wu-2", "wu-3"] }
+    ],
+    "topology": "hierarchical",
+    "consensusProtocol": "raft",
+    "maxDriftScore": 0.3
+  },
+  "expectedOutcomes": {
+    "steps": [
+      "topology-selection (hierarchical for structured task with clear delegation)",
+      "role-assignment (tactical queen leads, coders implement, tester validates)",
+      "consensus-init (Raft with quorum=3, fault tolerance=2)",
+      "parallel-execution (wu-1 first, then wu-2+wu-3 parallel, wu-4 last)",
+      "anti-drift-checkpoints (every 2 subtasks)",
+      "consensus-voting (weighted, 3 rounds max)"
+    ]
+  }
+}

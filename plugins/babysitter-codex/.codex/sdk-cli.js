@@ -1,8 +1,9 @@
 'use strict';
 
 const { execFileSync, spawnSync } = require('child_process');
+const { resolveSdkPackage } = require('./sdk-package');
 
-const DEFAULT_SDK_PKG = process.env.BABYSITTER_SDK_PACKAGE || '@a5c-ai/babysitter-sdk@0.0.173';
+const DEFAULT_SDK_PKG = resolveSdkPackage();
 const IS_WIN = process.platform === 'win32';
 
 function resolveNpxBinary() {
@@ -112,6 +113,7 @@ function getCompatibilityReport() {
 
   return {
     mode,
+    sdkPackage: DEFAULT_SDK_PKG,
     available,
     missingCore,
     missingAdvanced,
@@ -127,4 +129,5 @@ module.exports = {
   getSupportedCommands,
   parseJsonish,
   getCompatibilityReport,
+  getSdkPackage: () => DEFAULT_SDK_PKG,
 };

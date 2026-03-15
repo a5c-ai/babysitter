@@ -10,6 +10,7 @@ import type { HarnessAdapter } from "./types";
 import { createClaudeCodeAdapter } from "./claudeCode";
 import { createCodexAdapter } from "./codex";
 import { createGeminiCliAdapter } from "./geminiCli";
+import { createPiAdapter } from "./pi";
 import { createNullAdapter } from "./nullAdapter";
 
 // ---------------------------------------------------------------------------
@@ -18,6 +19,7 @@ import { createNullAdapter } from "./nullAdapter";
 
 const knownAdapters: HarnessAdapter[] = [
   createCodexAdapter(),
+  createPiAdapter(),
   createClaudeCodeAdapter(),
   createGeminiCliAdapter(),
 ];

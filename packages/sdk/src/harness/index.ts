@@ -8,6 +8,7 @@ export type {
 export { createClaudeCodeAdapter } from "./claudeCode";
 export { createCodexAdapter } from "./codex";
 export { createGeminiCliAdapter } from "./geminiCli";
+export { createPiAdapter } from "./pi";
 export { createNullAdapter } from "./nullAdapter";
 export {
   detectAdapter,

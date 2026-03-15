@@ -1,0 +1,20 @@
+{
+  "name": "CC10X REVIEW - Security Audit of Payment Module",
+  "description": "Multi-dimensional code review of payment processing module with confidence-gated reporting",
+  "processId": "methodologies/cc10x/cc10x-review",
+  "inputs": {
+    "request": "Review the payment processing module for security vulnerabilities and code quality",
+    "projectRoot": ".",
+    "targetFiles": ["src/payments/processor.ts", "src/payments/validator.ts", "src/payments/webhook.ts"],
+    "memory": {
+      "patterns": "Payment module handles Stripe webhooks, uses decimal.js for amounts"
+    },
+    "confidenceThreshold": 80
+  },
+  "expectedOutcomes": {
+    "phases": [
+      "parallel: security-review + quality-review + performance-review + maintainability-review",
+      "synthesize-results (weighted score, deduplicated issues, Router Contract)"
+    ]
+  }
+}

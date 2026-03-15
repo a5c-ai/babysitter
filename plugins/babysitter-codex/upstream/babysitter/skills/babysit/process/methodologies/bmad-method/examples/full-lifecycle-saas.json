@@ -1,0 +1,9 @@
+{
+  "projectName": "TaskFlow Pro",
+  "projectDescription": "A SaaS project management platform with AI-powered task prioritization, team collaboration features, and Gantt chart visualizations for mid-size software teams",
+  "complexity": "large",
+  "teamMode": "full-team",
+  "phases": ["analysis", "planning", "solutioning", "implementation"],
+  "domainContext": "B2B SaaS, project management tools market, competing with Jira, Asana, Linear",
+  "sprintCount": 4
+}

@@ -109,6 +109,21 @@ describe("collapseDoubledA5cRuns", () => {
     const input = "/tmp/my-custom-run-dir";
     expect(collapseDoubledA5cRuns(input)).toBe(input);
   });
+
+  it("collapses .a5c/.a5c/ into .a5c/", () => {
+    const input = "/workspace/.a5c/.a5c/runs/01RUNID";
+    expect(collapseDoubledA5cRuns(input)).toBe("/workspace/.a5c/runs/01RUNID");
+  });
+
+  it("collapses .a5c/.a5c/ with Windows backslashes", () => {
+    const input = "C:\\workspace\\.a5c\\.a5c\\runs\\01RUNID";
+    expect(collapseDoubledA5cRuns(input)).toBe("C:\\workspace\\.a5c\\runs\\01RUNID");
+  });
+
+  it("collapses .a5c/.a5c/processes/ paths", () => {
+    const input = "/workspace/.a5c/.a5c/processes/my-process.js";
+    expect(collapseDoubledA5cRuns(input)).toBe("/workspace/.a5c/processes/my-process.js");
+  });
 });
 
 describe("resolveRunDir integration with run:status", () => {

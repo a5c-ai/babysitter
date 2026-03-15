@@ -31,9 +31,47 @@ const sl = require('../.codex/skill-loader');
 test('loadPlugin returns valid manifest', () => {
   const plugin = sl.loadPlugin();
   assert.ok(plugin.name === 'babysitter');
-  assert.ok(plugin.version === '4.0.143');
+  assert.ok(plugin.version === '4.0.149');
   assert.ok(Array.isArray(plugin.commands));
-  assert.strictEqual(plugin.commands.length, 11);
+  assert.strictEqual(plugin.commands.length, 15);
+});
+
+test('resolvePluginRoot prefers explicit argument', () => {
+  const resolved = sl.resolvePluginRoot({ pluginRoot: './.codex' });
+  assert.ok(resolved.endsWith(path.join('.codex')));
+});
+
+test('resolvePluginRoot uses CODEX_PLUGIN_ROOT env', () => {
+  const originalCodex = process.env.CODEX_PLUGIN_ROOT;
+  const originalClaude = process.env.CLAUDE_PLUGIN_ROOT;
+  process.env.CODEX_PLUGIN_ROOT = '/tmp/codex-plugin-root';
+  process.env.CLAUDE_PLUGIN_ROOT = '/tmp/claude-plugin-root';
+  const resolved = sl.resolvePluginRoot();
+  assert.strictEqual(resolved, path.resolve('/tmp/codex-plugin-root'));
+  if (originalCodex === undefined) delete process.env.CODEX_PLUGIN_ROOT; else process.env.CODEX_PLUGIN_ROOT = originalCodex;
+  if (originalClaude === undefined) delete process.env.CLAUDE_PLUGIN_ROOT; else process.env.CLAUDE_PLUGIN_ROOT = originalClaude;
+});
+
+test('resolvePluginRoot uses CLAUDE_PLUGIN_ROOT when CODEX_PLUGIN_ROOT missing', () => {
+  const originalCodex = process.env.CODEX_PLUGIN_ROOT;
+  const originalClaude = process.env.CLAUDE_PLUGIN_ROOT;
+  delete process.env.CODEX_PLUGIN_ROOT;
+  process.env.CLAUDE_PLUGIN_ROOT = '/tmp/claude-plugin-root';
+  const resolved = sl.resolvePluginRoot();
+  assert.strictEqual(resolved, path.resolve('/tmp/claude-plugin-root'));
+  if (originalCodex === undefined) delete process.env.CODEX_PLUGIN_ROOT; else process.env.CODEX_PLUGIN_ROOT = originalCodex;
+  if (originalClaude === undefined) delete process.env.CLAUDE_PLUGIN_ROOT; else process.env.CLAUDE_PLUGIN_ROOT = originalClaude;
+});
+
+test('resolvePluginRoot falls back to packaged .codex root', () => {
+  const originalCodex = process.env.CODEX_PLUGIN_ROOT;
+  const originalClaude = process.env.CLAUDE_PLUGIN_ROOT;
+  delete process.env.CODEX_PLUGIN_ROOT;
+  delete process.env.CLAUDE_PLUGIN_ROOT;
+  const resolved = sl.resolvePluginRoot();
+  assert.ok(resolved && resolved.endsWith(path.join('.codex')));
+  if (originalCodex === undefined) delete process.env.CODEX_PLUGIN_ROOT; else process.env.CODEX_PLUGIN_ROOT = originalCodex;
+  if (originalClaude === undefined) delete process.env.CLAUDE_PLUGIN_ROOT; else process.env.CLAUDE_PLUGIN_ROOT = originalClaude;
 });
 
 test('resolveCommandName resolves canonical names', () => {
@@ -91,9 +129,9 @@ test('getSkillContent returns markdown content', () => {
   assert.ok(content.includes('#') || content.length > 10);
 });
 
-test('listCommands returns all 11 commands', () => {
+test('listCommands returns all 15 commands', () => {
   const commands = sl.listCommands();
-  assert.strictEqual(commands.length, 11);
+  assert.strictEqual(commands.length, 15);
   const names = commands.map(c => c.name);
   assert.ok(names.includes('babysitter:call'));
   assert.ok(names.includes('babysitter:yolo'));
@@ -102,10 +140,14 @@ test('listCommands returns all 11 commands', () => {
   assert.ok(names.includes('babysitter:forever'));
   assert.ok(names.includes('babysitter:doctor'));
   assert.ok(names.includes('babysitter:observe'));
+  assert.ok(names.includes('babysitter:retrospect'));
+  assert.ok(names.includes('babysitter:model'));
+  assert.ok(names.includes('babysitter:issue'));
   assert.ok(names.includes('babysitter:help'));
   assert.ok(names.includes('babysitter:project-install'));
   assert.ok(names.includes('babysitter:user-install'));
   assert.ok(names.includes('babysitter:assimilate'));
+  assert.ok(names.includes('babysitter:team-install'));
 });
 
 test('suggestCommand suggests close matches', () => {
@@ -129,6 +171,7 @@ const cd = require('../.codex/command-dispatcher');
 test('dispatch recognizes valid slash commands', () => {
   const result = cd.dispatch('/babysitter:help');
   assert.ok(result.dispatched);
+  assert.strictEqual(result.contractVersion, 'v1');
   assert.strictEqual(result.command, 'babysitter:help');
   assert.ok(result.instructions);
 });
@@ -138,6 +181,39 @@ test('dispatch extracts arguments', () => {
   assert.ok(result.dispatched);
   assert.strictEqual(result.command, 'babysitter:yolo');
   assert.strictEqual(result.args, 'build a REST API');
+});
+
+test('dispatch model command returns data payload', () => {
+  const result = cd.dispatch('/babysitter:model show');
+  assert.ok(result.dispatched);
+  assert.strictEqual(result.command, 'babysitter:model');
+  assert.ok(result.data);
+  assert.ok(result.data.action === 'show' || result.data.action === 'set');
+});
+
+test('dispatch issue command validates args', () => {
+  const result = cd.dispatch('/babysitter:issue');
+  assert.ok(result.dispatched);
+  assert.strictEqual(result.command, 'babysitter:issue');
+  assert.ok(result.data);
+  assert.strictEqual(result.data.ok, false);
+});
+
+test('dispatch resume command returns selector data', () => {
+  const result = cd.dispatch('/babysitter:resume recent');
+  assert.ok(result.dispatched);
+  assert.strictEqual(result.command, 'babysitter:resume');
+  assert.ok(result.data);
+  assert.strictEqual(result.data.selector, 'recent');
+});
+
+test('dispatch doctor mcp command returns mcp report payload', () => {
+  const result = cd.dispatch('/babysitter:doctor mcp');
+  assert.ok(result.dispatched);
+  assert.strictEqual(result.command, 'babysitter:doctor');
+  assert.ok(result.data);
+  assert.strictEqual(result.data.scope, 'mcp');
+  assert.ok(result.data.report);
 });
 
 test('dispatch returns dispatched:false for non-commands', () => {
@@ -523,13 +599,14 @@ console.log('\nHook Dispatcher (detailed):');
 
 const hd = require('../.codex/hook-dispatcher');
 
-test('HOOK_TYPES contains all 13 types', () => {
+test('HOOK_TYPES contains all lifecycle types', () => {
   const expected = [
     'on-run-start', 'on-run-complete', 'on-run-fail',
     'on-task-start', 'on-task-complete', 'on-step-dispatch',
     'on-iteration-start', 'on-iteration-end',
     'on-breakpoint', 'pre-commit', 'pre-branch',
     'post-planning', 'on-score',
+    'on-tool-error', 'on-policy-block', 'on-retry',
   ];
   for (const type of expected) {
     assert.ok(hd.HOOK_TYPES.includes(type), `Missing hook type: ${type}`);
@@ -588,6 +665,10 @@ test('getRunId reads from environment', () => {
 console.log('\nDiscovery:');
 
 const disc = require('../.codex/discovery');
+const { loadCodexMapping, getCommandMapping } = require('../.codex/codex-mapping');
+const { getLibraryStats } = require('../.codex/process-library');
+const { resolveRules } = require('../.codex/rules-resolver');
+const { buildIndex, loadIndex, searchIndex } = require('../.codex/process-index');
 
 test('parseProcessMarkers extracts @skill markers', () => {
   const tmpFile = path.join(os.tmpdir(), 'test-process.js');
@@ -617,6 +698,40 @@ test('parseProcessMarkers handles null input', () => {
   assert.deepStrictEqual(result, { skills: [], agents: [] });
 });
 
+test('codex command mapping includes retrospect and call mappings', () => {
+  const mapping = loadCodexMapping(PROJECT_ROOT);
+  assert.ok(Array.isArray(mapping.commandMappings));
+  const callMap = getCommandMapping('babysitter:call', PROJECT_ROOT);
+  const retroMap = getCommandMapping('babysitter:retrospect', PROJECT_ROOT);
+  assert.ok(callMap && callMap.skillFile.includes('call/SKILL.md'));
+  assert.ok(retroMap && retroMap.upstreamCommandDoc && retroMap.upstreamCommandDoc.includes('retrospect.md'));
+});
+
+test('process library stats report bundled upstream roots', () => {
+  const stats = getLibraryStats(PROJECT_ROOT);
+  assert.ok(stats.exists, 'bundled process library should exist');
+  assert.ok(stats.processFiles > 100, 'expected substantial upstream process library size');
+});
+
+test('rules resolver merges layered rule files', () => {
+  const resolved = resolveRules(PROJECT_ROOT);
+  assert.ok(resolved.rules);
+  assert.ok(Array.isArray(resolved.layers));
+  assert.ok(resolved.rules.quality && resolved.rules.quality.minScore >= 80);
+});
+
+test('process index build/load/search works', () => {
+  const processRoot = path.join(PROJECT_ROOT, 'upstream', 'babysitter', 'skills', 'babysit', 'process');
+  const tmpIndex = path.join(os.tmpdir(), `babysitter-process-index-${Date.now()}.json`);
+  const built = buildIndex(processRoot, tmpIndex);
+  assert.ok(built.count > 100);
+  const loaded = loadIndex(tmpIndex);
+  assert.ok(loaded && loaded.count === built.count);
+  const results = searchIndex(loaded, 'web-development');
+  assert.ok(Array.isArray(results));
+  fs.unlinkSync(tmpIndex);
+});
+
 // ============================================================================
 // SKILL.md files existence tests
 // ============================================================================
@@ -625,7 +740,8 @@ console.log('\nSkill Files:');
 
 const expectedSkills = [
   'call', 'yolo', 'resume', 'plan', 'forever',
-  'doctor', 'observe', 'help', 'project-install',
+  'retrospect', 'model', 'issue',
+  'doctor', 'observe', 'help', 'project-install', 'team-install',
   'user-install', 'assimilate'
 ];
 
@@ -635,6 +751,36 @@ for (const skill of expectedSkills) {
     assert.ok(fs.existsSync(skillPath), `Missing: ${skillPath}`);
     const content = fs.readFileSync(skillPath, 'utf8');
     assert.ok(content.length > 50, `SKILL.md for ${skill} is too short (${content.length} chars)`);
+  });
+}
+
+console.log('\nCommand Docs:');
+
+const expectedCommandDocs = [
+  'README.md',
+  'call.md',
+  'yolo.md',
+  'resume.md',
+  'plan.md',
+  'forever.md',
+  'doctor.md',
+  'observe.md',
+  'retrospect.md',
+  'model.md',
+  'issue.md',
+  'help.md',
+  'project-install.md',
+  'team-install.md',
+  'user-install.md',
+  'assimilate.md',
+];
+
+for (const doc of expectedCommandDocs) {
+  test(`command doc exists: ${doc}`, () => {
+    const docPath = path.join(PROJECT_ROOT, 'commands', doc);
+    assert.ok(fs.existsSync(docPath), `Missing command doc: ${docPath}`);
+    const content = fs.readFileSync(docPath, 'utf8');
+    assert.ok(content.length > 50, `Command doc too short: ${doc}`);
   });
 }
 

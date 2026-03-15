@@ -1,75 +1,8 @@
 {
   "enabledPlugins": {
-    "babysitter@a5c.ai": true,
-    "plugin-dev@claude-plugins-official": true,
-    "context7@claude-plugins-official": true
+    "babysitter@a5c.ai": true
   },
   "hooks": {
-    "SessionStart": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash .claude/sound-hooks/scripts/play.sh .claude/sound-hooks/sounds/session-start.mp3"
-          }
-        ]
-      }
-    ],
-    "Stop": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash .claude/sound-hooks/scripts/play.sh .claude/sound-hooks/sounds/stop.mp3"
-          }
-        ]
-      }
-    ],
-    "PostToolUse": [
-      {
-        "matcher": "Edit|Write",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash -c 'if [[ \"$TOOL_INPUT\" =~ \\.ts$ ]]; then cd \"$(git rev-parse --show-toplevel)\" && npm run lint --workspace=@a5c-ai/babysitter-sdk -- --fix 2>/dev/null || true; fi'"
-          }
-        ]
-      }
-    ],
-    "PostToolUseFailure": [
-      {
-        "matcher": ".*",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash .claude/sound-hooks/scripts/play.sh .claude/sound-hooks/sounds/tool-failure.mp3"
-          }
-        ]
-      }
-    ],
-    "PreToolUse": [
-      {
-        "matcher": "Edit|Write",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash -c 'if [[ \"$TOOL_INPUT\" =~ (package-lock\\.json|pnpm-lock\\.yaml)$ ]]; then echo \"BLOCK: Lock files should not be edited directly. Use npm/pnpm commands instead.\" && exit 1; fi'"
-          }
-        ]
-      }
-    ],
-    "Notification": [
-      {
-        "matcher": ".*",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash .claude/sound-hooks/scripts/play.sh .claude/sound-hooks/sounds/notification.mp3"
-          }
-        ]
-      }
-    ]
+   
   }
 }

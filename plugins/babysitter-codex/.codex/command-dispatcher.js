@@ -1,5 +1,12 @@
 'use strict';
 const { resolveCommand, getSkillContent, listCommands, suggestCommand } = require('./skill-loader');
+const { getCommandMapping } = require('./codex-mapping');
+const {
+  handleModelCommand,
+  handleIssueCommand,
+  handleResumeSelector,
+  handleDoctorCommand,
+} = require('./mode-handlers');
 
 /**
  * Parse user input and dispatch to the appropriate babysitter skill.
@@ -34,11 +41,25 @@ function dispatch(input) {
     };
   }
 
+  let data = null;
+  if (parsed.command === 'babysitter:model') {
+    data = handleModelCommand(parsed.args, { repoRoot: process.cwd() });
+  } else if (parsed.command === 'babysitter:issue') {
+    data = handleIssueCommand(parsed.args, { repoRoot: process.cwd() });
+  } else if (parsed.command === 'babysitter:resume') {
+    data = handleResumeSelector(parsed.args, { repoRoot: process.cwd() });
+  } else if (parsed.command === 'babysitter:doctor') {
+    data = handleDoctorCommand(parsed.args, { repoRoot: process.cwd() });
+  }
+
   return {
     dispatched: true,
+    contractVersion: 'v1',
     command: parsed.command,
     args: parsed.args,
-    instructions
+    instructions,
+    mapping: getCommandMapping(parsed.command, process.cwd()),
+    data,
   };
 }
 

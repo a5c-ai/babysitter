@@ -1,0 +1,8 @@
+{
+  "type": "RUN_COMPLETED",
+  "recordedAt": "2026-03-10T08:00:10.000Z",
+  "data": {
+    "runId": "test-run-001"
+  },
+  "checksum": "jkl012"
+}

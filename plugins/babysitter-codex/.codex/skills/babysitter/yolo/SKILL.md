@@ -27,7 +27,7 @@ babysitter run:create \
   --inputs <inputs-file> \
   --prompt "$PROMPT" \
   --harness codex \
-  --session-id "$CODEX_SESSION_ID" \
+  --session-id "${CODEX_THREAD_ID:-$CODEX_SESSION_ID}" \
   --plugin-root "$CODEX_PLUGIN_ROOT" \
   --json
 ```

@@ -1,0 +1,18 @@
+{
+  "name": "Metaswarm PR Shepherd - Monitor and Merge",
+  "description": "Monitor a PR through CI, handle review comments, and verify merge readiness",
+  "processId": "methodologies/metaswarm/metaswarm-pr-shepherd",
+  "inputs": {
+    "prNumber": 42,
+    "prUrl": "https://github.com/org/repo/pull/42",
+    "projectRoot": ".",
+    "autoResolve": true
+  },
+  "expectedOutcomes": {
+    "steps": [
+      "monitor-ci (watch pipeline, triage failures)",
+      "handle-comments (respond to review feedback, make code changes)",
+      "verify-readiness (approvals, CI green, threads resolved, coverage met)"
+    ]
+  }
+}

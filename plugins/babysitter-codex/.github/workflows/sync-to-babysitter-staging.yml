@@ -1,0 +1,165 @@
+name: Sync To Babysitter Staging
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate token
+        shell: bash
+        run: |
+          if [ -z "${{ secrets.BABYSITTER_SYNC_GH_TOKEN }}" ]; then
+            echo "Missing secret: BABYSITTER_SYNC_GH_TOKEN"
+            echo "Create a PAT with repo access and add it as a repository secret."
+            exit 1
+          fi
+
+      - name: Checkout babysitter-codex source
+        uses: actions/checkout@v4
+        with:
+          path: source
+          fetch-depth: 0
+
+      - name: Sync subtree into babysitter fork
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.BABYSITTER_SYNC_GH_TOKEN }}
+          SOURCE_SHA: ${{ github.sha }}
+          SOURCE_REPO: ${{ github.repository }}
+          SOURCE_REF: ${{ github.ref_name }}
+          SOURCE_RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          CFG_UPSTREAM_REPO: ${{ vars.BABYSITTER_UPSTREAM_REPO }}
+          CFG_UPSTREAM_BASE: ${{ vars.BABYSITTER_UPSTREAM_BASE_BRANCH }}
+          CFG_UPSTREAM_FORK: ${{ vars.BABYSITTER_UPSTREAM_FORK_REPO }}
+          CFG_UPSTREAM_PLUGIN_PATH: ${{ vars.BABYSITTER_UPSTREAM_PLUGIN_PATH }}
+        run: |
+          set -euo pipefail
+
+          UPSTREAM_REPO="${CFG_UPSTREAM_REPO:-a5c-ai/babysitter}"
+          UPSTREAM_BASE="${CFG_UPSTREAM_BASE:-staging}"
+          UPSTREAM_FORK="${CFG_UPSTREAM_FORK:-${GITHUB_REPOSITORY_OWNER}/babysitter}"
+          UPSTREAM_PLUGIN_PATH="${CFG_UPSTREAM_PLUGIN_PATH:-plugins/babysitter-codex}"
+          SYNC_BRANCH="sync/babysitter-codex-auto"
+          PR_TITLE="chore(sync): update babysitter-codex from ${SOURCE_REPO}@${SOURCE_SHA:0:7}"
+
+          echo "upstream repo: ${UPSTREAM_REPO}"
+          echo "upstream base: ${UPSTREAM_BASE}"
+          echo "upstream fork: ${UPSTREAM_FORK}"
+          echo "plugin path:   ${UPSTREAM_PLUGIN_PATH}"
+
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+          git clone "https://x-access-token:${GH_TOKEN}@github.com/${UPSTREAM_FORK}.git" upstream-fork
+          cd upstream-fork
+
+          git remote add upstream "https://github.com/${UPSTREAM_REPO}.git"
+          git fetch --no-tags upstream "${UPSTREAM_BASE}"
+          git checkout -B "${SYNC_BRANCH}" "upstream/${UPSTREAM_BASE}"
+
+          mkdir -p "${UPSTREAM_PLUGIN_PATH}"
+          rsync -a --delete \
+            --exclude ".git/" \
+            --exclude "node_modules/" \
+            --exclude ".a5c/" \
+            --exclude ".DS_Store" \
+            "${GITHUB_WORKSPACE}/source/" "${UPSTREAM_PLUGIN_PATH}/"
+
+          cat > "${UPSTREAM_PLUGIN_PATH}/SOURCE_VERSION" <<EOF
+          source_repo=${SOURCE_REPO}
+          source_ref=${SOURCE_REF}
+          source_sha=${SOURCE_SHA}
+          synced_at=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          source_run_url=${SOURCE_RUN_URL}
+          EOF
+
+          git add "${UPSTREAM_PLUGIN_PATH}"
+          if git diff --cached --quiet; then
+            echo "No changes to sync."
+            exit 0
+          fi
+
+          git commit -m "chore(sync): update babysitter-codex from ${SOURCE_REPO}@${SOURCE_SHA:0:7}"
+          git push --force-with-lease origin "${SYNC_BRANCH}" || git push --force origin "${SYNC_BRANCH}"
+
+          PR_BODY="$(mktemp)"
+          cat > "${PR_BODY}" <<EOF
+          Automated sync from \`${SOURCE_REPO}\`.
+
+          - Source commit: \`${SOURCE_SHA}\`
+          - Source ref: \`${SOURCE_REF}\`
+          - Workflow run: ${SOURCE_RUN_URL}
+          - Synced path: \`${UPSTREAM_PLUGIN_PATH}\`
+
+          Included scope:
+          - runtime/hooks/skills
+          - tests and scripts
+          - documentation (\`README.md\`, \`docs/\`, \`CHANGELOG.md\`)
+          - sync trace file (\`${UPSTREAM_PLUGIN_PATH}/SOURCE_VERSION\`)
+          EOF
+
+          HEAD_OWNER="${UPSTREAM_FORK%%/*}"
+          EXISTING_PR="$(gh pr list \
+            --repo "${UPSTREAM_REPO}" \
+            --base "${UPSTREAM_BASE}" \
+            --head "${HEAD_OWNER}:${SYNC_BRANCH}" \
+            --state open \
+            --json number \
+            --jq '.[0].number // empty')"
+
+          if [ -n "${EXISTING_PR}" ]; then
+            gh pr edit "${EXISTING_PR}" \
+              --repo "${UPSTREAM_REPO}" \
+              --title "${PR_TITLE}" \
+              --body-file "${PR_BODY}"
+            echo "Updated PR #${EXISTING_PR}"
+          else
+            set +e
+            CREATE_OUT="$(gh pr create \
+              --repo "${UPSTREAM_REPO}" \
+              --base "${UPSTREAM_BASE}" \
+              --head "${HEAD_OWNER}:${SYNC_BRANCH}" \
+              --title "${PR_TITLE}" \
+              --body-file "${PR_BODY}" 2>&1)"
+            CREATE_CODE=$?
+            set -e
+
+            if [ ${CREATE_CODE} -eq 0 ]; then
+              echo "${CREATE_OUT}"
+              echo "Created new PR"
+            elif echo "${CREATE_OUT}" | grep -qi "already exists"; then
+              # gh can return non-zero while still telling us the existing PR URL.
+              EXISTING_URL="$(echo "${CREATE_OUT}" | grep -Eo 'https://github.com/[^ ]+/pull/[0-9]+' | tail -1)"
+              if [ -n "${EXISTING_URL}" ]; then
+                EXISTING_PR="${EXISTING_URL##*/}"
+              else
+                EXISTING_PR="$(gh pr list \
+                  --repo "${UPSTREAM_REPO}" \
+                  --base "${UPSTREAM_BASE}" \
+                  --head "${HEAD_OWNER}:${SYNC_BRANCH}" \
+                  --state all \
+                  --json number \
+                  --jq '.[0].number // empty')"
+              fi
+
+              if [ -n "${EXISTING_PR}" ]; then
+                gh pr edit "${EXISTING_PR}" \
+                  --repo "${UPSTREAM_REPO}" \
+                  --title "${PR_TITLE}" \
+                  --body-file "${PR_BODY}"
+                echo "Updated existing PR #${EXISTING_PR} after create conflict"
+              else
+                echo "${CREATE_OUT}"
+                echo "Failed to resolve existing PR after create conflict"
+                exit 1
+              fi
+            else
+              echo "${CREATE_OUT}"
+              exit ${CREATE_CODE}
+            fi
+          fi

@@ -1,0 +1,19 @@
+{
+  "name": "Brainstorming - API Redesign",
+  "description": "Socratic design refinement for API restructuring",
+  "processId": "methodologies/superpowers/brainstorming",
+  "inputs": {
+    "task": "Redesign the REST API to support GraphQL alongside existing endpoints",
+    "projectRoot": ".",
+    "maxQuestionRounds": 5,
+    "requireDesignDoc": true,
+    "designSections": ["architecture", "components", "data-flow", "error-handling", "testing", "migration-strategy"]
+  },
+  "expectedOutcomes": {
+    "design": {
+      "approaches": 3,
+      "sections": ["architecture", "components", "data-flow", "error-handling", "testing", "migration-strategy"],
+      "designDocPath": "docs/plans/YYYY-MM-DD-graphql-api-design.md"
+    }
+  }
+}

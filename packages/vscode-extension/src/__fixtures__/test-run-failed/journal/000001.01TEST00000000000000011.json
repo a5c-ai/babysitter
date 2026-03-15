@@ -1,0 +1,9 @@
+{
+  "type": "RUN_CREATED",
+  "recordedAt": "2026-03-10T09:00:00.000Z",
+  "data": {
+    "runId": "test-run-002",
+    "processId": "test-process"
+  },
+  "checksum": "fail-abc123"
+}

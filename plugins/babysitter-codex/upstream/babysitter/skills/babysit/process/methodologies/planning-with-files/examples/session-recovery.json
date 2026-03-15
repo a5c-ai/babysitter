@@ -1,0 +1,7 @@
+{
+  "taskDescription": "Refactor database layer to use connection pooling",
+  "projectPath": "./planning",
+  "sessionId": "previous-session-abc123",
+  "recoveryMode": true,
+  "qualityThreshold": 85
+}

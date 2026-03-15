@@ -1,0 +1,46 @@
+{
+  "projectName": "TaskManager Pro",
+  "releaseGoal": "Real-time collaboration features",
+  "iterationLength": 2,
+  "teamSize": 6,
+  "velocity": null,
+  "practices": [
+    "pair-programming",
+    "planning-game",
+    "tdd",
+    "whole-team",
+    "continuous-integration",
+    "refactoring",
+    "small-releases",
+    "coding-standards",
+    "collective-ownership",
+    "simple-design",
+    "system-metaphor",
+    "sustainable-pace"
+  ],
+  "userStories": null,
+  "enablePairProgramming": true,
+  "enableTDD": true,
+  "enableCI": true,
+  "enableRefactoring": true,
+  "context": {
+    "description": "Building real-time collaboration features for TaskManager Pro web application",
+    "businessGoals": [
+      "Enable teams to collaborate in real-time on tasks",
+      "Show presence indicators for active users",
+      "Provide conflict resolution for simultaneous edits",
+      "Improve team productivity through better coordination"
+    ],
+    "technicalContext": {
+      "stack": "React frontend, Node.js backend, WebSocket for real-time",
+      "existingCodebase": "Mature codebase with good test coverage",
+      "teamExperience": "Team experienced with XP practices"
+    },
+    "expectedOutcomes": {
+      "iterations": 3,
+      "storiesEstimate": "12-18 stories",
+      "velocityEstimate": "15 story points per iteration",
+      "practiceAdherence": "High (90%+)"
+    }
+  }
+}

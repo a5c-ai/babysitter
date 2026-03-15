@@ -1,0 +1,125 @@
+{
+  "examples": [
+    {
+      "name": "Web Application Feature Release",
+      "file": "web-app-feature.json",
+      "description": "Real-time collaboration features for a task management application with full XP practices",
+      "teamSize": 6,
+      "iterationLength": 2,
+      "complexity": "medium",
+      "highlights": [
+        "Full 12-practice XP implementation",
+        "Real-time features requiring close collaboration",
+        "3 iterations with velocity tracking",
+        "Strong pair programming and TDD focus"
+      ]
+    },
+    {
+      "name": "API Development with Small Team",
+      "file": "api-small-team.json",
+      "description": "Payment gateway API with multi-currency support, small team doing 1-week iterations",
+      "teamSize": 2,
+      "iterationLength": 1,
+      "complexity": "simple",
+      "highlights": [
+        "Small team (2 developers) with intensive pairing",
+        "Short 1-week iterations",
+        "API focus with contract testing",
+        "High TDD adherence for reliability"
+      ]
+    },
+    {
+      "name": "Legacy System Refactoring",
+      "file": "legacy-refactoring.json",
+      "description": "Modernizing inventory tracking module with heavy refactoring and test coverage addition",
+      "teamSize": 4,
+      "iterationLength": 2,
+      "complexity": "complex",
+      "highlights": [
+        "Brownfield codebase with technical debt",
+        "Adding test coverage to legacy code",
+        "Heavy refactoring focus",
+        "Collective ownership critical for knowledge spread",
+        "Sustainable pace to prevent burnout"
+      ]
+    },
+    {
+      "name": "Mobile App Development",
+      "file": "mobile-app.json",
+      "description": "Social media mobile app features with cross-platform development",
+      "teamSize": 5,
+      "iterationLength": 2,
+      "complexity": "medium",
+      "highlights": [
+        "Cross-platform mobile development",
+        "UI/UX focused stories",
+        "Continuous integration with mobile specifics",
+        "Frequent small releases to app stores"
+      ]
+    },
+    {
+      "name": "Microservices Development",
+      "file": "microservices.json",
+      "description": "Building distributed microservices architecture with XP practices",
+      "teamSize": 8,
+      "iterationLength": 2,
+      "complexity": "complex",
+      "highlights": [
+        "Distributed system complexity",
+        "Multiple services requiring coordination",
+        "Heavy integration testing",
+        "Service-level pair programming",
+        "Architectural refactoring"
+      ]
+    }
+  ],
+  "usage": {
+    "basic": "Use these examples as templates for your own XP projects",
+    "modify": "Copy and modify the JSON files to match your team size, iteration length, and focus",
+    "run": "Pass the JSON file contents as inputs to the XP process"
+  },
+  "practiceGuidelines": {
+    "pairProgramming": "Essential for knowledge sharing and code quality. Start with 50% if new to pairing.",
+    "tdd": "Critical for maintaining quality and enabling refactoring. Write tests first, always.",
+    "continuousIntegration": "Commit multiple times per day. Fix broken builds immediately.",
+    "refactoring": "Continuous, not in phases. Keep tests passing.",
+    "sustainablePace": "40-hour weeks. No heroics. Monitor team morale.",
+    "smallReleases": "1-2 week iterations. Deploy frequently.",
+    "collectiveOwnership": "Anyone can work on any code. Rotate pairs to spread knowledge.",
+    "simpleDesign": "YAGNI - You Aren't Gonna Need It. Do the simplest thing that works.",
+    "codingStandards": "Agree on standards. Use automated formatting.",
+    "wholeTeam": "Include business representatives. Cross-functional teams.",
+    "planningGame": "Business and developers plan together. Negotiate scope vs. time.",
+    "systemMetaphor": "Create shared understanding through simple metaphors."
+  },
+  "teamSizeGuidelines": {
+    "2-3": "Small team - Intensive pairing, everyone knows everything, very tight feedback loops",
+    "4-6": "Optimal size - Good balance of collaboration and productivity, can split into 2-3 pairs",
+    "7-10": "Large team - Consider splitting into sub-teams, coordinate carefully, may need dedicated coach",
+    "10+": "Very large - Strongly consider splitting into multiple XP teams with clear boundaries"
+  },
+  "iterationLengthGuidelines": {
+    "1 week": "Short iterations - High overhead, very responsive to change, good for uncertain projects",
+    "2 weeks": "Recommended - Good balance of planning overhead and flexibility, most common choice",
+    "3 weeks": "Longer iterations - Lower overhead, less flexibility, good for stable requirements",
+    "4+ weeks": "Not recommended - Defeats XP's fast feedback loops and adaptability"
+  },
+  "velocityGuidelines": {
+    "firstIteration": "Estimate conservatively. Team will establish baseline velocity.",
+    "secondIteration": "Start seeing patterns. Adjust planning based on actual velocity.",
+    "thirdIteration": "Velocity stabilizes. Can predict release timeline more accurately.",
+    "ongoing": "Velocity should be relatively stable. Large changes indicate impediments or scope changes."
+  },
+  "tips": [
+    "Start with practices that provide immediate value (TDD, CI, pair programming on complex code)",
+    "Don't try to adopt all 12 practices at once - build up over 2-3 iterations",
+    "Trust the velocity - don't pressure team to increase estimates",
+    "Keep stories small (completable in one iteration)",
+    "Rotate pairs frequently to spread knowledge",
+    "Fix broken builds immediately (< 10 minutes)",
+    "Refactor continuously, don't let technical debt accumulate",
+    "Celebrate and track team health - sustainable pace is critical",
+    "Include business representatives in planning and demos",
+    "Adapt practices to your context, but don't skip core practices (TDD, pairing, CI)"
+  ]
+}

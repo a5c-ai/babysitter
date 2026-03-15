@@ -1,0 +1,47 @@
+{
+  "projectName": "Payment Gateway API",
+  "releaseGoal": "Multi-currency payment processing",
+  "iterationLength": 1,
+  "teamSize": 2,
+  "velocity": 8,
+  "practices": [
+    "pair-programming",
+    "tdd",
+    "continuous-integration",
+    "refactoring",
+    "simple-design",
+    "collective-ownership",
+    "sustainable-pace"
+  ],
+  "userStories": null,
+  "enablePairProgramming": true,
+  "enableTDD": true,
+  "enableCI": true,
+  "enableRefactoring": true,
+  "context": {
+    "description": "Small team building payment gateway API with multi-currency support",
+    "businessGoals": [
+      "Support 10+ currencies with real-time conversion",
+      "Process payments securely and reliably",
+      "Provide webhook notifications for payment events",
+      "Ensure PCI compliance"
+    ],
+    "technicalContext": {
+      "stack": "Node.js API, PostgreSQL, Redis for caching",
+      "existingCodebase": "New greenfield project",
+      "teamExperience": "Experienced developers new to XP, pair programming critical for knowledge sharing"
+    },
+    "expectedOutcomes": {
+      "iterations": 3,
+      "storiesEstimate": "8-10 stories",
+      "velocityEstimate": "8 story points per iteration",
+      "practiceAdherence": "Very high due to small team size and pairing focus"
+    },
+    "specialConsiderations": [
+      "Small team means pair programming is nearly 100% of the time",
+      "API focus requires strong contract testing",
+      "Security critical - extensive test coverage needed",
+      "Short 1-week iterations for fast feedback"
+    ]
+  }
+}

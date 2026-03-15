@@ -1,13 +1,14 @@
 {
   "name": "@a5c-ai/babysitter-sdk",
-  "version": "0.0.177",
+  "version": "0.0.180",
   "description": "Storage and run-registry primitives for event-sourced babysitter workflows.",
   "license": "UNLICENSED",
   "type": "commonjs",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {
-    "babysitter": "dist/cli/main.js"
+    "babysitter": "dist/cli/main.js",
+    "babysitter-mcp-server": "dist/cli/mcpServeEntry.js"
   },
   "files": [
     "dist",
@@ -22,6 +23,7 @@
     "smoke:cli": "node scripts/smoke-cli.js --runs-dir packages/sdk/test-fixtures/cli/runs/smoke"
   },
   "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.1",
     "fs-extra": "^11.2.0",
     "ulid": "^2.3.0"
   },

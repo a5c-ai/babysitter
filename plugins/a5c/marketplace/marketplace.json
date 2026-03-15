@@ -57,6 +57,15 @@
       "packagePath": "plugins/testing-suite",
       "tags": ["testing", "unit-tests", "integration-tests", "e2e", "storybook", "coverage", "playwright", "vitest", "tdd", "quality"],
       "author": "a5c-ai"
+    },
+    "themes": {
+      "name": "themes",
+      "description": "Apply any theme to your project — sound effects, design system, conversational personality, and decorative assets. No predefined list: name any movie, game, art style, mood, character, or concept and the installer interviews you, researches the theme, then searches, downloads, and generates all resources. Includes all sound-hooks functionality plus CLAUDE.md integration for themed speech patterns and visual design tokens. Assets stored in .a5c/themes/ with symlink switching.",
+      "latestVersion": "1.0.0",
+      "versions": ["1.0.0"],
+      "packagePath": "plugins/themes",
+      "tags": ["themes", "design-system", "sounds", "hooks", "ux", "branding", "conversational-style", "assets", "claude-code"],
+      "author": "a5c-ai"
     }
   }
 }

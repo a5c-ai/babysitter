@@ -1,0 +1,22 @@
+{
+  "name": "CC10X PLAN - Microservices Migration Strategy",
+  "description": "Comprehensive planning with research and brainstorming for monolith-to-microservices migration",
+  "processId": "methodologies/cc10x/cc10x-plan",
+  "inputs": {
+    "request": "Design a migration strategy to move the user management module from our monolith to a standalone microservice",
+    "projectRoot": ".",
+    "memory": {
+      "activeContext": "Monolith is Node.js/Express with PostgreSQL",
+      "patterns": "Team familiar with Docker, Kubernetes; using event-driven patterns"
+    },
+    "includeResearch": true
+  },
+  "expectedOutcomes": {
+    "phases": [
+      "parallel: research (GitHub patterns, migration guides) + brainstorm (3+ approaches)",
+      "create-plan (phased migration with milestones, risks, TDD strategy)",
+      "review-gate (completeness score >=80)",
+      "save to docs/plans/ for BUILD continuity"
+    ]
+  }
+}

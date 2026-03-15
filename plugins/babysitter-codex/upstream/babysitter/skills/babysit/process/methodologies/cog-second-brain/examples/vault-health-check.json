@@ -1,0 +1,5 @@
+{
+  "vaultPath": "./cog-vault",
+  "mode": "health-check",
+  "targetQuality": 80
+}

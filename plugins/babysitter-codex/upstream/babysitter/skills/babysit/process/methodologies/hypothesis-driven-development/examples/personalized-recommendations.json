@@ -1,0 +1,55 @@
+{
+  "name": "ML-Powered Personalized Recommendations",
+  "description": "Test hypothesis that personalized product recommendations increase engagement and revenue",
+  "inputs": {
+    "projectName": "personalized-recommendations",
+    "featureIdea": "Display ML-powered personalized product recommendations on homepage based on browsing and purchase history",
+    "targetAudience": "returning customers with 3+ previous visits",
+    "context": {
+      "currentHomepageEngagementRate": 0.18,
+      "currentRecommendationClickRate": 0.05,
+      "returningCustomerPercentage": 0.35,
+      "averageSessionValue": 42.30,
+      "monthlyReturningVisitors": 320000
+    },
+    "experimentDuration": 21,
+    "significanceLevel": 0.05,
+    "skipImplementation": false
+  },
+  "expectedHypothesis": {
+    "statement": "We believe showing ML-powered personalized recommendations for returning customers will increase recommendation click-through rate from 5% to 8% and revenue per session by 12%. We'll know we're right when both metrics show statistically significant improvement.",
+    "assumptions": [
+      "ML model can accurately predict user preferences",
+      "Users want personalized recommendations (vs. generic popular items)",
+      "Browsing history is a strong signal for future interest",
+      "Users are aware recommendations are personalized"
+    ],
+    "risks": [
+      "Model creates filter bubble (reduces discovery)",
+      "Cold-start problem for new users",
+      "Recommendation staleness (model update lag)",
+      "Privacy concerns from personalization",
+      "Increased infrastructure costs from ML inference"
+    ]
+  },
+  "expectedMetrics": {
+    "primary": [
+      "Recommendation click-through rate",
+      "Revenue per session"
+    ],
+    "secondary": [
+      "Add-to-cart rate from recommendations",
+      "Purchase conversion rate",
+      "Average order value",
+      "Time on site",
+      "Product category diversity viewed"
+    ],
+    "counter": [
+      "Bounce rate (watch for creepiness factor)",
+      "Category diversity purchased (watch for filter bubble)",
+      "Customer satisfaction (watch for privacy concerns)",
+      "Server costs (watch for infrastructure burden)"
+    ]
+  },
+  "notes": "This experiment requires ML model training and deployment infrastructure. Consider starting with simpler collaborative filtering before full personalization."
+}

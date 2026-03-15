@@ -12,6 +12,7 @@ const os = require('os');
 
 const SKILL_NAME = 'babysitter-codex';
 const PACKAGE_ROOT = path.resolve(__dirname, '..');
+const IS_WIN = process.platform === 'win32';
 
 function getCodexHome() {
   if (process.env.CODEX_HOME) return process.env.CODEX_HOME;
@@ -28,6 +29,14 @@ function copyRecursive(src, dest) {
       copyRecursive(path.join(src, entry), path.join(dest, entry));
     }
   } else {
+    // Codex requires SKILL.md frontmatter to begin exactly with "---".
+    // Strip UTF-8 BOM if present to avoid loader parse failures.
+    if (path.basename(src) === 'SKILL.md') {
+      const file = fs.readFileSync(src);
+      const hasBom = file.length >= 3 && file[0] === 0xef && file[1] === 0xbb && file[2] === 0xbf;
+      fs.writeFileSync(dest, hasBom ? file.subarray(3) : file);
+      return;
+    }
     fs.copyFileSync(src, dest);
   }
 }
@@ -61,6 +70,22 @@ function main() {
     if (fs.existsSync(codexDir)) {
       copyRecursive(codexDir, path.join(skillDir, '.codex'));
       console.log('[babysitter-codex]   .codex/');
+
+      if (!IS_WIN) {
+        const hookDir = path.join(skillDir, '.codex', 'hooks');
+        const executableHooks = [
+          'babysitter-session-start.sh',
+          'babysitter-stop-hook.sh',
+          'loop-control.sh',
+        ];
+        for (const name of executableHooks) {
+          const hookPath = path.join(hookDir, name);
+          if (fs.existsSync(hookPath)) {
+            fs.chmodSync(hookPath, 0o755);
+          }
+        }
+        console.log('[babysitter-codex]   +x hooks/*.sh');
+      }
     }
 
     console.log('[babysitter-codex] Installation complete!');

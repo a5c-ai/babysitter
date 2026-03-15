@@ -1,0 +1,13 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-03-10T11:01:00.000Z",
+  "data": {
+    "effectId": "BP001",
+    "stepId": "S000001",
+    "kind": "breakpoint",
+    "taskId": "approval-task",
+    "title": "Approval Required",
+    "question": "Do you approve this action?"
+  },
+  "checksum": "bp001"
+}

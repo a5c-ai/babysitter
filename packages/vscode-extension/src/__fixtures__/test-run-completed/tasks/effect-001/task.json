@@ -1,0 +1,11 @@
+{
+  "taskId": "my-task",
+  "title": "Run node task",
+  "kind": "node",
+  "label": "test-label",
+  "invocationKey": "inv-key-001",
+  "stepId": "S000001",
+  "input": {
+    "command": "echo hello"
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "vaultPath": "./cog-vault",
+  "captureType": "braindump",
+  "content": "Had a great idea about the auth system redesign - we should use passkeys instead of passwords. Also need to remember to book vacation for July. The new React 19 server components look promising for our dashboard project. Feeling energized after the morning run.",
+  "targetQuality": 80
+}

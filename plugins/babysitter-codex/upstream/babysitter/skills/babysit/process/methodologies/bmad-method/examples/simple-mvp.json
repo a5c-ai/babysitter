@@ -1,0 +1,8 @@
+{
+  "projectName": "BookClub",
+  "projectDescription": "Simple web app for book clubs to track reading lists, schedule meetings, and share reviews",
+  "complexity": "small",
+  "teamMode": "full-team",
+  "phases": ["analysis", "planning", "solutioning", "implementation"],
+  "sprintCount": 2
+}

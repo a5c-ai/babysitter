@@ -1,0 +1,9 @@
+{
+  "goal": "Build a real-time collaboration platform with video conferencing, shared whiteboards, and project management for distributed teams",
+  "projectRoot": ".",
+  "coderCount": 3,
+  "qualityThreshold": 85,
+  "mode": "development",
+  "maintenanceFrequency": 5,
+  "userExpertise": "intermediate"
+}

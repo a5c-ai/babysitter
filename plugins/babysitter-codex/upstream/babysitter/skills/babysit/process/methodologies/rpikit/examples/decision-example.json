@@ -1,0 +1,19 @@
+{
+  "name": "RPIKit Decision - Database Technology Choice",
+  "description": "Architecture Decision Record for choosing between PostgreSQL and MongoDB",
+  "processId": "methodologies/rpikit/rpikit-decision",
+  "inputs": {
+    "title": "Use PostgreSQL over MongoDB for user data storage",
+    "context": "The application needs structured user data with complex relationships and ACID transactions",
+    "projectRoot": ".",
+    "status": "proposed"
+  },
+  "expectedOutcomes": {
+    "phases": [
+      "gather-context (existing ADRs and codebase context)",
+      "analyze-options (PostgreSQL vs MongoDB with pros/cons)",
+      "approval-gate (human approves decision)",
+      "write-adr (docs/decisions/0001-use-postgresql.md)"
+    ]
+  }
+}

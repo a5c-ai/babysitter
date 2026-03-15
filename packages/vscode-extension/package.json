@@ -1,0 +1,184 @@
+{
+  "name": "babysitter-observer",
+  "displayName": "Babysitter Observer",
+  "description": "Monitor and observe babysitter orchestration runs in your workspace",
+  "version": "0.1.0",
+  "publisher": "a5c-ai",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/a5c-ai/babysitter",
+    "directory": "packages/vscode-extension"
+  },
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "main": "./dist/extension.js",
+  "activationEvents": [
+    "onView:babysitter-runs",
+    "workspaceContains:.a5c/runs"
+  ],
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "babysitter-observer",
+          "title": "Babysitter Observer",
+          "icon": "resources/icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "babysitter-observer": [
+        {
+          "id": "babysitter-runs",
+          "name": "Runs",
+          "icon": "resources/icon.svg"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "babysitter.refresh",
+        "title": "Refresh Runs",
+        "category": "Babysitter",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "babysitter.openRun",
+        "title": "Open Run Details",
+        "category": "Babysitter",
+        "icon": "$(open-preview)"
+      },
+      {
+        "command": "babysitter.filterRuns",
+        "title": "Filter Runs",
+        "category": "Babysitter",
+        "icon": "$(filter)"
+      },
+      {
+        "command": "babysitter.approveBreakpoint",
+        "title": "Approve Breakpoint",
+        "category": "Babysitter",
+        "icon": "$(check)"
+      },
+      {
+        "command": "babysitter.copyRunId",
+        "title": "Copy Run ID",
+        "category": "Babysitter",
+        "icon": "$(copy)"
+      },
+      {
+        "command": "babysitter.openRunDir",
+        "title": "Open Run Directory",
+        "category": "Babysitter",
+        "icon": "$(folder-opened)"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "babysitter.refresh",
+          "when": "view == babysitter-runs",
+          "group": "navigation"
+        },
+        {
+          "command": "babysitter.filterRuns",
+          "when": "view == babysitter-runs",
+          "group": "navigation"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "babysitter.openRun",
+          "when": "view == babysitter-runs && viewItem == run",
+          "group": "inline"
+        },
+        {
+          "command": "babysitter.approveBreakpoint",
+          "when": "view == babysitter-runs && viewItem == breakpoint",
+          "group": "inline"
+        },
+        {
+          "command": "babysitter.copyRunId",
+          "when": "view == babysitter-runs && viewItem == run",
+          "group": "context@1"
+        },
+        {
+          "command": "babysitter.openRunDir",
+          "when": "view == babysitter-runs && viewItem == run",
+          "group": "context@2"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Babysitter Observer",
+      "properties": {
+        "babysitter.runsDirectory": {
+          "type": "string",
+          "default": ".a5c/runs",
+          "description": "Relative path to the runs directory within the workspace"
+        },
+        "babysitter.autoRefreshInterval": {
+          "type": "number",
+          "default": 5000,
+          "minimum": 1000,
+          "description": "Auto-refresh interval in milliseconds (minimum 1000ms)"
+        },
+        "babysitter.showCompletedRuns": {
+          "type": "boolean",
+          "default": true,
+          "description": "Whether to show completed runs in the tree view"
+        },
+        "babysitter.showFailedRuns": {
+          "type": "boolean",
+          "default": true,
+          "description": "Whether to show failed runs in the tree view"
+        },
+        "babysitter.maxRunsDisplayed": {
+          "type": "number",
+          "default": 50,
+          "minimum": 10,
+          "maximum": 500,
+          "description": "Maximum number of runs to display in the tree view"
+        },
+        "babysitter.staleThresholdMinutes": {
+          "type": "number",
+          "default": 30,
+          "minimum": 5,
+          "description": "Minutes after which a non-terminal run is considered stale"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "build": "node esbuild.config.mjs",
+    "watch": "node esbuild.config.mjs --watch",
+    "package": "npx @vscode/vsce package --no-dependencies",
+    "lint": "eslint \"src/**/*.ts\" --max-warnings=0",
+    "compile": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest watch",
+    "test:coverage": "vitest run --coverage",
+    "pretest:e2e": "npm run build",
+    "test:e2e": "node dist/test/e2e/runTest.js"
+  },
+  "devDependencies": {
+    "@types/mocha": "^10.0.10",
+    "@types/node": "^20.0.0",
+    "@types/vscode": "^1.85.0",
+    "@typescript-eslint/eslint-plugin": "^7.0.0",
+    "@typescript-eslint/parser": "^7.0.0",
+    "@vitest/coverage-v8": "^2.0.0",
+    "@vscode/test-cli": "^0.0.12",
+    "@vscode/test-electron": "^2.5.2",
+    "esbuild": "^0.20.0",
+    "eslint": "^8.56.0",
+    "mocha": "^11.7.5",
+    "typescript": "^5.3.0",
+    "vitest": "^2.0.0"
+  }
+}

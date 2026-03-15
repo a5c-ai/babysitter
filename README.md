@@ -11,7 +11,7 @@ https://a5c.ai
 [![GitHub issues](https://img.shields.io/github/issues/a5c-ai/babysitter.svg)](https://github.com/a5c-ai/babysitter/issues)
 [![GitHub stars](https://img.shields.io/github/stars/a5c-ai/babysitter.svg)](https://github.com/a5c-ai/babysitter/stargazers)
 
-> **Orchestrate complex, multi-step workflows with human-in-the-loop approval, iterative refinement, and quality convergence.**
+> **Enforce obedience to agentic workforces. Manage extremely complex workflows through deterministic, hallucination-free self-orchestration.**
 
 [Getting Started](#installation) | [Documentation](#documentation) | [Community](#community-and-support)
 
@@ -28,6 +28,7 @@ https://github.com/user-attachments/assets/8c3b0078-9396-48e8-aa43-5f40da30c20b
 - [What is Babysitter?](#what-is-babysitter)
 - [Prerequisites](#prerequisites)
 - [Installation](#installation)
+- [First Steps](#first-steps)
 - [Quick Start](#quick-start)
 - [How It Works](#how-it-works)
 - [Why Babysitter?](#why-babysitter)
@@ -40,7 +41,7 @@ https://github.com/user-attachments/assets/8c3b0078-9396-48e8-aa43-5f40da30c20b
 
 ## What is Babysitter?
 
-Babysitter is an orchestration framework for Claude Code that enables deterministic, event-sourced workflow management. It allows you to build complex, multi-step development processes with built-in quality gates, human approval checkpoints, and automatic iteration until quality targets are met. Babysitter works seamlessly with your existing subagents, skills, and tools, orchestrating them into sophisticated workflows.
+Babysitter enforces obedience to agentic workforces, enabling them to manage extremely complex tasks and workflows through deterministic, hallucination-free self-orchestration. Define your workflow in code - Babysitter enforces every step, ensures quality gates pass before progression, requires human approval at breakpoints, and records every decision in an immutable journal. Your agents do exactly what the process permits, nothing more.
 
 ---
 
@@ -77,6 +78,42 @@ It includes Codex hook wiring, slash command dispatch, and orchestration harness
 
 ---
 
+## First Steps
+
+After installation, set up your environment:
+
+### 1. Configure Your Profile (One-Time)
+
+```bash
+/babysitter:user-install
+```
+
+This creates your personal profile with:
+- Breakpoint preferences (how much oversight you want)
+- Tool preferences and communication style
+- Expertise areas for better process matching
+
+### 2. Set Up Your Project
+
+```bash
+/babysitter:project-install
+```
+
+This analyzes your codebase and configures:
+- Project-specific workflows
+- Test frameworks and CI/CD integration
+- Tech stack preferences
+
+### 3. Verify Setup
+
+```bash
+/babysitter:doctor
+```
+
+Run diagnostics to confirm everything is working.
+
+---
+
 ## Quick Start
 
 ```bash
@@ -91,26 +128,84 @@ Use the babysitter skill to implement user authentication with TDD
 
 Claude will create an orchestration run, execute tasks step-by-step, handle quality checks and approvals, and continue until completion.
 
+### Choose Your Mode
+
+| Mode | Command | When to Use |
+|------|---------|-------------|
+| **Interactive** | `/babysitter:call` | Learning, critical workflows - pauses for approval |
+| **Autonomous** | `/babysitter:yolo` | Trusted tasks - full auto, no breakpoints |
+| **Planning** | `/babysitter:plan` | Review process before executing |
+| **Continuous** | `/babysitter:forever` | Monitoring, periodic tasks - runs indefinitely |
+
+### Utility Commands
+
+| Command | Purpose |
+|---------|----------|
+| `/babysitter:doctor` | Diagnose run health and issues |
+| `/babysitter:observe` | Launch real-time monitoring dashboard |
+| `/babysitter:resume` | Continue an interrupted run |
+| `/babysitter:help` | Documentation and usage help |
+
 ---
 
 ## How It Works
 
 ```
-+-----------------------------------------------------------------+
-|                     Babysitter Loop                              |
-|                                                                  |
-|   +----------+     +----------+     +----------+     +----------+|
-|   | Iterate  | --> |   Get    | --> | Execute  | --> |   Post   ||
-|   |          |     | Effects  |     |  Tasks   |     | Results  ||
-|   +----------+     +----------+     +----------+     +----------+|
-|        |                                               |         |
-|        +----------------- repeat <---------------------+         |
-+-----------------------------------------------------------------+
++=============================================================================+
+|                         /babysitter:call                                    |
++=============================================================================+
+|                                                                             |
+|   YOUR PROCESS (JavaScript)                   This is the AUTHORITY         |
+|   +----------------------------------------+                                |
+|   | async function process(inputs, ctx) {  |  Real code, not config.       |
+|   |                                        |  The orchestrator can ONLY    |
+|   |   await ctx.task(plan, { ... });       |  do what this code permits.   |
+|   |                                        |                                |
+|   |   await ctx.breakpoint({               |  Breakpoints = human gates    |
+|   |     question: 'Approve plan?'          |  (enforced, not optional)     |
+|   |   });                                  |                                |
+|   |                                        |                                |
+|   |   await ctx.task(implement, { ... });  |  Tasks = executable work      |
+|   |                                        |                                |
+|   |   const score = await ctx.task(verify);|  Quality gates = code logic   |
+|   |   if (score < 80)                      |  (not config, real checks)    |
+|   |     await ctx.task(refine, { ... });   |                                |
+|   | }                                      |                                |
+|   +-------------------+--------------------+                                |
+|                       |                                                     |
+|                       | governs                                             |
+|                       v                                                     |
+|   +---------------------------------------------------------------------+   |
+|   |                      ENFORCEMENT MECHANISM                          |   |
+|   |                                                                     |   |
+|   |   +-------------+     +------------------+     +-----------------+  |   |
+|   |   | MANDATORY   |---->| PROCESS CHECK    |---->| DECISION        |  |   |
+|   |   | STOP        |     | What does the    |     |                 |  |   |
+|   |   | (enforced   |     | process permit   |     | Permitted: next |  |   |
+|   |   |  by hook)   |     | next?            |     | task assigned   |  |   |
+|   |   +-------------+     +------------------+     |                 |  |   |
+|   |                              |                 | Blocked: halt   |  |   |
+|   |                              v                 | until gate      |  |   |
+|   |                       +--------------+        | passes          |  |   |
+|   |                       | Gate/task    |        +-----------------+  |   |
+|   |                       | from code    |                              |   |
+|   |                       +--------------+                              |   |
+|   +---------------------------------------------------------------------+   |
+|                       |                                                     |
+|                       | records every decision                              |
+|                       v                                                     |
+|   +---------------------------------------------------------------------+   |
+|   |   JOURNAL: Every task, gate, decision - immutable, replayable       |   |
+|   +---------------------------------------------------------------------+   |
+|                                                                             |
++=============================================================================+
 ```
 
-**Each iteration:** Advance process -> Get pending effects -> Execute tasks -> Record outcomes -> Repeat until complete.
-
-**Everything is recorded:** `.a5c/runs/<runId>/` contains journal, tasks, and state. Pause, resume, or recover at any point.
+**The difference from simple iteration:**
+- **Process as Code:** Your workflow is JavaScript - the orchestrator can ONLY do what this code permits
+- **Mandatory Stop:** Claude cannot "keep running" - every step ends with a forced stop, then the process decides what's next
+- **Enforcement, not Assistance:** Gates block progression until satisfied - they're not suggestions
+- **Event-Sourced Journal:** All state in `.a5c/runs/` - deterministic replay and resume from any point
 
 ---
 
@@ -118,14 +213,14 @@ Claude will create an orchestration run, execute tasks step-by-step, handle qual
 
 | Traditional Approach | Babysitter |
 |---------------------|------------|
-| Run script once, hope it works | Iterate until quality target met |
+| Run script once, hope it works | Process enforces quality gates before completion |
 | Manual approval via chat | Structured breakpoints with context |
 | State lost on session end | Event-sourced, fully resumable |
 | Single task execution | Parallel execution, dependencies |
 | No audit trail | Complete journal of all events |
-| Fixed workflow | Process-driven, customizable |
+| Ad-hoc workflow | Deterministic, code-defined processes |
 
-**Key differentiators:** Deterministic replay, quality convergence, human-in-the-loop breakpoints, agent scoring, and parallel execution.
+**Key differentiators:** Process enforcement, deterministic replay, quality convergence, human-in-the-loop breakpoints, and parallel execution.
 
 ---
 
@@ -168,9 +263,18 @@ See [CONTRIBUTING.md](https://github.com/a5c-ai/babysitter/blob/main/CONTRIBUTIN
 
 ## Community and Support
 
+- **Discord**: [Join our community](https://discord.gg/dHGkzxf48a) *(GitHub invite link)*
 - **GitHub Issues**: [Report bugs or request features](https://github.com/a5c-ai/babysitter/issues)
 - **GitHub Discussions**: [Ask questions and share ideas](https://github.com/a5c-ai/babysitter/discussions)
 - **npm**: [@a5c-ai/babysitter-sdk](https://www.npmjs.com/package/@a5c-ai/babysitter-sdk)
+
+### Community Tools
+
+| Tool | Description |
+|------|-------------|
+| [Observer Dashboard](https://github.com/yoavmayer/babysitter-observer-dashboard) | Real-time monitoring UI for parallel runs |
+| [Telegram Bot](https://github.com/a5c-ai/claude-code-telegram-bot) | Control sessions remotely |
+| [vibe-kanban](https://github.com/BloopAI/vibe-kanban) | Parallel process management |
 
 ### Star History
 

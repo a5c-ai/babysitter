@@ -1,0 +1,36 @@
+{
+  "name": "Metaswarm Knowledge Cycle - Self-Reflection",
+  "description": "Extract learnings from completed work into the knowledge base before PR creation",
+  "processId": "methodologies/metaswarm/metaswarm-knowledge-cycle",
+  "inputs": {
+    "mode": "reflect",
+    "issueDescription": "Implement user authentication with OAuth2",
+    "completedWorkUnits": [
+      {
+        "id": "wu-001",
+        "title": "JWT token generation",
+        "attempts": 2,
+        "filesModified": ["src/auth/jwt.ts", "src/auth/__tests__/jwt.test.ts"]
+      },
+      {
+        "id": "wu-002",
+        "title": "Auth middleware",
+        "attempts": 1,
+        "filesModified": ["src/auth/middleware.ts", "src/auth/__tests__/middleware.test.ts"]
+      }
+    ],
+    "reviewResults": [
+      { "workUnitId": "wu-001", "attempt": 1, "verdict": "FAIL", "evidence": ["Missing edge case for expired refresh token"] },
+      { "workUnitId": "wu-001", "attempt": 2, "verdict": "PASS" },
+      { "workUnitId": "wu-002", "attempt": 1, "verdict": "PASS" }
+    ],
+    "projectRoot": "."
+  },
+  "expectedOutcomes": {
+    "knowledgeExtracted": [
+      "Pattern: Always handle expired refresh tokens as a distinct code path",
+      "Gotcha: First attempt missed refresh token expiry edge case",
+      "Decision: Used RS256 over HS256 for JWT signing (asymmetric for microservice verification)"
+    ]
+  }
+}

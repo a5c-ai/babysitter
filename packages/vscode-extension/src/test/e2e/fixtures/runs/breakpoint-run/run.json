@@ -1,0 +1,8 @@
+{
+  "runId": "breakpoint-run",
+  "processId": "breakpoint-process",
+  "entrypoint": "process.js",
+  "layoutVersion": "2026.01.runs-v1",
+  "createdAt": "2026-03-10T11:00:00.000Z",
+  "prompt": "Breakpoint test run"
+}

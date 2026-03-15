@@ -15,6 +15,7 @@ const DEFAULT_OPTS: ExecSyncOptions = {
   encoding: "utf-8" as BufferEncoding,
   timeout: 30_000,
   stdio: ["pipe", "pipe", "pipe"],
+  env: { ...process.env, MSYS_NO_PATHCONV: "1" },
 };
 
 /** Run a command on the host and return stdout. Throws on non-zero exit. */

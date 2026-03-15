@@ -1,0 +1,18 @@
+{
+  "issue": {
+    "id": "HOT-042",
+    "title": "Production crash on user login with expired OAuth tokens",
+    "description": "Users with expired OAuth tokens cause unhandled promise rejection in auth middleware, crashing the server process",
+    "stackTrace": "UnhandledPromiseRejection: TokenExpiredError at AuthMiddleware.validateToken",
+    "logs": [
+      "ERROR [auth-middleware] Unhandled rejection in token validation",
+      "FATAL [process] Worker crashed, restarting..."
+    ],
+    "affectedUsers": 1200,
+    "reportedAt": "2026-03-02T08:15:00Z"
+  },
+  "projectRoot": ".",
+  "severity": "critical",
+  "qualityThreshold": 70,
+  "skipPlanning": false
+}

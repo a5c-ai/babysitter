@@ -1,0 +1,39 @@
+{
+  "name": "Metaswarm Execution Loop - Single Work Unit",
+  "description": "4-phase execution cycle for a single work unit with TDD, quality gates, and adversarial review",
+  "processId": "methodologies/metaswarm/metaswarm-execution-loop",
+  "inputs": {
+    "workUnit": {
+      "id": "wu-auth-001",
+      "title": "Implement JWT token generation and validation",
+      "definitionOfDone": [
+        "JWT tokens generated with RS256 signing",
+        "Token validation middleware rejects expired tokens",
+        "Refresh token rotation implemented",
+        "Rate limiting on token endpoint",
+        "100% test coverage on auth module"
+      ],
+      "fileScope": ["src/auth/jwt.ts", "src/auth/middleware.ts", "src/auth/__tests__/"],
+      "humanCheckpoint": "Security-sensitive authentication code"
+    },
+    "projectRoot": ".",
+    "coverageThresholds": {
+      "lines": 100,
+      "branches": 100,
+      "functions": 100,
+      "statements": 100
+    },
+    "maxRetries": 3,
+    "projectContext": {
+      "existingPatterns": ["Express middleware pattern", "Zod schema validation"]
+    }
+  },
+  "expectedOutcomes": {
+    "phases": [
+      "implement (TDD: write tests first, watch fail, implement)",
+      "validate (independent tsc + eslint + vitest, never trust subagent)",
+      "adversarial-review (fresh reviewer, binary PASS/FAIL with evidence)",
+      "commit (only after PASS, within declared file scope)"
+    ]
+  }
+}

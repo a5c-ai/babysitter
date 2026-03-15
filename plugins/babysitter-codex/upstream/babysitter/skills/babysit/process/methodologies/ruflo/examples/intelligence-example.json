@@ -1,0 +1,35 @@
+{
+  "name": "Ruflo Intelligence - Post-Execution Learning Cycle",
+  "description": "RuVector intelligence cycle extracting patterns, updating ReasoningBank, and adapting SONA after task completion",
+  "processId": "methodologies/ruflo/ruflo-intelligence",
+  "inputs": {
+    "executionData": {
+      "taskId": "feature-collab-editing",
+      "taskType": "feature",
+      "agentsUsed": 5,
+      "topology": "hierarchical",
+      "consensusRounds": 2,
+      "qualityScore": 87,
+      "executionTime": "4500ms",
+      "tokensUsed": 45000,
+      "driftEvents": 0,
+      "patterns": ["crdt-merge-strategy", "websocket-reconnect-pattern"]
+    },
+    "memoryScope": "project",
+    "learningAlgorithm": "q-learning",
+    "embeddingDimension": 128,
+    "maxPatterns": 1000
+  },
+  "expectedOutcomes": {
+    "steps": [
+      "pattern-extraction (mine CRDT and WebSocket patterns from execution)",
+      "reasoning-retrieve (search ReasoningBank for similar collaborative editing trajectories)",
+      "reasoning-judge (evaluate trajectory applicability to current CRDT context)",
+      "reasoning-distill (compress and store new CRDT merge strategy entries)",
+      "sona-adapt (update weights with EWC++ regularization, check forgetting risk)",
+      "knowledge-graph (add nodes for CRDT patterns, run PageRank)",
+      "vector-embedding (HNSW index update for new patterns)",
+      "memory-consolidation (persist to project scope)"
+    ]
+  }
+}

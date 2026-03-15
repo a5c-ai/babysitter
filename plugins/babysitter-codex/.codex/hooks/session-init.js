@@ -32,7 +32,11 @@ function main() {
     process.exit(0);
   }
 
-  const requestedSessionId = process.env.BABYSITTER_SESSION_ID || process.env.CODEX_SESSION_ID || `codex-${Date.now()}`;
+  const requestedSessionId =
+    process.env.BABYSITTER_SESSION_ID ||
+    process.env.CODEX_THREAD_ID ||
+    process.env.CODEX_SESSION_ID ||
+    `codex-${Date.now()}`;
   const result = runJson(
     ['session:init', '--session-id', requestedSessionId, '--state-dir', A5C_DIR, '--json'],
     { timeout: 15000 }

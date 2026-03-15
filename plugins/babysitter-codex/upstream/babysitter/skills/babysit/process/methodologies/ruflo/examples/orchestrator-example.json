@@ -1,0 +1,25 @@
+{
+  "name": "Ruflo Orchestrator - Feature Development",
+  "description": "Full swarm orchestration pipeline for implementing a new feature with multi-agent coordination",
+  "processId": "methodologies/ruflo/ruflo-orchestrator",
+  "inputs": {
+    "task": "Implement real-time collaborative editing with conflict resolution using CRDTs",
+    "taskType": "feature",
+    "projectRoot": ".",
+    "maxAgents": 8,
+    "consensusStrategy": "weighted",
+    "qualityThreshold": 80
+  },
+  "expectedOutcomes": {
+    "phases": [
+      "complexity-assessment (Q-Learning router evaluates task complexity)",
+      "agent-selection (Strategic Queen + architect + coder + tester + reviewer)",
+      "swarm-formation (Hierarchical topology with Raft consensus)",
+      "coordinated-execution (parallel agent work with shared memory)",
+      "anti-drift-check (hierarchical coordinator validates alignment)",
+      "consensus-protocol (weighted voting, Queen=3x)",
+      "output-verification (quality score >= 80 threshold)",
+      "learning-extraction (RuVector patterns persisted)"
+    ]
+  }
+}

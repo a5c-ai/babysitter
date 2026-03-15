@@ -1,0 +1,19 @@
+{
+  "feature": "Real-time task updates via WebSocket",
+  "targetQuality": 85,
+  "maxIterations": 5,
+  "requirements": [
+    "WebSocket connection established on page load",
+    "Task updates broadcast to all connected clients",
+    "Optimistic UI updates with rollback on failure",
+    "Reconnection logic with exponential backoff",
+    "Connection status indicator in UI"
+  ],
+  "context": {
+    "existingPatterns": {
+      "stateManagement": "Redux with RTK",
+      "apiLayer": "REST with fetch",
+      "errorHandling": "Global error boundary"
+    }
+  }
+}

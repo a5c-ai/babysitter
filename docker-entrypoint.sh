@@ -2,8 +2,8 @@
 set -e
 
 # Check for API key (support both direct Anthropic and Azure Foundry)
-if [ -z "$ANTHROPIC_API_KEY" ] && [ -z "$ANTHROPIC_FOUNDRY_API_KEY" ]; then
-    echo "Error: ANTHROPIC_API_KEY or ANTHROPIC_FOUNDRY_API_KEY environment variable is required"
+if [ -z "$ANTHROPIC_API_KEY" ] && [ -z "$ANTHROPIC_FOUNDRY_API_KEY" ] && [ -z "$AZURE_OPENAI_API_KEY" ]; then
+    echo "Error: ANTHROPIC_API_KEY, ANTHROPIC_FOUNDRY_API_KEY, or AZURE_OPENAI_API_KEY environment variable is required"
     exit 1
 fi
 

@@ -1,0 +1,8 @@
+{
+  "runId": "failed-run",
+  "processId": "failed-process",
+  "entrypoint": "process.js",
+  "layoutVersion": "2026.01.runs-v1",
+  "createdAt": "2026-03-10T09:00:00.000Z",
+  "prompt": "Failed test run"
+}

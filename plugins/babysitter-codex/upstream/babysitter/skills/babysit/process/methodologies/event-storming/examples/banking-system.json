@@ -1,0 +1,107 @@
+{
+  "name": "Banking System Event Storm",
+  "description": "Event storming for core banking system covering accounts, transactions, transfers, and fraud detection",
+  "inputs": {
+    "projectName": "core-banking-system",
+    "domainDescription": "Core banking platform that manages customer accounts, processes transactions (deposits, withdrawals, transfers), enforces business rules, detects fraud, and maintains audit trails. Includes ATM integration and mobile banking.",
+    "sessionType": "full",
+    "skipVisualization": false
+  },
+  "expectedBigPicture": {
+    "keyEvents": [
+      "Customer Onboarded",
+      "Account Opened",
+      "Initial Deposit Made",
+      "Debit Card Issued",
+      "Card Activated",
+      "ATM Withdrawal Requested",
+      "PIN Verified",
+      "Cash Dispensed",
+      "Transaction Recorded",
+      "Balance Updated",
+      "Transfer Initiated",
+      "Funds Reserved",
+      "Transfer Approved",
+      "Transfer Completed",
+      "Notification Sent",
+      "Suspicious Activity Detected",
+      "Account Frozen",
+      "Fraud Investigation Started",
+      "Statement Generated",
+      "Interest Calculated"
+    ],
+    "actors": [
+      "Customer",
+      "Bank Teller",
+      "Account Manager",
+      "Fraud Analyst",
+      "System Auditor",
+      "Regulator"
+    ],
+    "externalSystems": [
+      "ATM Network",
+      "Card Processing Network (Visa/Mastercard)",
+      "Credit Bureau",
+      "Fraud Detection AI",
+      "Regulatory Reporting System",
+      "SMS Gateway"
+    ],
+    "hotSpots": [
+      "Concurrent transactions on same account",
+      "Overdraft handling and limits",
+      "Real-time fraud detection latency",
+      "Regulatory compliance for large transactions",
+      "Account closure with pending transactions"
+    ]
+  },
+  "expectedAggregates": [
+    "Account",
+    "Transaction",
+    "Customer",
+    "Card",
+    "FraudCase",
+    "Statement"
+  ],
+  "expectedBoundedContexts": [
+    {
+      "name": "Account Management",
+      "aggregates": ["Account", "Customer"],
+      "responsibility": "Manage customer accounts and profiles"
+    },
+    {
+      "name": "Transaction Processing",
+      "aggregates": ["Transaction"],
+      "responsibility": "Process and record all financial transactions"
+    },
+    {
+      "name": "Fraud Detection",
+      "aggregates": ["FraudCase"],
+      "responsibility": "Monitor and investigate suspicious activities"
+    },
+    {
+      "name": "Card Services",
+      "aggregates": ["Card"],
+      "responsibility": "Issue and manage debit/credit cards"
+    }
+  ],
+  "expectedContextRelationships": [
+    {
+      "upstream": "Account Management",
+      "downstream": "Transaction Processing",
+      "pattern": "customer-supplier",
+      "integration": "api"
+    },
+    {
+      "upstream": "Transaction Processing",
+      "downstream": "Fraud Detection",
+      "pattern": "customer-supplier",
+      "integration": "events"
+    },
+    {
+      "upstream": "Fraud Detection",
+      "downstream": "Account Management",
+      "pattern": "customer-supplier",
+      "integration": "events"
+    }
+  ]
+}

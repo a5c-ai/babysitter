@@ -1,0 +1,28 @@
+{
+  "name": "Metaswarm Design Review - API Redesign",
+  "description": "6-agent parallel design review gate for an API redesign proposal",
+  "processId": "methodologies/metaswarm/metaswarm-design-review",
+  "inputs": {
+    "planDocument": "Redesign the REST API to support GraphQL alongside existing endpoints. Add schema federation for microservice composition.",
+    "workUnits": [
+      {
+        "id": "wu-001",
+        "title": "GraphQL schema definition",
+        "definitionOfDone": ["Schema covers all existing REST endpoints", "Input validation types defined", "Subscription types for real-time data"],
+        "fileScope": ["src/graphql/schema.ts", "src/graphql/types/"]
+      },
+      {
+        "id": "wu-002",
+        "title": "Resolver implementation",
+        "definitionOfDone": ["All queries resolve correctly", "Mutations have proper authorization", "N+1 query prevention via DataLoader"],
+        "fileScope": ["src/graphql/resolvers/"]
+      }
+    ],
+    "issueDescription": "Add GraphQL support alongside REST API with schema federation",
+    "maxIterations": 3
+  },
+  "expectedOutcomes": {
+    "reviewers": ["product-manager", "architect", "designer", "security-design", "ux-reviewer", "cto"],
+    "requirement": "ALL 6 must approve (unanimous)"
+  }
+}

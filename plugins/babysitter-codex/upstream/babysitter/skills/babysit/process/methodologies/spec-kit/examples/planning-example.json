@@ -1,0 +1,31 @@
+{
+  "processId": "methodologies/spec-kit/spec-kit-planning",
+  "description": "Planning + task breakdown for a pre-existing specification",
+  "inputs": {
+    "specification": {
+      "requirements": [
+        { "id": "REQ-001", "type": "functional", "description": "Users can create tasks with title, description, priority, and due date" },
+        { "id": "REQ-002", "type": "functional", "description": "Tasks can be assigned to team members" },
+        { "id": "REQ-003", "type": "functional", "description": "Real-time updates when tasks are modified by any team member" },
+        { "id": "REQ-004", "type": "non-functional", "description": "Dashboard loads within 2 seconds on 3G connections" }
+      ],
+      "userStories": [
+        { "id": "US-001", "story": "As a project manager, I want to create and assign tasks so that work is distributed efficiently" },
+        { "id": "US-002", "story": "As a team member, I want to see real-time task updates so that I always have current information" }
+      ],
+      "acceptanceCriteria": [
+        { "storyId": "US-001", "criteria": "Given a logged-in PM, when they fill the task form and submit, then the task appears in the board within 1 second" },
+        { "storyId": "US-002", "criteria": "Given two users viewing the same board, when one modifies a task, then the other sees the update within 2 seconds" }
+      ]
+    },
+    "constitution": {
+      "codeQuality": { "linting": "eslint:recommended", "formatting": "prettier", "maxComplexity": 10 },
+      "testing": { "coverageThreshold": 80, "requiredTypes": ["unit", "integration"] },
+      "performance": { "loadTimeBudget": "2s", "bundleSizeLimit": "500KB" }
+    },
+    "projectType": "web",
+    "constraints": {
+      "techStack": { "preferred": ["TypeScript", "React", "Node.js"] }
+    }
+  }
+}

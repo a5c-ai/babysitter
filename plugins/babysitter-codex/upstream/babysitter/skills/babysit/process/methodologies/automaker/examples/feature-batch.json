@@ -1,0 +1,26 @@
+{
+  "projectName": "DevDash",
+  "features": [
+    {
+      "id": "feat-010",
+      "title": "Dashboard Widgets",
+      "description": "Configurable dashboard with drag-and-drop widget grid. Widgets include: commit activity chart, PR status summary, build health indicator, and team velocity graph.",
+      "priority": "high"
+    },
+    {
+      "id": "feat-011",
+      "title": "GitHub Integration",
+      "description": "Connect to GitHub API for repository data. Pull commits, PRs, issues, and actions status. Support multiple repositories per workspace.",
+      "priority": "high"
+    },
+    {
+      "id": "feat-012",
+      "title": "Dark Mode Theme",
+      "description": "System-aware dark mode with manual toggle. Apply across all components including charts and code snippets.",
+      "priority": "low"
+    }
+  ],
+  "prioritizationStrategy": "value-first",
+  "testFramework": "vitest",
+  "maxParallel": 2
+}

@@ -1,0 +1,22 @@
+{
+  "name": "ClaudeKit Spec Execution - 6-Phase Implementation",
+  "description": "Execute a specification through 6 iterative phases with quality-gated convergence",
+  "processId": "methodologies/claudekit/claudekit-spec-workflow",
+  "inputs": {
+    "mode": "execute",
+    "specFile": "docs/specs/user-notification-system.md",
+    "projectRoot": ".",
+    "qualityThreshold": 80,
+    "maxImprovementCycles": 3
+  },
+  "expectedOutcomes": {
+    "phases": [
+      "implementation (write production code per spec)",
+      "test writing (unit + integration + edge cases)",
+      "code review (verify requirements met)",
+      "iterative improvement (quality-gated convergence, max 3 cycles)",
+      "atomic commit (logical grouping, descriptive messages)",
+      "progress tracking (completion %, coverage, remaining work)"
+    ]
+  }
+}

@@ -1,0 +1,259 @@
+{
+  "projectName": "E-Commerce Platform",
+  "domainDescription": "Online retail system with product catalog, shopping cart, payment processing, order management, and customer accounts. Supports multiple payment methods, inventory tracking, and order fulfillment.",
+  "iterationWeeks": 2,
+  "teamSize": 12,
+  "chiefProgrammers": 3,
+  "features": [
+    {
+      "id": "f-001",
+      "title": "Display catalog of products",
+      "action": "Display",
+      "result": "catalog",
+      "object": "products",
+      "priority": "high",
+      "estimatedDays": 3,
+      "dependencies": []
+    },
+    {
+      "id": "f-002",
+      "title": "Search products by keyword",
+      "action": "Search",
+      "result": "products",
+      "object": "keyword",
+      "priority": "high",
+      "estimatedDays": 2,
+      "dependencies": ["f-001"]
+    },
+    {
+      "id": "f-003",
+      "title": "Filter products by category",
+      "action": "Filter",
+      "result": "products",
+      "object": "category",
+      "priority": "high",
+      "estimatedDays": 2,
+      "dependencies": ["f-001"]
+    },
+    {
+      "id": "f-004",
+      "title": "Add item to cart",
+      "action": "Add",
+      "result": "item",
+      "object": "cart",
+      "priority": "high",
+      "estimatedDays": 2,
+      "dependencies": []
+    },
+    {
+      "id": "f-005",
+      "title": "Remove item from cart",
+      "action": "Remove",
+      "result": "item",
+      "object": "cart",
+      "priority": "high",
+      "estimatedDays": 1,
+      "dependencies": ["f-004"]
+    },
+    {
+      "id": "f-006",
+      "title": "Update quantity of cart item",
+      "action": "Update",
+      "result": "quantity",
+      "object": "cart item",
+      "priority": "high",
+      "estimatedDays": 1,
+      "dependencies": ["f-004"]
+    },
+    {
+      "id": "f-007",
+      "title": "Calculate total of cart",
+      "action": "Calculate",
+      "result": "total",
+      "object": "cart",
+      "priority": "high",
+      "estimatedDays": 2,
+      "dependencies": ["f-004"]
+    },
+    {
+      "id": "f-008",
+      "title": "Apply discount of coupon",
+      "action": "Apply",
+      "result": "discount",
+      "object": "coupon",
+      "priority": "medium",
+      "estimatedDays": 3,
+      "dependencies": ["f-007"]
+    },
+    {
+      "id": "f-009",
+      "title": "Calculate shipping of order",
+      "action": "Calculate",
+      "result": "shipping",
+      "object": "order",
+      "priority": "high",
+      "estimatedDays": 2,
+      "dependencies": ["f-007"]
+    },
+    {
+      "id": "f-010",
+      "title": "Validate address of shipping",
+      "action": "Validate",
+      "result": "address",
+      "object": "shipping",
+      "priority": "high",
+      "estimatedDays": 2,
+      "dependencies": []
+    },
+    {
+      "id": "f-011",
+      "title": "Process payment of order",
+      "action": "Process",
+      "result": "payment",
+      "object": "order",
+      "priority": "high",
+      "estimatedDays": 5,
+      "dependencies": ["f-007", "f-009"]
+    },
+    {
+      "id": "f-012",
+      "title": "Authorize transaction of credit card",
+      "action": "Authorize",
+      "result": "transaction",
+      "object": "credit card",
+      "priority": "high",
+      "estimatedDays": 3,
+      "dependencies": ["f-011"]
+    },
+    {
+      "id": "f-013",
+      "title": "Create order from cart",
+      "action": "Create",
+      "result": "order",
+      "object": "cart",
+      "priority": "high",
+      "estimatedDays": 3,
+      "dependencies": ["f-011"]
+    },
+    {
+      "id": "f-014",
+      "title": "Send confirmation of order",
+      "action": "Send",
+      "result": "confirmation",
+      "object": "order",
+      "priority": "high",
+      "estimatedDays": 2,
+      "dependencies": ["f-013"]
+    },
+    {
+      "id": "f-015",
+      "title": "Track status of order",
+      "action": "Track",
+      "result": "status",
+      "object": "order",
+      "priority": "high",
+      "estimatedDays": 3,
+      "dependencies": ["f-013"]
+    },
+    {
+      "id": "f-016",
+      "title": "Update inventory of product",
+      "action": "Update",
+      "result": "inventory",
+      "object": "product",
+      "priority": "high",
+      "estimatedDays": 2,
+      "dependencies": ["f-013"]
+    },
+    {
+      "id": "f-017",
+      "title": "Register account of customer",
+      "action": "Register",
+      "result": "account",
+      "object": "customer",
+      "priority": "high",
+      "estimatedDays": 3,
+      "dependencies": []
+    },
+    {
+      "id": "f-018",
+      "title": "Authenticate credentials of customer",
+      "action": "Authenticate",
+      "result": "credentials",
+      "object": "customer",
+      "priority": "high",
+      "estimatedDays": 2,
+      "dependencies": ["f-017"]
+    },
+    {
+      "id": "f-019",
+      "title": "Display history of orders",
+      "action": "Display",
+      "result": "history",
+      "object": "orders",
+      "priority": "medium",
+      "estimatedDays": 3,
+      "dependencies": ["f-013", "f-018"]
+    },
+    {
+      "id": "f-020",
+      "title": "Save preferences of customer",
+      "action": "Save",
+      "result": "preferences",
+      "object": "customer",
+      "priority": "low",
+      "estimatedDays": 2,
+      "dependencies": ["f-017"]
+    },
+    {
+      "id": "f-021",
+      "title": "Generate report of sales",
+      "action": "Generate",
+      "result": "report",
+      "object": "sales",
+      "priority": "medium",
+      "estimatedDays": 4,
+      "dependencies": ["f-013"]
+    },
+    {
+      "id": "f-022",
+      "title": "Export data of orders",
+      "action": "Export",
+      "result": "data",
+      "object": "orders",
+      "priority": "low",
+      "estimatedDays": 2,
+      "dependencies": ["f-013"]
+    },
+    {
+      "id": "f-023",
+      "title": "Review product with rating",
+      "action": "Review",
+      "result": "product",
+      "object": "rating",
+      "priority": "medium",
+      "estimatedDays": 3,
+      "dependencies": ["f-001", "f-013"]
+    },
+    {
+      "id": "f-024",
+      "title": "Display reviews of product",
+      "action": "Display",
+      "result": "reviews",
+      "object": "product",
+      "priority": "medium",
+      "estimatedDays": 2,
+      "dependencies": ["f-023"]
+    },
+    {
+      "id": "f-025",
+      "title": "Create wishlist of customer",
+      "action": "Create",
+      "result": "wishlist",
+      "object": "customer",
+      "priority": "low",
+      "estimatedDays": 2,
+      "dependencies": ["f-017"]
+    }
+  ]
+}

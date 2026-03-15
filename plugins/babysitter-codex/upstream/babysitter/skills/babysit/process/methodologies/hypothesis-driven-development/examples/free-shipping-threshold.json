@@ -1,0 +1,97 @@
+{
+  "name": "Free Shipping Threshold Optimization",
+  "description": "Test hypothesis that raising free shipping threshold increases average order value without hurting conversion",
+  "inputs": {
+    "projectName": "free-shipping-threshold-optimization",
+    "featureIdea": "Increase free shipping threshold from $50 to $75 to improve unit economics while maintaining conversion rate",
+    "targetAudience": "all customers",
+    "context": {
+      "currentFreeShippingThreshold": 50,
+      "currentAverageOrderValue": 58.20,
+      "currentConversionRate": 0.042,
+      "percentageOrdersOverThreshold": 0.68,
+      "shippingCostPerOrder": 8.50,
+      "monthlyOrders": 45000
+    },
+    "experimentDuration": 21,
+    "significanceLevel": 0.05,
+    "skipImplementation": false
+  },
+  "expectedHypothesis": {
+    "statement": "We believe raising free shipping threshold from $50 to $75 for all customers will increase average order value to $64+ without decreasing conversion rate by more than 5%. We'll know we're right when AOV increases significantly and conversion rate stays within acceptable bounds.",
+    "assumptions": [
+      "Customers will add items to reach new threshold",
+      "Conversion rate impact will be minimal (<5%)",
+      "Customer lifetime value won't be negatively impacted",
+      "Cart abandonment won't increase significantly"
+    ],
+    "risks": [
+      "Conversion rate drops more than AOV gains (net negative revenue)",
+      "Cart abandonment increases (threshold too high)",
+      "Customer satisfaction decreases (perceived value loss)",
+      "Competitive disadvantage (competitors offer $50)",
+      "Lower-value customer segment churns"
+    ]
+  },
+  "expectedMetrics": {
+    "primary": [
+      "Average order value",
+      "Revenue per visitor"
+    ],
+    "secondary": [
+      "Conversion rate",
+      "Items per order",
+      "Percentage of orders with free shipping",
+      "Shipping revenue (from paid shipping)",
+      "Cart abandonment rate"
+    ],
+    "counter": [
+      "Overall conversion rate (must not drop >5%)",
+      "Customer satisfaction score",
+      "Cart abandonment rate",
+      "Order frequency (watch for decreased purchase frequency)",
+      "Customer churn rate"
+    ]
+  },
+  "economicAnalysis": {
+    "currentState": {
+      "monthlyOrders": 45000,
+      "averageOrderValue": 58.20,
+      "ordersWithFreeShipping": 30600,
+      "shippingCostOnFreeOrders": 260100,
+      "monthlyRevenue": 2619000
+    },
+    "breakEvenScenario": {
+      "requiredAOVIncrease": 6.00,
+      "acceptableConversionRateDecrease": 0.05,
+      "description": "AOV must increase to $64.20 to offset 5% conversion rate decrease while maintaining revenue"
+    },
+    "successScenario": {
+      "targetAOV": 65.00,
+      "targetConversionRate": 0.041,
+      "projectedMonthlyRevenue": 2633000,
+      "projectedShippingCost": 220000,
+      "netImprovement": 54000
+    }
+  },
+  "segmentationStrategy": {
+    "note": "Consider segmenting by customer lifetime value or order history",
+    "segments": [
+      {
+        "name": "High-value customers",
+        "definition": "AOV > $100 or 5+ previous purchases",
+        "hypothesis": "Minimal impact (already exceed threshold)"
+      },
+      {
+        "name": "Medium-value customers",
+        "definition": "AOV $50-$100",
+        "hypothesis": "Most likely to add items to reach threshold"
+      },
+      {
+        "name": "Low-value customers",
+        "definition": "AOV < $50",
+        "hypothesis": "At-risk segment - may experience conversion drop"
+      }
+    ]
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "name": "CC10X DEBUG - Fix Authentication Error",
+  "description": "Log-first investigation and fix of an authentication token validation failure",
+  "processId": "methodologies/cc10x/cc10x-debug",
+  "inputs": {
+    "request": "Fix: Users getting 401 Unauthorized after token refresh. Error: 'TokenExpiredError: jwt expired' even with fresh tokens.",
+    "projectRoot": ".",
+    "errorOutput": "TokenExpiredError: jwt expired\n    at /src/middleware/auth.ts:45:15\n    at processTicksAndRejections (node:internal/process/task_queues:95:5)",
+    "memory": {
+      "patterns": "JWT tokens use RS256, refresh rotation implemented last sprint"
+    },
+    "confidenceThreshold": 80
+  },
+  "expectedOutcomes": {
+    "phases": [
+      "log-investigation (read error output, check git log for auth changes)",
+      "implement-fix (regression test exit 1, fix token validation, exit 0)",
+      "code-review (verify fix addresses root cause)",
+      "integration-verify (full suite passes, original error no longer reproducible)"
+    ]
+  }
+}

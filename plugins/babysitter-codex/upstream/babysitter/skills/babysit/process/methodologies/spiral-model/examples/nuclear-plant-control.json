@@ -1,0 +1,35 @@
+{
+  "projectName": "Nuclear Power Plant Control System Modernization",
+  "projectDescription": "Mission-critical control system modernization for nuclear power plant operations, replacing legacy systems with modern digital controls while maintaining safety standards. Includes reactor monitoring, emergency shutdown systems, radiation monitoring, and full NRC compliance.",
+  "maxSpirals": 10,
+  "convergenceCriteria": "all-risks-resolved",
+  "stakeholders": [
+    {
+      "name": "Dr. Alexander Volkov",
+      "role": "Plant Manager",
+      "department": "Operations",
+      "email": "avolkov@nuclear.example.com"
+    },
+    {
+      "name": "Catherine Williams",
+      "role": "Nuclear Safety Officer",
+      "department": "Safety",
+      "email": "cwilliams@nuclear.example.com"
+    },
+    {
+      "name": "Dr. Hassan Al-Rahman",
+      "role": "Chief Engineer",
+      "department": "Engineering",
+      "email": "halrahman@nuclear.example.com"
+    },
+    {
+      "name": "Margaret Foster",
+      "role": "NRC Liaison",
+      "department": "Regulatory Affairs",
+      "email": "mfoster@nuclear.example.com"
+    }
+  ],
+  "riskTolerance": "low",
+  "initialRisks": "Safety-critical nature, NRC certification requirements, legacy system integration, real-time response requirements, redundancy and failover complexity, radiation-hardened hardware",
+  "generateVisualizations": true
+}

@@ -8,6 +8,7 @@ Babysitter is Claude Code with superpowers. Everything you already know about Cl
 
 - [Key Ideas](#key-ideas)
 - [The Basics](#the-basics)
+- [Profile Configuration](#profile-configuration)
 - [Process Selection](#process-selection)
   - [Skills vs Processes](#skills-vs-processes)
 - [Quality Targets](#quality-targets)
@@ -29,6 +30,7 @@ Babysitter is Claude Code with superpowers. Everything you already know about Cl
 - [The .a5c Directory](#the-a5c-directory)
 - [Common Mistakes](#common-mistakes)
 - [Quick Reference](#quick-reference)
+- [Troubleshooting Quick Reference](#troubleshooting-quick-reference)
 - [Links](#links)
 
 ---
@@ -52,6 +54,36 @@ The difference is what happens behind the scenes: Babysitter adds structured pro
 **First steps**: Start with simple tasks to learn the workflow. Watch the `.a5c/runs` directory to understand how runs are tracked. Practice resumption early - you'll need it when you hit rate limits.
 
 **Beyond code**: Babysitter works for any workflow that benefits from structured phases, quality checkpoints, and iterative improvement - research, documentation, data processing, and more.
+
+---
+
+## Profile Configuration
+
+Babysitter uses profiles to personalize your experience:
+
+### User Profile
+
+Run `/babysitter:user-install` once to configure:
+- **Breakpoint tolerance**: How many approval gates you want
+- **Skip topics**: Areas where you don't need confirmation (e.g., "don't ask about framework choices")
+- **Communication style**: Verbosity, tone, preferred formats
+
+Your profile persists across sessions in `~/.a5c/user-profile.json`.
+
+### Project Profile
+
+Run `/babysitter:project-install` per project to configure:
+- Tech stack and testing frameworks
+- CI/CD integration settings
+- Project-specific workflows
+
+Stored in `.a5c/project-profile.json`.
+
+### Tips
+
+> **Community tip (Klein)**: If you ever said 'continue' at a breakpoint, that becomes the default for that repo. Reset between tasks if needed.
+
+> **Community tip (Yedidia)**: If Claude tries to skip Babysitter, add explicit instructions in CLAUDE.md.
 
 ---
 
@@ -259,6 +291,19 @@ Add node_modules and optionally .a5c/runs/ to .gitignore if they're noisy.
 | Resume a stopped run | "resume the last uncompleted run" |
 | Turn a run into a process | "turn what we just did into a reusable process" |
 | Debug | Check .a5c/runs/<runId>/journal/ |
+
+---
+
+## Troubleshooting Quick Reference
+
+| Symptom | Solution |
+|---------|----------|
+| Run seems stuck | `/babysitter:doctor` to diagnose |
+| Breakpoints being skipped | Update to latest version; check if you previously said "continue" |
+| Want to see what's happening | `/babysitter:observe` for real-time dashboard |
+| Need to continue interrupted run | `/babysitter:call resume` |
+| Claude suggests skipping Babysitter | Add explicit instructions in CLAUDE.md |
+| Plugin update issues | `claude plugin marketplace update a5c.ai && claude plugin update babysitter@a5c.ai` |
 
 ---
 

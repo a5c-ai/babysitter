@@ -12,6 +12,7 @@
 const fs = require('fs');
 const path = require('path');
 const { runJson, supports } = require('../sdk-cli');
+const { emitEvent, notify } = require('../event-stream');
 
 // Import shared hook utilities
 const { getRunId, isValidRunId } = require('./utils.js');
@@ -53,6 +54,7 @@ function logTurnCompletion(runId, turnIndex, status) {
     status: status || null,
     env: {
       CODEX_TURN_INDEX: process.env.CODEX_TURN_INDEX || null,
+      CODEX_THREAD_ID: process.env.CODEX_THREAD_ID || null,
       CODEX_SESSION_ID: process.env.CODEX_SESSION_ID || null,
       BABYSITTER_RUN_ID: process.env.BABYSITTER_RUN_ID || null,
     },
@@ -60,6 +62,12 @@ function logTurnCompletion(runId, turnIndex, status) {
 
   const logFile = path.join(logDir, 'turns.jsonl');
   fs.appendFileSync(logFile, JSON.stringify(logEntry) + '\n', 'utf8');
+  const ev = emitEvent('turn.complete', {
+    runId: logEntry.runId,
+    turnIndex: logEntry.turnIndex,
+    status: logEntry.status,
+  }, { repoRoot: REPO_ROOT });
+  notify(ev);
   console.log(`[on-turn-complete] Turn logged to: ${logFile}`);
   return logEntry;
 }

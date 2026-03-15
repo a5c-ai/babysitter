@@ -1,0 +1,136 @@
+{
+  "name": "Food Delivery Platform Event Storm",
+  "description": "Event storming for multi-sided food delivery marketplace connecting customers, restaurants, and delivery drivers",
+  "inputs": {
+    "projectName": "food-delivery-platform",
+    "domainDescription": "Multi-sided marketplace platform connecting customers with restaurants and delivery drivers. Handles menu browsing, order placement, payment processing, real-time order tracking, driver assignment, and delivery completion.",
+    "sessionType": "full",
+    "skipVisualization": false
+  },
+  "expectedBigPicture": {
+    "keyEvents": [
+      "Customer Registered",
+      "Restaurant Onboarded",
+      "Driver Onboarded",
+      "Menu Published",
+      "Restaurant Opened for Business",
+      "Customer Browsed Menu",
+      "Item Added to Cart",
+      "Order Placed",
+      "Payment Processed",
+      "Order Received by Restaurant",
+      "Order Accepted",
+      "Food Preparation Started",
+      "Driver Search Initiated",
+      "Driver Assigned",
+      "Driver Accepted Order",
+      "Driver Arrived at Restaurant",
+      "Food Ready for Pickup",
+      "Order Picked Up",
+      "Delivery Started",
+      "Customer Notified of ETA",
+      "Driver Arrived at Delivery Location",
+      "Order Delivered",
+      "Delivery Confirmed",
+      "Payment Settled",
+      "Rating Submitted",
+      "Restaurant Paid",
+      "Driver Paid"
+    ],
+    "actors": [
+      "Customer",
+      "Restaurant Owner",
+      "Restaurant Staff",
+      "Delivery Driver",
+      "Support Agent",
+      "Operations Manager"
+    ],
+    "externalSystems": [
+      "Payment Gateway",
+      "Maps/GPS Service (Google Maps)",
+      "SMS/Push Notification Service",
+      "Restaurant POS Systems",
+      "Driver Background Check Service",
+      "Weather Service",
+      "Fraud Detection Service"
+    ],
+    "hotSpots": [
+      "Driver no-show or cancellation",
+      "Order accuracy and missing items",
+      "Dynamic pricing during peak hours",
+      "Driver assignment optimization",
+      "Cold food and delivery time SLAs",
+      "Multi-restaurant orders",
+      "Refund and dispute handling"
+    ]
+  },
+  "expectedAggregates": [
+    "Order",
+    "Cart",
+    "Restaurant",
+    "Menu",
+    "Driver",
+    "Delivery",
+    "Payment",
+    "Rating"
+  ],
+  "expectedBoundedContexts": [
+    {
+      "name": "Order Management",
+      "aggregates": ["Order", "Cart"],
+      "responsibility": "Handle customer orders from placement to completion"
+    },
+    {
+      "name": "Restaurant Management",
+      "aggregates": ["Restaurant", "Menu"],
+      "responsibility": "Manage restaurant profiles, menus, and availability"
+    },
+    {
+      "name": "Delivery Management",
+      "aggregates": ["Driver", "Delivery"],
+      "responsibility": "Assign drivers and track deliveries"
+    },
+    {
+      "name": "Payment Processing",
+      "aggregates": ["Payment"],
+      "responsibility": "Process customer payments and settle with restaurants/drivers"
+    },
+    {
+      "name": "Rating & Reviews",
+      "aggregates": ["Rating"],
+      "responsibility": "Collect and manage ratings for restaurants and drivers"
+    }
+  ],
+  "expectedContextRelationships": [
+    {
+      "upstream": "Order Management",
+      "downstream": "Restaurant Management",
+      "pattern": "customer-supplier",
+      "integration": "events"
+    },
+    {
+      "upstream": "Order Management",
+      "downstream": "Delivery Management",
+      "pattern": "customer-supplier",
+      "integration": "events"
+    },
+    {
+      "upstream": "Order Management",
+      "downstream": "Payment Processing",
+      "pattern": "customer-supplier",
+      "integration": "events"
+    },
+    {
+      "upstream": "Delivery Management",
+      "downstream": "Rating & Reviews",
+      "pattern": "customer-supplier",
+      "integration": "events"
+    },
+    {
+      "upstream": "Restaurant Management",
+      "downstream": "Order Management",
+      "pattern": "open-host-service",
+      "integration": "api"
+    }
+  ]
+}

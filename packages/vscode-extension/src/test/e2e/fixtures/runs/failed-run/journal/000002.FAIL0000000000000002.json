@@ -1,0 +1,12 @@
+{
+  "type": "RUN_FAILED",
+  "recordedAt": "2026-03-10T09:01:00.000Z",
+  "data": {
+    "runId": "failed-run",
+    "error": {
+      "message": "Test error",
+      "category": "Runtime"
+    }
+  },
+  "checksum": "fail001"
+}

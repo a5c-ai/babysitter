@@ -1,18 +1,9 @@
 'use strict';
 
-/**
- * hook-dispatcher.js
- * Main dispatcher for the babysitter-codex harness.
- * Supports all 13 hook types and routes payloads to:
- *   1. babysitter hook:log CLI (structured logging via stdin pipe)
- *   2. Custom handler scripts in .codex/hooks/<hookType>/*.js
- */
-
 const fs = require('fs');
 const path = require('path');
 const { runRaw, supports } = require('./sdk-cli');
 
-// All 13 supported hook types
 const HOOK_TYPES = [
   'on-run-start',
   'on-run-complete',
@@ -27,16 +18,14 @@ const HOOK_TYPES = [
   'pre-branch',
   'post-planning',
   'on-score',
+  'on-tool-error',
+  'on-policy-block',
+  'on-retry',
 ];
 
-// Resolve the hooks base directory relative to this file's location
 const HOOKS_BASE_DIR = path.resolve(__dirname, 'hooks');
+const TRANSFORM_CONFIG_PATH = path.join(process.cwd(), '.a5c', 'config', 'hook-transforms.json');
 
-/**
- * Serialize payload to JSON safely.
- * @param {*} payload
- * @returns {string}
- */
 function serializePayload(payload) {
   try {
     return JSON.stringify(payload, null, 2);
@@ -48,15 +37,6 @@ function serializePayload(payload) {
   }
 }
 
-/**
- * Pipe the serialized payload to the babysitter hook:log CLI.
- * The CLI is expected to accept JSON on stdin and record a structured log entry.
- * Falls back gracefully if the CLI is not available.
- *
- * @param {string} hookType
- * @param {string} serializedPayload
- * @param {object} options
- */
 function logToBabysitter(hookType, serializedPayload, options) {
   const logFile =
     options.logFile ||
@@ -92,127 +72,135 @@ function logToBabysitter(hookType, serializedPayload, options) {
   }
 }
 
-/**
- * Discover and return all .js handler files in .codex/hooks/<hookType>/.
- *
- * @param {string} hookType
- * @returns {string[]} Absolute paths to handler JS files
- */
 function discoverHandlers(hookType) {
   const hookDir = path.join(HOOKS_BASE_DIR, hookType);
+  if (!fs.existsSync(hookDir)) return [];
 
-  if (!fs.existsSync(hookDir)) {
-    return [];
-  }
-
-  let entries;
+  let entries = [];
   try {
     entries = fs.readdirSync(hookDir);
   } catch (err) {
-    process.stderr.write(
-      `[hook-dispatcher] Could not read hook directory "${hookDir}": ${err.message}\n`
-    );
+    process.stderr.write(`[hook-dispatcher] Could not read hook directory "${hookDir}": ${err.message}\n`);
     return [];
   }
 
   return entries
     .filter((name) => name.endsWith('.js'))
-    .sort() // deterministic load order
+    .sort()
     .map((name) => path.join(hookDir, name));
 }
 
-/**
- * Load and invoke a single JS handler file.
- * The handler must export a function; it receives (payload, options).
- *
- * @param {string} handlerPath
- * @param {*} payload
- * @param {object} options
- */
 function invokeJsHandler(handlerPath, payload, options) {
   let handler;
-
   try {
-    // Clear cache entry so hot-reload works in long-lived processes if desired
     delete require.cache[require.resolve(handlerPath)];
     handler = require(handlerPath);
   } catch (err) {
-    process.stderr.write(
-      `[hook-dispatcher] Failed to require handler "${handlerPath}": ${err.message}\n`
-    );
+    process.stderr.write(`[hook-dispatcher] Failed to require handler "${handlerPath}": ${err.message}\n`);
     return;
   }
 
-  // Support both module.exports = fn and module.exports = { default: fn }
   if (typeof handler === 'object' && handler !== null && typeof handler.default === 'function') {
     handler = handler.default;
   }
-
   if (typeof handler !== 'function') {
-    process.stderr.write(
-      `[hook-dispatcher] Handler "${handlerPath}" does not export a function — skipping.\n`
-    );
+    process.stderr.write(`[hook-dispatcher] Handler "${handlerPath}" does not export a function, skipping.\n`);
     return;
   }
 
   try {
     const result = handler(payload, options);
-    // If the handler returns a promise, await it and catch rejections
     if (result && typeof result.then === 'function') {
       result.catch((err) => {
-        process.stderr.write(
-          `[hook-dispatcher] Async handler "${handlerPath}" rejected: ${err.message}\n`
-        );
+        process.stderr.write(`[hook-dispatcher] Async handler "${handlerPath}" rejected: ${err.message}\n`);
       });
     }
   } catch (err) {
-    process.stderr.write(
-      `[hook-dispatcher] Handler "${handlerPath}" threw synchronously: ${err.message}\n`
-    );
+    process.stderr.write(`[hook-dispatcher] Handler "${handlerPath}" threw synchronously: ${err.message}\n`);
   }
 }
 
-/**
- * fireHook — the main public API.
- *
- * @param {string} hookType   One of the 13 supported hook type strings.
- * @param {*}      payload    Arbitrary data describing the event.
- * @param {object} [options]  Optional configuration:
- *   - options.babysitterBin {string}  Override the babysitter CLI binary name/path.
- *   - options.cliArgs       {string[]} Extra arguments passed to babysitter hook:log.
- *   - options.skipCli       {boolean} If true, skip the babysitter CLI call.
- *   - options.skipHandlers  {boolean} If true, skip loading custom handler scripts.
- * @returns {void}
- */
-function fireHook(hookType, payload, options) {
-  options = options || {};
+function loadTransformConfig(configPath = TRANSFORM_CONFIG_PATH) {
+  if (!fs.existsSync(configPath)) return {};
+  try {
+    return JSON.parse(fs.readFileSync(configPath, 'utf8')) || {};
+  } catch (err) {
+    process.stderr.write(`[hook-dispatcher] Failed reading transform config "${configPath}": ${err.message}\n`);
+    return {};
+  }
+}
 
-  // Validate hook type
-  if (!HOOK_TYPES.includes(hookType)) {
-    process.stderr.write(
-      `[hook-dispatcher] Unknown hook type "${hookType}". ` +
-        `Supported types: ${HOOK_TYPES.join(', ')}\n`
-    );
-    // Still attempt to continue rather than throwing
+function applyConfiguredTransform(hookType, payload, options = {}) {
+  const cfg = loadTransformConfig(options.transformConfigPath);
+  const defaults = cfg['*'] && typeof cfg['*'] === 'object' ? cfg['*'] : {};
+  const scoped = cfg[hookType] && typeof cfg[hookType] === 'object' ? cfg[hookType] : {};
+  const rules = { ...defaults, ...scoped };
+  if (!rules || typeof rules !== 'object') return payload;
+
+  let next = payload && typeof payload === 'object'
+    ? JSON.parse(JSON.stringify(payload))
+    : payload;
+
+  if (Array.isArray(rules.stripFields) && next && typeof next === 'object') {
+    for (const field of rules.stripFields) {
+      if (Object.prototype.hasOwnProperty.call(next, field)) {
+        delete next[field];
+      }
+    }
   }
 
-  const serializedPayload = serializePayload(payload);
+  if (rules.maxStringLength && next && typeof next === 'object') {
+    const maxLen = Number(rules.maxStringLength);
+    for (const key of Object.keys(next)) {
+      if (typeof next[key] === 'string' && next[key].length > maxLen) {
+        next[key] = `${next[key].slice(0, maxLen)}...`;
+      }
+    }
+  }
 
-  // --- Step 1: structured logging via babysitter CLI ---
+  if (rules.addFields && next && typeof next === 'object') {
+    next = { ...next, ...rules.addFields };
+  }
+
+  return next;
+}
+
+function fireHook(hookType, payload, options = {}) {
+  let effectivePayload = applyConfiguredTransform(hookType, payload, options);
+
+  if (!HOOK_TYPES.includes(hookType)) {
+    process.stderr.write(
+      `[hook-dispatcher] Unknown hook type "${hookType}". Supported types: ${HOOK_TYPES.join(', ')}\n`
+    );
+  }
+
+  if (typeof options.transformPayload === 'function') {
+    try {
+      const transformed = options.transformPayload(effectivePayload, hookType);
+      if (transformed !== undefined) effectivePayload = transformed;
+    } catch (err) {
+      process.stderr.write(`[hook-dispatcher] transformPayload failed for "${hookType}": ${err.message}\n`);
+    }
+  }
+
+  const serializedPayload = serializePayload(effectivePayload);
   if (!options.skipCli) {
     logToBabysitter(hookType, serializedPayload, options);
   }
 
-  // --- Step 2: custom handler scripts ---
   if (!options.skipHandlers) {
     const handlers = discoverHandlers(hookType);
     for (const handlerPath of handlers) {
-      invokeJsHandler(handlerPath, payload, options);
+      invokeJsHandler(handlerPath, effectivePayload, options);
     }
   }
 }
 
-// Expose the list of supported hook types for introspection
 fireHook.HOOK_TYPES = HOOK_TYPES;
 
-module.exports = { fireHook, HOOK_TYPES };
+module.exports = {
+  fireHook,
+  HOOK_TYPES,
+  applyConfiguredTransform,
+  loadTransformConfig,
+};

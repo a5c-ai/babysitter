@@ -1,0 +1,34 @@
+{
+  "projectName": "ChatApp",
+  "featureName": "real-time-messaging",
+  "epic": {
+    "title": "Real-Time Messaging System",
+    "architectureDecisions": [
+      {
+        "id": "ADR-001",
+        "title": "WebSocket for real-time communication",
+        "decision": "Use Socket.IO over raw WebSockets for cross-browser compatibility and auto-reconnection"
+      },
+      {
+        "id": "ADR-002",
+        "title": "Redis for pub/sub",
+        "decision": "Use Redis pub/sub for horizontal scaling of WebSocket connections"
+      }
+    ],
+    "techApproach": {
+      "frontend": "React with Socket.IO client",
+      "backend": "Express with Socket.IO server",
+      "database": "PostgreSQL for messages, Redis for presence"
+    }
+  },
+  "prd": {
+    "userStories": [
+      { "id": "US-001", "title": "Send and receive messages in real-time" },
+      { "id": "US-002", "title": "See typing indicators" },
+      { "id": "US-003", "title": "View message read receipts" },
+      { "id": "US-004", "title": "Search message history" },
+      { "id": "US-005", "title": "Share files in chat" }
+    ]
+  },
+  "parallelAgents": 5
+}

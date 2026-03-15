@@ -1,0 +1,18 @@
+{
+  "processId": "methodologies/spec-kit/spec-kit-specification",
+  "description": "Constitution + specification for an API rate limiting feature (brownfield)",
+  "inputs": {
+    "projectName": "PaymentGateway",
+    "featureDescription": "Add configurable rate limiting to the API gateway to prevent abuse and ensure fair usage across tenants. Support per-tenant, per-endpoint, and global rate limits with customizable windows and burst allowances.",
+    "projectType": "api",
+    "mode": "brownfield",
+    "targetAudience": "API consumers and platform administrators",
+    "existingCodebase": true,
+    "complianceRequirements": ["SOC2", "PCI-DSS"],
+    "constraints": {
+      "performance": {
+        "latencyOverhead": "< 5ms per request"
+      }
+    }
+  }
+}

@@ -1,0 +1,148 @@
+{
+  "name": "Ride Sharing Platform Event Storm",
+  "description": "Event storming for ride-sharing marketplace connecting riders and drivers with real-time matching and routing",
+  "inputs": {
+    "projectName": "ride-sharing-platform",
+    "domainDescription": "Multi-sided ride-sharing marketplace that connects riders with drivers. Features include real-time GPS tracking, dynamic pricing, driver matching algorithms, payment processing, and safety features. Supports multiple ride types (economy, premium, shared).",
+    "sessionType": "full",
+    "skipVisualization": false
+  },
+  "expectedBigPicture": {
+    "keyEvents": [
+      "Rider Registered",
+      "Driver Onboarded",
+      "Driver Background Check Completed",
+      "Vehicle Registered",
+      "Driver Went Online",
+      "Ride Requested",
+      "Surge Pricing Applied",
+      "Driver Search Started",
+      "Nearby Drivers Notified",
+      "Driver Accepted Ride",
+      "Ride Confirmed",
+      "ETA Calculated",
+      "Driver Arrived at Pickup",
+      "Rider Notified",
+      "Trip Started",
+      "Route Calculated",
+      "Trip Progress Updated",
+      "Destination Reached",
+      "Trip Completed",
+      "Fare Calculated",
+      "Payment Processed",
+      "Receipt Sent",
+      "Driver Rated",
+      "Rider Rated",
+      "Driver Paid",
+      "Driver Went Offline"
+    ],
+    "actors": [
+      "Rider",
+      "Driver",
+      "Support Agent",
+      "Safety Team",
+      "Operations Manager",
+      "Dispute Resolver"
+    ],
+    "externalSystems": [
+      "Maps/GPS Service (Google Maps)",
+      "Payment Gateway",
+      "SMS/Push Notification Service",
+      "Driver Background Check Service",
+      "Insurance Provider",
+      "Weather Service",
+      "Traffic Data Service",
+      "Fraud Detection Service"
+    ],
+    "hotSpots": [
+      "Driver no-show or cancellation penalties",
+      "Surge pricing transparency and acceptance",
+      "Route optimization vs actual driver navigation",
+      "Split fare handling with multiple riders",
+      "Safety incident reporting and response",
+      "Driver waiting time at pickup location",
+      "Fare disputes and adjustments",
+      "Pool/shared ride coordination"
+    ]
+  },
+  "expectedAggregates": [
+    "Ride",
+    "Driver",
+    "Rider",
+    "Trip",
+    "Fare",
+    "Payment",
+    "Rating",
+    "SafetyIncident"
+  ],
+  "expectedBoundedContexts": [
+    {
+      "name": "Ride Matching",
+      "aggregates": ["Ride", "Driver"],
+      "responsibility": "Match riders with available drivers in real-time"
+    },
+    {
+      "name": "Trip Execution",
+      "aggregates": ["Trip"],
+      "responsibility": "Track ongoing trips with GPS and routing"
+    },
+    {
+      "name": "Pricing",
+      "aggregates": ["Fare"],
+      "responsibility": "Calculate fares with dynamic pricing and promotions"
+    },
+    {
+      "name": "Payment Processing",
+      "aggregates": ["Payment"],
+      "responsibility": "Process rider payments and driver payouts"
+    },
+    {
+      "name": "Safety & Trust",
+      "aggregates": ["SafetyIncident", "Rating"],
+      "responsibility": "Handle safety features, incidents, and reputation management"
+    },
+    {
+      "name": "User Management",
+      "aggregates": ["Rider"],
+      "responsibility": "Manage rider and driver profiles"
+    }
+  ],
+  "expectedContextRelationships": [
+    {
+      "upstream": "Ride Matching",
+      "downstream": "Trip Execution",
+      "pattern": "customer-supplier",
+      "integration": "events"
+    },
+    {
+      "upstream": "Trip Execution",
+      "downstream": "Pricing",
+      "pattern": "customer-supplier",
+      "integration": "events"
+    },
+    {
+      "upstream": "Pricing",
+      "downstream": "Payment Processing",
+      "pattern": "customer-supplier",
+      "integration": "events"
+    },
+    {
+      "upstream": "Trip Execution",
+      "downstream": "Safety & Trust",
+      "pattern": "customer-supplier",
+      "integration": "events"
+    },
+    {
+      "upstream": "User Management",
+      "downstream": "Ride Matching",
+      "pattern": "open-host-service",
+      "integration": "api"
+    },
+    {
+      "upstream": "Safety & Trust",
+      "downstream": "User Management",
+      "pattern": "customer-supplier",
+      "integration": "events"
+    }
+  ]
+}

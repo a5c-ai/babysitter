@@ -1,0 +1,129 @@
+{
+  "name": "Hotel Booking System Event Storm",
+  "description": "Event storming for hotel reservation and management system with rooms, bookings, and guest services",
+  "inputs": {
+    "projectName": "hotel-booking-system",
+    "domainDescription": "Hotel management platform handling room inventory, reservations, guest check-in/check-out, housekeeping, and ancillary services. Includes online booking, loyalty programs, and revenue management.",
+    "sessionType": "full",
+    "skipVisualization": false
+  },
+  "expectedBigPicture": {
+    "keyEvents": [
+      "Room Inventory Updated",
+      "Rate Plan Published",
+      "Availability Checked",
+      "Room Reserved",
+      "Booking Confirmed",
+      "Payment Authorized",
+      "Confirmation Email Sent",
+      "Guest Arrived",
+      "ID Verified",
+      "Room Key Issued",
+      "Guest Checked In",
+      "Room Occupied",
+      "Service Requested",
+      "Room Service Delivered",
+      "Housekeeping Scheduled",
+      "Room Cleaned",
+      "Guest Checked Out",
+      "Final Bill Generated",
+      "Payment Settled",
+      "Room Inspected",
+      "Room Available for Booking",
+      "Review Submitted"
+    ],
+    "actors": [
+      "Guest",
+      "Front Desk Agent",
+      "Housekeeping Staff",
+      "Concierge",
+      "Revenue Manager",
+      "Maintenance Staff"
+    ],
+    "externalSystems": [
+      "Online Travel Agencies (OTAs)",
+      "Channel Manager",
+      "Payment Gateway",
+      "Property Management System",
+      "Smart Lock System",
+      "Loyalty Program Platform",
+      "Review Sites (TripAdvisor)"
+    ],
+    "hotSpots": [
+      "Overbooking strategy and resolution",
+      "Early check-in/late check-out requests",
+      "Dynamic pricing synchronization",
+      "Room type upgrades and downgrades",
+      "Group bookings with partial cancellations",
+      "Housekeeping coordination with check-out times"
+    ]
+  },
+  "expectedAggregates": [
+    "Booking",
+    "Room",
+    "Guest",
+    "RoomStay",
+    "Bill",
+    "RateCalendar",
+    "ServiceRequest"
+  ],
+  "expectedBoundedContexts": [
+    {
+      "name": "Reservations",
+      "aggregates": ["Booking", "RateCalendar"],
+      "responsibility": "Manage room reservations and availability"
+    },
+    {
+      "name": "Front Office",
+      "aggregates": ["RoomStay", "Guest"],
+      "responsibility": "Handle guest check-in, check-out, and services"
+    },
+    {
+      "name": "Housekeeping",
+      "aggregates": ["Room"],
+      "responsibility": "Manage room cleaning and maintenance status"
+    },
+    {
+      "name": "Billing",
+      "aggregates": ["Bill"],
+      "responsibility": "Generate and settle guest bills"
+    },
+    {
+      "name": "Guest Services",
+      "aggregates": ["ServiceRequest"],
+      "responsibility": "Handle concierge and room service requests"
+    }
+  ],
+  "expectedContextRelationships": [
+    {
+      "upstream": "Reservations",
+      "downstream": "Front Office",
+      "pattern": "customer-supplier",
+      "integration": "events"
+    },
+    {
+      "upstream": "Front Office",
+      "downstream": "Housekeeping",
+      "pattern": "customer-supplier",
+      "integration": "events"
+    },
+    {
+      "upstream": "Front Office",
+      "downstream": "Billing",
+      "pattern": "customer-supplier",
+      "integration": "events"
+    },
+    {
+      "upstream": "Housekeeping",
+      "downstream": "Reservations",
+      "pattern": "customer-supplier",
+      "integration": "events"
+    },
+    {
+      "upstream": "Guest Services",
+      "downstream": "Billing",
+      "pattern": "customer-supplier",
+      "integration": "api"
+    }
+  ]
+}

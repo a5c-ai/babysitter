@@ -1,0 +1,99 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "cloud-chaos-monkey-inputs",
+  "title": "Cloud Chaos Monkey — Input Schema",
+  "description": "Input parameters for the cloud-chaos-monkey babysitter process.",
+  "type": "object",
+  "required": ["provider", "projectIdentifier", "region"],
+  "additionalProperties": false,
+  "properties": {
+    "provider": {
+      "type": "string",
+      "enum": ["gcp", "aws", "azure", "custom"],
+      "description": "Cloud provider. Determines CLI hints, service naming, and provider-aware agent prompts."
+    },
+    "projectIdentifier": {
+      "type": "string",
+      "description": "Cloud project or account identifier (GCP project ID, AWS account ID, Azure subscription ID)."
+    },
+    "region": {
+      "type": "string",
+      "description": "Primary deployment region where services are running (e.g., 'us-central1', 'us-east-1', 'westeurope')."
+    },
+    "chaosPrefix": {
+      "type": "string",
+      "default": "chaos",
+      "description": "Prefix for shadow resource names. Shadow services are named '{chaosPrefix}-{originalName}'."
+    },
+    "faultDomains": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["service-crashes", "network-latency", "data-layer", "external-apis"]
+      },
+      "default": ["service-crashes", "network-latency", "data-layer", "external-apis"],
+      "description": "Fault domains to test. Each domain generates targeted chaos scenarios."
+    },
+    "executionMode": {
+      "type": "string",
+      "enum": ["hybrid", "automated", "manual"],
+      "default": "hybrid",
+      "description": "How chaos scenarios are executed. 'hybrid' mixes automated and manual steps. 'automated' runs all scenarios programmatically. 'manual' generates runbooks for human execution."
+    },
+    "safetyControls": {
+      "type": "object",
+      "description": "Safety guardrails for chaos execution.",
+      "additionalProperties": false,
+      "properties": {
+        "autoAbort": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically abort if error rate exceeds threshold."
+        },
+        "maxErrorRatePercent": {
+          "type": "number",
+          "default": 50,
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Maximum error rate percentage before auto-abort triggers."
+        },
+        "rollbackTimeoutSeconds": {
+          "type": "number",
+          "default": 120,
+          "minimum": 10,
+          "description": "Maximum seconds to wait for rollback completion."
+        }
+      }
+    },
+    "healthCheckConfig": {
+      "type": "object",
+      "description": "Configuration for health check probes during chaos execution.",
+      "additionalProperties": false,
+      "properties": {
+        "sampleCount": {
+          "type": "integer",
+          "default": 5,
+          "minimum": 1,
+          "description": "Number of health check samples to take per probe."
+        },
+        "timeoutSeconds": {
+          "type": "number",
+          "default": 10,
+          "minimum": 1,
+          "description": "Timeout in seconds for each health check probe."
+        }
+      }
+    },
+    "reportOutputPath": {
+      "type": "string",
+      "default": "docs/chaos-report.html",
+      "description": "File path where the interactive HTML report will be written."
+    },
+    "reportTheme": {
+      "type": "string",
+      "enum": ["dark", "light"],
+      "default": "dark",
+      "description": "Color theme for the generated HTML report."
+    }
+  }
+}

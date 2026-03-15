@@ -1,0 +1,177 @@
+{
+  "fullSpecDrivenDevelopment": {
+    "processId": "methodologies/spec-driven-development",
+    "description": "Complete spec-driven development workflow for a new feature",
+    "inputs": {
+      "projectName": "User Dashboard Analytics",
+      "initialRequirements": "Add comprehensive analytics dashboard showing user behavior, engagement metrics, and performance insights. Users should be able to filter by date range, export reports, and set up automated alerts.",
+      "developmentPhase": "greenfield",
+      "projectType": "web",
+      "targetAudience": "Product managers and data analysts",
+      "complianceRequirements": ["GDPR", "SOC2"]
+    }
+  },
+
+  "constitutionOnly": {
+    "processId": "methodologies/spec-kit-constitution",
+    "description": "Establish project constitution independently",
+    "inputs": {
+      "projectName": "Enterprise SaaS Platform",
+      "scope": "project",
+      "projectType": "web",
+      "targetAudience": "Enterprise customers (500+ employees)",
+      "complianceRequirements": ["SOC2", "HIPAA", "ISO27001"],
+      "existingStandards": {
+        "codingStyle": "Airbnb JavaScript Style Guide",
+        "testCoverage": "Minimum 80% for new code",
+        "reviewProcess": "Minimum 2 approvals for production"
+      }
+    }
+  },
+
+  "qualityChecklist": {
+    "processId": "methodologies/spec-kit-quality-checklist",
+    "description": "Generate and validate quality checklist for a specification",
+    "inputs": {
+      "targetType": "specification",
+      "target": {
+        "projectName": "Real-time Chat Feature",
+        "userStories": [
+          {
+            "id": "US1",
+            "priority": "P1",
+            "journey": "As a user, I want to send real-time messages to other users so that I can communicate instantly",
+            "acceptance": [
+              {
+                "given": "User is logged in",
+                "when": "User types a message and presses send",
+                "then": "Message appears instantly in both sender and recipient chat windows"
+              }
+            ]
+          }
+        ],
+        "requirements": [
+          {
+            "id": "REQ-1",
+            "capability": "WebSocket connection for real-time messaging",
+            "mustHave": true
+          }
+        ]
+      },
+      "constitution": {
+        "performance": {
+          "loadTime": {
+            "target": "Message delivery < 100ms"
+          }
+        },
+        "security": {
+          "dataProtection": "End-to-end encryption for messages"
+        }
+      },
+      "customCriteria": [
+        "Offline message queuing specified",
+        "Connection recovery strategy defined"
+      ]
+    }
+  },
+
+  "brownfieldFeature": {
+    "processId": "methodologies/spec-kit-brownfield",
+    "description": "Add new feature to existing application",
+    "inputs": {
+      "featureName": "Two-Factor Authentication",
+      "existingCodebase": "./src",
+      "featureDescription": "Add optional two-factor authentication using TOTP (Time-based One-Time Password). Users should be able to enable/disable 2FA in their account settings, and will be prompted for a code after password login when enabled.",
+      "existingConstitution": {
+        "security": {
+          "authentication": "JWT tokens with 24-hour expiration",
+          "dataProtection": "Passwords hashed with bcrypt"
+        },
+        "codeQuality": {
+          "testing": {
+            "coverage": "Minimum 75% for authentication code"
+          }
+        }
+      }
+    }
+  },
+
+  "mobileApp": {
+    "processId": "methodologies/spec-driven-development",
+    "description": "Spec-driven development for mobile application",
+    "inputs": {
+      "projectName": "Fitness Tracker Mobile App",
+      "initialRequirements": "Cross-platform mobile app for tracking workouts, nutrition, and progress. Users can log exercises, meals, weight, and view charts showing trends over time. Social features allow sharing achievements with friends.",
+      "developmentPhase": "greenfield",
+      "projectType": "mobile",
+      "targetAudience": "Health-conscious individuals aged 25-45",
+      "complianceRequirements": ["GDPR", "Health data privacy"],
+      "constraints": [
+        "Must work offline with sync when online",
+        "Support iOS 14+ and Android 10+",
+        "Maximum bundle size 50MB"
+      ]
+    }
+  },
+
+  "microservice": {
+    "processId": "methodologies/spec-driven-development",
+    "description": "Spec-driven development for microservice",
+    "inputs": {
+      "projectName": "Notification Service",
+      "initialRequirements": "Microservice handling email, SMS, and push notifications. Accepts notification requests via REST API and message queue, handles templating, tracks delivery status, implements retry logic, and provides webhook callbacks for delivery events.",
+      "developmentPhase": "greenfield",
+      "projectType": "api",
+      "targetAudience": "Internal services",
+      "complianceRequirements": ["CAN-SPAM Act", "GDPR"],
+      "constraints": [
+        "Must handle 10,000 notifications/minute",
+        "99.9% uptime SLA",
+        "Support multiple email and SMS providers"
+      ]
+    }
+  },
+
+  "refactoringWithSpecs": {
+    "processId": "methodologies/spec-kit-brownfield",
+    "description": "Use specs to guide major refactoring",
+    "inputs": {
+      "featureName": "Payment Processing Refactor",
+      "existingCodebase": "./src/payments",
+      "featureDescription": "Refactor monolithic payment processing code into modular architecture supporting multiple payment providers (Stripe, PayPal, Square). Extract provider-specific logic, create unified interface, add proper error handling, and improve testability.",
+      "existingConstitution": {
+        "architecture": {
+          "modularity": "Extract interfaces for external dependencies"
+        },
+        "codeQuality": {
+          "testing": {
+            "coverage": "100% for payment code",
+            "approach": "Integration tests with test payment providers"
+          }
+        },
+        "security": {
+          "dataProtection": "PCI DSS Level 1 compliance",
+          "sensitiveData": "Never log full card numbers or CVV"
+        }
+      }
+    }
+  },
+
+  "aiFeature": {
+    "processId": "methodologies/spec-driven-development",
+    "description": "AI-powered feature with spec-driven approach",
+    "inputs": {
+      "projectName": "Smart Document Summarization",
+      "initialRequirements": "AI-powered feature that analyzes uploaded documents and generates concise summaries. Supports PDF, Word, and text files up to 50 pages. Users can adjust summary length (brief/detailed) and get key points extracted. Summaries are stored and can be regenerated with different settings.",
+      "developmentPhase": "brownfield",
+      "projectType": "web",
+      "constraints": [
+        "Use Claude API for summarization",
+        "Processing time < 30 seconds for typical document",
+        "Cost per summary < $0.10"
+      ],
+      "existingCodebase": "./src",
+      "complianceRequirements": ["Data residency requirements", "No sensitive data sent to external APIs without encryption"]
+    }
+  }
+}

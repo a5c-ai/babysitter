@@ -1,0 +1,29 @@
+{
+  "name": "Metaswarm Orchestrator - Feature Development",
+  "description": "Full 7-phase lifecycle for implementing a new feature from issue to merged PR",
+  "processId": "methodologies/metaswarm/metaswarm-orchestrator",
+  "inputs": {
+    "issueDescription": "Implement user authentication with OAuth2 and session management including refresh token rotation",
+    "projectRoot": ".",
+    "coverageThresholds": {
+      "lines": 100,
+      "branches": 100,
+      "functions": 100,
+      "statements": 100
+    },
+    "maxRetries": 3,
+    "executionMode": "orchestrated"
+  },
+  "expectedOutcomes": {
+    "phases": [
+      "research-planning (Researcher explores codebase, Architect creates plan)",
+      "plan-review-gate (3 adversarial reviewers: feasibility, completeness, scope)",
+      "preflight-validation (external dependency detection)",
+      "design-review-gate (6 parallel specialists, all must approve)",
+      "orchestrated-execution (4-phase cycle per work unit)",
+      "final-review (cross-unit integration check)",
+      "self-reflection (extract learnings before PR)",
+      "pr-creation (PR Shepherd monitors through merge)"
+    ]
+  }
+}

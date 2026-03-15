@@ -4,11 +4,13 @@ const fs = require('fs');
 const path = require('path');
 const { spawnSync } = require('child_process');
 const { supports, getCompatibilityReport } = require('../.codex/sdk-cli');
+const { resolveSdkPackage } = require('../.codex/sdk-package');
 
 const ROOT = path.resolve(__dirname, '..');
 const PROCESS_DIR = path.join(ROOT, '.a5c', 'processes');
 const RUNS_DIR = path.join(ROOT, '.a5c', 'runs');
 const STRICT = process.argv.includes('--strict');
+const SDK_PACKAGE = resolveSdkPackage();
 
 function fail(message, details) {
   console.error('[scenario] FAIL:', message);
@@ -49,9 +51,9 @@ function runnerCandidates() {
     { bin: localCmd, baseArgs: [] },
   ];
   if (process.platform === 'win32') {
-    candidates.push({ bin: 'npx.cmd', baseArgs: ['-y', '@a5c-ai/babysitter-sdk@0.0.173'] });
+    candidates.push({ bin: 'npx.cmd', baseArgs: ['-y', SDK_PACKAGE] });
   } else {
-    candidates.push({ bin: 'npx', baseArgs: ['-y', '@a5c-ai/babysitter-sdk@0.0.173'] });
+    candidates.push({ bin: 'npx', baseArgs: ['-y', SDK_PACKAGE] });
   }
   return candidates;
 }
@@ -133,6 +135,8 @@ function verifySkillLibrary() {
     'forever',
     'doctor',
     'observe',
+    'model',
+    'issue',
     'help',
     'project-install',
     'user-install',

@@ -3,6 +3,7 @@ import { JournalEvent } from "../../storage/types";
 import { RunFailedError } from "../exceptions";
 import { EffectRecord, EffectStatus, SerializedEffectError } from "../types";
 import { serializeUnknownError } from "../errorUtils";
+import { collapseDoubledA5cRuns } from "../../cli/resolveInputPath";
 
 export interface BuildEffectIndexOptions {
   runDir: string;
@@ -204,10 +205,10 @@ export class EffectIndex {
     }
     const status: EffectStatus = payload.status === "ok" ? "resolved_ok" : "resolved_error";
     record.status = status;
-    record.resultRef = payload.resultRef;
+    record.resultRef = payload.resultRef ? collapseDoubledA5cRuns(payload.resultRef) : payload.resultRef;
     record.error = payload.error;
-    record.stdoutRef = payload.stdoutRef;
-    record.stderrRef = payload.stderrRef;
+    record.stdoutRef = payload.stdoutRef ? collapseDoubledA5cRuns(payload.stdoutRef) : payload.stdoutRef;
+    record.stderrRef = payload.stderrRef ? collapseDoubledA5cRuns(payload.stderrRef) : payload.stderrRef;
     record.resolvedAt = event.recordedAt;
   }
 

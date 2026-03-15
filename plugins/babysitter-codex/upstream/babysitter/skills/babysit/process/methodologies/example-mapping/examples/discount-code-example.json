@@ -1,0 +1,46 @@
+{
+  "description": "Example Mapping for e-commerce discount code feature",
+  "inputs": {
+    "userStory": "As a customer, I want to apply discount codes at checkout, so that I can save money on my purchase",
+    "timeboxMinutes": 25,
+    "sessionMode": "collaborative",
+    "existingContext": {
+      "existingFeatures": ["shopping cart", "checkout flow", "payment processing"],
+      "businessRules": ["promotional campaigns", "customer loyalty program"]
+    },
+    "stakeholders": [
+      { "role": "product-owner", "name": "Alice" },
+      { "role": "marketing-manager", "name": "Bob" },
+      { "role": "developer", "name": "Charlie" },
+      { "role": "qa-engineer", "name": "Diana" }
+    ]
+  },
+  "expectedOutputs": {
+    "rules": [
+      "Valid codes reduce order total by code percentage or fixed amount",
+      "Expired codes are rejected with error message",
+      "One code per order (no stacking)",
+      "Minimum order value may apply",
+      "Code is case-insensitive",
+      "Invalid code format shows validation error",
+      "Code usage limits enforced (per user, per campaign)",
+      "Free shipping codes reduce shipping to $0"
+    ],
+    "exampleScenarios": [
+      "Apply 20% off code to $100 order → $80 total",
+      "Apply expired code → error message",
+      "Try to stack two codes → error, keep first code",
+      "Apply code below minimum order → error message",
+      "Apply code with mixed case → works correctly",
+      "Apply code at usage limit → error message"
+    ],
+    "questions": [
+      "What happens if discount brings total below $0?",
+      "Do codes apply to shipping costs?",
+      "Can codes be used with sale items?",
+      "How do we handle codes during refunds?",
+      "What's the priority if multiple promotional rules apply?"
+    ],
+    "readiness": "likely ready after questions answered"
+  }
+}

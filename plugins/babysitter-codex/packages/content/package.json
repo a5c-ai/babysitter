@@ -1,0 +1,10 @@
+{
+  "name": "@a5c/babysitter-codex-content",
+  "version": "0.1.4",
+  "private": true,
+  "description": "Content pack with upstream babysitter process/skill/reference library",
+  "files": [
+    "../../upstream/babysitter",
+    "../../config/codex-command-map.json"
+  ]
+}

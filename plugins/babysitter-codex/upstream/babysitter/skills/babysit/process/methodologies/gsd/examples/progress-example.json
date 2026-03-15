@@ -1,0 +1,8 @@
+{
+  "projectPath": ".",
+  "options": {
+    "verbose": true,
+    "showBlockers": true,
+    "showRecentWork": true
+  }
+}

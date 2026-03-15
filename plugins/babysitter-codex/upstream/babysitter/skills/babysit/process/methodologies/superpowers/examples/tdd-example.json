@@ -1,0 +1,29 @@
+{
+  "name": "Test-Driven Development - Retry Mechanism",
+  "description": "Implement retry with exponential backoff using strict TDD",
+  "processId": "methodologies/superpowers/test-driven-development",
+  "inputs": {
+    "task": "Implement a retry mechanism with exponential backoff for HTTP requests",
+    "testFramework": "vitest",
+    "maxCycles": 10,
+    "qualityThreshold": 90
+  },
+  "expectedOutcomes": {
+    "behaviors": [
+      "retries failed operations up to max attempts",
+      "applies exponential backoff between retries",
+      "succeeds immediately on first success",
+      "throws after max retries exhausted",
+      "respects configurable max delay cap",
+      "handles non-retryable errors immediately"
+    ],
+    "cyclesPerBehavior": {
+      "red": "write failing test",
+      "verifyRed": "confirm correct failure",
+      "green": "minimal passing code",
+      "verifyGreen": "all tests pass",
+      "refactor": "clean up",
+      "commit": "frequent small commit"
+    }
+  }
+}

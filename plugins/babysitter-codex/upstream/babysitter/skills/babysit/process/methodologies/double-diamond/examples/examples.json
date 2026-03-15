@@ -1,0 +1,195 @@
+{
+  "examples": [
+    {
+      "name": "Food Delivery App Redesign",
+      "file": "food-delivery-example.json",
+      "description": "Complete Double Diamond for redesigning food delivery app experience",
+      "useCase": "Consumer mobile app with UX problems",
+      "phase": "full",
+      "highlights": [
+        "Discovery revealed decision fatigue and unreliable ETAs as key problems",
+        "Problem definition focused on confidence and time management",
+        "Development generated 7 distinct solution concepts",
+        "Delivery combined best elements into unified 'Confident Ordering' solution"
+      ]
+    },
+    {
+      "name": "Healthcare Patient Portal",
+      "file": "healthcare-portal-example.json",
+      "description": "Double Diamond for improving patient portal usability",
+      "useCase": "Healthcare B2C portal for appointment management and records",
+      "phase": "full",
+      "highlights": [
+        "Discovery with patients and healthcare providers",
+        "Problem definition around medical information comprehension",
+        "Design principles emphasizing clarity and empowerment",
+        "Solution focused on plain language and visual health timelines"
+      ]
+    },
+    {
+      "name": "Enterprise Dashboard Discovery",
+      "file": "enterprise-dashboard-example.json",
+      "description": "Discovery and definition phases for enterprise analytics dashboard",
+      "useCase": "B2B enterprise analytics tool",
+      "phase": "define",
+      "highlights": [
+        "Discovery phase with data analysts and executives",
+        "Problem definition converged on 'insight discovery vs. report generation'",
+        "Design principles balancing depth and simplicity",
+        "Stopped at definition to validate problem with stakeholders"
+      ]
+    },
+    {
+      "name": "Smart Home App Concept Development",
+      "file": "smart-home-example.json",
+      "description": "Development and delivery phases for smart home control app",
+      "useCase": "IoT consumer app for home automation",
+      "phase": "deliver",
+      "highlights": [
+        "Started from existing problem definition",
+        "Development generated 8 concepts from manual to fully automated control",
+        "Delivery converged on 'Intelligent Suggestions' with manual override",
+        "Implementation plan with phased rollout of automation features"
+      ]
+    },
+    {
+      "name": "Educational Platform for Teachers",
+      "file": "education-platform-example.json",
+      "description": "Complete Double Diamond for teacher classroom management tool",
+      "useCase": "EdTech B2B platform for K-12 teachers",
+      "phase": "full",
+      "highlights": [
+        "Discovery revealed teacher time management crisis",
+        "Multiple iterations: first diamond too broad, second zoomed into grading workflow",
+        "Development concepts ranged from AI auto-grading to better manual workflows",
+        "Final solution balanced automation with teacher judgment and control"
+      ]
+    },
+    {
+      "name": "Retail Store Checkout Redesign",
+      "file": "retail-checkout-example.json",
+      "description": "Discovery phase only for retail checkout experience",
+      "useCase": "Physical retail store checkout process improvement",
+      "phase": "discover",
+      "highlights": [
+        "User research through observation and interviews",
+        "Discovered tension between speed (customers) and thoroughness (staff)",
+        "Problem areas: payment friction, loyalty program confusion, bag packing delays",
+        "Discovery complete, ready for definition workshop with store managers"
+      ]
+    }
+  ],
+  "usagePatterns": {
+    "fullWorkflow": {
+      "description": "Complete Double Diamond from discovery through delivery",
+      "exampleFiles": [
+        "food-delivery-example.json",
+        "healthcare-portal-example.json",
+        "education-platform-example.json"
+      ],
+      "phases": ["discover", "define", "develop", "deliver"]
+    },
+    "problemExploration": {
+      "description": "Discovery and definition only to validate problem before solution work",
+      "exampleFiles": [
+        "enterprise-dashboard-example.json",
+        "retail-checkout-example.json"
+      ],
+      "phases": ["discover", "define"]
+    },
+    "solutionDevelopment": {
+      "description": "Development and delivery with pre-existing problem definition",
+      "exampleFiles": ["smart-home-example.json"],
+      "phases": ["develop", "deliver"]
+    }
+  },
+  "learningPath": {
+    "beginner": {
+      "start": "retail-checkout-example.json",
+      "reason": "Simple discovery phase showing divergent thinking in familiar context",
+      "keyLearnings": [
+        "How to conduct user research",
+        "Divergent thinking in discovery",
+        "Identifying problem areas without jumping to solutions"
+      ]
+    },
+    "intermediate": {
+      "start": "food-delivery-example.json",
+      "reason": "Complete diamond showing all four phases clearly",
+      "keyLearnings": [
+        "Full Double Diamond workflow",
+        "Convergent problem definition from broad insights",
+        "Ideation generating multiple concepts",
+        "Converging to final solution with implementation plan"
+      ]
+    },
+    "advanced": {
+      "start": "education-platform-example.json",
+      "reason": "Shows iteration - running multiple diamonds to refine scope",
+      "keyLearnings": [
+        "When and why to iterate",
+        "Zooming in from broad to specific",
+        "Balancing stakeholder constraints with user needs",
+        "Phased implementation strategy"
+      ]
+    }
+  },
+  "industryVariations": {
+    "consumer": {
+      "examples": ["food-delivery-example.json", "smart-home-example.json"],
+      "notes": "Consumer apps emphasize ease of use, delight, and emotional connection. Discovery often reveals unstated desires and frustrations."
+    },
+    "healthcare": {
+      "examples": ["healthcare-portal-example.json"],
+      "notes": "Healthcare requires special attention to comprehension, trust, and accessibility. Design principles must address health literacy and patient empowerment."
+    },
+    "enterprise": {
+      "examples": ["enterprise-dashboard-example.json"],
+      "notes": "Enterprise tools balance power-user needs with simplicity. Multiple stakeholder perspectives must be reconciled in problem definition."
+    },
+    "education": {
+      "examples": ["education-platform-example.json"],
+      "notes": "EdTech must respect teacher expertise while addressing time constraints. Solutions should enhance, not replace, teacher judgment."
+    },
+    "retail": {
+      "examples": ["retail-checkout-example.json"],
+      "notes": "Retail involves physical and digital touchpoints. Must balance customer experience with operational efficiency and staff needs."
+    }
+  },
+  "commonPatterns": {
+    "discoveryInsights": [
+      "Gap between what users say and what they do",
+      "Workarounds reveal pain points",
+      "Edge cases illuminate core problems",
+      "Contradictions between stakeholders",
+      "Unstated emotional needs alongside functional ones"
+    ],
+    "problemStatementFormats": [
+      "[User group] struggle to [goal] because [root cause], resulting in [impact]",
+      "[User group] need a way to [job to be done] but [current solution] doesn't [capability gap]",
+      "When [situation], [user group] can't [desired action] which leads to [consequence]"
+    ],
+    "designPrincipleTypes": [
+      "User-value principles (e.g., 'Empower, don't dictate')",
+      "Experience principles (e.g., 'Predictable over optimistic')",
+      "Interaction principles (e.g., 'Guide decisions, don't overwhelm')",
+      "Brand principles (e.g., 'Transparent and trustworthy')"
+    ],
+    "ideationTechniques": [
+      "Brainstorming (divergent generation)",
+      "SCAMPER (Substitute, Combine, Adapt, Modify, Put to other use, Eliminate, Reverse)",
+      "Worst possible idea (then flip to best)",
+      "Analogies from other domains",
+      "How might we... questions",
+      "Storyboarding user journeys"
+    ],
+    "convergenceCriteria": [
+      "Alignment with design principles",
+      "Addresses success criteria",
+      "Technical feasibility",
+      "User value vs. implementation effort",
+      "Risk level acceptable",
+      "Stakeholder buy-in"
+    ]
+  }
+}

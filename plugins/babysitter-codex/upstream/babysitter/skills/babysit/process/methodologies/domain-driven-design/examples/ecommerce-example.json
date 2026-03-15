@@ -1,0 +1,55 @@
+{
+  "name": "E-Commerce Platform - Full DDD",
+  "description": "Complete domain-driven design for an e-commerce marketplace",
+  "inputs": {
+    "projectName": "E-Commerce Marketplace",
+    "domainDescription": "An online marketplace platform that connects buyers and sellers. Sellers can list products with descriptions, images, and pricing. Buyers can browse products, add items to shopping cart, complete checkout, and track orders. The platform handles payment processing, inventory management, order fulfillment, and shipping coordination. Additional features include product reviews, seller ratings, customer support, and promotional campaigns.",
+    "complexity": "complex",
+    "phase": "full",
+    "generateImplementation": true
+  },
+  "expectedOutcomes": {
+    "subdomains": {
+      "core": [
+        "Product Catalog",
+        "Order Management",
+        "Dynamic Pricing"
+      ],
+      "supporting": [
+        "Inventory Management",
+        "Shipping Coordination",
+        "Customer Support",
+        "Reviews & Ratings"
+      ],
+      "generic": [
+        "Authentication",
+        "Payment Processing",
+        "Email Notifications"
+      ]
+    },
+    "boundedContexts": [
+      "Catalog Context",
+      "Sales Context",
+      "Fulfillment Context",
+      "Customer Context",
+      "Marketing Context"
+    ],
+    "keyAggregates": [
+      "Product",
+      "Order",
+      "ShoppingCart",
+      "Shipment",
+      "Customer"
+    ],
+    "domainEvents": [
+      "ProductPublished",
+      "ProductPriceChanged",
+      "ItemAddedToCart",
+      "OrderPlaced",
+      "PaymentProcessed",
+      "OrderShipped",
+      "OrderDelivered",
+      "ReviewSubmitted"
+    ]
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "runId": "test-run-002",
+  "processId": "test-process",
+  "layoutVersion": 1,
+  "createdAt": "2026-03-10T09:00:00.000Z",
+  "prompt": "Test failed run prompt"
+}

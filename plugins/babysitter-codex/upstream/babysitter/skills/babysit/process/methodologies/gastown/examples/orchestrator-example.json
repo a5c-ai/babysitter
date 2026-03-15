@@ -1,0 +1,23 @@
+{
+  "name": "Gas Town Orchestrator - Feature Development",
+  "description": "Mayor coordinates multi-agent convoy for a feature implementation",
+  "processId": "methodologies/gastown/gastown-orchestrator",
+  "inputs": {
+    "goal": "Implement user authentication with OAuth2 and session management",
+    "projectRoot": ".",
+    "agentPool": ["crew-lead", "polecat", "polecat", "polecat"],
+    "maxConvoys": 2,
+    "qualityThreshold": 85
+  },
+  "expectedOutcomes": {
+    "phases": [
+      "setup-town (infrastructure and agent discovery)",
+      "analyze-work (MEOW decomposition)",
+      "create-convoy (work order with beads)",
+      "assign-workers (Crew for auth core, Polecats for endpoints)",
+      "monitor-execution (GUPP enforcement)",
+      "merge-review (Refinery integration)",
+      "completion-summary (attribution report)"
+    ]
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "approval": {
+    "default": "interactive",
+    "alwaysBreakOn": ["deploy", "destructive-git", "production-db"]
+  },
+  "safety": {
+    "planModeImmutable": true
+  },
+  "quality": {
+    "requireTests": true,
+    "minScore": 80
+  }
+}

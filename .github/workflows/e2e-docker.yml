@@ -8,6 +8,7 @@ on:
       - 'docker-compose.yml'
       - 'packages/sdk/**'
       - 'plugins/babysitter/**'
+      - 'plugins/pi/**'
       - 'e2e-tests/**'
       - '.github/workflows/e2e-docker.yml'
   push:
@@ -20,6 +21,7 @@ on:
       - 'docker-compose.yml'
       - 'packages/sdk/**'
       - 'plugins/babysitter/**'
+      - 'plugins/pi/**'
       - 'e2e-tests/**'
       - '.github/workflows/e2e-docker.yml'
   workflow_dispatch:
@@ -67,26 +69,26 @@ jobs:
             e2e-tests/docker/structural.test.ts \
             e2e-tests/docker/sdk-cli.test.ts \
             e2e-tests/docker/stop-hook.test.ts \
+            e2e-tests/docker/pi-harness.test.ts \
+            e2e-tests/docker/pi-workflow.test.ts \
             2>&1 | tee e2e-artifacts/structural-tests.log
 
-      - name: Run fixture & E2E orchestration tests
-        if: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
-        # E2E orchestration requires valid credentials (Foundry or Anthropic API key).
+      # NOTE: orchestration.test.ts (Anthropic Foundry) is disabled —
+      # Foundry model is no longer provisioned.  Re-enable when restored.
+
+      - name: Run Pi workflow tests with Azure OpenAI (gated on secret)
+        if: env.AZURE_OPENAI_API_KEY != ''
+        env:
+          AZURE_OPENAI_API_KEY: ${{ secrets.AZURE_OPENAI_API_KEY }}
+          AZURE_OPENAI_PROJECT_NAME: ${{ secrets.AZURE_OPENAI_PROJECT_NAME }}
+          AZURE_OPENAI_DEPLOYMENT: ${{ secrets.AZURE_OPENAI_DEPLOYMENT }}
         run: |
           set -euo pipefail
           npx vitest run --config e2e-tests/docker/vitest.config.ts \
             --reporter=default --reporter=json \
-            --outputFile.json=e2e-artifacts/test-results-e2e.json \
-            e2e-tests/docker/orchestration.test.ts \
-            2>&1 | tee e2e-artifacts/e2e-tests.log
-        env:
-          CLAUDE_CODE_USE_FOUNDRY: ${{ secrets.CLAUDE_CODE_USE_FOUNDRY }}
-          ANTHROPIC_FOUNDRY_RESOURCE: ${{ secrets.ANTHROPIC_FOUNDRY_RESOURCE }}
-          ANTHROPIC_FOUNDRY_API_KEY: ${{ secrets.ANTHROPIC_FOUNDRY_API_KEY }}
-          ANTHROPIC_DEFAULT_SONNET_MODEL: ${{ secrets.ANTHROPIC_DEFAULT_SONNET_MODEL }}
-          ANTHROPIC_DEFAULT_HAIKU_MODEL: ${{ secrets.ANTHROPIC_DEFAULT_HAIKU_MODEL }}
-          ANTHROPIC_DEFAULT_OPUS_MODEL: ${{ secrets.ANTHROPIC_DEFAULT_OPUS_MODEL }}
-        timeout-minutes: 35
+            --outputFile.json=e2e-artifacts/test-results-pi-azure.json \
+            e2e-tests/docker/pi-workflow.test.ts \
+            2>&1 | tee e2e-artifacts/pi-azure-tests.log
 
       - name: Upload test artifacts
         if: always()

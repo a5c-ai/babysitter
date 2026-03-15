@@ -1,0 +1,6 @@
+{
+  "userName": "Alex",
+  "rolePack": "engineer",
+  "vaultPath": "./cog-vault",
+  "cycleMode": "setup"
+}

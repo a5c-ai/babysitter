@@ -1,0 +1,6 @@
+{
+  "taskDescription": "Evaluate and select a state management solution for the React frontend, considering Redux, Zustand, Jotai, and MobX",
+  "projectPath": "./planning",
+  "qualityThreshold": 90,
+  "phases": ["research", "comparison", "proof-of-concept", "decision", "documentation"]
+}

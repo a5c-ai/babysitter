@@ -1,0 +1,163 @@
+name: VSCode Extension Release
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'packages/vscode-extension/**'
+
+permissions:
+  contents: write
+  id-token: write
+
+concurrency:
+  group: vscode-extension-release-main
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    if: ${{ !contains(github.event.head_commit.message, '[skip release]') }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          # Workaround: npm ci on Windows-generated lockfile may miss linux optional deps
+          npm install --no-save @rollup/rollup-linux-x64-gnu 2>/dev/null || true
+
+      - name: Prepare artifacts directory
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/logs
+
+      - name: Type check
+        run: |
+          set -euo pipefail
+          cd packages/vscode-extension && npx tsc --noEmit 2>&1 | tee ../../artifacts/logs/typecheck.log
+
+      - name: Lint
+        run: |
+          set -euo pipefail
+          npm run lint --workspace=babysitter-observer 2>&1 | tee artifacts/logs/lint.log
+
+      - name: Build
+        run: |
+          set -euo pipefail
+          npm run build --workspace=babysitter-observer 2>&1 | tee artifacts/logs/build.log
+
+      - name: Unit tests with coverage
+        run: |
+          set -euo pipefail
+          npm run test:coverage --workspace=babysitter-observer 2>&1 | tee artifacts/logs/unit-tests.log
+
+      - name: Upload build logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-logs
+          path: artifacts/logs
+          if-no-files-found: warn
+
+  release:
+    if: ${{ !contains(github.event.head_commit.message, '[skip release]') }}
+    needs: validate
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          # Workaround: npm ci on Windows-generated lockfile may miss linux optional deps
+          npm install --no-save @rollup/rollup-linux-x64-gnu 2>/dev/null || true
+
+      - name: Download build logs
+        uses: actions/download-artifact@v4
+        with:
+          name: build-logs
+          path: artifacts/logs
+
+      - name: Prepare release artifacts directory
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/release
+
+      - name: Build extension
+        run: |
+          set -euo pipefail
+          npm run build --workspace=babysitter-observer
+
+      - name: Package VSIX
+        run: |
+          set -euo pipefail
+          cd packages/vscode-extension
+          npx @vscode/vsce package --no-dependencies --out ../../artifacts/release/
+          ls -lh ../../artifacts/release/*.vsix
+
+      - name: Get extension version
+        id: version
+        run: |
+          set -euo pipefail
+          VERSION=$(node -e "console.log(require('./packages/vscode-extension/package.json').version)")
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Publish to VSCode Marketplace
+        env:
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}
+        run: |
+          set -euo pipefail
+          cd packages/vscode-extension
+          npx @vscode/vsce publish --no-dependencies -p $VSCE_PAT
+
+      - name: Upload VSIX artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: vscode-extension-vsix
+          path: artifacts/release/*.vsix
+          if-no-files-found: error
+
+      - name: Attach VSIX to GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          TAG="v${{ steps.version.outputs.version }}"
+          VSIX_FILE=$(ls artifacts/release/*.vsix | head -n1)
+          if [[ -z "$VSIX_FILE" ]]; then
+            echo "No VSIX file found" >&2
+            exit 1
+          fi
+          # Check if release exists, if not create it
+          if ! gh release view "$TAG" >/dev/null 2>&1; then
+            gh release create "$TAG" "$VSIX_FILE" \
+              --title "VSCode Extension $TAG" \
+              --notes "VSCode Extension release ${{ steps.version.outputs.version }}"
+          else
+            # Attach to existing release
+            gh release upload "$TAG" "$VSIX_FILE" --clobber
+          fi

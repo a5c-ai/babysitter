@@ -1,0 +1,23 @@
+{
+  "name": "RPIKit Research - Authentication System Investigation",
+  "description": "Research phase exploring how authentication works in the codebase before planning changes",
+  "processId": "methodologies/rpikit/rpikit-research",
+  "inputs": {
+    "question": "How does the current authentication system handle session management and token refresh?",
+    "projectRoot": ".",
+    "priorContext": "",
+    "constraints": {
+      "compatibility": "Must maintain backward compatibility with existing API clients",
+      "security": "Must comply with OWASP authentication guidelines"
+    }
+  },
+  "expectedOutcomes": {
+    "phases": [
+      "clarify-request (Iron Law: understand before exploring)",
+      "locate-files (file-finder agent discovers relevant files)",
+      "examine-codebase (systematic reading in dependency order)",
+      "external-research (web-researcher for unknown patterns)",
+      "document-findings (structured research document)"
+    ]
+  }
+}

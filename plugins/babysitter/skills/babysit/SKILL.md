@@ -97,8 +97,10 @@ Before building the process, check for an existing user profile to personalize t
 
 #### Process creation phase
 
-after the interview phase, create the complete custom process files (js and jsons) for the run according to the Process Creation Guidelines and methodologies section. also install the babysitter-sdk inside .a5c if it is not already installed. (install it in .a5c/package.json if it is not already installed, make sure to use the latest version)
+after the interview phase, create the complete custom process files (js and jsons) for the run according to the Process Creation Guidelines and methodologies section. also install the babysitter-sdk inside .a5c if it is not already installed. (install it in .a5c/package.json if it is not already installed, make sure to use the latest version). **IMPORTANT**: When installing into `.a5c/`, use `npm i --prefix .a5c @a5c-ai/babysitter-sdk@latest` or a subshell `(cd .a5c && npm i @a5c-ai/babysitter-sdk@latest)` to avoid leaving CWD inside `.a5c/`, which causes doubled path resolution bugs.
 you must abide the syntax and structure of the process files from the process library.
+
+**IMPORTANT — Path resolution**: Always use **absolute paths** for `--entry` when calling `run:create`, and always run the CLI from the **project root** directory (not from `.a5c/`). Using relative paths while CWD is inside `.a5c/` causes doubled paths like `.a5c/.a5c/runs/` or `.a5c/.a5c/processes/`.
 
 **User profile awareness**: If a user profile was loaded in the User Profile Integration step, use it to inform process design — adjust breakpoint density per the user's tolerance level, select agents/skills the user prefers, and match the process complexity to the user's expertise.
 
@@ -119,7 +121,6 @@ $CLI run:create \
   --inputs <file> \
   --prompt "$PROMPT" \
   --harness claude-code \
-  --session-id "${CLAUDE_SESSION_ID}" \
   --plugin-root "${CLAUDE_PLUGIN_ROOT}" \
   --json
 ```
@@ -128,8 +129,7 @@ $CLI run:create \
 - `--process-id <id>` — unique identifier for the process definition
 - `--entry <path>#<export>` — path to the process JS file and its named export (e.g., `./my-process.js#process`)
 - `--prompt "$PROMPT"` — the user's initial prompt/request text
-- `--harness claude-code` — activates Claude Code session binding (init + associate in one step)
-- `--session-id "${CLAUDE_SESSION_ID}"` — the current Claude Code session ID (available as env var)
+- `--harness claude-code` — activates Claude Code session binding (init + associate in one step). The session ID is auto-detected from `CLAUDE_ENV_FILE` (written by the session-start hook).
 - `--plugin-root "${CLAUDE_PLUGIN_ROOT}"` — plugin root directory for state file resolution
 
 **Optional flags:**
@@ -142,7 +142,7 @@ This single command creates the run AND binds the session (initializing the stop
 **For resuming existing runs:**
 
 ```bash
-$CLI session:resume --session-id "${CLAUDE_SESSION_ID}" \
+$CLI session:resume \
   --state-dir "${CLAUDE_PLUGIN_ROOT}/skills/babysit/state" \
   --run-id <runId> --runs-dir .a5c/runs --json
 ```
@@ -223,6 +223,33 @@ If running in interactive mode, use AskUserQuestion tool to ask the user the bre
 - NEVER fabricate, synthesize, or infer approval text. Only pass through the user's actual selected response verbatim.
 - NEVER assume approval from ambiguous, empty, or missing responses. When in doubt, the answer is "not approved".
 
+**CRITICAL: Breakpoint rejection posting rules:**
+- Breakpoint rejection MUST be posted with `--status ok` and a value of `{"approved": false, "response": "..."}`. NEVER use `--status error` for a user rejection — that signals a task execution failure and will trigger `RUN_FAILED`, requiring manual journal surgery to recover.
+- Only use `--status error` if the `AskUserQuestion` tool itself throws an error.
+
+**Breakpoint posting examples:**
+
+```bash
+# ✅ CORRECT: User approved the breakpoint
+echo '{"approved": true, "response": "Looks good, proceed"}' > tasks/<effectId>/output.json
+$CLI task:post <runId> <effectId> --status ok --value tasks/<effectId>/output.json
+
+# ✅ CORRECT: User rejected the breakpoint
+echo '{"approved": false, "response": "Stop here"}' > tasks/<effectId>/output.json
+$CLI task:post <runId> <effectId> --status ok --value tasks/<effectId>/output.json
+
+# ❌ WRONG: Posting rejection as error — causes RUN_FAILED
+$CLI task:post <runId> <effectId> --status error
+```
+
+**Breakpoint value payload schema:**
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `approved` | `boolean` | Yes | Whether the user approved the breakpoint |
+| `response` | `string` | No | The user's response text or selected option |
+| `feedback` | `string` | No | Additional feedback from the user |
+
 After receiving an explicit approval or rejection from the user, post the result of the breakpoint to the run by calling `task:post`.
 
 Breakpoints are meant for human approval. NEVER prompt directly and never release or approve breakpoints yourself. Once the user responds via the AskUserQuestion tool, post the result of the breakpoint to the run by calling `task:post` when the breakpoint is resolved.
@@ -233,7 +260,20 @@ Otherwise:
 
 ##### 5.1.2 Non-interactive mode
 
-If running in non-interactive mode, skip the AskUserQuestion tool as it is not available. resolve the breakpoint by selecting the best option according to the context and the intent of the user. then post the result of the breakpoint to the run by calling `task:post` when the breakpoint is resolved.
+If running in non-interactive mode, skip the AskUserQuestion tool as it is not available. Resolve the breakpoint by selecting the best option according to the context and the intent of the user, then post the result via `task:post`.
+
+**CRITICAL:** When rejecting a breakpoint in non-interactive mode, always use `--status ok` with `{"approved": false}` in the value payload. Never use `--status error` for rejections — it will fail the entire run.
+
+**Non-interactive breakpoint posting:**
+```bash
+# Approve: proceed with the action
+echo '{"approved": true, "response": "Auto-approved based on context"}' > tasks/<effectId>/output.json
+$CLI task:post <runId> <effectId> --status ok --value tasks/<effectId>/output.json
+
+# Reject: skip but keep the run alive
+echo '{"approved": false, "response": "Skipped — not applicable in current context"}' > tasks/<effectId>/output.json
+$CLI task:post <runId> <effectId> --status ok --value tasks/<effectId>/output.json
+```
 
 ### 6. Results Posting
 
@@ -283,6 +323,21 @@ $CLI task:post <runId> <effectId> --status ok
 echo '{"score": 85}' > tasks/<effectId>/output.json
 $CLI task:post <runId> <effectId> --status ok --value tasks/<effectId>/output.json
 ```
+
+**Breakpoint-specific posting:**
+
+Breakpoints use the same `task:post` workflow but require a specific value payload with an `approved` field:
+
+```bash
+# Breakpoint approval
+echo '{"approved": true, "response": "User approved"}' > tasks/<effectId>/output.json
+$CLI task:post <runId> <effectId> --status ok --value tasks/<effectId>/output.json
+
+# Breakpoint rejection (ALWAYS use --status ok, not --status error)
+echo '{"approved": false, "response": "User rejected"}' > tasks/<effectId>/output.json
+$CLI task:post <runId> <effectId> --status ok --value tasks/<effectId>/output.json
+```
+
 ---
 
 ### 7. STOP after every phase after run-session association — the hook drives the loop, not you.
@@ -305,14 +360,16 @@ After you ran run:create, progress through the phases above by Stopping the sess
 
 ## Task Kinds
 
-| Kind | Description | Executor |
-|------|-------------|----------|
-| `node` | Node.js script | Local node process |
-| `shell` | Shell script | Local shell process |
-| `agent` | LLM agent | Agent runtime |
-| `skill` | Claude Code skill | Skill system |
-| `breakpoint` | Human approval | UI/CLI |
-| `sleep` | Time gate | Scheduler |
+**CRITICAL RULE: NEVER use `node` kind effects in generated processes.** The `node` kind executes inline Node.js scripts which bypasses the agent orchestration model entirely — it produces deterministic scripts instead of leveraging LLM reasoning. Every task that would be a `node` effect MUST be converted to an `agent` or `skill` effect instead. If you encounter `node` kind tasks in reference process files, convert them to `agent` kind when using them as templates. The only acceptable non-agent kinds are `shell` (for running existing test suites, git commands, or build tools), `breakpoint` (human approval), and `sleep` (time gates).
+
+| Kind | Description | Executor | When to use |
+|------|-------------|----------|-------------|
+| ~~`node`~~ | ~~Node.js script~~ | ~~Local node process~~ | **NEVER — forbidden. Convert to `agent` or `skill`.** |
+| `shell` | Shell command | Local shell process | Only for running existing CLI tools, test suites, git, linters, builds |
+| `agent` | LLM agent | Agent runtime | **Default for all tasks** — planning, implementation, analysis, verification, scoring, debugging, code writing, research |
+| `skill` | Claude Code skill | Skill system | When a matching installed skill exists (preferred over agent when available) |
+| `breakpoint` | Human approval | UI/CLI | Decision gates requiring user input |
+| `sleep` | Time gate | Scheduler | Time-based pauses |
 
 ### Agent Task Example
 
@@ -388,7 +445,7 @@ export const skillTask = defineTask('analyzer-skill', (args, taskCtx) => ({
 ```bash
 $CLI run:create --process-id <id> --entry <path>#<export> --inputs <file> \
   --prompt "$PROMPT" --harness claude-code \
-  --session-id "${CLAUDE_SESSION_ID}" --plugin-root "${CLAUDE_PLUGIN_ROOT}" --json
+  --plugin-root "${CLAUDE_PLUGIN_ROOT}" --json
 ```
 
 **Check status:**
@@ -504,9 +561,13 @@ CRITICAL RULE: do not use the babysit skill inside the delegated tasks. if you a
 
 CRITICAL RULE: Never build a wrapper, python or helper scripts to orchestrate the runs. Use the CLI to drive the orchestration loop and never loop programmatically.
 
-CRITICAL RULE: Never fallback to simpler execution if the user activated this skill. persist in executing the orchestration itself rather than simplifying the execution by bypassing the process above - you must create a valid process js file, create a run (with --harness claude-code --session-id to bind the session), then iterate the run until it is completed.
+CRITICAL RULE: Never fallback to simpler execution if the user activated this skill. persist in executing the orchestration itself rather than simplifying the execution by bypassing the process above - you must create a valid process js file, create a run (with --harness claude-code to bind the session), then iterate the run until it is completed.
 
 CRITICAL RULE: After run:create or run-session association and after each effect is posted, you MUST stop the session and return control. Do NOT proceed to the next run:iterate in the same session turn. The stop-hook will call you back to continue. Running multiple iterations in a single session turn bypasses the hook loop and breaks the orchestration model.
+
+CRITICAL RULE: NEVER use `kind: 'node'` in generated process files. All tasks MUST use `kind: 'agent'` (with an agent prompt schema) or `kind: 'skill'` (when a matching skill is available). If a reference process template uses `node` kind tasks, you MUST convert them to `agent` kind when adapting the template. The `node` kind produces inline scripts that bypass LLM reasoning — this defeats the purpose of agent orchestration. The only non-agent kinds allowed are `shell` (for existing CLI tools/tests/git), `breakpoint`, and `sleep`.
+
+CRITICAL RULE: NEVER bypass, avoid or skip the babysitter orchestration model when the user explicitly requested this skill. Do not execute the tasks yourself, do not loop programmatically, do not create helper scripts to orchestrate the runs. Use the CLI to drive the orchestration loop and do not bypass it. not for simple tasks, and even if things get complicated or don't go smoothly. persist in executing the orchestration itself rather than simplifying the execution by bypassing the process above.
 
 ## See Also
 - `process/tdd-quality-convergence.js` - TDD quality convergence example - read and look for relevant processes and methodolies before creating the code process for a new run (create the run using the CLI, then use these process as a reference)

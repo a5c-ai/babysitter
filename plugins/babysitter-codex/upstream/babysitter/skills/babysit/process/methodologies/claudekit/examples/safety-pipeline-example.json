@@ -1,0 +1,20 @@
+{
+  "name": "ClaudeKit Safety Pipeline - Full Check Suite",
+  "description": "Run the complete safety pipeline: file-guard, quality checks, self-review, checkpoint, and profiling",
+  "processId": "methodologies/claudekit/claudekit-safety-pipeline",
+  "inputs": {
+    "projectRoot": ".",
+    "enableProfiling": true,
+    "checkpointLabel": "post-implementation"
+  },
+  "expectedOutcomes": {
+    "phases": [
+      "initialize file guard (195+ patterns, 12 categories)",
+      "scan for sensitive file access",
+      "parallel: typecheck + lint + test + comment-check + unused-params",
+      "self-review of session changes",
+      "convergence loop if checks fail (max 2 attempts)",
+      "create safety checkpoint + profile hooks (parallel)"
+    ]
+  }
+}

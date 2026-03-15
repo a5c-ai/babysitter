@@ -1,0 +1,23 @@
+{
+  "name": "RPIKit Plan - API Rate Limiting Feature",
+  "description": "Planning phase transforming research findings into an implementation plan with test-first strategy",
+  "processId": "methodologies/rpikit/rpikit-plan",
+  "inputs": {
+    "topic": "api-rate-limiting",
+    "researchDocPath": "docs/plans/2026-03-01-api-rate-limiting-research.md",
+    "projectRoot": ".",
+    "stakesOverride": ""
+  },
+  "expectedOutcomes": {
+    "phases": [
+      "load-research (find and validate research document)",
+      "classify-stakes (medium: multiple files, moderate scope)",
+      "define-success-criteria (functional + non-functional requirements)",
+      "decompose-tasks (granular steps with file paths and verification)",
+      "plan-test-strategy (test specifications before implementation)",
+      "assess-risks (breaking changes, performance, rollback)",
+      "write-plan-document (docs/plans/2026-03-01-api-rate-limiting-plan.md)",
+      "approval-gate (human approves or requests changes)"
+    ]
+  }
+}

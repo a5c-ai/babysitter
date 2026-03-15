@@ -4,13 +4,14 @@
 
 PLUGIN_ROOT="${CODEX_PLUGIN_ROOT:-$(cd "$(dirname "$0")/.." && pwd)}"
 SDK_VERSION="${BABYSITTER_SDK_VERSION:-0.0.173}"
+SDK_PACKAGE="${BABYSITTER_SDK_PACKAGE:-@a5c-ai/babysitter-sdk@${SDK_VERSION}}"
 
 # Resolve babysitter CLI
 if ! command -v babysitter &>/dev/null; then
   if [ -x "$HOME/.local/bin/babysitter" ]; then
     export PATH="$HOME/.local/bin:$PATH"
   else
-    babysitter() { npx -y "@a5c-ai/babysitter-sdk@${SDK_VERSION}" "$@"; }
+    babysitter() { npx -y "${SDK_PACKAGE}" "$@"; }
   fi
 fi
 

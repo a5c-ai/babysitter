@@ -1,0 +1,14 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-03-10T10:00:01.000Z",
+  "data": {
+    "effectId": "effect-bp-001",
+    "kind": "breakpoint",
+    "taskId": "approval-gate",
+    "title": "Approve deployment to production",
+    "question": "Do you approve deploying version 2.0 to production?",
+    "invocationKey": "inv-key-bp-001",
+    "stepId": "S000001"
+  },
+  "checksum": "wait-def456"
+}

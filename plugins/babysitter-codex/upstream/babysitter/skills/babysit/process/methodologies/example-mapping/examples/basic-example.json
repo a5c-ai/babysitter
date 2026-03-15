@@ -1,0 +1,20 @@
+{
+  "description": "Basic Example Mapping session for a simple user story",
+  "inputs": {
+    "userStory": "As a customer, I want to search for products by name, so that I can quickly find what I'm looking for",
+    "timeboxMinutes": 25,
+    "sessionMode": "collaborative"
+  },
+  "expectedOutputs": {
+    "rules": [
+      "Search should be case-insensitive",
+      "Partial matches should be included",
+      "Results should be sorted by relevance",
+      "Empty search returns all products",
+      "No results shows helpful message"
+    ],
+    "exampleCategories": ["happy-path", "edge-case", "error-case"],
+    "questionTypes": ["technical", "business"],
+    "readiness": "likely ready - simple story with clear scope"
+  }
+}

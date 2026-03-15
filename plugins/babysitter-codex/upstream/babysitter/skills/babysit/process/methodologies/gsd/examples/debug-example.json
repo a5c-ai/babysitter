@@ -1,0 +1,20 @@
+{
+  "issue": "WebSocket connections drop after exactly 60 seconds of inactivity, causing real-time updates to stop until page refresh",
+  "severity": "high",
+  "reproductionSteps": [
+    "Open the task board in two browser tabs",
+    "Wait 60 seconds without any interaction",
+    "Create a task in tab 1",
+    "Observe that tab 2 does not receive the update"
+  ],
+  "context": {
+    "projectPath": ".",
+    "environment": "development",
+    "suspectedArea": "src/services/websocket.ts",
+    "previousAttempts": [
+      "Increased WebSocket timeout to 120s - did not help",
+      "Added ping/pong heartbeat - partially helped but still drops"
+    ],
+    "relevantLogs": "WebSocket connection closed: code 1006, reason: ''"
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "processId": "methodologies/spec-kit/spec-kit-implementation",
+  "description": "Implementation + quality validation for a pre-planned feature",
+  "inputs": {
+    "tasks": [
+      { "id": "TASK-001", "title": "Create Task model and database schema", "dependencies": [], "acceptanceCriteria": "Task model with title, description, priority, due date, assignee fields" },
+      { "id": "TASK-002", "title": "Implement task CRUD API endpoints", "dependencies": ["TASK-001"], "acceptanceCriteria": "REST endpoints for create, read, update, delete tasks" },
+      { "id": "TASK-003", "title": "Build task creation form component", "dependencies": ["TASK-001"], "acceptanceCriteria": "Form with validation, priority selector, date picker, assignee dropdown" },
+      { "id": "TASK-004", "title": "Implement real-time WebSocket updates", "dependencies": ["TASK-002"], "acceptanceCriteria": "Task changes broadcast to all connected clients within 2 seconds" },
+      { "id": "TASK-005", "title": "Build task board dashboard view", "dependencies": ["TASK-002", "TASK-003"], "acceptanceCriteria": "Kanban board with drag-and-drop, filtering, and sorting" },
+      { "id": "TASK-006", "title": "Write unit and integration tests", "dependencies": ["TASK-002", "TASK-003", "TASK-004", "TASK-005"], "acceptanceCriteria": "80% coverage with passing unit and integration tests" }
+    ],
+    "plan": {
+      "architecture": {
+        "components": ["TaskModel", "TaskAPI", "TaskForm", "WebSocketService", "TaskBoard"],
+        "techStack": { "frontend": "React + TypeScript", "backend": "Node.js + Express", "database": "PostgreSQL", "realtime": "Socket.io" }
+      }
+    },
+    "specification": {
+      "requirements": [
+        { "id": "REQ-001", "description": "Users can create tasks with title, description, priority, and due date" },
+        { "id": "REQ-002", "description": "Tasks can be assigned to team members" },
+        { "id": "REQ-003", "description": "Real-time updates when tasks are modified" }
+      ]
+    },
+    "constitution": {
+      "codeQuality": { "linting": "eslint:recommended", "formatting": "prettier" },
+      "testing": { "coverageThreshold": 80 }
+    },
+    "customChecks": [
+      { "name": "accessibility", "description": "All interactive elements have ARIA labels" },
+      { "name": "responsive", "description": "Dashboard usable on screens >= 320px wide" }
+    ]
+  }
+}

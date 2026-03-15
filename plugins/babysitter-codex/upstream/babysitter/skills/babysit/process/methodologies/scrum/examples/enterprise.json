@@ -1,0 +1,218 @@
+{
+  "projectName": "Enterprise Resource Planning (ERP) System",
+  "productVision": "Integrated ERP system for mid-size manufacturing company covering inventory management, order processing, production planning, accounting, and reporting. Replace legacy systems with modern cloud-based solution.",
+  "sprintDuration": 1,
+  "sprintCount": 12,
+  "teamSize": 9,
+  "productOwner": "David Thompson (CFO)",
+  "scrumMaster": "Rachel Kim",
+  "definitionOfDone": {
+    "criteria": [
+      {
+        "category": "Code Quality",
+        "requirements": [
+          "Code reviewed by at least 2 senior developers",
+          "Unit test coverage >= 85%",
+          "Integration tests pass",
+          "Static code analysis passes (SonarQube)",
+          "No critical or high security vulnerabilities",
+          "Follows company coding standards"
+        ]
+      },
+      {
+        "category": "Testing",
+        "requirements": [
+          "All acceptance criteria met",
+          "UAT completed by business stakeholders",
+          "Performance testing completed (if applicable)",
+          "Security testing completed",
+          "Regression tests pass",
+          "Tested on all supported browsers"
+        ]
+      },
+      {
+        "category": "Documentation",
+        "requirements": [
+          "API documentation updated (OpenAPI/Swagger)",
+          "User documentation updated",
+          "Admin documentation updated",
+          "Database schema changes documented",
+          "Release notes drafted"
+        ]
+      },
+      {
+        "category": "Deployment",
+        "requirements": [
+          "Deployed to staging environment",
+          "Database migrations tested",
+          "Rollback plan documented",
+          "Operations team notified",
+          "Monitoring and alerts configured"
+        ]
+      },
+      {
+        "category": "Compliance",
+        "requirements": [
+          "SOX compliance requirements met",
+          "Audit trail implemented",
+          "Data privacy requirements met (GDPR)",
+          "Access controls properly configured"
+        ]
+      }
+    ]
+  },
+  "backlogItems": [
+    {
+      "id": "ERP-001",
+      "title": "Inventory Management - Core Module",
+      "userStory": "As a warehouse manager, I want to track inventory levels in real-time, so that I can prevent stockouts and optimize ordering",
+      "acceptanceCriteria": [
+        "View current inventory levels by location",
+        "Track inventory movements (in/out)",
+        "Set reorder points and get alerts",
+        "Multi-location warehouse support",
+        "Barcode scanning integration",
+        "Inventory valuation (FIFO/LIFO/Average)"
+      ],
+      "storyPoints": 21,
+      "priority": "must-have",
+      "type": "feature",
+      "businessValue": 100
+    },
+    {
+      "id": "ERP-002",
+      "title": "Purchase Order Management",
+      "userStory": "As a purchasing manager, I want to create and manage purchase orders, so that I can procure materials efficiently",
+      "acceptanceCriteria": [
+        "Create PO from requisition or manually",
+        "Approve PO workflow (multi-level approval)",
+        "Send PO to supplier via email",
+        "Track PO status (pending, approved, received)",
+        "Receive goods against PO",
+        "Handle partial receipts",
+        "Match PO to invoices (3-way matching)"
+      ],
+      "storyPoints": 13,
+      "priority": "must-have",
+      "type": "feature",
+      "businessValue": 95,
+      "dependencies": ["ERP-001"]
+    },
+    {
+      "id": "ERP-003",
+      "title": "Sales Order Processing",
+      "userStory": "As a sales representative, I want to create sales orders and track fulfillment, so that I can serve customers efficiently",
+      "acceptanceCriteria": [
+        "Create sales order with line items",
+        "Check inventory availability",
+        "Calculate pricing with discounts",
+        "Credit check integration",
+        "Order confirmation to customer",
+        "Track order status through fulfillment",
+        "Integration with shipping carriers"
+      ],
+      "storyPoints": 13,
+      "priority": "must-have",
+      "type": "feature",
+      "businessValue": 98,
+      "dependencies": ["ERP-001"]
+    },
+    {
+      "id": "ERP-004",
+      "title": "Production Planning and Scheduling",
+      "userStory": "As a production planner, I want to schedule production runs based on orders and capacity, so that we meet delivery commitments",
+      "acceptanceCriteria": [
+        "View production capacity by work center",
+        "Create production orders from sales orders",
+        "Schedule production runs",
+        "Bill of Materials (BOM) support",
+        "Material Requirements Planning (MRP)",
+        "Track work in progress (WIP)",
+        "Shop floor reporting"
+      ],
+      "storyPoints": 21,
+      "priority": "must-have",
+      "type": "feature",
+      "businessValue": 90,
+      "dependencies": ["ERP-001", "ERP-003"]
+    },
+    {
+      "id": "ERP-005",
+      "title": "Financial Accounting Integration",
+      "userStory": "As a controller, I want all transactions to post to the general ledger automatically, so that financial statements are accurate and timely",
+      "acceptanceCriteria": [
+        "Chart of accounts setup",
+        "Automated journal entries from transactions",
+        "Accounts payable integration",
+        "Accounts receivable integration",
+        "Inventory valuation posting",
+        "Cost of goods sold (COGS) calculation",
+        "Financial reports (P&L, Balance Sheet, Cash Flow)",
+        "Period close process",
+        "SOX compliance audit trail"
+      ],
+      "storyPoints": 21,
+      "priority": "must-have",
+      "type": "feature",
+      "businessValue": 100,
+      "dependencies": ["ERP-001", "ERP-002", "ERP-003"]
+    },
+    {
+      "id": "ERP-006",
+      "title": "Customer and Supplier Master Data",
+      "userStory": "As a data manager, I want to maintain accurate customer and supplier information, so that all modules have consistent data",
+      "acceptanceCriteria": [
+        "Customer master data management",
+        "Supplier master data management",
+        "Contact management",
+        "Credit terms and payment terms",
+        "Shipping addresses",
+        "Tax information",
+        "Data validation and deduplication",
+        "Import from legacy systems"
+      ],
+      "storyPoints": 8,
+      "priority": "must-have",
+      "type": "feature",
+      "businessValue": 85
+    },
+    {
+      "id": "ERP-007",
+      "title": "Role-Based Access Control and Security",
+      "userStory": "As a system administrator, I want to control user access by role, so that sensitive data is protected",
+      "acceptanceCriteria": [
+        "Define roles with permissions",
+        "Assign users to roles",
+        "Row-level security for sensitive data",
+        "Audit log of all data changes",
+        "Single sign-on (SSO) integration",
+        "Password policies and MFA",
+        "Session timeout and security",
+        "Compliance with SOX and GDPR"
+      ],
+      "storyPoints": 13,
+      "priority": "must-have",
+      "type": "technical",
+      "businessValue": 95
+    },
+    {
+      "id": "ERP-008",
+      "title": "Business Intelligence and Reporting",
+      "userStory": "As an executive, I want to view KPIs and reports with drill-down capability, so that I can make data-driven decisions",
+      "acceptanceCriteria": [
+        "Dashboard with key metrics",
+        "Standard reports (sales, inventory, financial)",
+        "Custom report builder",
+        "Drill-down from summary to detail",
+        "Export to Excel/PDF",
+        "Scheduled report delivery",
+        "Data warehouse integration"
+      ],
+      "storyPoints": 13,
+      "priority": "should-have",
+      "type": "feature",
+      "businessValue": 80,
+      "dependencies": ["ERP-001", "ERP-003", "ERP-005"]
+    }
+  ]
+}

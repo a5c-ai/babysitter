@@ -1,0 +1,34 @@
+{
+  "projectName": "TaskBoard Pro",
+  "features": [
+    {
+      "id": "feat-001",
+      "title": "User Authentication",
+      "description": "Implement JWT-based authentication with login, signup, and password reset flows. Include OAuth2 support for Google and GitHub.",
+      "priority": "high"
+    },
+    {
+      "id": "feat-002",
+      "title": "Kanban Board UI",
+      "description": "Create a drag-and-drop Kanban board with columns for Backlog, In Progress, Review, and Done. Cards should show title, assignee, and priority badge.",
+      "priority": "high"
+    },
+    {
+      "id": "feat-003",
+      "title": "Real-time Notifications",
+      "description": "WebSocket-based notification system for card movements, comments, and mentions. Include toast UI and notification center dropdown.",
+      "priority": "medium"
+    },
+    {
+      "id": "feat-004",
+      "title": "API Rate Limiting",
+      "description": "Express middleware for API rate limiting with configurable windows and limits per endpoint. Include Redis-backed sliding window counter.",
+      "priority": "medium"
+    }
+  ],
+  "repoUrl": "https://github.com/example/taskboard-pro",
+  "baseBranch": "main",
+  "maxConcurrentAgents": 3,
+  "testFramework": "both",
+  "reviewPolicy": "hybrid"
+}

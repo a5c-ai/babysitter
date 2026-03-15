@@ -1,0 +1,11 @@
+{
+  "type": "EFFECT_RESOLVED",
+  "recordedAt": "2026-03-10T10:02:00.000Z",
+  "data": {
+    "effectId": "E001",
+    "result": {
+      "success": true
+    }
+  },
+  "checksum": "res001"
+}

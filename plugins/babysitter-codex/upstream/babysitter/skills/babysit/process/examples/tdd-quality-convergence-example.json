@@ -1,0 +1,21 @@
+{
+  "feature": "User authentication with JWT",
+  "targetQuality": 90,
+  "maxIterations": 5,
+  "requirements": [
+    "Support email/password login",
+    "JWT token generation and validation",
+    "Token refresh mechanism",
+    "Secure password hashing with bcrypt",
+    "Rate limiting on login attempts",
+    "Session management"
+  ],
+  "constraints": [
+    "Use bcrypt with cost factor 12 for password hashing",
+    "Access tokens expire in 15 minutes",
+    "Refresh tokens expire in 7 days",
+    "Maximum 5 login attempts per 15 minutes",
+    "Store refresh tokens securely",
+    "Follow OWASP authentication guidelines"
+  ]
+}

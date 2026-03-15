@@ -21,13 +21,21 @@ import { existsSync } from "node:fs";
  * // => "C:\\project\\.a5c\\runs\\01RUN"
  */
 export function collapseDoubledA5cRuns(p: string): string {
-  // Match both forward and back-slash variants
-  const pattern = /([/\\]?\.a5c[/\\]runs)[/\\]\.a5c[/\\]runs([/\\]|$)/;
   let result = p;
-  // Collapse repeatedly in case of triple+ duplication
-  while (pattern.test(result)) {
-    result = result.replace(pattern, "$1$2");
+
+  // Collapse .a5c/runs/.a5c/runs/ → .a5c/runs/
+  const runsPattern = /([/\\]?\.a5c[/\\]runs)[/\\]\.a5c[/\\]runs([/\\]|$)/;
+  while (runsPattern.test(result)) {
+    result = result.replace(runsPattern, "$1$2");
   }
+
+  // Collapse .a5c/.a5c/ → .a5c/ (e.g. when CLI runs from .a5c/ with relative
+  // --runs-dir .a5c/runs, producing /project/.a5c/.a5c/runs/)
+  const a5cPattern = /([/\\]\.a5c)[/\\]\.a5c([/\\])/;
+  while (a5cPattern.test(result)) {
+    result = result.replace(a5cPattern, "$1$2");
+  }
+
   return result;
 }
 
