@@ -31,6 +31,7 @@ import {
   handleSessionIterationMessage,
 } from "./commands/session";
 import { handleSkillDiscover, handleSkillFetchRemote, discoverSkillsInternal, discoverFromProcessFile } from "./commands/skill";
+import { handleMcpServe } from "./commands/mcpServe";
 import { handleHookLog } from "./commands/hookLog";
 import { handleHookRun } from "./commands/hookRun";
 import { handleProfileCommand } from "./commands/profile";
@@ -98,6 +99,7 @@ const USAGE = `Usage:
   babysitter plugin:update-marketplace --marketplace-name <name> [--marketplace-branch <ref>] [--global|--project] [--json] [--verbose]
   babysitter plugin:update-registry [<pluginName>] [--plugin-name <name>] [--plugin-version <ver>] [--global|--project] [--json] [--verbose]
   babysitter plugin:remove-from-registry [<pluginName>] [--plugin-name <name>] [--global|--project] [--json] [--verbose]
+  babysitter mcp:serve [--json]
   babysitter health [--json] [--verbose]
   babysitter configure [show|validate|paths] [--json] [--defaults-only]
   babysitter version
@@ -2037,6 +2039,7 @@ const VALID_COMMANDS = [
   "plugin:update-marketplace",
   "plugin:update-registry",
   "plugin:remove-from-registry",
+  "mcp:serve",
   "health",
   "configure",
   "version",
@@ -2361,6 +2364,9 @@ export function createBabysitterCli() {
           if (parsed.command === "plugin:remove-from-registry") {
             return await handlePluginRemoveFromRegistry(pluginArgs);
           }
+        }
+        if (parsed.command === "mcp:serve") {
+          return await handleMcpServe({ json: parsed.json });
         }
         if (parsed.command === "health") {
           return await handleHealthCommand({
