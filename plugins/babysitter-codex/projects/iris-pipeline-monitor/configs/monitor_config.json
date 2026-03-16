@@ -1,0 +1,56 @@
+{
+  "scraper_vm": {
+    "host": "34.142.11.15",
+    "user": "iris",
+    "port": 22,
+    "scraper_base_path": "C:\\projects\\scrappers\\IM",
+    "scraper_log_path": "C:\\irisdata\\lOGS"
+  },
+  "gcp_project": "veritas-452309",
+  "region": "me-west1",
+  "buckets": {
+    "scrapped_data": "real_time_ingestion_dev",
+    "archive": "real_time_ingestion_dev_archieved",
+    "logs": "iris_devp2_ingestion_logs",
+    "scraper_sync": "iris-scrapper"
+  },
+  "ingestion_jobs": [
+    "iris-devp2-ingestion-job",
+    "iris-devp2-ingestion-maintenance-job",
+    "iris-devp2-ingestion-pp-job"
+  ],
+  "expected_schedules": {
+    "Telegram groups scheduler": {
+      "interval_hours": 8,
+      "warning_hours": 10,
+      "critical_hours": 12
+    },
+    "Whatsapp Groups Iris": {
+      "interval_hours": 8,
+      "warning_hours": 10,
+      "critical_hours": 12
+    }
+  },
+  "thresholds": {
+    "disk_warning_percent": 80,
+    "disk_critical_percent": 90,
+    "memory_warning_percent": 85,
+    "memory_critical_percent": 95,
+    "avatar_error_rate_warning": 0.3,
+    "avatar_error_rate_critical": 0.5,
+    "avatar_inactive_hours": 24,
+    "gcs_sync_stale_hours_warning": 6,
+    "gcs_sync_stale_hours_critical": 12,
+    "pending_folders_warning": 20,
+    "pending_folders_critical": 50,
+    "recent_errors_warning": 10,
+    "recent_errors_critical": 25,
+    "job_max_age_hours_warning": 12,
+    "job_max_age_hours_critical": 24
+  },
+  "status_gcs_path": {
+    "bucket": "iris_devp2_ingestion_logs",
+    "latest": "pipeline-monitor/latest.json",
+    "history_prefix": "pipeline-monitor/history"
+  }
+}
