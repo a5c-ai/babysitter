@@ -128,6 +128,55 @@ jobs:
             _ci_artifacts/cli/${{ matrix.os }}/node${{ matrix.node }}
             _ci_artifacts/logs/${{ matrix.os }}/node${{ matrix.node }}
 
+  observer-dashboard:
+    name: Observer Dashboard
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          # Workaround: npm ci on Windows-generated lockfile may miss linux optional deps
+          npm install --no-save @rollup/rollup-linux-x64-gnu 2>/dev/null || true
+
+      - name: Prepare artifact directories
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/observer-logs
+
+      - name: Build observer dashboard
+        run: |
+          set -euo pipefail
+          npm run build:observer 2>&1 | tee artifacts/observer-logs/build.log
+
+      - name: Build CLI
+        run: |
+          set -euo pipefail
+          npm run build:cli --workspace=@a5c-ai/babysitter-observer-dashboard 2>&1 | tee artifacts/observer-logs/build-cli.log
+
+      - name: Unit tests
+        run: |
+          set -euo pipefail
+          npm run test:observer 2>&1 | tee artifacts/observer-logs/unit-tests.log
+
+      - name: Upload test logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: observer-logs
+          path: artifacts/observer-logs
+          if-no-files-found: error
+
   vscode-extension-tests:
     name: VSCode Extension Tests
     runs-on: ubuntu-latest
