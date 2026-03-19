@@ -58,5 +58,4 @@ bug.task.md
 .claude/sound-hooks/sounds/tool-failure.mp3
 .claude/sound-hooks/sounds/tool-success.mp3
 .claude/sound-hooks/sounds/user-prompt.mp3
-.claude/settings.json
-
+.claude/settings.local.json
