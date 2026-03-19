@@ -6,7 +6,7 @@ argument-hint: Specific instructions for the run
 
 # babysitter:yolo
 
-Identical to `/babysitter:call` but runs in **non-interactive mode**:
+Identical to `babysitter call` but runs in **non-interactive mode**:
 
 - **Skip the interview phase** — parse intent directly from the user's prompt
 - **Auto-approve all breakpoints** — never pause for human approval
@@ -28,7 +28,7 @@ babysitter run:create \
   --prompt "$PROMPT" \
   --harness codex \
   --session-id "${CODEX_THREAD_ID:-$CODEX_SESSION_ID}" \
-  --plugin-root "$CODEX_PLUGIN_ROOT" \
+  --state-dir .a5c \
   --json
 ```
 
@@ -44,8 +44,8 @@ echo '{"approved":true,"response":"Auto-approved (yolo mode)"}' > tasks/<effectI
 babysitter task:post .a5c/runs/<runId> <effectId> --status ok --value tasks/<effectId>/output.json --json
 ```
 
-7. When `completionProof` is emitted, return it wrapped in `<promise>PROOF</promise>`
+7. When `completionProof` is emitted, report it plainly
 
-## Key Difference from /babysitter:call
+## Key Difference from `babysitter call`
 
 The ONLY difference is that breakpoints are auto-approved and no user questions are asked. The orchestration loop, effect handling, and result posting are identical.

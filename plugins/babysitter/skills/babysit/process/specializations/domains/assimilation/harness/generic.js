@@ -6,6 +6,14 @@
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
+import {
+  adaptOriginalBabysitTask,
+  refineHarnessAssimilationTask,
+  runHarnessResearchTask,
+  runHarnessRuntimeValidationTask,
+  verifyHarnessAssimilationTask,
+  writeHarnessInstallDocsTask
+} from './shared-assimilation.js';
 
 // ============================================================================
 // PROCESS ENTRY POINT
@@ -22,6 +30,22 @@ export async function process(inputs, ctx) {
   const integrationFiles = [];
   let finalQuality = 0;
   let iterations = 0;
+
+  // ==========================================================================
+  // PHASE 0: RESEARCH
+  // ==========================================================================
+
+  ctx.log('phase:research', `Researching ${harnessType} distribution, upstream install path, and continuation hooks`);
+
+  const research = await ctx.task(runHarnessResearchTask, {
+    projectDir,
+    harnessName: harnessType,
+    upstreamSource: `${harnessType} upstream repo plus the canonical babysitter plugin and skill`,
+    distributionTarget: `${harnessType} plugin, extension, or runtime package`,
+    loopModel: `${harnessType} continuation path, including native harness binding or explicit fallback binding`
+  });
+
+  integrationFiles.push(...(research.artifactsCreated || []));
 
   // ==========================================================================
   // PHASE 1: ANALYZE
@@ -63,6 +87,21 @@ export async function process(inputs, ctx) {
 
   integrationFiles.push(...scaffold.filesCreated);
   ctx.log('phase:scaffold:complete', `Scaffolded ${scaffold.filesCreated.length} files`);
+
+  // ==========================================================================
+  // PHASE 2.5: ASSIMILATE CANONICAL BABYSIT ASSETS
+  // ==========================================================================
+
+  ctx.log('phase:assimilate', 'Adapting the canonical babysit skill and upstream process library');
+
+  const assimilation = await ctx.task(adaptOriginalBabysitTask, {
+    projectDir,
+    harnessName: harnessType,
+    upstreamSource: `${harnessType} runtime install source plus the babysitter plugin repo`,
+    research
+  });
+
+  integrationFiles.push(...assimilation.filesCreated, ...assimilation.filesModified);
 
   // ==========================================================================
   // PHASE 3: IMPLEMENT
@@ -152,6 +191,15 @@ export async function process(inputs, ctx) {
 
   ctx.log('phase:implement:complete', `Implemented ${integrationFiles.length} integration files total`);
 
+  const docs = await ctx.task(writeHarnessInstallDocsTask, {
+    projectDir,
+    harnessName: harnessType,
+    research,
+    assimilation
+  });
+
+  integrationFiles.push(...docs.filesCreated, ...docs.filesModified);
+
   // ==========================================================================
   // PHASE 4: TEST
   // ==========================================================================
@@ -166,22 +214,35 @@ export async function process(inputs, ctx) {
 
   ctx.log('phase:test:complete', `Smoke tests: ${smokeTests.passed}/${smokeTests.total} passed`);
 
+  const runtimeValidation = await ctx.task(runHarnessRuntimeValidationTask, {
+    projectDir,
+    harnessName: harnessType,
+    loopModel: `${harnessType} hook or continuation mechanism`,
+    research,
+    docs,
+    integrationFiles,
+    localTestResult: smokeTests
+  });
+
   // ==========================================================================
   // PHASE 5: VERIFY
   // ==========================================================================
 
   ctx.log('phase:verify', 'Scoring implementation quality');
 
-  const verification = await ctx.task(verifyQualityTask, {
+  let verification = await ctx.task(verifyHarnessAssimilationTask, {
     projectDir,
-    harnessType,
-    capabilities: analysis.capabilities,
+    harnessName: harnessType,
+    research,
+    assimilation,
+    docs,
     integrationFiles,
-    smokeTestResults: smokeTests,
+    localTestResult: smokeTests,
+    runtimeValidation,
     targetQuality
   });
 
-  finalQuality = verification.score;
+  finalQuality = verification.qualityScore;
   iterations = 1;
 
   ctx.log('phase:verify:complete', `Quality score: ${finalQuality}/${targetQuality}`);
@@ -196,9 +257,9 @@ export async function process(inputs, ctx) {
     ctx.log('phase:converge', `Iteration ${iterations}: quality ${finalQuality} < target ${targetQuality}, fixing issues`);
 
     // Fix identified issues
-    const fix = await ctx.task(fixIssuesTask, {
+    const fix = await ctx.task(refineHarnessAssimilationTask, {
       projectDir,
-      harnessType,
+      harnessName: harnessType,
       issues: verification.issues,
       recommendations: verification.recommendations,
       integrationFiles,
@@ -222,17 +283,30 @@ export async function process(inputs, ctx) {
 
     ctx.log('phase:converge:retest', `Smoke tests: ${retestResults.passed}/${retestResults.total} passed`);
 
-    // Re-verify quality
-    const reverify = await ctx.task(verifyQualityTask, {
+    const reruntime = await ctx.task(runHarnessRuntimeValidationTask, {
       projectDir,
-      harnessType,
-      capabilities: analysis.capabilities,
+      harnessName: harnessType,
+      loopModel: `${harnessType} hook or continuation mechanism`,
+      research,
+      docs,
       integrationFiles,
-      smokeTestResults: retestResults,
+      localTestResult: retestResults
+    });
+
+    // Re-verify quality
+    verification = await ctx.task(verifyHarnessAssimilationTask, {
+      projectDir,
+      harnessName: harnessType,
+      research,
+      assimilation,
+      docs,
+      integrationFiles,
+      localTestResult: retestResults,
+      runtimeValidation: reruntime,
       targetQuality
     });
 
-    finalQuality = reverify.score;
+    finalQuality = verification.qualityScore;
 
     ctx.log('phase:converge:score', `Iteration ${iterations}: quality now ${finalQuality}/${targetQuality}`);
   }
@@ -500,7 +574,7 @@ export const implementSessionAdapterTask = defineTask('implement-session-adapter
 export const implementRunBindingTask = defineTask('implement-run-binding', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Implement run creation and session binding',
-  description: 'Create adapter for babysitter run:create and session:associate',
+  description: 'Create adapter for babysitter run:create with harness-first binding and explicit fallback binding only when necessary',
 
   agent: {
     name: 'general-purpose',
@@ -515,10 +589,11 @@ export const implementRunBindingTask = defineTask('implement-run-binding', (args
       },
       instructions: [
         'Implement createAndBindRun(processId, entryPoint, inputs, prompt, sessionId, pluginRoot) that:',
-        '  1. Calls: babysitter run:create --process-id {processId} --entry {entryPoint} --inputs {inputsFilePath} --prompt "{prompt}" --json',
-        '  2. Parses the runId from JSON stdout',
-        '  3. Calls: babysitter session:associate --session-id {sessionId} --run-id {runId} --state-dir {stateDir} --json',
-        '  4. Returns { runId, runDir }',
+        '  1. Prefer a first-class harness binding path: babysitter run:create --process-id {processId} --entry {entryPoint} --inputs {inputsFilePath} --prompt "{prompt}" --harness {harnessType} --plugin-root {pluginRoot} --json',
+        '  2. Use an absolute --entry path and invoke the CLI from the project root to avoid doubled .a5c path bugs',
+        '  3. Parse runId, runDir, and session binding details from JSON stdout',
+        '  4. Only if the harness truly lacks native binding, document and implement explicit fallback session:init/session:associate behavior as an external mode',
+        '  5. Returns { runId, runDir, bindingMode }',
         'Handle re-entrant run prevention:',
         '  - If session already bound to a different run, surface error to user',
         '  - Provide cleanup mechanism for stale sessions',
@@ -577,6 +652,7 @@ export const implementLoopDriverTask = defineTask('implement-loop-driver', (args
         '  1. Increment iteration in session state file',
         '  2. Call: babysitter session:iteration-message --iteration {N} --run-id {runId} --runs-dir {runsDir} --plugin-root {pluginRoot} --json',
         '  3. Return BLOCK with the systemMessage for context re-injection',
+        'The harness continuation mechanism owns the next iteration after task:post. Do not implement repeated run:iterate calls inside the same user turn.',
         'Implement extractPromiseTag(text) to scan for <promise>VALUE</promise>',
         'Wire the interception into the harness stop/exit mechanism:',
         `  - Harness type "${args.harnessType}": use appropriate mechanism (stop hook, middleware, event, loop condition, API check)`,
@@ -608,7 +684,7 @@ export const implementLoopDriverTask = defineTask('implement-loop-driver', (args
 export const implementEffectAdapterTask = defineTask('implement-effect-adapter', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Implement effect execution adapter',
-  description: 'Create adapter that executes pending effects by kind (node, breakpoint, sleep, agent, orchestrator_task)',
+  description: 'Create adapter that executes pending effects by kind (shell, breakpoint, sleep, agent, skill)',
 
   agent: {
     name: 'general-purpose',
@@ -625,12 +701,13 @@ export const implementEffectAdapterTask = defineTask('implement-effect-adapter',
         '  1. Call: babysitter run:iterate .a5c/runs/{runId} --json to get pending actions',
         '  2. Call: babysitter task:list .a5c/runs/{runId} --pending --json to get pending tasks',
         '  3. For each pending task, dispatch by kind:',
-        '    - kind="node": Execute the Node.js script specified in task.node.entry with task.node.args',
+        '    - kind="shell": Execute an existing command or test suite via the host shell',
         '    - kind="breakpoint": Present the breakpoint question to the user for approval',
         '    - kind="sleep": Wait until the specified time (sleepUntil)',
-        '    - kind="orchestrator_task": Delegate to a sub-agent or orchestrator within the harness',
         '    - kind="agent": Delegate to an agent subprocess with the specified prompt',
-        '    - custom kinds: Log a warning and attempt generic execution',
+        '    - kind="skill": Invoke the matching installed skill when one exists',
+        '    - custom kinds: Log a warning, fail safely, and update the mapping rather than inventing unsupported execution',
+        'Reject any design that emits kind="node". Convert those cases to agent or skill execution instead.',
         'Each handler must return EffectResult: { status: "ok"|"error", value: object }',
         'Handle errors gracefully: catch exceptions and return { status: "error", value: { message, stack } }',
         'Support concurrent effect execution where possible'
@@ -675,10 +752,12 @@ export const implementResultAdapterTask = defineTask('implement-result-adapter',
       },
       instructions: [
         'Implement postEffectResult(runId, effectId, result) that:',
-        '  1. Writes the result JSON to the task directory: .a5c/runs/{runId}/tasks/{effectId}/result.json',
-        '  2. Calls: babysitter task:post .a5c/runs/{runId} --effect-id {effectId} --json',
-        '  3. Handles BLOB_THRESHOLD (1 MiB) - large payloads are stored as blobs',
-        '  4. Returns the post confirmation',
+        '  1. Writes the result value to .a5c/runs/{runId}/tasks/{effectId}/output.json',
+        '  2. Calls: babysitter task:post .a5c/runs/{runId} {effectId} --status ok --value .a5c/runs/{runId}/tasks/{effectId}/output.json --json',
+        '  3. Uses --error <file> for failure payloads instead of inventing direct result writes',
+        '  4. Handles BLOB_THRESHOLD (1 MiB) through the SDK posting path rather than manual result.json management',
+        '  5. Returns the post confirmation',
+        'Never write result.json directly. The SDK owns that file.',
         'Implement batch posting for parallel effect results',
         'Handle errors: retry on transient failures (EBUSY, ETXTBSY), fail on permanent errors',
         'Follow the atomic write protocol: write to .tmp file, fsync, rename',
@@ -780,9 +859,10 @@ export const smokeTestTask = defineTask('smoke-test', (args, taskCtx) => ({
         'Execute the following smoke tests:',
         '  Test 1 - SDK Available: Run "babysitter version --json" and verify it returns valid JSON with version field',
         '  Test 2 - Session Init: Run the session initialization adapter and verify a state file is created',
-        '  Test 3 - Run Create: Create a test run with a minimal process and verify run.json exists',
+        '  Test 3 - Run Create: Create a test run with a minimal process and prefer the harness-native run:create --harness path when supported',
         '  Test 4 - Run Iterate: Call run:iterate on the test run and verify it returns valid JSON status',
         '  Test 5 - Guard Check: Verify iteration guards correctly identify max iterations exceeded',
+        '  Test 6 - Protocol Check: verify that generated assets use output.json + task:post and do not emit kind="node"',
         'For each test, record: testName, passed (boolean), error (string if failed), duration (ms)',
         'Clean up any test artifacts after execution',
         'Return aggregate results'
@@ -844,16 +924,17 @@ export const verifyQualityTask = defineTask('verify-quality', (args, taskCtx) =>
         'Score the integration on three dimensions (each 0-100):',
         '  Accuracy: Do the integration components correctly implement the babysitter protocol?',
         '    - Session init creates correct state file format',
-        '    - Run creation uses correct CLI flags and parses output correctly',
+        '    - Run creation prefers harness-native binding and uses fallback association only when required',
         '    - Loop driver implements all 6 guards from the generic harness guide',
-        '    - Effect adapter handles all effect kinds (node, breakpoint, sleep, agent, orchestrator_task)',
-        '    - Result posting follows atomic write protocol',
+        '    - Effect adapter handles shell, breakpoint, sleep, agent, and skill effects without emitting node',
+        '    - Result posting follows output.json + task:post protocol',
         '    - Completion proof extraction uses correct regex',
         '  Completeness: Are all integration points implemented?',
         '    - All 7 core components present (install, session, run-binding, loop, effects, results, guards)',
         '    - Config files properly reference all adapters',
         '    - Error handling for all CLI failure modes',
         '    - Cross-platform support where applicable',
+        '    - Research, upstream sync, install docs, and full runtime validation are present',
         '  Working Code: Does the code actually run?',
         '    - Smoke test pass rate',
         '    - No syntax errors',

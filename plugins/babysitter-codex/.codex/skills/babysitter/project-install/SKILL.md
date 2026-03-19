@@ -40,7 +40,7 @@ The profile includes:
 ### 4. Install Tools
 - Ensure `@a5c-ai/babysitter-sdk` is in package.json
 - Create `.a5c/` directory structure
-- Set up `.codex/config.toml` MCP server config
+- Set up `.codex/config.toml` using real Codex settings (sandbox, approval, optional notify)
 - Create AGENTS.md if not present
 
 ### 5. Optional: Configure CI/CD
@@ -50,6 +50,6 @@ The profile includes:
 
 ### Done!
 
-Project is ready for babysitting. Try `/babysitter:call` to start your first orchestrated workflow.
+Project is ready for babysitting. Try `babysitter call ...` to start your first orchestrated workflow.
 
 Star the repo: https://github.com/a5c-ai/babysitter

@@ -6,6 +6,14 @@
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
+import {
+  adaptOriginalBabysitTask,
+  refineHarnessAssimilationTask,
+  runHarnessResearchTask,
+  runHarnessRuntimeValidationTask,
+  verifyHarnessAssimilationTask,
+  writeHarnessInstallDocsTask
+} from './shared-assimilation.js';
 
 // ============================================================================
 // PROCESS ENTRY POINT
@@ -38,6 +46,16 @@ export async function process(inputs, ctx) {
   const integrationFiles = [];
   let currentQuality = 0;
   let iterations = 0;
+
+  const researchResult = await ctx.task(runHarnessResearchTask, {
+    projectDir,
+    harnessName: 'Gemini CLI',
+    upstreamSource: 'official Gemini CLI extension and hook model plus the canonical babysitter plugin repo',
+    distributionTarget: 'Gemini extension manifest, settings, hooks, commands, and runtime install path',
+    loopModel: 'SessionStart and AfterAgent continuation with explicit yield back to the user'
+  });
+
+  integrationFiles.push(...(researchResult.artifactsCreated || []));
 
   // ==========================================================================
   // PHASE 1: ANALYZE
@@ -80,6 +98,15 @@ export async function process(inputs, ctx) {
 
   integrationFiles.push(...manifestResult.filesCreated);
   integrationFiles.push(...directoryResult.filesCreated);
+
+  const assimilationResult = await ctx.task(adaptOriginalBabysitTask, {
+    projectDir,
+    harnessName: 'Gemini CLI',
+    upstreamSource: 'the canonical babysitter plugin repo and its babysit process library',
+    research: researchResult
+  });
+
+  integrationFiles.push(...(assimilationResult.filesCreated || []), ...(assimilationResult.filesModified || []));
 
   ctx.log('phase:scaffold:complete', `Scaffolded ${integrationFiles.length} files`);
 
@@ -151,6 +178,15 @@ export async function process(inputs, ctx) {
 
   integrationFiles.push(...settingsResult.filesCreated);
 
+  const docsResult = await ctx.task(writeHarnessInstallDocsTask, {
+    projectDir,
+    harnessName: 'Gemini CLI',
+    research: researchResult,
+    assimilation: assimilationResult
+  });
+
+  integrationFiles.push(...(docsResult.filesCreated || []), ...(docsResult.filesModified || []));
+
   ctx.log('phase:implement:complete', `Implemented ${integrationFiles.length} total files`);
 
   // ==========================================================================
@@ -165,6 +201,16 @@ export async function process(inputs, ctx) {
   });
 
   ctx.log('phase:test:complete', `Tests passed: ${testResult.passed}/${testResult.total}`);
+
+  let runtimeValidationResult = await ctx.task(runHarnessRuntimeValidationTask, {
+    projectDir,
+    harnessName: 'Gemini CLI',
+    loopModel: 'SessionStart and AfterAgent continuation with explicit yield back to the user',
+    research: researchResult,
+    docs: docsResult,
+    integrationFiles,
+    localTestResult: testResult
+  });
 
   // Gate: review test results
   if (!testResult.allPassed) {
@@ -184,9 +230,15 @@ export async function process(inputs, ctx) {
 
   ctx.log('phase:verify', 'Verifying integration quality');
 
-  const verifyResult = await ctx.task(verifyIntegrationTask, {
+  let verifyResult = await ctx.task(verifyHarnessAssimilationTask, {
     projectDir,
+    harnessName: 'Gemini CLI',
+    research: researchResult,
+    assimilation: assimilationResult,
+    docs: docsResult,
     integrationFiles,
+    localTestResult: testResult,
+    runtimeValidation: runtimeValidationResult,
     targetQuality
   });
 
@@ -203,22 +255,41 @@ export async function process(inputs, ctx) {
     ctx.log('phase:converge', `Iteration ${iterations + 1}: quality=${currentQuality}, target=${targetQuality}`);
 
     // Fix issues identified by verification
-    const fixResult = await ctx.task(fixIntegrationIssuesTask, {
+    const fixResult = await ctx.task(refineHarnessAssimilationTask, {
       projectDir,
+      harnessName: 'Gemini CLI',
       issues: verifyResult.issues,
+      recommendations: verifyResult.recommendations,
       integrationFiles,
       iteration: iterations + 1
     });
 
-    integrationFiles.push(...(fixResult.newFiles || []));
+    integrationFiles.push(...(fixResult.newFiles || []), ...(fixResult.filesCreated || []), ...(fixResult.filesModified || []));
+
+    runtimeValidationResult = await ctx.task(runHarnessRuntimeValidationTask, {
+      projectDir,
+      harnessName: 'Gemini CLI',
+      loopModel: 'SessionStart and AfterAgent continuation with explicit yield back to the user',
+      research: researchResult,
+      docs: docsResult,
+      integrationFiles,
+      localTestResult: testResult
+    });
 
     // Re-verify
-    const reconvergeResult = await ctx.task(verifyIntegrationTask, {
+    const reconvergeResult = await ctx.task(verifyHarnessAssimilationTask, {
       projectDir,
+      harnessName: 'Gemini CLI',
+      research: researchResult,
+      assimilation: assimilationResult,
+      docs: docsResult,
       integrationFiles,
+      localTestResult: testResult,
+      runtimeValidation: runtimeValidationResult,
       targetQuality
     });
 
+    verifyResult = reconvergeResult;
     currentQuality = reconvergeResult.qualityScore;
     iterations++;
 
@@ -784,9 +855,9 @@ export const runIntegrationTestsTask = defineTask('run-integration-tests', (args
         'Test commands/babysit.toml: valid TOML format',
         'Run a dry-run of the full flow:',
         '  1. session:init',
-        '  2. run:create (with --dry-run if supported)',
-        '  3. session:associate',
-        '  4. Check AfterAgent hook response',
+        '  2. run:create using the Gemini harness binding path first (with --dry-run only as a shallow precheck if supported)',
+        '  3. explicit session association only as a documented fallback when Gemini lacks native binding',
+        '  4. Check AfterAgent hook response and user-yield reentry behavior',
         'Report pass/fail for each test',
         'Return structured test results'
       ],
@@ -833,7 +904,7 @@ export const verifyIntegrationTask = defineTask('verify-integration', (args, tas
     name: 'general-purpose',
     prompt: {
       role: 'senior quality assurance engineer',
-      task: 'Verify the Gemini CLI babysitter integration quality',
+      task: 'Verify the Gemini CLI babysitter integration quality, including research fidelity, runtime install docs, canonical skill adaptation, and user-yield loop behavior',
       context: {
         projectDir: args.projectDir,
         integrationFiles: args.integrationFiles,
@@ -841,15 +912,14 @@ export const verifyIntegrationTask = defineTask('verify-integration', (args, tas
       },
       instructions: [
         'Score the integration on a 0-100 scale across these dimensions:',
-        '  - Extension manifest completeness (10 points)',
-        '  - Hook protocol compliance (20 points): correct stdin/stdout JSON, exit codes',
-        '  - SessionStart hook: SDK install, session:init call (10 points)',
-        '  - AfterAgent hook: deny/approve logic, completion proof validation (20 points)',
-        '  - MCP server: tool exposure, error handling (15 points)',
-        '  - Sub-agent config: parallel execution support (10 points)',
-        '  - Settings.json: correct hook registration (5 points)',
-        '  - GEMINI.md and /babysit command (5 points)',
-        '  - Error handling and edge cases (5 points)',
+        '  - Research and upstream distribution understanding (15 points)',
+        '  - Canonical babysit skill adaptation fidelity (15 points)',
+        '  - Hook protocol compliance and continuation behavior (20 points): correct stdin/stdout JSON, exit codes, yield-to-user reentry',
+        '  - SessionStart hook and runtime install flow (10 points)',
+        '  - AfterAgent hook completion proof validation (10 points)',
+        '  - MCP server and tool exposure (10 points)',
+        '  - Settings, docs, and operator install guidance (10 points)',
+        '  - Error handling and edge cases (10 points)',
         'For each dimension below target, list specific issues to fix',
         'Identify any security concerns (e.g., unvalidated inputs, missing timeouts)',
         'Check for protocol mismatches (deny vs block, exit codes)',
@@ -908,7 +978,7 @@ export const fixIntegrationIssuesTask = defineTask('fix-integration-issues', (ar
     name: 'general-purpose',
     prompt: {
       role: 'senior integration engineer',
-      task: 'Fix the identified issues in the Gemini CLI babysitter integration',
+      task: 'Fix the identified issues in the Gemini CLI babysitter integration and remove stale contract drift',
       context: {
         projectDir: args.projectDir,
         issues: args.issues,
@@ -917,7 +987,7 @@ export const fixIntegrationIssuesTask = defineTask('fix-integration-issues', (ar
       },
       instructions: [
         'Review each issue from the verification report',
-        'Fix issues in priority order: critical first, then high, medium, low',
+        'Fix issues in priority order: research gaps, install docs, canonical skill migration, and yield-loop issues first; then critical, high, medium, low',
         'For each fix:',
         '  - Read the affected file',
         '  - Apply the suggested fix or implement a better solution',
@@ -928,6 +998,7 @@ export const fixIntegrationIssuesTask = defineTask('fix-integration-issues', (ar
         '  - Missing error handling: add try/catch or set -e guards',
         '  - Missing timeouts: add timeout parameters to hook registrations',
         '  - Completion proof: ensure SHA-256 validation is correct',
+        '  - Stale contract language: remove fallback-first session association, direct result.json writes, or non-agent public effect kinds',
         'Return list of fixed issues and any new files created'
       ],
       outputFormat: 'JSON with fixedIssues (array), newFiles (array), unfixedIssues (array with reasons)'

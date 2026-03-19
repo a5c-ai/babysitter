@@ -8,6 +8,7 @@ on:
       - 'docker-compose.yml'
       - 'packages/sdk/**'
       - 'plugins/babysitter/**'
+      - 'plugins/babysitter-codex/**'
       - 'plugins/pi/**'
       - 'e2e-tests/**'
       - '.github/workflows/e2e-docker.yml'
@@ -21,6 +22,7 @@ on:
       - 'docker-compose.yml'
       - 'packages/sdk/**'
       - 'plugins/babysitter/**'
+      - 'plugins/babysitter-codex/**'
       - 'plugins/pi/**'
       - 'e2e-tests/**'
       - '.github/workflows/e2e-docker.yml'
@@ -95,6 +97,58 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: e2e-test-artifacts
+          path: e2e-artifacts/
+          include-hidden-files: true
+          if-no-files-found: warn
+          retention-days: 14
+
+  codex-docker-e2e:
+    name: Codex Docker E2E
+    if: ${{ secrets.OPENAI_API_KEY != '' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: |
+          set -euo pipefail
+          npm ci
+          npm install --no-save @rollup/rollup-linux-x64-gnu 2>/dev/null || true
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Prepare artifact directories
+        run: |
+          set -euo pipefail
+          mkdir -p e2e-artifacts
+
+      - name: Run Codex Docker full-run E2E
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_BASE_URL: ${{ secrets.OPENAI_BASE_URL }}
+        run: |
+          set -euo pipefail
+          npx vitest run --config e2e-tests/docker/vitest.config.ts \
+            --reporter=default --reporter=json \
+            --outputFile.json=e2e-artifacts/test-results-codex.json \
+            e2e-tests/docker/codex-full-run.test.ts \
+            2>&1 | tee e2e-artifacts/codex-docker-e2e.log
+
+      - name: Upload Codex test artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: codex-e2e-artifacts
           path: e2e-artifacts/
           include-hidden-files: true
           if-no-files-found: warn

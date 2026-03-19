@@ -1,52 +1,48 @@
 ---
 name: babysitter-codex
 description: >-
-  Orchestrate complex, multi-step AI workflows with quality convergence loops,
-  event-sourced state, and human-in-the-loop approval gates. Use when the user
-  wants to babysit a task, orchestrate a workflow, run quality-gated development,
-  resume a previous orchestration run, diagnose run health, plan without executing,
-  set up a project or user profile for babysitter, or assimilate an external
-  methodology. Also use when the user mentions "babysitter", "orchestrate",
-  "babysit", "quality loop", or "convergence loop".
+  Run babysitter workflows from Codex using real Codex surfaces: skills,
+  AGENTS.md guidance, project config, and an external orchestration supervisor.
+  Use when the user wants to babysit a task, resume a run, diagnose run health,
+  install the Codex skill, or assimilate a methodology for Codex.
 ---
 
 # Babysitter for Codex CLI
 
-Orchestrate complex, multi-step workflows with event-sourced state management,
-hook-based extensibility, and human-in-the-loop approval gates.
+Babysitter on Codex is implemented as:
+
+- Codex-facing instructions and skills
+- A `.a5c` state directory in the target workspace
+- An external babysitter supervisor that owns `run:create`, `run:iterate`,
+  `task:post`, breakpoint handling, and resume behavior
+- Optional `notify` monitoring after Codex turns complete
+
+Codex does **not** provide Claude-style blocking `SessionStart` or `Stop`
+hooks. Do not claim or depend on them.
 
 ## Choosing a Mode
 
-Based on the user's request, read the appropriate sub-skill from
-`.codex/skills/babysitter/<mode>/SKILL.md` (relative to this skill's install
-directory) and follow its instructions.
+Read the matching sub-skill from `.codex/skills/babysitter/<mode>/SKILL.md`.
+If the user intent is unclear, default to `call/SKILL.md`.
 
-| User intent | Mode | Sub-skill to read |
-|-------------|------|-------------------|
-| Start an orchestration run (default) | call | `call/SKILL.md` |
-| Run autonomously, no interaction | yolo | `yolo/SKILL.md` |
-| Resume an existing run | resume | `resume/SKILL.md` |
-| Plan a workflow without executing | plan | `plan/SKILL.md` |
-| Start a never-ending periodic run | forever | `forever/SKILL.md` |
-| Diagnose run health | doctor | `doctor/SKILL.md` |
-| Launch observer dashboard | observe | `observe/SKILL.md` |
-| Analyze previous run improvements | retrospect | `retrospect/SKILL.md` |
-| Set or view model routing policy | model | `model/SKILL.md` |
-| Work directly from a GitHub issue | issue | `issue/SKILL.md` |
-| Help and documentation | help | `help/SKILL.md` |
-| Onboard a project | project-install | `project-install/SKILL.md` |
-| Install team-pinned setup | team-install | `team-install/SKILL.md` |
-| Set up user profile | user-install | `user-install/SKILL.md` |
-| Assimilate external methodology | assimilate | `assimilate/SKILL.md` |
+| User intent | Mode |
+|-------------|------|
+| Start an orchestration run | `call` |
+| Run autonomously | `yolo` |
+| Resume an existing run | `resume` |
+| Plan without executing | `plan` |
+| Diagnose run health | `doctor` |
+| Help and documentation | `help` |
+| Install into a project | `project-install` |
+| Install user profile/setup | `user-install` |
+| Install team-pinned setup | `team-install` |
+| Assimilate external methodology | `assimilate` |
 
-If unclear, default to `call/SKILL.md`.
+## Core CLI Contract
 
-## SDK CLI Quick Reference
+Use the babysitter SDK CLI for orchestration:
 
-The babysitter SDK CLI (`babysitter` or `npx @a5c-ai/babysitter-sdk`) drives
-all orchestration:
-
-```
+```bash
 babysitter run:create   --process-id <id> --entry <path>#<export> ...
 babysitter run:iterate  <runDir> --json --iteration <n>
 babysitter run:status   <runDir> --json
@@ -54,29 +50,22 @@ babysitter task:list    <runDir> --pending --json
 babysitter task:post    <runDir> <effectId> --status ok --value <file> --json
 ```
 
-Compatibility levels:
+When a Codex session ID is available, bind it honestly:
 
-- Core required: `run:create`, `run:iterate`, `run:status`, `task:list`, `task:post`
-- Optional advanced: `session:*`, `profile:*`, `skill:*`, `health`
-
-If advanced commands are missing, continue in `compat-core` mode and do not
-block orchestration.
-
-### Canonical argument shapes (current Babysitter SDK)
-
-- `run:status <runDir> --json`
-- `task:list <runDir> --json`
-- `session:init --session-id <id> --state-dir .a5c --json`
-- `session:associate --session-id <id> --state-dir .a5c --run-id <runId> --json`
-- `hook:log --hook-type <type> --log-file .a5c/logs/hooks.jsonl --json`
+```bash
+babysitter run:create ... --harness codex --session-id <id> --state-dir .a5c --json
+```
 
 ## Result Posting Protocol
 
-1. Write result value to `tasks/<effectId>/output.json`
-2. Post: `babysitter task:post <runDir> <effectId> --status ok --value tasks/<effectId>/output.json`
-3. Never write `result.json` directly -- the SDK owns that file.
+1. Write the result value to `tasks/<effectId>/output.json`
+2. Post it with `babysitter task:post`
+3. Never write `result.json` directly
 
-## Hook-Driven Loop
+## Codex-Specific Rules
 
-After each effect is posted, stop the session. The stop hook re-invokes
-Codex to continue the next iteration. Do not loop within a single session.
+- Prefer natural-language activation such as `babysitter call ...`
+- Legacy `/babysitter:*` aliases may exist only as optional user-installed
+  prompt sugar; they are not a native Codex plugin feature
+- Use `notify` only for monitoring and telemetry, never as the orchestration
+  control loop

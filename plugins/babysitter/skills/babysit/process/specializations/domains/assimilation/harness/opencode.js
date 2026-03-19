@@ -6,6 +6,14 @@
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
+import {
+  adaptOriginalBabysitTask,
+  refineHarnessAssimilationTask,
+  runHarnessResearchTask,
+  runHarnessRuntimeValidationTask,
+  verifyHarnessAssimilationTask,
+  writeHarnessInstallDocsTask
+} from './shared-assimilation.js';
 
 /**
  * OpenCode Harness Integration Process
@@ -39,6 +47,16 @@ export async function process(inputs, ctx) {
   const integrationFiles = [];
   let finalQuality = 0;
   let iterations = 0;
+
+  const researchResult = await ctx.task(runHarnessResearchTask, {
+    projectDir,
+    harnessName: 'OpenCode',
+    upstreamSource: 'official OpenCode plugin model plus the canonical babysitter plugin repo',
+    distributionTarget: 'OpenCode plugin hooks, opencode.json, custom tools, and runtime install path',
+    loopModel: 'session.idle and stop-hook continuation with explicit yield back to the harness user'
+  });
+
+  integrationFiles.push(...(researchResult.artifactsCreated || []));
 
   // ==========================================================================
   // PHASE 1: ANALYZE
@@ -79,6 +97,15 @@ export async function process(inputs, ctx) {
     ...scaffoldToolsResult.filesCreated,
     ...scaffoldConfigResult.filesCreated
   );
+
+  const assimilationResult = await ctx.task(adaptOriginalBabysitTask, {
+    projectDir,
+    harnessName: 'OpenCode',
+    upstreamSource: 'the canonical babysitter plugin repo and its babysit process library',
+    research: researchResult
+  });
+
+  integrationFiles.push(...(assimilationResult.filesCreated || []), ...(assimilationResult.filesModified || []));
 
   ctx.log(`Scaffolding complete: ${integrationFiles.length} files created`);
 
@@ -150,6 +177,15 @@ export async function process(inputs, ctx) {
     ...doomLoopResult.filesModified
   );
 
+  const docsResult = await ctx.task(writeHarnessInstallDocsTask, {
+    projectDir,
+    harnessName: 'OpenCode',
+    research: researchResult,
+    assimilation: assimilationResult
+  });
+
+  integrationFiles.push(...(docsResult.filesCreated || []), ...(docsResult.filesModified || []));
+
   ctx.log(`Implementation complete: ${integrationFiles.length} total integration files`);
 
   // ==========================================================================
@@ -164,6 +200,16 @@ export async function process(inputs, ctx) {
   });
 
   ctx.log(`Tests: ${testResult.passed}/${testResult.total} passed`);
+
+  let runtimeValidationResult = await ctx.task(runHarnessRuntimeValidationTask, {
+    projectDir,
+    harnessName: 'OpenCode',
+    loopModel: 'session.idle and stop-hook continuation with explicit yield back to the harness user',
+    research: researchResult,
+    docs: docsResult,
+    integrationFiles,
+    localTestResult: testResult
+  });
 
   if (!testResult.allPassed) {
     await ctx.breakpoint({
@@ -184,9 +230,15 @@ export async function process(inputs, ctx) {
 
   ctx.log('Phase 5: Quality verification');
 
-  const verifyResult = await ctx.task(verifyIntegrationTask, {
+  let verifyResult = await ctx.task(verifyHarnessAssimilationTask, {
     projectDir,
+    harnessName: 'OpenCode',
+    research: researchResult,
+    assimilation: assimilationResult,
+    docs: docsResult,
     integrationFiles,
+    localTestResult: testResult,
+    runtimeValidation: runtimeValidationResult,
     targetQuality
   });
 
@@ -203,23 +255,40 @@ export async function process(inputs, ctx) {
     iterations++;
     ctx.log(`Convergence iteration ${iterations}/${maxIterations}: quality=${finalQuality}`);
 
-    const fixResult = await ctx.task(convergenceFixTask, {
+    const fixResult = await ctx.task(refineHarnessAssimilationTask, {
       projectDir,
+      harnessName: 'OpenCode',
       integrationFiles,
-      currentQuality: finalQuality,
-      targetQuality,
       issues: verifyResult.issues,
+      recommendations: verifyResult.recommendations,
       iteration: iterations
     });
 
-    integrationFiles.push(...(fixResult.newFiles || []));
+    integrationFiles.push(...(fixResult.newFiles || []), ...(fixResult.filesCreated || []), ...(fixResult.filesModified || []));
 
-    const reVerify = await ctx.task(verifyIntegrationTask, {
+    runtimeValidationResult = await ctx.task(runHarnessRuntimeValidationTask, {
       projectDir,
+      harnessName: 'OpenCode',
+      loopModel: 'session.idle and stop-hook continuation with explicit yield back to the harness user',
+      research: researchResult,
+      docs: docsResult,
       integrationFiles,
+      localTestResult: testResult
+    });
+
+    const reVerify = await ctx.task(verifyHarnessAssimilationTask, {
+      projectDir,
+      harnessName: 'OpenCode',
+      research: researchResult,
+      assimilation: assimilationResult,
+      docs: docsResult,
+      integrationFiles,
+      localTestResult: testResult,
+      runtimeValidation: runtimeValidationResult,
       targetQuality
     });
 
+    verifyResult = reVerify;
     finalQuality = reVerify.qualityScore;
 
     if (finalQuality >= targetQuality) {
@@ -476,7 +545,8 @@ export const implementPluginHooksTask = defineTask('implement-plugin-hooks', (ar
         'session.created:',
         '  - Generate babysitter session ID (opencode-<timestamp>-<random>)',
         '  - Run: npx babysitter session:init --session-id <id>',
-        '  - Run: npx babysitter run:create --process-id <processId> --session-id <id>',
+        '  - Run: npx babysitter run:create --process-id <processId> --harness opencode --session-id <id> --plugin-root <pluginRoot> when native binding is available',
+        '  - Only fall back to explicit association if OpenCode truly lacks a first-class harness binding path',
         '  - Store run ID and session state in plugin state',
         '',
         'session.idle:',
@@ -690,15 +760,16 @@ export const implementEffectMappingTask = defineTask('implement-effect-mapping',
       instructions: [
         `Edit the plugin file at ${args.pluginFile}`,
         'When babysitter emits pending effects (via run:iterate), each effect has:',
-        '  - effectId, taskId, kind, title, description, agent/node/shell config',
+        '  - effectId, taskId, kind, title, description, and agent/skill/shell configuration',
         'Map effect kinds to OpenCode execution:',
         '  - kind=agent: Build a prompt from the agent config and send via client.session.prompt()',
-        '  - kind=node: Execute the node script via shell tool or Bun.spawn',
+        '  - kind=skill: Expand the matching installed skill through the plugin surface when available',
         '  - kind=shell: Execute the shell command via shell tool',
         '  - kind=breakpoint: Present to user via TUI toast or auto-resolve in CLI mode',
         '  - kind=sleep: Use setTimeout or schedule for later',
-        '  - kind=orchestrator_task: Delegate to a sub-session',
-        'After effect execution, post result via: npx babysitter task:post --effect-id <id> --result <json>',
+        '  - complex orchestration requests: delegate to a sub-session while keeping the public effect kind as agent or skill and preserving the canonical yield-and-resume contract',
+        'After effect execution, write output.json and post via: npx babysitter task:post <runDir> <effectId> --status ok --value tasks/<effectId>/output.json',
+        'Never write result.json directly',
         'Include tool.execute.after hook to capture tool results for effect mapping',
         'Return list of modified files'
       ],
@@ -740,12 +811,13 @@ export const implementResultPostingTask = defineTask('implement-result-posting',
         'Create a postResult helper function that:',
         '  1. Takes effectId, result object, and optional metadata',
         '  2. Serializes the result to JSON',
-        '  3. Invokes: npx babysitter task:post --run-id <runId> --effect-id <effectId> --json',
-        '  4. Pipes the result JSON to stdin or writes to a temp file',
-        '  5. Handles errors: retry once on EBUSY/EPERM, fail on other errors',
-        '  6. Logs the post result for debugging',
-        'Also create a postFailure helper for when effect execution fails:',
-        '  - Posts error result with success=false and error details',
+          '  3. Writes the value payload to tasks/<effectId>/output.json',
+          '  4. Invokes: npx babysitter task:post <runDir> <effectId> --status ok --value tasks/<effectId>/output.json',
+          '  5. Handles errors: retry once on EBUSY/EPERM, fail on other errors',
+          '  6. Logs the post result for debugging',
+          'Also create a postFailure helper for when effect execution fails:',
+          '  - Writes an error payload file and posts with --error <file>',
+          'Never write result.json directly; the SDK owns that file',
         'Wire postResult into the effect mapping so results are automatically posted',
         'after each tool execution completes',
         'Return list of modified files'
@@ -892,7 +964,7 @@ export const verifyIntegrationTask = defineTask('verify-integration', (args, tas
     name: 'general-purpose',
     prompt: {
       role: 'senior QA engineer performing quality verification on a babysitter integration',
-      task: 'Verify the OpenCode babysitter integration meets quality standards',
+      task: 'Verify the OpenCode babysitter integration meets quality standards, including research fidelity, runtime installability, canonical skill adaptation, and user-yield continuation',
       context: {
         projectDir: args.projectDir,
         integrationFiles: args.integrationFiles,
@@ -901,16 +973,16 @@ export const verifyIntegrationTask = defineTask('verify-integration', (args, tas
       instructions: [
         'Score the integration on these criteria (each 0-10 points, total 100):',
         '',
-        '1. Plugin structure (10): Correct directory layout, valid package.json, proper exports',
-        '2. Hook completeness (10): All 4 hooks implemented (session.created, session.idle, session.error, stop)',
-        '3. MCP registration (10): MCP server properly configured in opencode.json',
-        '4. Orchestration loop (10): session.idle drives iteration correctly',
-        '5. Effect mapping (10): All effect kinds mapped to OpenCode execution',
-        '6. Result posting (10): Results posted back correctly via task:post',
-        '7. Doom loop handling (10): Runaway detection with configurable limits',
-        '8. Custom tool (10): babysitter CLI tool accessible to agent',
-        '9. Error handling (10): Proper error handling, retries, state cleanup',
-        '10. TypeScript quality (10): No any types, proper typing, clean code',
+        '1. Research and upstream install model (10): real distribution and hook points understood first',
+        '2. Canonical babysit skill adaptation (10): important Claude Code behavior preserved',
+        '3. Plugin structure (10): Correct directory layout, valid package.json, proper exports',
+        '4. Hook completeness (10): All 4 hooks implemented (session.created, session.idle, session.error, stop)',
+        '5. Orchestration loop (10): session.idle and stop handling preserve yield-to-user continuation',
+        '6. Effect mapping (10): public effect kinds stay agent, skill, shell, breakpoint, or sleep',
+        '7. Result posting (10): output.json plus task:post used correctly',
+        '8. Install docs and operator readiness (10): install, upgrade, rollback, troubleshooting',
+        '9. Error handling and doom loop handling (10): retries, state cleanup, configurable limits',
+        '10. Runtime validation (10): real harness run proved beyond structural tests',
         '',
         'Provide per-criterion scores and overall quality score',
         'List any issues that need fixing',
@@ -949,7 +1021,7 @@ export const convergenceFixTask = defineTask('convergence-fix', (args, taskCtx) 
     name: 'general-purpose',
     prompt: {
       role: 'senior integration engineer fixing quality issues in a babysitter integration',
-      task: `Fix the identified issues to improve integration quality from ${args.currentQuality} to ${args.targetQuality}`,
+      task: `Fix the identified issues to improve integration quality from ${args.currentQuality} to ${args.targetQuality} and remove stale contract drift`,
       context: {
         projectDir: args.projectDir,
         integrationFiles: args.integrationFiles,
@@ -964,11 +1036,13 @@ export const convergenceFixTask = defineTask('convergence-fix', (args, taskCtx) 
         'Fix the following issues in priority order:',
         ...(args.issues || []).map((issue, i) => `  ${i + 1}. ${issue}`),
         '',
+        'Prioritize research, install-doc, canonical skill migration, and yield-loop gaps first.',
         'For each fix:',
         '  1. Identify the file and specific location',
         '  2. Apply the minimal change needed',
         '  3. Verify the fix does not break other parts',
         '  4. Document what was changed and why',
+        '  5. Replace any stale direct result.json, node-effect, or fallback-first binding guidance if still present',
         '',
         'Return list of modified files and any new files created'
       ],

@@ -52,7 +52,7 @@ For each assimilation, generate:
 ## Usage
 
 ```
-/babysitter:assimilate https://github.com/org/methodology-repo
-/babysitter:assimilate harness codex
-/babysitter:assimilate ./specs/api-design.md
+babysitter assimilate https://github.com/org/methodology-repo
+babysitter assimilate harness codex
+babysitter assimilate ./specs/api-design.md
 ```

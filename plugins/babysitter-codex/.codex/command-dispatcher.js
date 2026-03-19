@@ -8,26 +8,39 @@ const {
   handleDoctorCommand,
 } = require('./mode-handlers');
 
+function normalizePhrase(input) {
+  const trimmed = (input || '').trim();
+  if (!/^babysitter(?:\s|:)/i.test(trimmed)) return null;
+  if (/^babysitter:/i.test(trimmed)) {
+    return `/${trimmed}`;
+  }
+  const parts = trimmed.split(/\s+/);
+  const mode = parts[1] || 'call';
+  const args = parts.slice(2).join(' ');
+  return `/babysitter:${mode}${args ? ` ${args}` : ''}`;
+}
+
 /**
  * Parse user input and dispatch to the appropriate babysitter skill.
  *
- * @param {string} input - Raw user input (e.g., "/babysitter:yolo build a REST API")
- * @returns {{ dispatched: boolean, command?: string, args?: string, instructions?: string, error?: string }}
+ * Supports natural-language command phrases first, with optional legacy
+ * `/babysitter:*` aliases for compatibility.
  */
 function dispatch(input) {
-  const parsed = resolveCommand(input);
+  const trimmed = (input || '').trim();
+  const parsed = resolveCommand(trimmed) || resolveCommand(normalizePhrase(trimmed) || '');
 
   if (!parsed) {
-    // Check if it looks like a babysitter command but didn't match
-    const trimmed = (input || '').trim();
-    if (trimmed.startsWith('/babysitter')) {
-      const token = trimmed.slice(1).split(/\s+/)[0];
+    if (trimmed.startsWith('/babysitter') || /^babysitter(?:\s|:)/i.test(trimmed)) {
+      const token = trimmed.startsWith('/')
+        ? trimmed.slice(1).split(/\s+/)[0]
+        : `babysitter:${(trimmed.split(/\s+/)[1] || 'call').trim()}`;
       const suggestion = suggestCommand(token);
       return {
         dispatched: false,
         error: suggestion
           ? `Unknown command "${token}". Did you mean "${suggestion}"?`
-          : `Unknown command "${token}". Run /babysitter:help to see available commands.`
+          : `Unknown command "${token}". Run "babysitter help" to see available commands.`,
       };
     }
     return { dispatched: false };
@@ -37,7 +50,7 @@ function dispatch(input) {
   if (!instructions) {
     return {
       dispatched: false,
-      error: `SKILL.md not found for command "${parsed.command}". Run /babysitter:help for available commands.`
+      error: `SKILL.md not found for command "${parsed.command}". Run "babysitter help" for available commands.`,
     };
   }
 
@@ -63,31 +76,27 @@ function dispatch(input) {
   };
 }
 
-/**
- * Generate a help summary of all available commands.
- */
 function helpSummary() {
   const commands = listCommands();
   const lines = [
-    'Babysitter for Codex CLI — Available Commands',
+    'Babysitter for Codex CLI - Available Commands',
     '',
-    ...commands.map(c => `  /${c.name}  — ${c.description}${c.aliases.length ? ` (aliases: ${c.aliases.map(a => '/' + a).join(', ')})` : ''}`),
+    ...commands.map((c) => `  ${c.name.replace(/^babysitter:/, 'babysitter ')}  - ${c.description}`),
     '',
-    'Usage: /<command> [arguments]',
-    'Example: /babysitter:yolo build a REST API with authentication'
+    'Preferred usage: babysitter <mode> [arguments]',
+    'Example: babysitter yolo build a REST API with authentication',
+    'Legacy /babysitter:* aliases are compatibility-only, not native Codex commands.',
   ];
   return lines.join('\n');
 }
 
-/**
- * Check if input is a babysitter slash command.
- */
 function isBabysitterCommand(input) {
-  return (input || '').trim().startsWith('/babysitter');
+  const trimmed = (input || '').trim();
+  return trimmed.startsWith('/babysitter') || /^babysitter(?:\s|:)/i.test(trimmed);
 }
 
 module.exports = {
   dispatch,
   helpSummary,
-  isBabysitterCommand
+  isBabysitterCommand,
 };

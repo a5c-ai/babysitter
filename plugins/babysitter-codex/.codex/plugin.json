@@ -1,13 +1,20 @@
 {
     "name":  "babysitter",
-    "version":  "4.0.149",
-    "description":  "Babysitter orchestration plugin for Codex CLI with full upstream process/skill library mapping and command-phrase activation",
+    "version":  "0.1.5",
+    "description":  "Babysitter command catalog and skill metadata for Codex CLI. Runtime orchestration is owned by an external supervisor, not Codex lifecycle hooks.",
     "author":  "a5c.ai",
     "license":  "MIT",
-    "hooks":  {
-                  "SessionStart":  "hooks/babysitter-session-start.sh",
-                  "Stop":  "hooks/babysitter-stop-hook.sh"
-              },
+    "runtimeCapabilities":  {
+                                "codexNativeSurfaces":  [
+                                                             "AGENTS.md",
+                                                             "skills",
+                                                             "config.toml",
+                                                             "notify"
+                                                         ],
+                                "requiresExternalSupervisor":  true,
+                                "supportsBlockingHooks":  false,
+                                "supportsCustomSlashCommands":  false
+                            },
     "commands":  [
                      {
                          "name":  "babysitter:call",

@@ -1,0 +1,47 @@
+FROM node:20-bookworm
+
+LABEL maintainer="a5c.ai"
+LABEL description="Codex CLI with babysitter SDK and repo-installed babysitter-codex for E2E validation"
+
+RUN apt-get update && apt-get install -y \
+    bash \
+    git \
+    jq \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN groupadd -r codex && useradd -r -g codex -m -d /home/codex codex
+
+ENV HOME=/home/codex
+ENV CODEX_HOME=/home/codex/.codex
+ENV PATH=/home/codex/.local/bin:${PATH}
+
+RUN mkdir -p /home/codex/.local /home/codex/.codex && \
+    echo "prefix=/home/codex/.local" > /home/codex/.npmrc
+
+WORKDIR /app
+
+COPY package.json package-lock.json* ./
+COPY packages/sdk/package.json ./packages/sdk/
+COPY plugins/babysitter-codex/package.json ./plugins/babysitter-codex/
+
+RUN npm install --include=dev
+
+COPY . .
+
+RUN npm run build:sdk
+
+RUN mkdir -p /workspace && chown -R codex:codex /app /home/codex /workspace
+
+USER codex
+
+RUN npm install -g @openai/codex@latest
+RUN npm install -g /app/packages/sdk
+RUN npm install -g /app/plugins/babysitter-codex
+
+WORKDIR /workspace
+
+ENV OPENAI_API_KEY=""
+ENV OPENAI_BASE_URL=""
+
+CMD ["bash"]

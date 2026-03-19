@@ -6,6 +6,14 @@
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
+import {
+  adaptOriginalBabysitTask,
+  refineHarnessAssimilationTask,
+  runHarnessResearchTask,
+  runHarnessRuntimeValidationTask,
+  verifyHarnessAssimilationTask,
+  writeHarnessInstallDocsTask
+} from './shared-assimilation.js';
 
 /**
  * Oh-My-Pi Deep Babysitter Integration Process
@@ -55,6 +63,16 @@ export async function process(inputs, ctx) {
 
   ctx.log('Starting oh-my-pi deep babysitter integration', { projectDir, targetQuality });
 
+  const researchResult = await ctx.task(runHarnessResearchTask, {
+    projectDir,
+    harnessName: 'oh-my-pi',
+    upstreamSource: 'official oh-my-pi package and plugin ecosystem plus the canonical babysitter plugin repo',
+    distributionTarget: 'Pi package install flow, extension hooks, commands, skills, and runtime sync path',
+    loopModel: 'agent_end and followUp continuation with explicit validation of user-yield reentry'
+  });
+
+  integrationFiles.push(...(researchResult.artifactsCreated || []));
+
   // ============================================================================
   // PHASE 1: ANALYZE
   // ============================================================================
@@ -98,6 +116,15 @@ export async function process(inputs, ctx) {
   ]);
 
   ctx.log('Scaffold complete', { totalFiles: integrationFiles.length });
+
+  const assimilationResult = await ctx.task(adaptOriginalBabysitTask, {
+    projectDir,
+    harnessName: 'oh-my-pi',
+    upstreamSource: 'the canonical babysitter plugin repo and its babysit process library',
+    research: researchResult
+  });
+
+  integrationFiles.push(...(assimilationResult.filesCreated || []), ...(assimilationResult.filesModified || []));
 
   // ============================================================================
   // PHASE 3: CORE -- Session auto-binding + CLI harness adapter
@@ -275,6 +302,15 @@ export async function process(inputs, ctx) {
 
   ctx.log('UX layer complete', { totalFiles: integrationFiles.length });
 
+  const docsResult = await ctx.task(writeHarnessInstallDocsTask, {
+    projectDir,
+    harnessName: 'oh-my-pi',
+    research: researchResult,
+    assimilation: assimilationResult
+  });
+
+  integrationFiles.push(...(docsResult.filesCreated || []), ...(docsResult.filesModified || []));
+
   // ============================================================================
   // PHASE 7: TEST
   // ============================================================================
@@ -287,17 +323,36 @@ export async function process(inputs, ctx) {
 
   ctx.log('Tests complete', { passed: testResult.passed, failed: testResult.failed, total: testResult.total });
 
+  let runtimeValidationResult = await ctx.task(runHarnessRuntimeValidationTask, {
+    projectDir,
+    harnessName: 'oh-my-pi',
+    loopModel: 'agent_end and followUp continuation with explicit validation of user-yield reentry',
+    research: researchResult,
+    docs: docsResult,
+    integrationFiles,
+    localTestResult: testResult
+  });
+
   // ============================================================================
   // PHASE 8: VERIFY
   // ============================================================================
 
   ctx.log('Phase 8: Quality verification');
 
-  let verifyResult = await ctx.task(verifyIntegrationTask, {
-    projectDir, integrationFiles, testResult, targetQuality, analysis
+  let verifyResult = await ctx.task(verifyHarnessAssimilationTask, {
+    projectDir,
+    harnessName: 'oh-my-pi',
+    research: researchResult,
+    assimilation: assimilationResult,
+    docs: docsResult,
+    analysis,
+    integrationFiles,
+    localTestResult: testResult,
+    runtimeValidation: runtimeValidationResult,
+    targetQuality
   });
 
-  finalQuality = verifyResult.score;
+  finalQuality = verifyResult.qualityScore;
   iteration = 1;
   ctx.log('Verification', { quality: finalQuality, target: targetQuality });
 
@@ -315,20 +370,40 @@ export async function process(inputs, ctx) {
       context: { runId: ctx.runId }
     });
 
-    const fix = await ctx.task(refineTask, {
+    const fix = await ctx.task(refineHarnessAssimilationTask, {
       projectDir, integrationFiles,
+      harnessName: 'oh-my-pi',
       issues: verifyResult.issues,
       recommendations: verifyResult.recommendations,
       iteration, analysis
     });
-    integrationFiles.push(...(fix.filesCreated || []));
+    integrationFiles.push(...(fix.filesCreated || []), ...(fix.filesModified || []));
 
     const retest = await ctx.task(runTestsTask, { projectDir, integrationFiles, analysis });
 
-    verifyResult = await ctx.task(verifyIntegrationTask, {
-      projectDir, integrationFiles, testResult: retest, targetQuality, analysis
+    runtimeValidationResult = await ctx.task(runHarnessRuntimeValidationTask, {
+      projectDir,
+      harnessName: 'oh-my-pi',
+      loopModel: 'agent_end and followUp continuation with explicit validation of user-yield reentry',
+      research: researchResult,
+      docs: docsResult,
+      integrationFiles,
+      localTestResult: retest
     });
-    finalQuality = verifyResult.score;
+
+    verifyResult = await ctx.task(verifyHarnessAssimilationTask, {
+      projectDir,
+      harnessName: 'oh-my-pi',
+      research: researchResult,
+      assimilation: assimilationResult,
+      docs: docsResult,
+      analysis,
+      integrationFiles,
+      localTestResult: retest,
+      runtimeValidation: runtimeValidationResult,
+      targetQuality
+    });
+    finalQuality = verifyResult.qualityScore;
     ctx.log(`Iteration ${iteration} complete`, { quality: finalQuality });
   }
 
@@ -786,7 +861,7 @@ export const implementEffectMappingTask = defineTask('implement-effect-mapping',
         '',
         '  skill: Expand via /skill:<name> command',
         '',
-        '  orchestrator_task: Delegate to sub-agent with orchestrator prompt',
+        '  complex orchestration request: Delegate to sub-agent with an agent-style orchestrator prompt while keeping the public effect kind as agent or skill',
         '',
         'Each handler returns: { status: "ok"|"error", value: object }',
         'Include comprehensive error handling',
@@ -1156,16 +1231,16 @@ export const implementInstallScriptsTask = defineTask('implement-install-scripts
       role: 'DevOps engineer',
       task: 'Create installation and setup scripts for the babysitter-pi plugin',
       context: { projectDir: args.projectDir, analysis: args.analysis },
-      instructions: [
-        `Create ${args.projectDir}/scripts/postinstall.js:`,
-        '  Check/install babysitter CLI, verify, create .a5c/ if needed',
-        `Create ${args.projectDir}/scripts/preuninstall.js:`,
-        '  Cleanup session state, warn about active runs',
-        `Create ${args.projectDir}/scripts/setup.sh:`,
-        '  Full setup: install plugin via omp plugin install, run postinstall, smoke test',
-        'Handle cross-platform (Windows/macOS/Linux)',
-        'Return list of files created'
-      ],
+        instructions: [
+          `Create ${args.projectDir}/scripts/postinstall.js:`,
+          '  Check/install babysitter CLI, verify, create .a5c/ if needed, and sync the canonical babysit process library from the upstream repo when configured',
+          `Create ${args.projectDir}/scripts/preuninstall.js:`,
+          '  Cleanup session state, warn about active runs',
+          `Create ${args.projectDir}/scripts/setup.sh:`,
+          '  Full setup: install plugin via omp plugin install from the upstream package or GitHub source, run postinstall, smoke test, and verify the followUp loop stays active after yielding to the user',
+          'Handle cross-platform (Windows/macOS/Linux)',
+          'Return list of files created'
+        ],
       outputFormat: 'JSON with success, filesCreated (array)'
     },
     outputSchema: {
@@ -1274,22 +1349,22 @@ export const verifyIntegrationTask = defineTask('verify-integration', (args, tas
     name: 'general-purpose',
     prompt: {
       role: 'integration quality assessor',
-      task: 'Score the babysitter-pi deep integration on 12 criteria for a total of 0-120 scaled to 0-100',
+      task: 'Score the babysitter-pi deep integration on research fidelity, canonical skill adaptation, runtime installability, user-yield continuation, and operator readiness',
       context: { projectDir: args.projectDir, integrationFiles: args.integrationFiles, testResults: args.testResult, targetQuality: args.targetQuality, analysis: args.analysis },
       instructions: [
         'Read all integration files and score on 12 criteria (each 0-10):',
         '',
-        '1. Package structure: Valid Pi package, omp manifest, deps',
-        '2. Session auto-binding: Every session auto-initializes babysitter',
-        '3. Loop driver: agent_end + followUp correctly implements orchestration',
-        '4. Harness adapter: CLI harness type "pi" works with run:create',
-        '5. Task interception: Built-in task tool routed through babysitter during runs',
-        '6. Effect mapping: All 7 kinds mapped correctly',
-        '7. Todo replacement: Built-in todo replaced with babysitter task tracking',
-        '8. TUI widgets: Run status, task progress, quality scores displayed',
-        '9. Custom tools: All 5 babysitter tools registered with valid schemas',
-        '10. Commands/Skills: All /babysitter:* commands and SKILL.md functional',
-        '11. Tests: All tests pass',
+        '1. Research: upstream packaging, hook points, and distribution model understood first',
+        '2. Canonical skill adaptation: important Claude Code babysit behavior preserved',
+        '3. Package structure: Valid Pi package, omp manifest, deps',
+        '4. Session auto-binding: Every session auto-initializes babysitter',
+        '5. Loop driver: agent_end + followUp correctly implements orchestration and user-yield reentry',
+        '6. Harness adapter: CLI harness type "pi" works with run:create',
+        '7. Task interception and effect mapping: public effect kinds stay agent, skill, shell, breakpoint, or sleep',
+        '8. Todo replacement: Built-in todo replaced with babysitter task tracking',
+        '9. TUI widgets and operator UX: Run status, task progress, quality scores displayed',
+        '10. Commands, skills, and install docs: /babysitter:* commands, SKILL.md, install, upgrade, rollback',
+        '11. Runtime validation: real harness run and loop continuation proved',
         '12. Error handling: Comprehensive error handling, guards, cleanup',
         '',
         'Overall score = (sum of criteria / 120) * 100',
@@ -1322,11 +1397,13 @@ export const refineTask = defineTask('refine-integration', (args, taskCtx) => ({
     name: 'general-purpose',
     prompt: {
       role: 'senior integration engineer',
-      task: 'Fix identified issues to improve integration quality',
+      task: 'Fix identified issues to improve integration quality and remove stale contract drift',
       context: { projectDir: args.projectDir, integrationFiles: args.integrationFiles, issues: args.issues, recommendations: args.recommendations, iteration: args.iteration, analysis: args.analysis },
       instructions: [
         'Review all issues sorted by severity',
+        'Prioritize research, install-doc, canonical skill migration, and loop-continuation gaps first',
         'Fix each issue in the appropriate file',
+        'Replace any stale direct result.json, node-effect, or fallback-first binding guidance if it remains',
         'Do NOT add features beyond fixing issues',
         'Verify fixes dont break other components',
         'Return list of files modified'

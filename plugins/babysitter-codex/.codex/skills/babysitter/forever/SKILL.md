@@ -12,7 +12,7 @@ Start a **never-ending** babysitter orchestration run. The process runs in an in
 
 ### 1. Interview Phase
 
-Same as `/babysitter:call` — gather intent, requirements, and scope. Focus on:
+Same as `babysitter call` — gather intent, requirements, and scope. Focus on:
 - What should happen each cycle?
 - How long between cycles? (sleep duration)
 - What quality gates should be checked?
@@ -40,6 +40,6 @@ export async function process(inputs, ctx) {
 
 ### 3. Run Creation and Loop
 
-Same as `/babysitter:call` — create the run and iterate. Sleep effects are handled by waiting until the specified timestamp before continuing.
+Same as `babysitter call` — create the run and iterate. Sleep effects are handled by waiting until the specified timestamp before continuing.
 
 The run will only complete when the process logic breaks out of the loop or when manually stopped.

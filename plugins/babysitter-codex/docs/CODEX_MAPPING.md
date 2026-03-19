@@ -5,7 +5,7 @@ This document defines how upstream Babysitter assets are mapped for use in Codex
 ## Source of Truth
 
 - Mapping manifest: `config/codex-command-map.json`
-- Upstream plugin snapshot: `upstream/babysitter/plugin.json`
+- Upstream plugin snapshot: `upstream/babysitter/plugin.json` (reference data only, not a native Codex runtime contract)
 - Upstream process root: `upstream/babysitter/skills/babysit/process`
 - Upstream reference root: `upstream/babysitter/skills/babysit/reference`
 
@@ -39,6 +39,19 @@ Use these Codex env vars when adapting upstream instructions:
 - `CLAUDE_SESSION_ID` -> `${CODEX_THREAD_ID:-$CODEX_SESSION_ID}`
 - `CLAUDE_PLUGIN_ROOT` -> `${CODEX_PLUGIN_ROOT}`
 - `--harness claude-code` -> `--harness codex`
+
+Preferred Codex run binding:
+
+- `run:create --harness codex --session-id <id> --state-dir .a5c`
+- `session:associate` only as compatibility fallback
+
+## Runtime Truths
+
+- Primary user-facing activation is `babysitter <mode> ...`
+- Legacy `/babysitter:*` forms are compatibility shims only
+- Codex orchestration is supervisor-owned
+- `notify` is monitoring only
+- `.codex/plugin.json` is packaged metadata for this repo, not a native Codex hook manifest
 
 ## Runtime Discovery Mapping
 

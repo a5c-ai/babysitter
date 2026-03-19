@@ -1,11 +1,19 @@
 /**
  * @process assimilation/harness/codex
- * @description Orchestrate babysitter SDK integration into OpenAI Codex CLI. Sets up AGENTS.md instructions, MCP config, hook scripts, and wrapper loop for orchestration.
+ * @description Orchestrate babysitter SDK integration into OpenAI Codex CLI using real Codex surfaces: AGENTS.md, skills, project config.toml, notify monitoring, and an external supervisor loop.
  * @inputs { projectDir: string, targetQuality: number, maxIterations: number }
  * @outputs { success: boolean, integrationFiles: string[], finalQuality: number, iterations: number }
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
+import {
+  adaptOriginalBabysitTask,
+  refineHarnessAssimilationTask,
+  runHarnessResearchTask,
+  runHarnessRuntimeValidationTask,
+  verifyHarnessAssimilationTask,
+  writeHarnessInstallDocsTask
+} from './shared-assimilation.js';
 
 /**
  * Codex CLI Harness Integration Process
@@ -15,7 +23,7 @@ import { defineTask } from '@a5c-ai/babysitter-sdk';
  *
  * Supports two strategies:
  *   - Strategy A: External wrapper loop around `codex exec` (production/CI)
- *   - Strategy B: AGENTS.md + MCP server for in-session orchestration (interactive)
+ *   - Strategy B: AGENTS.md + optional MCP tools for in-session assistance (interactive, non-blocking)
  *
  * @param {Object} inputs - Process inputs
  * @param {string} inputs.projectDir - Target Codex project directory
@@ -38,6 +46,16 @@ export async function process(inputs, ctx) {
   let iteration = 0;
 
   ctx.log('Starting Codex CLI harness integration', { projectDir, strategy, targetQuality });
+
+  const researchResult = await ctx.task(runHarnessResearchTask, {
+    projectDir,
+    harnessName: 'Codex CLI',
+    upstreamSource: 'official Codex CLI distribution, runtime extension surface, and the canonical babysitter plugin repo',
+    distributionTarget: 'AGENTS.md, config.toml, notify wiring, wrapper scripts, skills, and any installable Codex extension surface',
+    loopModel: strategy === 'mcp' ? 'in-session Codex assistance via AGENTS and MCP, with external orchestration ownership' : 'wrapper-driven orchestration with explicit user-yield and resume behavior'
+  });
+
+  integrationFiles.push(...(researchResult.artifactsCreated || []));
 
   // ============================================================================
   // PHASE 1: ANALYZE -- Assess Codex project structure and capabilities
@@ -89,13 +107,13 @@ export async function process(inputs, ctx) {
       integrationFiles.push(...(result.filesCreated || []));
       return result;
     },
-    // (c) Configure MCP server in config.toml for babysitter CLI tools
+    // (c) Configure real Codex project config surface
     async () => {
       const result = await ctx.task(configureMcpServerTask, { projectDir, strategy, analysis });
       integrationFiles.push(...(result.filesCreated || []), ...(result.filesModified || []));
       return result;
     },
-    // (d) Create hook scripts for session init and loop control
+    // (d) Create notify/support scripts and wrapper entry points
     async () => {
       const result = await ctx.task(createHookScriptsTask, { projectDir, strategy });
       integrationFiles.push(...(result.filesCreated || []));
@@ -111,6 +129,15 @@ export async function process(inputs, ctx) {
     totalFiles: integrationFiles.length
   });
 
+  const assimilationResult = await ctx.task(adaptOriginalBabysitTask, {
+    projectDir,
+    harnessName: 'Codex CLI',
+    upstreamSource: 'the canonical babysitter plugin repo and its babysit process library',
+    research: researchResult
+  });
+
+  integrationFiles.push(...(assimilationResult.filesCreated || []), ...(assimilationResult.filesModified || []));
+
   // ============================================================================
   // PHASE 3: IMPLEMENT -- Build wrapper loop, effect mapping, result posting
   // ============================================================================
@@ -119,7 +146,7 @@ export async function process(inputs, ctx) {
 
   // Steps e, f, g can run in parallel (independent implementations)
   const [wrapperResult, effectMapResult, resultPostResult] = await ctx.parallel.all([
-    // (e) Implement wrapper loop or MCP-driven polling
+    // (e) Implement wrapper loop or MCP-assisted orchestration
     async () => {
       const result = await ctx.task(implementWrapperLoopTask, {
         projectDir,
@@ -165,6 +192,15 @@ export async function process(inputs, ctx) {
     runawayGuardCreated: runawayGuardResult.success
   });
 
+  const docsResult = await ctx.task(writeHarnessInstallDocsTask, {
+    projectDir,
+    harnessName: 'Codex CLI',
+    research: researchResult,
+    assimilation: assimilationResult
+  });
+
+  integrationFiles.push(...(docsResult.filesCreated || []), ...(docsResult.filesModified || []));
+
   // ============================================================================
   // PHASE 4: TEST -- Validate the integration
   // ============================================================================
@@ -183,21 +219,35 @@ export async function process(inputs, ctx) {
     total: testResult.total
   });
 
+  const runtimeValidationResult = await ctx.task(runHarnessRuntimeValidationTask, {
+    projectDir,
+    harnessName: 'Codex CLI',
+    loopModel: strategy === 'mcp' ? 'in-session Codex continuation via MCP and hook points' : 'wrapper-driven orchestration with explicit user-yield and resume behavior',
+    research: researchResult,
+    docs: docsResult,
+    integrationFiles,
+    localTestResult: testResult
+  });
+
   // ============================================================================
   // PHASE 5: VERIFY -- Check integration quality
   // ============================================================================
 
   ctx.log('Phase 5: Verify -- Scoring integration quality');
 
-  const verifyResult = await ctx.task(verifyIntegrationTask, {
+  let verifyResult = await ctx.task(verifyHarnessAssimilationTask, {
     projectDir,
-    strategy,
+    harnessName: 'Codex CLI',
+    research: researchResult,
+    assimilation: assimilationResult,
+    docs: docsResult,
     integrationFiles,
-    testResult,
+    localTestResult: testResult,
+    runtimeValidation: runtimeValidationResult,
     targetQuality
   });
 
-  finalQuality = verifyResult.score;
+  finalQuality = verifyResult.qualityScore;
   iteration = 1;
 
   ctx.log('Verification complete', { quality: finalQuality, target: targetQuality });
@@ -227,12 +277,12 @@ export async function process(inputs, ctx) {
     });
 
     // Refine based on feedback
-    const refinement = await ctx.task(refineIntegrationTask, {
+    const refinement = await ctx.task(refineHarnessAssimilationTask, {
       projectDir,
-      strategy,
+      harnessName: 'Codex CLI',
       integrationFiles,
-      feedback: verifyResult.feedback,
       issues: verifyResult.issues,
+      recommendations: verifyResult.recommendations,
       iteration
     });
 
@@ -246,15 +296,29 @@ export async function process(inputs, ctx) {
     });
 
     // Re-verify
-    const reverify = await ctx.task(verifyIntegrationTask, {
+    const reruntime = await ctx.task(runHarnessRuntimeValidationTask, {
       projectDir,
-      strategy,
+      harnessName: 'Codex CLI',
+      loopModel: strategy === 'mcp' ? 'in-session Codex continuation via MCP and hook points' : 'wrapper-driven orchestration with explicit user-yield and resume behavior',
+      research: researchResult,
+      docs: docsResult,
       integrationFiles,
-      testResult: retest,
+      localTestResult: retest
+    });
+
+    verifyResult = await ctx.task(verifyHarnessAssimilationTask, {
+      projectDir,
+      harnessName: 'Codex CLI',
+      research: researchResult,
+      assimilation: assimilationResult,
+      docs: docsResult,
+      integrationFiles,
+      localTestResult: retest,
+      runtimeValidation: reruntime,
       targetQuality
     });
 
-    finalQuality = reverify.score;
+    finalQuality = verifyResult.qualityScore;
 
     ctx.log(`Iteration ${iteration} complete`, {
       quality: finalQuality,
@@ -320,6 +384,8 @@ export const analyzeCodexProjectTask = defineTask('analyze-codex-project', (args
         'Verify sandbox mode capabilities: read-only, workspace-write, danger-full-access',
         'Check if MCP server support is available (codex mcp add/list/remove)',
         'Check if exec mode is available (codex exec --help)',
+        'Determine whether Codex exposes any real blocking lifecycle hooks; if not, document that orchestration must stay external',
+        'Determine how Codex skills are actually distributed and installed for end users before proposing package layout',
         'Detect Node.js version (must be >= 18)',
         'Check for existing babysitter SDK installation (babysitter version --json)',
         'List existing config files that may need modification',
@@ -412,19 +478,16 @@ export const createAgentsMdTask = defineTask('create-agents-md', (args, taskCtx)
         codexVersion: args.analysis?.codexVersion
       },
       instructions: [
-        'Create AGENTS.md in the project root directory',
-        'Include babysitter orchestration protocol instructions:',
-        '  - On session start: call babysitter session:init to initialize',
-        '  - On each turn: call babysitter session:check-iteration to get pending tasks',
-        '  - Execute pending task effects using available tools (shell, file, MCP)',
-        '  - After completing each task: call babysitter task:post to report results',
-        '  - Continue iteration loop until no pending tasks remain or run completes',
-        '  - Respect iteration guards: check iteration count before continuing',
-        'Include MCP tool usage instructions if strategy is "mcp"',
-        'Include wrapper loop coordination instructions if strategy is "wrapper"',
-        'Include error handling: report failures via task:post with error details',
-        'Include quality gate: self-assess work quality before posting results',
-        'Keep instructions clear and concise for LLM consumption',
+          'Create AGENTS.md in the project root directory',
+          'Keep AGENTS.md truthful and concise about Codex integration boundaries',
+          'Describe how Codex should cooperate with the babysitter supervisor and where .a5c state lives',
+          'Explain result posting, error reporting, and explicit resume behavior',
+          'Do not claim Codex has native SessionStart/Stop hooks or automatic self-reentry after yielding to the user',
+          'If strategy is "mcp", describe MCP as assistance tooling unless research proves it can safely own the loop',
+          'If strategy is "wrapper", explain that the wrapper/supervisor owns continuation and breakpoint collection',
+          'Include error handling: report failures via task:post with error details',
+          'Include quality gate: self-assess work quality before posting results',
+          'Keep instructions clear and concise for LLM consumption',
         'Also create .codex/AGENTS.md for project-scoped instructions if needed',
         'Return list of files created'
       ],
@@ -454,33 +517,28 @@ export const createAgentsMdTask = defineTask('create-agents-md', (args, taskCtx)
  */
 export const configureMcpServerTask = defineTask('configure-mcp-server', (args, taskCtx) => ({
   kind: 'agent',
-  title: 'Configure babysitter MCP server in config.toml',
+    title: 'Configure Codex project config.toml for babysitter',
 
   agent: {
     name: 'general-purpose',
     prompt: {
-      role: 'MCP server configuration specialist',
-      task: 'Configure babysitter CLI as an MCP server in Codex config.toml',
+        role: 'Codex configuration specialist',
+        task: 'Configure real Codex config.toml settings for babysitter integration',
       context: {
         projectDir: args.projectDir,
         strategy: args.strategy,
         existingConfig: args.analysis?.existingConfigFiles
       },
       instructions: [
-        'Create or update .codex/config.toml in the project directory',
-        'Add [mcp_servers.babysitter] section with STDIO transport:',
-        '  command = "npx"',
-        '  args = ["babysitter", "mcp-server"]',
-        '  env = { BABYSITTER_RUNS_DIR = ".a5c/runs" }',
-        'Configure sandbox to allow .a5c/ directory writes:',
-        '  sandbox = "workspace-write"',
-        '  writable_roots = [".a5c/"]',
-        'Set approval policy to allow babysitter CLI calls without prompting',
-        'Configure notify hook for agent-turn-complete monitoring:',
-        '  [notify]',
-        '  command = ["node", ".codex/hooks/on-turn-complete.js"]',
-        'If existing config.toml found, merge settings without overwriting user config',
-        'Return list of files created or modified'
+          'Create or update .codex/config.toml in the project directory',
+          'Use only real Codex config keys discovered during research',
+          'Configure sandbox to allow .a5c/ directory writes',
+          'Set an approval policy consistent with babysitter CLI usage',
+          'Configure notify for agent-turn-complete monitoring if supported',
+          'Only add MCP server configuration if research proves it is needed for the chosen strategy',
+          'Do not invent [plugin], [hooks], SessionStart, or Stop sections',
+          'If existing config.toml found, merge settings without overwriting user config',
+          'Return list of files created or modified'
       ],
       outputFormat: 'JSON with success, filesCreated, filesModified, configPath'
     },
@@ -509,31 +567,31 @@ export const configureMcpServerTask = defineTask('configure-mcp-server', (args, 
  */
 export const createHookScriptsTask = defineTask('create-hook-scripts', (args, taskCtx) => ({
   kind: 'agent',
-  title: 'Create hook scripts for session init and loop control',
+    title: 'Create notify/support scripts and wrapper entry points',
 
   agent: {
     name: 'general-purpose',
     prompt: {
       role: 'shell scripting and Node.js automation engineer',
-      task: 'Create hook scripts that bridge Codex lifecycle events to babysitter orchestration',
+        task: 'Create only the Codex support scripts that are real: notify handlers, validation helpers, and external wrapper entry points',
       context: {
         projectDir: args.projectDir,
         strategy: args.strategy
       },
       instructions: [
-        'Create .codex/hooks/ directory in the project',
-        'Create session-init.js: calls `babysitter session:init` on first run, stores session ID',
-        'Create on-turn-complete.js: notify hook handler that logs turn completion and checks iteration state',
-        'Create iteration-guard.js: checks current iteration count against max, writes warning if approaching limit',
-        'Create loop-control.sh (POSIX): wrapper script entry point for Strategy A that:',
-        '  1. Initializes babysitter session',
-        '  2. Creates a run with babysitter run:create',
-        '  3. Loops: calls codex exec --full-auto with iteration context',
-        '  4. Parses output and posts results via babysitter task:post',
-        '  5. Checks babysitter run:status for completion',
-        '  6. Enforces max iteration guard',
-        'Make shell scripts executable (chmod +x)',
-        'Return list of all files created'
+          'Create .codex/hooks/ directory in the project',
+          'Create on-turn-complete.js only as a notify/monitoring handler, not as a blocking orchestration hook',
+          'Create iteration-guard.js: checks current iteration count against max, writes warning if approaching limit',
+          'Create loop-control.sh (POSIX): wrapper script entry point for Strategy A that:',
+          '  1. Initializes babysitter session',
+          '  2. Creates a run with babysitter run:create',
+          '  3. Loops: calls codex exec --full-auto with iteration context',
+          '  4. Parses output and posts results via babysitter task:post',
+          '  5. Checks babysitter run:status for completion',
+          '  6. Enforces max iteration guard',
+          'Do not invent SessionStart/Stop hook files unless research finds a real supported Codex surface for them',
+          'Make shell scripts executable (chmod +x)',
+          'Return list of all files created'
       ],
       outputFormat: 'JSON with success, filesCreated, hookScripts'
     },
@@ -574,37 +632,35 @@ export const implementWrapperLoopTask = defineTask('implement-wrapper-loop', (ar
         codexVersion: args.analysis?.codexVersion,
         hasExecMode: args.analysis?.hasExecMode
       },
-      instructions: args.strategy === 'wrapper' ? [
-        'Create .codex/orchestrate.js -- the main Node.js wrapper script',
-        'Implement the full orchestration loop:',
-        '  1. Parse CLI args (--runs-dir, --max-iterations, --process-id)',
-        '  2. Call babysitter session:init --json to get session ID',
-        '  3. Call babysitter run:create --process-id <id> --json to start a run',
-        '  4. Loop:',
-        '     a. Call babysitter run:iterate --run-id <id> --json',
-        '     b. Parse pending actions from iterate output',
+        instructions: args.strategy === 'wrapper' ? [
+          'Create .codex/orchestrate.js -- the main Node.js wrapper script',
+          'Implement the full orchestration loop:',
+          '  1. Parse CLI args (--runs-dir, --max-iterations, --process-id)',
+          '  2. Call babysitter session:init --json to get or seed a stable session ID when available',
+          '  3. Call babysitter run:create --process-id <id> --harness codex --session-id <id> --state-dir .a5c --json when session binding is possible',
+          '  4. Loop:',
+          '     a. Call babysitter run:iterate --run-id <id> --json',
+          '     b. Parse pending actions from iterate output',
         '     c. For each pending task: build codex exec prompt with task context',
         '     d. Spawn codex exec --full-auto --json with the prompt',
         '     e. Parse codex output and extract results',
         '     f. Call babysitter task:post --run-id <id> --effect-id <eid> with results',
         '     g. Check run:status for completion',
         '     h. Increment iteration counter and check guard',
-        '  5. Report final status',
-        'Handle errors gracefully: catch spawn failures, timeouts, parse errors',
-        'Use child_process.execFile for spawning codex and babysitter CLI',
-        'Support --json output mode for all CLI calls',
-        'Return list of files created'
-      ] : [
-        'Create .codex/mcp-orchestrate.js -- MCP server extension for polling',
-        'Implement MCP tools that the Codex agent can call:',
-        '  babysitter_init: Initialize session and create run',
-        '  babysitter_iterate: Get next pending tasks',
-        '  babysitter_post_result: Post task completion result',
-        '  babysitter_check_status: Check run status and iteration count',
-        'Each tool wraps the corresponding babysitter CLI command',
-        'Include iteration guard logic in babysitter_iterate',
-        'Return list of files created'
-      ],
+          '  5. Report final status',
+          'Keep breakpoint collection and user-yield continuation in the wrapper/supervisor, not in fictional Codex stop hooks',
+          'Handle errors gracefully: catch spawn failures, timeouts, parse errors',
+          'Use child_process.execFile for spawning codex and babysitter CLI',
+          'Support --json output mode for all CLI calls',
+          'Return list of files created'
+        ] : [
+          'Create .codex/mcp-orchestrate.js only if research proves MCP materially improves the chosen strategy',
+          'Implement MCP tools as assistance to the external supervisor rather than pretending Codex can own the loop',
+          'Each tool must wrap a real babysitter CLI command',
+          'Include iteration guard logic in babysitter_iterate-style helpers',
+          'Document that MCP mode is non-blocking and cannot replace wrapper-owned continuation unless verified',
+          'Return list of files created'
+        ],
       outputFormat: 'JSON with success, filesCreated, entryPoint'
     },
     outputSchema: {
@@ -650,7 +706,7 @@ export const mapEffectExecutionTask = defineTask('map-effect-execution', (args, 
         '  shell effect -> shell command execution via Codex shell tool',
         '  breakpoint effect -> interactive prompt or auto-resolve based on mode',
         '  sleep effect -> setTimeout or process.nextTick with timestamp check',
-        '  orchestrator_task effect -> codex exec with sub-task prompt',
+        '  complex orchestration effect -> codex exec with an agent-style sub-task prompt rather than a custom orchestrator_task kind',
         'Handle effect serialization: read task.json, extract args, build Codex prompt',
         'Handle result deserialization: parse Codex output, format as task result',
         'Include error mapping: Codex error codes to babysitter error categories',
@@ -698,16 +754,18 @@ export const createResultPostingTask = defineTask('create-result-posting', (args
         'Create .codex/result-poster.js with result posting logic',
         'Implement postTaskResult(runId, effectId, result) function:',
         '  1. Serialize result to JSON',
-        '  2. Write result to tasks/<effectId>/result.json',
-        '  3. Call babysitter task:post --run-id <runId> --effect-id <effectId> --json',
-        '  4. Verify posting success by checking CLI exit code',
-        '  5. Return posting confirmation',
+        '  2. Write the value payload to tasks/<effectId>/output.json',
+        '  3. Call babysitter task:post <runDir> <effectId> --status ok --value tasks/<effectId>/output.json --json',
+        '  4. Use --error <file> for failure payloads and let the SDK own result.json',
+        '  5. Verify posting success by checking CLI exit code',
+        '  6. Return posting confirmation',
         'Handle large results: check against BLOB_THRESHOLD_BYTES (1 MiB)',
-        '  If result exceeds threshold, write to blobs/ and reference in result.json',
+        '  If result exceeds threshold, rely on task:post and the SDK blob flow instead of manual result.json writes',
         'Handle posting failures: retry up to 3 times with backoff',
         'Include result validation: ensure required fields (success, data) are present',
         'For MCP strategy: expose as babysitter_post_result MCP tool',
         'For wrapper strategy: call as part of wrapper loop iteration',
+        'Never write result.json directly',
         'Return list of files created'
       ],
       outputFormat: 'JSON with success, filesCreated'
@@ -811,16 +869,18 @@ export const runIntegrationTestsTask = defineTask('run-integration-tests', (args
       },
       instructions: [
         'Verify all integration files exist and are syntactically valid',
-        'Test 1: Validate AGENTS.md contains required orchestration instructions',
-        'Test 2: Validate config.toml has correct MCP server configuration',
-        'Test 3: Validate hook scripts are executable and have correct shebang lines',
-        'Test 4: Dry-run the wrapper script with --dry-run flag if supported',
-        'Test 5: Verify babysitter CLI commands work: session:init, run:create (dry-run)',
+        'Validate that the process includes research-first decisions about Codex distribution, runtime install, and continuation hook points',
+        'Validate that AGENTS.md and related assets adapt the original Claude Code babysit skill semantics instead of inventing a weaker local workflow',
+        'Test 1: Validate AGENTS.md contains truthful orchestration instructions and no fake Codex hook claims',
+        'Test 2: Validate config.toml uses real Codex keys and correct sandbox/notify settings',
+        'Test 3: Validate notify/wrapper support scripts are executable and syntactically valid',
+        'Test 4: Dry-run the wrapper script with --dry-run flag if supported, then identify what must be exercised in the real harness runtime',
+        'Test 5: Verify babysitter CLI commands work: session:init, run:create (prefer harness-native binding), and task:post protocol',
         'Test 6: Verify effect-mapper handles all required effect kinds',
-        'Test 7: Verify result-poster can serialize and write result JSON',
+        'Test 7: Verify result-poster writes output.json and never instructs direct result.json writes',
         'Test 8: Verify iteration guard correctly counts and enforces limits',
         'Test 9: Check for common issues: missing imports, unresolved paths, permission errors',
-        'Test 10: Validate sandbox configuration allows .a5c/ writes',
+        'Test 10: Validate sandbox configuration allows .a5c/ writes and the supervisor keeps Codex inside the orchestration loop after yielding to the user',
         'Report pass/fail for each test with details on failures'
       ],
       outputFormat: 'JSON with passed (number), failed (number), total (number), testResults (array of {name, passed, details})'
@@ -866,7 +926,7 @@ export const verifyIntegrationTask = defineTask('verify-integration', (args, tas
     name: 'general-purpose',
     prompt: {
       role: 'integration quality assessor',
-      task: 'Score the babysitter-Codex integration quality on a 0-100 scale',
+      task: 'Score the babysitter-Codex integration quality on a 0-100 scale, including research, skill adaptation, runtime installability, and yield-loop validation',
       context: {
         projectDir: args.projectDir,
         strategy: args.strategy,
@@ -875,25 +935,21 @@ export const verifyIntegrationTask = defineTask('verify-integration', (args, tas
         targetQuality: args.targetQuality
       },
       instructions: [
-        'Assess integration completeness (0-25 points):',
-        '  - All 8 implementation steps (a-h) completed',
-        '  - All required files created',
-        '  - No missing components',
-        'Assess correctness (0-25 points):',
-        '  - All tests passing',
-        '  - No syntax errors in generated files',
+        'Assess research and upstream distribution fidelity (0-20 points):',
+        '  - Real Codex distribution and extension model researched first',
+        '  - Runtime install or sync path from the canonical babysitter repo documented',
+        'Assess correctness (0-20 points):',
         '  - CLI commands correctly formed',
-        '  - Config.toml valid TOML syntax',
-        'Assess robustness (0-25 points):',
-        '  - Error handling present in all scripts',
-        '  - Retry logic for transient failures',
-        '  - Runaway detection properly configured',
-        '  - Atomic writes for state files',
-        'Assess usability (0-25 points):',
-        '  - Clear AGENTS.md instructions',
-        '  - Helpful error messages',
-        '  - Documentation in generated files',
-        '  - Easy to configure and customize',
+        '  - AGENTS.md and config assets preserve canonical babysit semantics',
+        '  - output.json + task:post protocol used correctly',
+        'Assess runtime robustness (0-30 points):',
+        '  - Real harness run validated, not only dry-run',
+        '  - Yield back to the user stays inside the orchestration loop',
+        '  - Retry logic and guards are properly configured',
+        'Assess usability and operator readiness (0-30 points):',
+        '  - Clear install, upgrade, rollback, and troubleshooting docs exist',
+        '  - Helpful error messages and actionable operator guidance',
+        '  - Easy to configure and customize without drifting from the canonical contract',
         'Identify specific issues that reduce the score',
         'Provide actionable feedback for improvement'
       ],
@@ -939,7 +995,7 @@ export const refineIntegrationTask = defineTask('refine-integration', (args, tas
     name: 'general-purpose',
     prompt: {
       role: 'senior integration engineer',
-      task: 'Refine the babysitter-Codex integration based on quality feedback',
+      task: 'Refine the babysitter-Codex integration based on quality feedback and eliminate stale contract drift',
       context: {
         projectDir: args.projectDir,
         strategy: args.strategy,
@@ -950,12 +1006,14 @@ export const refineIntegrationTask = defineTask('refine-integration', (args, tas
       },
       instructions: [
         'Review all identified issues from verification',
+        'Prioritize research, install-doc, skill-adaptation, and user-yield loop issues before cosmetic cleanup',
         'For each issue, determine the fix:',
         '  - Missing components: create them',
         '  - Syntax errors: fix the offending files',
         '  - Missing error handling: add try/catch and retries',
         '  - Missing documentation: add comments and docs',
         '  - Configuration issues: update config.toml or AGENTS.md',
+        '  - Stale contract language: replace direct result.json writes, session-associate-first guidance, or non-agent public effect kinds',
         'Apply all fixes to the integration files',
         'Verify fixes do not introduce regressions',
         'Return list of files created or modified'

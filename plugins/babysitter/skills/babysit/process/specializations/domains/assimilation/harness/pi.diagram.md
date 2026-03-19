@@ -1,111 +1,88 @@
-# oh-my-pi Harness Integration -- Process Diagram
+# oh-my-pi Harness Integration Diagram
 
-```
-                    ┌──────────────────────────────┐
-                    │    PHASE 1: ANALYZE           │
-                    │  Detect omp version,          │
-                    │  capabilities, existing config │
-                    └──────────────┬───────────────┘
-                                   │
-                         ┌─────────▼─────────┐
-                         │  BREAKPOINT:       │
-                         │  Review Analysis   │
-                         └─────────┬─────────┘
-                                   │
-        ┌──────────────────────────┼──────────────────────────┐
-        │                          │                          │
-   ┌────▼─────┐            ┌──────▼──────┐            ┌──────▼──────┐
-   │ 2a:      │            │ 2b:         │            │ 2c:         │
-   │ Package  │            │ Extension   │            │ Commands    │
-   │ scaffold │            │ skeleton    │            │ scaffold    │
-   └────┬─────┘            └──────┬──────┘            └──────┬──────┘
-        │                          │                          │
-        │                   ┌──────▼──────┐                   │
-        │                   │ 2d:         │                   │
-        │                   │ AGENTS.md   │                   │
-        │                   └──────┬──────┘                   │
-        └──────────────────────────┼──────────────────────────┘
-                                   │
-        ┌──────────────────────────┼──────────────────────────┐
-        │                          │                          │
-   ┌────▼─────┐            ┌──────▼──────┐            ┌──────▼──────┐
-   │ 3a:      │            │ 3b:         │            │ 3c:         │
-   │ Install  │            │ Session     │            │ Loop        │
-   │ script   │            │ hooks       │            │ driver      │
-   └────┬─────┘            └──────┬──────┘            └──────┬──────┘
-        │                          │                          │
-        └──────────────────────────┼──────────────────────────┘
-                                   │
-   ┌───────────────┬───────────────┼───────────────┬───────────────┐
-   │               │               │               │               │
-┌──▼──┐        ┌───▼───┐      ┌───▼───┐      ┌───▼───┐      ┌───▼───┐
-│ 3d: │        │ 3e:   │      │ 3f:   │      │ 3g:   │      │       │
-│Effect│       │Result │      │Guards │      │Custom │      │       │
-│ map  │       │poster │      │       │      │tools  │      │       │
-└──┬──┘        └───┬───┘      └───┬───┘      └───┬───┘      └───────┘
-   │               │               │               │
-   └───────────────┴───────────────┴───────────────┘
-                         │
-                ┌────────▼────────┐
-                │  PHASE 4: TEST  │
-                │  14 tests       │
-                └────────┬────────┘
-                         │
-                ┌────────▼────────┐
-                │ PHASE 5: VERIFY │
-                │ 10 criteria     │
-                │ scored 0-100    │
-                └────────┬────────┘
-                         │
-                    ┌────▼────┐
-                    │ quality │──── >= target ──── DONE
-                    │ check   │
-                    └────┬────┘
-                         │ < target
-                ┌────────▼────────┐
-                │ PHASE 6:        │
-                │ CONVERGE        │
-                │ Fix → Retest →  │
-                │ Reverify        │
-                └────────┬────────┘
-                         │
-                    ┌────▼────┐
-                    │ loop    │──── converged ──── DONE
-                    └─────────┘
+## Phase Flow
+
+```text
+Research
+  |
+  v
+Analyze
+  |
+  v
+Scaffold
+  |
+  v
+Assimilate canonical babysit assets
+  |
+  v
+Core harness binding
+  |
+  v
+Takeover: effects, posting, guards
+  |
+  v
+TUI + UX + install docs
+  |
+  v
+Local tests
+  |
+  v
+Real harness runtime validation
+  |
+  v
+Verify score
+  |
+  +--> below target --> refine --> retest --> rerun runtime validation --> verify again
+  |
+  +--> at or above target --> done
 ```
 
-## Orchestration Loop (Runtime)
+## Runtime Loop
 
+```text
+session_start
+  -> session:init
+  -> baseline state file
+
+user starts /babysitter:call
+  -> run:create --harness pi
+  -> run:iterate
+  -> execute effects
+  -> write output.json
+  -> task:post
+  -> yield
+
+agent_end
+  -> evaluate guards
+  -> check completion proof state
+  -> if more work:
+       build continuation prompt
+       session.followUp(prompt)
+     else:
+       allow exit and cleanup
+
+follow-up turn
+  -> run:iterate
+  -> execute next effects
+  -> task:post
+  -> yield
+
+completed run
+  -> run reports completionProof
+  -> assistant emits <promise>PROOF</promise>
+  -> cleanup session state
 ```
-┌─────────────────────────────────────────────────────┐
-│  oh-my-pi Session                                   │
-│                                                     │
-│  session_start event                                │
-│    └─► babysitter session:init                      │
-│    └─► Store session state                          │
-│                                                     │
-│  User: /babysitter:call "build feature X"           │
-│    └─► babysitter run:create --harness pi           │
-│    └─► babysitter run:iterate (get first effects)   │
-│    └─► Agent executes effects                       │
-│    └─► babysitter task:post results                 │
-│                                                     │
-│  agent_end event (LLM finished turn)                │
-│    └─► Check guards (max iter, runaway, completion) │
-│    └─► babysitter session:check-iteration           │
-│    └─► babysitter run:iterate (next effects)        │
-│    └─► Build continuation prompt                    │
-│    └─► session.followUp(prompt)                     │
-│           │                                         │
-│           ▼                                         │
-│  Agent runs again (processes follow-up)             │
-│    └─► Execute next effects                         │
-│    └─► Post results                                 │
-│    └─► <promise>PROOF</promise> on completion       │
-│                                                     │
-│  agent_end event                                    │
-│    └─► Detect completion proof                      │
-│    └─► Cleanup session state                        │
-│    └─► Notify: "Run completed!"                     │
-└─────────────────────────────────────────────────────┘
+
+## Edge Cases
+
+```text
+- stale session state
+- re-entrant run binding
+- lock contention
+- missing run directory
+- crash and restart recovery
+- completion proof mismatch
+- ambiguous breakpoint response
+- direct result.json misuse
+- upgrade, reinstall, disable, rollback
 ```

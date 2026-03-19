@@ -9,6 +9,7 @@ Controlled tests are necessary but not sufficient. Use this checklist before rel
 4. Budget-constrained execution with prompt shrinking.
 5. Multi-repo run with explicit repo aliases.
 6. MCP doctor diagnostics path (`babysitter:doctor mcp`).
+7. Yield to the user, then resume through the external supervisor without losing the active run.
 
 ## Required Artifacts
 - `.a5c/events/events.jsonl`
@@ -17,8 +18,9 @@ Controlled tests are necessary but not sufficient. Use this checklist before rel
 - `.a5c/runs/<runId>/state/telemetry.json`
 
 ## Pass Criteria
-- No unhandled hook crashes.
+- No unhandled supervisor or notify-handler crashes.
 - Breakpoints produce resolvable `approved/answers/response` payloads.
 - Resume selectors resolve deterministically.
 - Budget enforcement behaves as configured.
 - Multi-repo tasks execute in the intended working directory.
+- `notify` is used for observability only and is not required for run continuation.

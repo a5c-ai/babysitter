@@ -3,10 +3,10 @@
 Version policy for `babysitter-codex`.
 
 ## Plugin
-- Current: `0.1.4`
+- Current: `0.1.5`
 
 ## Node.js
-- Supported majors: `20`, `22`
+- Supported majors: `18`, `20`, `22`
 - Other versions: best effort, not guaranteed.
 
 ## Babysitter SDK

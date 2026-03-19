@@ -6,6 +6,14 @@
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
+import {
+  adaptOriginalBabysitTask,
+  refineHarnessAssimilationTask,
+  runHarnessResearchTask,
+  runHarnessRuntimeValidationTask,
+  verifyHarnessAssimilationTask,
+  writeHarnessInstallDocsTask
+} from './shared-assimilation.js';
 
 /**
  * Antigravity Harness Integration Process
@@ -38,6 +46,16 @@ export async function process(inputs, ctx) {
   } = inputs;
 
   const integrationFiles = [];
+
+  const researchResult = await ctx.task(runHarnessResearchTask, {
+    projectDir,
+    harnessName: 'Google Antigravity',
+    upstreamSource: 'official Antigravity distribution model plus the canonical babysitter plugin repo',
+    distributionTarget: 'Antigravity skills, workflows, rules, MCP config, and runtime install path',
+    loopModel: 'workflow-driven orchestration with explicit user-yield and resume discipline'
+  });
+
+  integrationFiles.push(...(researchResult.artifactsCreated || []));
 
   // ============================================================================
   // PHASE 1: ANALYZE
@@ -93,6 +111,15 @@ export async function process(inputs, ctx) {
   integrationFiles.push(...ruleResult.filesCreated);
   integrationFiles.push(...workflowResult.filesCreated);
 
+  const assimilationResult = await ctx.task(adaptOriginalBabysitTask, {
+    projectDir,
+    harnessName: 'Google Antigravity',
+    upstreamSource: 'the canonical babysitter plugin repo and its babysit process library',
+    research: researchResult
+  });
+
+  integrationFiles.push(...(assimilationResult.filesCreated || []), ...(assimilationResult.filesModified || []));
+
   // ============================================================================
   // PHASE 3: IMPLEMENT
   // Wire up multi-agent dispatch, artifact-based breakpoints, browser e2e gates,
@@ -135,6 +162,15 @@ export async function process(inputs, ctx) {
   integrationFiles.push(...browserResult.filesCreated);
   integrationFiles.push(...modelResult.filesCreated);
 
+  const docsResult = await ctx.task(writeHarnessInstallDocsTask, {
+    projectDir,
+    harnessName: 'Google Antigravity',
+    research: researchResult,
+    assimilation: assimilationResult
+  });
+
+  integrationFiles.push(...(docsResult.filesCreated || []), ...(docsResult.filesModified || []));
+
   // ============================================================================
   // PHASE 4: TEST
   // Run validation on each generated artifact to ensure correctness.
@@ -146,6 +182,16 @@ export async function process(inputs, ctx) {
     projectDir,
     integrationFiles,
     analysis
+  });
+
+  let runtimeValidationResult = await ctx.task(runHarnessRuntimeValidationTask, {
+    projectDir,
+    harnessName: 'Google Antigravity',
+    loopModel: 'workflow-driven orchestration with explicit user-yield and resume discipline',
+    research: researchResult,
+    docs: docsResult,
+    integrationFiles,
+    localTestResult: testResult
   });
 
   if (!testResult.allPassed) {
@@ -169,10 +215,16 @@ export async function process(inputs, ctx) {
 
   ctx.log('Phase 5: Verifying end-to-end orchestration loop');
 
-  const verifyResult = await ctx.task(verifyOrchestrationLoopTask, {
+  let verifyResult = await ctx.task(verifyHarnessAssimilationTask, {
     projectDir,
+    harnessName: 'Google Antigravity',
+    research: researchResult,
+    assimilation: assimilationResult,
+    docs: docsResult,
     integrationFiles,
-    analysis
+    localTestResult: testResult,
+    runtimeValidation: runtimeValidationResult,
+    targetQuality
   });
 
   // ============================================================================
@@ -192,28 +244,43 @@ export async function process(inputs, ctx) {
 
     ctx.log(`Convergence iteration ${iteration}: quality=${quality}, target=${targetQuality}`);
 
-    // Score current state
-    const scoreResult = await ctx.task(qualityScoreTask, {
+    const scoreResult = await ctx.task(verifyHarnessAssimilationTask, {
       projectDir,
+      harnessName: 'Google Antigravity',
+      research: researchResult,
+      assimilation: assimilationResult,
+      docs: docsResult,
       integrationFiles,
-      verifyResult,
+      localTestResult: testResult,
+      runtimeValidation: runtimeValidationResult,
       targetQuality,
       iteration
     });
 
-    quality = scoreResult.score;
+    quality = scoreResult.qualityScore;
     converged = quality >= targetQuality;
 
     if (!converged && iteration < maxIterations) {
-      // Apply fixes based on scoring feedback
-      const fixResult = await ctx.task(applyQualityFixesTask, {
+      const fixResult = await ctx.task(refineHarnessAssimilationTask, {
         projectDir,
+        harnessName: 'Google Antigravity',
         integrationFiles,
-        scoreResult,
+        issues: scoreResult.issues,
+        recommendations: scoreResult.recommendations,
         iteration
       });
 
-      integrationFiles.push(...(fixResult.filesCreated || []));
+      integrationFiles.push(...(fixResult.filesCreated || []), ...(fixResult.filesModified || []));
+      runtimeValidationResult = await ctx.task(runHarnessRuntimeValidationTask, {
+        projectDir,
+        harnessName: 'Google Antigravity',
+        loopModel: 'workflow-driven orchestration with explicit user-yield and resume discipline',
+        research: researchResult,
+        docs: docsResult,
+        integrationFiles,
+        localTestResult: testResult
+      });
+      verifyResult = scoreResult;
 
       await ctx.breakpoint({
         question: `Iteration ${iteration}/${maxIterations}: Quality ${quality}/${targetQuality}. Continue converging or accept current state?`,
@@ -383,7 +450,8 @@ export const scaffoldMcpConfigTask = defineTask('scaffold-mcp-config', (args, ta
       instructions: [
         'Create or merge into mcp_config.json at project root',
         'Register babysitter as stdio MCP server: command=babysitter, transport=stdio',
-        'Expose tools: run:create, run:iterate, run:status, run:events, task:list, task:post, task:show, session:init, session:associate, session:resume, session:state, session:check-iteration, health, version',
+        'Expose tools: run:create, run:iterate, run:status, run:events, task:list, task:post, task:show, session:init, session:resume, session:state, session:check-iteration, health, version',
+        'Prefer harness-native run:create binding and only document explicit session association as a fallback external mode',
         'Set --runs-dir flag to .a5c/runs for consistency',
         'Preserve any existing MCP server entries',
         'Include environment variable passthrough for BABYSITTER_* vars',
@@ -472,9 +540,9 @@ export const scaffoldWorkflowTask = defineTask('scaffold-workflow', (args, taskC
         'Create .agents/babysit.md as a workflow triggered by /babysit command',
         'Workflow step 1: Install babysitter SDK if not present (scripts/install.sh)',
         'Workflow step 2: Call MCP session:init to initialize babysitter session',
-        'Workflow step 3: Call MCP run:create with user-provided process-id and inputs',
-        'Workflow step 4: Call MCP session:associate to bind run to session',
-        'Workflow step 5: Enter orchestration loop (delegate to skill)',
+        'Workflow step 3: Call MCP run:create with user-provided process-id, inputs, and the harness binding path when available',
+        'Workflow step 4: Only if Antigravity lacks first-class binding, enter the documented fallback session association mode',
+        'Workflow step 5: Enter orchestration loop, post results with output.json + task:post, then yield so the harness continuation path resumes the next iteration',
         'Include parameter prompting for process-id and inputs',
         'Support --process-id and --inputs flags for non-interactive usage',
         'Return list of files created'
@@ -751,28 +819,31 @@ export const testIntegrationTask = defineTask('test-integration', (args, taskCtx
 export const verifyOrchestrationLoopTask = defineTask('verify-orchestration-loop', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Verify end-to-end orchestration loop',
-  description: 'Dry-run the full orchestration cycle through Antigravity extension layer',
+  description: 'Validate the full orchestration cycle through the real Antigravity extension layer',
 
   agent: {
     name: 'general-purpose',
     prompt: {
       role: 'integration verification engineer',
-      task: 'Perform an end-to-end dry-run of the babysitter orchestration loop through the generated Antigravity extensions',
+      task: 'Perform real end-to-end validation of the babysitter orchestration loop through the generated Antigravity extensions',
       context: {
         projectDir: args.projectDir,
         integrationFiles: args.integrationFiles,
         analysis: args.analysis
       },
       instructions: [
-        'Simulate /babysit workflow activation',
-        'Verify session:init and run:create would succeed via MCP',
+        'Research and use the real Antigravity plugin install and workflow activation path before validation begins',
+        'Validate /babysit workflow activation through the actual harness entry point',
+        'Prefer run:create with harness-native binding and treat explicit session association only as a fallback external mode',
         'Verify run:iterate produces expected pending effects',
         'Verify task:list returns correct pending tasks',
-        'Verify Agent Manager dispatch would route to correct sub-agents',
-        'Verify task:post would resolve effects correctly',
-        'Verify run:status reports completion with completionSecret',
-        'Verify rule would catch premature exit attempts',
-        'Score the integration quality 0-100',
+        'Verify Agent Manager dispatch routes to the right sub-agents while preserving agent or skill public effect kinds',
+        'Verify task:post resolves effects using output.json rather than direct result.json writes',
+        'Verify yield back to the user still returns control to the orchestration loop on the next harness callback',
+        'Verify run:status reports completion with the exact completion proof contract',
+        'Verify the adapted skill still preserves the important canonical babysit instructions',
+        'Verify the rule catches premature exit attempts',
+        'Score the integration quality 0-100 with explicit attention to research, install docs, and edge-case coverage',
         'Return quality score and verification details'
       ],
       outputFormat: 'JSON with qualityScore (number), verified (boolean), steps (array of {step, passed, notes}), issues (array)'
@@ -818,7 +889,7 @@ export const qualityScoreTask = defineTask('quality-score', (args, taskCtx) => (
     name: 'general-purpose',
     prompt: {
       role: 'quality assurance engineer',
-      task: 'Score the babysitter-Antigravity integration quality on a 0-100 scale',
+      task: 'Score the babysitter-Antigravity integration quality on a 0-100 scale, including research fidelity and runtime validation strength',
       context: {
         projectDir: args.projectDir,
         integrationFiles: args.integrationFiles,
@@ -827,14 +898,15 @@ export const qualityScoreTask = defineTask('quality-score', (args, taskCtx) => (
         iteration: args.iteration
       },
       instructions: [
-        'Assess SKILL.md completeness and clarity (0-20 points)',
-        'Assess MCP config correctness and tool coverage (0-15 points)',
-        'Assess Rule effectiveness for loop discipline (0-15 points)',
-        'Assess Workflow usability and error handling (0-10 points)',
-        'Assess multi-agent dispatch correctness (0-15 points)',
+        'Assess research quality, upstream install path, and hook-point discovery (0-15 points)',
+        'Assess SKILL.md adaptation fidelity to the canonical babysit skill (0-15 points)',
+        'Assess MCP config correctness and tool coverage (0-10 points)',
+        'Assess Rule and Workflow effectiveness for loop discipline and user-yield continuation (0-15 points)',
+        'Assess multi-agent dispatch correctness (0-10 points)',
         'Assess breakpoint and artifact integration (0-10 points)',
-        'Assess model-agnostic compatibility (0-10 points)',
-        'Assess browser gate coverage (0-5 points)',
+        'Assess model-agnostic compatibility (0-5 points)',
+        'Assess browser gate coverage and real runtime validation depth (0-10 points)',
+        'Assess install docs, upgrade flow, and operator readiness (0-10 points)',
         'Provide specific feedback for improvement areas',
         'Return score with breakdown and recommendations'
       ],
@@ -869,7 +941,7 @@ export const applyQualityFixesTask = defineTask('apply-quality-fixes', (args, ta
     name: 'general-purpose',
     prompt: {
       role: 'senior integration engineer',
-      task: 'Apply targeted fixes based on quality scoring feedback to improve the integration',
+      task: 'Apply targeted fixes based on quality scoring feedback to improve the integration and remove stale contract drift',
       context: {
         projectDir: args.projectDir,
         integrationFiles: args.integrationFiles,
@@ -878,9 +950,10 @@ export const applyQualityFixesTask = defineTask('apply-quality-fixes', (args, ta
       },
       instructions: [
         'Review scoring feedback and recommendations',
-        'Prioritize fixes by impact on quality score',
+        'Prioritize fixes that close research, upstream install, docs, skill adaptation, and user-yield loop gaps first',
         'Apply fixes to existing integration files',
         'Create any missing files identified by scoring',
+        'Replace stale contract language such as session-associate-first flow, direct result.json writes, implicit approvals, or public node effect kinds if any remain',
         'Do not introduce regressions in areas that scored well',
         'Document changes made in this iteration',
         'Return list of files created or modified'

@@ -31,9 +31,11 @@ const sl = require('../.codex/skill-loader');
 test('loadPlugin returns valid manifest', () => {
   const plugin = sl.loadPlugin();
   assert.ok(plugin.name === 'babysitter');
-  assert.ok(plugin.version === '4.0.149');
+  assert.ok(plugin.version === '0.1.5');
   assert.ok(Array.isArray(plugin.commands));
   assert.strictEqual(plugin.commands.length, 15);
+  assert.ok(plugin.runtimeCapabilities);
+  assert.strictEqual(plugin.runtimeCapabilities.supportsBlockingHooks, false);
 });
 
 test('resolvePluginRoot prefers explicit argument', () => {
@@ -168,23 +170,29 @@ console.log('\nCommand Dispatcher:');
 
 const cd = require('../.codex/command-dispatcher');
 
-test('dispatch recognizes valid slash commands', () => {
-  const result = cd.dispatch('/babysitter:help');
+test('dispatch recognizes phrase commands', () => {
+  const result = cd.dispatch('babysitter help');
   assert.ok(result.dispatched);
   assert.strictEqual(result.contractVersion, 'v1');
   assert.strictEqual(result.command, 'babysitter:help');
   assert.ok(result.instructions);
 });
 
+test('dispatch still supports legacy slash aliases', () => {
+  const result = cd.dispatch('/babysitter:help');
+  assert.ok(result.dispatched);
+  assert.strictEqual(result.command, 'babysitter:help');
+});
+
 test('dispatch extracts arguments', () => {
-  const result = cd.dispatch('/babysitter:yolo build a REST API');
+  const result = cd.dispatch('babysitter yolo build a REST API');
   assert.ok(result.dispatched);
   assert.strictEqual(result.command, 'babysitter:yolo');
   assert.strictEqual(result.args, 'build a REST API');
 });
 
 test('dispatch model command returns data payload', () => {
-  const result = cd.dispatch('/babysitter:model show');
+  const result = cd.dispatch('babysitter model show');
   assert.ok(result.dispatched);
   assert.strictEqual(result.command, 'babysitter:model');
   assert.ok(result.data);
@@ -192,7 +200,7 @@ test('dispatch model command returns data payload', () => {
 });
 
 test('dispatch issue command validates args', () => {
-  const result = cd.dispatch('/babysitter:issue');
+  const result = cd.dispatch('babysitter issue');
   assert.ok(result.dispatched);
   assert.strictEqual(result.command, 'babysitter:issue');
   assert.ok(result.data);
@@ -200,7 +208,7 @@ test('dispatch issue command validates args', () => {
 });
 
 test('dispatch resume command returns selector data', () => {
-  const result = cd.dispatch('/babysitter:resume recent');
+  const result = cd.dispatch('babysitter resume recent');
   assert.ok(result.dispatched);
   assert.strictEqual(result.command, 'babysitter:resume');
   assert.ok(result.data);
@@ -208,7 +216,7 @@ test('dispatch resume command returns selector data', () => {
 });
 
 test('dispatch doctor mcp command returns mcp report payload', () => {
-  const result = cd.dispatch('/babysitter:doctor mcp');
+  const result = cd.dispatch('babysitter doctor mcp');
   assert.ok(result.dispatched);
   assert.strictEqual(result.command, 'babysitter:doctor');
   assert.ok(result.data);
@@ -229,23 +237,24 @@ test('dispatch returns error for unknown babysitter commands', () => {
 });
 
 test('dispatch suggests typo corrections', () => {
-  const result = cd.dispatch('/babysitter:cal');
+  const result = cd.dispatch('babysitter cal');
   assert.strictEqual(result.dispatched, false);
   assert.ok(result.error.includes('babysitter:call'));
 });
 
 test('isBabysitterCommand detects babysitter commands', () => {
+  assert.ok(cd.isBabysitterCommand('babysitter call'));
+  assert.ok(cd.isBabysitterCommand('babysitter yolo build stuff'));
   assert.ok(cd.isBabysitterCommand('/babysitter:call'));
-  assert.ok(cd.isBabysitterCommand('/babysitter:yolo build stuff'));
   assert.ok(!cd.isBabysitterCommand('/git commit'));
-  assert.ok(!cd.isBabysitterCommand('babysitter:call'));
+  assert.ok(!cd.isBabysitterCommand('implement auth'));
 });
 
 test('helpSummary includes all commands', () => {
   const help = cd.helpSummary();
-  assert.ok(help.includes('babysitter:call'));
-  assert.ok(help.includes('babysitter:yolo'));
-  assert.ok(help.includes('babysitter:help'));
+  assert.ok(help.includes('babysitter call'));
+  assert.ok(help.includes('babysitter yolo'));
+  assert.ok(help.includes('Preferred usage'));
   assert.ok(help.includes('Available Commands'));
 });
 
@@ -817,11 +826,12 @@ console.log('\nConfig:');
 test('config.toml exists and contains required sections', () => {
   const configPath = path.join(PROJECT_ROOT, '.codex', 'config.toml');
   const content = fs.readFileSync(configPath, 'utf8');
-  assert.ok(content.includes('[sandbox]'));
-  assert.ok(content.includes('[plugin]'));
-  assert.ok(content.includes('[hooks]'));
-  // MCP server section should NOT be present (SDK is CLI-only, not an MCP server)
-  assert.ok(!content.includes('[mcp_servers.babysitter]'), 'config.toml should not have MCP server section');
+  assert.ok(content.includes('sandbox_mode = "workspace-write"'));
+  assert.ok(content.includes('approval_policy = "on-request"'));
+  assert.ok(content.includes('notify = ["node", ".codex/hooks/on-turn-complete.js"]'));
+  assert.ok(content.includes('[sandbox_workspace_write]'));
+  assert.ok(!content.includes('[plugin]'));
+  assert.ok(!content.includes('[hooks]'));
 });
 
 // ============================================================================

@@ -1,17 +1,30 @@
 ﻿# babysitter-codex
 
-Babysitter orchestration plugin for [OpenAI Codex CLI](https://github.com/openai/codex). It adds structured multi-step AI workflows with quality convergence, lifecycle hooks, 15 orchestration modes, and the full upstream Babysitter process library.
+Babysitter integration package for [OpenAI Codex CLI](https://github.com/openai/codex). It provides Codex-facing skills, config templates, an external orchestration supervisor flow, and the full upstream Babysitter process library.
 
 This project was created by Babysitter already running on Codex.
 
 ## What You Get
 
-- External Babysitter orchestration integrated into Codex
-- Iterative execution loop (`run:create` -> `run:iterate` -> `task:post`)
-- Breakpoint support for interactive approvals
-- Yolo mode for non-interactive auto-approval
+- Codex skills and instruction assets for babysitter workflows
+- External orchestration loop (`run:create` -> `run:iterate` -> `task:post`)
+- Optional Codex session binding when a stable session/thread ID is available
+- Notify-based post-turn observability
 - Compatibility mode for SDK builds that expose only core run/task commands
 - Deterministic per-run trace log at `<runDir>/run-trace.jsonl`
+
+## Integration Model
+
+Babysitter on Codex uses the surfaces Codex actually provides:
+
+- installed skills
+- `AGENTS.md`
+- project `.codex/config.toml`
+- optional `notify`
+
+Codex does **not** provide Claude-style blocking `SessionStart` or `Stop`
+hooks. Deterministic continuation after yielding to the user is handled by the
+external supervisor, not by Codex itself.
 
 ## Latest Version
 

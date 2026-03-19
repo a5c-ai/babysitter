@@ -12,7 +12,7 @@ Plan a complex workflow **without executing it**. This command goes through the 
 
 ### 1. Interview Phase
 
-Same as `/babysitter:call`:
+Same as `babysitter call`:
 - Research the repo structure
 - Search the process library for relevant specializations/methodologies
 - Gather user intent, requirements, goals, and scope
@@ -28,7 +28,7 @@ Create the complete process .js file with all task definitions, quality gates, a
 
 ### 3. Review
 
-Present the process to the user for review. The process should be complete and ready to run — the user can later execute it with `/babysitter:call` or `/babysitter:yolo`.
+Present the process to the user for review. The process should be complete and ready to run — the user can later execute it with `babysitter call` or `babysitter yolo`.
 
 ### 4. Output
 

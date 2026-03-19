@@ -95,7 +95,7 @@ function babysitter(subArgs, opts = {}) {
 // Helper: run a single codex exec call for an agent task
 // ---------------------------------------------------------------------------
 
-function runCodexExec(agentPrompt, workdir, taskDef) {
+function runCodexExec(agentPrompt, workdir, taskDef, context = {}) {
   console.log(`[orchestrate] Running codex exec --full-auto â€¦`);
 
   const codexArgs = buildCodexArgs(taskDef || {}, { fullAuto: true, workdir });
@@ -108,7 +108,12 @@ function runCodexExec(agentPrompt, workdir, taskDef) {
       cwd:      workdir || process.cwd(),
       encoding: 'utf8',
       stdio:    ['pipe', 'pipe', 'pipe'],
-      env:      { ...process.env },
+      env:      {
+        ...process.env,
+        ...(context.repoRoot ? { REPO_ROOT: context.repoRoot, BABYSITTER_REPO_ROOT: context.repoRoot } : {}),
+        ...(context.runId ? { BABYSITTER_RUN_ID: context.runId } : {}),
+        ...(context.runDir ? { BABYSITTER_RUN_DIR: context.runDir } : {}),
+      },
     }
   );
 
@@ -182,6 +187,35 @@ function sanitizeKey(input, fallback) {
     .replace(/[^a-z0-9]+(.)/g, (_, c) => c.toUpperCase())
     .replace(/[^a-zA-Z0-9]/g, '');
   return cleaned || fallback;
+}
+
+function writeCurrentRunFile(repoRoot, payload) {
+  if (!repoRoot || !payload || !payload.runId) return;
+  const currentRunPath = path.join(repoRoot, '.a5c', 'current-run.json');
+  fs.mkdirSync(path.dirname(currentRunPath), { recursive: true });
+  fs.writeFileSync(currentRunPath, JSON.stringify(payload, null, 2));
+}
+
+function markCurrentRunFinished(repoRoot, payload) {
+  if (!repoRoot || !payload || !payload.runId) return;
+  const currentRunPath = path.join(repoRoot, '.a5c', 'current-run.json');
+  let existing = {};
+  if (fs.existsSync(currentRunPath)) {
+    try {
+      existing = JSON.parse(fs.readFileSync(currentRunPath, 'utf8'));
+    } catch (_) {
+      existing = {};
+    }
+  }
+  fs.mkdirSync(path.dirname(currentRunPath), { recursive: true });
+  fs.writeFileSync(
+    currentRunPath,
+    JSON.stringify({
+      ...existing,
+      ...payload,
+      finishedAt: new Date().toISOString(),
+    }, null, 2),
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -290,6 +324,9 @@ async function main() {
   if (args.processId) runCreateArgs.push('--process-id', args.processId);
   if (args.entry)     runCreateArgs.push('--entry',      args.entry);
   if (args.prompt)    runCreateArgs.push('--prompt',     args.prompt);
+  if (sessionId) {
+    runCreateArgs.push('--harness', 'codex', '--session-id', sessionId, '--state-dir', stateDir);
+  }
 
   let runData;
   try {
@@ -311,6 +348,14 @@ async function main() {
   }
 
   console.log(`[orchestrate] Trace log: ${resolveTracePath(runDir)}`);
+  writeCurrentRunFile(repoRoot, {
+    runId,
+    runDir,
+    sessionId,
+    processId: args.processId || null,
+    state: 'running',
+    startedAt: new Date().toISOString(),
+  });
   appendTrace(runDir, {
     type: 'run.start',
     runId,
@@ -331,8 +376,9 @@ async function main() {
     });
   }
 
-  // Associate session with this run
-  if (supports('session:associate')) {
+  // Older SDK builds may not bind during run:create; keep a best-effort fallback.
+  const sessionBoundAtCreate = Boolean(runData && runData.session && !runData.session.error);
+  if (!sessionBoundAtCreate && sessionId && supports('session:associate')) {
     try {
       associateSession(runId, { sessionId, stateDir, repoRoot });
     } catch (e) {
@@ -617,7 +663,11 @@ async function main() {
       fireHook('on-task-start', { effectId: task.effectId, kind });
 
       // 4dâ€“4e. Spawn codex exec and parse output (uses buildCodexArgs via runCodexExec)
-      const codexResult = runCodexExec(agentPrompt, repoScopedWorkdir, task);
+      const codexResult = runCodexExec(agentPrompt, repoScopedWorkdir, task, {
+        repoRoot,
+        runId,
+        runDir,
+      });
       appendTrace(runDir, {
         type: 'task.executed',
         runId,
@@ -725,12 +775,26 @@ async function main() {
     }
 
     if (finalStatus === 'complete') {
+      markCurrentRunFinished(repoRoot, {
+        runId,
+        runDir,
+        sessionId,
+        state: 'completed',
+        finalStatus: 'complete',
+      });
       fireHook('on-run-complete', { runId, output: completionProof });
       if (featureFlags.eventStreamV1) {
         const ev = emitEvent('run.end', { runId, finalStatus: 'complete', iterations: iteration }, { repoRoot });
         if (featureFlags.notifications) notify(ev);
       }
     } else {
+      markCurrentRunFinished(repoRoot, {
+        runId,
+        runDir,
+        sessionId,
+        state: 'failed',
+        finalStatus,
+      });
       fireHook('on-run-fail', { runId, error: finalStatus });
       if (featureFlags.eventStreamV1) {
         const ev = emitEvent('run.end', { runId, finalStatus, iterations: iteration }, { repoRoot });
@@ -741,6 +805,14 @@ async function main() {
 
     process.exit(finalStatus === 'complete' ? 0 : 1);
   } catch (err) {
+    markCurrentRunFinished(repoRoot, {
+      runId,
+      runDir,
+      sessionId,
+      state: 'failed',
+      finalStatus: 'fatal',
+      error: err.message,
+    });
     fireHook('on-run-fail', { runId, error: err.message });
     if (runDir) appendTrace(runDir, { type: 'run.fatal', runId, error: err.message });
     throw err;
@@ -758,4 +830,3 @@ if (require.main === module) {
 }
 
 module.exports = { parseArgs, main };
-

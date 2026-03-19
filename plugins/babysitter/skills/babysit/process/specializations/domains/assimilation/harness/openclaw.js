@@ -6,6 +6,14 @@
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
+import {
+  adaptOriginalBabysitTask,
+  refineHarnessAssimilationTask,
+  runHarnessResearchTask,
+  runHarnessRuntimeValidationTask,
+  verifyHarnessAssimilationTask,
+  writeHarnessInstallDocsTask
+} from './shared-assimilation.js';
 
 /**
  * OpenClaw Harness Integration Process
@@ -40,6 +48,16 @@ export async function process(inputs, ctx) {
   const integrationFiles = [];
   let currentQuality = 0;
   let iterations = 0;
+
+  const researchResult = await ctx.task(runHarnessResearchTask, {
+    projectDir,
+    harnessName: 'OpenClaw',
+    upstreamSource: 'official OpenClaw package, plugin registry, and the canonical babysitter plugin repo',
+    distributionTarget: 'OpenClaw plugin package, openclaw.json MCP tools, hooks, and runtime install path',
+    loopModel: 'daemon lifecycle hooks with user-yield continuation across agent_end and channel resumes'
+  });
+
+  integrationFiles.push(...(researchResult.artifactsCreated || []));
 
   // ============================================================================
   // PHASE 1: ANALYZE
@@ -84,6 +102,15 @@ export async function process(inputs, ctx) {
 
   integrationFiles.push(...packageScaffoldResult.filesCreated);
   integrationFiles.push(...skillMdResult.filesCreated);
+
+  const assimilationResult = await ctx.task(adaptOriginalBabysitTask, {
+    projectDir,
+    harnessName: 'OpenClaw',
+    upstreamSource: 'the canonical babysitter plugin repo and its babysit process library',
+    research: researchResult
+  });
+
+  integrationFiles.push(...(assimilationResult.filesCreated || []), ...(assimilationResult.filesModified || []));
 
   // ============================================================================
   // PHASE 3: IMPLEMENT
@@ -141,6 +168,15 @@ export async function process(inputs, ctx) {
 
   integrationFiles.push(...daemonAdapterResult.filesCreated);
 
+  const docsResult = await ctx.task(writeHarnessInstallDocsTask, {
+    projectDir,
+    harnessName: 'OpenClaw',
+    research: researchResult,
+    assimilation: assimilationResult
+  });
+
+  integrationFiles.push(...(docsResult.filesCreated || []), ...(docsResult.filesModified || []));
+
   await ctx.breakpoint({
     question: `Implementation phase complete. Review the integration files before testing. All lifecycle hooks, MCP tools, agent routing, result posting, and daemon adapter are in place.`,
     title: 'Implementation Review',
@@ -164,17 +200,32 @@ export async function process(inputs, ctx) {
     analysis: analysisResult
   });
 
+  let runtimeValidationResult = await ctx.task(runHarnessRuntimeValidationTask, {
+    projectDir,
+    harnessName: 'OpenClaw',
+    loopModel: 'daemon lifecycle hooks with user-yield continuation across agent_end and channel resumes',
+    research: researchResult,
+    docs: docsResult,
+    integrationFiles,
+    localTestResult: testResult
+  });
+
   // ============================================================================
   // PHASE 5: VERIFY
   // ============================================================================
 
   ctx.log('phase:verify', 'Running quality checks against target threshold');
 
-  const verifyResult = await ctx.task(verifyIntegrationQualityTask, {
+  let verifyResult = await ctx.task(verifyHarnessAssimilationTask, {
     projectDir,
+    harnessName: 'OpenClaw',
+    research: researchResult,
+    assimilation: assimilationResult,
+    docs: docsResult,
     targetQuality,
-    testResult,
-    integrationFiles
+    integrationFiles,
+    localTestResult: testResult,
+    runtimeValidation: runtimeValidationResult
   });
 
   currentQuality = verifyResult.qualityScore;
@@ -187,11 +238,13 @@ export async function process(inputs, ctx) {
   while (currentQuality < targetQuality && iterations < maxIterations) {
     ctx.log('phase:converge', `Iteration ${iterations + 1}: quality=${currentQuality}, target=${targetQuality}`);
 
-    const fixResult = await ctx.task(convergenceFixTask, {
+    const fixResult = await ctx.task(refineHarnessAssimilationTask, {
       projectDir,
-      verifyResult,
+      harnessName: 'OpenClaw',
       iteration: iterations + 1,
-      issues: verifyResult.issues
+      issues: verifyResult.issues,
+      recommendations: verifyResult.recommendations,
+      integrationFiles
     });
 
     integrationFiles.push(...(fixResult.filesCreated || []));
@@ -204,13 +257,29 @@ export async function process(inputs, ctx) {
     });
 
     // Re-verify quality
-    const reVerifyResult = await ctx.task(verifyIntegrationQualityTask, {
+    runtimeValidationResult = await ctx.task(runHarnessRuntimeValidationTask, {
       projectDir,
-      targetQuality,
-      testResult: reTestResult,
-      integrationFiles
+      harnessName: 'OpenClaw',
+      loopModel: 'daemon lifecycle hooks with user-yield continuation across agent_end and channel resumes',
+      research: researchResult,
+      docs: docsResult,
+      integrationFiles,
+      localTestResult: reTestResult
     });
 
+    const reVerifyResult = await ctx.task(verifyHarnessAssimilationTask, {
+      projectDir,
+      harnessName: 'OpenClaw',
+      research: researchResult,
+      assimilation: assimilationResult,
+      docs: docsResult,
+      targetQuality,
+      integrationFiles,
+      localTestResult: reTestResult,
+      runtimeValidation: runtimeValidationResult
+    });
+
+    verifyResult = reVerifyResult;
     currentQuality = reVerifyResult.qualityScore;
     iterations++;
 
@@ -390,7 +459,8 @@ export const createSkillMdTask = defineTask('create-skill-md', (args, taskCtx) =
       instructions: [
         'Define the skill name, description, and trigger conditions',
         'Document input schema for process invocation',
-        'Explain the orchestration loop: run:create -> session:associate -> iterate -> execute -> post -> re-iterate',
+        'Explain the orchestration loop: harness-native run:create binding -> iterate -> execute -> post -> yield -> harness-driven reentry',
+        'Document explicit session association only as a fallback external mode',
         'Describe how breakpoints surface to the user via channel messages',
         'Include examples for common use cases (code review, project planning, etc.)',
         'Document daemon-specific behavior (always-on, multi-channel routing)',
@@ -495,7 +565,8 @@ export const registerMcpToolsTask = defineTask('register-mcp-tools', (args, task
       instructions: [
         'Create or update openclaw.json with babysitter MCP tool definitions',
         'Register tools for: run:create, run:iterate, run:status, task:list, task:post, task:show',
-        'Register tools for: session:init, session:associate, session:check-iteration',
+        'Register tools for: session:init, session:check-iteration',
+        'Prefer harness-native run:create binding and document explicit session association only as a fallback',
         'Define input schemas for each tool matching babysitter CLI argument formats',
         'Set appropriate sandbox permissions for file system access (.a5c/runs/)',
         'Include sessions_send as an allowed tool for orchestration re-injection',
@@ -550,7 +621,7 @@ export const mapAgentRoutingTask = defineTask('map-agent-routing', (args, taskCt
         'Handle breakpoint effects: surface as channel messages, await user response',
         'Handle sleep effects: use daemon scheduling (setTimeout or cron) since OpenClaw is always-on',
         'Handle parallel effects: dispatch multiple agent sessions concurrently',
-        'Handle orchestrator_task effects: delegate to sub-agent via sessions_spawn',
+        'Handle complex orchestration effects by delegating to sub-agents via sessions_spawn while keeping the public effect kind as agent or skill',
         'Return created files and routing table'
       ],
       outputFormat: 'JSON with filesCreated (array), routingTable (object), summary (string)'
@@ -597,11 +668,12 @@ export const implementResultPostingTask = defineTask('implement-result-posting',
       instructions: [
         'Implement result posting using babysitter task:post CLI command',
         'Parse agent output from tool_result_persist hook or agent_end payload',
-        'Write result.json to the correct tasks/<effectId>/ directory',
-        'Call task:post with --status ok/fail and --value pointing to result file',
+        'Write output.json to the correct tasks/<effectId>/ directory',
+        'Call task:post with --status ok/fail and --value pointing to output.json',
         'Handle large results (>1 MiB) by storing as blobs per SDK protocol',
         'Implement retry logic for transient failures (EBUSY, lock contention)',
         'Handle concurrent result posting from parallel agent sessions',
+        'Never write result.json directly; the SDK owns that file',
         'Validate result schema before posting',
         'Return created files'
       ],
@@ -692,7 +764,7 @@ export const runIntegrationTestsTask = defineTask('run-integration-tests', (args
     name: 'general-purpose',
     prompt: {
       role: 'senior QA engineer with expertise in integration testing for daemon-based systems',
-      task: 'Run comprehensive integration tests for the babysitter-OpenClaw integration',
+      task: 'Run comprehensive integration tests for the babysitter-OpenClaw integration, including runtime install, canonical skill adaptation, and user-yield continuation',
       context: {
         projectDir: args.projectDir,
         integrationFiles: args.integrationFiles,
@@ -700,10 +772,11 @@ export const runIntegrationTestsTask = defineTask('run-integration-tests', (args
       },
       instructions: [
         'Test plugin activation: verify package loads and hooks register correctly',
+        'Test runtime install and sync: verify the plugin can be installed or refreshed from the upstream source and that canonical babysit assets are present',
         'Test before_agent_start hook: verify session:init is called and state file created',
         'Test agent_end hook: verify orchestration loop driver evaluates run state correctly',
         'Test MCP tool registration: verify all babysitter tools appear in openclaw.json',
-        'Test run lifecycle: create -> iterate -> execute effect -> post result -> re-iterate -> complete',
+        'Test run lifecycle: create -> iterate -> execute effect -> post result -> yield -> harness-driven reentry -> complete',
         'Test breakpoint surfacing: verify breakpoints appear as channel messages',
         'Test multi-channel routing: verify effects dispatch to correct agent sessions',
         'Test daemon restart recovery: verify incomplete runs resume after restart',
@@ -758,7 +831,7 @@ export const verifyIntegrationQualityTask = defineTask('verify-integration-quali
     name: 'general-purpose',
     prompt: {
       role: 'senior quality engineer assessing integration completeness and correctness',
-      task: 'Verify the babysitter-OpenClaw integration quality and produce a score',
+      task: 'Verify the babysitter-OpenClaw integration quality and produce a score, including research fidelity, runtime installability, and user-yield continuation strength',
       context: {
         projectDir: args.projectDir,
         targetQuality: args.targetQuality,
@@ -767,10 +840,11 @@ export const verifyIntegrationQualityTask = defineTask('verify-integration-quali
       },
       instructions: [
         'Score the integration across these dimensions (each 0-100):',
-        '  - Completeness: all 8 integration steps implemented (package, hooks, MCP, agent_end driver, routing, result posting, SKILL.md, daemon adapter)',
-        '  - Correctness: test pass rate and error handling coverage',
-        '  - Robustness: daemon restart recovery, concurrent session handling, lock contention',
-        '  - Documentation: SKILL.md quality, inline comments, README',
+        '  - Research and upstream install fidelity',
+        '  - Canonical babysit skill adaptation quality',
+        '  - Correctness: test pass rate and protocol compliance',
+        '  - Runtime robustness: daemon restart recovery, concurrent session handling, lock contention, and user-yield continuation',
+        '  - Documentation and operator readiness: SKILL.md, README, install, upgrade, rollback',
         '  - Code quality: no any types, proper error handling, no floating promises',
         'Compute weighted average as overall quality score',
         'Identify specific issues preventing higher quality',
@@ -831,7 +905,7 @@ export const convergenceFixTask = defineTask('convergence-fix', (args, taskCtx) 
     name: 'general-purpose',
     prompt: {
       role: 'senior engineer performing targeted fixes to improve integration quality',
-      task: 'Fix the identified issues from the previous verification to improve the quality score',
+      task: 'Fix the identified issues from the previous verification to improve the quality score and remove stale contract drift',
       context: {
         projectDir: args.projectDir,
         iteration: args.iteration,
@@ -840,10 +914,11 @@ export const convergenceFixTask = defineTask('convergence-fix', (args, taskCtx) 
       },
       instructions: [
         'Review each issue from the verification report',
-        'Prioritize: fix critical issues first, then major, then minor',
+        'Prioritize: fix research, install-doc, canonical skill, and user-yield continuation issues first; then critical, major, minor',
         'Apply targeted fixes to the specific files identified',
         'Do not introduce new issues while fixing existing ones',
         'Add or improve tests for each fix',
+        'Replace any stale direct result.json, fallback-first session binding, or non-agent public effect guidance that remains',
         'Document what was fixed and why',
         'Return list of files created or modified'
       ],
