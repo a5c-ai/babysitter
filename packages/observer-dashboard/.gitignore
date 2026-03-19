@@ -1,0 +1,12 @@
+.next/
+dist/
+node_modules/
+coverage/
+playwright-report/
+test-results/
+e2e/fixtures/runs/
+.env
+.env.local
+.env.*.local
+.env.production
+.env.development

@@ -195,6 +195,22 @@ export async function handleHookRun(args: HookRunCommandArgs): Promise<number> {
     return 1;
   }
 
+  if (adapter.supportsHookType && !adapter.supportsHookType(hookType)) {
+    const message = adapter.getUnsupportedHookMessage
+      ? adapter.getUnsupportedHookMessage(hookType)
+      : `Harness "${harness}" does not support hook type "${hookType}".`;
+    const error = {
+      error: "UNSUPPORTED_HOOK_TYPE",
+      message,
+    };
+    if (json) {
+      process.stderr.write(JSON.stringify(error, null, 2) + "\n");
+    } else {
+      process.stderr.write(`Error: ${message}\n`);
+    }
+    return 1;
+  }
+
   switch (hookType) {
     case "stop":
       return await adapter.handleStopHook(args);

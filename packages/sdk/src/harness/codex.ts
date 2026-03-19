@@ -1,13 +1,14 @@
 /**
  * Codex harness adapter.
  *
- * Extends the SDK harness layer with "codex" support while reusing the
- * mature Claude stop/session-start hook handlers. The Codex adapter maps
- * Codex-specific environment conventions to the generic adapter interface.
+ * Codex can participate in session binding and state resolution, but it does
+ * not expose the Claude-style blocking stop/session-start hook contract.
+ * Keep this adapter honest: support explicit run binding and env detection,
+ * but reject fictional hook-driven orchestration.
  */
 
 import * as path from "node:path";
-import { existsSync, readFileSync } from "node:fs";
+import { readFileSync } from "node:fs";
 import { createClaudeCodeAdapter } from "./claudeCode";
 import type {
   HarnessAdapter,
@@ -63,6 +64,13 @@ function resolveCodexSessionId(parsed: { sessionId?: string }): string | undefin
 
 export function createCodexAdapter(): HarnessAdapter {
   const claude = createClaudeCodeAdapter();
+  const unsupportedHookMessage = (
+    hookType: string,
+  ): string => (
+    `Codex does not support the babysitter "${hookType}" hook contract. ` +
+    `Use explicit --session-id binding plus the external Codex supervisor ` +
+    `or notify-based monitoring instead.`
+  );
 
   return {
     name: "codex",
@@ -91,53 +99,47 @@ export function createCodexAdapter(): HarnessAdapter {
       return resolveCodexPluginRoot(args);
     },
 
-    bindSession(opts: SessionBindOptions): Promise<SessionBindResult> {
+    getMissingSessionIdHint(): string {
+      return (
+        "Use --session-id explicitly, or launch through the Codex babysitter " +
+        "supervisor so it can provide a stable session/thread ID."
+      );
+    },
+
+    supportsHookType(hookType: string): boolean {
+      return hookType !== "stop" && hookType !== "session-start";
+    },
+
+    getUnsupportedHookMessage(hookType: string): string {
+      return unsupportedHookMessage(hookType);
+    },
+
+    async bindSession(opts: SessionBindOptions): Promise<SessionBindResult> {
       const stateDir = resolveCodexStateDir({
         stateDir: opts.stateDir,
         pluginRoot: opts.pluginRoot,
       });
-      return claude.bindSession({
+      const result = await claude.bindSession({
         ...opts,
         stateDir,
       });
+      return {
+        ...result,
+        harness: "codex",
+      };
     },
 
-    handleStopHook(args: HookHandlerArgs): Promise<number> {
-      const pluginRoot = resolveCodexPluginRoot(args);
-      const stateDir = resolveCodexStateDir({
-        stateDir: args.stateDir,
-        pluginRoot,
-      });
-      return claude.handleStopHook({
-        ...args,
-        pluginRoot,
-        stateDir,
-      });
+    handleStopHook(_args: HookHandlerArgs): Promise<number> {
+      process.stderr.write(`${unsupportedHookMessage("stop")}\n`);
+      return Promise.resolve(1);
     },
 
-    handleSessionStartHook(args: HookHandlerArgs): Promise<number> {
-      const pluginRoot = resolveCodexPluginRoot(args);
-      const stateDir = resolveCodexStateDir({
-        stateDir: args.stateDir,
-        pluginRoot,
-      });
-      return claude.handleSessionStartHook({
-        ...args,
-        pluginRoot,
-        stateDir,
-      });
+    handleSessionStartHook(_args: HookHandlerArgs): Promise<number> {
+      process.stderr.write(`${unsupportedHookMessage("session-start")}\n`);
+      return Promise.resolve(1);
     },
 
-    findHookDispatcherPath(startCwd: string): string | null {
-      const pluginRoot = resolveCodexPluginRoot();
-      if (pluginRoot) {
-        const candidate = path.join(pluginRoot, "hooks", "hook-dispatcher.sh");
-        if (existsSync(candidate)) return candidate;
-      }
-
-      const local = path.join(path.resolve(startCwd), ".codex", "hooks", "hook-dispatcher.sh");
-      if (existsSync(local)) return local;
-
+    findHookDispatcherPath(_startCwd: string): string | null {
       return null;
     },
   };

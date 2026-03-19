@@ -89,7 +89,7 @@ const USAGE = `Usage:
   babysitter session:iteration-message --iteration <n> [--run-id <id>] [--runs-dir <dir>] [--plugin-root <dir>] [--json]
   babysitter skill:discover --plugin-root <dir> [--run-id <id>] [--cache-ttl <seconds>] [--runs-dir <dir>] [--include-remote] [--summary-only] [--process-path <path>] [--json]
   babysitter hook:log --hook-type <type> --log-file <path> [--json]
-  babysitter hook:run --hook-type <stop|session-start|user-prompt-submit|pre-tool-use> [--harness <claude-code|codex|gemini-cli>] [--plugin-root <dir>] [--state-dir <dir>] [--runs-dir <dir>] [--json] [--verbose]
+  babysitter hook:run --hook-type <stop|session-start|user-prompt-submit|pre-tool-use> [--harness <claude-code|gemini-cli>] [--plugin-root <dir>] [--state-dir <dir>] [--runs-dir <dir>] [--json] [--verbose]
   babysitter compress-output <command and args...>
   babysitter skill:fetch-remote --source-type <github|well-known> --url <url> [--json]
   babysitter profile:read --user|--project [--dir <dir>] [--json]
@@ -1035,19 +1035,23 @@ async function handleRunCreate(parsed: ParsedArgs): Promise<number> {
         runDir: result.runDir,
         pluginRoot: adapter.resolvePluginRoot(parsed),
         stateDir: parsed.stateDir,
+        runsDir: parsed.runsDir,
         maxIterations: parsed.maxIterations,
         prompt: parsed.prompt ?? "",
         verbose: parsed.verbose,
         json: parsed.json,
       });
-    } else if (parsed.harness) {
-      // --harness was specified but no session ID could be resolved
-      sessionBound = {
-        harness: parsed.harness,
-        sessionId: "",
-        error: "No session ID provided. Use --session-id or set CLAUDE_SESSION_ID.",
-      };
-    }
+      } else if (parsed.harness) {
+        // --harness was specified but no session ID could be resolved
+        sessionBound = {
+          harness: parsed.harness,
+          sessionId: "",
+          error: (
+            adapter.getMissingSessionIdHint?.() ??
+            "No session ID provided. Use --session-id or set CLAUDE_SESSION_ID."
+          ),
+        };
+      }
   } else if (parsed.harness) {
     // --harness was specified but the adapter name is unknown
     sessionBound = {
@@ -1111,7 +1115,7 @@ async function handleRunCreate(parsed: ParsedArgs): Promise<number> {
       console.log(`[run:create] session=${sessionBound.sessionId} bound via ${sessionBound.harness} stateFile=${sessionBound.stateFile}`);
     }
   }
-  return 0;
+  return sessionBound?.fatal ? 1 : 0;
 }
 
 type RunLifecycleState = "created" | "waiting" | "completed" | "failed";

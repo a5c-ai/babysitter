@@ -825,7 +825,7 @@ async function handleSessionStartHookImpl(
 async function bindSessionImpl(
   opts: SessionBindOptions,
 ): Promise<SessionBindResult> {
-  const { sessionId, runId, pluginRoot, maxIterations = 256, prompt, verbose } = opts;
+  const { sessionId, runId, pluginRoot, runsDir, maxIterations = 256, prompt, verbose } = opts;
 
   // Resolve state directory (always resolve to absolute paths)
   const resolvedPluginRoot = pluginRoot ? path.resolve(pluginRoot) : "";
@@ -848,24 +848,53 @@ async function bindSessionImpl(
     try {
       const existing = await readSessionFile(filePath);
       if (existing.state.runId && existing.state.runId !== runId) {
-        return {
-          harness: "claude-code",
-          sessionId,
-          stateFile: filePath,
-          error: `Session already associated with run: ${existing.state.runId}`,
-        };
+        const oldRunId = existing.state.runId;
+        let isTerminal = false;
+
+        // If runsDir is provided, check whether the old run is in a terminal state
+        if (runsDir) {
+          try {
+            const oldRunDir = path.join(runsDir, oldRunId);
+            const journal = await loadJournal(oldRunDir);
+            const hasCompleted = journal.some((e) => e.type === "RUN_COMPLETED");
+            const hasFailed = journal.some((e) => e.type === "RUN_FAILED");
+            isTerminal = hasCompleted || hasFailed;
+          } catch {
+            // Journal unreadable — treat as non-terminal (safe default)
+          }
+        }
+
+        if (isTerminal) {
+          // Auto-release: old run is finished, delete stale session and proceed
+          if (verbose) {
+            process.stderr.write(
+              `[run:create] Auto-releasing stale session ${sessionId} from terminal run ${oldRunId}\n`,
+            );
+          }
+          await deleteSessionFile(filePath);
+          // Fall through to create new session file below (skip update block)
+        } else {
+          return {
+            harness: "claude-code",
+            sessionId,
+            stateFile: filePath,
+            error: `Session bound to active run: ${oldRunId}. Complete or fail that run first, or manually remove the session state file at ${filePath}`,
+            fatal: true,
+          };
+        }
+      } else {
+        // Session exists but has no run or same run — update it
+        await updateSessionState(filePath, { runId, active: true }, {
+          state: existing.state,
+          prompt: existing.prompt,
+        });
+        if (verbose) {
+          process.stderr.write(
+            `[run:create] Updated existing session ${sessionId} with run ${runId}\n`,
+          );
+        }
+        return { harness: "claude-code", sessionId, stateFile: filePath };
       }
-      // Session exists but has no run or same run — update it
-      await updateSessionState(filePath, { runId, active: true }, {
-        state: existing.state,
-        prompt: existing.prompt,
-      });
-      if (verbose) {
-        process.stderr.write(
-          `[run:create] Updated existing session ${sessionId} with run ${runId}\n`,
-        );
-      }
-      return { harness: "claude-code", sessionId, stateFile: filePath };
     } catch {
       // Corrupted state file — overwrite it
     }

@@ -17,6 +17,7 @@ export interface SessionBindOptions {
   runDir: string;
   pluginRoot?: string;
   stateDir?: string;
+  runsDir?: string;
   maxIterations?: number;
   prompt: string;
   verbose: boolean;
@@ -28,6 +29,8 @@ export interface SessionBindResult {
   sessionId: string;
   stateFile?: string;
   error?: string;
+  /** When true, the error is fatal and run:create should exit non-zero. */
+  fatal?: boolean;
 }
 
 // ---------------------------------------------------------------------------
@@ -61,6 +64,15 @@ export interface HarnessAdapter {
 
   /** Resolve plugin root from args / env */
   resolvePluginRoot(args: { pluginRoot?: string }): string | undefined;
+
+  /** Guidance shown when a harness-specific session ID is required but missing. */
+  getMissingSessionIdHint?(): string;
+
+  /** Whether this harness truthfully supports a given SDK hook entrypoint. */
+  supportsHookType?(hookType: string): boolean;
+
+  /** Message shown when a hook type is requested but unsupported by the harness. */
+  getUnsupportedHookMessage?(hookType: string): string;
 
   /** Bind a run to the caller's session (run:create flow) */
   bindSession(opts: SessionBindOptions): Promise<SessionBindResult>;

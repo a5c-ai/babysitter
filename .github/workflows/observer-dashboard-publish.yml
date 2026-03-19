@@ -1,0 +1,143 @@
+name: Observer Dashboard Publish
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'packages/observer-dashboard/**'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: observer-dashboard-publish
+  cancel-in-progress: false
+
+jobs:
+  test:
+    name: Validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          npm install --no-save @rollup/rollup-linux-x64-gnu 2>/dev/null || true
+
+      - name: Build
+        run: |
+          set -euo pipefail
+          npm run build:observer
+
+      - name: Build CLI
+        run: |
+          set -euo pipefail
+          npm run build:cli --workspace=@a5c-ai/babysitter-observer-dashboard
+
+      - name: Unit tests
+        run: |
+          set -euo pipefail
+          npm run test:observer
+
+  publish:
+    name: Publish to npm
+    needs: test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          registry-url: https://registry.npmjs.org/
+          always-auth: true
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          npm install --no-save @rollup/rollup-linux-x64-gnu 2>/dev/null || true
+
+      - name: Bump version
+        id: bump
+        run: |
+          set -euo pipefail
+          cd packages/observer-dashboard
+          CURRENT=$(node -e "console.log(require('./package.json').version)")
+          # Determine bump level from commit messages since last observer tag
+          LAST_TAG=$(git tag -l 'observer-dashboard-v*' --sort=-v:refname | head -1)
+          if [ -n "$LAST_TAG" ]; then
+            COMMITS=$(git log "$LAST_TAG"..HEAD --pretty=%s -- packages/observer-dashboard/)
+          else
+            COMMITS=$(git log -n 20 --pretty=%s -- packages/observer-dashboard/)
+          fi
+          BUMP="patch"
+          if echo "$COMMITS" | grep -qiE '#major\b'; then
+            BUMP="major"
+          elif echo "$COMMITS" | grep -qiE '#minor\b|^feat'; then
+            BUMP="minor"
+          fi
+          NEW=$(node -e "
+            const [M,m,p] = '${CURRENT}'.split('.').map(Number);
+            if ('${BUMP}'==='major') console.log(M+1+'.0.0');
+            else if ('${BUMP}'==='minor') console.log(M+'.'+(m+1)+'.0');
+            else console.log(M+'.'+m+'.'+(p+1));
+          ")
+          echo "version=$NEW" >> "$GITHUB_OUTPUT"
+          echo "current=$CURRENT" >> "$GITHUB_OUTPUT"
+          node -e "
+            const fs = require('fs');
+            const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+            pkg.version = '${NEW}';
+            fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2) + '\n');
+          "
+
+      - name: Commit version bump
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add packages/observer-dashboard/package.json
+          if git diff --cached --quiet; then
+            echo "No version change."
+          else
+            git commit -m "chore(observer-dashboard): bump to v${{ steps.bump.outputs.version }} [skip release]"
+            git push origin HEAD:main
+          fi
+
+      - name: Build
+        run: |
+          set -euo pipefail
+          npm run build --workspace=@a5c-ai/babysitter-observer-dashboard
+          npm run build:cli --workspace=@a5c-ai/babysitter-observer-dashboard
+
+      - name: Publish to npm
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          set -euo pipefail
+          npm publish --access public
+        working-directory: packages/observer-dashboard
+
+      - name: Tag release
+        run: |
+          set -euo pipefail
+          TAG="observer-dashboard-v${{ steps.bump.outputs.version }}"
+          git tag "$TAG"
+          git push origin "$TAG"

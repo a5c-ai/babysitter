@@ -10,8 +10,13 @@
  */
 
 import * as path from "node:path";
+import { promises as fs } from "node:fs";
+import * as os from "node:os";
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { createClaudeCodeAdapter } from "../claudeCode";
+import { writeSessionFile } from "../../session/write";
+import { getSessionFilePath, readSessionFile, sessionFileExists } from "../../session/parse";
+import { appendEvent } from "../../storage/journal";
 import { createCodexAdapter } from "../codex";
 import { createNullAdapter } from "../nullAdapter";
 import {
@@ -214,6 +219,32 @@ describe("CodexAdapter", () => {
       expect(adapter.resolveStateDir({})).toBe(path.resolve(".a5c"));
     });
   });
+
+  it("reports codex-specific missing session ID guidance", () => {
+    const adapter = createCodexAdapter();
+    expect(adapter.getMissingSessionIdHint?.()).toContain("Codex babysitter supervisor");
+  });
+
+  it("does not advertise stop-hook support", () => {
+    const adapter = createCodexAdapter();
+    expect(adapter.supportsHookType?.("stop")).toBe(false);
+    expect(adapter.supportsHookType?.("session-start")).toBe(false);
+    expect(adapter.findHookDispatcherPath("/tmp")).toBeNull();
+  });
+
+  it("returns a codex harness label when binding a session", async () => {
+    const adapter = createCodexAdapter();
+    const result = await adapter.bindSession({
+      sessionId: "codex-session",
+      runId: "run-1",
+      runDir: "/tmp/run-1",
+      stateDir: "/tmp/state",
+      prompt: "",
+      verbose: false,
+      json: true,
+    });
+    expect(result.harness).toBe("codex");
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -341,5 +372,214 @@ describe("Registry", () => {
       const a2 = getAdapter();
       expect(a2.name).toBe("claude-code");
     });
+  });
+});
+
+// ---------------------------------------------------------------------------
+// bindSession stale session handling (Issue #54)
+// ---------------------------------------------------------------------------
+
+describe("bindSession stale session handling", () => {
+  let tmpDir: string;
+  let stateDir: string;
+  let runsDir: string;
+
+  beforeEach(async () => {
+    tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "harness-bind-test-"));
+    stateDir = path.join(tmpDir, "state");
+    runsDir = path.join(tmpDir, "runs");
+    await fs.mkdir(stateDir, { recursive: true });
+    await fs.mkdir(runsDir, { recursive: true });
+  });
+
+  afterEach(async () => {
+    await fs.rm(tmpDir, { recursive: true, force: true });
+  });
+
+  function makeSessionState(runId: string) {
+    return {
+      active: true,
+      iteration: 1,
+      maxIterations: 256,
+      runId,
+      startedAt: "2026-01-01T00:00:00Z",
+      lastIterationAt: "2026-01-01T00:00:00Z",
+      iterationTimes: [],
+    };
+  }
+
+  async function createRunWithTerminalEvent(runId: string, eventType: "RUN_COMPLETED" | "RUN_FAILED") {
+    const runDir = path.join(runsDir, runId);
+    await fs.mkdir(runDir, { recursive: true });
+    await appendEvent({
+      runDir,
+      event: { reason: "test" },
+      eventType,
+    });
+  }
+
+  it("auto-releases stale terminal session (completed run) and binds new run", async () => {
+    const sessionId = "test-session";
+    const oldRunId = "old-run-completed";
+    const newRunId = "new-run";
+
+    // Create session bound to old run
+    const filePath = getSessionFilePath(stateDir, sessionId);
+    await writeSessionFile(filePath, makeSessionState(oldRunId), "old prompt");
+
+    // Create old run with RUN_COMPLETED journal event
+    await createRunWithTerminalEvent(oldRunId, "RUN_COMPLETED");
+
+    const adapter = createClaudeCodeAdapter();
+    const result = await adapter.bindSession({
+      sessionId,
+      runId: newRunId,
+      runDir: path.join(runsDir, newRunId),
+      stateDir,
+      runsDir,
+      prompt: "new prompt",
+      verbose: false,
+      json: false,
+    });
+
+    expect(result.error).toBeUndefined();
+    expect(result.sessionId).toBe(sessionId);
+    expect(result.stateFile).toBe(filePath);
+
+    // Verify session is now bound to new run
+    const session = await readSessionFile(filePath);
+    expect(session.state.runId).toBe(newRunId);
+  });
+
+  it("auto-releases stale terminal session (failed run) and binds new run", async () => {
+    const sessionId = "test-session";
+    const oldRunId = "old-run-failed";
+    const newRunId = "new-run";
+
+    const filePath = getSessionFilePath(stateDir, sessionId);
+    await writeSessionFile(filePath, makeSessionState(oldRunId), "old prompt");
+
+    await createRunWithTerminalEvent(oldRunId, "RUN_FAILED");
+
+    const adapter = createClaudeCodeAdapter();
+    const result = await adapter.bindSession({
+      sessionId,
+      runId: newRunId,
+      runDir: path.join(runsDir, newRunId),
+      stateDir,
+      runsDir,
+      prompt: "new prompt",
+      verbose: false,
+      json: false,
+    });
+
+    expect(result.error).toBeUndefined();
+    expect(result.sessionId).toBe(sessionId);
+
+    const session = await readSessionFile(filePath);
+    expect(session.state.runId).toBe(newRunId);
+  });
+
+  it("rejects when existing session is bound to active (non-terminal) run", async () => {
+    const sessionId = "test-session";
+    const oldRunId = "active-run";
+    const newRunId = "new-run";
+
+    const filePath = getSessionFilePath(stateDir, sessionId);
+    await writeSessionFile(filePath, makeSessionState(oldRunId), "old prompt");
+
+    // Create old run directory with NO terminal event (just a directory, no journal)
+    const oldRunDir = path.join(runsDir, oldRunId);
+    await fs.mkdir(oldRunDir, { recursive: true });
+
+    const adapter = createClaudeCodeAdapter();
+    const result = await adapter.bindSession({
+      sessionId,
+      runId: newRunId,
+      runDir: path.join(runsDir, newRunId),
+      stateDir,
+      runsDir,
+      prompt: "new prompt",
+      verbose: false,
+      json: false,
+    });
+
+    expect(result.error).toContain("Session bound to active run: active-run");
+    expect(result.error).toContain("Complete or fail that run first");
+    expect(result.error).toContain(filePath);
+    expect(result.fatal).toBe(true);
+
+    // Session file should still be bound to old run
+    const session = await readSessionFile(filePath);
+    expect(session.state.runId).toBe(oldRunId);
+  });
+
+  it("idempotent: succeeds when session is already bound to the same runId", async () => {
+    const sessionId = "test-session";
+    const runId = "same-run";
+
+    const filePath = getSessionFilePath(stateDir, sessionId);
+    await writeSessionFile(filePath, makeSessionState(runId), "prompt");
+
+    const adapter = createClaudeCodeAdapter();
+    const result = await adapter.bindSession({
+      sessionId,
+      runId,
+      runDir: path.join(runsDir, runId),
+      stateDir,
+      runsDir,
+      prompt: "prompt",
+      verbose: false,
+      json: false,
+    });
+
+    expect(result.error).toBeUndefined();
+    expect(result.sessionId).toBe(sessionId);
+    expect(result.stateFile).toBe(filePath);
+  });
+
+  it("works for no-runId case (session init without run)", async () => {
+    const sessionId = "test-session";
+    const filePath = getSessionFilePath(stateDir, sessionId);
+    await writeSessionFile(filePath, makeSessionState(""), "prompt");
+
+    const adapter = createClaudeCodeAdapter();
+    const result = await adapter.bindSession({
+      sessionId,
+      runId: "new-run",
+      runDir: path.join(runsDir, "new-run"),
+      stateDir,
+      runsDir,
+      prompt: "prompt",
+      verbose: false,
+      json: false,
+    });
+
+    expect(result.error).toBeUndefined();
+    expect(result.sessionId).toBe(sessionId);
+  });
+
+  it("falls back to old error behavior when runsDir is not provided", async () => {
+    const sessionId = "test-session";
+    const oldRunId = "old-run";
+    const newRunId = "new-run";
+
+    const filePath = getSessionFilePath(stateDir, sessionId);
+    await writeSessionFile(filePath, makeSessionState(oldRunId), "prompt");
+
+    const adapter = createClaudeCodeAdapter();
+    const result = await adapter.bindSession({
+      sessionId,
+      runId: newRunId,
+      runDir: path.join(runsDir, newRunId),
+      stateDir,
+      // runsDir intentionally omitted
+      prompt: "prompt",
+      verbose: false,
+      json: false,
+    });
+
+    // Without runsDir, can't check terminal state, so should return error
+    expect(result.error).toContain("Session bound to active run: old-run");
   });
 });

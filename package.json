@@ -10,6 +10,31 @@
     "test:sdk": "npm run test --workspace=@a5c-ai/babysitter-sdk",
     "test:e2e:docker": "vitest run --config e2e-tests/docker/vitest.config.ts",
     "build:sdk": "npm run build --workspace=@a5c-ai/babysitter-sdk",
-    "token:eval": "bash scripts/eval-compression.sh"
+    "token:eval": "bash scripts/eval-compression.sh",
+    "build:observer": "npm run build --workspace=@a5c-ai/babysitter-observer-dashboard",
+    "test:observer": "npm run test --workspace=@a5c-ai/babysitter-observer-dashboard"
+  },
+  "overrides": {
+    "@radix-ui/react-dialog": {
+      "@types/react": "18.2.79"
+    },
+    "@radix-ui/react-accordion": {
+      "@types/react": "18.2.79"
+    },
+    "@radix-ui/react-scroll-area": {
+      "@types/react": "18.2.79"
+    },
+    "@radix-ui/react-separator": {
+      "@types/react": "18.2.79"
+    },
+    "@radix-ui/react-slot": {
+      "@types/react": "18.2.79"
+    },
+    "@radix-ui/react-tabs": {
+      "@types/react": "18.2.79"
+    },
+    "@radix-ui/react-tooltip": {
+      "@types/react": "18.2.79"
+    }
   }
 }

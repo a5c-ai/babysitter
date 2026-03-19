@@ -1,0 +1,553 @@
+@import "tailwindcss";
+
+/* ============================================
+   BABYSITTER OBSERVER — Design System
+   a5c.ai Brand Identity
+   Neon cyberpunk with professional restraint
+   Dark-mode-first premium developer tool
+   ============================================ */
+
+/* Dark theme (default) */
+:root {
+  /* Backgrounds - deep dark, not pure black */
+  --background: #0a0a0b;
+  --background-secondary: #141417;
+  --background-tertiary: #1c1c21;
+  --foreground: #e4e4e7;
+  --foreground-secondary: #a1a1aa;
+  --foreground-muted: #71717a;
+
+  /* Card - subtle glass effect */
+  --card: rgba(15, 15, 20, 0.8);
+  --card-foreground: #e4e4e7;
+  --card-border: rgba(255, 0, 224, 0.08);
+  --card-hover: rgba(255, 0, 224, 0.04);
+
+  /* Primary - Magenta */
+  --primary: #FF00E0;
+  --primary-foreground: #ffffff;
+  --primary-hover: #ff33e6;
+  --primary-muted: rgba(255, 0, 224, 0.15);
+
+  /* Secondary - Neon Cyan */
+  --secondary: #00F0FF;
+  --secondary-foreground: #0a0a0b;
+  --secondary-muted: rgba(0, 240, 255, 0.12);
+
+  /* Muted */
+  --muted: #27272a;
+  --muted-foreground: #a1a1aa;
+
+  /* Accent - Magenta */
+  --accent: #FF00E0;
+  --accent-foreground: #ffffff;
+
+  /* Destructive */
+  --destructive: #FF3366;
+  --destructive-foreground: #ffffff;
+
+  /* Semantic - Status colors (neon palette) */
+  --success: #00FF88;
+  --success-muted: rgba(0, 255, 136, 0.15);
+  --warning: #FFD700;
+  --warning-muted: rgba(255, 215, 0, 0.15);
+  --error: #FF3366;
+  --error-muted: rgba(255, 51, 102, 0.18);
+  --info: #00F0FF;
+  --info-muted: rgba(0, 240, 255, 0.12);
+  --pending: #a1a1aa;
+  --pending-muted: rgba(161, 161, 170, 0.15);
+
+  /* Border - subtle magenta tint */
+  --border: rgba(255, 0, 224, 0.08);
+  --border-hover: rgba(255, 0, 224, 0.15);
+  --input: rgba(255, 0, 224, 0.08);
+  --ring: #FF00E0;
+
+  /* Subtle backgrounds */
+  --background-muted: #1a1a1f;
+
+  /* Neon glow effects */
+  --glow-primary: 0 0 20px rgba(255, 0, 224, 0.3), 0 0 40px rgba(255, 0, 224, 0.1);
+  --glow-success: 0 0 20px rgba(0, 255, 136, 0.3), 0 0 40px rgba(0, 255, 136, 0.1);
+  --glow-error: 0 0 20px rgba(255, 51, 102, 0.3), 0 0 40px rgba(255, 51, 102, 0.1);
+  --glow-cyan: 0 0 20px rgba(0, 240, 255, 0.3), 0 0 40px rgba(0, 240, 255, 0.1);
+  --glow-warning: 0 0 20px rgba(255, 215, 0, 0.3), 0 0 40px rgba(255, 215, 0, 0.1);
+
+  /* Neon drop-shadow tokens */
+  --drop-glow-primary: 0 0 4px rgba(255, 0, 224, 0.4);
+  --drop-glow-primary-sm: 0 0 3px rgba(255, 0, 224, 0.3);
+  --drop-glow-success: 0 0 4px rgba(0, 255, 136, 0.5);
+  --drop-glow-success-sm: 0 0 3px rgba(0, 255, 136, 0.3);
+  --drop-glow-error: 0 0 4px rgba(255, 51, 102, 0.5);
+  --drop-glow-error-sm: 0 0 3px rgba(255, 51, 102, 0.3);
+  --drop-glow-warning: 0 0 4px rgba(255, 215, 0, 0.5);
+  --drop-glow-warning-sm: 0 0 3px rgba(255, 215, 0, 0.3);
+  --drop-glow-cyan: 0 0 4px rgba(0, 240, 255, 0.5);
+  --drop-glow-cyan-sm: 0 0 3px rgba(0, 240, 255, 0.3);
+  --drop-glow-pending: 0 0 4px rgba(128, 128, 128, 0.3);
+
+  /* Neon box-shadow tokens for inset/hover glows */
+  --neon-inset-primary: inset 0 0 12px rgba(255, 0, 224, 0.06);
+  --neon-inset-success: inset 0 0 12px rgba(0, 255, 136, 0.06);
+  --neon-inset-error: inset 0 0 12px rgba(255, 51, 102, 0.06);
+  --neon-inset-warning: inset 0 0 12px rgba(255, 215, 0, 0.06);
+  --neon-inset-cyan: inset 0 0 12px rgba(0, 240, 255, 0.06);
+
+  /* Neon accent box-shadow tokens (status badge / button glows) */
+  --neon-glow-success-sm: 0 0 8px rgba(0, 255, 136, 0.15);
+  --neon-glow-error-sm: 0 0 8px rgba(255, 51, 102, 0.15);
+  --neon-glow-warning-sm: 0 0 8px rgba(255, 215, 0, 0.15);
+  --neon-glow-cyan-sm: 0 0 8px rgba(0, 240, 255, 0.15);
+  --neon-glow-primary-sm: 0 0 8px rgba(255, 0, 224, 0.15);
+  --neon-glow-primary-xs: 0 0 10px rgba(255, 0, 224, 0.1);
+  --neon-glow-warning-xs: 0 0 8px rgba(255, 215, 0, 0.1);
+  --neon-glow-error-xs: 0 0 8px rgba(255, 51, 102, 0.1);
+  --neon-glow-primary-ring: 0 0 12px rgba(255, 0, 224, 0.15);
+  --neon-glow-primary-focus: 0 0 12px rgba(255, 0, 224, 0.1);
+  --neon-glow-warning-badge: 0 0 12px rgba(255, 215, 0, 0.15);
+
+  /* Glass background tokens */
+  --glass-bg: rgba(10, 10, 11, 0.85);
+  --glass-bg-heavy: rgba(10, 10, 11, 0.9);
+  --glass-border: rgba(255, 0, 224, 0.12);
+  --glass-border-subtle: rgba(255, 0, 224, 0.1);
+  --glass-border-faint: rgba(255, 0, 224, 0.06);
+  --glass-card-bg: rgba(20, 20, 23, 0.6);
+  --glass-shadow: 0 0 30px rgba(255, 0, 224, 0.08), 0 4px 16px rgba(0, 0, 0, 0.4);
+  --glass-shadow-toast: 0 4px 16px rgba(0, 0, 0, 0.3);
+
+  /* Kbd shadow tokens */
+  --kbd-shadow: 0 1px 0 rgba(255, 0, 224, 0.08), inset 0 -1px 0 rgba(0, 0, 0, 0.3);
+  --kbd-border: rgba(255, 0, 224, 0.15);
+
+  /* Step card composite shadows */
+  --step-inset-warning: inset 3px 0 8px rgba(255, 215, 0, 0.12);
+  --step-inset-cyan: inset 3px 0 8px rgba(0, 240, 255, 0.10);
+  --step-selected-shadow: inset 3px 0 12px rgba(255, 0, 224, 0.15), 0 0 12px rgba(255, 0, 224, 0.08);
+  --step-running-dot: 0 0 6px rgba(0, 240, 255, 0.6), 0 0 12px rgba(0, 240, 255, 0.3);
+
+  /* Progress bar glow tokens */
+  --progress-glow-primary: 0 0 10px rgba(255, 0, 224, 0.4), inset 0 1px 2px rgba(255, 0, 224, 0.3);
+  --progress-glow-success: 0 0 10px rgba(0, 255, 136, 0.4), inset 0 1px 2px rgba(0, 255, 136, 0.3);
+  --progress-glow-error: 0 0 10px rgba(255, 51, 102, 0.4), inset 0 1px 2px rgba(255, 51, 102, 0.3);
+  --progress-glow-warning: 0 0 10px rgba(255, 215, 0, 0.4), inset 0 1px 2px rgba(255, 215, 0, 0.3);
+
+  /* Toast border status shadows */
+  --toast-glow-success: 0 0 12px rgba(0, 255, 136, 0.1);
+  --toast-glow-error: 0 0 12px rgba(255, 51, 102, 0.1);
+  --toast-glow-warning: 0 0 12px rgba(255, 215, 0, 0.1);
+  --toast-glow-cyan: 0 0 12px rgba(0, 240, 255, 0.1);
+
+  /* Event stream filter shadow */
+  --event-filter-active: 0 0 8px rgba(255, 0, 224, 0.1);
+
+  /* Breakpoint panel glow */
+  --breakpoint-glow: 0 0 20px rgba(255, 215, 0, 0.15), 0 0 40px rgba(255, 215, 0, 0.05);
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.2);
+  --shadow-md: 0 2px 8px rgba(0,0,0,0.25);
+  --shadow-lg: 0 4px 16px rgba(0,0,0,0.3);
+
+  /* Transitions */
+  --transition-fast: 150ms ease;
+  --transition-normal: 200ms ease-out;
+
+  /* Radius */
+  --radius: 8px;
+}
+
+/* Light theme */
+[data-theme="light"],
+.light {
+  --background: #ffffff;
+  --background-secondary: #f4f4f5;
+  --background-tertiary: #e4e4e7;
+  --foreground: #18181b;
+  --foreground-secondary: #52525b;
+  --foreground-muted: #71717a;
+
+  --card: #ffffff;
+  --card-foreground: #18181b;
+  --card-border: rgba(255, 0, 224, 0.15);
+  --card-hover: rgba(255, 0, 224, 0.06);
+
+  --primary: #D600C0;
+  --primary-foreground: #ffffff;
+  --primary-hover: #FF00E0;
+  --primary-muted: rgba(214, 0, 192, 0.1);
+
+  --secondary: #00C8D6;
+  --secondary-foreground: #ffffff;
+  --secondary-muted: rgba(0, 200, 214, 0.1);
+
+  --muted: #f4f4f5;
+  --muted-foreground: #71717a;
+
+  --accent: #D600C0;
+  --accent-foreground: #ffffff;
+
+  --destructive: #E6295A;
+  --destructive-foreground: #ffffff;
+
+  --success: #00CC6E;
+  --success-muted: rgba(0, 204, 110, 0.12);
+  --warning: #D4AF00;
+  --warning-muted: rgba(212, 175, 0, 0.12);
+  --error: #E6295A;
+  --error-muted: rgba(230, 41, 90, 0.12);
+  --info: #00C8D6;
+  --info-muted: rgba(0, 200, 214, 0.1);
+  --pending: #a1a1aa;
+  --pending-muted: rgba(161, 161, 170, 0.1);
+
+  --border: rgba(255, 0, 224, 0.15);
+  --border-hover: rgba(255, 0, 224, 0.25);
+  --input: rgba(255, 0, 224, 0.12);
+  --ring: #D600C0;
+
+  --background-muted: #e8e8ec;
+
+  --glow-primary: 0 0 20px rgba(214, 0, 192, 0.2), 0 0 40px rgba(214, 0, 192, 0.06);
+  --glow-success: 0 0 20px rgba(0, 204, 110, 0.2), 0 0 40px rgba(0, 204, 110, 0.06);
+  --glow-error: 0 0 20px rgba(230, 41, 90, 0.2), 0 0 40px rgba(230, 41, 90, 0.06);
+  --glow-cyan: 0 0 20px rgba(0, 200, 214, 0.2), 0 0 40px rgba(0, 200, 214, 0.06);
+  --glow-warning: 0 0 20px rgba(212, 175, 0, 0.2), 0 0 40px rgba(212, 175, 0, 0.06);
+
+  /* Neon drop-shadow tokens (light) */
+  --drop-glow-primary: 0 0 3px rgba(214, 0, 192, 0.25);
+  --drop-glow-primary-sm: 0 0 2px rgba(214, 0, 192, 0.2);
+  --drop-glow-success: 0 0 3px rgba(0, 204, 110, 0.3);
+  --drop-glow-success-sm: 0 0 2px rgba(0, 204, 110, 0.2);
+  --drop-glow-error: 0 0 3px rgba(230, 41, 90, 0.3);
+  --drop-glow-error-sm: 0 0 2px rgba(230, 41, 90, 0.2);
+  --drop-glow-warning: 0 0 3px rgba(212, 175, 0, 0.3);
+  --drop-glow-warning-sm: 0 0 2px rgba(212, 175, 0, 0.2);
+  --drop-glow-cyan: 0 0 3px rgba(0, 200, 214, 0.3);
+  --drop-glow-cyan-sm: 0 0 2px rgba(0, 200, 214, 0.2);
+  --drop-glow-pending: 0 0 3px rgba(128, 128, 128, 0.2);
+
+  /* Neon box-shadow tokens (light) */
+  --neon-inset-primary: inset 0 0 10px rgba(214, 0, 192, 0.04);
+  --neon-inset-success: inset 0 0 10px rgba(0, 204, 110, 0.04);
+  --neon-inset-error: inset 0 0 10px rgba(230, 41, 90, 0.04);
+  --neon-inset-warning: inset 0 0 10px rgba(212, 175, 0, 0.04);
+  --neon-inset-cyan: inset 0 0 10px rgba(0, 200, 214, 0.04);
+
+  /* Neon accent box-shadow tokens (light) */
+  --neon-glow-success-sm: 0 0 6px rgba(0, 204, 110, 0.1);
+  --neon-glow-error-sm: 0 0 6px rgba(230, 41, 90, 0.1);
+  --neon-glow-warning-sm: 0 0 6px rgba(212, 175, 0, 0.1);
+  --neon-glow-cyan-sm: 0 0 6px rgba(0, 200, 214, 0.1);
+  --neon-glow-primary-sm: 0 0 6px rgba(214, 0, 192, 0.1);
+  --neon-glow-primary-xs: 0 0 8px rgba(214, 0, 192, 0.06);
+  --neon-glow-warning-xs: 0 0 6px rgba(212, 175, 0, 0.06);
+  --neon-glow-error-xs: 0 0 6px rgba(230, 41, 90, 0.06);
+  --neon-glow-primary-ring: 0 0 10px rgba(214, 0, 192, 0.1);
+  --neon-glow-primary-focus: 0 0 10px rgba(214, 0, 192, 0.06);
+  --neon-glow-warning-badge: 0 0 10px rgba(212, 175, 0, 0.1);
+
+  /* Glass background tokens (light) */
+  --glass-bg: rgba(255, 255, 255, 0.9);
+  --glass-bg-heavy: rgba(255, 255, 255, 0.95);
+  --glass-border: rgba(214, 0, 192, 0.1);
+  --glass-border-subtle: rgba(214, 0, 192, 0.08);
+  --glass-border-faint: rgba(214, 0, 192, 0.04);
+  --glass-card-bg: rgba(244, 244, 245, 0.7);
+  --glass-shadow: 0 0 20px rgba(214, 0, 192, 0.05), 0 4px 16px rgba(0, 0, 0, 0.08);
+  --glass-shadow-toast: 0 4px 16px rgba(0, 0, 0, 0.1);
+
+  /* Kbd shadow tokens (light) */
+  --kbd-shadow: 0 1px 0 rgba(214, 0, 192, 0.06), inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+  --kbd-border: rgba(214, 0, 192, 0.12);
+
+  /* Step card composite shadows (light) */
+  --step-inset-warning: inset 3px 0 8px rgba(212, 175, 0, 0.08);
+  --step-inset-cyan: inset 3px 0 8px rgba(0, 200, 214, 0.06);
+  --step-selected-shadow: inset 3px 0 12px rgba(214, 0, 192, 0.1), 0 0 10px rgba(214, 0, 192, 0.05);
+  --step-running-dot: 0 0 4px rgba(0, 200, 214, 0.4), 0 0 8px rgba(0, 200, 214, 0.2);
+
+  /* Progress bar glow tokens (light) */
+  --progress-glow-primary: 0 0 8px rgba(214, 0, 192, 0.25), inset 0 1px 2px rgba(214, 0, 192, 0.2);
+  --progress-glow-success: 0 0 8px rgba(0, 204, 110, 0.25), inset 0 1px 2px rgba(0, 204, 110, 0.2);
+  --progress-glow-error: 0 0 8px rgba(230, 41, 90, 0.25), inset 0 1px 2px rgba(230, 41, 90, 0.2);
+  --progress-glow-warning: 0 0 8px rgba(212, 175, 0, 0.25), inset 0 1px 2px rgba(212, 175, 0, 0.2);
+
+  /* Toast border status shadows (light) */
+  --toast-glow-success: 0 0 8px rgba(0, 204, 110, 0.06);
+  --toast-glow-error: 0 0 8px rgba(230, 41, 90, 0.06);
+  --toast-glow-warning: 0 0 8px rgba(212, 175, 0, 0.06);
+  --toast-glow-cyan: 0 0 8px rgba(0, 200, 214, 0.06);
+
+  /* Event stream filter shadow (light) */
+  --event-filter-active: 0 0 6px rgba(214, 0, 192, 0.06);
+
+  /* Breakpoint panel glow (light) */
+  --breakpoint-glow: 0 0 16px rgba(212, 175, 0, 0.1), 0 0 30px rgba(212, 175, 0, 0.03);
+
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.06);
+  --shadow-md: 0 2px 8px rgba(0,0,0,0.08);
+  --shadow-lg: 0 4px 16px rgba(0,0,0,0.12);
+}
+
+/* Tailwind v4 theme */
+@theme inline {
+  --color-background: var(--background);
+  --color-background-secondary: var(--background-secondary);
+  --color-background-tertiary: var(--background-tertiary);
+  --color-foreground: var(--foreground);
+  --color-foreground-secondary: var(--foreground-secondary);
+  --color-foreground-muted: var(--foreground-muted);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-card-border: var(--card-border);
+  --color-card-hover: var(--card-hover);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-muted: var(--primary-muted);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary-muted: var(--secondary-muted);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-border-hover: var(--border-hover);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-success: var(--success);
+  --color-success-muted: var(--success-muted);
+  --color-warning: var(--warning);
+  --color-warning-muted: var(--warning-muted);
+  --color-error: var(--error);
+  --color-error-muted: var(--error-muted);
+  --color-info: var(--info);
+  --color-info-muted: var(--info-muted);
+  --color-pending: var(--pending);
+  --color-pending-muted: var(--pending-muted);
+  --color-background-muted: var(--background-muted);
+  --shadow-sm: var(--shadow-sm);
+  --shadow-md: var(--shadow-md);
+  --shadow-lg: var(--shadow-lg);
+  --shadow-glow-primary: var(--glow-primary);
+  --shadow-glow-success: var(--glow-success);
+  --shadow-glow-error: var(--glow-error);
+  --shadow-glow-cyan: var(--glow-cyan);
+  --shadow-glow-warning: var(--glow-warning);
+  --shadow-neon-glow-success-sm: var(--neon-glow-success-sm);
+  --shadow-neon-glow-error-sm: var(--neon-glow-error-sm);
+  --shadow-neon-glow-warning-sm: var(--neon-glow-warning-sm);
+  --shadow-neon-glow-cyan-sm: var(--neon-glow-cyan-sm);
+  --shadow-neon-glow-primary-sm: var(--neon-glow-primary-sm);
+  --shadow-neon-glow-primary-xs: var(--neon-glow-primary-xs);
+  --shadow-neon-glow-warning-xs: var(--neon-glow-warning-xs);
+  --shadow-neon-glow-error-xs: var(--neon-glow-error-xs);
+  --shadow-neon-glow-primary-ring: var(--neon-glow-primary-ring);
+  --shadow-neon-glow-primary-focus: var(--neon-glow-primary-focus);
+  --shadow-neon-glow-warning-badge: var(--neon-glow-warning-badge);
+  --shadow-neon-inset-primary: var(--neon-inset-primary);
+  --shadow-neon-inset-success: var(--neon-inset-success);
+  --shadow-neon-inset-error: var(--neon-inset-error);
+  --shadow-neon-inset-warning: var(--neon-inset-warning);
+  --shadow-neon-inset-cyan: var(--neon-inset-cyan);
+  --shadow-step-inset-warning: var(--step-inset-warning);
+  --shadow-step-inset-cyan: var(--step-inset-cyan);
+  --shadow-step-selected: var(--step-selected-shadow);
+  --shadow-step-running-dot: var(--step-running-dot);
+  --shadow-progress-glow-primary: var(--progress-glow-primary);
+  --shadow-progress-glow-success: var(--progress-glow-success);
+  --shadow-progress-glow-error: var(--progress-glow-error);
+  --shadow-progress-glow-warning: var(--progress-glow-warning);
+  --shadow-toast-glow-success: var(--toast-glow-success);
+  --shadow-toast-glow-error: var(--toast-glow-error);
+  --shadow-toast-glow-warning: var(--toast-glow-warning);
+  --shadow-toast-glow-cyan: var(--toast-glow-cyan);
+  --shadow-glass: var(--glass-shadow);
+  --shadow-glass-toast: var(--glass-shadow-toast);
+  --shadow-kbd: var(--kbd-shadow);
+  --shadow-event-filter-active: var(--event-filter-active);
+  --shadow-breakpoint-glow: var(--breakpoint-glow);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: var(--radius);
+  --radius-lg: calc(var(--radius) + 4px);
+  --radius-xl: calc(var(--radius) + 8px);
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", "Fira Code", ui-monospace, monospace;
+}
+
+/* Base */
+* {
+  border-color: var(--border);
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans, "Inter", ui-sans-serif, system-ui, sans-serif);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Scrollbar - thin, magenta-tinted */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 0, 224, 0.15);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 0, 224, 0.3);
+}
+
+[data-theme="light"] ::-webkit-scrollbar-thumb {
+  background: rgba(214, 0, 192, 0.12);
+}
+
+[data-theme="light"] ::-webkit-scrollbar-thumb:hover {
+  background: rgba(214, 0, 192, 0.22);
+}
+
+/* Focus */
+*:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+/* Monospace data elements */
+.font-mono {
+  font-family: var(--font-mono, "JetBrains Mono", monospace);
+  font-feature-settings: "liga" 1;
+}
+
+/* Neon text utilities */
+.neon-text {
+  text-shadow: 0 0 10px currentColor, 0 0 20px currentColor;
+}
+
+.neon-text-subtle {
+  text-shadow: 0 0 8px rgba(255, 0, 224, 0.4);
+}
+
+.glow-border {
+  box-shadow: var(--glow-primary);
+}
+
+/* Brand gradient background */
+.bg-gradient-brand {
+  background: linear-gradient(135deg, rgba(255, 0, 224, 0.03) 0%, rgba(0, 240, 255, 0.02) 100%);
+}
+
+/* Status pulse animation */
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.animate-pulse-dot {
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+
+/* Smooth spin for loading */
+@keyframes spin-smooth {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.animate-spin-smooth {
+  animation: spin-smooth 1s linear infinite;
+}
+
+/* Toast slide in from right */
+@keyframes slide-in-right {
+  from { opacity: 0; transform: translateX(50px) scale(0.95); }
+  to { opacity: 1; transform: translateX(0) scale(1); }
+}
+
+.animate-slide-in-right {
+  animation: slide-in-right 0.2s ease-out;
+}
+
+/* Breakpoint glow - magenta/warning neon pulse for pending breakpoints */
+@keyframes breakpoint-glow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 0, 224, 0.04), 0 0 0 0 rgba(255, 215, 0, 0.02); }
+  50% { box-shadow: 0 0 14px 4px rgba(255, 0, 224, 0.12), 0 0 8px 2px rgba(255, 215, 0, 0.08); }
+}
+
+.animate-breakpoint-glow {
+  animation: breakpoint-glow 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* JSON tree expand fade-in */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-2px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Smooth transitions */
+.transition-panel { transition: all var(--transition-normal, 200ms ease-out); }
+.transition-expand { transition: height var(--transition-normal, 200ms ease-out), opacity var(--transition-fast, 150ms ease); }
+
+/* Card hover lift */
+.card-hover-lift {
+  transition: transform var(--transition-fast, 150ms ease), box-shadow var(--transition-fast, 150ms ease);
+}
+.card-hover-lift:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md, 0 2px 8px rgba(0,0,0,0.25));
+}
+
+/* Timeline bar gradient — uses brand CSS vars */
+.bg-gradient-timeline {
+  background: linear-gradient(90deg, var(--primary-muted) 0%, var(--secondary-muted) 100%);
+}
+
+/* Idle / wait time stripe pattern for timeline gaps */
+.bg-idle-stripes {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    transparent,
+    transparent 3px,
+    var(--pending-muted) 3px,
+    var(--pending-muted) 5px
+  );
+}
+
+/* Accessibility: respect user's motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .animate-pulse-dot,
+  .animate-spin-smooth,
+  .animate-slide-in-right,
+  .animate-breakpoint-glow,
+  .animate-pulse,
+  .animate-spin,
+  .animate-ping {
+    animation: none !important;
+  }
+
+  .card-hover-lift:hover {
+    transform: none;
+  }
+
+  .transition-panel,
+  .transition-expand {
+    transition: none;
+  }
+
+  /* Keep breakpoint glow visible but static */
+  .animate-breakpoint-glow {
+    box-shadow: 0 0 14px 4px rgba(255, 0, 224, 0.12), 0 0 8px 2px rgba(255, 215, 0, 0.08);
+  }
+}
