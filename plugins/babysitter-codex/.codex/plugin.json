@@ -1,7 +1,7 @@
 {
     "name":  "babysitter",
     "version":  "0.1.5",
-    "description":  "Babysitter command catalog and skill metadata for Codex CLI. Runtime orchestration is owned by an external supervisor, not Codex lifecycle hooks.",
+    "description":  "Compatibility alias for the Babysitter Codex command catalog. This file is packaged metadata for the skill bundle, not a native Codex plugin manifest.",
     "author":  "a5c.ai",
     "license":  "MIT",
     "runtimeCapabilities":  {
@@ -11,9 +11,12 @@
                                                              "config.toml",
                                                              "notify"
                                                          ],
-                                "requiresExternalSupervisor":  true,
+                                "babysitterRuntimeOwnsRunLoop":  true,
                                 "supportsBlockingHooks":  false,
-                                "supportsCustomSlashCommands":  false
+                                "supportsCustomSlashCommands":  false,
+                                "sessionBinding":  "best-effort-explicit-only",
+                                "legacyHookStubs":  "compatibility-only",
+                                "primaryTurnControl":  "babysitter-codex-turn"
                             },
     "commands":  [
                      {
@@ -124,6 +127,6 @@
                      "codex",
                      "babysitter",
                      "command-phrases",
-                     "plugin"
+                     "command-catalog"
                  ]
 }

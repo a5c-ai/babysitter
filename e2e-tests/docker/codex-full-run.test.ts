@@ -9,17 +9,21 @@ import {
 } from "./helpers-codex";
 
 const ROOT = path.resolve(__dirname, "../..");
-const hasOpenAiKey = Boolean(process.env.OPENAI_API_KEY);
-const describeCodex = hasOpenAiKey ? describe : describe.skip;
+const hasAzureProviderCreds = Boolean(
+  process.env.AZURE_OPENAI_API_KEY && process.env.AZURE_OPENAI_PROJECT_NAME,
+);
+const hasOpenAiProviderCreds = Boolean(process.env.OPENAI_API_KEY);
+const hasCodexProviderCreds = hasAzureProviderCreds || hasOpenAiProviderCreds;
+const describeCodex = hasCodexProviderCreds ? describe : describe.skip;
 
 beforeAll(() => {
-  if (!hasOpenAiKey) return;
+  if (!hasCodexProviderCreds) return;
   buildCodexImage(ROOT);
   startCodexContainer();
 }, 900_000);
 
 afterAll(() => {
-  if (!hasOpenAiKey) return;
+  if (!hasCodexProviderCreds) return;
   stopCodexContainer();
 });
 
@@ -28,15 +32,17 @@ describeCodex("Codex Docker E2E", () => {
     const codexVersion = dockerExec("codex --version").trim();
     const babysitterVersion = dockerExec("babysitter --version").trim();
     const skillManifest = dockerExec(`test -f ${CODEX_SKILL_DIR}/SKILL.md && echo ok`).trim();
-    const orchestratePath = dockerExec(`test -f ${CODEX_SKILL_DIR}/.codex/orchestrate.js && echo ok`).trim();
+    const commandCatalog = dockerExec(`test -f ${CODEX_SKILL_DIR}/.codex/command-catalog.json && echo ok`).trim();
+    const turnController = dockerExec(`test -f ${CODEX_SKILL_DIR}/.codex/turn-controller.js && echo ok`).trim();
 
     expect(codexVersion).toBeTruthy();
     expect(babysitterVersion).toMatch(/^\d+\.\d+\.\d+$/);
     expect(skillManifest).toBe("ok");
-    expect(orchestratePath).toBe("ok");
+    expect(commandCatalog).toBe("ok");
+    expect(turnController).toBe("ok");
   });
 
-  test("runs a full babysitter orchestration with real Codex, breakpoint yield, and hook logging", () => {
+  test("runs a full babysitter orchestration with real Codex through the turn controller path", () => {
     const result = dockerExec("node /app/e2e-tests/docker/codex-babysitter-full-runner.js", {
       timeout: 900_000,
     });

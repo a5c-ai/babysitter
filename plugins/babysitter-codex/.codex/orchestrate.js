@@ -1,6 +1,11 @@
 #!/usr/bin/env node
 'use strict';
 
+// Legacy compatibility wrapper only.
+// The primary Codex integration path is `babysitter-codex-turn` /
+// `.codex/turn-controller.js`, which keeps Codex in the user-facing
+// orchestration loop one turn at a time.
+
 /**
  * orchestrate.js â€” Main Node.js wrapper script for babysitter orchestration with Codex CLI.
  *
@@ -174,7 +179,7 @@ function resolveCodexSessionId() {
     process.env.BABYSITTER_SESSION_ID ||
     process.env.CODEX_THREAD_ID ||
     process.env.CODEX_SESSION_ID ||
-    `codex-${Date.now()}`
+    null
   );
 }
 
@@ -292,16 +297,19 @@ async function main() {
 
   console.log('\n[orchestrate] === session:init ===');
   let sessionData = {};
-  if (supports('session:init')) {
+  const requestedSessionId = resolveCodexSessionId();
+  if (supports('session:init') && requestedSessionId) {
     try {
       sessionData = initSession({
-        sessionId: resolveCodexSessionId(),
+        sessionId: requestedSessionId,
         stateDir,
       }) || {};
     } catch (e) {
       console.warn(`[orchestrate] session:init failed, continuing in compat mode: ${e.message}`);
       sessionData = {};
     }
+  } else if (supports('session:init')) {
+    console.log('[orchestrate] No explicit Codex session/thread ID was provided; skipping session:init.');
   } else {
     console.log('[orchestrate] session:init not supported by SDK; continuing in compat mode.');
   }

@@ -78,12 +78,12 @@ jobs:
       # NOTE: orchestration.test.ts (Anthropic Foundry) is disabled —
       # Foundry model is no longer provisioned.  Re-enable when restored.
 
-      - name: Run Pi workflow tests with Azure OpenAI (gated on secret)
-        if: env.AZURE_OPENAI_API_KEY != ''
+      - name: Run Pi workflow tests with Azure OpenAI (gated on configured provider)
+        if: ${{ secrets.AZURE_OPENAI_API_KEY != '' && vars.AZURE_OPENAI_PROJECT_NAME != '' }}
         env:
           AZURE_OPENAI_API_KEY: ${{ secrets.AZURE_OPENAI_API_KEY }}
-          AZURE_OPENAI_PROJECT_NAME: ${{ secrets.AZURE_OPENAI_PROJECT_NAME }}
-          AZURE_OPENAI_DEPLOYMENT: ${{ secrets.AZURE_OPENAI_DEPLOYMENT }}
+          AZURE_OPENAI_PROJECT_NAME: ${{ vars.AZURE_OPENAI_PROJECT_NAME }}
+          AZURE_OPENAI_DEPLOYMENT: ${{ vars.A5C_SELECTED_MODEL }}
         run: |
           set -euo pipefail
           npx vitest run --config e2e-tests/docker/vitest.config.ts \
@@ -104,7 +104,7 @@ jobs:
 
   codex-docker-e2e:
     name: Codex Docker E2E
-    if: ${{ secrets.OPENAI_API_KEY != '' }}
+    if: ${{ (secrets.AZURE_OPENAI_API_KEY != '' && vars.AZURE_OPENAI_PROJECT_NAME != '') || secrets.OPENAI_API_KEY != '' }}
     runs-on: ubuntu-latest
     timeout-minutes: 90
 
@@ -134,6 +134,13 @@ jobs:
 
       - name: Run Codex Docker full-run E2E
         env:
+          A5C_PROVIDER_NAME: ${{ vars.A5C_PROVIDER_NAME }}
+          A5C_SELECTED_CLI_COMMAND: ${{ vars.A5C_SELECTED_CLI_COMMAND }}
+          A5C_CLI_TOOL: ${{ vars.A5C_CLI_TOOL }}
+          A5C_SELECTED_MODEL: ${{ vars.A5C_SELECTED_MODEL }}
+          AZURE_OPENAI_API_KEY: ${{ secrets.AZURE_OPENAI_API_KEY }}
+          AZURE_OPENAI_PROJECT_NAME: ${{ vars.AZURE_OPENAI_PROJECT_NAME }}
+          AZURE_OPENAI_DEPLOYMENT: ${{ vars.A5C_SELECTED_MODEL }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           OPENAI_BASE_URL: ${{ secrets.OPENAI_BASE_URL }}
         run: |

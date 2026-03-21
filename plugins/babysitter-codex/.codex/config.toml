@@ -2,12 +2,12 @@
 #
 # This file documents the Codex surfaces babysitter actually relies on:
 # - project instructions via AGENTS.md / skills
-# - a writable .a5c state directory for the external supervisor
+# - a writable .a5c state directory for Codex-owned run state
 # - optional post-turn monitoring via notify
 #
 # Codex does not load the fictional legacy plugin-manifest or lifecycle-hook
 # sections that older revisions of this package used. Keep orchestration in the
-# external supervisor.
+# Codex turn loop plus the packaged turn-state helper.
 
 approval_policy = "on-request"
 sandbox_mode = "workspace-write"

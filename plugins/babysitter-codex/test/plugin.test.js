@@ -24,18 +24,24 @@ function test(name, fn) {
 // skill-loader.js tests
 // ============================================================================
 
-console.log('\nSkill Loader:');
+console.log('\nSkill Loader / Command Catalog:');
 
 const sl = require('../.codex/skill-loader');
 
-test('loadPlugin returns valid manifest', () => {
-  const plugin = sl.loadPlugin();
+test('loadCommandCatalog returns valid command catalog', () => {
+  const plugin = sl.loadCommandCatalog();
   assert.ok(plugin.name === 'babysitter');
   assert.ok(plugin.version === '0.1.5');
   assert.ok(Array.isArray(plugin.commands));
   assert.strictEqual(plugin.commands.length, 15);
   assert.ok(plugin.runtimeCapabilities);
   assert.strictEqual(plugin.runtimeCapabilities.supportsBlockingHooks, false);
+});
+
+test('loadPlugin remains as a compatibility alias', () => {
+  const plugin = sl.loadPlugin();
+  assert.ok(plugin);
+  assert.ok(Array.isArray(plugin.commands));
 });
 
 test('resolvePluginRoot prefers explicit argument', () => {

@@ -3,8 +3,47 @@
 const fs = require('fs');
 const path = require('path');
 
+function resolveStateDir(repoRoot) {
+  const root = repoRoot || process.cwd();
+  const override = process.env.BABYSITTER_STATE_DIR;
+  if (override) {
+    return path.isAbsolute(override) ? override : path.resolve(root, override);
+  }
+  return path.join(root, '.a5c');
+}
+
+function readActiveProcessLibraryState(repoRoot) {
+  const statePath = path.join(resolveStateDir(repoRoot), 'active', 'process-library.json');
+  if (!fs.existsSync(statePath)) return null;
+  try {
+    return JSON.parse(fs.readFileSync(statePath, 'utf8'));
+  } catch {
+    return null;
+  }
+}
+
+function resolveActiveBinding(repoRoot) {
+  const state = readActiveProcessLibraryState(repoRoot);
+  if (!state) return null;
+  const runId = process.env.BABYSITTER_RUN_ID;
+  const sessionId = process.env.BABYSITTER_SESSION_ID;
+  if (runId && state.runBindings && state.runBindings[runId]) {
+    return state.runBindings[runId];
+  }
+  if (sessionId && state.sessionBindings && state.sessionBindings[sessionId]) {
+    return state.sessionBindings[sessionId];
+  }
+  return state.defaultBinding || null;
+}
+
 function resolveProcessLibraryRoot(repoRoot) {
   const root = repoRoot || process.cwd();
+  const activeBinding = resolveActiveBinding(root);
+  if (activeBinding && activeBinding.dir) {
+    return path.isAbsolute(activeBinding.dir)
+      ? activeBinding.dir
+      : path.resolve(root, activeBinding.dir);
+  }
   const override = process.env.BABYSITTER_PROCESS_LIBRARY_ROOT;
   if (override) {
     return path.isAbsolute(override) ? override : path.resolve(root, override);

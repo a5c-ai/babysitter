@@ -6,5 +6,5 @@
 # routing Codex through the Claude-style SDK hook path.
 
 echo "{}"
-echo "[babysitter-codex] SessionStart hook is not supported on Codex; use explicit session binding in the external supervisor." >&2
+echo "[babysitter-codex] SessionStart hook is not supported on Codex; pass an explicit session/thread id when starting the run." >&2
 exit 0

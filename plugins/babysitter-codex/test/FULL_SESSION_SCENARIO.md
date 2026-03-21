@@ -25,7 +25,7 @@ node test/full-session-scenario.js --upstream-url https://github.com/a5c-ai/baby
 ### Automated pass criteria
 
 - Required SDK commands exist.
-- All 11 local skill directories contain `SKILL.md`.
+- All 15 local skill directories contain `SKILL.md`.
 - A new process is created under `.a5c/processes/full-session-scenario-process.js`.
 - A run is created and reaches `completed`.
 - At least one `breakpoint` task is emitted.

@@ -6,7 +6,7 @@ Version policy for `babysitter-codex`.
 - Current: `0.1.5`
 
 ## Node.js
-- Supported majors: `18`, `20`, `22`
+- Supported majors: `20`, `22`
 - Other versions: best effort, not guaranteed.
 
 ## Babysitter SDK
@@ -15,9 +15,10 @@ Version policy for `babysitter-codex`.
 
 ## Codex CLI
 - Minimum policy: `current stable` (explicit pin not enforced yet).
-- Session env compatibility:
-  - Primary: `CODEX_THREAD_ID`
-  - Fallback: `CODEX_SESSION_ID`
+- Session binding:
+  - Use an actual session/thread ID only when Codex or the caller provides one.
+  - Supported explicit inputs: `BABYSITTER_SESSION_ID`, `CODEX_THREAD_ID`, `CODEX_SESSION_ID`
+  - Never fabricate a session ID just to satisfy `session:init`.
 
 ## Enforcement
 - Machine-readable policy file: `config/compatibility-policy.json`

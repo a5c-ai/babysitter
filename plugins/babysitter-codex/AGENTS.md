@@ -12,12 +12,13 @@ command registration.
 
 ## Product Contract
 
-- The external babysitter supervisor owns orchestration, `.a5c` state,
-  breakpoint collection, and resume/yield behavior.
-- Codex participates as the coding agent plus optional `notify` telemetry
-  source.
+- The Babysitter SDK run/task loop owns orchestration and `.a5c` state.
+- Codex participates through skills, instructions, `config.toml`, and optional
+  `notify` telemetry.
 - If a stable Codex session/thread ID is available, pass it explicitly to
   `babysitter run:create --harness codex --session-id <id> --state-dir .a5c`.
+- Never fabricate a session ID just to satisfy `session:init`.
+- Compatibility shell hooks may exist in the package, but they are stubs only.
 
 ## UX Goals
 
@@ -25,8 +26,8 @@ command registration.
   `babysitter call ...` or explicit skill selection.
 - Optional `/babysitter:*` aliases may be shipped only as compatibility sugar;
   do not describe them as a native Codex feature.
-- Keep the runtime contract honest. If a feature is supervisor-only, document
-  it that way.
+- Keep the runtime contract honest. If a feature is runtime-only, document it
+  that way.
 
 ## Documentation Rules
 

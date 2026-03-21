@@ -13,6 +13,20 @@ const os = require('os');
 const SKILL_NAME = 'babysitter-codex';
 const PACKAGE_ROOT = path.resolve(__dirname, '..');
 const IS_WIN = process.platform === 'win32';
+const INSTALL_ENTRIES = [
+  { source: 'SKILL.md', required: true },
+  { source: 'AGENTS.md', required: true },
+  { source: 'README.md', required: true },
+  { source: 'agents', required: true },
+  { source: 'bin', required: true },
+  { source: '.codex', required: true },
+  { source: 'commands', required: true },
+  { source: 'config', required: true },
+  { source: 'docs', required: true },
+  { source: 'scripts', required: true },
+  { source: 'upstream', required: true },
+  { source: 'babysitter.lock.json', required: true },
+];
 
 function getCodexHome() {
   if (process.env.CODEX_HOME) return process.env.CODEX_HOME;
@@ -41,6 +55,29 @@ function copyRecursive(src, dest) {
   }
 }
 
+function installEntry(skillDir, entry) {
+  const src = path.join(PACKAGE_ROOT, entry.source);
+  const dest = path.join(skillDir, entry.source);
+  if (!fs.existsSync(src)) {
+    if (entry.required) {
+      throw new Error(`required install payload is missing: ${src}`);
+    }
+    return false;
+  }
+  copyRecursive(src, dest);
+  console.log(`[babysitter-codex]   ${entry.source}${fs.statSync(src).isDirectory() ? '/' : ''}`);
+  return true;
+}
+
+function verifyInstalledPayload(skillDir) {
+  const missing = INSTALL_ENTRIES
+    .map((entry) => entry.source)
+    .filter((source) => !fs.existsSync(path.join(skillDir, source)));
+  if (missing.length > 0) {
+    throw new Error(`installed skill is incomplete; missing: ${missing.join(', ')}`);
+  }
+}
+
 function main() {
   const codexHome = getCodexHome();
   const skillDir = path.join(codexHome, 'skills', SKILL_NAME);
@@ -48,39 +85,20 @@ function main() {
   console.log(`[babysitter-codex] Installing skill to ${skillDir}`);
 
   try {
-    // Create the skill directory
     fs.mkdirSync(skillDir, { recursive: true });
 
-    // Copy SKILL.md (required entry point)
-    const skillMd = path.join(PACKAGE_ROOT, 'SKILL.md');
-    if (fs.existsSync(skillMd)) {
-      fs.copyFileSync(skillMd, path.join(skillDir, 'SKILL.md'));
-      console.log('[babysitter-codex]   SKILL.md');
+    for (const entry of INSTALL_ENTRIES) {
+      installEntry(skillDir, entry);
     }
 
-    // Copy agents/ directory
-    const agentsDir = path.join(PACKAGE_ROOT, 'agents');
-    if (fs.existsSync(agentsDir)) {
-      copyRecursive(agentsDir, path.join(skillDir, 'agents'));
-      console.log('[babysitter-codex]   agents/');
-    }
+    verifyInstalledPayload(skillDir);
 
-    // Copy .codex/ directory (runtime modules, skills, hooks)
-    const codexDir = path.join(PACKAGE_ROOT, '.codex');
-    if (fs.existsSync(codexDir)) {
-      copyRecursive(codexDir, path.join(skillDir, '.codex'));
-      console.log('[babysitter-codex]   .codex/');
-
-      if (!IS_WIN) {
-        const hookDir = path.join(skillDir, '.codex', 'hooks');
-        const executableHooks = [
-          'babysitter-session-start.sh',
-          'babysitter-stop-hook.sh',
-          'loop-control.sh',
-        ];
-        for (const name of executableHooks) {
+    if (!IS_WIN) {
+      const hookDir = path.join(skillDir, '.codex', 'hooks');
+      if (fs.existsSync(hookDir)) {
+        for (const name of fs.readdirSync(hookDir)) {
           const hookPath = path.join(hookDir, name);
-          if (fs.existsSync(hookPath)) {
+          if (name.endsWith('.sh') && fs.statSync(hookPath).isFile()) {
             fs.chmodSync(hookPath, 0o755);
           }
         }
@@ -91,9 +109,8 @@ function main() {
     console.log('[babysitter-codex] Installation complete!');
     console.log('[babysitter-codex] Restart Codex to pick up the new skill.');
   } catch (err) {
-    // Non-fatal: don't break npm install if skill copy fails
-    console.warn(`[babysitter-codex] Warning: Could not install skill files: ${err.message}`);
-    console.warn('[babysitter-codex] You can manually copy files to ~/.codex/skills/babysitter-codex/');
+    console.error(`[babysitter-codex] Failed to install skill files: ${err.message}`);
+    process.exitCode = 1;
   }
 }
 

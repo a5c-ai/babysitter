@@ -1,6 +1,6 @@
 {
   "name": "@a5c/babysitter-codex-content",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "private": true,
   "description": "Content pack with upstream babysitter process/skill/reference library",
   "files": [

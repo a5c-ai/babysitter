@@ -1,7 +1,7 @@
 {
   "name": "@a5c/babysitter-codex-runtime",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "private": true,
-  "description": "Runtime adapter, hooks, and orchestration glue for babysitter-codex",
-  "main": "../../.codex/orchestrate.js"
+  "description": "Runtime adapter and turn-state control helper for babysitter-codex",
+  "main": "../../.codex/turn-controller.js"
 }

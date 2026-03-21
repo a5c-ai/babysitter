@@ -5,6 +5,17 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 
+function resolvePackageRoot() {
+  const explicit = process.argv.indexOf('--root');
+  if (explicit >= 0 && process.argv[explicit + 1]) {
+    return path.resolve(process.argv[explicit + 1]);
+  }
+  if (process.env.BABYSITTER_PACKAGE_ROOT) {
+    return path.resolve(process.env.BABYSITTER_PACKAGE_ROOT);
+  }
+  return path.resolve(__dirname, '..');
+}
+
 function sha256File(filePath) {
   const h = crypto.createHash('sha256');
   h.update(fs.readFileSync(filePath));
@@ -12,7 +23,7 @@ function sha256File(filePath) {
 }
 
 function main() {
-  const root = process.cwd();
+  const root = resolvePackageRoot();
   const manifestPath = path.join(root, 'config', 'content-manifest.json');
   if (!fs.existsSync(manifestPath)) {
     throw new Error(`missing manifest: ${manifestPath}`);

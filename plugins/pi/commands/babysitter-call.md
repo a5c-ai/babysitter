@@ -25,6 +25,19 @@ This command initialises a fresh babysitter run with the given prompt, associate
 3. Runs the first orchestration iteration (`iterate`).
 4. Injects a continuation prompt if effects are pending.
 
+## Implementation Notes
+
+This command doc is the right place for low-level Babysitter runtime mechanics.
+The top-level plugin README should stay at the `/babysitter:*` command surface.
+
+- The command implementation may call raw Babysitter runtime primitives such as
+  harness-aware `run:create`, iteration, status inspection, and result posting.
+- Result values are written to `tasks/<effectId>/output.json` and then committed
+  through `task:post`; the implementation must never write `result.json`
+  directly.
+- If the harness exposes a stronger native binding path than explicit session
+  association, the implementation should prefer that path.
+
 ## Notes
 
 - Only one run can be active per session. Starting a new run while one is active will replace it.

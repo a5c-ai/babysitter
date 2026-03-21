@@ -1,6 +1,6 @@
 /**
  * @process assimilation/harness/pi
- * @description Deep integration of babysitter SDK into oh-my-pi (can1357/oh-my-pi) as a first-class, mandatory orchestration layer. Replaces built-in task management, auto-binds sessions, adds TUI widgets, creates CLI harness adapter, and rewires the entire agent experience around babysitter orchestration.
+ * @description Deep integration of babysitter SDK into oh-my-pi (can1357/oh-my-pi) as a first-class orchestration layer using the real extension, plugin, tool, and TUI surfaces. Session start is initialization only; later loop turns should use the session and event context that oh-my-pi already provides.
  * @inputs { projectDir: string, targetQuality: number, maxIterations: number }
  * @outputs { success: boolean, integrationFiles: string[], finalQuality: number, iterations: number }
  */
@@ -21,12 +21,12 @@ import {
  * This is NOT a light plugin integration. This makes babysitter the mandatory,
  * first-class orchestration backbone of oh-my-pi:
  *
- *   1. Every new session auto-associates with babysitter CLI hooks
+ *   1. Every new session initializes babysitter state without relying on a startup bridge hack
  *   2. Built-in task/sub-agent management is bypassed in favor of babysitter effects
  *   3. TUI widgets show babysitter run status, task progress, iteration count
  *   4. A new CLI harness adapter ("pi") is created for `run:create --harness pi`
  *   5. Custom tools, commands, and AGENTS.md make babysitter seamless
- *   6. The agent_end + followUp loop driver replaces manual iteration
+ *   6. The agent_end + followUp loop driver replaces manual iteration while using native event context
  *
  * Architecture targets oh-my-pi (can1357/oh-my-pi) which extends Pi Coding Agent with:
  *   - Sub-agents/task tool with parallel execution + background jobs
@@ -68,7 +68,7 @@ export async function process(inputs, ctx) {
     harnessName: 'oh-my-pi',
     upstreamSource: 'official oh-my-pi package and plugin ecosystem plus the canonical babysitter plugin repo',
     distributionTarget: 'Pi package install flow, extension hooks, commands, skills, and runtime sync path',
-    loopModel: 'agent_end and followUp continuation with explicit validation of user-yield reentry'
+    loopModel: 'agent_end and followUp continuation with explicit validation of user-yield reentry, using native session context rather than a startup hook bridge'
   });
 
   integrationFiles.push(...(researchResult.artifactsCreated || []));
@@ -326,7 +326,7 @@ export async function process(inputs, ctx) {
   let runtimeValidationResult = await ctx.task(runHarnessRuntimeValidationTask, {
     projectDir,
     harnessName: 'oh-my-pi',
-    loopModel: 'agent_end and followUp continuation with explicit validation of user-yield reentry',
+    loopModel: 'agent_end and followUp continuation with explicit validation of user-yield reentry, using native session context rather than a startup hook bridge',
     research: researchResult,
     docs: docsResult,
     integrationFiles,
@@ -384,7 +384,7 @@ export async function process(inputs, ctx) {
     runtimeValidationResult = await ctx.task(runHarnessRuntimeValidationTask, {
       projectDir,
       harnessName: 'oh-my-pi',
-      loopModel: 'agent_end and followUp continuation with explicit validation of user-yield reentry',
+      loopModel: 'agent_end and followUp continuation with explicit validation of user-yield reentry, using native session context rather than a startup hook bridge',
       research: researchResult,
       docs: docsResult,
       integrationFiles,
@@ -444,16 +444,17 @@ export const analyzeOmpDeepTask = defineTask('analyze-omp-deep', (args, taskCtx)
       instructions: [
         'Check omp installation: `omp --version`, `which omp`, npm global packages',
         'Check babysitter SDK: `babysitter version --json`',
-        'Check Node.js version (>= 18 required)',
+        'Record the installed Node.js version and compare it to current package requirements instead of assuming an older minimum',
         'Analyze oh-my-pi task system:',
         '  - Does the task tool exist? Check for task/sub-agent support',
-        '  - What agents are bundled (explore, plan, designer, reviewer, task, quick_task)?',
+        '  - What built-in agents or shipped defaults exist (explore, plan, designer, reviewer, task, quick_task)?',
         '  - How does TaskTool.execute work? (discovery, spawn policy, recursion depth)',
         'Analyze oh-my-pi todo tool:',
         '  - Does the todo widget exist? (phases, task states, Ctrl+T toggle)',
         '  - How does it integrate with the TUI?',
         'Analyze extension API:',
         '  - What events are available? (session_start, agent_end, tool_call, etc.)',
+        '  - Which later callbacks already include session identity or handles so we do not need session_start as a synthetic bridge?',
         '  - Can we intercept/block tool calls? (tool_call returns { block: true })',
         '  - Can we modify context? (context event returns { messages })',
         '  - Can we inject messages? (sendHookMessage, appendEntry)',
@@ -464,6 +465,7 @@ export const analyzeOmpDeepTask = defineTask('analyze-omp-deep', (args, taskCtx)
         '  - Overlays and notifications',
         'Analyze plugin system:',
         '  - omp plugin install/list/link/enable/disable',
+        '  - install or sync from GitHub or workspace source for operator docs',
         '  - Plugin manifest (package.json.omp or .pi)',
         '  - Feature toggles, capability resolution',
         'Analyze custom tool system:',
@@ -556,7 +558,7 @@ export const scaffoldExtensionSkeletonTask = defineTask('scaffold-extension-skel
       context: { projectDir: args.projectDir, analysis: args.analysis },
       instructions: [
         `Create ${args.projectDir}/extensions/babysitter/index.ts -- main entry point`,
-        'Export default function(pi: ExtensionAPI) with event subscription stubs:',
+        'Export default function(pi: ExtensionAPI) with event subscription stubs discovered in analysis:',
         '  pi.on("session_start", ...) pi.on("agent_end", ...) pi.on("session_shutdown", ...)',
         '  pi.on("before_agent_start", ...) pi.on("tool_call", ...) pi.on("tool_result", ...)',
         '  pi.on("input", ...) pi.on("context", ...)',
@@ -608,6 +610,7 @@ export const implementSessionAutoBindTask = defineTask('implement-session-auto-b
         '  4. Store session state using pi.appendEntry() for persistence across restarts',
         '  5. Set ctx.ui.setStatus("babysitter", "Session initialized")',
         '  6. Set ctx.ui.setWidget("babysitter", ["Babysitter: ready"])',
+        '  7. Do not use session_start as a fake bridge for later loop callbacks when agent_end or session objects already carry the current identity',
         '',
         'On session_before_switch (fires before /new or /resume):',
         '  - Check for active run; if active, warn user and offer to save state',
@@ -623,7 +626,7 @@ export const implementSessionAutoBindTask = defineTask('implement-session-auto-b
         'Also implement state file management:',
         '  readState(stateDir): parse markdown state file',
         '  writeState(stateDir, state): atomic write with tmp+rename',
-        '  State: { sessionId, runId, iteration, maxIterations, iterationTimes[], startedAt }',
+        '  State: { sessionId, runId, iteration, maxIterations, iterationTimes[], startedAt, followUpCapable, lastNativeSessionHandle }',
         '',
         'Wire into the main extension index.ts',
         'Return list of files modified'
@@ -656,7 +659,7 @@ export const implementHarnessAdapterTask = defineTask('implement-harness-adapter
         '',
         'The adapter should handle:',
         '  1. Session initialization: call session:init with omp session ID',
-        '  2. Session association: bind the run to the current omp session',
+        '  2. Prefer native harness binding to the current omp session; only use explicit association if the researched pi harness surface truly lacks first-class binding',
         '  3. State file management: write/read state in the plugin state directory',
         '  4. Iteration message generation: build omp-specific continuation prompts',
         '  5. Completion detection: scan for <promise>PROOF</promise> tags',
@@ -695,7 +698,7 @@ export const implementCliWrapperTask = defineTask('implement-cli-wrapper', (args
         `Create ${args.projectDir}/extensions/babysitter/cli-wrapper.ts`,
         '',
         'Implement runBabysitterCli(command, args, options) that:',
-        '  1. Detects babysitter CLI path (global, npx fallback)',
+        '  1. Detects the active babysitter runtime path in researched order: synced process-library wrapper or project-local install first, then documented package-manager or global fallback if needed',
         '  2. Spawns child process with JSON output mode',
         '  3. Parses JSON stdout into structured result',
         '  4. Handles errors (exit code != 0, parse failures, timeouts)',
@@ -741,10 +744,10 @@ export const implementLoopDriverTask = defineTask('implement-loop-driver', (args
         `Edit loop-driver.ts at ${args.projectDir}/extensions/babysitter/loop-driver.ts`,
         '',
         'oh-my-pi does NOT have a Stop hook that blocks exit like Claude Code.',
-        'Instead, agent_end fires when the LLM finishes. We use session.followUp() to continue.',
+        'Instead, agent_end fires when the LLM finishes. We use the current session handle and session.followUp() to continue.',
         '',
         'agent_end handler:',
-        '  1. Read session state (sessionId, runId, iteration, etc.)',
+        '  1. Read current event or session context first, then session state (sessionId, runId, iteration, etc.)',
         '  2. If no active run -> return (do nothing)',
         '  3. Scan last agent output for <promise>VALUE</promise> completion proof',
         '  4. If completion proof found:',
@@ -761,6 +764,7 @@ export const implementLoopDriverTask = defineTask('implement-loop-driver', (args
         '        - Pending effects list with instructions',
         '        - Reminder of orchestration protocol',
         '     e. Inject via session.followUp(continuationPrompt)',
+        '  8. Never depend on session_start breadcrumbs for the current session identity when agent_end already gives you the session handle',
         '',
         'extractPromiseTag(text): regex for <promise>([^<]+)</promise>',
         '',
@@ -847,10 +851,8 @@ export const implementEffectMappingTask = defineTask('implement-effect-mapping',
         '    - Use model roles: pi/smol for quick, pi/slow for complex',
         '    - Support background jobs for parallel effects if available',
         '',
-        '  node: Execute via bash tool: node <entry> <args>',
-        '    - Timeout: BABYSITTER_NODE_TASK_TIMEOUT (default 15min)',
-        '',
         '  shell: Execute via bash tool: <command>',
+        '    - If a task needs local code execution, keep the public effect kind as shell or agent; do not generate public node effects',
         '',
         '  breakpoint: Use oh-my-pi ask tool or ctx.ui.confirm',
         '    - Present question with explicit Approve/Reject options',
@@ -1237,7 +1239,7 @@ export const implementInstallScriptsTask = defineTask('implement-install-scripts
           `Create ${args.projectDir}/scripts/preuninstall.js:`,
           '  Cleanup session state, warn about active runs',
           `Create ${args.projectDir}/scripts/setup.sh:`,
-          '  Full setup: install plugin via omp plugin install from the upstream package or GitHub source, run postinstall, smoke test, and verify the followUp loop stays active after yielding to the user',
+          '  Full setup: install plugin via omp plugin install from the upstream package or GitHub source, run postinstall, run preflight checks, and verify the followUp loop stays active after yielding to the user without relying on session_start as a context bridge',
           'Handle cross-platform (Windows/macOS/Linux)',
           'Return list of files created'
         ],
@@ -1297,6 +1299,7 @@ export const runTestsTask = defineTask('run-tests', (args, taskCtx) => ({
       task: 'Create and run comprehensive tests for the babysitter-pi deep integration',
       context: { projectDir: args.projectDir, integrationFiles: args.integrationFiles, analysis: args.analysis },
       instructions: [
+        'Treat this task as local preflight coverage; the shared runtime validation task is responsible for proving the real harness loop, user-yield continuation, active process-library root usage, and operator install path.',
         `Create test files in ${args.projectDir}/test/ if they don't exist:`,
         '',
         'integration.test.js (package/structure tests):',
@@ -1310,7 +1313,7 @@ export const runTestsTask = defineTask('run-tests', (args, taskCtx) => ({
         'harness.test.js (core functionality):',
         '  7. CLI wrapper exports all convenience functions',
         '  8. Session state read/write is atomic',
-        '  9. Effect executor handles all 7 kinds',
+        '  9. Effect executor handles all canonical public effect kinds and orchestrator delegation paths',
         '  10. Result poster writes output.json (never result.json)',
         '  11. Guards detect max iterations correctly',
         '  12. Guards detect runaway (fast iterations)',

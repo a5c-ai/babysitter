@@ -7,6 +7,8 @@ const crypto = require('crypto');
 
 const ROOT = process.cwd();
 const TARGETS = [
+  '.codex/command-catalog.json',
+  '.codex/plugin.json',
   'upstream/babysitter/plugin.json',
   'upstream/babysitter/commands',
   'upstream/babysitter/skills',

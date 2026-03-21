@@ -1,6 +1,6 @@
 /**
  * @process assimilation/harness/antigravity
- * @description Orchestrate babysitter SDK integration into Google Antigravity. Sets up SKILL.md, MCP server config, Rule definition, Workflow pipeline, and multi-agent dispatch for parallel effects.
+ * @description Orchestrate babysitter SDK integration into Google Antigravity by researching the real skill, workflow, rule, and MCP surfaces first, then adapting the canonical babysit contract onto those host-native entry points without inventing unsupported extension layers.
  * @inputs { projectDir: string, targetQuality: number, maxIterations: number }
  * @outputs { success: boolean, integrationFiles: string[], finalQuality: number, iterations: number }
  */
@@ -23,9 +23,9 @@ import {
  * Integrates the babysitter SDK orchestration loop into Google Antigravity's
  * agent-first IDE by producing all required extension artifacts:
  *   - SKILL.md with scripts/ and references/
- *   - MCP server config (mcp_config.json) for babysitter CLI tools
- *   - Rule for orchestration discipline (.agents/babysitter-loop.md)
- *   - Workflow for /babysit command entry point
+ *   - MCP server config for babysitter CLI tools
+ *   - Rule for orchestration discipline
+ *   - Workflow for the researched /babysit command entry point
  *   - Multi-agent dispatch mapping for parallel effect execution
  *   - Artifact-based breakpoint review
  *   - Browser integration for e2e quality gates
@@ -344,13 +344,15 @@ export const analyzeProjectTask = defineTask('analyze-project', (args, taskCtx) 
         projectDir: args.projectDir
       },
       instructions: [
-        'Check for .agent/skills/ directory and list existing skills',
-        'Check for .agents/ directory and list existing rules',
-        'Check for mcp_config.json or mcp_servers.json',
+        'Determine the actual Antigravity repo-local paths for skills, workflows, rules, and command definitions instead of assuming one fixed directory layout',
+        'Check for any existing skill directories and list existing skills',
+        'Check for the real rules or workflow directories and list existing rule or workflow files',
+        'Check for mcp_config.json, mcp_servers.json, or any current Antigravity MCP config path',
         'Identify preferred model from Antigravity config (Gemini, Claude, GPT, etc.)',
         'Check if babysitter SDK is already installed (npm ls @a5c-ai/babysitter-sdk)',
         'Identify project type (language, framework, package manager)',
         'Check for existing .a5c/ directory from prior babysitter usage',
+        'Document which Antigravity surface actually resumes the loop after user yield: workflow rerun, command entry, rule-governed follow-up, or another researched mechanism',
         'Return structured analysis of the project state'
       ],
       outputFormat: 'JSON with existingSkills (array), existingRules (array), mcpConfig (object|null), preferredModel (string), sdkInstalled (boolean), projectType (object), hasPriorBabysitter (boolean)'
@@ -402,12 +404,12 @@ export const scaffoldSkillTask = defineTask('scaffold-skill', (args, taskCtx) =>
         analysis: args.analysis
       },
       instructions: [
-        'Create .agent/skills/babysitter/SKILL.md with semantic trigger descriptions',
+        'Create the babysitter SKILL.md under the actual skill directory discovered during analysis rather than assuming .agent/skills blindly',
         'Include full orchestration loop instructions in SKILL.md',
-        'Create scripts/install.sh to install babysitter SDK globally',
+        'Create scripts/install.sh to install or sync the babysitter runtime using the researched operator path from the canonical repo, not a global-only shortcut',
         'Create scripts/iterate.sh to drive one orchestration iteration',
         'Create scripts/check-status.sh to verify run state and guard against runaway loops',
-        'Create references/effect-kinds.md documenting agent, node, shell, breakpoint, sleep effects',
+        'Create references/effect-kinds.md documenting agent, skill, shell, breakpoint, and sleep effects and explicitly rejecting node effects',
         'Create references/completion-proof.md explaining the SHA-256 completion secret protocol',
         'Ensure SKILL.md references the MCP server tools by name',
         'Include session state management instructions in SKILL.md',
@@ -448,10 +450,10 @@ export const scaffoldMcpConfigTask = defineTask('scaffold-mcp-config', (args, ta
         existingMcpConfig: args.analysis.mcpConfig
       },
       instructions: [
-        'Create or merge into mcp_config.json at project root',
+        'Create or merge into the real Antigravity MCP config path discovered during analysis',
         'Register babysitter as stdio MCP server: command=babysitter, transport=stdio',
         'Expose tools: run:create, run:iterate, run:status, run:events, task:list, task:post, task:show, session:init, session:resume, session:state, session:check-iteration, health, version',
-        'Prefer harness-native run:create binding and only document explicit session association as a fallback external mode',
+        'Prefer harness-native run:create binding and, if that is missing, document the SDK or CLI gap plus a secondary external association workflow instead of presenting association as the default path',
         'Set --runs-dir flag to .a5c/runs for consistency',
         'Preserve any existing MCP server entries',
         'Include environment variable passthrough for BABYSITTER_* vars',
@@ -492,7 +494,7 @@ export const scaffoldRuleTask = defineTask('scaffold-rule', (args, taskCtx) => (
         analysis: args.analysis
       },
       instructions: [
-        'Create .agents/babysitter-loop.md as an always-on rule',
+        'Create the babysitter orchestration rule in the actual Antigravity rule location discovered during analysis',
         'Rule MUST prevent agent from declaring task complete without completion proof',
         'Rule MUST enforce iterate -> execute -> post -> repeat cycle',
         'Rule MUST require checking run:status before exiting a babysitter session',
@@ -537,12 +539,12 @@ export const scaffoldWorkflowTask = defineTask('scaffold-workflow', (args, taskC
         analysis: args.analysis
       },
       instructions: [
-        'Create .agents/babysit.md as a workflow triggered by /babysit command',
-        'Workflow step 1: Install babysitter SDK if not present (scripts/install.sh)',
+        'Create the /babysit workflow in the actual Antigravity workflow or command location discovered during analysis',
+        'Workflow step 1: Install or sync the babysitter runtime if not present (scripts/install.sh)',
         'Workflow step 2: Call MCP session:init to initialize babysitter session',
         'Workflow step 3: Call MCP run:create with user-provided process-id, inputs, and the harness binding path when available',
-        'Workflow step 4: Only if Antigravity lacks first-class binding, enter the documented fallback session association mode',
-        'Workflow step 5: Enter orchestration loop, post results with output.json + task:post, then yield so the harness continuation path resumes the next iteration',
+        'Workflow step 4: Only if Antigravity lacks first-class binding, enter the documented secondary external association workflow and record the gap explicitly',
+        'Workflow step 5: Enter orchestration loop, post results with output.json + task:post, then yield so the researched Antigravity continuation path resumes the next iteration',
         'Include parameter prompting for process-id and inputs',
         'Support --process-id and --inputs flags for non-interactive usage',
         'Return list of files created'
@@ -660,20 +662,21 @@ export const implementBreakpointArtifactsTask = defineTask('implement-breakpoint
 
 export const implementBrowserGatesTask = defineTask('implement-browser-gates', (args, taskCtx) => ({
   kind: 'agent',
-  title: 'Implement browser-based e2e quality gates',
-  description: 'Leverage Antigravity integrated browser for automated quality verification',
+  title: 'Implement browser-based e2e quality gates when Antigravity actually exposes them',
+  description: 'Use the researched Antigravity browser or UI automation surface when it exists, otherwise make browser gates optional',
 
   agent: {
     name: 'general-purpose',
     prompt: {
       role: 'test automation engineer with browser integration expertise',
-      task: 'Implement e2e quality gates using Antigravity integrated headless Chrome browser',
+      task: 'Implement e2e quality gates using the real Antigravity browser or UI automation surface if the harness actually provides one',
       context: {
         projectDir: args.projectDir,
         analysis: args.analysis
       },
       instructions: [
-        'Create scripts/browser-gate.sh to run e2e tests via Antigravity browser',
+        'First confirm from analysis that Antigravity exposes a browser or UI automation surface; do not invent one',
+        'Create scripts/browser-gate.sh only when such a browser surface is real and supported',
         'Support screenshot comparison for visual regression testing',
         'Support DOM assertion checking for functional verification',
         'Integrate browser gates as a verification step in the orchestration loop',
@@ -760,7 +763,7 @@ export const implementModelAgnosticTask = defineTask('implement-model-agnostic',
 export const testIntegrationTask = defineTask('test-integration', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Test integration artifacts',
-  description: 'Validate all generated files for correctness and completeness',
+  description: 'Run preflight validation on generated files and researched host wiring before shared runtime validation',
 
   agent: {
     name: 'general-purpose',
@@ -773,6 +776,7 @@ export const testIntegrationTask = defineTask('test-integration', (args, taskCtx
         analysis: args.analysis
       },
       instructions: [
+        'Treat this task as preflight validation only; the shared runtime validation task is responsible for proving the real harness loop, user-yield continuation, and active process-library use',
         'Verify SKILL.md has valid markdown and all required sections',
         'Verify mcp_config.json is valid JSON and references correct babysitter command',
         'Verify .agents/babysitter-loop.md rule is well-formed',
@@ -832,14 +836,14 @@ export const verifyOrchestrationLoopTask = defineTask('verify-orchestration-loop
         analysis: args.analysis
       },
       instructions: [
-        'Research and use the real Antigravity plugin install and workflow activation path before validation begins',
+        'Research and use the real Antigravity install, workflow, and skill activation path before validation begins',
         'Validate /babysit workflow activation through the actual harness entry point',
-        'Prefer run:create with harness-native binding and treat explicit session association only as a fallback external mode',
+        'Prefer run:create with harness-native binding and, if that is missing, record the SDK or CLI gap and exercise the documented secondary external association workflow',
         'Verify run:iterate produces expected pending effects',
         'Verify task:list returns correct pending tasks',
         'Verify Agent Manager dispatch routes to the right sub-agents while preserving agent or skill public effect kinds',
         'Verify task:post resolves effects using output.json rather than direct result.json writes',
-        'Verify yield back to the user still returns control to the orchestration loop on the next harness callback',
+        'Verify yield back to the user still returns control to the orchestration loop on the next researched workflow, command, or callback path',
         'Verify run:status reports completion with the exact completion proof contract',
         'Verify the adapted skill still preserves the important canonical babysit instructions',
         'Verify the rule catches premature exit attempts',

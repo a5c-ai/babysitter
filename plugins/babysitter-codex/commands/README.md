@@ -1,6 +1,8 @@
 # Command Docs
 
-This folder mirrors the upstream Babysitter command-doc structure for the Codex plugin.
+This folder mirrors the upstream Babysitter command-doc structure for the
+Codex skill bundle and integration package. It is not evidence of a native
+Codex plugin manifest model.
 
 ## Commands
 

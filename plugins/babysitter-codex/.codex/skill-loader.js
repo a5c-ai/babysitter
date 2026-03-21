@@ -3,28 +3,39 @@ const fs = require('fs');
 const path = require('path');
 
 const CODEX_DIR = path.resolve(__dirname);
+const COMMAND_CATALOG_PATH = path.join(CODEX_DIR, 'command-catalog.json');
 const PLUGIN_JSON_PATH = path.join(CODEX_DIR, 'plugin.json');
 
-let _pluginCache = null;
+let _catalogCache = null;
+
+function loadCommandCatalog() {
+  if (_catalogCache) return _catalogCache;
+  const candidates = [COMMAND_CATALOG_PATH, PLUGIN_JSON_PATH];
+  for (const candidate of candidates) {
+    try {
+      _catalogCache = JSON.parse(fs.readFileSync(candidate, 'utf8'));
+      return _catalogCache;
+    } catch (_) {
+      // Try the next compatibility path.
+    }
+  }
+  _catalogCache = { commands: [], skills: [], hooks: {} };
+  return _catalogCache;
+}
 
 function loadPlugin() {
-  if (_pluginCache) return _pluginCache;
-  try {
-    _pluginCache = JSON.parse(fs.readFileSync(PLUGIN_JSON_PATH, 'utf8'));
-  } catch (err) {
-    _pluginCache = { commands: [], skills: [], hooks: {} };
-  }
-  return _pluginCache;
+  return loadCommandCatalog();
 }
 
 /**
- * Resolve plugin root for SDK commands that require --plugin-root.
+ * Resolve the packaged Babysitter metadata root for SDK commands that still
+ * require --plugin-root terminology.
  * Resolution order:
  * 1) explicit options.pluginRoot
  * 2) CODEX_PLUGIN_ROOT env
  * 3) CLAUDE_PLUGIN_ROOT env
- * 4) this package's own .codex directory (if plugin.json exists)
- * 5) current working directory .codex (if plugin.json exists)
+ * 4) this package's own .codex directory (if command-catalog/plugin metadata exists)
+ * 5) current working directory .codex (if command-catalog/plugin metadata exists)
  *
  * @param {Object} [options]
  * @param {string} [options.pluginRoot]
@@ -41,10 +52,14 @@ function resolvePluginRoot(options = {}) {
   if (fromClaudeEnv) return path.resolve(fromClaudeEnv);
 
   const packageCodexDir = CODEX_DIR;
-  if (fs.existsSync(path.join(packageCodexDir, 'plugin.json'))) return packageCodexDir;
+  if (fs.existsSync(path.join(packageCodexDir, 'command-catalog.json')) || fs.existsSync(path.join(packageCodexDir, 'plugin.json'))) {
+    return packageCodexDir;
+  }
 
   const cwdCodexDir = path.join(process.cwd(), '.codex');
-  if (fs.existsSync(path.join(cwdCodexDir, 'plugin.json'))) return cwdCodexDir;
+  if (fs.existsSync(path.join(cwdCodexDir, 'command-catalog.json')) || fs.existsSync(path.join(cwdCodexDir, 'plugin.json'))) {
+    return cwdCodexDir;
+  }
 
   return null;
 }
@@ -53,7 +68,7 @@ function resolvePluginRoot(options = {}) {
  * Build alias map: alias → canonical command name.
  */
 function buildAliasMap() {
-  const plugin = loadPlugin();
+  const plugin = loadCommandCatalog();
   const map = {};
   for (const cmd of plugin.commands || []) {
     // Canonical name maps to itself
@@ -102,7 +117,7 @@ function resolveCommand(input) {
  * Get the SKILL.md file path for a command.
  */
 function getSkillPath(commandName) {
-  const plugin = loadPlugin();
+  const plugin = loadCommandCatalog();
   const canonical = resolveCommandName(commandName) || commandName;
   const cmd = (plugin.commands || []).find(c => c.name === canonical);
   if (!cmd) return null;
@@ -139,7 +154,7 @@ function getSkillContent(commandName) {
  * List all registered commands with metadata.
  */
 function listCommands() {
-  const plugin = loadPlugin();
+  const plugin = loadCommandCatalog();
   return (plugin.commands || []).map(cmd => ({
     name: cmd.name,
     description: cmd.description || '',
@@ -187,6 +202,7 @@ function suggestCommand(input) {
 }
 
 module.exports = {
+  loadCommandCatalog,
   loadPlugin,
   resolvePluginRoot,
   resolveCommand,

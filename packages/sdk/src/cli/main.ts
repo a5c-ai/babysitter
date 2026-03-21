@@ -37,6 +37,10 @@ import { handleHookRun } from "./commands/hookRun";
 import { handleProfileCommand } from "./commands/profile";
 import type { ProfileCommandArgs } from "./commands/profile";
 import {
+  handleProcessLibraryCommand,
+} from "./commands/processLibrary";
+import type { ProcessLibraryCommandArgs } from "./commands/processLibrary";
+import {
   handlePluginAddMarketplace,
   handlePluginUpdateMarketplace,
   handlePluginListPlugins,
@@ -92,6 +96,10 @@ const USAGE = `Usage:
   babysitter hook:run --hook-type <stop|session-start|user-prompt-submit|pre-tool-use> [--harness <claude-code|gemini-cli>] [--plugin-root <dir>] [--state-dir <dir>] [--runs-dir <dir>] [--json] [--verbose]
   babysitter compress-output <command and args...>
   babysitter skill:fetch-remote --source-type <github|well-known> --url <url> [--json]
+  babysitter process-library:clone --repo <url> --dir <path> [--ref <ref>] [--json]
+  babysitter process-library:update --dir <path> [--ref <ref>] [--json]
+  babysitter process-library:use --dir <path> [--run-id <id>] [--session-id <id>] [--state-dir <dir>] [--ref <ref>] [--json]
+  babysitter process-library:active [--run-id <id>] [--session-id <id>] [--state-dir <dir>] [--json]
   babysitter profile:read --user|--project [--dir <dir>] [--json]
   babysitter profile:write --user|--project --input <file> [--dir <dir>] [--json]
   babysitter profile:merge --user|--project --input <file> [--dir <dir>] [--json]
@@ -192,6 +200,10 @@ interface ParsedArgs {
   includeRemote?: boolean;
   summaryOnly?: boolean;
   processPath?: string;
+  // Process-library command args
+  processLibraryRepo?: string;
+  processLibraryDir?: string;
+  processLibraryRef?: string;
   // Profile command flags
   profileUser?: boolean;
   profileProject?: boolean;
@@ -480,6 +492,14 @@ function parseArgs(argv: string[]): ParsedArgs {
       parsed.url = expectFlagValue(rest, ++i, "--url");
       continue;
     }
+    if (arg === "--repo") {
+      parsed.processLibraryRepo = expectFlagValue(rest, ++i, "--repo");
+      continue;
+    }
+    if (arg === "--ref") {
+      parsed.processLibraryRef = expectFlagValue(rest, ++i, "--ref");
+      continue;
+    }
     if (arg === "--include-remote") {
       parsed.includeRemote = true;
       continue;
@@ -507,7 +527,9 @@ function parseArgs(argv: string[]): ParsedArgs {
       continue;
     }
     if (arg === "--dir") {
-      parsed.profileDir = expectFlagValue(rest, ++i, "--dir");
+      const dir = expectFlagValue(rest, ++i, "--dir");
+      parsed.profileDir = dir;
+      parsed.processLibraryDir = dir;
       continue;
     }
     // Plugin command flags
@@ -1017,11 +1039,12 @@ async function handleRunCreate(parsed: ParsedArgs): Promise<number> {
   const entrySpec = formatEntrypointSpecifier(result.metadata.entrypoint);
 
   // --- Harness-specific session binding ---
-  // When --harness is explicitly specified, use that adapter directly.
-  // Otherwise auto-detect from env vars (CLAUDE_SESSION_ID, CLAUDE_ENV_FILE).
+  // Bind only when the caller is explicit about harness/session context.
+  // Ambient harness env inside editor/test hosts should not silently mutate
+  // generic CLI runs.
   const adapter = parsed.harness
     ? getAdapterByName(parsed.harness)
-    : getAdapter();
+    : (parsed.sessionId ? getAdapter() : undefined);
 
   let sessionBound: SessionBindResult | undefined;
 
@@ -1065,7 +1088,9 @@ async function handleRunCreate(parsed: ParsedArgs): Promise<number> {
   // Try process-driven discovery first (reads @skill/@agent markers from process file)
   let discoveredSkills: Array<{ name: string; file?: string }> | undefined;
   let discoveredAgents: Array<{ name: string; file?: string }> | undefined;
-  const discoverPluginRoot = adapter?.resolvePluginRoot(parsed) ?? getAdapter().resolvePluginRoot(parsed);
+  const discoverPluginRoot =
+    parsed.pluginRoot ??
+    adapter?.resolvePluginRoot(parsed);
   if (discoverPluginRoot) {
     try {
       const processDiscovery = discoverFromProcessFile({
@@ -2074,6 +2099,10 @@ const VALID_COMMANDS = [
   "hook:run",
   "skill:discover",
   "skill:fetch-remote",
+  "process-library:clone",
+  "process-library:update",
+  "process-library:use",
+  "process-library:active",
   "profile:read",
   "profile:write",
   "profile:merge",
@@ -2355,6 +2384,21 @@ export function createBabysitterCli() {
             url: parsed.url,
             json: parsed.json,
           });
+        }
+        // Process-library commands
+        if (parsed.command?.startsWith("process-library:")) {
+          const subcommand = parsed.command.split(":")[1];
+          const processLibraryArgs: ProcessLibraryCommandArgs = {
+            subcommand: subcommand as ProcessLibraryCommandArgs["subcommand"],
+            repo: parsed.processLibraryRepo,
+            dir: parsed.processLibraryDir,
+            ref: parsed.processLibraryRef,
+            runId: parsed.runIdOverride,
+            sessionId: parsed.sessionId,
+            stateDir: parsed.stateDir,
+            json: parsed.json,
+          };
+          return await handleProcessLibraryCommand(processLibraryArgs);
         }
         // Profile commands
         if (

@@ -1,9 +1,12 @@
 {
   "name": "@yaniv-tg/babysitter-codex",
   "version": "0.1.5",
-  "description": "Babysitter orchestration plugin for OpenAI Codex CLI - multi-step AI workflows with full upstream process library, 15 orchestration modes, and BOM-safe SKILL installation",
+  "description": "Babysitter Codex skill bundle and integration package for OpenAI Codex CLI - multi-step AI workflows with the upstream process library, 15 orchestration modes, and BOM-safe SKILL installation",
+  "bin": {
+    "babysitter-codex-turn": "bin/turn-controller.js"
+  },
   "scripts": {
-    "test": "node test/integration.test.js && node test/harness.test.js && node test/plugin.test.js && node test/features-1-10.test.js && node test/process-mining.test.js",
+    "test": "node test/integration.test.js && node test/harness.test.js && node test/plugin.test.js && node test/turn-controller.test.js && node test/packaged-install.test.js && node test/features-1-10.test.js && node test/process-mining.test.js",
     "test:unit": "node test/harness.test.js",
     "test:integration": "node test/integration.test.js",
     "test:plugin": "node test/plugin.test.js",
@@ -24,6 +27,7 @@
   },
   "files": [
     "SKILL.md",
+    "AGENTS.md",
     "CHANGELOG.md",
     "agents/",
     "commands/",

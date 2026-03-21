@@ -6,8 +6,9 @@ argument-hint: Specific instructions for the run
 
 # babysitter:call
 
-Start a babysitter run using the external supervisor and keep Codex aligned
-with the current `.a5c` run state.
+Start a babysitter run with Codex itself owning the chat-turn orchestration
+loop, using the packaged turn-state helper to persist `.a5c` state between
+turns.
 
 ## Workflow
 
@@ -15,7 +16,7 @@ with the current `.a5c` run state.
 
 - Clarify the user goal, constraints, and definition of done
 - Inspect the repo and process library before choosing or generating a process
-- Prefer existing upstream babysit processes/skills when they already fit
+- Prefer existing upstream babysit processes and skills when they already fit
 
 ### 2. Prepare process inputs
 
@@ -25,50 +26,62 @@ with the current `.a5c` run state.
 
 ### 3. Create the run
 
-If a Codex session/thread ID is available, bind it at creation time:
+If a Codex session or thread ID is available, bind it honestly at creation
+time:
 
 ```bash
-babysitter run:create \
+babysitter-codex-turn start \
   --process-id <id> \
   --entry <path>#<export> \
   --inputs <inputs-file> \
-  --prompt "<operator prompt>" \
-  --harness codex \
-  --session-id <codex-session-id> \
-  --state-dir .a5c \
-  --json
+  --prompt "<operator prompt>"
 ```
 
-If no session ID is available, create the run without harness binding and let
-the supervisor own resume behavior explicitly.
+The helper binds `--harness codex --session-id ... --state-dir .a5c` only when
+a real session or thread ID exists. It must never fabricate one.
 
-### 4. Run the orchestration loop
+### 4. Advance exactly one Codex turn at a time
 
-Use the external supervisor or wrapper to iterate the run:
+Advance the run through the packaged turn helper:
 
 ```bash
-babysitter run:iterate .a5c/runs/<runId> --json --iteration <n>
+babysitter-codex-turn continue
 ```
 
-Supported runtime expectations:
+Interpret the returned `action`:
 
-- `agent` tasks are executed by Codex
-- breakpoint handling is mediated by the supervisor or the user chat flow
-- `notify` may observe turn completion but does not control continuation
+- `execute_tasks`: Codex should execute the returned task(s) in this turn
+- `yield_to_user`: ask the user the returned breakpoint questions, then stop
+- `run_completed`: report completion honestly
+- `run_failed`: report the failure honestly
+
+Codex should stay in the loop by explicit stateful continuation across turns,
+not by handing control to `.codex/orchestrate.js` or any hidden stop hook.
 
 ### 5. Post results correctly
 
 ```bash
-babysitter task:post .a5c/runs/<runId> <effectId> \
-  --status ok \
-  --value tasks/<effectId>/output.json \
-  --json
+babysitter-codex-turn post \
+  --effect-id <effectId> \
+  --value-file tasks/<effectId>/output.json
 ```
 
 Never write `result.json` directly.
+
+For breakpoint answers on a later turn:
+
+```bash
+babysitter-codex-turn approve \
+  --effect-id <effectId> \
+  --approved true \
+  --response "<user response>" \
+  --answers-file <answers.json>
+```
 
 ### 6. Finish honestly
 
 - Report the run status from `run:status`
 - If a completion proof exists, relay it plainly
-- Do not claim a hidden hook will re-enter Codex automatically
+- Do not claim a hidden hook or wrapper will re-enter Codex automatically
+- If `babysitter-codex-turn` is not on PATH, use the installed skill copy at
+  `~/.codex/skills/babysitter-codex/.codex/turn-controller.js`

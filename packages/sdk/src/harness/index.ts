@@ -3,7 +3,14 @@ export type {
   SessionBindOptions,
   SessionBindResult,
   HookHandlerArgs,
+  HarnessDiscoveryResult,
+  HarnessInvokeOptions,
+  HarnessInvokeResult,
+  PiSessionOptions,
+  PiPromptResult,
 } from "./types";
+
+export { HarnessCapability } from "./types";
 
 export { createClaudeCodeAdapter } from "./claudeCode";
 export { createCodexAdapter } from "./codex";

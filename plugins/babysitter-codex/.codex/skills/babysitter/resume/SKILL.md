@@ -6,8 +6,8 @@ argument-hint: "[recent|tag:<tag>|search:<query>|list|name <alias>|tag +/-<tag>|
 
 # babysitter:resume
 
-Resume an incomplete babysitter run without pretending Codex will auto-reenter
-through a hidden stop hook.
+Resume an incomplete babysitter run with Codex explicitly re-entering the
+stateful loop on the next user turn.
 
 ## Workflow
 
@@ -16,32 +16,24 @@ through a hidden stop hook.
 - Use the session index helpers when available
 - Otherwise inspect `.a5c/runs/*` and choose the most recent incomplete run
 
-### 2. Rebind or resume explicitly
+### 2. Resume explicitly from persisted turn state
 
-If you have a stable Codex session/thread ID:
-
-```bash
-babysitter session:resume \
-  --session-id <codex-session-id> \
-  --state-dir .a5c \
-  --run-id <runId> \
-  --runs-dir .a5c/runs \
-  --json
-```
-
-If you do not, resume the run operationally through the external supervisor and
-report that the session binding is supervisor-managed.
-
-### 3. Continue iterating
+Inspect the current run or selector:
 
 ```bash
-babysitter run:iterate .a5c/runs/<runId> --json --iteration <n>
+babysitter-codex-turn status <selector>
 ```
 
-Post task results with `task:post` and keep user approvals inside the explicit
-supervisor/chat flow.
+Then advance the run:
 
-### 4. Close out
+```bash
+babysitter-codex-turn continue <selector>
+```
+
+If the prior turn stopped on a breakpoint, post the user response explicitly
+with `babysitter-codex-turn approve`, then continue again on the next turn.
+
+### 3. Close out
 
 - Report the new run status
 - If the run still needs user input, say so directly

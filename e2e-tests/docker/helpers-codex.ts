@@ -36,13 +36,20 @@ export function startCodexContainer(): void {
     // ignore
   }
 
-  const openAiKey = process.env.OPENAI_API_KEY || "";
-  const openAiBaseUrl = process.env.OPENAI_BASE_URL || "";
-  const envArgs = [
-    openAiKey ? `-e OPENAI_API_KEY="${openAiKey}"` : "",
-    openAiBaseUrl ? `-e OPENAI_BASE_URL="${openAiBaseUrl}"` : "",
-  ]
-    .filter(Boolean)
+  const forwardedEnvNames = [
+    "A5C_PROVIDER_NAME",
+    "A5C_SELECTED_CLI_COMMAND",
+    "A5C_CLI_TOOL",
+    "A5C_SELECTED_MODEL",
+    "AZURE_OPENAI_API_KEY",
+    "AZURE_OPENAI_PROJECT_NAME",
+    "AZURE_OPENAI_DEPLOYMENT",
+    "OPENAI_API_KEY",
+    "OPENAI_BASE_URL",
+  ];
+  const envArgs = forwardedEnvNames
+    .filter((name) => Boolean(process.env[name]))
+    .map((name) => `-e ${name}`)
     .join(" ");
 
   exec(

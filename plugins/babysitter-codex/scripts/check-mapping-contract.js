@@ -8,9 +8,22 @@ function readJson(filePath) {
   return JSON.parse(fs.readFileSync(filePath, 'utf8'));
 }
 
+function readCommandCatalog(root) {
+  const candidates = [
+    path.join(root, '.codex', 'command-catalog.json'),
+    path.join(root, '.codex', 'plugin.json'),
+  ];
+  for (const candidate of candidates) {
+    if (fs.existsSync(candidate)) {
+      return readJson(candidate);
+    }
+  }
+  throw new Error('missing .codex/command-catalog.json and .codex/plugin.json');
+}
+
 function main() {
   const root = process.cwd();
-  const plugin = readJson(path.join(root, '.codex', 'plugin.json'));
+  const plugin = readCommandCatalog(root);
   const mapping = readJson(path.join(root, 'config', 'codex-command-map.json'));
 
   const commands = plugin.commands || [];

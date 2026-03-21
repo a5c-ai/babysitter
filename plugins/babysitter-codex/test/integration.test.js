@@ -6,6 +6,7 @@ const assert = require('assert');
 
 const PROJECT_ROOT = path.resolve(__dirname, '..');
 const CODEX_DIR = path.join(PROJECT_ROOT, '.codex');
+const BIN_DIR = path.join(PROJECT_ROOT, 'bin');
 
 // Test: All JS files pass node --check
 function testSyntax() {
@@ -19,6 +20,7 @@ function testSyntax() {
     }
   }
   collectJs(CODEX_DIR);
+  if (fs.existsSync(BIN_DIR)) collectJs(BIN_DIR);
 
   let passed = 0;
   for (const file of jsFiles) {
@@ -53,6 +55,7 @@ function testRequire() {
     '.codex/process-mining.js',
     '.codex/rules-resolver.js',
     '.codex/mode-handlers.js',
+    '.codex/turn-controller.js',
     '.codex/prompt-shrinker.js',
     '.codex/hooks/utils.js',
     '.codex/hooks/read-json.js',

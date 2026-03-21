@@ -141,10 +141,12 @@ function verifySkillLibrary() {
     'forever',
     'doctor',
     'observe',
+    'retrospect',
     'model',
     'issue',
     'help',
     'project-install',
+    'team-install',
     'user-install',
     'assimilate',
   ];

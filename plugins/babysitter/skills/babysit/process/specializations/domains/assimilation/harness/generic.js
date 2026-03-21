@@ -1,6 +1,6 @@
 /**
  * @process assimilation/harness/generic
- * @description Orchestrate babysitter SDK integration into a generic AI coding harness. Guides through analysis, scaffolding, implementation, testing, and quality verification.
+ * @description Orchestrate babysitter SDK integration into a generic AI coding harness. Research the real control plane first, prefer host-native continuation paths, fall back to wrappers only when the harness truly lacks stronger integration points, and treat the canonical upstream babysit process library as a cloned or synced source of truth instead of a bundled snapshot.
  * @inputs { projectDir: string, harnessType: string, targetQuality: number, maxIterations: number }
  * @outputs { success: boolean, integrationFiles: string[], finalQuality: number, iterations: number }
  */
@@ -35,14 +35,14 @@ export async function process(inputs, ctx) {
   // PHASE 0: RESEARCH
   // ==========================================================================
 
-  ctx.log('phase:research', `Researching ${harnessType} distribution, upstream install path, and continuation hooks`);
+  ctx.log('phase:research', `Researching ${harnessType} distribution, upstream process-library lifecycle, and continuation hooks`);
 
   const research = await ctx.task(runHarnessResearchTask, {
     projectDir,
     harnessName: harnessType,
-    upstreamSource: `${harnessType} upstream repo plus the canonical babysitter plugin and skill`,
-    distributionTarget: `${harnessType} plugin, extension, or runtime package`,
-    loopModel: `${harnessType} continuation path, including native harness binding or explicit fallback binding`
+    upstreamSource: `${harnessType} upstream repo plus the canonical babysitter repo and original Claude Code babysit skill/process library`,
+    distributionTarget: `${harnessType} plugin, extension, or runtime package plus a runtime-cloned or runtime-synced canonical process library`,
+    loopModel: `${harnessType} continuation control plane, preferring host-native events, API sessions, SDK threads, or MCP before explicit wrapper fallback`
   });
 
   integrationFiles.push(...(research.artifactsCreated || []));
@@ -92,12 +92,12 @@ export async function process(inputs, ctx) {
   // PHASE 2.5: ASSIMILATE CANONICAL BABYSIT ASSETS
   // ==========================================================================
 
-  ctx.log('phase:assimilate', 'Adapting the canonical babysit skill and upstream process library');
+  ctx.log('phase:assimilate', 'Adapting the canonical babysit skill and canonical upstream process library clone/sync model');
 
   const assimilation = await ctx.task(adaptOriginalBabysitTask, {
     projectDir,
     harnessName: harnessType,
-    upstreamSource: `${harnessType} runtime install source plus the babysitter plugin repo`,
+    upstreamSource: `${harnessType} runtime install source plus the canonical babysitter repo and original Claude Code babysit skill/process library`,
     research
   });
 
@@ -217,7 +217,7 @@ export async function process(inputs, ctx) {
   const runtimeValidation = await ctx.task(runHarnessRuntimeValidationTask, {
     projectDir,
     harnessName: harnessType,
-    loopModel: `${harnessType} hook or continuation mechanism`,
+    loopModel: `${harnessType} chosen continuation control plane`,
     research,
     docs,
     integrationFiles,
@@ -286,7 +286,7 @@ export async function process(inputs, ctx) {
     const reruntime = await ctx.task(runHarnessRuntimeValidationTask, {
       projectDir,
       harnessName: harnessType,
-      loopModel: `${harnessType} hook or continuation mechanism`,
+      loopModel: `${harnessType} chosen continuation control plane`,
       research,
       docs,
       integrationFiles,
@@ -357,7 +357,7 @@ export const analyzeProjectTask = defineTask('analyze-project', (args, taskCtx) 
       },
       instructions: [
         `Examine the project at ${args.projectDir} for harness configuration files`,
-        `Identify the harness type "${args.harnessType}" and its architecture (hook-based, middleware, event-based, loop-based, API-based)`,
+        `Identify the harness type "${args.harnessType}" and its architecture (hook-based, middleware, event-based, loop-based, API-based, app-server, sdk-thread, mcp-assisted)`,
         'Detect which capabilities are available:',
         '  - shellExec: can the harness execute shell commands?',
         '  - exitInterception: can exit/stop signals be intercepted?',
@@ -365,9 +365,18 @@ export const analyzeProjectTask = defineTask('analyze-project', (args, taskCtx) 
         '  - sessionIdentity: does the harness provide stable session/conversation IDs?',
         '  - lifecycleHooks: are pre-session, post-session, pre-turn, post-turn hooks available?',
         '  - transcriptAccess: can the harness read the agent\'s recent output text?',
+        '  - callbackContext: do later callbacks already include session, thread, approval, or turn identity without needing a startup bridge?',
+        '  - appServerControlPlane: does the harness expose a streamed app/server integration path?',
+        '  - sdkThreadControlPlane: can the harness preserve and resume a thread / conversation programmatically?',
+        '  - mcpTools: can babysitter be exposed as MCP tools or servers?',
+        '  - toolInterception: can conflicting task tools be blocked while babysitter is active?',
+        '  - repoSkills: can the harness consume repo-scoped skills rather than only global install state?',
+        '  - notifyTelemetry: can the harness run a post-turn notification command?',
         'Locate existing config files, hook registration points, and plugin directories',
-        'Identify the interception mechanism (stop hook, middleware wrapper, event listener, loop condition, API check)',
-        'Identify the re-injection mechanism (system message, user message, tool result, context prepend)',
+        'Identify the strongest available control plane in order: host-native lifecycle events, app/server API, SDK thread/session API, MCP, notify telemetry, wrapper fallback',
+        'Determine how context is propagated between callbacks; reject any design that uses a startup hook only to pass identity to a later stop or notify hook when the harness already exposes that identity directly',
+        'Identify the interception mechanism (stop hook, middleware wrapper, event listener, loop condition, API check, approval callback, streamed event consumer)',
+        'Identify the re-injection mechanism (system message, user message, tool result, context prepend, thread resume, event response)',
         'Document any blockers or missing capabilities that will need workarounds',
         'Generate an analysis report as markdown artifact'
       ],
@@ -385,7 +394,14 @@ export const analyzeProjectTask = defineTask('analyze-project', (args, taskCtx) 
             contextReinjection: { type: 'boolean' },
             sessionIdentity: { type: 'boolean' },
             lifecycleHooks: { type: 'boolean' },
-            transcriptAccess: { type: 'boolean' }
+            transcriptAccess: { type: 'boolean' },
+            callbackContext: { type: 'boolean' },
+            appServerControlPlane: { type: 'boolean' },
+            sdkThreadControlPlane: { type: 'boolean' },
+            mcpTools: { type: 'boolean' },
+            toolInterception: { type: 'boolean' },
+            repoSkills: { type: 'boolean' },
+            notifyTelemetry: { type: 'boolean' }
           }
         },
         configPaths: { type: 'array', items: { type: 'string' } },
@@ -425,18 +441,19 @@ export const scaffoldIntegrationTask = defineTask('scaffold-integration', (args,
         configPaths: args.configPaths
       },
       instructions: [
-        'Create the integration directory structure under the project:',
-        '  - {projectDir}/.babysitter/ or appropriate location for this harness',
-        '  - hooks/ directory for lifecycle hook scripts',
-        '  - scripts/ directory for integration scripts',
-        '  - state/ directory for session state files',
+        'Create the integration directory structure under the project using the harness-native layout, not an invented generic layout when the harness already has a standard place for config, skills, or plugins',
+        'Create only the directories justified by the detected control plane:',
+        '  - state/ for babysitter run or session state when needed',
+        '  - hooks/ only when the harness truly supports lifecycle hooks',
+        '  - scripts/ for helper scripts, adapters, or fallback wrappers',
+        '  - skills/ or repo-local skill directories when the harness consumes repo-scoped skills',
         'Create config stub files:',
         '  - babysitter integration config (JSON or YAML per harness convention)',
-        '  - hook registration config pointing to the hook scripts',
+        '  - control-plane registration config pointing to hooks, App Server client, SDK adapter, MCP server, or wrapper entry points as appropriate',
         'Create script template files (empty shells with correct exports/signatures):',
         '  - install.sh or install.js for SDK installation',
-        '  - session-init adapter',
-        '  - stop-hook adapter',
+        '  - session-init adapter only if the harness has a real session-start callback or bootstrap API',
+        '  - loop driver or continuation adapter for the chosen control plane',
         '  - effect-executor adapter',
         '  - result-poster adapter',
         'Add a .gitignore for state/ directory contents',
@@ -534,16 +551,19 @@ export const implementSessionAdapterTask = defineTask('implement-session-adapter
         configPaths: args.configPaths
       },
       instructions: [
-        'Implement onSessionStart(sessionId, pluginRoot) that:',
-        '  1. Determines the state directory: {pluginRoot}/skills/babysit/state/',
-        '  2. Ensures the state directory exists',
+        'Implement a session bootstrap adapter only when the harness has a real session/conversation start surface; otherwise create an external bootstrap helper and document why',
+        'If native session bootstrap exists:',
+        '  1. Determine a project-scoped state directory appropriate for the harness',
+        '  2. Ensure the state directory exists',
         '  3. Calls: babysitter session:init --session-id {sessionId} --state-dir {stateDir} --json',
-        '  4. Persists session ID and plugin root in the harness environment',
-        '  5. Handles failures gracefully with warning logs',
+        '  4. Persist session ID and project root in the harness environment',
+        '  5. Handle failures gracefully with warning logs',
+        'Do not create a session-start hook solely to pass identity into a later callback when that later callback already contains thread, turn, approval, or session identity',
         'Wire the adapter into the harness lifecycle:',
         `  - For hook-based: register as session start hook`,
         '  - For middleware-based: call at top of agent main loop',
         '  - For event-based: listen for session_start event',
+        '  - For app/server or sdk-thread surfaces: bootstrap the durable conversation/thread mapping',
         'Obtain or generate unique session ID from harness session/conversation identity',
         'Export the entry point path for other adapters to reference'
       ],
@@ -589,7 +609,7 @@ export const implementRunBindingTask = defineTask('implement-run-binding', (args
       },
       instructions: [
         'Implement createAndBindRun(processId, entryPoint, inputs, prompt, sessionId, pluginRoot) that:',
-        '  1. Prefer a first-class harness binding path: babysitter run:create --process-id {processId} --entry {entryPoint} --inputs {inputsFilePath} --prompt "{prompt}" --harness {harnessType} --plugin-root {pluginRoot} --json',
+        '  1. Prefer the strongest native binding path available: in-process SDK runtime or harness API first, then babysitter run:create --harness, and only then explicit fallback binding',
         '  2. Use an absolute --entry path and invoke the CLI from the project root to avoid doubled .a5c path bugs',
         '  3. Parse runId, runDir, and session binding details from JSON stdout',
         '  4. Only if the harness truly lacks native binding, document and implement explicit fallback session:init/session:associate behavior as an external mode',
@@ -640,7 +660,7 @@ export const implementLoopDriverTask = defineTask('implement-loop-driver', (args
         configPaths: args.configPaths
       },
       instructions: [
-        'Implement onAgentStop(sessionId, pluginRoot, runsDir, lastAgentOutput) decision algorithm:',
+        'Implement the continuation driver for the strongest verified control plane, not a fake stop-hook model:',
         '  Guard 1: No state file -> APPROVE exit',
         '  Guard 2: iteration >= maxIterations -> APPROVE exit, cleanup',
         '  Guard 3: Runaway loop detection (avg iteration time <= 15s after 5 iterations) -> APPROVE, cleanup',
@@ -652,11 +672,13 @@ export const implementLoopDriverTask = defineTask('implement-loop-driver', (args
         '  1. Increment iteration in session state file',
         '  2. Call: babysitter session:iteration-message --iteration {N} --run-id {runId} --runs-dir {runsDir} --plugin-root {pluginRoot} --json',
         '  3. Return BLOCK with the systemMessage for context re-injection',
-        'The harness continuation mechanism owns the next iteration after task:post. Do not implement repeated run:iterate calls inside the same user turn.',
+        'The chosen control plane owns the next iteration after task:post. Do not implement repeated run:iterate calls inside the same user turn when the harness already provides turn boundaries or thread resume.',
         'Implement extractPromiseTag(text) to scan for <promise>VALUE</promise>',
+        'Prefer direct callback context, thread IDs, approval payload IDs, or persisted run-to-thread mappings over the Claude-style session-start bridge hack',
         'Wire the interception into the harness stop/exit mechanism:',
         `  - Harness type "${args.harnessType}": use appropriate mechanism (stop hook, middleware, event, loop condition, API check)`,
-        'Implement context re-injection via the harness mechanism (system message, user message, tool result, or context prepend)'
+        'If the harness supports app/server events, SDK thread resume, or MCP elicitations, prefer those over a blocking wrapper loop',
+        'Implement context re-injection via the harness mechanism (system message, user message, tool result, context prepend, or thread resume)'
       ],
       outputFormat: 'JSON with filesCreated (array), filesModified (array), summary (string)'
     },
@@ -698,13 +720,13 @@ export const implementEffectAdapterTask = defineTask('implement-effect-adapter',
       },
       instructions: [
         'Implement the effect execution cycle:',
-        '  1. Call: babysitter run:iterate .a5c/runs/{runId} --json to get pending actions',
-        '  2. Call: babysitter task:list .a5c/runs/{runId} --pending --json to get pending tasks',
+        '  1. Call: babysitter run:iterate .a5c/runs/{runId} --json to get pending actions when the control plane requires babysitter-driven iteration',
+        '  2. Call: babysitter task:list .a5c/runs/{runId} --pending --json to get pending tasks when needed',
         '  3. For each pending task, dispatch by kind:',
         '    - kind="shell": Execute an existing command or test suite via the host shell',
         '    - kind="breakpoint": Present the breakpoint question to the user for approval',
         '    - kind="sleep": Wait until the specified time (sleepUntil)',
-        '    - kind="agent": Delegate to an agent subprocess with the specified prompt',
+        '    - kind="agent": Delegate through the strongest harness-native agent surface, subagent API, or thread action primitive',
         '    - kind="skill": Invoke the matching installed skill when one exists',
         '    - custom kinds: Log a warning, fail safely, and update the mapping rather than inventing unsupported execution',
         'Reject any design that emits kind="node". Convert those cases to agent or skill execution instead.',
@@ -809,8 +831,8 @@ export const implementIterationGuardsTask = defineTask('implement-iteration-guar
         '  checkRunStatus(runId): calls run:status and returns true if status call fails',
         '  checkCompletionProof(runId, lastOutput): checks if run is completed AND promise tag matches proof',
         '  cleanupSession(stateFile): removes or archives the session state file',
-        'Implement session state file parser that reads the markdown state format:',
-        '  - Extracts run_id, iteration, max_iterations, iteration_times from the state file',
+        'Implement session state file parser that reads the actual chosen state format (prefer JSON) rather than assuming a markdown state file format',
+        '  - Extract runId, iteration, maxIterations, iterationTimes, and any control-plane-specific identifiers such as threadId',
         'Implement session state file updater that atomically writes updated state',
         'Configure guards with sensible defaults from environment variables:',
         '  - BABYSITTER_MAX_ITERATIONS (default: 256)',
@@ -859,10 +881,12 @@ export const smokeTestTask = defineTask('smoke-test', (args, taskCtx) => ({
         'Execute the following smoke tests:',
         '  Test 1 - SDK Available: Run "babysitter version --json" and verify it returns valid JSON with version field',
         '  Test 2 - Session Init: Run the session initialization adapter and verify a state file is created',
-        '  Test 3 - Run Create: Create a test run with a minimal process and prefer the harness-native run:create --harness path when supported',
+        '  Test 3 - Run Create: Create a test run with a minimal process and prefer the strongest verified binding path rather than defaulting to CLI fallback',
         '  Test 4 - Run Iterate: Call run:iterate on the test run and verify it returns valid JSON status',
         '  Test 5 - Guard Check: Verify iteration guards correctly identify max iterations exceeded',
-        '  Test 6 - Protocol Check: verify that generated assets use output.json + task:post and do not emit kind="node"',
+        '  Test 6 - Process Library Check: verify whether the SDK or CLI can clone, sync, bind, or inspect the canonical process-library root for the current active use; if not, confirm the integration documents the gap and the operator workaround instead of bundling-first behavior',
+        '  Test 7 - Protocol Check: verify that generated assets use output.json + task:post, do not emit kind="node", preserve orchestration continuity after a user-yield when the harness supports it, and do not use a startup hook only as a context-smuggling bridge',
+        '  Test 8 - Docs Split Check: if the harness exposes a higher-level command surface, fail when user-facing README or install docs still tell end users to use raw Babysitter primitives such as run:create, run:iterate, task:list, task:post, session:init, or session:associate',
         'For each test, record: testName, passed (boolean), error (string if failed), duration (ms)',
         'Clean up any test artifacts after execution',
         'Return aggregate results'
@@ -934,12 +958,16 @@ export const verifyQualityTask = defineTask('verify-quality', (args, taskCtx) =>
         '    - Config files properly reference all adapters',
         '    - Error handling for all CLI failure modes',
         '    - Cross-platform support where applicable',
-        '    - Research, upstream sync, install docs, and full runtime validation are present',
+        '    - Research, upstream sync, install docs, documented process-library lifecycle, and full runtime validation are present',
+        '    - User-facing docs stay on the harness command surface and move raw runtime primitives into internal command, skill, hook, or maintainer docs when possible',
         '  Working Code: Does the code actually run?',
         '    - Smoke test pass rate',
         '    - No syntax errors',
         '    - Correct imports and exports',
         '    - Proper async/await usage',
+        '    - Strongest available control plane chosen instead of a weaker wrapper fallback without justification',
+        '    - Canonical process library is treated as upstream-owned clone/sync source of truth rather than a silent bundled-first dependency',
+        '    - Active process-library binding or active-root inspection is implemented when supported, or the missing SDK/CLI capability is documented honestly',
         'Calculate overall score as weighted average: accuracy(40%) + completeness(30%) + workingCode(30%)',
         'Identify specific issues and provide actionable recommendations for each',
         'Return score, issues, and recommendations'

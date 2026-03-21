@@ -1,6 +1,6 @@
 /**
  * @process assimilation/harness/codex
- * @description Orchestrate babysitter SDK integration into OpenAI Codex CLI using real Codex surfaces: AGENTS.md, skills, project config.toml, notify monitoring, and an external supervisor loop.
+ * @description Orchestrate babysitter SDK integration into OpenAI Codex using research-first selection among real Codex surfaces: App Server, SDK threads, MCP, AGENTS.md, repo skills, project config.toml, and notify telemetry, while treating the canonical upstream babysit process library as a cloned or synced source of truth instead of a bundled snapshot.
  * @inputs { projectDir: string, targetQuality: number, maxIterations: number }
  * @outputs { success: boolean, integrationFiles: string[], finalQuality: number, iterations: number }
  */
@@ -21,15 +21,27 @@ import {
  * Integrates babysitter SDK orchestration into OpenAI Codex CLI using a
  * phased approach: Analyze -> Scaffold -> Implement -> Test -> Verify -> Converge.
  *
- * Supports two strategies:
- *   - Strategy A: External wrapper loop around `codex exec` (production/CI)
- *   - Strategy B: AGENTS.md + optional MCP tools for in-session assistance (interactive, non-blocking)
+ * Supports four strategies in descending preference:
+ *   - Strategy A: App Server client owned by babysitter (closest to host-native control)
+ *   - Strategy B: Codex SDK thread orchestration with persistent thread resume
+ *   - Strategy C: AGENTS.md + repo skills + MCP tools for in-session assistance
+ *   - Strategy D: External wrapper loop around `codex exec` (fallback / CI / bootstrap)
+ *
+ * Codex distribution rules:
+ *   - Treat Codex as exposing skills, AGENTS.md, config.toml, MCP, CLI, and SDK surfaces
+ *   - Do not model the integration as a native Codex plugin manifest unless upstream Codex docs add such a feature
+ *   - Any local plugin.json-style file is Babysitter compatibility metadata only, not a Codex platform primitive
+ *
+ * Process-library distribution rules:
+ *   - Prefer SDK/CLI-supported clone or sync of the canonical upstream babysit library
+ *   - Require an explicit description of the actual process-library lifecycle and fallback behavior when Codex cannot use the preferred path directly
+ *   - Treat bundled copies only as temporary compatibility fallbacks, never the source of truth
  *
  * @param {Object} inputs - Process inputs
  * @param {string} inputs.projectDir - Target Codex project directory
  * @param {number} inputs.targetQuality - Quality threshold to converge (0-100)
  * @param {number} inputs.maxIterations - Maximum convergence iterations
- * @param {string} inputs.strategy - Integration strategy: 'wrapper' (A) or 'mcp' (B), default 'wrapper'
+ * @param {string} inputs.strategy - Integration strategy: 'app-server', 'sdk', 'mcp', or 'wrapper'. Default: 'sdk'
  * @param {Object} ctx - Process context
  * @returns {Promise<Object>} Integration result
  */
@@ -38,7 +50,7 @@ export async function process(inputs, ctx) {
     projectDir,
     targetQuality = 80,
     maxIterations = 6,
-    strategy = 'wrapper'
+    strategy = 'sdk'
   } = inputs;
 
   const integrationFiles = [];
@@ -50,9 +62,16 @@ export async function process(inputs, ctx) {
   const researchResult = await ctx.task(runHarnessResearchTask, {
     projectDir,
     harnessName: 'Codex CLI',
-    upstreamSource: 'official Codex CLI distribution, runtime extension surface, and the canonical babysitter plugin repo',
-    distributionTarget: 'AGENTS.md, config.toml, notify wiring, wrapper scripts, skills, and any installable Codex extension surface',
-    loopModel: strategy === 'mcp' ? 'in-session Codex assistance via AGENTS and MCP, with external orchestration ownership' : 'wrapper-driven orchestration with explicit user-yield and resume behavior'
+    upstreamSource: 'official Codex CLI distribution, runtime extension surface, the canonical babysitter repo, and the original Claude Code babysit skill/process library',
+    distributionTarget: 'Codex App Server client assets, SDK-thread orchestration code, AGENTS.md, .agents/skills, config.toml, notify wiring, MCP tools, wrapper scripts, and a runtime-cloned or runtime-synced canonical process library',
+    loopModel:
+      strategy === 'app-server'
+        ? 'babysitter-owned App Server client with streamed agent events and explicit approval handling'
+        : strategy === 'sdk'
+          ? 'persistent Codex SDK thread orchestration with explicit thread resume'
+          : strategy === 'mcp'
+            ? 'in-session Codex assistance via AGENTS, repo skills, and MCP tools, with continuation owned by the chosen control plane'
+            : 'external supervisor fallback with explicit user-yield and resume behavior'
   });
 
   integrationFiles.push(...(researchResult.artifactsCreated || []));
@@ -132,7 +151,7 @@ export async function process(inputs, ctx) {
   const assimilationResult = await ctx.task(adaptOriginalBabysitTask, {
     projectDir,
     harnessName: 'Codex CLI',
-    upstreamSource: 'the canonical babysitter plugin repo and its babysit process library',
+    upstreamSource: 'the canonical babysitter repo and the original Claude Code babysit skill/process library',
     research: researchResult
   });
 
@@ -222,7 +241,14 @@ export async function process(inputs, ctx) {
   const runtimeValidationResult = await ctx.task(runHarnessRuntimeValidationTask, {
     projectDir,
     harnessName: 'Codex CLI',
-    loopModel: strategy === 'mcp' ? 'in-session Codex continuation via MCP and hook points' : 'wrapper-driven orchestration with explicit user-yield and resume behavior',
+    loopModel:
+      strategy === 'app-server'
+        ? 'App Server notifications and approval events keep babysitter in the orchestration loop'
+        : strategy === 'sdk'
+          ? 'persistent SDK thread resume keeps babysitter in the orchestration loop'
+          : strategy === 'mcp'
+            ? 'MCP-assisted continuation with explicit validation of user-yield reentry'
+            : 'wrapper-driven orchestration with explicit user-yield and resume behavior',
     research: researchResult,
     docs: docsResult,
     integrationFiles,
@@ -299,7 +325,14 @@ export async function process(inputs, ctx) {
     const reruntime = await ctx.task(runHarnessRuntimeValidationTask, {
       projectDir,
       harnessName: 'Codex CLI',
-      loopModel: strategy === 'mcp' ? 'in-session Codex continuation via MCP and hook points' : 'wrapper-driven orchestration with explicit user-yield and resume behavior',
+      loopModel:
+        strategy === 'app-server'
+          ? 'App Server notifications and approval events keep babysitter in the orchestration loop'
+          : strategy === 'sdk'
+            ? 'persistent SDK thread resume keeps babysitter in the orchestration loop'
+            : strategy === 'mcp'
+              ? 'MCP-assisted continuation with explicit validation of user-yield reentry'
+              : 'wrapper-driven orchestration with explicit user-yield and resume behavior',
       research: researchResult,
       docs: docsResult,
       integrationFiles,
@@ -361,7 +394,7 @@ export async function process(inputs, ctx) {
 // ============================================================================
 
 /**
- * Analyze the target Codex project: detect version, config, MCP support, sandbox mode.
+ * Analyze the target Codex project: detect version, config, App Server / SDK / MCP support, and sandbox mode.
  */
 export const analyzeCodexProjectTask = defineTask('analyze-codex-project', (args, taskCtx) => ({
   kind: 'agent',
@@ -378,28 +411,39 @@ export const analyzeCodexProjectTask = defineTask('analyze-codex-project', (args
       },
       instructions: [
         'Run `codex --version` to detect Codex CLI version',
-        'Run `codex --help` and `codex mcp --help` to confirm available subcommands',
+        'Run `codex --help`, `codex mcp --help`, and `codex app-server --help` when available to confirm supported control planes',
         'Check for existing .codex/config.toml (project-level) and ~/.codex/config.toml (user-level)',
-        'Check for existing AGENTS.md files in project root and .codex/ directory',
+        'Check for existing AGENTS.md files, .agents/skills/ directories, and any repo-scoped Codex skill assets',
         'Verify sandbox mode capabilities: read-only, workspace-write, danger-full-access',
         'Check if MCP server support is available (codex mcp add/list/remove)',
+        'Check whether Codex App Server is available and whether its event stream / approvals model can be used as the primary babysitter control plane',
+        'Check whether the Codex SDK or thread-oriented integration path is available for persistent thread resume',
         'Check if exec mode is available (codex exec --help)',
-        'Determine whether Codex exposes any real blocking lifecycle hooks; if not, document that orchestration must stay external',
+        'Determine whether Codex exposes any real host-owned lifecycle events, approval callbacks, streamed notifications, or only post-turn notify',
+        'Determine how Codex context identity is passed without a fake session-start hook: App Server thread IDs, SDK thread IDs, MCP structuredContent.threadId, and approval payload thread IDs',
+        'Document the preferred context propagation method for each strategy and reject any design that uses a startup hook only to smuggle context into later callbacks',
         'Determine how Codex skills are actually distributed and installed for end users before proposing package layout',
+        'Determine whether custom prompts are deprecated in favor of skills and AGENTS guidance, and avoid proposing prompt-only integration',
+        'Determine whether Codex subagents can help execute babysitter effects without giving up orchestration ownership',
         'Detect Node.js version (must be >= 18)',
         'Check for existing babysitter SDK installation (babysitter version --json)',
         'List existing config files that may need modification',
         'Report all findings as structured JSON'
       ],
-      outputFormat: 'JSON with codexVersion, hasMcpSupport, hasExecMode, sandboxModes, existingConfigFiles, nodeVersion, hasBabysitterSdk, recommendations'
+      outputFormat: 'JSON with codexVersion, hasAppServerSupport, hasSdkThreadPath, hasMcpSupport, hasExecMode, supportsRepoSkills, supportsNotify, contextPropagationMethods, sandboxModes, existingConfigFiles, nodeVersion, hasBabysitterSdk, recommendations'
     },
     outputSchema: {
       type: 'object',
       required: ['codexVersion', 'hasMcpSupport', 'hasExecMode'],
       properties: {
         codexVersion: { type: 'string' },
+        hasAppServerSupport: { type: 'boolean' },
+        hasSdkThreadPath: { type: 'boolean' },
         hasMcpSupport: { type: 'boolean' },
         hasExecMode: { type: 'boolean' },
+        supportsRepoSkills: { type: 'boolean' },
+        supportsNotify: { type: 'boolean' },
+        contextPropagationMethods: { type: 'array', items: { type: 'string' } },
         sandboxModes: { type: 'array', items: { type: 'string' } },
         existingConfigFiles: { type: 'array', items: { type: 'string' } },
         nodeVersion: { type: 'string' },
@@ -479,16 +523,23 @@ export const createAgentsMdTask = defineTask('create-agents-md', (args, taskCtx)
       },
       instructions: [
           'Create AGENTS.md in the project root directory',
+          'Prefer repo-scoped Codex skills under .agents/skills/ over only global skill installation when the repo should be self-contained',
           'Keep AGENTS.md truthful and concise about Codex integration boundaries',
-          'Describe how Codex should cooperate with the babysitter supervisor and where .a5c state lives',
+          'Describe the selected control plane in order of preference: App Server, SDK thread integration, MCP assistance, then wrapper fallback',
+          'Describe how Codex should cooperate with babysitter and where .a5c state lives',
+          'Describe how context identity is propagated without a session-start hack: persist threadId or run mapping from App Server, SDK thread creation, or MCP tool responses',
           'Explain result posting, error reporting, and explicit resume behavior',
           'Do not claim Codex has native SessionStart/Stop hooks or automatic self-reentry after yielding to the user',
+          'Do not emulate the Claude session-start hack solely to pass context into a later notify callback',
+          'If strategy is "app-server", describe App Server as the authoritative streamed control plane',
+          'If strategy is "sdk", describe persistent thread resume and why it is closer to harness-native continuation than repeated codex exec calls',
           'If strategy is "mcp", describe MCP as assistance tooling unless research proves it can safely own the loop',
-          'If strategy is "wrapper", explain that the wrapper/supervisor owns continuation and breakpoint collection',
+          'If strategy is "wrapper", explain that the wrapper/supervisor owns continuation and breakpoint collection as a fallback, not the ideal architecture',
           'Include error handling: report failures via task:post with error details',
           'Include quality gate: self-assess work quality before posting results',
           'Keep instructions clear and concise for LLM consumption',
         'Also create .codex/AGENTS.md for project-scoped instructions if needed',
+        'Create repo-scoped .agents/skills/babysitter-codex/SKILL.md when the research indicates repo-local skills are the right distribution model',
         'Return list of files created'
       ],
       outputFormat: 'JSON with success, filesCreated, agentsMdPath'
@@ -513,7 +564,7 @@ export const createAgentsMdTask = defineTask('create-agents-md', (args, taskCtx)
 }));
 
 /**
- * (c) Configure MCP server in config.toml for babysitter CLI tools.
+ * (c) Configure Codex project config.toml for the selected control plane.
  */
 export const configureMcpServerTask = defineTask('configure-mcp-server', (args, taskCtx) => ({
   kind: 'agent',
@@ -534,8 +585,9 @@ export const configureMcpServerTask = defineTask('configure-mcp-server', (args, 
           'Use only real Codex config keys discovered during research',
           'Configure sandbox to allow .a5c/ directory writes',
           'Set an approval policy consistent with babysitter CLI usage',
-          'Configure notify for agent-turn-complete monitoring if supported',
-          'Only add MCP server configuration if research proves it is needed for the chosen strategy',
+          'Configure notify only for telemetry / wakeups if supported, not as if it were a blocking orchestration hook',
+          'Add MCP server configuration only if research proves it is needed for the chosen strategy',
+          'If App Server or SDK thread mode is chosen, document the config expectations that route users toward that control plane instead of wrapper-first execution',
           'Do not invent [plugin], [hooks], SessionStart, or Stop sections',
           'If existing config.toml found, merge settings without overwriting user config',
           'Return list of files created or modified'
@@ -582,13 +634,11 @@ export const createHookScriptsTask = defineTask('create-hook-scripts', (args, ta
           'Create .codex/hooks/ directory in the project',
           'Create on-turn-complete.js only as a notify/monitoring handler, not as a blocking orchestration hook',
           'Create iteration-guard.js: checks current iteration count against max, writes warning if approaching limit',
-          'Create loop-control.sh (POSIX): wrapper script entry point for Strategy A that:',
-          '  1. Initializes babysitter session',
-          '  2. Creates a run with babysitter run:create',
-          '  3. Loops: calls codex exec --full-auto with iteration context',
-          '  4. Parses output and posts results via babysitter task:post',
-          '  5. Checks babysitter run:status for completion',
-          '  6. Enforces max iteration guard',
+          'If strategy is "app-server", create App Server client bootstrap scripts instead of a codex-exec loop',
+          'If strategy is "sdk", create SDK thread bootstrap / resume helpers instead of a codex-exec loop',
+          'If strategy is "mcp", create MCP helper scripts and repo-scoped skill assets that keep Codex inside the chosen control plane',
+          'If strategy is "wrapper", create loop-control.sh (POSIX) as the fallback wrapper entry point that initializes babysitter, runs codex exec, posts results, checks completion, and enforces guards',
+          'Where later callbacks need run or thread identity, persist that mapping explicitly in .a5c or pass it through tool payloads; do not create a startup hook only to smuggle context into notify',
           'Do not invent SessionStart/Stop hook files unless research finds a real supported Codex surface for them',
           'Make shell scripts executable (chmod +x)',
           'Return list of all files created'
@@ -615,24 +665,50 @@ export const createHookScriptsTask = defineTask('create-hook-scripts', (args, ta
 }));
 
 /**
- * (e) Implement wrapper loop or MCP-driven polling for orchestration.
+ * (e) Implement the selected Codex control plane for orchestration.
  */
 export const implementWrapperLoopTask = defineTask('implement-wrapper-loop', (args, taskCtx) => ({
   kind: 'agent',
-  title: `Implement ${args.strategy === 'mcp' ? 'MCP-driven polling' : 'external wrapper loop'}`,
+  title: `Implement ${
+    args.strategy === 'app-server'
+      ? 'App Server client control plane'
+      : args.strategy === 'sdk'
+        ? 'SDK thread orchestration'
+        : args.strategy === 'mcp'
+          ? 'MCP-assisted orchestration'
+          : 'external wrapper loop'
+  }`,
 
   agent: {
     name: 'general-purpose',
     prompt: {
       role: 'orchestration systems engineer',
-      task: `Implement the ${args.strategy === 'mcp' ? 'MCP-driven polling mechanism' : 'external wrapper loop'} for babysitter orchestration with Codex`,
+      task: 'Implement the selected Codex orchestration control plane for babysitter',
       context: {
         projectDir: args.projectDir,
         strategy: args.strategy,
         codexVersion: args.analysis?.codexVersion,
         hasExecMode: args.analysis?.hasExecMode
       },
-        instructions: args.strategy === 'wrapper' ? [
+        instructions: args.strategy === 'app-server' ? [
+          'Create an App Server client entry point that treats Codex App Server as the primary control plane',
+          'Use streamed agent events, approvals, and conversation history instead of repeated codex exec subprocesses',
+          'Keep babysitter as the orchestration owner that maps run state to thread / conversation state',
+          'Persist the App Server thread ID and any approval correlation IDs at thread creation time rather than inventing a startup hook to bridge context',
+          'Model breakpoints as approval / elicitation events instead of stdin pauses',
+          'Persist run state so the client can resume without losing orchestration continuity',
+          'Only keep a codex exec wrapper as a compatibility fallback if App Server is unavailable',
+          'Return list of files created'
+        ] : args.strategy === 'sdk' ? [
+          'Create a persistent Codex SDK thread adapter instead of a codex exec while-loop',
+          'Start or resume a single Codex thread per babysitter run',
+          'Persist the SDK thread ID in babysitter state at thread creation time and reuse it for later resume',
+          'Use SDK thread resume to preserve conversational continuity across iterations',
+          'Model user-yield and breakpoint continuation through persisted thread and run state, not stdin pauses',
+          'Keep babysitter as the orchestration owner that decides when to iterate and when to suspend',
+          'Only keep a codex exec wrapper as a fallback when SDK thread integration is unavailable',
+          'Return list of files created'
+        ] : args.strategy === 'wrapper' ? [
           'Create .codex/orchestrate.js -- the main Node.js wrapper script',
           'Implement the full orchestration loop:',
           '  1. Parse CLI args (--runs-dir, --max-iterations, --process-id)',
@@ -655,10 +731,12 @@ export const implementWrapperLoopTask = defineTask('implement-wrapper-loop', (ar
           'Return list of files created'
         ] : [
           'Create .codex/mcp-orchestrate.js only if research proves MCP materially improves the chosen strategy',
-          'Implement MCP tools as assistance to the external supervisor rather than pretending Codex can own the loop',
-          'Each tool must wrap a real babysitter CLI command',
+          'Implement MCP tools as assistance to the chosen control plane rather than pretending Codex can own the loop by prompt alone',
+          'Expose real babysitter primitives such as run:create, run:iterate, run:status, task:list, task:post, and breakpoint or approval helpers',
+          'Capture and persist thread identity from MCP structured content or approval payloads instead of inventing a session-start bridge',
           'Include iteration guard logic in babysitter_iterate-style helpers',
-          'Document that MCP mode is non-blocking and cannot replace wrapper-owned continuation unless verified',
+          'If the harness supports MCP elicitations or approval flows, use them for breakpoints instead of stdin pauses',
+          'Document that MCP mode alone is not enough unless research proves it can preserve orchestration continuity after yielding to the user',
           'Return list of files created'
         ],
       outputFormat: 'JSON with success, filesCreated, entryPoint'
@@ -701,15 +779,16 @@ export const mapEffectExecutionTask = defineTask('map-effect-execution', (args, 
       instructions: [
         'Create .codex/effect-mapper.js with effect-to-tool mapping logic',
         'Map babysitter effect kinds to Codex tool execution:',
-        '  agent effect -> codex exec with task prompt (strategy A) or direct agent call (strategy B)',
+        '  agent effect -> App Server / SDK thread action / codex exec prompt / MCP-assisted agent call depending on strategy',
         '  node effect -> Node.js script execution via shell tool',
         '  shell effect -> shell command execution via Codex shell tool',
-        '  breakpoint effect -> interactive prompt or auto-resolve based on mode',
+        '  breakpoint effect -> approval event, elicitation, interactive prompt, or auto-resolve based on verified harness capability',
         '  sleep effect -> setTimeout or process.nextTick with timestamp check',
         '  complex orchestration effect -> codex exec with an agent-style sub-task prompt rather than a custom orchestrator_task kind',
         'Handle effect serialization: read task.json, extract args, build Codex prompt',
         'Handle result deserialization: parse Codex output, format as task result',
         'Include error mapping: Codex error codes to babysitter error categories',
+        'Prefer Codex subagents when they materially help execute effects without giving up orchestration ownership',
         'Support parallel effect batching when multiple effects are pending',
         'Return list of files created'
       ],
@@ -763,6 +842,7 @@ export const createResultPostingTask = defineTask('create-result-posting', (args
         '  If result exceeds threshold, rely on task:post and the SDK blob flow instead of manual result.json writes',
         'Handle posting failures: retry up to 3 times with backoff',
         'Include result validation: ensure required fields (success, data) are present',
+        'For App Server or SDK strategy: expose result posting through the chosen client control plane',
         'For MCP strategy: expose as babysitter_post_result MCP tool',
         'For wrapper strategy: call as part of wrapper loop iteration',
         'Never write result.json directly',
@@ -825,7 +905,7 @@ export const addRunawayDetectionTask = defineTask('add-runaway-detection', (args
         '  - Track quality score progression across iterations',
         '  - Detect if quality is not improving (plateau detection)',
         '  - Abort if no improvement for 3 consecutive iterations',
-        'Integrate guards into wrapper loop / MCP polling',
+        'Integrate guards into the chosen control plane: App Server client, SDK thread adapter, MCP helper flow, or wrapper fallback',
         'Add guard check to AGENTS.md instructions for model self-enforcement',
         'Return list of files created'
       ],
@@ -869,18 +949,21 @@ export const runIntegrationTestsTask = defineTask('run-integration-tests', (args
       },
       instructions: [
         'Verify all integration files exist and are syntactically valid',
-        'Validate that the process includes research-first decisions about Codex distribution, runtime install, and continuation hook points',
+        'Validate that the process includes research-first decisions about Codex distribution, runtime install, and continuation control plane selection',
+        'Validate that the generated integration is framed as a Codex skill bundle / integration layer rather than a fictional native Codex plugin manifest',
+        'Validate that the process-library plan prefers upstream clone or sync of the canonical babysit library and accurately describes the runtime lifecycle and fallback behavior used by the Codex integration',
         'Validate that AGENTS.md and related assets adapt the original Claude Code babysit skill semantics instead of inventing a weaker local workflow',
         'Test 1: Validate AGENTS.md contains truthful orchestration instructions and no fake Codex hook claims',
         'Test 2: Validate config.toml uses real Codex keys and correct sandbox/notify settings',
-        'Test 3: Validate notify/wrapper support scripts are executable and syntactically valid',
-        'Test 4: Dry-run the wrapper script with --dry-run flag if supported, then identify what must be exercised in the real harness runtime',
-        'Test 5: Verify babysitter CLI commands work: session:init, run:create (prefer harness-native binding), and task:post protocol',
+        'Test 3: Validate repo-scoped skills, notify helpers, and selected control-plane scripts are executable and syntactically valid',
+        'Test 4: Exercise the selected control plane: App Server client, SDK thread adapter, MCP flow, or wrapper fallback, then identify what must be exercised in the real harness runtime',
+        'Test 5: Verify babysitter CLI commands work: session:init, run:create (prefer harness-native binding), task:post protocol, and any available active process-library binding or inspection surface for the canonical process library',
         'Test 6: Verify effect-mapper handles all required effect kinds',
         'Test 7: Verify result-poster writes output.json and never instructs direct result.json writes',
         'Test 8: Verify iteration guard correctly counts and enforces limits',
-        'Test 9: Check for common issues: missing imports, unresolved paths, permission errors',
-        'Test 10: Validate sandbox configuration allows .a5c/ writes and the supervisor keeps Codex inside the orchestration loop after yielding to the user',
+        'Test 9: Verify run or thread identity is captured through the real Codex surface for the chosen strategy and not via a fake startup hook bridge',
+        'Test 10: Validate sandbox configuration allows .a5c/ writes, the chosen control plane keeps Codex inside the orchestration loop after yielding to the user, and the integration does not silently depend on a bundled process-library snapshot as primary distribution',
+        'Test 11: Fail if user-facing README or install docs still tell end users to use raw Babysitter SDK or CLI primitives instead of the Codex command surface',
         'Report pass/fail for each test with details on failures'
       ],
       outputFormat: 'JSON with passed (number), failed (number), total (number), testResults (array of {name, passed, details})'
@@ -938,6 +1021,7 @@ export const verifyIntegrationTask = defineTask('verify-integration', (args, tas
         'Assess research and upstream distribution fidelity (0-20 points):',
         '  - Real Codex distribution and extension model researched first',
         '  - Runtime install or sync path from the canonical babysitter repo documented',
+        '  - SDK/CLI process-library clone, sync, active-binding, active-root inspection, and path-return gaps documented honestly',
         'Assess correctness (0-20 points):',
         '  - CLI commands correctly formed',
         '  - AGENTS.md and config assets preserve canonical babysit semantics',
@@ -945,6 +1029,8 @@ export const verifyIntegrationTask = defineTask('verify-integration', (args, tas
         'Assess runtime robustness (0-30 points):',
         '  - Real harness run validated, not only dry-run',
         '  - Yield back to the user stays inside the orchestration loop',
+        '  - App Server or SDK thread control plane preferred over wrapper fallback when actually available',
+        '  - Canonical process library is cloned or synced from upstream when supported, with any snapshot fallback clearly demoted',
         '  - Retry logic and guards are properly configured',
         'Assess usability and operator readiness (0-30 points):',
         '  - Clear install, upgrade, rollback, and troubleshooting docs exist',

@@ -38,3 +38,9 @@ Each check reports one of:
 - When called without arguments, diagnoses the run bound to the current session.
 - Suggests remediation commands (e.g., `run:repair-journal`, `run:rebuild-state`) when issues are found.
 - Does not modify any run state; this is a read-only diagnostic.
+
+## Implementation Notes
+
+This command doc is an appropriate place for low-level runtime inspection and
+repair references. The plugin README should not tell end users to operate those
+Babysitter primitives manually.

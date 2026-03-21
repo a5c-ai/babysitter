@@ -29,5 +29,11 @@ Check the current status of a babysitter orchestration run. Displays run metadat
 ## Notes
 
 - When called without arguments, reports on the run bound to the current session.
-- When called with a run ID, reads status directly from the run directory via the SDK.
-- Returns structured JSON when `--json` is passed.
+- When called with a run ID, the implementation may read status directly from
+  the underlying Babysitter runtime.
+
+## Implementation Notes
+
+Raw Babysitter runtime inspection belongs here, not in the user-facing README.
+If the command implementation shells out to Babysitter status or event APIs,
+that is an internal harness detail.

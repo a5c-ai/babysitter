@@ -6,5 +6,5 @@
 # Codex can stay in the babysitter orchestration loop through a stop hook.
 
 echo "{}"
-echo "[babysitter-codex] Stop hook is not supported on Codex; continuation must stay in the external supervisor." >&2
+echo "[babysitter-codex] Stop hook is not supported on Codex; continue the run explicitly with babysitter-codex-turn." >&2
 exit 0

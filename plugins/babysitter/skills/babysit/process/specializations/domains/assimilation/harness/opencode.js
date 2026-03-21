@@ -1,6 +1,6 @@
 /**
  * @process assimilation/harness/opencode
- * @description Orchestrate babysitter SDK integration into OpenCode. Sets up plugin hooks, MCP tools, session.idle loop driver, and custom tools.
+ * @description Orchestrate babysitter SDK integration into OpenCode using the real plugin and configuration surfaces first: project or global config, repo-local plugins and tools, session.created and session.idle events, MCP helpers, and documented SDK or server fallbacks instead of an invented stop hook.
  * @inputs { projectDir: string, targetQuality: number, maxIterations: number }
  * @outputs { success: boolean, integrationFiles: string[], finalQuality: number, iterations: number }
  */
@@ -19,7 +19,8 @@ import {
  * OpenCode Harness Integration Process
  *
  * Orchestrates the full integration of babysitter SDK into an OpenCode project.
- * Follows the Plugin with Stop Hook strategy (Strategy A) from the integration guide.
+ * Prefers the actual OpenCode plugin and event model, with session.idle as the
+ * researched continuation callback and no fake stop-hook contract.
  *
  * Phases:
  *   1. Analyze  - Inspect project structure, detect existing OpenCode config
@@ -27,7 +28,7 @@ import {
  *   3. Implement - Write plugin hooks, MCP tool registration, session.idle driver,
  *                  effect mapping, result posting, doom_loop handling, custom tool
  *   4. Test     - Run integration tests against scaffolded files
- *   5. Verify   - Quality gate: lint, type-check, smoke test
+ *   5. Verify   - Quality gate: runtime-aware verification backed by real host reentry evidence
  *   6. Converge - Iterative refinement until targetQuality is met
  *
  * @param {Object} inputs - Process inputs
@@ -52,8 +53,8 @@ export async function process(inputs, ctx) {
     projectDir,
     harnessName: 'OpenCode',
     upstreamSource: 'official OpenCode plugin model plus the canonical babysitter plugin repo',
-    distributionTarget: 'OpenCode plugin hooks, opencode.json, custom tools, and runtime install path',
-    loopModel: 'session.idle and stop-hook continuation with explicit yield back to the harness user'
+    distributionTarget: 'OpenCode plugin hooks, project or global opencode config, repo-local custom tools, MCP helpers, and runtime install path',
+    loopModel: 'session.idle continuation with plugin state, client prompt reentry, and documented SDK or server fallback only when the host event model is insufficient'
   });
 
   integrationFiles.push(...(researchResult.artifactsCreated || []));
@@ -204,7 +205,7 @@ export async function process(inputs, ctx) {
   let runtimeValidationResult = await ctx.task(runHarnessRuntimeValidationTask, {
     projectDir,
     harnessName: 'OpenCode',
-    loopModel: 'session.idle and stop-hook continuation with explicit yield back to the harness user',
+    loopModel: 'session.idle continuation with plugin state, client prompt reentry, and documented SDK or server fallback only when the host event model is insufficient',
     research: researchResult,
     docs: docsResult,
     integrationFiles,
@@ -269,7 +270,7 @@ export async function process(inputs, ctx) {
     runtimeValidationResult = await ctx.task(runHarnessRuntimeValidationTask, {
       projectDir,
       harnessName: 'OpenCode',
-      loopModel: 'session.idle and stop-hook continuation with explicit yield back to the harness user',
+      loopModel: 'session.idle continuation with plugin state, client prompt reentry, and documented SDK or server fallback only when the host event model is insufficient',
       research: researchResult,
       docs: docsResult,
       integrationFiles,
@@ -348,11 +349,12 @@ export const analyzeProjectTask = defineTask('analyze-opencode-project', (args, 
         '1. Check if .opencode/ directory exists',
         '2. Check if .opencode/plugins/ directory exists',
         '3. Check if .opencode/tools/ directory exists',
-        '4. Check if opencode.json exists and read its contents',
-        '5. Check if package.json exists and has @opencode-ai/sdk dependency',
-        '6. Check if .a5c/ directory exists (prior babysitter integration)',
-        '7. Check if any MCP servers are already configured',
-        '8. Identify the project language/framework (Go, Node, etc.)',
+        '4. Check for project config in .opencode/opencode.json, .opencode/opencode.jsonc, or any other documented local config path and read its contents',
+        '5. Check whether the project relies on global OpenCode config instead of repo-local config',
+        '6. Check if package.json exists and has @opencode-ai/sdk dependency',
+        '7. Check if .a5c/ directory exists (prior babysitter integration)',
+        '8. Check if any MCP servers are already configured',
+        '9. Identify the project language/framework (Go, Node, etc.)',
         'Return a structured analysis of what exists and what needs to be created'
       ],
       outputFormat: 'JSON with hasOpencodeJson (bool), hasPluginsDir (bool), hasToolsDir (bool), opencodeJsonContent (object|null), hasA5cDir (bool), projectType (string), existingMcpServers (array), recommendations (array)'
@@ -489,8 +491,8 @@ export const scaffoldOpencodeConfigTask = defineTask('scaffold-opencode-config',
       },
       instructions: [
         args.hasOpencodeJson
-          ? 'Merge babysitter configuration into the existing opencode.json without overwriting existing settings'
-          : `Create opencode.json at ${args.projectDir}/opencode.json`,
+          ? 'Merge babysitter configuration into the existing project OpenCode config without overwriting existing settings'
+          : `Create the documented project-level OpenCode config under ${args.projectDir}/.opencode/ (prefer opencode.jsonc when that is the current upstream format)`,
         'Register the babysitter plugin: plugins.babysitter = { path: ".opencode/plugins/babysitter" }',
         'Register babysitter MCP server in mcpServers section:',
         '  "babysitter": {',
@@ -500,6 +502,7 @@ export const scaffoldOpencodeConfigTask = defineTask('scaffold-opencode-config',
         '  }',
         'Add tool permissions for babysitter tools: babysitter_run_create, babysitter_run_iterate,',
         '  babysitter_task_post, babysitter_session_init, babysitter_session_check',
+        'Document whether this configuration lives in repo-local or global scope and how operators install or disable it later',
         'Set experimental.chat.system.transform if not already set',
         'Return list of created/modified files'
       ],
@@ -526,31 +529,31 @@ export const scaffoldOpencodeConfigTask = defineTask('scaffold-opencode-config',
 
 export const implementPluginHooksTask = defineTask('implement-plugin-hooks', (args, taskCtx) => ({
   kind: 'agent',
-  title: 'Implement plugin hooks (session.created, session.idle, session.error)',
+  title: 'Implement plugin hooks around the real OpenCode event model',
   description: 'Write the core plugin hook implementations for babysitter lifecycle',
 
   agent: {
     name: 'general-purpose',
     prompt: {
       role: 'senior integration engineer implementing OpenCode plugin hooks for babysitter',
-      task: 'Implement the plugin hooks object with session.created, session.idle, session.error, and stop hook',
+      task: 'Implement the plugin hooks object with session.created, session.idle, session.error, and only the additional continuation surfaces OpenCode actually documents',
       context: {
         projectDir: args.projectDir,
         analysis: args.analysis
       },
       instructions: [
         'Edit the babysitter plugin entry point at .opencode/plugins/babysitter/index.ts',
-        'Implement the following hooks:',
+        'Implement the following host-native hooks:',
         '',
         'session.created:',
         '  - Generate babysitter session ID (opencode-<timestamp>-<random>)',
         '  - Run: npx babysitter session:init --session-id <id>',
         '  - Run: npx babysitter run:create --process-id <processId> --harness opencode --session-id <id> --plugin-root <pluginRoot> when native binding is available',
         '  - Only fall back to explicit association if OpenCode truly lacks a first-class harness binding path',
-        '  - Store run ID and session state in plugin state',
+        '  - Store run ID, session state, and any session handle or thread identity in plugin state at creation time',
         '',
         'session.idle:',
-        '  - This is the orchestration loop driver',
+        '  - This is the primary orchestration loop driver when the researched OpenCode event model provides it',
         '  - Run: npx babysitter session:check-iteration --session-id <id> --run-id <runId>',
         '  - If shouldContinue: run npx babysitter run:iterate --run-id <runId>',
         '  - Parse iterate output for pending effects',
@@ -562,11 +565,9 @@ export const implementPluginHooksTask = defineTask('implement-plugin-hooks', (ar
         '  - Log error to babysitter via: npx babysitter session:update --status error',
         '  - Clean up any pending state',
         '',
-        'stop hook:',
-        '  - Check if run is completed; if yes, allow stop',
-        '  - If not completed, check iteration count against MAX_ITERATIONS',
-        '  - If under limit, send continuation prompt to keep working',
-        '  - If over limit, allow stop with warning',
+        'Do not invent or scaffold a fake stop hook if OpenCode does not actually expose one.',
+        'If the research shows a separate server or SDK continuation surface is needed for resume or long-running orchestration, wire it explicitly and document why session.idle alone is insufficient',
+        'Reject designs that depend on a Claude-style startup bridge hack when the plugin event payload already exposes session identity',
         '',
         'Include proper TypeScript types and error handling',
         'Use CONFIG constants for all tunable values',
@@ -704,7 +705,7 @@ export const implementIdleDriverTask = defineTask('implement-idle-driver', (args
       },
       instructions: [
         `Edit the plugin file at ${args.pluginFile}`,
-        'The session.idle hook fires when the agent completes a turn',
+        'The session.idle hook fires when the agent completes a turn or when the host reports the session is idle',
         'Implementation:',
         '  1. Check if a babysitter run is active (state.runId is set)',
         '  2. Run session:check-iteration to see if more work is needed',
@@ -716,11 +717,13 @@ export const implementIdleDriverTask = defineTask('implement-idle-driver', (args
         '        - If fastIterationCount > MAX_FAST_ITERATIONS, halt with error',
         '     c. Run run:iterate to get pending effects',
         '     d. Build continuation prompt from pending effects',
-        '     e. Send prompt via client.session.prompt()',
+        '     e. Send prompt via the documented session messaging surface, typically client.session.prompt()',
         '     f. Update lastIterationTime',
         '  4. If shouldContinue is false:',
         '     a. Set state.completed = true',
         '     b. Log completion',
+        'Persist enough session metadata to survive --continue or process restarts when OpenCode resumes later',
+        'Do not spin inline loops inside one callback; yield back to OpenCode after each post or prompt so the host keeps ownership of turn scheduling',
         'Ensure proper error handling and state updates',
         'Return list of modified files'
       ],
@@ -906,7 +909,7 @@ export const implementDoomLoopHandlingTask = defineTask('implement-doom-loop-han
 export const runIntegrationTestsTask = defineTask('run-integration-tests', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Run integration tests for OpenCode babysitter plugin',
-  description: 'Verify all integration files are syntactically valid and structurally correct',
+  description: 'Run preflight and host-level reentry checks for the OpenCode plugin before shared runtime validation',
 
   agent: {
     name: 'general-purpose',
@@ -922,12 +925,14 @@ export const runIntegrationTestsTask = defineTask('run-integration-tests', (args
         '  1. File exists and is non-empty',
         '  2. TypeScript files parse without syntax errors (use tsc --noEmit or similar)',
         '  3. JSON files are valid JSON',
-        '  4. opencode.json has required babysitter sections (plugins, mcpServers)',
+        '  4. The documented OpenCode config file has required babysitter sections (plugins, mcpServers)',
         '  5. Plugin entry point exports a valid Plugin object',
         '  6. Custom tool exports a valid tool definition',
         '  7. All imports resolve (check for missing dependencies)',
+        '  8. No generated file assumes a fake stop hook or root-level config path that disagrees with current OpenCode docs',
         'Run: npx tsc --noEmit on the plugin directory if tsconfig exists',
         'Run: npx babysitter health to verify SDK is accessible',
+        'Run a real plugin-level flow that proves session.idle reentry or the documented fallback control plane after yielding to the user; treat this as preflight evidence and expect the shared runtime validation task to provide the final harness proof',
         'Compile test results into a summary',
         'Return: total tests, passed count, failed count, failure details'
       ],
@@ -976,8 +981,8 @@ export const verifyIntegrationTask = defineTask('verify-integration', (args, tas
         '1. Research and upstream install model (10): real distribution and hook points understood first',
         '2. Canonical babysit skill adaptation (10): important Claude Code behavior preserved',
         '3. Plugin structure (10): Correct directory layout, valid package.json, proper exports',
-        '4. Hook completeness (10): All 4 hooks implemented (session.created, session.idle, session.error, stop)',
-        '5. Orchestration loop (10): session.idle and stop handling preserve yield-to-user continuation',
+        '4. Event-model fidelity (10): only real documented OpenCode hooks and config paths are used; no fake stop hook',
+        '5. Orchestration loop (10): session.idle plus any documented fallback control plane preserve yield-to-user continuation',
         '6. Effect mapping (10): public effect kinds stay agent, skill, shell, breakpoint, or sleep',
         '7. Result posting (10): output.json plus task:post used correctly',
         '8. Install docs and operator readiness (10): install, upgrade, rollback, troubleshooting',

@@ -1,6 +1,6 @@
 /**
  * @process assimilation/harness/gemini-cli
- * @description Orchestrate babysitter SDK integration into Gemini CLI. Sets up gemini-extension.json, lifecycle hooks (SessionStart, AfterAgent, SessionEnd), MCP server, and sub-agent configs.
+ * @description Orchestrate babysitter SDK integration into Gemini CLI using the real Gemini extension and hook surfaces first: extension manifest, SessionStart and AfterAgent hooks, BeforeTool guards, MCP tools, and runtime install or sync from the canonical babysitter repo.
  * @inputs { projectDir: string, targetQuality: number, maxIterations: number }
  * @outputs { success: boolean, integrationFiles: string[], finalQuality: number, iterations: number }
  */
@@ -25,9 +25,9 @@ import {
  * Phases: Analyze -> Scaffold -> Implement -> Test -> Verify -> Converge
  *
  * Integrates the babysitter SDK into Gemini CLI by creating the extension
- * manifest, lifecycle hooks (SessionStart, AfterAgent, SessionEnd), MCP
- * server for CLI tool access, BeforeTool iteration guards, and sub-agent
- * configuration for parallel effect execution.
+ * manifest, using SessionStart for initialization only, using AfterAgent as
+ * the primary continuation owner, wiring BeforeTool guards, exposing an MCP
+ * server for CLI tool access, and preserving the canonical babysit contract.
  *
  * @param {Object} inputs - Process inputs
  * @param {string} inputs.projectDir - Absolute path to the target project
@@ -52,7 +52,7 @@ export async function process(inputs, ctx) {
     harnessName: 'Gemini CLI',
     upstreamSource: 'official Gemini CLI extension and hook model plus the canonical babysitter plugin repo',
     distributionTarget: 'Gemini extension manifest, settings, hooks, commands, and runtime install path',
-    loopModel: 'SessionStart and AfterAgent continuation with explicit yield back to the user'
+    loopModel: 'Gemini hook chain where SessionStart initializes state, AfterAgent owns continuation, BeforeTool enforces guards, and hook payload or environment session identity is used directly instead of a synthetic bridge'
   });
 
   integrationFiles.push(...(researchResult.artifactsCreated || []));
@@ -114,7 +114,7 @@ export async function process(inputs, ctx) {
   // PHASE 3: IMPLEMENT
   // ==========================================================================
 
-  ctx.log('phase:implement', 'Implementing lifecycle hooks, MCP server, and sub-agent configs');
+  ctx.log('phase:implement', 'Implementing Gemini hook chain, MCP server, and sub-agent configs');
 
   // Implement all independent hook scripts in parallel
   const [
@@ -205,7 +205,7 @@ export async function process(inputs, ctx) {
   let runtimeValidationResult = await ctx.task(runHarnessRuntimeValidationTask, {
     projectDir,
     harnessName: 'Gemini CLI',
-    loopModel: 'SessionStart and AfterAgent continuation with explicit yield back to the user',
+    loopModel: 'Gemini hook chain where SessionStart initializes state, AfterAgent owns continuation, BeforeTool enforces guards, and hook payload or environment session identity is used directly instead of a synthetic bridge',
     research: researchResult,
     docs: docsResult,
     integrationFiles,
@@ -269,7 +269,7 @@ export async function process(inputs, ctx) {
     runtimeValidationResult = await ctx.task(runHarnessRuntimeValidationTask, {
       projectDir,
       harnessName: 'Gemini CLI',
-      loopModel: 'SessionStart and AfterAgent continuation with explicit yield back to the user',
+      loopModel: 'Gemini hook chain where SessionStart initializes state, AfterAgent owns continuation, BeforeTool enforces guards, and hook payload or environment session identity is used directly instead of a synthetic bridge',
       research: researchResult,
       docs: docsResult,
       integrationFiles,
@@ -475,8 +475,8 @@ export const scaffoldDirectoryStructureTask = defineTask('scaffold-directory-str
 
 export const implementSessionStartHookTask = defineTask('implement-session-start-hook', (args, taskCtx) => ({
   kind: 'agent',
-  title: 'Implement SessionStart hook for SDK init and session binding',
-  description: 'Create session-start.sh: install SDK if needed, call session:init, create baseline state file',
+  title: 'Implement SessionStart hook for runtime init and direct session capture',
+  description: 'Create session-start.sh: install or sync the runtime assets if needed, capture Gemini session identity, and initialize baseline state without owning continuation',
 
   agent: {
     name: 'general-purpose',
@@ -490,10 +490,12 @@ export const implementSessionStartHookTask = defineTask('implement-session-start
       instructions: [
         'Create hooks/session-start.sh in the extension directory',
         'The script must follow the Gemini CLI hook protocol: read JSON from stdin, write JSON to stdout, use stderr for debug',
-        'On entry: ensure babysitter CLI is available (check PATH, try npm install -g, fallback to npx)',
-        'Read GEMINI_SESSION_ID from environment variable',
+        'On entry: ensure babysitter CLI or the repo-synced process library is available using the research-backed install order (extension-local runtime first, documented package-manager fallback second, ad-hoc global install last)',
+        'Read the Gemini session identity from the hook stdin payload first and only fall back to documented environment variables if the payload omits it',
         'Call: babysitter session:init --session-id $SESSION_ID --state-dir $STATE_DIR --json',
-        'This creates a session state file with YAML frontmatter (active, iteration, max_iterations, run_id, started_at)',
+        'Persist any run-to-session or session-to-hook metadata needed by later hooks explicitly in state; do not use SessionStart as a fake bridge just to smuggle identity into AfterAgent later',
+        'This creates a session state file with YAML frontmatter or equivalent structured state (active, iteration, max_iterations, run_id, started_at)',
+        'SessionStart is initialization only; it must not try to continue the orchestration loop or emulate a stop hook',
         'Output empty JSON {} on stdout and exit 0 on success',
         'Handle errors gracefully: output {} and exit 0 (non-fatal)',
         'Make the script executable (chmod +x)',
@@ -522,8 +524,8 @@ export const implementSessionStartHookTask = defineTask('implement-session-start
 
 export const implementAfterAgentHookTask = defineTask('implement-after-agent-hook', (args, taskCtx) => ({
   kind: 'agent',
-  title: 'Implement AfterAgent hook as orchestration loop driver',
-  description: 'Create after-agent.sh: check run status, deny exit to continue loop, approve on completion',
+  title: 'Implement AfterAgent hook as the primary orchestration loop driver',
+  description: 'Create after-agent.sh: evaluate run state after each turn, deny only when more babysitter work remains, and approve completion or fail-safe exit',
 
   agent: {
     name: 'general-purpose',
@@ -536,12 +538,13 @@ export const implementAfterAgentHookTask = defineTask('implement-after-agent-hoo
       },
       instructions: [
         'Create hooks/after-agent.sh in the extension directory',
-        'This is the CORE orchestration loop driver - it fires after every agent turn',
+        'This is the CORE orchestration loop driver and the primary continuation owner; it fires after every agent turn',
         'Follow Gemini CLI hook protocol: read JSON stdin, write JSON stdout, exit codes',
-        'Read the agent turn output from stdin JSON payload',
-        'Check if session has an active babysitter run (read state file)',
+        'Read the agent turn output and session identity from the hook stdin JSON payload',
+        'Check if session has an active babysitter run using the direct hook identity first and persisted state second',
         'If no active run: output {} and exit 0 (allow session to end normally)',
         'If active run: call babysitter session:check-iteration --session-id $SESSION_ID --state-dir $STATE_DIR --json',
+        'Do not create or depend on an external orchestrator process when AfterAgent plus persisted state is sufficient to keep the loop alive',
         'Check for completion proof: scan agent output for <promise>PROOF</promise> pattern',
         'Validate the proof: sha256("{runId}:babysitter-completion-secret-v1")',
         'Decision mapping:',
@@ -550,6 +553,7 @@ export const implementAfterAgentHookTask = defineTask('implement-after-agent-hoo
         '  - Max iterations exceeded: output {} exit 0 (APPROVE - fail-safe exit)',
         '  - Error during check: output {} exit 0 (APPROVE - fail-safe)',
         'The systemMessage in deny response must include: iteration count, pending effects summary, next step instructions',
+        'Use Gemini deny semantics rather than inventing a non-Gemini block contract; reserve non-zero exit handling for actual hook failure cases only',
         'Exit code 2 blocks the agent turn entirely (use for critical errors only)',
         'Make the script executable',
         'Return list of created files'
@@ -644,7 +648,7 @@ export const configureMcpServerTask = defineTask('configure-mcp-server', (args, 
         '  - babysitter_run_status: Get current run status and pending effects',
         '  - babysitter_task_list: List pending/completed tasks',
         '  - babysitter_task_post: Post a result for a pending task/effect',
-        '  - babysitter_session_associate: Bind session to a run',
+        '  - babysitter_session_associate: Bind session to a run only if research proves Gemini lacks harness-native binding and the fallback helper must remain available',
         'Each tool must: validate inputs, shell out to babysitter CLI with --json flag, parse and return JSON result',
         'Include proper error handling and timeout management',
         'Map Gemini tool execution results to babysitter effect execution results',
@@ -695,8 +699,8 @@ export const implementBeforeToolHookTask = defineTask('implement-before-tool-hoo
         '  - If max iterations exceeded: deny tool execution with explanation (exit 2)',
         '  - Map Gemini tool names to babysitter effect kinds for tracking',
         'Tool-to-effect mapping:',
-        '  - File read/write tools -> node effects',
-        '  - Shell execution tools -> node effects',
+        '  - File read/write tools -> track as agent-owned work within the current turn; never mint a public node effect from this hook',
+        '  - Shell execution tools -> shell effects',
         '  - MCP tool calls -> mapped by tool name prefix',
         'Log iteration progress to stderr for debugging',
         'Make the script executable',
@@ -802,6 +806,7 @@ export const createGeminiSettingsTask = defineTask('create-gemini-settings', (ar
         'Register mcpServers section with the babysitter MCP server',
         'Use ${extensionPath} variable for hook command paths',
         'Set appropriate timeouts (SessionStart: 30s, AfterAgent: 30s, SessionEnd: 10s, BeforeTool: 5s)',
+        'Document in settings comments or adjacent docs that SessionStart initializes state and AfterAgent owns continuation so later maintainers do not reintroduce an external supervisor unnecessarily',
         'If settings.json already exists, merge rather than overwrite',
         'Return list of created/modified files'
       ],
@@ -853,11 +858,12 @@ export const runIntegrationTestsTask = defineTask('run-integration-tests', (args
         'Test .gemini/settings.json: valid JSON, hooks registered correctly',
         'Test GEMINI.md: exists and contains required workflow instructions',
         'Test commands/babysit.toml: valid TOML format',
-        'Run a dry-run of the full flow:',
-        '  1. session:init',
-        '  2. run:create using the Gemini harness binding path first (with --dry-run only as a shallow precheck if supported)',
-        '  3. explicit session association only as a documented fallback when Gemini lacks native binding',
-        '  4. Check AfterAgent hook response and user-yield reentry behavior',
+        'Run a real host-level validation flow here as a preflight, with the shared runtime validation task providing the final runtime proof:',
+        '  1. Verify SessionStart resolves session identity from hook payload or documented env without a synthetic bridge file',
+        '  2. session:init',
+        '  3. run:create using the Gemini harness binding path first (with --dry-run only as a shallow precheck if supported)',
+        '  4. if native binding is unavailable, exercise the documented fallback association flow and record the gap rather than treating it as the primary contract',
+        '  5. Check AfterAgent deny or approve behavior and user-yield reentry behavior on the next Gemini callback',
         'Report pass/fail for each test',
         'Return structured test results'
       ],
@@ -915,8 +921,8 @@ export const verifyIntegrationTask = defineTask('verify-integration', (args, tas
         '  - Research and upstream distribution understanding (15 points)',
         '  - Canonical babysit skill adaptation fidelity (15 points)',
         '  - Hook protocol compliance and continuation behavior (20 points): correct stdin/stdout JSON, exit codes, yield-to-user reentry',
-        '  - SessionStart hook and runtime install flow (10 points)',
-        '  - AfterAgent hook completion proof validation (10 points)',
+        '  - Direct session context propagation and runtime install flow (10 points): no synthetic startup bridge when hook payload or env already carries identity',
+        '  - AfterAgent hook continuation ownership and completion proof validation (10 points)',
         '  - MCP server and tool exposure (10 points)',
         '  - Settings, docs, and operator install guidance (10 points)',
         '  - Error handling and edge cases (10 points)',

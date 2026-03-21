@@ -24,6 +24,16 @@ Resume an existing babysitter orchestration run that was previously stopped, int
 5. Runs the next orchestration iteration via the SDK.
 6. Injects a continuation prompt if effects are still pending.
 
+## Implementation Notes
+
+This command doc can describe the low-level Babysitter runtime behavior that the
+pi plugin hides from end users.
+
+- Resume may use raw Babysitter replay, iteration, and session-binding
+  primitives internally.
+- If the harness has a native resume path, prefer that over an explicit
+  fallback association flow.
+
 ## Notes
 
 - The run must exist on disk in the configured runs directory (`BABYSITTER_RUNS_DIR`).

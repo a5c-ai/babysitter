@@ -1,6 +1,6 @@
 /**
  * @process assimilation/harness/openclaw
- * @description Orchestrate babysitter SDK integration into OpenClaw. Sets up npm plugin package, lifecycle hooks (before_agent_start, agent_end), MCP tools, SKILL.md, and daemon-specific adapters.
+ * @description Orchestrate babysitter SDK integration into OpenClaw with research-first use of the real plugin, capability, session, and hook surfaces. Prefer authoritative session and capability context over legacy hook-only bridging, with daemon-safe reentry after user yield.
  * @inputs { projectDir: string, targetQuality: number, maxIterations: number }
  * @outputs { success: boolean, integrationFiles: string[], finalQuality: number, iterations: number }
  */
@@ -54,7 +54,7 @@ export async function process(inputs, ctx) {
     harnessName: 'OpenClaw',
     upstreamSource: 'official OpenClaw package, plugin registry, and the canonical babysitter plugin repo',
     distributionTarget: 'OpenClaw plugin package, openclaw.json MCP tools, hooks, and runtime install path',
-    loopModel: 'daemon lifecycle hooks with user-yield continuation across agent_end and channel resumes'
+    loopModel: 'session-serialized daemon continuation using authoritative session or capability context, with agent_end or documented wait or resume callbacks owning reentry after user yield'
   });
 
   integrationFiles.push(...(researchResult.artifactsCreated || []));
@@ -203,7 +203,7 @@ export async function process(inputs, ctx) {
   let runtimeValidationResult = await ctx.task(runHarnessRuntimeValidationTask, {
     projectDir,
     harnessName: 'OpenClaw',
-    loopModel: 'daemon lifecycle hooks with user-yield continuation across agent_end and channel resumes',
+    loopModel: 'session-serialized daemon continuation using authoritative session or capability context, with agent_end or documented wait or resume callbacks owning reentry after user yield',
     research: researchResult,
     docs: docsResult,
     integrationFiles,
@@ -260,7 +260,7 @@ export async function process(inputs, ctx) {
     runtimeValidationResult = await ctx.task(runHarnessRuntimeValidationTask, {
       projectDir,
       harnessName: 'OpenClaw',
-      loopModel: 'daemon lifecycle hooks with user-yield continuation across agent_end and channel resumes',
+      loopModel: 'session-serialized daemon continuation using authoritative session or capability context, with agent_end or documented wait or resume callbacks owning reentry after user yield',
       research: researchResult,
       docs: docsResult,
       integrationFiles,
@@ -344,15 +344,15 @@ export const analyzeOpenClawSetupTask = defineTask('analyze-openclaw-setup', (ar
         projectDir: args.projectDir
       },
       instructions: [
-        'Check OpenClaw Gateway version (must be v0.40+)',
-        'Verify Node.js version (must be >= 22)',
+        'Record the installed OpenClaw and Node.js versions, then confirm required minimums from the current upstream docs instead of assuming older thresholds',
         'Inspect existing plugin registry for conflicts',
         'Identify session manager configuration (SQLite path, per-agent isolation)',
         'Map channel router configuration (WhatsApp, Telegram, Slack, etc.)',
-        'Check for existing hooks that may conflict with before_agent_start / agent_end',
+        'Check for existing hooks or capabilities that may conflict with before_agent_start, agent_end, agent.wait, or session-scoped continuation surfaces',
         'Verify file system access to workspace for .a5c/runs/ and session state',
-        'Check if tool_result_persist hook is available (recommended)',
-        'Document the OpenClawPluginApi surface: registerHook, registerCommand, registerService, registerGatewayMethod',
+        'Check whether capability registration, agent.wait, session keys, or equivalent authoritative per-session context surfaces are available and preferred over legacy hook-only flow',
+        'Check if tool_result_persist hook is available and whether it is authoritative or only advisory',
+        'Document the OpenClawPluginApi surface: registerHook, registerCommand, registerService, registerGatewayMethod, capability registration, and any session APIs',
         'Generate an audit report as openclaw-audit.md'
       ],
       outputFormat: 'JSON with gatewayVersion (string), nodeVersion (string), existingPlugins (array), channels (array), conflicts (array), capabilities (object), auditMarkdown (string)'
@@ -460,7 +460,9 @@ export const createSkillMdTask = defineTask('create-skill-md', (args, taskCtx) =
         'Define the skill name, description, and trigger conditions',
         'Document input schema for process invocation',
         'Explain the orchestration loop: harness-native run:create binding -> iterate -> execute -> post -> yield -> harness-driven reentry',
-        'Document explicit session association only as a fallback external mode',
+        'Explain which runtime surface actually owns reentry for the researched deployment: capability callback, agent_end, agent.wait, or another documented session callback',
+        'Document explicit session association only as a secondary external recovery path, not the primary contract',
+        'Make clear that before_agent_start is initialization or compatibility glue only when richer session context already exists',
         'Describe how breakpoints surface to the user via channel messages',
         'Include examples for common use cases (code review, project planning, etc.)',
         'Document daemon-specific behavior (always-on, multi-channel routing)',
@@ -507,17 +509,18 @@ export const implementLifecycleHooksTask = defineTask('implement-lifecycle-hooks
         scaffold: args.scaffold
       },
       instructions: [
-        'Implement before_agent_start hook via api.registerHook("before_agent_start", handler, meta)',
-        '  - Initialize babysitter session state (babysitter session:init)',
+        'Prefer the strongest researched control plane in this order: capability registration and session APIs, authoritative wait or resume callbacks, agent_end, and before_agent_start compatibility glue last',
+        'Implement before_agent_start only for initialization or migration compatibility:',
+        '  - Initialize babysitter session state when the session does not already expose authoritative run context',
         '  - Check for existing active runs and resume if needed',
-        '  - Set up session context in the agent environment',
-        'Implement agent_end hook via api.registerHook("agent_end", handler, meta)',
-        '  - This is the orchestration loop driver',
-        '  - After agent completes a turn, evaluate run state (session:check-iteration)',
+        '  - Do not use before_agent_start as a fake bridge just to pass identity to later callbacks if the later callback already includes a session key or context object',
+        'Implement the researched continuation owner (agent_end, agent.wait, or equivalent):',
+        '  - After agent completes a turn or resumes from wait, evaluate run state (session:check-iteration)',
         '  - If run is incomplete: call run:iterate, extract pending effects, execute them',
-        '  - If effects need agent work: re-inject context via sessions_send',
+        '  - If effects need agent work: re-inject context via the documented session messaging surface',
         '  - If run is complete with proof matched: allow session to end, cleanup state',
-        'Implement tool_result_persist hook if available for completion proof scanning',
+        'Persist run-to-session mapping from authoritative session keys or capability payloads at creation time instead of rebuilding identity from hook order assumptions',
+        'Implement tool_result_persist only if it is a real supported surface for proof scanning; otherwise scan the authoritative turn transcript or agent_end payload',
         'Handle errors gracefully with retry logic and cleanup',
         'Return list of created files'
       ],
@@ -566,10 +569,11 @@ export const registerMcpToolsTask = defineTask('register-mcp-tools', (args, task
         'Create or update openclaw.json with babysitter MCP tool definitions',
         'Register tools for: run:create, run:iterate, run:status, task:list, task:post, task:show',
         'Register tools for: session:init, session:check-iteration',
-        'Prefer harness-native run:create binding and document explicit session association only as a fallback',
+        'Prefer harness-native run:create binding and document explicit session association only as a secondary recovery path when a native binding surface is genuinely absent',
+        'When OpenClaw already exposes capability or session APIs for orchestration, treat MCP tools as agent-facing helpers rather than the sole control plane',
         'Define input schemas for each tool matching babysitter CLI argument formats',
         'Set appropriate sandbox permissions for file system access (.a5c/runs/)',
-        'Include sessions_send as an allowed tool for orchestration re-injection',
+        'Include the researched session messaging primitive for orchestration re-injection only if it is a supported public surface',
         'Return list of tools registered and files created/modified'
       ],
       outputFormat: 'JSON with filesCreated (array), toolsRegistered (array), manifest (object)'
@@ -617,7 +621,7 @@ export const mapAgentRoutingTask = defineTask('map-agent-routing', (args, taskCt
         'Map agent task effects to OpenClaw agent sessions via sessions_send or sessions_spawn',
         'Handle multi-channel routing: effects may originate from WhatsApp, Telegram, Slack, etc.',
         'Ensure session isolation: each agent session maps to one babysitter run at a time',
-        'Implement effect-type routing: agent tasks -> agent session, node tasks -> direct execution',
+        'Implement effect-type routing: agent tasks -> agent session, shell tasks -> direct execution, and keep complex local execution under agent or shell semantics rather than inventing public node effects',
         'Handle breakpoint effects: surface as channel messages, await user response',
         'Handle sleep effects: use daemon scheduling (setTimeout or cron) since OpenClaw is always-on',
         'Handle parallel effects: dispatch multiple agent sessions concurrently',
@@ -720,7 +724,7 @@ export const implementDaemonAdapterTask = defineTask('implement-daemon-adapter',
       },
       instructions: [
         'Handle always-on daemon lifecycle: graceful startup, shutdown, restart recovery',
-        'Implement run resumption after daemon restart (check for incomplete runs on before_agent_start)',
+        'Implement run resumption after daemon restart using the strongest researched startup or resume surface, with before_agent_start used only if it is the real public restart hook in this deployment',
         'Handle multi-channel considerations: same user across WhatsApp + Telegram should share context',
         'Implement session-to-run mapping persistence in SQLite alongside OpenClaw session state',
         'Handle concurrent sessions: multiple users running babysitter processes simultaneously',
@@ -773,14 +777,15 @@ export const runIntegrationTestsTask = defineTask('run-integration-tests', (args
       instructions: [
         'Test plugin activation: verify package loads and hooks register correctly',
         'Test runtime install and sync: verify the plugin can be installed or refreshed from the upstream source and that canonical babysit assets are present',
-        'Test before_agent_start hook: verify session:init is called and state file created',
-        'Test agent_end hook: verify orchestration loop driver evaluates run state correctly',
+        'Test initialization path: verify authoritative session or capability context is captured without relying on a startup bridge when the host already provides identity',
+        'Test the researched continuation path (agent_end, agent.wait, or equivalent): verify orchestration loop driver evaluates run state correctly',
         'Test MCP tool registration: verify all babysitter tools appear in openclaw.json',
         'Test run lifecycle: create -> iterate -> execute effect -> post result -> yield -> harness-driven reentry -> complete',
         'Test breakpoint surfacing: verify breakpoints appear as channel messages',
         'Test multi-channel routing: verify effects dispatch to correct agent sessions',
         'Test daemon restart recovery: verify incomplete runs resume after restart',
         'Test concurrent sessions: verify multiple simultaneous runs do not conflict',
+        'Test channels or execution modes where agent_end is skipped or delayed and verify the documented fallback continuation surface still keeps babysitter in the loop',
         'Test error handling: verify graceful degradation on SDK unavailability',
         'Generate test results report'
       ],
@@ -843,7 +848,7 @@ export const verifyIntegrationQualityTask = defineTask('verify-integration-quali
         '  - Research and upstream install fidelity',
         '  - Canonical babysit skill adaptation quality',
         '  - Correctness: test pass rate and protocol compliance',
-        '  - Runtime robustness: daemon restart recovery, concurrent session handling, lock contention, and user-yield continuation',
+        '  - Runtime robustness: daemon restart recovery, concurrent session handling, lock contention, authoritative session mapping, and user-yield continuation',
         '  - Documentation and operator readiness: SKILL.md, README, install, upgrade, rollback',
         '  - Code quality: no any types, proper error handling, no floating promises',
         'Compute weighted average as overall quality score',
