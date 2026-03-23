@@ -165,8 +165,11 @@ export async function handleProcessLibraryCommand(
       return handleProcessLibraryUse(args);
     case "active":
       return handleProcessLibraryActive(args);
-    default:
-      console.error(`[process-library] Unknown subcommand: ${args.subcommand}`);
+    default: {
+      const _exhaustive: never = args.subcommand;
+      void _exhaustive;
+      console.error("[process-library] Unknown subcommand");
       return 1;
+    }
   }
 }
