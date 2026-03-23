@@ -23,6 +23,7 @@
     "smoke:cli": "node scripts/smoke-cli.js --runs-dir packages/sdk/test-fixtures/cli/runs/smoke"
   },
   "dependencies": {
+    "@mariozechner/pi-coding-agent": "*",
     "@modelcontextprotocol/sdk": "^1.12.1",
     "fs-extra": "^11.2.0",
     "ulid": "^2.3.0"
