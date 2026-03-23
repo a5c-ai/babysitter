@@ -86,7 +86,9 @@ export async function serializeTaskDefinition(
   options: SerializeTaskDefinitionOptions
 ): Promise<SerializedTaskDefinition> {
   const normalized = normalizeTaskDef(options.task);
+  const preservedTaskDef = stableClone(options.task as JsonRecord);
   const serialized: SerializedTaskDefinition = {
+    ...preservedTaskDef,
     schemaVersion: TASK_SCHEMA_VERSION,
     effectId: options.effectId,
     taskId: options.taskId,

@@ -291,6 +291,36 @@ test('mapEffectToCodexPrompt builds agent prompt with all fields', () => {
   assert.ok(prompt.includes('JSON'));
 });
 
+test('mapEffectToCodexPrompt handles SDK-serialized agent task definitions', () => {
+  const prompt = em.mapEffectToCodexPrompt({
+    schemaVersion: '2026.01.tasks-v1',
+    effectId: '01TESTEFFECT',
+    taskId: 'create-alpha-artifact',
+    invocationKey: 'ci:S000001:create-alpha-artifact',
+    stepId: 'S000001',
+    kind: 'agent',
+    title: 'Create alpha artifact',
+    inputs: { contents: 'alpha-run-ok' },
+    metadata: { stage: 'alpha' },
+    agent: {
+      role: 'CI filesystem validation agent',
+      task: 'Create codex-artifacts/alpha.txt in the current workspace.',
+      context: {
+        requiredContents: 'alpha-run-ok',
+        requiredPath: 'codex-artifacts/alpha.txt',
+      },
+      instructions: [
+        'Create the file if it does not exist.',
+        'Write exactly the required contents followed by a trailing newline.',
+      ],
+      outputFormat: 'plain text',
+    },
+  });
+  assert.ok(prompt.includes('CI filesystem validation agent'));
+  assert.ok(prompt.includes('Create codex-artifacts/alpha.txt'));
+  assert.ok(prompt.includes('"requiredPath": "codex-artifacts/alpha.txt"'));
+});
+
 test('mapEffectToCodexPrompt handles nested effect structure', () => {
   const prompt = em.mapEffectToCodexPrompt({
     effect: { kind: 'agent', agent: { role: 'dev', task: 'code' } }
