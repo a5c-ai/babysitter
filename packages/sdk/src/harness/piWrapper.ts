@@ -13,6 +13,8 @@ import {
   BabysitterRuntimeError,
   ErrorCategory,
 } from "../runtime/exceptions";
+import { loadCompressionConfig } from "../compression/config-loader";
+import { createSecureBashBackend } from "./piSecureSandbox";
 
 const DEFAULT_TIMEOUT_MS = 120_000;
 
@@ -60,8 +62,8 @@ interface PiCodingAgentModule {
   };
   codingTools?: unknown[];
   readOnlyTools?: unknown[];
-  createCodingTools?: (cwd: string) => unknown[];
-  createReadOnlyTools?: (cwd: string) => unknown[];
+  createCodingTools?: (cwd: string, options?: Record<string, unknown>) => unknown[];
+  createReadOnlyTools?: (cwd: string, options?: Record<string, unknown>) => unknown[];
 }
 
 /** Minimal subset of AgentSession we depend on. */
@@ -128,6 +130,7 @@ export class PiSessionHandle {
   private readonly options: PiSessionOptions;
   private session: PiAgentSession | null = null;
   private initPromise: Promise<void> | null = null;
+  private readonly cleanupTasks: Array<() => Promise<void> | void> = [];
 
   constructor(options: PiSessionOptions = {}) {
     this.options = options;
@@ -286,6 +289,12 @@ export class PiSessionHandle {
       this.session = null;
       this.initPromise = null;
     }
+    while (this.cleanupTasks.length > 0) {
+      const cleanup = this.cleanupTasks.pop();
+      if (cleanup) {
+        void cleanup();
+      }
+    }
   }
 
   /** The underlying pi session ID, if initialized. */
@@ -319,6 +328,10 @@ export class PiSessionHandle {
 
     const createOpts: Record<string, unknown> = {};
     const cwd = this.options.workspace ?? process.cwd();
+    const compressionConfig = loadCompressionConfigSafe(cwd);
+    const compactionEnabled = this.options.enableCompaction ??
+      Boolean(compressionConfig?.enabled && compressionConfig.layers.sdkContextHook.enabled);
+    const compactionSettings = buildCompactionSettings(compactionEnabled);
     createOpts.cwd = cwd;
     if (this.options.agentDir) createOpts.agentDir = this.options.agentDir;
     if (this.options.thinkingLevel) createOpts.thinkingLevel = this.options.thinkingLevel;
@@ -327,46 +340,76 @@ export class PiSessionHandle {
       createOpts.sessionManager = mod.SessionManager.inMemory();
     }
 
+    const secureBashBackend = this.options.toolsMode === "coding" || this.options.toolsMode === "readonly"
+      ? await createSecureBashBackend({
+        workspace: cwd,
+        mode: this.options.bashSandbox ?? "auto",
+      })
+      : null;
+    if (secureBashBackend) {
+      this.cleanupTasks.push(() => secureBashBackend.dispose());
+    }
+    const toolOptions = secureBashBackend
+      ? {
+        bash: {
+          operations: secureBashBackend.operations,
+        },
+      }
+      : undefined;
+
     if (this.options.toolsMode === "coding") {
       createOpts.tools = mod.createCodingTools
-        ? mod.createCodingTools(cwd)
+        ? mod.createCodingTools(cwd, toolOptions)
         : mod.codingTools;
     } else if (this.options.toolsMode === "readonly") {
       createOpts.tools = mod.createReadOnlyTools
-        ? mod.createReadOnlyTools(cwd)
+        ? mod.createReadOnlyTools(cwd, toolOptions)
         : mod.readOnlyTools;
     }
 
+    const appendedSystemPrompt = [
+      ...(this.options.appendSystemPrompt ?? []),
+      ...(secureBashBackend ? [secureBashBackend.promptNote] : []),
+    ];
+
     if (
       this.options.systemPrompt ||
-      (this.options.appendSystemPrompt && this.options.appendSystemPrompt.length > 0) ||
-      this.options.isolated
+      appendedSystemPrompt.length > 0 ||
+      this.options.isolated ||
+      compactionEnabled
     ) {
       const settingsManager = mod.SettingsManager.inMemory({
         quietStartup: true,
-        compaction: { enabled: false },
+        compaction: compactionSettings.compaction,
+        branchSummary: compactionSettings.branchSummary,
       });
-      const resourceLoader = new mod.DefaultResourceLoader({
-        cwd,
-        agentDir: this.options.agentDir,
-        settingsManager,
-        noExtensions: this.options.isolated === true,
-        noSkills: this.options.isolated === true,
-        noPromptTemplates: this.options.isolated === true,
-        noThemes: this.options.isolated === true,
-        agentsFilesOverride: this.options.isolated === true
-          ? () => ({ agentsFiles: [] })
-          : undefined,
-        systemPromptOverride: this.options.systemPrompt
-          ? () => this.options.systemPrompt
-          : undefined,
-        appendSystemPromptOverride: this.options.appendSystemPrompt
-          ? (base: string[]) => [...base, ...this.options.appendSystemPrompt!]
-          : undefined,
-      });
-      await resourceLoader.reload();
       createOpts.settingsManager = settingsManager;
-      createOpts.resourceLoader = resourceLoader;
+      if (
+        this.options.systemPrompt ||
+        appendedSystemPrompt.length > 0 ||
+        this.options.isolated
+      ) {
+        const resourceLoader = new mod.DefaultResourceLoader({
+          cwd,
+          agentDir: this.options.agentDir,
+          settingsManager,
+          noExtensions: this.options.isolated === true,
+          noSkills: this.options.isolated === true,
+          noPromptTemplates: this.options.isolated === true,
+          noThemes: this.options.isolated === true,
+          agentsFilesOverride: this.options.isolated === true
+            ? () => ({ agentsFiles: [] })
+            : undefined,
+          systemPromptOverride: this.options.systemPrompt
+            ? () => this.options.systemPrompt
+            : undefined,
+          appendSystemPromptOverride: appendedSystemPrompt.length > 0
+            ? (base: string[]) => [...base, ...appendedSystemPrompt]
+            : undefined,
+        });
+        await resourceLoader.reload();
+        createOpts.resourceLoader = resourceLoader;
+      }
     }
 
     // Resolve model string to a model object from pi's ModelRegistry.
@@ -404,8 +447,18 @@ export class PiSessionHandle {
       // If not resolved, let createAgentSession handle default model selection
     }
 
-    const { session } = await mod.createAgentSession(createOpts);
-    this.session = session;
+    try {
+      const { session } = await mod.createAgentSession(createOpts);
+      this.session = session;
+    } catch (error: unknown) {
+      while (this.cleanupTasks.length > 0) {
+        const cleanup = this.cleanupTasks.pop();
+        if (cleanup) {
+          await cleanup();
+        }
+      }
+      throw error;
+    }
   }
 
   private requireSession(): PiAgentSession {
@@ -427,4 +480,49 @@ export class PiSessionHandle {
  */
 export function createPiSession(options?: PiSessionOptions): PiSessionHandle {
   return new PiSessionHandle(options);
+}
+
+function loadCompressionConfigSafe(cwd: string) {
+  try {
+    return loadCompressionConfig(cwd);
+  } catch {
+    return null;
+  }
+}
+
+function readPositiveIntegerEnv(name: string, fallback: number): number {
+  const raw = process.env[name];
+  if (!raw) return fallback;
+  const parsed = Number.parseInt(raw, 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+}
+
+function buildCompactionSettings(enabled: boolean): {
+  compaction: {
+    enabled: boolean;
+    reserveTokens?: number;
+    keepRecentTokens?: number;
+  };
+  branchSummary?: {
+    reserveTokens?: number;
+    skipPrompt?: boolean;
+  };
+} {
+  if (!enabled) {
+    return {
+      compaction: { enabled: false },
+    };
+  }
+
+  return {
+    compaction: {
+      enabled: true,
+      reserveTokens: readPositiveIntegerEnv("BABYSITTER_PI_COMPACTION_RESERVE_TOKENS", 8_192),
+      keepRecentTokens: readPositiveIntegerEnv("BABYSITTER_PI_COMPACTION_KEEP_RECENT_TOKENS", 12_288),
+    },
+    branchSummary: {
+      reserveTokens: readPositiveIntegerEnv("BABYSITTER_PI_BRANCH_SUMMARY_RESERVE_TOKENS", 4_096),
+      skipPrompt: false,
+    },
+  };
 }

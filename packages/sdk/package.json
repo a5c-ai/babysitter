@@ -23,6 +23,7 @@
     "smoke:cli": "node scripts/smoke-cli.js --runs-dir packages/sdk/test-fixtures/cli/runs/smoke"
   },
   "dependencies": {
+    "@agentsh/secure-sandbox": "^0.1.7",
     "@mariozechner/pi-coding-agent": "*",
     "@modelcontextprotocol/sdk": "^1.12.1",
     "@sinclair/typebox": "^0.34.48",

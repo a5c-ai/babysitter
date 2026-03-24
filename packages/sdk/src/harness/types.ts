@@ -126,6 +126,10 @@ export interface PiSessionOptions {
   isolated?: boolean;
   /** Use an in-memory session manager instead of persistent session files. */
   ephemeral?: boolean;
+  /** Bash tool execution backend. "secure" requires the sandbox backend, "auto" falls back to local. */
+  bashSandbox?: "auto" | "secure" | "local";
+  /** Whether PI session compaction should be enabled for this session. */
+  enableCompaction?: boolean;
   /** Global pi agent config directory (default: ~/.pi/agent). */
   agentDir?: string;
 }

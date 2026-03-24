@@ -24,6 +24,8 @@ import type {
   PiSessionEvent,
   SessionBindResult,
 } from "../../harness/types";
+import { loadCompressionConfig } from "../../compression/config-loader";
+import { densityFilterText, estimateTokens } from "../../compression/density-filter";
 import { getAdapterByName } from "../../harness";
 import {
   createApprovalAskUserQuestion,
@@ -43,6 +45,7 @@ import {
   buildOrchestrationUserPrompt,
   buildProcessDefinitionSystemPrompt,
 } from "./sessionCreatePrompts";
+import type { CompressionConfig } from "../../compression/config";
 
 export interface SessionCreateArgs {
   prompt?: string;
@@ -119,6 +122,32 @@ interface OrchestrationState {
   pendingEffectResults: Map<string, Awaited<ReturnType<typeof resolveEffect>>>;
   lastAskUserQuestionResponse?: AskUserQuestionResponse;
   finished?: OrchestrationFinishReport;
+}
+
+function loadSessionCompressionConfig(workspace?: string): CompressionConfig | null {
+  try {
+    return loadCompressionConfig(workspace ?? process.cwd());
+  } catch {
+    return null;
+  }
+}
+
+function compressInternalHarnessPrompt(
+  text: string,
+  compressionConfig: CompressionConfig | null | undefined,
+  taskKind: "agent" | "skill" | "breakpoint" = "agent",
+): string {
+  if (!compressionConfig?.enabled || !compressionConfig.layers.sdkContextHook.enabled) {
+    return text;
+  }
+
+  const layer = compressionConfig.layers.sdkContextHook;
+  if (estimateTokens(text) <= layer.minCompressionTokens) {
+    return text;
+  }
+
+  const targetReduction = layer.perTaskKind?.[taskKind] ?? layer.targetReduction;
+  return densityFilterText(text, targetReduction);
 }
 
 const HARNESS_PRIORITY: readonly string[] = [
@@ -310,6 +339,10 @@ function buildAgentPrompt(taskDef: Record<string, unknown>): string {
   return parts.join("\n");
 }
 
+function shellQuoteArg(value: string): string {
+  return `'${value.replace(/'/g, `'"'"'`)}'`;
+}
+
 function resolveTaskHarness(
   action: EffectAction,
   defaultHarness: string,
@@ -333,7 +366,12 @@ function resolveTaskHarness(
 async function resolveEffect(
   action: EffectAction,
   harnessName: string,
-  options: { workspace?: string; model?: string; interactive?: boolean },
+  options: {
+    workspace?: string;
+    model?: string;
+    interactive?: boolean;
+    compressionConfig?: CompressionConfig | null;
+  },
   piSession?: PiSessionHandle | null,
   discovered?: HarnessDiscoveryResult[],
   rl?: readline.Interface | null,
@@ -354,13 +392,18 @@ async function resolveEffect(
       metaPrompt ??
       action.taskDef?.title ??
       `Execute task ${action.taskId ?? action.effectId}`;
+    const effectivePrompt = compressInternalHarnessPrompt(
+      prompt,
+      options.compressionConfig,
+      "skill",
+    );
 
     const taskHarness = discovered
       ? resolveTaskHarness(action, harnessName, discovered)
       : harnessName;
 
     if ((taskHarness === "pi" || taskHarness === "oh-my-pi") && piSession) {
-      const piResult = await piSession.prompt(prompt);
+      const piResult = await piSession.prompt(effectivePrompt);
       return {
         status: piResult.success ? "ok" : "error",
         value: piResult.success ? piResult.output : undefined,
@@ -370,7 +413,7 @@ async function resolveEffect(
     }
 
     const result = await invokeHarness(taskHarness, {
-      prompt,
+      prompt: effectivePrompt,
       workspace: options.workspace,
       model: options.model,
     });
@@ -390,6 +433,18 @@ async function resolveEffect(
       ? (shellMeta.args as string[]).filter((arg): arg is string => typeof arg === "string")
       : [];
     const cwd = typeof shellMeta?.cwd === "string" ? shellMeta.cwd : options.workspace;
+    if (piSession) {
+      const bashCommand = [command, ...shellArgs.map(shellQuoteArg)].join(" ");
+      const bashResult = await piSession.executeBash(bashCommand);
+      return {
+        status: bashResult.exitCode === 0 ? "ok" : "error",
+        value: bashResult.exitCode === 0 ? bashResult.output : undefined,
+        error: bashResult.exitCode === 0
+          ? undefined
+          : new Error(`Shell command exited with code ${bashResult.exitCode ?? "null"}: ${bashResult.output}`),
+        stdout: bashResult.output,
+      };
+    }
     const shellResult = await execShellEffect(command, shellArgs, cwd);
     return {
       status: shellResult.exitCode === 0 ? "ok" : "error",
@@ -451,7 +506,11 @@ async function resolveEffect(
   }
 
   if (kind === "agent") {
-    const textPrompt = buildAgentPrompt(action.taskDef as unknown as Record<string, unknown>);
+    const textPrompt = compressInternalHarnessPrompt(
+      buildAgentPrompt(action.taskDef as unknown as Record<string, unknown>),
+      options.compressionConfig,
+      "agent",
+    );
     const taskHarness = discovered
       ? resolveTaskHarness(action, harnessName, discovered)
       : harnessName;
@@ -498,8 +557,13 @@ async function resolveEffect(
 
   const fallbackPrompt =
     action.taskDef?.title ?? `Handle effect ${action.effectId} (kind: ${kind})`;
+  const effectiveFallbackPrompt = compressInternalHarnessPrompt(
+    fallbackPrompt,
+    options.compressionConfig,
+    "skill",
+  );
   const result = await invokeHarness(harnessName, {
-    prompt: fallbackPrompt,
+    prompt: effectiveFallbackPrompt,
     workspace: options.workspace,
     model: options.model,
   });
@@ -634,6 +698,7 @@ async function runProcessDefinitionPhase(args: {
   rl: readline.Interface | null;
   json: boolean;
   verbose: boolean;
+  compressionConfig: CompressionConfig | null;
 }): Promise<string> {
   const state: { report?: ProcessDefinitionReport } = {};
   const customTools: unknown[] = [
@@ -695,6 +760,8 @@ async function runProcessDefinitionPhase(args: {
     appendSystemPrompt: [buildProcessDefinitionSystemPrompt(args.outputPath)],
     isolated: true,
     ephemeral: true,
+    bashSandbox: "secure",
+    enableCompaction: true,
   });
 
   try {
@@ -711,7 +778,11 @@ async function runProcessDefinitionPhase(args: {
     }
 
     const result = await session.prompt(
-      buildMetaPrompt(args.prompt, args.workspace ?? process.cwd()),
+      compressInternalHarnessPrompt(
+        buildMetaPrompt(args.prompt, args.workspace ?? process.cwd()),
+        args.compressionConfig,
+        "agent",
+      ),
       300_000,
     );
 
@@ -779,6 +850,7 @@ async function runOrchestrationPhase(args: {
   rl: readline.Interface | null;
   selectedHarnessName: string;
   discovered: HarnessDiscoveryResult[];
+  compressionConfig: CompressionConfig | null;
 }): Promise<number> {
   const processId = path.basename(args.processPath, path.extname(args.processPath));
   const state: OrchestrationState = {
@@ -1045,13 +1117,15 @@ async function runOrchestrationPhase(args: {
 
         const taskHarness = resolveTaskHarness(action, args.selectedHarnessName, args.discovered);
         let workerSession: PiSessionHandle | null = null;
-        if (taskHarness === "pi" || taskHarness === "oh-my-pi") {
+        if (action.kind === "shell" || taskHarness === "pi" || taskHarness === "oh-my-pi") {
           workerSession = createPiSession({
             workspace: args.workspace,
             model: args.model,
             toolsMode: "coding",
             isolated: true,
             ephemeral: true,
+            bashSandbox: "secure",
+            enableCompaction: true,
           });
         }
 
@@ -1063,6 +1137,7 @@ async function runOrchestrationPhase(args: {
               workspace: args.workspace,
               model: args.model,
               interactive: false,
+              compressionConfig: args.compressionConfig,
             },
             workerSession,
             args.discovered,
@@ -1215,6 +1290,8 @@ async function runOrchestrationPhase(args: {
     appendSystemPrompt: [buildOrchestrationSystemPrompt(args.selectedHarnessName)],
     isolated: true,
     ephemeral: true,
+    bashSandbox: "secure",
+    enableCompaction: true,
   });
 
   emitProgress(
@@ -1236,10 +1313,14 @@ async function runOrchestrationPhase(args: {
     }
 
     const result = await orchestrationSession.prompt(
-      buildOrchestrationUserPrompt(
-        path.resolve(args.processPath),
-        args.prompt,
-        args.maxIterations,
+      compressInternalHarnessPrompt(
+        buildOrchestrationUserPrompt(
+          path.resolve(args.processPath),
+          args.prompt,
+          args.maxIterations,
+        ),
+        args.compressionConfig,
+        "agent",
       ),
       900_000,
     );
@@ -1337,6 +1418,7 @@ export async function handleSessionCreate(
     const discovered = await discoverHarnesses();
     const selected = selectHarness(discovered, preferredHarness);
     const selectedHarnessName = selected?.name ?? "pi";
+    const compressionConfig = loadSessionCompressionConfig(workspace);
 
     let processPath = providedProcessPath;
     if (processPath) {
@@ -1352,6 +1434,7 @@ export async function handleSessionCreate(
         rl,
         json,
         verbose,
+        compressionConfig,
       });
     }
 
@@ -1368,6 +1451,7 @@ export async function handleSessionCreate(
       rl,
       selectedHarnessName,
       discovered,
+      compressionConfig,
     });
   } finally {
     rl?.close();

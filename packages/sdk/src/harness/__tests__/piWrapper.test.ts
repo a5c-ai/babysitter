@@ -50,8 +50,15 @@ const mockDefaultResourceLoader = vi.fn(function MockDefaultResourceLoader() {
 });
 const mockSessionManagerInMemory = vi.fn(() => ({ kind: "session-manager" }));
 const mockSettingsManagerInMemory = vi.fn(() => ({ kind: "settings-manager" }));
-const mockCreateCodingTools = vi.fn((cwd: string) => [`coding:${cwd}`]);
-const mockCreateReadOnlyTools = vi.fn((cwd: string) => [`readonly:${cwd}`]);
+const mockCreateCodingTools = vi.fn((cwd: string, options?: Record<string, unknown>) => [`coding:${cwd}`, options ?? null]);
+const mockCreateReadOnlyTools = vi.fn((cwd: string, options?: Record<string, unknown>) => [`readonly:${cwd}`, options ?? null]);
+const mockSecureBashOperations = { exec: vi.fn() };
+const mockSecureBackendDispose = vi.fn<() => Promise<void>>().mockResolvedValue(undefined);
+const mockCreateSecureBashBackend = vi.fn(async () => ({
+  operations: mockSecureBashOperations,
+  dispose: mockSecureBackendDispose,
+  promptNote: "secure sandbox note",
+}));
 
 vi.mock("@mariozechner/pi-coding-agent", () => ({
   createAgentSession: (...args: unknown[]) => mockCreateAgentSession(...args),
@@ -74,6 +81,10 @@ vi.mock("@mariozechner/pi-coding-agent", () => ({
   createReadOnlyTools: mockCreateReadOnlyTools,
   codingTools: ["coding-default"],
   readOnlyTools: ["readonly-default"],
+}));
+
+vi.mock("../piSecureSandbox", () => ({
+  createSecureBashBackend: (...args: unknown[]) => mockCreateSecureBashBackend(...args),
 }));
 
 // Import AFTER mock is installed
@@ -111,6 +122,8 @@ beforeEach(() => {
   mockSettingsManagerInMemory.mockClear();
   mockCreateCodingTools.mockClear();
   mockCreateReadOnlyTools.mockClear();
+  mockCreateSecureBashBackend.mockClear();
+  mockSecureBackendDispose.mockClear();
   eventListeners = [];
 });
 
@@ -200,6 +213,10 @@ describe("PiSessionHandle", () => {
 
       expect(mockSessionManagerInMemory).toHaveBeenCalledTimes(1);
       expect(mockSettingsManagerInMemory).toHaveBeenCalledTimes(1);
+      expect(mockCreateSecureBashBackend).toHaveBeenCalledWith({
+        workspace: "/tmp/project",
+        mode: "auto",
+      });
       expect(mockDefaultResourceLoader).toHaveBeenCalledWith(
         expect.objectContaining({
           cwd: "/tmp/project",
@@ -209,12 +226,45 @@ describe("PiSessionHandle", () => {
           noThemes: true,
         }),
       );
-      expect(mockCreateReadOnlyTools).toHaveBeenCalledWith("/tmp/project");
-      expect(mockCreateAgentSession).toHaveBeenCalledWith(
+      expect(mockCreateReadOnlyTools).toHaveBeenCalledWith(
+        "/tmp/project",
         expect.objectContaining({
-          tools: ["readonly:/tmp/project"],
+          bash: expect.objectContaining({
+            operations: mockSecureBashOperations,
+          }),
         }),
       );
+      expect(mockCreateAgentSession).toHaveBeenCalledWith(
+        expect.objectContaining({
+          tools: expect.arrayContaining([
+            "readonly:/tmp/project",
+            expect.objectContaining({
+              bash: expect.objectContaining({
+                operations: mockSecureBashOperations,
+              }),
+            }),
+          ]),
+        }),
+      );
+      expect(mockSettingsManagerInMemory).toHaveBeenCalledWith(
+        expect.objectContaining({
+          compaction: expect.objectContaining({
+            enabled: true,
+          }),
+        }),
+      );
+    });
+
+    test("skips secure sandbox bootstrap when no explicit tool mode is requested", async () => {
+      mockPrompt.mockImplementation(async () => {
+        emitEvent({ type: "agent_end" });
+      });
+      mockGetLastAssistantText.mockReturnValue("ok");
+
+      const session = createPiSession();
+      await session.prompt("hello");
+
+      expect(mockCreateSecureBashBackend).not.toHaveBeenCalled();
     });
 
     test("lazy initialization — session created on first prompt", async () => {
@@ -374,11 +424,12 @@ describe("PiSessionHandle", () => {
       });
       mockGetLastAssistantText.mockReturnValue("ok");
 
-      const session = createPiSession();
+      const session = createPiSession({ toolsMode: "coding" });
       await session.prompt("start");
       session.dispose();
 
       expect(mockDispose).toHaveBeenCalledTimes(1);
+      expect(mockSecureBackendDispose).toHaveBeenCalledTimes(1);
       expect(session.isInitialized).toBe(false);
     });
 
