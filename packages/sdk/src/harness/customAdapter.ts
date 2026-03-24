@@ -55,20 +55,20 @@ export function createCustomAdapter(): HarnessAdapter {
       return true;
     },
 
-    async bindSession(opts: SessionBindOptions): Promise<SessionBindResult> {
+    bindSession(opts: SessionBindOptions): Promise<SessionBindResult> {
       if (!opts.sessionId) {
-        return {
+        return Promise.resolve({
           harness: "custom",
           sessionId: "",
           error: "Custom harness requires --session-id to be explicitly provided.",
           fatal: false,
-        };
+        });
       }
       // Minimal binding — store state in the default location.
-      return {
+      return Promise.resolve({
         harness: "custom",
         sessionId: opts.sessionId,
-      };
+      });
     },
 
     handleStopHook(_args: HookHandlerArgs): Promise<number> {
