@@ -9,7 +9,6 @@ const HOME = process.env.HOME || "/home/codex";
 const WORKSPACE = "/workspace/codex-full-run";
 const CODEX_HOME = process.env.CODEX_HOME || path.join(HOME, ".codex");
 const SKILL_DIR = path.join(CODEX_HOME, "skills", "babysitter-codex");
-const EFFECT_MAPPER = path.join(SKILL_DIR, ".codex", "effect-mapper.js");
 const PROCESS_PATH = path.join(WORKSPACE, "ci-codex-process.js");
 const AGENTS_PATH = path.join(WORKSPACE, "AGENTS.md");
 const CONFIG_PATH = path.join(WORKSPACE, ".codex", "config.toml");
@@ -18,12 +17,27 @@ const ENV_FILE_PATH = path.join(WORKSPACE, ".codex", "codex.env.sh");
 const ALPHA_PATH = path.join(WORKSPACE, "codex-artifacts", "alpha.txt");
 const REPORT_PATH = path.join(WORKSPACE, "codex-artifacts", "final-report.json");
 
-const {
-  buildCodexArgs,
-  mapCodexError,
-  mapEffectToCodexPrompt,
-  parseCodexOutput,
-} = require(EFFECT_MAPPER);
+/**
+ * Build a plain-text prompt from a task definition's agent fields.
+ * Replaces the deleted effect-mapper.js module.
+ */
+function buildPromptFromTaskDef(taskDef) {
+  const effect = taskDef.effect || taskDef;
+  if (effect.kind === "breakpoint") return null;
+
+  const agent = effect.agent || {};
+  const parts = [];
+  if (agent.role) parts.push(`Role: ${agent.role}`);
+  if (agent.task) parts.push(`Task: ${agent.task}`);
+  if (agent.instructions && Array.isArray(agent.instructions)) {
+    parts.push("Instructions:");
+    agent.instructions.forEach((inst) => parts.push(`- ${inst}`));
+  }
+  if (agent.context) {
+    parts.push(`Context: ${JSON.stringify(agent.context)}`);
+  }
+  return parts.join("\n") || effect.title || "Execute the task.";
+}
 
 function fail(message, details = {}) {
   const error = new Error(message);
@@ -344,14 +358,15 @@ function writeTaskValue(runDir, effectId, payload) {
 function executeCodexTask(runId, runDir, turnIndex, task) {
   const effectId = task.effectId;
   const taskDef = readTaskDefinition(runDir, effectId);
-  const prompt = mapEffectToCodexPrompt(taskDef);
+  const prompt = buildPromptFromTaskDef(taskDef);
   if (!prompt) {
     fail("No Codex prompt could be derived for executable task", { effectId, taskDef });
   }
 
   const codexArgs = [
     "exec",
-    ...buildCodexArgs(taskDef, { fullAuto: true, workdir: WORKSPACE }),
+    "--approval-policy", "never",
+    "--sandbox-mode", "workspace-write",
     prompt,
   ];
   const result = run("codex", codexArgs, {
@@ -368,22 +383,20 @@ function executeCodexTask(runId, runDir, turnIndex, task) {
   });
 
   if (result.status !== 0) {
-    const mapped = mapCodexError(result.status, result.stderr || "");
     fail("codex exec failed during hooks E2E", {
       effectId,
       codexArgs,
-      mapped,
+      exitCode: result.status,
       stdout: result.stdout,
       stderr: result.stderr,
     });
   }
 
-  const parsed = parseCodexOutput(result.stdout || "", taskDef);
   const valuePath = writeTaskValue(runDir, effectId, {
     success: true,
     exitCode: result.status,
     completedAt: new Date().toISOString(),
-    result: parsed.data ?? parsed,
+    result: { output: (result.stdout || "").trim() },
   });
 
   runBabysitterJson([
