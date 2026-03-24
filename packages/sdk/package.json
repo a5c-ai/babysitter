@@ -25,6 +25,7 @@
   "dependencies": {
     "@mariozechner/pi-coding-agent": "*",
     "@modelcontextprotocol/sdk": "^1.12.1",
+    "@sinclair/typebox": "^0.34.48",
     "fs-extra": "^11.2.0",
     "ulid": "^2.3.0"
   },

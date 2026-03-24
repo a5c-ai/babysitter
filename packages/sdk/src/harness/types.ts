@@ -114,8 +114,18 @@ export interface PiSessionOptions {
   timeout?: number;
   /** Thinking level for the model. */
   thinkingLevel?: "minimal" | "low" | "medium" | "high" | "xhigh";
+  /** Built-in tool mode to expose to the model. */
+  toolsMode?: "default" | "coding" | "readonly";
   /** Custom tool definitions to register with the session. */
   customTools?: unknown[];
+  /** Replace the discovered system prompt with a custom one. */
+  systemPrompt?: string;
+  /** Append custom system prompt instructions. */
+  appendSystemPrompt?: string[];
+  /** Isolate the session from discovered extensions, skills, and AGENTS files. */
+  isolated?: boolean;
+  /** Use an in-memory session manager instead of persistent session files. */
+  ephemeral?: boolean;
   /** Global pi agent config directory (default: ~/.pi/agent). */
   agentDir?: string;
 }

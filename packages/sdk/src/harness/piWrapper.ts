@@ -47,8 +47,21 @@ interface PiCodingAgentModule {
     extensionsResult?: unknown;
     modelFallbackMessage?: string;
   }>;
+  DefaultResourceLoader: new (options?: Record<string, unknown>) => {
+    reload(): Promise<void>;
+  };
   AuthStorage: PiAuthStorage & { create(path?: string): PiAuthStorage };
   ModelRegistry: new (auth: PiAuthStorage, modelsPath?: string) => PiModelRegistry;
+  SessionManager: {
+    inMemory(): unknown;
+  };
+  SettingsManager: {
+    inMemory(settings?: Record<string, unknown>): unknown;
+  };
+  codingTools?: unknown[];
+  readOnlyTools?: unknown[];
+  createCodingTools?: (cwd: string) => unknown[];
+  createReadOnlyTools?: (cwd: string) => unknown[];
 }
 
 /** Minimal subset of AgentSession we depend on. */
@@ -305,10 +318,56 @@ export class PiSessionHandle {
     }
 
     const createOpts: Record<string, unknown> = {};
-    if (this.options.workspace) createOpts.cwd = this.options.workspace;
+    const cwd = this.options.workspace ?? process.cwd();
+    createOpts.cwd = cwd;
     if (this.options.agentDir) createOpts.agentDir = this.options.agentDir;
     if (this.options.thinkingLevel) createOpts.thinkingLevel = this.options.thinkingLevel;
     if (this.options.customTools) createOpts.customTools = this.options.customTools;
+    if (this.options.ephemeral) {
+      createOpts.sessionManager = mod.SessionManager.inMemory();
+    }
+
+    if (this.options.toolsMode === "coding") {
+      createOpts.tools = mod.createCodingTools
+        ? mod.createCodingTools(cwd)
+        : mod.codingTools;
+    } else if (this.options.toolsMode === "readonly") {
+      createOpts.tools = mod.createReadOnlyTools
+        ? mod.createReadOnlyTools(cwd)
+        : mod.readOnlyTools;
+    }
+
+    if (
+      this.options.systemPrompt ||
+      (this.options.appendSystemPrompt && this.options.appendSystemPrompt.length > 0) ||
+      this.options.isolated
+    ) {
+      const settingsManager = mod.SettingsManager.inMemory({
+        quietStartup: true,
+        compaction: { enabled: false },
+      });
+      const resourceLoader = new mod.DefaultResourceLoader({
+        cwd,
+        agentDir: this.options.agentDir,
+        settingsManager,
+        noExtensions: this.options.isolated === true,
+        noSkills: this.options.isolated === true,
+        noPromptTemplates: this.options.isolated === true,
+        noThemes: this.options.isolated === true,
+        agentsFilesOverride: this.options.isolated === true
+          ? () => ({ agentsFiles: [] })
+          : undefined,
+        systemPromptOverride: this.options.systemPrompt
+          ? () => this.options.systemPrompt
+          : undefined,
+        appendSystemPromptOverride: this.options.appendSystemPrompt
+          ? (base: string[]) => [...base, ...this.options.appendSystemPrompt!]
+          : undefined,
+      });
+      await resourceLoader.reload();
+      createOpts.settingsManager = settingsManager;
+      createOpts.resourceLoader = resourceLoader;
+    }
 
     // Resolve model string to a model object from pi's ModelRegistry.
     // The `createAgentSession` API expects a model object (with provider,

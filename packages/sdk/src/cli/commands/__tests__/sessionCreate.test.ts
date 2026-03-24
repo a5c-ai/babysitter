@@ -28,6 +28,81 @@ vi.mock("../../../runtime/commitEffectResult", () => ({
   commitEffectResult: vi.fn(),
 }));
 
+vi.mock("../../../harness/piWrapper", () => {
+  let sessionCounter = 0;
+  const createPiSession = vi.fn((options?: { customTools?: Array<Record<string, unknown>> }) => {
+    sessionCounter += 1;
+    const sessionId = `mock-session-id-${sessionCounter}`;
+    const tools = options?.customTools ?? [];
+    const getTool = (name: string) => tools.find((tool) => tool.name === name) as {
+      execute?: (toolCallId: string, params: Record<string, unknown>) => Promise<{ details?: unknown }>;
+    } | undefined;
+
+    return {
+      initialize: vi.fn().mockResolvedValue(undefined),
+      subscribe: vi.fn(() => () => {}),
+      dispose: vi.fn(),
+      get sessionId() {
+        return sessionId;
+      },
+      get isInitialized() {
+        return true;
+      },
+      prompt: vi.fn(async () => {
+        const reportProcess = getTool("babysitter_report_process_definition");
+        if (reportProcess?.execute) {
+          await reportProcess.execute("tool-process", {
+            processPath: "/tmp/generated-process.js",
+            summary: "Generated process",
+          });
+          return { success: true, output: "phase1", exitCode: 0, duration: 1 };
+        }
+
+        const runCreate = getTool("babysitter_run_create");
+        const bindSession = getTool("babysitter_bind_session");
+        const runIterate = getTool("babysitter_run_iterate");
+        const executeEffect = getTool("babysitter_execute_effect");
+        const taskPost = getTool("babysitter_task_post_result");
+        const finish = getTool("babysitter_finish_orchestration");
+
+        if (runCreate?.execute) {
+          await runCreate.execute("tool-run-create", {});
+          await bindSession?.execute?.("tool-bind", {});
+
+          while (true) {
+            const iterationResult = await runIterate?.execute?.("tool-iterate", {});
+            const details = iterationResult?.details as Record<string, unknown> | undefined;
+            const status = details?.status as string | undefined;
+            if (status === "waiting") {
+              const nextActions = (details?.nextActions as Array<Record<string, unknown>> | undefined) ?? [];
+              for (const action of nextActions) {
+                const effectId = String(action.effectId);
+                if (action.kind === "breakpoint") {
+                  await taskPost?.execute?.("tool-post-breakpoint", { effectId });
+                } else {
+                  await executeEffect?.execute?.("tool-execute-effect", { effectId });
+                  await taskPost?.execute?.("tool-post-effect", { effectId });
+                }
+              }
+              continue;
+            }
+            break;
+          }
+
+          await finish?.execute?.("tool-finish", { summary: "done" });
+        }
+
+        return { success: true, output: "phase2", exitCode: 0, duration: 1 };
+      }),
+    };
+  });
+
+  return {
+    createPiSession,
+    PiSessionHandle: class {},
+  };
+});
+
 // Dynamic import validation is hard to mock; stub the fs.access call used by waitForProcessFile
 vi.mock("node:fs", async () => {
   const actual = await vi.importActual<typeof import("node:fs")>("node:fs");
@@ -308,7 +383,15 @@ describe("handleSessionCreate", () => {
           invocationKey: "key-1",
           result: expect.objectContaining({
             status: "ok",
-            value: { approved: true },
+            value: expect.objectContaining({
+              approved: true,
+              option: "Approve",
+              askUserQuestion: {
+                answers: {
+                  Decision: "Approve",
+                },
+              },
+            }),
           }),
         }),
       );
@@ -462,11 +545,10 @@ describe("handleSessionCreate", () => {
         })
         .filter(Boolean) as Record<string, unknown>[];
 
-      // Should have Phase A (skipped), Phase B, and Phase C progress entries
+      // Should have Phase 1 (skipped) and Phase 2 progress entries
       const phases = jsonOutputs.map((o) => o.phase);
-      expect(phases).toContain("A");
-      expect(phases).toContain("B");
-      expect(phases).toContain("C");
+      expect(phases).toContain("1");
+      expect(phases).toContain("2");
     });
   });
 
@@ -475,6 +557,15 @@ describe("handleSessionCreate", () => {
       (discoverHarnesses as Mock).mockResolvedValue([
         makeDiscoveryResult({ name: "pi", installed: false }),
       ]);
+      (createRun as Mock).mockResolvedValue({
+        runId: "run-1",
+        runDir: "/tmp/runs/run-1",
+        metadata: {},
+      });
+      (orchestrateIteration as Mock).mockResolvedValue({
+        status: "completed",
+        output: "done",
+      });
 
       const code = await handleSessionCreate({
         processPath: "/tmp/p.js",

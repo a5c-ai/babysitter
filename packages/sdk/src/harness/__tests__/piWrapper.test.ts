@@ -42,9 +42,20 @@ const mockSession = {
 
 const mockCreateAgentSession = vi.fn<() => Promise<{ session: typeof mockSession }>>()
   .mockResolvedValue({ session: mockSession });
+const mockResourceLoaderReload = vi.fn<() => Promise<void>>().mockResolvedValue(undefined);
+const mockDefaultResourceLoader = vi.fn(function MockDefaultResourceLoader() {
+  return {
+    reload: mockResourceLoaderReload,
+  };
+});
+const mockSessionManagerInMemory = vi.fn(() => ({ kind: "session-manager" }));
+const mockSettingsManagerInMemory = vi.fn(() => ({ kind: "settings-manager" }));
+const mockCreateCodingTools = vi.fn((cwd: string) => [`coding:${cwd}`]);
+const mockCreateReadOnlyTools = vi.fn((cwd: string) => [`readonly:${cwd}`]);
 
 vi.mock("@mariozechner/pi-coding-agent", () => ({
   createAgentSession: (...args: unknown[]) => mockCreateAgentSession(...args),
+  DefaultResourceLoader: mockDefaultResourceLoader,
   AuthStorage: {
     create: () => ({}),
   },
@@ -53,6 +64,16 @@ vi.mock("@mariozechner/pi-coding-agent", () => ({
     find() { return undefined; }
     getApiKey() { return Promise.resolve(null); }
   },
+  SessionManager: {
+    inMemory: mockSessionManagerInMemory,
+  },
+  SettingsManager: {
+    inMemory: mockSettingsManagerInMemory,
+  },
+  createCodingTools: mockCreateCodingTools,
+  createReadOnlyTools: mockCreateReadOnlyTools,
+  codingTools: ["coding-default"],
+  readOnlyTools: ["readonly-default"],
 }));
 
 // Import AFTER mock is installed
@@ -83,6 +104,13 @@ beforeEach(() => {
   mockExecuteBash.mockReset();
   mockCreateAgentSession.mockReset();
   mockCreateAgentSession.mockResolvedValue({ session: mockSession });
+  mockResourceLoaderReload.mockReset();
+  mockResourceLoaderReload.mockResolvedValue(undefined);
+  mockDefaultResourceLoader.mockClear();
+  mockSessionManagerInMemory.mockClear();
+  mockSettingsManagerInMemory.mockClear();
+  mockCreateCodingTools.mockClear();
+  mockCreateReadOnlyTools.mockClear();
   eventListeners = [];
 });
 
@@ -151,6 +179,40 @@ describe("PiSessionHandle", () => {
           cwd: "/tmp/project",
           thinkingLevel: "high",
           agentDir: "/custom/agent",
+        }),
+      );
+    });
+
+    test("builds isolated ephemeral sessions with readonly tools", async () => {
+      mockPrompt.mockImplementation(async () => {
+        emitEvent({ type: "agent_end" });
+      });
+      mockGetLastAssistantText.mockReturnValue("ok");
+
+      const session = createPiSession({
+        workspace: "/tmp/project",
+        toolsMode: "readonly",
+        isolated: true,
+        ephemeral: true,
+        appendSystemPrompt: ["extra instructions"],
+      });
+      await session.prompt("inspect");
+
+      expect(mockSessionManagerInMemory).toHaveBeenCalledTimes(1);
+      expect(mockSettingsManagerInMemory).toHaveBeenCalledTimes(1);
+      expect(mockDefaultResourceLoader).toHaveBeenCalledWith(
+        expect.objectContaining({
+          cwd: "/tmp/project",
+          noExtensions: true,
+          noSkills: true,
+          noPromptTemplates: true,
+          noThemes: true,
+        }),
+      );
+      expect(mockCreateReadOnlyTools).toHaveBeenCalledWith("/tmp/project");
+      expect(mockCreateAgentSession).toHaveBeenCalledWith(
+        expect.objectContaining({
+          tools: ["readonly:/tmp/project"],
         }),
       );
     });
