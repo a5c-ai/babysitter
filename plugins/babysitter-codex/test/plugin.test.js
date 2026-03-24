@@ -35,7 +35,7 @@ test('loadCommandCatalog returns valid command catalog', () => {
   assert.ok(Array.isArray(plugin.commands));
   assert.strictEqual(plugin.commands.length, 15);
   assert.ok(plugin.runtimeCapabilities);
-  assert.strictEqual(plugin.runtimeCapabilities.supportsBlockingHooks, false);
+  assert.strictEqual(plugin.runtimeCapabilities.supportsBlockingHooks, true);
 });
 
 test('loadPlugin remains as a compatibility alias', () => {
@@ -853,6 +853,15 @@ test('loop-control.sh exists and is non-empty', () => {
   assert.ok(fs.readFileSync(hookPath, 'utf8').length > 10);
 });
 
+test('hooks.json exists and registers SessionStart/UserPromptSubmit/Stop', () => {
+  const hooksPath = path.join(PROJECT_ROOT, '.codex', 'hooks.json');
+  assert.ok(fs.existsSync(hooksPath));
+  const hooks = JSON.parse(fs.readFileSync(hooksPath, 'utf8'));
+  assert.ok(Array.isArray(hooks?.hooks?.SessionStart));
+  assert.ok(Array.isArray(hooks?.hooks?.UserPromptSubmit));
+  assert.ok(Array.isArray(hooks?.hooks?.Stop));
+});
+
 // ============================================================================
 // config.toml validation
 // ============================================================================
@@ -864,7 +873,8 @@ test('config.toml exists and contains required sections', () => {
   const content = fs.readFileSync(configPath, 'utf8');
   assert.ok(content.includes('sandbox_mode = "workspace-write"'));
   assert.ok(content.includes('approval_policy = "on-request"'));
-  assert.ok(content.includes('notify = ["node", ".codex/hooks/on-turn-complete.js"]'));
+  assert.ok(content.includes('[features]'));
+  assert.ok(content.includes('codex_hooks = true'));
   assert.ok(content.includes('[sandbox_workspace_write]'));
   assert.ok(!content.includes('[plugin]'));
   assert.ok(!content.includes('[hooks]'));

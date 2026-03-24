@@ -1,17 +1,18 @@
 # babysitter-codex
 
 Babysitter integration package for OpenAI Codex CLI. It packages Codex-facing
-skills, install helpers, mapping docs, and the runtime assets needed for the
-Codex supervisor model.
+skills, install helpers, mapping docs, and the hook assets used to keep
+Babysitter in the Codex lifecycle loop.
 
-This is a Codex skill bundle and integration package. It is not a native
-Codex plugin in the Claude-style manifest or blocking-hook sense.
+This is a Codex skill bundle plus workspace hook templates. It is not a
+Claude-style manifest plugin, but it does rely on Codex's real lifecycle hook
+engine through `.codex/hooks.json`.
 
 ## What This Package Owns
 
 - Codex skill payload under `~/.codex/skills/babysitter-codex`
 - Codex-facing command docs and install docs
-- Codex runtime helpers under `.codex/` and `bin/`
+- Codex runtime hook helpers under `.codex/`
 - Codex mapping and compatibility policy for SDK-driven orchestration
 
 ## Active Process-Library Model
@@ -32,30 +33,32 @@ project/team process-library scope.
 
 ## Codex User Experience
 
-Codex does not expose Claude-style blocking stop hooks. Codex orchestration is
-supervisor-owned and proceeds one turn at a time through persisted `.a5c` run
-state plus the installed Codex skill payload.
+Codex should be integrated through its real hook engine:
+
+- `SessionStart` initializes Babysitter session state
+- `UserPromptSubmit` handles prompt-time transformations safely
+- `Stop` keeps Babysitter in the orchestration loop after each yielded turn
 
 Current contract:
 
 - start, resume, and inspect work through Codex command phrases such as
   `babysitter call`, `babysitter resume`, and `babysitter doctor`
-- execute at most one orchestration phase per turn
-- let the installed Codex harness assets handle runtime state, result posting,
+- let the installed Codex hook assets handle runtime state, result posting,
   and continuation
-- stop after each completed phase so the supervisor can drive the next turn
+- stop after each completed phase so the `Stop` hook can decide whether Codex
+  exits or receives the next Babysitter iteration message
 - finish only when `completionProof` is emitted and echoed as
   `<promise>...</promise>`
 
-Do not document hidden stop hooks, multi-iteration loops inside one turn, or
-harness-owned `notify` as the continuation mechanism.
+Do not document external supervisors, hidden wrapper loops, or `notify` as the
+continuation mechanism for the plugin path.
 
 ## Installation
 
 Install from npm:
 
 ```bash
-npm install -g @yaniv-tg/babysitter-codex
+npm install -g @a5c-ai/babysitter-codex
 ```
 
 Or from a local checkout:
@@ -68,10 +71,11 @@ npm install -g .
 Verify the installed skill payload:
 
 ```bash
-npm ls -g @yaniv-tg/babysitter-codex --depth=0
+npm ls -g @a5c-ai/babysitter-codex --depth=0
 ls -1 ~/.codex/skills/babysitter-codex
 test -f ~/.codex/skills/babysitter-codex/scripts/team-install.js
-test -f ~/.codex/skills/babysitter-codex/.codex/turn-controller.js
+test -f ~/.codex/skills/babysitter-codex/.codex/hooks.json
+test -f ~/.codex/skills/babysitter-codex/.codex/hooks/babysitter-stop-hook.sh
 ```
 
 For the fuller install runbook, see [docs/INSTALL.md](./docs/INSTALL.md).
@@ -88,10 +92,10 @@ babysitter resume latest incomplete run
 babysitter doctor current run
 ```
 
-For Codex users, the expected interface is the Codex command phrases and the
-installed skill payload. Raw Babysitter CLI primitives and turn-controller
-mechanics are internal harness details and live in the Codex skill or command
-implementation docs, not in this user-facing README.
+For Codex users, the expected interface is the Codex command phrases plus the
+workspace hook install created by onboarding. Raw Babysitter CLI primitives are
+internal harness details and live in the Codex skill or maintainer docs, not in
+this user-facing README.
 
 ## Project And Team Install
 

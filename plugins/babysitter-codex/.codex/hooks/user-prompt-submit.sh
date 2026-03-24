@@ -9,7 +9,7 @@ export CODEX_PLUGIN_ROOT="${CODEX_PLUGIN_ROOT:-${PLUGIN_ROOT}}"
 export BABYSITTER_STATE_DIR="${STATE_DIR}"
 
 exec babysitter hook:run \
-  --hook-type session-start \
+  --hook-type user-prompt-submit \
   --harness codex \
   --plugin-root "${CODEX_PLUGIN_ROOT}" \
   --state-dir "${BABYSITTER_STATE_DIR}"

@@ -21,26 +21,28 @@ Identical to `babysitter call` but runs in non-interactive mode:
 5. Create the run:
 
 ```bash
-babysitter-codex-turn start \
+babysitter run:create \
   --process-id <id> \
   --entry <path>#<export> \
   --inputs <inputs-file> \
-  --prompt "$PROMPT"
+  --prompt "$PROMPT" \
+  --harness codex \
+  --state-dir .a5c \
+  --json
 ```
 
-6. Advance the run with auto-approved breakpoints:
+6. Continue by handling returned tasks and auto-approving breakpoints
 
-```bash
-babysitter-codex-turn continue --auto-approve
-```
+The hook model remains active:
 
-Repeat per Codex turn until the helper reports either `execute_tasks` or a
-terminal run state. Codex still executes the returned tasks itself; yolo only
-removes human breakpoint approvals.
+- `SessionStart` initializes state
+- `Stop` decides continuation
+- yolo only removes human approval pauses
 
 7. When `completionProof` is emitted, report it plainly
 
 ## Key Difference from `babysitter call`
 
 The only difference is that breakpoints are auto-approved and no user questions
-are asked. The turn-state control model and result posting stay the same.
+are asked. The hook-owned continuation and result posting contract stay the
+same.

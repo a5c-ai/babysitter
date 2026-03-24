@@ -222,13 +222,14 @@ describe("CodexAdapter", () => {
 
   it("reports codex-specific missing session ID guidance", () => {
     const adapter = createCodexAdapter();
-    expect(adapter.getMissingSessionIdHint?.()).toContain("Codex babysitter supervisor");
+    expect(adapter.getMissingSessionIdHint?.()).toContain("Codex hook callback");
   });
 
-  it("does not advertise stop-hook support", () => {
+  it("advertises hook support on hook-capable platforms", () => {
     const adapter = createCodexAdapter();
-    expect(adapter.supportsHookType?.("stop")).toBe(false);
-    expect(adapter.supportsHookType?.("session-start")).toBe(false);
+    const expectedHookSupport = process.platform !== "win32";
+    expect(adapter.supportsHookType?.("stop")).toBe(expectedHookSupport);
+    expect(adapter.supportsHookType?.("session-start")).toBe(expectedHookSupport);
     expect(adapter.findHookDispatcherPath("/tmp")).toBeNull();
   });
 
@@ -336,9 +337,9 @@ describe("Registry", () => {
       expect(adapter.name).toBe("claude-code");
     });
 
-    it("returns null adapter when no harness is active", () => {
+    it("returns custom adapter when no harness is active", () => {
       const adapter = detectAdapter();
-      expect(adapter.name).toBe("none");
+      expect(adapter.name).toBe("custom");
     });
   });
 
@@ -362,9 +363,9 @@ describe("Registry", () => {
     });
 
     it("resetAdapter clears the singleton for re-detection", () => {
-      // First: no env → null adapter
+      // First: no env → custom adapter
       const a1 = getAdapter();
-      expect(a1.name).toBe("none");
+      expect(a1.name).toBe("custom");
 
       // Set env and reset → should re-detect
       process.env.CLAUDE_SESSION_ID = "session-123";

@@ -9,11 +9,9 @@ import {
 } from "./helpers-codex";
 
 const ROOT = path.resolve(__dirname, "../..");
-const hasAzureProviderCreds = Boolean(
+const hasCodexProviderCreds = Boolean(
   process.env.AZURE_OPENAI_API_KEY && process.env.AZURE_OPENAI_PROJECT_NAME,
 );
-const hasOpenAiProviderCreds = Boolean(process.env.OPENAI_API_KEY);
-const hasCodexProviderCreds = hasAzureProviderCreds || hasOpenAiProviderCreds;
 const describeCodex = hasCodexProviderCreds ? describe : describe.skip;
 
 beforeAll(() => {
@@ -33,16 +31,18 @@ describeCodex("Codex Docker E2E", () => {
     const babysitterVersion = dockerExec("babysitter --version").trim();
     const skillManifest = dockerExec(`test -f ${CODEX_SKILL_DIR}/SKILL.md && echo ok`).trim();
     const commandCatalog = dockerExec(`test -f ${CODEX_SKILL_DIR}/.codex/command-catalog.json && echo ok`).trim();
-    const turnController = dockerExec(`test -f ${CODEX_SKILL_DIR}/.codex/turn-controller.js && echo ok`).trim();
+    const hooksJson = dockerExec(`test -f ${CODEX_SKILL_DIR}/.codex/hooks.json && echo ok`).trim();
+    const stopHook = dockerExec(`test -f ${CODEX_SKILL_DIR}/.codex/hooks/babysitter-stop-hook.sh && echo ok`).trim();
 
     expect(codexVersion).toBeTruthy();
     expect(babysitterVersion).toMatch(/^\d+\.\d+\.\d+$/);
     expect(skillManifest).toBe("ok");
     expect(commandCatalog).toBe("ok");
-    expect(turnController).toBe("ok");
+    expect(hooksJson).toBe("ok");
+    expect(stopHook).toBe("ok");
   });
 
-  test("runs a full babysitter orchestration with real Codex through the turn controller path", () => {
+  test("runs a full babysitter orchestration with real Codex through the hook model", () => {
     const result = dockerExec("node /app/e2e-tests/docker/codex-babysitter-full-runner.js", {
       timeout: 900_000,
     });
@@ -59,7 +59,8 @@ describeCodex("Codex Docker E2E", () => {
     expect(payload.output.releaseToken).toBe("ci-release-token");
     expect(payload.breakpointTask.output.approved).toBe(true);
     expect(payload.breakpointTask.output.answers.releaseToken).toBe("ci-release-token");
-    expect(payload.hookLogEntries).toBeGreaterThan(0);
+    expect(payload.hookModel).toBe("codex-hooks");
+    expect(payload.lastHookDecision).toBe("approve");
     expect(payload.taskCount).toBeGreaterThanOrEqual(3);
   }, 900_000);
 });

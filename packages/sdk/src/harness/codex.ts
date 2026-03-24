@@ -1,15 +1,23 @@
 /**
  * Codex harness adapter.
  *
- * Codex can participate in session binding and state resolution, but it does
- * not expose the Claude-style blocking stop/session-start hook contract.
- * Keep this adapter honest: support explicit run binding and env detection,
- * but reject fictional hook-driven orchestration.
+ * Codex supports lifecycle hook callbacks (SessionStart/Stop/UserPromptSubmit)
+ * on hook-capable installs. This adapter keeps the implementation honest:
+ * use Codex hook payload identity and project state as the continuation source
+ * of truth, with explicit fallback binding only when needed.
  */
 
 import * as path from "node:path";
-import { readFileSync } from "node:fs";
+import { appendFileSync, readFileSync } from "node:fs";
+import { Readable } from "node:stream";
 import { createClaudeCodeAdapter } from "./claudeCode";
+import {
+  getCurrentTimestamp,
+  getSessionFilePath,
+  sessionFileExists,
+  writeSessionFile,
+} from "../session";
+import type { SessionState } from "../session";
 import type {
   HarnessAdapter,
   HookHandlerArgs,
@@ -62,14 +70,192 @@ function resolveCodexSessionId(parsed: { sessionId?: string }): string | undefin
   }
 }
 
+function supportsCodexLifecycleHooks(): boolean {
+  if (process.env.BABYSITTER_CODEX_FORCE_HOOKS === "1") return true;
+  return process.platform !== "win32";
+}
+
+function readStdin(): Promise<string> {
+  return new Promise((resolve, reject) => {
+    let data = "";
+    process.stdin.setEncoding("utf8");
+    process.stdin.on("data", (chunk: string) => {
+      data += chunk;
+    });
+    process.stdin.on("end", () => resolve(data));
+    process.stdin.on("error", reject);
+  });
+}
+
+function parseHookInput(raw: string): Record<string, unknown> {
+  const trimmed = raw.trim();
+  if (!trimmed) return {};
+  try {
+    const parsed: unknown = JSON.parse(trimmed);
+    if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+      return parsed as Record<string, unknown>;
+    }
+  } catch {
+    // Treat malformed JSON as empty input.
+  }
+  return {};
+}
+
+function firstString(
+  obj: Record<string, unknown>,
+  keys: string[],
+): string | undefined {
+  for (const key of keys) {
+    const value = obj[key];
+    if (typeof value === "string" && value.trim()) {
+      return value;
+    }
+  }
+  return undefined;
+}
+
+function normalizeCodexHookInput(raw: string): Record<string, unknown> {
+  const parsed = parseHookInput(raw);
+  const sessionId = firstString(parsed, [
+    "session_id",
+    "sessionId",
+    "thread_id",
+    "threadId",
+    "conversation_id",
+    "conversationId",
+  ]) || resolveCodexSessionId({});
+
+  const transcriptPath = firstString(parsed, [
+    "transcript_path",
+    "transcriptPath",
+  ]);
+  const lastAssistantMessage = firstString(parsed, [
+    "last_assistant_message",
+    "lastAssistantMessage",
+    "assistant_message",
+    "assistantMessage",
+  ]);
+
+  return {
+    ...parsed,
+    ...(sessionId ? { session_id: sessionId } : {}),
+    ...(transcriptPath ? { transcript_path: transcriptPath } : {}),
+    ...(lastAssistantMessage
+      ? { last_assistant_message: lastAssistantMessage }
+      : {}),
+  };
+}
+
+async function withSyntheticStdin<T>(
+  payload: string,
+  fn: () => Promise<T>,
+): Promise<T> {
+  const originalStdin = process.stdin;
+  const fakeStdin = Readable.from([payload], { encoding: "utf8" });
+  (fakeStdin as Readable & { unref?: () => void }).unref = () => {};
+
+  Object.defineProperty(process, "stdin", {
+    value: fakeStdin,
+    writable: true,
+    configurable: true,
+  });
+
+  try {
+    return await fn();
+  } finally {
+    Object.defineProperty(process, "stdin", {
+      value: originalStdin,
+      writable: true,
+      configurable: true,
+    });
+  }
+}
+
+async function handleCodexSessionStartHookImpl(
+  args: HookHandlerArgs,
+): Promise<number> {
+  const { verbose } = args;
+
+  let rawInput = "";
+  try {
+    rawInput = await readStdin();
+  } catch {
+    process.stdout.write("{}\n");
+    return 0;
+  } finally {
+    if (typeof process.stdin.unref === "function") {
+      process.stdin.unref();
+    }
+  }
+
+  const normalized = normalizeCodexHookInput(rawInput);
+  const sessionId = firstString(normalized, ["session_id"]);
+  if (!sessionId) {
+    process.stdout.write("{}\n");
+    return 0;
+  }
+
+  const envFile = process.env.CODEX_ENV_FILE;
+  if (envFile) {
+    try {
+      appendFileSync(
+        envFile,
+        `export CODEX_THREAD_ID="${sessionId}"\nexport CODEX_SESSION_ID="${sessionId}"\n`,
+      );
+    } catch {
+      if (verbose) {
+        process.stderr.write(
+          `[hook:run session-start] Failed to write to CODEX_ENV_FILE: ${envFile}\n`,
+        );
+      }
+    }
+  }
+
+  const stateDir = resolveCodexStateDir({
+    stateDir: args.stateDir,
+    pluginRoot: args.pluginRoot,
+  });
+  const filePath = getSessionFilePath(stateDir, sessionId);
+
+  try {
+    if (!(await sessionFileExists(filePath))) {
+      const nowTs = getCurrentTimestamp();
+      const state: SessionState = {
+        active: true,
+        iteration: 1,
+        maxIterations: 256,
+        runId: "",
+        startedAt: nowTs,
+        lastIterationAt: nowTs,
+        iterationTimes: [],
+      };
+      await writeSessionFile(filePath, state, "");
+      if (verbose) {
+        process.stderr.write(
+          `[hook:run session-start] Created Codex session state: ${filePath}\n`,
+        );
+      }
+    }
+  } catch {
+    if (verbose) {
+      process.stderr.write(
+        `[hook:run session-start] Failed to create session state in ${stateDir}\n`,
+      );
+    }
+  }
+
+  process.stdout.write("{}\n");
+  return 0;
+}
+
 export function createCodexAdapter(): HarnessAdapter {
   const claude = createClaudeCodeAdapter();
   const unsupportedHookMessage = (
     hookType: string,
   ): string => (
-    `Codex does not support the babysitter "${hookType}" hook contract. ` +
-    `Use explicit --session-id binding plus the external Codex supervisor ` +
-    `or notify-based monitoring instead.`
+    `Codex lifecycle hook "${hookType}" is unavailable on this platform. ` +
+    `Use a hook-capable Codex install on Linux, macOS, or WSL for the ` +
+    `babysitter-codex plugin hook model.`
   );
 
   return {
@@ -82,6 +268,10 @@ export function createCodexAdapter(): HarnessAdapter {
         process.env.CODEX_ENV_FILE ||
         process.env.CODEX_PLUGIN_ROOT
       );
+    },
+
+    autoResolvesSessionId(): boolean {
+      return true;
     },
 
     resolveSessionId(parsed: { sessionId?: string }): string | undefined {
@@ -101,13 +291,16 @@ export function createCodexAdapter(): HarnessAdapter {
 
     getMissingSessionIdHint(): string {
       return (
-        "Use --session-id explicitly, or launch through the Codex babysitter " +
-        "supervisor so it can provide a stable session/thread ID."
+        "Use --session-id explicitly, or launch through a Codex hook callback " +
+        "that provides a stable session/thread ID."
       );
     },
 
     supportsHookType(hookType: string): boolean {
-      return hookType !== "stop" && hookType !== "session-start";
+      if (hookType === "stop" || hookType === "session-start") {
+        return supportsCodexLifecycleHooks();
+      }
+      return true;
     },
 
     getUnsupportedHookMessage(hookType: string): string {
@@ -129,14 +322,39 @@ export function createCodexAdapter(): HarnessAdapter {
       };
     },
 
-    handleStopHook(_args: HookHandlerArgs): Promise<number> {
-      process.stderr.write(`${unsupportedHookMessage("stop")}\n`);
-      return Promise.resolve(1);
+    async handleStopHook(args: HookHandlerArgs): Promise<number> {
+      if (!supportsCodexLifecycleHooks()) {
+        process.stderr.write(`${unsupportedHookMessage("stop")}\n`);
+        return 1;
+      }
+
+      let rawInput = "";
+      try {
+        rawInput = await readStdin();
+      } catch {
+        rawInput = "";
+      }
+      const normalized = normalizeCodexHookInput(rawInput);
+
+      return withSyntheticStdin(
+        JSON.stringify(normalized),
+        () => claude.handleStopHook({
+          ...args,
+          pluginRoot: resolveCodexPluginRoot({ pluginRoot: args.pluginRoot }),
+          stateDir: resolveCodexStateDir({
+            stateDir: args.stateDir,
+            pluginRoot: args.pluginRoot,
+          }),
+        }),
+      );
     },
 
-    handleSessionStartHook(_args: HookHandlerArgs): Promise<number> {
-      process.stderr.write(`${unsupportedHookMessage("session-start")}\n`);
-      return Promise.resolve(1);
+    handleSessionStartHook(args: HookHandlerArgs): Promise<number> {
+      if (!supportsCodexLifecycleHooks()) {
+        process.stderr.write(`${unsupportedHookMessage("session-start")}\n`);
+        return Promise.resolve(1);
+      }
+      return handleCodexSessionStartHookImpl(args);
     },
 
     findHookDispatcherPath(_startCwd: string): string | null {

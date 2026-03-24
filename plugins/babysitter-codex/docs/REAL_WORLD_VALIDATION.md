@@ -18,7 +18,7 @@ Controlled tests are necessary but not sufficient. Use this checklist before rel
 - `.a5c/runs/<runId>/state/telemetry.json`
 
 ## Pass Criteria
-- No unhandled runtime or notify-handler crashes.
+- No unhandled runtime or hook-handler crashes.
 - Breakpoints produce resolvable `approved/answers/response` payloads.
 - Resume selectors resolve deterministically.
 - Budget enforcement behaves as configured.

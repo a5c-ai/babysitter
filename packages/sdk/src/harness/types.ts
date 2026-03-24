@@ -29,7 +29,14 @@ export enum HarnessCapability {
 // Discovery types
 // ---------------------------------------------------------------------------
 
-/** Result of probing the local environment for a specific harness CLI. */
+/**
+ * Result of probing the local environment for a specific harness CLI.
+ *
+ * This is the **installed-discovery** result — it answers "is this CLI on
+ * PATH?" and "does config exist?".  It does NOT report whether we are
+ * currently running inside this harness; use `CallerHarnessResult` /
+ * `detectCallerHarness()` for that.
+ */
 export interface HarnessDiscoveryResult {
   /** Harness identifier (matches HarnessAdapter.name). */
   name: string;
@@ -41,14 +48,22 @@ export interface HarnessDiscoveryResult {
   cliPath?: string;
   /** Shell command used to invoke the CLI. */
   cliCommand: string;
-  /** Whether the harness currently has an active session. */
-  activeSession: boolean;
   /** Whether harness-specific configuration was found on disk. */
   configFound: boolean;
   /** Capabilities advertised by this harness. */
   capabilities: HarnessCapability[];
   /** Platform identifier (e.g. "win32", "linux", "darwin"). */
   platform: string;
+}
+
+/** Result of detecting which harness spawned the current process, if any. */
+export interface CallerHarnessResult {
+  /** Harness identifier (matches HarnessAdapter.name). */
+  name: string;
+  /** Environment variable names that matched the active caller. */
+  matchedEnvVars: string[];
+  /** Capabilities advertised by the detected caller harness. */
+  capabilities: HarnessCapability[];
 }
 
 // ---------------------------------------------------------------------------
@@ -89,30 +104,41 @@ export interface HarnessInvokeResult {
 // Pi-specific session types
 // ---------------------------------------------------------------------------
 
-/** Options for creating a Pi harness session. */
+/** Options for creating a Pi harness session (programmatic API). */
 export interface PiSessionOptions {
   /** Working directory for the session. */
   workspace?: string;
-  /** Model override. */
+  /** Model identifier string (e.g. "claude-opus-4-5"). */
   model?: string;
-  /** Maximum execution time in milliseconds. */
+  /** Maximum time in ms to wait for a single prompt to complete. */
   timeout?: number;
-  /** Additional environment variables. */
-  env?: Record<string, string>;
-  /** Explicit path to the Pi CLI binary. */
-  cliPath?: string;
+  /** Thinking level for the model. */
+  thinkingLevel?: "minimal" | "low" | "medium" | "high" | "xhigh";
+  /** Custom tool definitions to register with the session. */
+  customTools?: unknown[];
+  /** Global pi agent config directory (default: ~/.pi/agent). */
+  agentDir?: string;
+}
+
+/**
+ * Event emitted by a Pi session during prompt execution.
+ * Mirrors the AgentSessionEvent union from `@mariozechner/pi-coding-agent`.
+ */
+export interface PiSessionEvent {
+  type: string;
+  [key: string]: unknown;
 }
 
 /** Result of sending a prompt through a Pi session. */
 export interface PiPromptResult {
-  /** Raw output from the Pi CLI. */
+  /** Collected text output from the agent response. */
   output: string;
-  /** Process exit code. */
-  exitCode: number;
   /** Wall-clock duration in milliseconds. */
   duration: number;
   /** Whether the prompt completed without error. */
   success: boolean;
+  /** Exit code (0 = success, 1 = failure). */
+  exitCode: number;
 }
 
 // ---------------------------------------------------------------------------
@@ -172,6 +198,13 @@ export interface HarnessAdapter {
 
   /** Resolve plugin root from args / env */
   resolvePluginRoot(args: { pluginRoot?: string }): string | undefined;
+
+  /**
+   * Whether this adapter auto-resolves session IDs from environment variables
+   * or other ambient sources.  When true, explicitly passing `--session-id`
+   * is rejected as a conflict.  Defaults to `false` when not implemented.
+   */
+  autoResolvesSessionId?(): boolean;
 
   /** Guidance shown when a harness-specific session ID is required but missing. */
   getMissingSessionIdHint?(): string;

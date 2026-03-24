@@ -13,10 +13,10 @@ point. End-user docs should stay on the `babysitter ...` command surface.
 The bundled upstream snapshot under `upstream/` is reference content. It is not
 the primary runtime contract for Codex.
 
-Codex’s documented extension surfaces are skills, `AGENTS.md`, `config.toml`,
-MCP servers, and SDK or CLI entry points. This package should therefore be
-modeled as a Codex skill bundle and integration layer, not as a native Codex
-plugin.
+Codex's documented extension surfaces are skills, `AGENTS.md`, `config.toml`,
+`.codex/hooks.json`, MCP servers, and SDK or CLI entry points. This package
+should therefore be modeled as a Codex skill bundle plus hook-enabled workspace
+integration, not as a Claude-style manifest plugin.
 
 ## Active Process-Root Mapping
 
@@ -62,7 +62,8 @@ When adapting Claude-oriented instructions for Codex:
 
 - `--harness claude-code` -> `--harness codex`
 - `CLAUDE_PLUGIN_ROOT` -> Codex skill root / packaged payload root
-- blocking stop-hook ownership -> supervisor-owned turn controller
+- blocking stop-hook ownership -> Codex `Stop` hook registered through
+  `.codex/hooks.json`
 
 User-facing Codex docs should speak in terms of `babysitter call`, `resume`,
 `doctor`, and other command phrases. The exact runtime binding and result
@@ -73,8 +74,8 @@ and maintainer runbook.
 
 Codex docs should preserve these rules:
 
-- one orchestration phase per supervisor turn
-- let the harness-owned runtime helpers manage result posting and binding
+- one orchestration phase per yielded Codex turn
+- let the hook-owned runtime helpers manage result posting and binding
 - complete only when the emitted `completionProof` is echoed in
   `<promise>...</promise>`
 

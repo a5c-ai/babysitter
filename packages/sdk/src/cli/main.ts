@@ -119,6 +119,10 @@ const USAGE = `Usage:
   babysitter compression:toggle <layer> <on|off> [--json]
   babysitter compression:set <layer.key> <value> [--json]
   babysitter compression:reset [--json]
+  babysitter session:create --prompt <text> [--harness <name>] [--process <path>] [--workspace <dir>] [--model <model>] [--max-iterations <n>] [--runs-dir <dir>] [--interactive|--no-interactive] [--json] [--verbose]
+  babysitter harness:discover [--json]
+  babysitter harness:list [--json]
+  babysitter harness:invoke <name> --prompt <text> [--workspace <dir>] [--model <model>] [--timeout <ms>] [--json]
   babysitter mcp:serve [--json]
   babysitter health [--json] [--verbose]
   babysitter configure [show|validate|paths] [--json] [--defaults-only]
@@ -221,6 +225,11 @@ interface ParsedArgs {
   // tokens:stats flags
   tokensAll?: boolean;
   tokensRunId?: string;
+  // harness command flags
+  positional?: string[];
+  workspace?: string;
+  model?: string;
+  interactive?: boolean;
 }
 
 interface ActionSummary {
@@ -431,6 +440,22 @@ function parseArgs(argv: string[]): ParsedArgs {
       parsed.prompt = expectFlagValue(rest, ++i, "--prompt");
       continue;
     }
+    if (arg === "--workspace") {
+      parsed.workspace = expectFlagValue(rest, ++i, "--workspace");
+      continue;
+    }
+    if (arg === "--model") {
+      parsed.model = expectFlagValue(rest, ++i, "--model");
+      continue;
+    }
+    if (arg === "--interactive") {
+      parsed.interactive = true;
+      continue;
+    }
+    if (arg === "--no-interactive") {
+      parsed.interactive = false;
+      continue;
+    }
     if (arg === "--last-iteration-at") {
       parsed.lastIterationAt = expectFlagValue(rest, ++i, "--last-iteration-at");
       continue;
@@ -508,8 +533,8 @@ function parseArgs(argv: string[]): ParsedArgs {
       parsed.summaryOnly = true;
       continue;
     }
-    if (arg === "--process-path") {
-      parsed.processPath = expectFlagValue(rest, ++i, "--process-path");
+    if (arg === "--process-path" || arg === "--process") {
+      parsed.processPath = expectFlagValue(rest, ++i, arg);
       continue;
     }
     // Profile command flags
@@ -615,6 +640,8 @@ function parseArgs(argv: string[]): ParsedArgs {
     parsed.compressionSetValue = value;
   } else if (parsed.command === "compress-output") {
     parsed.compressOutputArgs = positionals;
+  } else if (parsed.command === "harness:invoke") {
+    parsed.positional = positionals;
   }
   return parsed;
 }
@@ -1045,6 +1072,18 @@ async function handleRunCreate(parsed: ParsedArgs): Promise<number> {
   const adapter = parsed.harness
     ? getAdapterByName(parsed.harness)
     : (parsed.sessionId ? getAdapter() : undefined);
+
+  // Reject explicit --session-id when the adapter auto-resolves it.
+  if (parsed.sessionId && adapter?.autoResolvesSessionId?.()) {
+    const msg = `The "${adapter.name}" harness auto-detects session IDs. ` +
+      `Do not pass --session-id explicitly when running inside ${adapter.name}.`;
+    if (parsed.json) {
+      console.log(JSON.stringify({ error: "SESSION_ID_CONFLICT", message: msg }));
+    } else {
+      process.stderr.write(`Error: ${msg}\n`);
+    }
+    return 1;
+  }
 
   let sessionBound: SessionBindResult | undefined;
 
@@ -2095,6 +2134,7 @@ const VALID_COMMANDS = [
   "session:check-iteration",
   "session:last-message",
   "session:iteration-message",
+  "session:create",
   "hook:log",
   "hook:run",
   "skill:discover",
@@ -2117,6 +2157,9 @@ const VALID_COMMANDS = [
   "plugin:update-marketplace",
   "plugin:update-registry",
   "plugin:remove-from-registry",
+  "harness:discover",
+  "harness:list",
+  "harness:invoke",
   "mcp:serve",
   "health",
   "configure",
@@ -2132,6 +2175,122 @@ const VALID_COMMANDS = [
 /**
  * Handles unknown commands with suggestions
  */
+// ---------------------------------------------------------------------------
+// Harness commands
+// ---------------------------------------------------------------------------
+
+async function handleHarnessDiscover(parsed: ParsedArgs): Promise<number> {
+  const { discoverHarnesses, detectCallerHarness } = await import("../harness/discovery");
+  const results = await discoverHarnesses();
+  const caller = detectCallerHarness();
+
+  if (parsed.json) {
+    console.log(JSON.stringify({ installed: results, caller }, null, 2));
+  } else {
+    const colors = supportsColors();
+    const green = colors ? "\x1b[32m" : "";
+    const reset = colors ? "\x1b[0m" : "";
+    const bold = colors ? "\x1b[1m" : "";
+
+    console.log(`\n${bold}Installed Harnesses${reset}\n`);
+    console.log(
+      "  Name            Installed  Version          Config   Capabilities",
+    );
+    console.log(
+      "  ──────────────  ─────────  ───────────────  ───────  ────────────────────────",
+    );
+    for (const r of results) {
+      const version = (r.version ?? "-").padEnd(15);
+      const caps = r.capabilities.join(", ") || "-";
+      console.log(
+        `  ${r.name.padEnd(14)}  ${(r.installed ? "yes" : "no").padEnd(9)}  ${version}  ${(r.configFound ? "yes" : "no").padEnd(7)}  ${caps}`,
+      );
+    }
+
+    if (caller) {
+      console.log(`\n${bold}Caller Harness${reset}  ${green}${caller.name}${reset}  (env: ${caller.matchedEnvVars.join(", ")})`);
+    } else {
+      console.log(`\n${bold}Caller Harness${reset}  none detected`);
+    }
+    console.log("");
+  }
+  return 0;
+}
+
+async function handleHarnessInvoke(parsed: ParsedArgs): Promise<number> {
+  const { invokeHarness } = await import("../harness/invoker");
+
+  const harnessName = parsed.positional?.[0];
+  if (!harnessName) {
+    const error = new BabysitterRuntimeError(
+      "MissingArgument",
+      "harness:invoke requires a harness name as the first argument",
+      {
+        category: ErrorCategory.Validation,
+        suggestions: ["babysitter harness:invoke claude-code --prompt \"hello\""],
+      },
+    );
+    if (parsed.json) {
+      console.error(JSON.stringify(toStructuredError(error), null, 2));
+    } else {
+      console.error(formatErrorWithContext(error, { colors: supportsColors() }));
+    }
+    return 1;
+  }
+
+  const prompt = parsed.prompt;
+  if (!prompt) {
+    const error = new BabysitterRuntimeError(
+      "MissingArgument",
+      "harness:invoke requires --prompt <text>",
+      {
+        category: ErrorCategory.Validation,
+        suggestions: [`babysitter harness:invoke ${harnessName} --prompt "your prompt"`],
+      },
+    );
+    if (parsed.json) {
+      console.error(JSON.stringify(toStructuredError(error), null, 2));
+    } else {
+      console.error(formatErrorWithContext(error, { colors: supportsColors() }));
+    }
+    return 1;
+  }
+
+  try {
+    const result = await invokeHarness(harnessName, {
+      prompt,
+      workspace: parsed.workspace,
+      model: parsed.model,
+      timeout: parsed.timeout ? Number(parsed.timeout) : undefined,
+    });
+
+    if (parsed.json) {
+      console.log(JSON.stringify(result, null, 2));
+    } else {
+      if (result.success) {
+        console.log(result.output);
+      } else {
+        console.error(result.output);
+      }
+    }
+    return result.success ? 0 : 1;
+  } catch (err: unknown) {
+    if (parsed.json) {
+      const structured = err instanceof BabysitterRuntimeError
+        ? toStructuredError(err)
+        : { error: err instanceof Error ? err.message : String(err) };
+      console.error(JSON.stringify(structured, null, 2));
+    } else {
+      if (err instanceof BabysitterRuntimeError) {
+        console.error(formatErrorWithContext(err, { colors: supportsColors() }));
+      } else {
+        console.error(err instanceof Error ? err.message : String(err));
+      }
+    }
+    return 1;
+  }
+}
+
 function handleUnknownCommand(command: string, json: boolean): number {
   const suggestion = suggestCommand(command);
   const suggestions = suggestion ? [`Did you mean: ${suggestion}?`] : [];
@@ -2260,13 +2419,27 @@ export function createBabysitterCli() {
         if (parsed.command === "task:show") {
           return await handleTaskShow(parsed);
         }
-        // Session commands — auto-resolve sessionId via harness adapter if not
-        // explicitly provided (e.g. from CLAUDE_ENV_FILE written by session-start hook).
-        if (!parsed.sessionId && parsed.command?.startsWith("session:")) {
+        // Session commands — resolve sessionId via harness adapter.
+        if (parsed.command?.startsWith("session:")) {
           const sessionAdapter = parsed.harness
             ? getAdapterByName(parsed.harness)
             : getAdapter();
-          if (sessionAdapter) {
+
+          // Reject explicit --session-id when the adapter auto-resolves it
+          // from environment variables (e.g. claude-code, codex, pi).
+          if (parsed.sessionId && sessionAdapter?.autoResolvesSessionId?.()) {
+            const msg = `The "${sessionAdapter.name}" harness auto-detects session IDs from environment variables. ` +
+              `Do not pass --session-id explicitly when running inside ${sessionAdapter.name}.`;
+            if (parsed.json) {
+              console.log(JSON.stringify({ error: "SESSION_ID_CONFLICT", message: msg }));
+            } else {
+              process.stderr.write(`Error: ${msg}\n`);
+            }
+            return 1;
+          }
+
+          // Auto-resolve when not explicitly provided.
+          if (!parsed.sessionId && sessionAdapter) {
             const resolved = sessionAdapter.resolveSessionId(parsed);
             if (resolved) {
               parsed.sessionId = resolved;
@@ -2355,9 +2528,13 @@ export function createBabysitterCli() {
           });
         }
         if (parsed.command === "hook:run") {
+          // Auto-detect caller harness from env vars, fall back to claude-code
+          // for backward compat with existing hook scripts.
+          const { detectCallerHarness } = await import("../harness/discovery");
+          const callerHarness = detectCallerHarness();
           return await handleHookRun({
             hookType: parsed.hookType ?? "",
-            harness: parsed.harness ?? "claude-code",
+            harness: parsed.harness ?? callerHarness?.name ?? "claude-code",
             pluginRoot: parsed.pluginRoot,
             stateDir: parsed.stateDir,
             runsDir: parsed.runsDir,
@@ -2463,6 +2640,28 @@ export function createBabysitterCli() {
           if (parsed.command === "plugin:remove-from-registry") {
             return await handlePluginRemoveFromRegistry(pluginArgs);
           }
+        }
+        // Harness commands
+        if (parsed.command === "harness:discover" || parsed.command === "harness:list") {
+          return await handleHarnessDiscover(parsed);
+        }
+        if (parsed.command === "harness:invoke") {
+          return await handleHarnessInvoke(parsed);
+        }
+        if (parsed.command === "session:create") {
+          const { handleSessionCreate } = await import("./commands/sessionCreate");
+          return await handleSessionCreate({
+            prompt: parsed.prompt,
+            harness: parsed.harness,
+            processPath: parsed.processPath,
+            workspace: parsed.workspace,
+            model: parsed.model,
+            maxIterations: parsed.maxIterations,
+            runsDir: parsed.runsDir,
+            json: parsed.json,
+            verbose: parsed.verbose,
+            interactive: parsed.interactive,
+          });
         }
         if (parsed.command === "mcp:serve") {
           return await handleMcpServe({ json: parsed.json });

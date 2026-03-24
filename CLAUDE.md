@@ -29,6 +29,15 @@ cd packages/sdk && npm run smoke:cli                # CLI smoke test
 babysitter mcp:serve [--json]                        # Start MCP server over stdio
 ```
 
+### Harness Management
+
+```bash
+babysitter harness:discover [--json]                  # Discover installed harness CLIs (claude, codex, pi, gemini, etc.)
+babysitter harness:list [--json]                      # Alias for harness:discover
+babysitter harness:invoke <name> --prompt <text> [--workspace <dir>] [--model <model>] [--timeout <ms>] [--json]  # Invoke a harness CLI
+babysitter session:create --prompt <text> [--harness <name>] [--process <path>] [--workspace <dir>] [--model <model>] [--max-iterations <n>] [--runs-dir <dir>] [--json] [--verbose]  # Create and run a programmatic orchestration session
+```
+
 ### Plugin Management
 
 ```bash
@@ -82,12 +91,13 @@ Config: `testTimeout: 30000`, `hookTimeout: 300000`, `fileParallelism: false`, J
 - **`storage/`** — `createRunDir`, `appendEvent`, `loadJournal`, `snapshotState`, `storeTaskArtifacts`, run locking (`acquireRunLock`/`releaseRunLock`/`readRunLock`), run file I/O (`readRunMetadata`, `readRunInputs`, `writeRunOutput`), task file I/O (`writeTaskDefinition`, `readTaskDefinition`, `readTaskResult`, `writeTaskResult`), `getDiskUsage`/`findOrphanedBlobs`, atomic writes.
 - **`tasks/`** — `defineTask<TArgs, TResult>(id, impl, options)`. `TaskDef` descriptor with `kind`, `title`, `labels`, `io`, built-in kinds: `node`, `breakpoint`, `orchestrator_task`, `sleep`. Custom kinds extensible via `[key: string]: unknown`. `TaskBuildContext` provides `effectId`, `invocationKey`, `taskId`, `runId`, `runDir`, `taskDir`, `createBlobRef`, `toTaskRelativePath`. Sub-modules: **serializer** (`TASK_SCHEMA_VERSION: '2026.01.tasks-v1'`, `RESULT_SCHEMA_VERSION: '2026.01.results-v1'`, `BLOB_THRESHOLD_BYTES: 1 MiB` — payloads over 1 MiB are stored as blobs), **registry** (`RegisteredTaskDefinition`, `RegistryEffectRecord`), **batching** (`buildParallelBatch` deduplicates effects by effectId, `ParallelBatch`, `BatchedEffectSummary`).
 - **`plugins/`** — Plugin management: **types** (`PluginScope`, `PluginRegistryEntry`, `PluginRegistry`, `MarketplaceManifest`, `MarketplacePluginEntry`, `MigrationDescriptor`, `PluginPackageInfo`, `PLUGIN_REGISTRY_SCHEMA_VERSION`), **paths** (`getRegistryPath`, `getMarketplacesDir`, `getMarketplaceDir`), **registry** (`readPluginRegistry`, `writePluginRegistry`, `getPluginEntry`, `upsertPluginEntry`, `removePluginEntry`, `listPluginEntries`), **marketplace** (`cloneMarketplace`, `updateMarketplace`, `readMarketplaceManifest`, `listMarketplacePlugins`, `resolvePluginPackagePath`, `deriveMarketplaceName`, `listMarketplaces`), **packageReader** (`readPluginPackage`, `readInstallInstructions`, `readUninstallInstructions`, `readConfigureInstructions`, `listMigrations`, `readMigration`), **migrations** (`parseMigrationFilename`, `buildMigrationGraph`, `findMigrationPath`, `resolveMigrationChain` — BFS shortest-path migration chain resolution).
-- **`cli/`** — Commands: `run:create|status|events|rebuild-state|repair-journal|iterate`, `task:post|list|show`, `session:init|associate|resume|state|update|check-iteration`, `skill:discover|fetch-remote`, `plugin:install|uninstall|update|configure|list-installed|list-plugins|add-marketplace|update-marketplace|update-registry|remove-from-registry`, `mcp:serve`, `health`, `configure`, `version`. Global flags: `--runs-dir`, `--json`, `--dry-run`, `--verbose`, `--show-config`, `--help`/`-h`, `--version`/`-v`.
+- **`cli/`** — Commands: `run:create|status|events|rebuild-state|repair-journal|iterate`, `task:post|list|show`, `session:init|associate|resume|state|update|check-iteration|create`, `skill:discover|fetch-remote`, `harness:discover|list|invoke`, `plugin:install|uninstall|update|configure|list-installed|list-plugins|add-marketplace|update-marketplace|update-registry|remove-from-registry`, `mcp:serve`, `health`, `configure`, `version`. Global flags: `--runs-dir`, `--json`, `--dry-run`, `--verbose`, `--show-config`, `--help`/`-h`, `--version`/`-v`.
 - **`mcp/`** — MCP server: `createBabysitterMcpServer`, tool handlers (runs, tasks, sessions, discovery), stdio transport.
 - **`hooks/`** — 13 hook types: `on-run-start`, `on-run-complete`, `on-run-fail`, `on-task-start`, `on-task-complete`, `on-step-dispatch`, `on-iteration-start`, `on-iteration-end`, `on-breakpoint`, `pre-commit`, `pre-branch`, `post-planning`, `on-score`. Dispatcher: `callHook(hookType, payload, options)`.
+- **`harness/`** — Harness adapter abstraction and enrichment APIs. **types** (`HarnessAdapter`, `HarnessCapability` enum: Programmatic/SessionBinding/StopHook/Mcp/HeadlessPrompt, `HarnessDiscoveryResult`, `HarnessInvokeOptions`, `HarnessInvokeResult`, `PiSessionOptions`, `PiPromptResult`, `PiSessionEvent`, `SessionBindOptions`, `SessionBindResult`, `HookHandlerArgs`), **discovery** (`discoverHarnesses` — parallel CLI detection via `Promise.allSettled`, `checkCliAvailable` — single CLI probe via `which`/`where` + `--version`, `KNOWN_HARNESSES` — specs for claude-code, codex, cursor, gemini-cli, opencode, pi), **invoker** (`invokeHarness` — spawn harness CLI as child process with timeout/model/workspace flags, `buildHarnessArgs` — pure arg builder, `HARNESS_CLI_MAP` — flag mapping per harness), **piWrapper** (`createPiSession` — factory for `PiSessionHandle`, `PiSessionHandle` class with `.prompt()`, `.steer()`, `.followUp()`, `.subscribe()`, `.executeBash()`, `.abort()`, `.dispose()`, lazy initialization, `PiEventListener` type), **registry** (`detectAdapter`, `getAdapterByName`, `listSupportedHarnesses`, `getAdapter`, `setAdapter`, `resetAdapter`), **adapters** (`createClaudeCodeAdapter`, `createCodexAdapter`, `createGeminiCliAdapter`, `createPiAdapter`, `createNullAdapter`).
 - **`testing/`** — `runHarness` for deterministic execution with snapshots.
 - **`config/`** — Environment variable resolution with defaults.
-- **`index.ts`** — Public API re-exports: `runtime`, `runtime/types`, `storage`, `storage/types`, `tasks`, `cli/main`, `testing`, `hooks`, `config`, `plugins`.
+- **`index.ts`** — Public API re-exports: `runtime`, `runtime/types`, `storage`, `storage/types`, `tasks`, `cli/main`, `testing`, `hooks`, `harness`, `config`, `profiles`, `plugins`.
 
 ## Orchestration Flow (cross-file pattern)
 

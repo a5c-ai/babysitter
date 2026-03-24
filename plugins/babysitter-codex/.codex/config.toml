@@ -1,23 +1,22 @@
 # Project-scoped Codex configuration template for babysitter-codex.
 #
-# This file documents the Codex surfaces babysitter actually relies on:
-# - project instructions via AGENTS.md / skills
-# - a writable .a5c state directory for Codex-owned run state
-# - optional post-turn monitoring via notify
+# This package now assumes the real Codex lifecycle hook engine:
+# - `.codex/hooks.json` registers SessionStart, UserPromptSubmit, and Stop
+# - `features.codex_hooks = true` enables that engine on supported platforms
+# - `.a5c` stores babysitter session and run state
 #
-# Codex does not load the fictional legacy plugin-manifest or lifecycle-hook
-# sections that older revisions of this package used. Keep orchestration in the
-# Codex turn loop plus the packaged turn-state helper.
+# `team-install` / `project-install` should materialize a workspace-local
+# `.codex/hooks.json` that points at the installed hook scripts.
 
 approval_policy = "on-request"
 sandbox_mode = "workspace-write"
 project_doc_max_bytes = 65536
-notify = ["node", ".codex/hooks/on-turn-complete.js"]
 
 [sandbox_workspace_write]
 writable_roots = [".a5c", ".codex"]
 
 [features]
+codex_hooks = true
 multi_agent = true
 
 [agents]

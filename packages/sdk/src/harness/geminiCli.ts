@@ -807,6 +807,10 @@ export function createGeminiCliAdapter(): HarnessAdapter {
       );
     },
 
+    autoResolvesSessionId(): boolean {
+      return true;
+    },
+
     resolveSessionId(parsed: { sessionId?: string }): string | undefined {
       if (parsed.sessionId) return parsed.sessionId;
       if (process.env.GEMINI_SESSION_ID) return process.env.GEMINI_SESSION_ID;

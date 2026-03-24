@@ -24,5 +24,5 @@ babysitter yolo fix lint and failing tests
 ## Notes
 
 - Use command phrases in Codex chat (`babysitter ...`), not custom slash commands.
-- Autonomous progression still uses `babysitter-codex-turn`; it only auto-approves breakpoints.
+- Autonomous progression still uses the hook-first runtime; yolo mode only auto-approves breakpoints.
 - If SDK capabilities are missing in your installed version, babysitter-codex falls back to compatibility behavior where possible.

@@ -2,7 +2,8 @@
 name: babysitter-codex
 description: >-
   Run babysitter workflows from Codex using real Codex surfaces: skills,
-  AGENTS.md guidance, project config, and the Babysitter SDK runtime loop.
+  AGENTS.md guidance, project config, lifecycle hooks, and the Babysitter SDK
+  runtime loop.
   Use when the user wants to babysit a task, resume a run, diagnose run health,
   install the Codex skill, or assimilate a methodology for Codex.
 ---
@@ -12,14 +13,16 @@ description: >-
 Babysitter on Codex is implemented as:
 
 - Codex-facing instructions and skills
+- A workspace `.codex/hooks.json` with `SessionStart`, `UserPromptSubmit`, and
+  `Stop` registrations
 - A `.a5c` state directory in the target workspace
-- The packaged `babysitter-codex-turn` helper for one-turn create/continue/post/approve control
 - The Babysitter SDK run/task loop that owns `run:create`, `run:iterate`,
   `task:post`, breakpoint handling, and resume behavior
-- Optional `notify` monitoring after Codex turns complete
+- Optional `notify` monitoring only as secondary telemetry
 
-Codex does **not** provide Claude-style blocking `SessionStart` or `Stop`
-hooks. Do not claim or depend on them.
+Codex does expose real lifecycle hooks for this package on supported
+installations. Do not replace them with an external orchestrator or claim that
+`notify` owns continuation.
 Codex also does not expose a native installable plugin manifest for this
 package. Treat `.codex/command-catalog.json` as Babysitter compatibility
 metadata for the skill bundle, not as a Codex platform feature.
@@ -66,17 +69,15 @@ babysitter run:create ... --harness codex --session-id <id> --state-dir .a5c --j
 2. Post it with `babysitter task:post`
 3. Never write `result.json` directly
 
-## Codex Turn Loop
+## Codex Hook Loop
 
-Use the packaged turn helper when Codex needs to advance or answer a run
-outside the SDK itself:
+The workspace onboarding flow should install `.codex/config.toml` and
+`.codex/hooks.json` so:
 
-```bash
-babysitter-codex-turn start|continue|post|approve|status ...
-```
-
-This keeps Codex in the user-facing loop one chat turn at a time without
-pretending native stop hooks exist.
+1. `SessionStart` seeds `.a5c` session state
+2. `UserPromptSubmit` performs prompt-time transformations when needed
+3. `Stop` decides whether the run is complete or Codex should receive the next
+   Babysitter iteration context
 
 ## Codex-Specific Rules
 

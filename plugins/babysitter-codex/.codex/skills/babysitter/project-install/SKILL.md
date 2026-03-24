@@ -29,7 +29,7 @@ Guide through onboarding a new or existing project for babysitter orchestration.
   - `.a5c/team/install.json`
   - `.a5c/team/profile.json`
 - Treat the installed skill root as the source of truth for bundled rules,
-  docs, processes, and the `babysitter-codex-turn` helper
+  docs, processes, and hook scripts
 
 ### 4. Build Project Profile
 - If `babysitter profile:*` commands are supported, write the project profile
@@ -49,8 +49,9 @@ The profile or onboarding notes should cover:
 - Ensure `@a5c-ai/babysitter-sdk` is available
 - Create `.a5c/` directory structure
 - Set up `.codex/config.toml` using real Codex settings (sandbox, approval, optional notify)
+- Set up `.codex/hooks.json` with `SessionStart`, `UserPromptSubmit`, and `Stop`
 - Create AGENTS.md if not present
-- Do not add fake lifecycle-hook sections or tell the user Codex will re-enter automatically
+- Do not add fake manifest/plugin sections or external supervisor loops
 
 ### 6. Optional: Configure CI/CD
 - Add babysitter orchestration to CI pipeline

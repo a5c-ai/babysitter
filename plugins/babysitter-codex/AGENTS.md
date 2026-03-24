@@ -5,20 +5,20 @@ This package targets real Codex customization surfaces:
 - `AGENTS.md` guidance
 - installed skills under `~/.codex/skills/...`
 - project `.codex/config.toml`
-- optional `notify` monitoring
+- workspace `.codex/hooks.json`
 
-It does **not** rely on fictional Codex lifecycle hooks or native custom slash
+It does **not** rely on fictional manifest plugins or native custom slash
 command registration.
 
 ## Product Contract
 
 - The Babysitter SDK run/task loop owns orchestration and `.a5c` state.
-- Codex participates through skills, instructions, `config.toml`, and optional
-  `notify` telemetry.
+- Codex participates through skills, instructions, `config.toml`, and real
+  lifecycle hooks registered in `.codex/hooks.json`.
 - If a stable Codex session/thread ID is available, pass it explicitly to
   `babysitter run:create --harness codex --session-id <id> --state-dir .a5c`.
 - Never fabricate a session ID just to satisfy `session:init`.
-- Compatibility shell hooks may exist in the package, but they are stubs only.
+- The `Stop` hook is the continuation owner for the plugin path.
 
 ## UX Goals
 
@@ -31,9 +31,10 @@ command registration.
 
 ## Documentation Rules
 
-- Do not claim Codex fires `SessionStart` or `Stop` hooks.
-- Do not say the agent stays in the orchestration loop because a stop hook
-  re-invokes it.
-- Describe `notify` as post-turn monitoring only.
+- Do not describe an external supervisor or turn-controller as the primary
+  plugin runtime model.
+- Do say that `SessionStart`, `UserPromptSubmit`, and `Stop` are the active
+  Codex lifecycle hooks when onboarding has installed `.codex/hooks.json`.
+- Describe `notify` as optional post-turn monitoring only.
 - Keep version numbers, supported Node/Codex versions, and feature status
   consistent across README, docs, tests, and package metadata.

@@ -64,6 +64,10 @@ export function createPiAdapter(): HarnessAdapter {
       );
     },
 
+    autoResolvesSessionId(): boolean {
+      return true;
+    },
+
     resolveSessionId(parsed: { sessionId?: string }): string | undefined {
       return resolvePiSessionId(parsed);
     },

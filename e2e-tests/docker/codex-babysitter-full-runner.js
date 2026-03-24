@@ -1,25 +1,22 @@
 #!/usr/bin/env node
-'use strict';
+"use strict";
 
-const fs = require('fs');
-const os = require('os');
-const path = require('path');
-const { spawnSync } = require('child_process');
+const fs = require("fs");
+const path = require("path");
+const { spawnSync } = require("child_process");
 
-const HOME = process.env.HOME || '/home/codex';
-const WORKSPACE = '/workspace/codex-full-run';
-const CODEX_HOME = process.env.CODEX_HOME || path.join(HOME, '.codex');
-const SKILL_DIR = path.join(CODEX_HOME, 'skills', 'babysitter-codex');
-const TURN_CONTROLLER = 'babysitter-codex-turn';
-const TURN_CONTROLLER_SCRIPT = path.join(SKILL_DIR, '.codex', 'turn-controller.js');
-const EFFECT_MAPPER = path.join(SKILL_DIR, '.codex', 'effect-mapper.js');
-const HOOK_SCRIPT = path.join(SKILL_DIR, '.codex', 'hooks', 'on-turn-complete.js');
-const PROCESS_PATH = path.join(WORKSPACE, 'ci-codex-process.js');
-const AGENTS_PATH = path.join(WORKSPACE, 'AGENTS.md');
-const CONFIG_PATH = path.join(WORKSPACE, '.codex', 'config.toml');
-const CURRENT_RUN_PATH = path.join(WORKSPACE, '.a5c', 'current-run.json');
-const ALPHA_PATH = path.join(WORKSPACE, 'codex-artifacts', 'alpha.txt');
-const REPORT_PATH = path.join(WORKSPACE, 'codex-artifacts', 'final-report.json');
+const HOME = process.env.HOME || "/home/codex";
+const WORKSPACE = "/workspace/codex-full-run";
+const CODEX_HOME = process.env.CODEX_HOME || path.join(HOME, ".codex");
+const SKILL_DIR = path.join(CODEX_HOME, "skills", "babysitter-codex");
+const EFFECT_MAPPER = path.join(SKILL_DIR, ".codex", "effect-mapper.js");
+const PROCESS_PATH = path.join(WORKSPACE, "ci-codex-process.js");
+const AGENTS_PATH = path.join(WORKSPACE, "AGENTS.md");
+const CONFIG_PATH = path.join(WORKSPACE, ".codex", "config.toml");
+const HOOKS_PATH = path.join(WORKSPACE, ".codex", "hooks.json");
+const ENV_FILE_PATH = path.join(WORKSPACE, ".codex", "codex.env.sh");
+const ALPHA_PATH = path.join(WORKSPACE, "codex-artifacts", "alpha.txt");
+const REPORT_PATH = path.join(WORKSPACE, "codex-artifacts", "final-report.json");
 
 const {
   buildCodexArgs,
@@ -40,17 +37,17 @@ function ensureDir(dir) {
 
 function writeFile(file, contents) {
   ensureDir(path.dirname(file));
-  fs.writeFileSync(file, contents, 'utf8');
+  fs.writeFileSync(file, contents, "utf8");
 }
 
 function readJson(file) {
-  return JSON.parse(fs.readFileSync(file, 'utf8'));
+  return JSON.parse(fs.readFileSync(file, "utf8"));
 }
 
 function run(cmd, args, options = {}) {
   return spawnSync(cmd, args, {
-    encoding: 'utf8',
-    stdio: ['pipe', 'pipe', 'pipe'],
+    encoding: "utf8",
+    stdio: ["pipe", "pipe", "pipe"],
     ...options,
   });
 }
@@ -58,7 +55,7 @@ function run(cmd, args, options = {}) {
 function runChecked(cmd, args, options = {}) {
   const result = run(cmd, args, options);
   if (result.status !== 0) {
-    fail(`${cmd} ${args.join(' ')} failed`, {
+    fail(`${cmd} ${args.join(" ")} failed`, {
       exitCode: result.status,
       stdout: result.stdout,
       stderr: result.stderr,
@@ -72,7 +69,7 @@ function runJsonChecked(cmd, args, options = {}) {
   try {
     return JSON.parse(result.stdout);
   } catch (error) {
-    fail(`Could not parse JSON output from ${cmd} ${args.join(' ')}`, {
+    fail(`Could not parse JSON output from ${cmd} ${args.join(" ")}`, {
       stdout: result.stdout,
       stderr: result.stderr,
       parseError: error.message,
@@ -81,32 +78,29 @@ function runJsonChecked(cmd, args, options = {}) {
 }
 
 function resolveProviderConfig() {
-  const providerName = String(process.env.A5C_PROVIDER_NAME || '').trim().toLowerCase();
-  const selectedCli = String(process.env.A5C_SELECTED_CLI_COMMAND || process.env.A5C_CLI_TOOL || '').trim().toLowerCase();
-  const selectedModel = String(process.env.A5C_SELECTED_MODEL || '').trim();
-  const azureKey = String(process.env.AZURE_OPENAI_API_KEY || '').trim();
-  const azureProject = String(process.env.AZURE_OPENAI_PROJECT_NAME || '').trim();
-  const openAiKey = String(process.env.OPENAI_API_KEY || '').trim();
-  const openAiBaseUrl = String(process.env.OPENAI_BASE_URL || '').trim();
-  const azureSelected =
-    providerName === 'azure_openai' ||
-    selectedCli === 'azure_codex';
+  const providerName = String(process.env.A5C_PROVIDER_NAME || "").trim().toLowerCase();
+  const selectedCli = String(process.env.A5C_SELECTED_CLI_COMMAND || process.env.A5C_CLI_TOOL || "").trim().toLowerCase();
+  const selectedModel = String(process.env.A5C_SELECTED_MODEL || "").trim();
+  const azureKey = String(process.env.AZURE_OPENAI_API_KEY || "").trim();
+  const azureProject = String(process.env.AZURE_OPENAI_PROJECT_NAME || "").trim();
+  const openAiKey = String(process.env.OPENAI_API_KEY || "").trim();
+  const openAiBaseUrl = String(process.env.OPENAI_BASE_URL || "").trim();
+  const azureSelected = providerName === "azure_openai" || selectedCli === "azure_codex";
   const azureConfigured = Boolean(azureKey && azureProject);
   const preferAzure = azureConfigured && (azureSelected || !openAiKey);
 
   if (preferAzure) {
     return {
-      kind: 'azure',
-      model: String(process.env.AZURE_OPENAI_DEPLOYMENT || selectedModel || 'gpt-5.4').trim(),
-      modelProvider: 'azure',
+      kind: "azure",
+      model: String(process.env.AZURE_OPENAI_DEPLOYMENT || selectedModel || "gpt-5.4").trim(),
+      modelProvider: "azure",
       baseUrl: `https://${azureProject}.openai.azure.com/openai/v1`,
-      envKey: 'AZURE_OPENAI_API_KEY',
-      source: 'AZURE_OPENAI_API_KEY + AZURE_OPENAI_PROJECT_NAME',
+      envKey: "AZURE_OPENAI_API_KEY",
     };
   }
 
   if (azureSelected && !azureConfigured && !openAiKey) {
-    fail('Azure Codex provider is selected but required Azure env is missing', {
+    fail("Azure Codex provider is selected but required Azure env is missing", {
       providerName,
       selectedCli,
       hasAzureApiKey: Boolean(azureKey),
@@ -116,21 +110,18 @@ function resolveProviderConfig() {
 
   if (openAiKey) {
     return {
-      kind: 'openai',
-      model: selectedModel || 'gpt-5.4',
+      kind: "openai",
+      model: selectedModel || "gpt-5.4",
       baseUrl: openAiBaseUrl,
-      envKey: 'OPENAI_API_KEY',
-      source: 'OPENAI_API_KEY',
+      envKey: "OPENAI_API_KEY",
     };
   }
 
-  fail('No supported Codex provider credentials found for the Docker E2E test', {
+  fail("No supported Codex provider credentials found for the Docker E2E test", {
     expected: [
-      'AZURE_OPENAI_API_KEY + AZURE_OPENAI_PROJECT_NAME',
-      'OPENAI_API_KEY',
+      "AZURE_OPENAI_API_KEY + AZURE_OPENAI_PROJECT_NAME",
+      "OPENAI_API_KEY",
     ],
-    providerName,
-    selectedCli,
     hasAzureApiKey: Boolean(azureKey),
     hasAzureProjectName: Boolean(azureProject),
     hasOpenAiKey: Boolean(openAiKey),
@@ -142,38 +133,66 @@ function workspaceConfig(provider) {
     `model = "${provider.model}"`,
     'approval_policy = "never"',
     'sandbox_mode = "workspace-write"',
-    `notify = ["node", "${HOOK_SCRIPT.replace(/\\/g, '/')}"]`,
+    "",
+    "[features]",
+    "codex_hooks = true",
   ];
 
-  if (provider.kind === 'azure') {
+  if (provider.kind === "azure") {
     lines.push('model_provider = "azure"');
   } else if (provider.baseUrl) {
     lines.push(`openai_base_url = "${provider.baseUrl}"`);
   }
 
-  lines.push('', '[sandbox_workspace_write]');
+  lines.push("", "[sandbox_workspace_write]");
   lines.push('writable_roots = [".", ".a5c", ".codex"]');
 
-  if (provider.kind === 'azure') {
-    lines.push('', '[model_providers.azure]');
+  if (provider.kind === "azure") {
+    lines.push("", "[model_providers.azure]");
     lines.push('name = "Azure OpenAI"');
     lines.push(`base_url = "${provider.baseUrl}"`);
     lines.push(`env_key = "${provider.envKey}"`);
   }
 
-  lines.push('');
-  return lines.join('\n');
+  lines.push("");
+  return lines.join("\n");
 }
 
 function workspaceAgents() {
   return [
-    '# CI instructions',
-    '',
-    '- Follow the task exactly.',
-    '- When asked to create or update a file, do it in the current workspace.',
-    '- Keep responses plain text with no markdown unless asked.',
-    '',
-  ].join('\n');
+    "# CI instructions",
+    "",
+    "- Follow the task exactly.",
+    "- When asked to create or update a file, do it in the current workspace.",
+    "- Keep responses plain text with no markdown unless asked.",
+    "",
+  ].join("\n");
+}
+
+function workspaceHooksConfig(skillDir) {
+  const hooksDir = path.join(skillDir, ".codex", "hooks");
+  return {
+    hooks: {
+      SessionStart: [
+        {
+          matcher: "*",
+          hooks: [{ type: "command", command: path.join(hooksDir, "babysitter-session-start.sh") }],
+        },
+      ],
+      UserPromptSubmit: [
+        {
+          matcher: "*",
+          hooks: [{ type: "command", command: path.join(hooksDir, "user-prompt-submit.sh") }],
+        },
+      ],
+      Stop: [
+        {
+          matcher: "*",
+          hooks: [{ type: "command", command: path.join(hooksDir, "babysitter-stop-hook.sh") }],
+        },
+      ],
+    },
+  };
 }
 
 function processSource() {
@@ -276,40 +295,50 @@ export async function process(_inputs, ctx) {
 `;
 }
 
-function parseRunId(stdout) {
-  const currentRun = fs.existsSync(CURRENT_RUN_PATH) ? readJson(CURRENT_RUN_PATH) : null;
-  if (currentRun && currentRun.runId) return currentRun.runId;
-  const match = String(stdout || '').match(/Run ID:\s+([A-Za-z0-9-]+)/);
-  return match ? match[1] : null;
-}
-
-function runTurnController(args, options = {}) {
-  return runJsonChecked(TURN_CONTROLLER, args, {
+function runBabysitterJson(args, options = {}) {
+  return runJsonChecked("babysitter", [...args, "--json"], {
     cwd: WORKSPACE,
     env: {
       ...process.env,
       CODEX_HOME,
+      REPO_ROOT: WORKSPACE,
+      ...options.env,
     },
-    ...options,
+    input: options.input,
+    timeout: options.timeout || 900_000,
+  });
+}
+
+function runHook(args, payload, options = {}) {
+  return runJsonChecked("babysitter", [
+    "hook:run",
+    ...args,
+    "--json",
+  ], {
+    cwd: WORKSPACE,
+    env: {
+      ...process.env,
+      CODEX_HOME,
+      REPO_ROOT: WORKSPACE,
+      ...options.env,
+    },
+    input: payload,
   });
 }
 
 function readTaskDefinition(runDir, effectId) {
-  const taskPath = path.join(runDir, 'tasks', effectId, 'task.json');
+  const taskPath = path.join(runDir, "tasks", effectId, "task.json");
   if (!fs.existsSync(taskPath)) {
-    fail('Task definition missing', { taskPath, effectId, runDir });
+    fail("Task definition missing", { taskPath, effectId, runDir });
   }
   return readJson(taskPath);
 }
 
-function writeTaskOutput(runDir, effectId, payload) {
-  const taskDir = path.join(runDir, 'tasks', effectId);
-  const outputPath = path.join(taskDir, 'output.json');
-  writeFile(outputPath, JSON.stringify(payload, null, 2));
-  return {
-    outputPath,
-    outputRef: `tasks/${effectId}/output.json`,
-  };
+function writeTaskValue(runDir, effectId, payload) {
+  const taskDir = path.join(runDir, "tasks", effectId);
+  const valuePath = path.join(taskDir, "value.json");
+  writeFile(valuePath, JSON.stringify(payload, null, 2));
+  return valuePath;
 }
 
 function executeCodexTask(runId, runDir, turnIndex, task) {
@@ -317,15 +346,15 @@ function executeCodexTask(runId, runDir, turnIndex, task) {
   const taskDef = readTaskDefinition(runDir, effectId);
   const prompt = mapEffectToCodexPrompt(taskDef);
   if (!prompt) {
-    fail('No Codex prompt could be derived for executable task', { effectId, taskDef });
+    fail("No Codex prompt could be derived for executable task", { effectId, taskDef });
   }
 
   const codexArgs = [
-    'exec',
+    "exec",
     ...buildCodexArgs(taskDef, { fullAuto: true, workdir: WORKSPACE }),
     prompt,
   ];
-  const result = run('codex', codexArgs, {
+  const result = run("codex", codexArgs, {
     cwd: WORKSPACE,
     env: {
       ...process.env,
@@ -339,8 +368,8 @@ function executeCodexTask(runId, runDir, turnIndex, task) {
   });
 
   if (result.status !== 0) {
-    const mapped = mapCodexError(result.status, result.stderr || '');
-    fail('codex exec failed during turn-controller E2E', {
+    const mapped = mapCodexError(result.status, result.stderr || "");
+    fail("codex exec failed during hooks E2E", {
       effectId,
       codexArgs,
       mapped,
@@ -349,46 +378,52 @@ function executeCodexTask(runId, runDir, turnIndex, task) {
     });
   }
 
-  const parsed = parseCodexOutput(result.stdout || '', taskDef);
-  const payload = {
+  const parsed = parseCodexOutput(result.stdout || "", taskDef);
+  const valuePath = writeTaskValue(runDir, effectId, {
     success: true,
     exitCode: result.status,
     completedAt: new Date().toISOString(),
     result: parsed.data ?? parsed,
-  };
-  const { outputRef } = writeTaskOutput(runDir, effectId, payload);
-  runTurnController(['post', '--selector', runId, '--effect-id', effectId, '--value-file', outputRef]);
+  });
+
+  runBabysitterJson([
+    "task:post",
+    runDir,
+    effectId,
+    "--status",
+    "ok",
+    "--value",
+    valuePath,
+  ]);
 }
 
-function approveBreakpoint(runId, runDir, task) {
-  const effectId = task.effectId;
-  const answersPath = path.join(runDir, 'tasks', effectId, 'answers.json');
-  writeFile(answersPath, JSON.stringify({ releaseToken: 'ci-release-token' }, null, 2));
-  return runTurnController([
-    'approve',
-    '--selector',
-    runId,
-    '--effect-id',
+function approveBreakpoint(runDir, effectId) {
+  const valuePath = writeTaskValue(runDir, effectId, {
+    approved: true,
+    response: "Continue after approval.",
+    answers: { releaseToken: "ci-release-token" },
+  });
+  runBabysitterJson([
+    "task:post",
+    runDir,
     effectId,
-    '--approved',
-    'true',
-    '--response',
-    'Continue after approval.',
-    '--answers-file',
-    answersPath,
+    "--status",
+    "ok",
+    "--value",
+    valuePath,
   ]);
 }
 
 function collectTaskSummaries(runDir) {
-  const tasksDir = path.join(runDir, 'tasks');
+  const tasksDir = path.join(runDir, "tasks");
   if (!fs.existsSync(tasksDir)) return [];
   return fs.readdirSync(tasksDir).sort().map((effectId) => {
     const taskDir = path.join(tasksDir, effectId);
-    const taskDef = fs.existsSync(path.join(taskDir, 'task.json'))
-      ? readJson(path.join(taskDir, 'task.json'))
+    const taskDef = fs.existsSync(path.join(taskDir, "task.json"))
+      ? readJson(path.join(taskDir, "task.json"))
       : {};
-    const output = fs.existsSync(path.join(taskDir, 'output.json'))
-      ? readJson(path.join(taskDir, 'output.json'))
+    const output = fs.existsSync(path.join(taskDir, "output.json"))
+      ? readJson(path.join(taskDir, "output.json"))
       : null;
     return {
       effectId,
@@ -400,134 +435,141 @@ function collectTaskSummaries(runDir) {
 }
 
 function main() {
-  const provider = resolveProviderConfig();
-  if (!fs.existsSync(TURN_CONTROLLER_SCRIPT)) {
-    fail('Installed babysitter-codex skill is missing turn-controller.js', { turnController: TURN_CONTROLLER_SCRIPT });
+  if (!fs.existsSync(path.join(SKILL_DIR, ".codex", "hooks", "babysitter-stop-hook.sh"))) {
+    fail("Installed babysitter-codex skill is missing stop hook script", {
+      expectedPath: path.join(SKILL_DIR, ".codex", "hooks", "babysitter-stop-hook.sh"),
+    });
   }
 
+  const provider = resolveProviderConfig();
   fs.rmSync(WORKSPACE, { recursive: true, force: true });
   ensureDir(WORKSPACE);
   ensureDir(path.dirname(CONFIG_PATH));
   writeFile(CONFIG_PATH, workspaceConfig(provider));
+  writeFile(HOOKS_PATH, JSON.stringify(workspaceHooksConfig(SKILL_DIR), null, 2));
   writeFile(AGENTS_PATH, workspaceAgents());
   writeFile(PROCESS_PATH, processSource());
+  writeFile(ENV_FILE_PATH, "");
 
-  runChecked('git', ['init', '-q'], { cwd: WORKSPACE });
-  runChecked('git', ['config', 'user.email', 'ci@example.com'], { cwd: WORKSPACE });
-  runChecked('git', ['config', 'user.name', 'CI'], { cwd: WORKSPACE });
+  runChecked("git", ["init", "-q"], { cwd: WORKSPACE });
+  runChecked("git", ["config", "user.email", "ci@example.com"], { cwd: WORKSPACE });
+  runChecked("git", ["config", "user.name", "CI"], { cwd: WORKSPACE });
 
-  const started = runTurnController([
-    'start',
-    '--process-id',
-    'ci/codex-full-run',
-    '--entry',
-    `${PROCESS_PATH}#process`,
-  ], {
-    env: {
-      ...process.env,
-      CODEX_HOME,
-      REPO_ROOT: WORKSPACE,
-      BABYSITTER_NOTIFY_SINKS: 'file',
-      BABYSITTER_NOTIFY_DESKTOP: '0',
-    },
-  });
-
-  const runId = started.runId || parseRunId(JSON.stringify(started));
-  if (!runId) {
-    fail('Could not resolve runId from turn-controller start output', {
-      started,
-      currentRunPath: CURRENT_RUN_PATH,
-    });
+  const sessionId = `codex-ci-${Date.now()}`;
+  runHook(
+    ["--hook-type", "session-start", "--harness", "codex", "--plugin-root", path.join(WORKSPACE, ".codex"), "--state-dir", path.join(WORKSPACE, ".a5c")],
+    JSON.stringify({ session_id: sessionId }),
+    { env: { CODEX_ENV_FILE: ENV_FILE_PATH } },
+  );
+  const envFile = fs.readFileSync(ENV_FILE_PATH, "utf8");
+  if (!envFile.includes(sessionId)) {
+    fail("Session-start hook did not write CODEX env session identity", { envFile, sessionId });
   }
 
-  const runDir = path.join(WORKSPACE, '.a5c', 'runs', runId);
-  let action = null;
+  const created = runBabysitterJson([
+    "run:create",
+    "--process-id",
+    "ci/codex-full-run-hooks",
+    "--entry",
+    `${PROCESS_PATH}#process`,
+    "--prompt",
+    "Run the full Codex hook integration validation flow.",
+    "--harness",
+    "codex",
+    "--session-id",
+    sessionId,
+    "--plugin-root",
+    path.join(WORKSPACE, ".codex"),
+  ]);
+
+  const runId = created.runId;
+  if (!runId) {
+    fail("Could not resolve runId from run:create output", { created });
+  }
+
+  const runDir = path.join(WORKSPACE, ".a5c", "runs", runId);
   let turns = 0;
-  const maxTurns = 12;
+  const maxTurns = 16;
+  let lastHookDecision = null;
 
   while (turns < maxTurns) {
     turns += 1;
-    action = runTurnController(['continue', '--selector', runId], {
-      env: {
-        ...process.env,
-        CODEX_HOME,
-        REPO_ROOT: WORKSPACE,
-        BABYSITTER_NOTIFY_SINKS: 'file',
-        BABYSITTER_NOTIFY_DESKTOP: '0',
-      },
-    });
+    const iteration = runBabysitterJson(["run:iterate", runDir, "--iteration", String(turns)]);
+    const pending = runBabysitterJson(["task:list", runDir, "--pending"]);
+    const tasks = Array.isArray(pending.tasks) ? pending.tasks : [];
 
-    if (action.action === 'run_completed') {
-      break;
-    }
-    if (action.action === 'run_failed') {
-      fail('Turn controller reported failed run', { action });
-    }
-    if (action.action === 'yield_to_user') {
-      const breakpointTask = (action.tasks || []).find((task) => task.kind === 'breakpoint');
-      if (!breakpointTask) {
-        fail('yield_to_user returned without a breakpoint task', { action });
-      }
-      approveBreakpoint(runId, runDir, breakpointTask);
-      continue;
-    }
-    if (action.action === 'execute_tasks') {
-      for (const task of action.tasks || []) {
+    for (const task of tasks) {
+      if (task.kind === "breakpoint") {
+        approveBreakpoint(runDir, task.effectId);
+      } else {
         executeCodexTask(runId, runDir, turns, task);
       }
-      continue;
-    }
-    if (action.action === 'idle') {
-      continue;
     }
 
-    fail('Turn controller returned unexpected action', { action });
+    const status = runBabysitterJson(["run:status", runDir]);
+    if (status.state === "completed") {
+      const completionProof = status.completionProof;
+      const hookPayload = JSON.stringify({
+        session_id: sessionId,
+        last_assistant_message: `<promise>${completionProof}</promise>`,
+      });
+      const hookOutput = runHook(
+        ["--hook-type", "stop", "--harness", "codex", "--plugin-root", path.join(WORKSPACE, ".codex"), "--state-dir", path.join(WORKSPACE, ".a5c"), "--runs-dir", path.join(WORKSPACE, ".a5c", "runs")],
+        hookPayload,
+      );
+      if (hookOutput.decision) {
+        fail("Stop hook should approve completion when proof is provided", { hookOutput, status });
+      }
+      lastHookDecision = "approve";
+      break;
+    }
+
+    const continueOutput = runHook(
+      ["--hook-type", "stop", "--harness", "codex", "--plugin-root", path.join(WORKSPACE, ".codex"), "--state-dir", path.join(WORKSPACE, ".a5c"), "--runs-dir", path.join(WORKSPACE, ".a5c", "runs")],
+      JSON.stringify({ session_id: sessionId }),
+    );
+    if (continueOutput.decision !== "block") {
+      fail("Stop hook should block when run is still active", {
+        continueOutput,
+        iteration,
+        runId,
+      });
+    }
+    lastHookDecision = "block";
   }
 
-  const statusResult = runChecked('babysitter', ['run:status', runDir, '--json'], { cwd: WORKSPACE });
-  const status = JSON.parse(statusResult.stdout);
-
-  if (status.state !== 'completed') {
-    fail('Babysitter run did not complete through the turn-controller path', { status, action });
+  const finalStatus = runBabysitterJson(["run:status", runDir]);
+  if (finalStatus.state !== "completed") {
+    fail("Babysitter run did not complete through hook-based flow", { finalStatus, turns });
   }
   if (!fs.existsSync(ALPHA_PATH)) {
-    fail('Codex did not create the alpha artifact', { alphaPath: ALPHA_PATH });
+    fail("Codex did not create the alpha artifact", { alphaPath: ALPHA_PATH });
   }
   if (!fs.existsSync(REPORT_PATH)) {
-    fail('Codex did not create the final report artifact', { reportPath: REPORT_PATH });
+    fail("Codex did not create the final report artifact", { reportPath: REPORT_PATH });
   }
 
-  const alphaContents = fs.readFileSync(ALPHA_PATH, 'utf8').trim();
+  const alphaContents = fs.readFileSync(ALPHA_PATH, "utf8").trim();
   const report = readJson(REPORT_PATH);
-  const outputPath = path.join(runDir, 'state', 'output.json');
+  const outputPath = path.join(runDir, "state", "output.json");
   const output = fs.existsSync(outputPath) ? readJson(outputPath) : null;
-  const hookLogPath = path.join(runDir, 'logs', 'turns.jsonl');
-  const notificationPath = path.join(WORKSPACE, '.a5c', 'events', 'notifications.jsonl');
   const taskSummaries = collectTaskSummaries(runDir);
-  const breakpointTask = taskSummaries.find((task) => task.kind === 'breakpoint');
+  const breakpointTask = taskSummaries.find((task) => task.kind === "breakpoint");
 
-  if (alphaContents !== 'alpha-run-ok') {
-    fail('Alpha artifact contents were not preserved', { alphaContents });
+  if (alphaContents !== "alpha-run-ok") {
+    fail("Alpha artifact contents were not preserved", { alphaContents });
   }
-  if (report.alpha !== 'alpha-run-ok' || report.gateApproved !== true || report.releaseToken !== 'ci-release-token') {
-    fail('Final report did not contain the expected integrated values', { report });
+  if (report.alpha !== "alpha-run-ok" || report.gateApproved !== true || report.releaseToken !== "ci-release-token") {
+    fail("Final report did not contain the expected integrated values", { report });
   }
-  if (!output || output.completed !== true || output.gateApproved !== true || output.releaseToken !== 'ci-release-token') {
-    fail('Run output.json did not record the completed full-run state', { output, outputPath });
+  if (!output || output.completed !== true || output.gateApproved !== true || output.releaseToken !== "ci-release-token") {
+    fail("Run output.json did not record the completed full-run state", { output, outputPath });
   }
   if (!breakpointTask || !breakpointTask.output || breakpointTask.output.approved !== true) {
-    fail('Breakpoint task did not capture an approval result', { breakpointTask, taskSummaries });
+    fail("Breakpoint task did not capture an approval result", { breakpointTask, taskSummaries });
   }
-  if (!breakpointTask.output.answers || breakpointTask.output.answers.releaseToken !== 'ci-release-token') {
-    fail('Breakpoint task did not capture the release token answer', { breakpointTask });
-  }
-  if (!fs.existsSync(hookLogPath)) {
-    fail('Codex notify hook did not emit a turn log', { hookLogPath, action });
-  }
-
-  const hookLines = fs.readFileSync(hookLogPath, 'utf8').trim().split('\n').filter(Boolean);
-  if (hookLines.length === 0) {
-    fail('Codex notify hook log was empty', { hookLogPath });
+  if (!breakpointTask.output.answers || breakpointTask.output.answers.releaseToken !== "ci-release-token") {
+    fail("Breakpoint task did not capture the release token answer", { breakpointTask });
   }
 
   console.log(JSON.stringify({
@@ -536,18 +578,17 @@ function main() {
     runDir,
     installedSkillDir: SKILL_DIR,
     provider,
-    turnControllerCommand: TURN_CONTROLLER,
-    turnControllerScript: TURN_CONTROLLER_SCRIPT,
+    hookModel: "codex-hooks",
+    hooksConfigPath: HOOKS_PATH,
+    sessionId,
+    lastHookDecision,
     alphaPath: ALPHA_PATH,
     reportPath: REPORT_PATH,
     alphaContents,
     report,
-    finalStatus: status.state,
+    finalStatus: finalStatus.state,
     output,
     breakpointTask,
-    hookLogPath,
-    hookLogEntries: hookLines.length,
-    notificationPath,
     turns,
     taskCount: taskSummaries.length,
     tasks: taskSummaries.map((task) => ({
@@ -565,7 +606,6 @@ try {
     ok: false,
     message: error.message,
     details: error.details || null,
-    tmpdir: os.tmpdir(),
   }, null, 2));
   process.exit(1);
 }

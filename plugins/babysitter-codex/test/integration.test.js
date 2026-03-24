@@ -55,7 +55,6 @@ function testRequire() {
     '.codex/process-mining.js',
     '.codex/rules-resolver.js',
     '.codex/mode-handlers.js',
-    '.codex/turn-controller.js',
     '.codex/prompt-shrinker.js',
     '.codex/hooks/utils.js',
     '.codex/hooks/read-json.js',
@@ -99,7 +98,7 @@ function testRequire() {
     try {
       require(full);
     } catch (err) {
-      // orchestrate.js has main guard, skip execution errors
+      // Some CLI-style modules can throw when loaded outside command mode.
       if (err.code === 'MODULE_NOT_FOUND') throw err;
     }
   }

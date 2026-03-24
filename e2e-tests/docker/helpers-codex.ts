@@ -44,8 +44,6 @@ export function startCodexContainer(): void {
     "AZURE_OPENAI_API_KEY",
     "AZURE_OPENAI_PROJECT_NAME",
     "AZURE_OPENAI_DEPLOYMENT",
-    "OPENAI_API_KEY",
-    "OPENAI_BASE_URL",
   ];
   const envArgs = forwardedEnvNames
     .filter((name) => Boolean(process.env[name]))

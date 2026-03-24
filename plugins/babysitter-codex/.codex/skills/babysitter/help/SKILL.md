@@ -6,9 +6,8 @@ argument-hint: "[command|process|skill|agent|methodology] topic to get help on"
 
 # babysitter:help
 
-Babysitter for Codex uses skills, AGENTS guidance, project config, and an
-explicit turn-state helper so Codex itself owns the user-facing orchestration
-loop.
+Babysitter for Codex uses skills, AGENTS guidance, project config, and
+workspace lifecycle hooks so Codex stays in the orchestration loop.
 
 ## No Arguments
 
@@ -28,13 +27,13 @@ Codex-native surfaces:
   - skills
   - AGENTS.md guidance
   - project .codex/config.toml
+  - project .codex/hooks.json (SessionStart, UserPromptSubmit, Stop)
   - optional notify monitoring
 
-Turn-state helper responsibilities:
-  - persist the active run in .a5c/current-run.json
-  - advance exactly one orchestration step per Codex turn
-  - classify the next action as execute / yield / complete / fail
-  - post explicit breakpoint approvals and task outputs
+Hook model responsibilities:
+  - SessionStart: seed session state
+  - UserPromptSubmit: prompt-level transforms
+  - Stop: continue or approve exit after each yielded turn
 ```
 
 ## With Arguments
@@ -47,5 +46,4 @@ If an argument is provided:
 4. Methodology help: search the upstream process library
 
 Legacy `/babysitter:*` aliases may be mentioned only as optional compatibility
-shims, not as native Codex commands. For shell execution, prefer the packaged
-`babysitter-codex-turn` helper over repo-local `.codex/*.js` paths.
+shims, not as native Codex commands.

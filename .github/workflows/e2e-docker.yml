@@ -114,8 +114,6 @@ jobs:
       AZURE_OPENAI_API_KEY: ${{ secrets.AZURE_OPENAI_API_KEY }}
       AZURE_OPENAI_PROJECT_NAME: ${{ vars.AZURE_OPENAI_PROJECT_NAME }}
       AZURE_OPENAI_DEPLOYMENT: ${{ vars.A5C_SELECTED_MODEL }}
-      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-      OPENAI_BASE_URL: ${{ secrets.OPENAI_BASE_URL }}
 
     steps:
       - name: Resolve Codex provider availability
@@ -125,9 +123,6 @@ jobs:
           if [ -n "${AZURE_OPENAI_API_KEY:-}" ] && [ -n "${AZURE_OPENAI_PROJECT_NAME:-}" ]; then
             echo "run_codex=true" >> "$GITHUB_OUTPUT"
             echo "provider=azure" >> "$GITHUB_OUTPUT"
-          elif [ -n "${OPENAI_API_KEY:-}" ]; then
-            echo "run_codex=true" >> "$GITHUB_OUTPUT"
-            echo "provider=openai" >> "$GITHUB_OUTPUT"
           else
             echo "run_codex=false" >> "$GITHUB_OUTPUT"
             echo "provider=none" >> "$GITHUB_OUTPUT"

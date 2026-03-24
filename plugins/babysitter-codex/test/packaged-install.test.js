@@ -93,7 +93,8 @@ try {
   const hasBom = skillBytes.length >= 3 && skillBytes[0] === 0xef && skillBytes[1] === 0xbb && skillBytes[2] === 0xbf;
   assert.strictEqual(hasBom, false, 'Installed SKILL.md should not contain a UTF-8 BOM');
   const installedSkill = fs.readFileSync(path.join(installedSkillRoot, 'SKILL.md'), 'utf8');
-  assert.ok(installedSkill.includes('babysitter-codex-turn'));
+  assert.ok(installedSkill.includes('SessionStart'));
+  assert.ok(installedSkill.includes('Stop'));
 
   const verifyOutput = run(process.execPath, [path.join(installedSkillRoot, 'scripts', 'verify-content-manifest.js')], {
     cwd: workspaceRoot,
@@ -118,10 +119,17 @@ try {
 
   assert.strictEqual(path.resolve(installJson.packageRoot), path.resolve(installedSkillRoot));
   assert.strictEqual(path.resolve(installJson.workspaceRoot), path.resolve(workspaceRoot));
-  assert.strictEqual(installJson.turnControllerCommand, 'babysitter-codex-turn');
   assert.strictEqual(
-    path.resolve(installJson.turnControllerScript),
-    path.resolve(path.join(installedSkillRoot, '.codex', 'turn-controller.js')),
+    path.resolve(installJson.workspaceHooksConfigPath),
+    path.resolve(path.join(workspaceRoot, '.codex', 'hooks.json')),
+  );
+  assert.strictEqual(
+    path.resolve(installJson.workspaceConfigPath),
+    path.resolve(path.join(workspaceRoot, '.codex', 'config.toml')),
+  );
+  assert.strictEqual(
+    path.resolve(installJson.hookScriptsRoot),
+    path.resolve(path.join(installedSkillRoot, '.codex', 'hooks')),
   );
   assert.strictEqual(
     path.resolve(installJson.bundledProcessLibraryFallbackRoot),
@@ -129,10 +137,17 @@ try {
   );
   assert.strictEqual(path.resolve(profileJson.installedSkillRoot), path.resolve(installedSkillRoot));
   assert.ok(!('processLibraryRoot' in profileJson), 'team profile should not pin an active process-library root');
-  assert.strictEqual(profileJson.turnControllerCommand, 'babysitter-codex-turn');
   assert.strictEqual(
-    path.resolve(profileJson.turnControllerScript),
-    path.resolve(path.join(installedSkillRoot, '.codex', 'turn-controller.js')),
+    path.resolve(profileJson.workspaceHooksConfigPath),
+    path.resolve(path.join(workspaceRoot, '.codex', 'hooks.json')),
+  );
+  assert.strictEqual(
+    path.resolve(profileJson.workspaceConfigPath),
+    path.resolve(path.join(workspaceRoot, '.codex', 'config.toml')),
+  );
+  assert.strictEqual(
+    path.resolve(profileJson.hookScriptsRoot),
+    path.resolve(path.join(installedSkillRoot, '.codex', 'hooks')),
   );
   assert.ok(fs.existsSync(profileJson.rulesLayer), `Missing rules layer: ${profileJson.rulesLayer}`);
 

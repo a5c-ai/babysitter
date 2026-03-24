@@ -21,7 +21,7 @@ import { densityFilterText, estimateTokens } from "../../compression/density-fil
 
 export interface HookRunCommandArgs {
   hookType: string;
-  /** Which host tool is invoking the hook. Defaults to "claude-code". */
+  /** Which host tool is invoking the hook. Auto-detected from caller env, falls back to "claude-code". */
   harness: string;
   pluginRoot?: string;
   stateDir?: string;

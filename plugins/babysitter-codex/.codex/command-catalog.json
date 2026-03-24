@@ -1,7 +1,7 @@
 {
   "name": "babysitter",
   "version": "0.1.5",
-  "description": "Babysitter command catalog and skill metadata for Codex CLI. This is internal compatibility metadata for the Babysitter skill bundle, not a native Codex plugin manifest.",
+  "description": "Packaged metadata for the Babysitter Codex skill bundle and hook-enabled project install templates.",
   "author": "a5c.ai",
   "license": "MIT",
   "runtimeCapabilities": {
@@ -9,14 +9,14 @@
       "AGENTS.md",
       "skills",
       "config.toml",
-      "notify"
+      "hooks.json"
     ],
-    "babysitterRuntimeOwnsRunLoop": true,
-    "supportsBlockingHooks": false,
+    "babysitterRuntimeOwnsRunLoop": false,
+    "supportsBlockingHooks": true,
     "supportsCustomSlashCommands": false,
-    "sessionBinding": "best-effort-explicit-only",
-    "legacyHookStubs": "compatibility-only",
-    "primaryTurnControl": "babysitter-codex-turn"
+    "sessionBinding": "hook-first",
+    "hookModel": "codex-hooks",
+    "primaryTurnControl": "stop-hook"
   },
   "commands": [
     {

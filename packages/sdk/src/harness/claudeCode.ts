@@ -943,6 +943,10 @@ export function createClaudeCodeAdapter(): HarnessAdapter {
       return !!(process.env.CLAUDE_SESSION_ID || process.env.CLAUDE_ENV_FILE);
     },
 
+    autoResolvesSessionId(): boolean {
+      return true;
+    },
+
     resolveSessionId(parsed: { sessionId?: string }): string | undefined {
       if (parsed.sessionId) return parsed.sessionId;
       if (process.env.CLAUDE_SESSION_ID) return process.env.CLAUDE_SESSION_ID;
