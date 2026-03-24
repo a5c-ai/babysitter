@@ -126,7 +126,7 @@ export interface PiSessionOptions {
   isolated?: boolean;
   /** Use an in-memory session manager instead of persistent session files. */
   ephemeral?: boolean;
-  /** Bash tool execution backend. "secure" requires the sandbox backend, "auto" falls back to local. */
+  /** Bash tool execution backend. Defaults to native/local PI execution; "secure" opts into the sandbox backend and "auto" falls back to local. */
   bashSandbox?: "auto" | "secure" | "local";
   /** Whether PI session compaction should be enabled for this session. */
   enableCompaction?: boolean;

@@ -17,6 +17,7 @@ import { loadCompressionConfig } from "../compression/config-loader";
 import { createSecureBashBackend } from "./piSecureSandbox";
 
 const DEFAULT_TIMEOUT_MS = 120_000;
+const DEFAULT_BASH_SANDBOX_MODE: NonNullable<PiSessionOptions["bashSandbox"]> = "local";
 
 /** Listener for Pi session events. */
 export type PiEventListener = (event: PiSessionEvent) => void;
@@ -343,7 +344,7 @@ export class PiSessionHandle {
     const secureBashBackend = this.options.toolsMode === "coding" || this.options.toolsMode === "readonly"
       ? await createSecureBashBackend({
         workspace: cwd,
-        mode: this.options.bashSandbox ?? "auto",
+        mode: this.options.bashSandbox ?? DEFAULT_BASH_SANDBOX_MODE,
       })
       : null;
     if (secureBashBackend) {

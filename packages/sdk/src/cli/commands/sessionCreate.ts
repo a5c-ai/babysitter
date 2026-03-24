@@ -22,6 +22,7 @@ import { createPiSession, PiSessionHandle } from "../../harness/piWrapper";
 import type {
   HarnessDiscoveryResult,
   PiSessionEvent,
+  PiSessionOptions,
   SessionBindResult,
 } from "../../harness/types";
 import { loadCompressionConfig } from "../../compression/config-loader";
@@ -44,6 +45,7 @@ import {
   buildOrchestrationSystemPrompt,
   buildOrchestrationUserPrompt,
   buildProcessDefinitionSystemPrompt,
+  type SessionCreatePromptContext,
 } from "./sessionCreatePrompts";
 import type { CompressionConfig } from "../../compression/config";
 
@@ -148,6 +150,47 @@ function compressInternalHarnessPrompt(
 
   const targetReduction = layer.perTaskKind?.[taskKind] ?? layer.targetReduction;
   return densityFilterText(text, targetReduction);
+}
+
+function buildPromptContext(args: {
+  workspace?: string;
+  selectedHarnessName?: string;
+  discovered: HarnessDiscoveryResult[];
+  compressionConfig: CompressionConfig | null;
+}): SessionCreatePromptContext {
+  const envNames = [
+    "CI",
+    "BABYSITTER_COMPRESSION_ENABLED",
+    "BABYSITTER_PI_SANDBOX_IMAGE",
+    "AZURE_OPENAI_API_KEY",
+    "AZURE_OPENAI_PROJECT_NAME",
+    "AZURE_OPENAI_DEPLOYMENT",
+    "OPENAI_API_KEY",
+    "ANTHROPIC_API_KEY",
+  ] as const;
+
+  return {
+    platform: process.platform,
+    arch: process.arch,
+    nodeVersion: process.version,
+    cwd: process.cwd(),
+    workspace: path.resolve(args.workspace ?? process.cwd()),
+    selectedHarnessName: args.selectedHarnessName,
+    discoveredHarnesses: args.discovered,
+    compressionEnabled: Boolean(
+      args.compressionConfig?.enabled &&
+      args.compressionConfig.layers.sdkContextHook.enabled,
+    ),
+    secureSandboxImage: process.env.BABYSITTER_PI_SANDBOX_IMAGE || "node:22-bookworm",
+    piDefaultBashSandbox: "local",
+    piIsolationDefault: false,
+    envFlags: envNames.map((name) => ({
+      name,
+      value: process.env[name]
+        ? (name.endsWith("_API_KEY") ? "set" : process.env[name])
+        : "unset",
+    })),
+  };
 }
 
 const HARNESS_PRIORITY: readonly string[] = [
@@ -361,6 +404,57 @@ function resolveTaskHarness(
   }
 
   return defaultHarness;
+}
+
+function isPiHarness(harnessName: string): boolean {
+  return harnessName === "pi" || harnessName === "oh-my-pi";
+}
+
+function readBooleanMetadata(
+  metadata: Record<string, unknown> | undefined,
+  key: string,
+): boolean | undefined {
+  const value = metadata?.[key];
+  if (typeof value === "boolean") {
+    return value;
+  }
+  if (value === "true") {
+    return true;
+  }
+  if (value === "false") {
+    return false;
+  }
+  return undefined;
+}
+
+function readBashSandboxMetadata(
+  metadata: Record<string, unknown> | undefined,
+): PiSessionOptions["bashSandbox"] | undefined {
+  const value = metadata?.bashSandbox;
+  return value === "auto" || value === "secure" || value === "local"
+    ? value
+    : undefined;
+}
+
+function buildPiWorkerSessionOptions(args: {
+  action: EffectAction;
+  workspace?: string;
+  model?: string;
+}): PiSessionOptions {
+  const metadata = args.action.taskDef?.metadata as Record<string, unknown> | undefined;
+  const isolated = readBooleanMetadata(metadata, "isolated");
+  const enableCompaction = readBooleanMetadata(metadata, "enableCompaction");
+  const bashSandbox = readBashSandboxMetadata(metadata);
+
+  return {
+    workspace: args.workspace,
+    model: args.model,
+    toolsMode: "coding",
+    ephemeral: true,
+    ...(isolated !== undefined ? { isolated } : {}),
+    ...(enableCompaction !== undefined ? { enableCompaction } : {}),
+    ...(bashSandbox ? { bashSandbox } : {}),
+  };
 }
 
 async function resolveEffect(
@@ -699,6 +793,7 @@ async function runProcessDefinitionPhase(args: {
   json: boolean;
   verbose: boolean;
   compressionConfig: CompressionConfig | null;
+  promptContext: SessionCreatePromptContext;
 }): Promise<string> {
   const state: { report?: ProcessDefinitionReport } = {};
   const customTools: unknown[] = [
@@ -757,11 +852,8 @@ async function runProcessDefinitionPhase(args: {
     model: args.model,
     toolsMode: "coding",
     customTools,
-    appendSystemPrompt: [buildProcessDefinitionSystemPrompt(args.outputPath)],
-    isolated: true,
+    appendSystemPrompt: [buildProcessDefinitionSystemPrompt(args.outputPath, args.promptContext)],
     ephemeral: true,
-    bashSandbox: "secure",
-    enableCompaction: true,
   });
 
   try {
@@ -851,6 +943,7 @@ async function runOrchestrationPhase(args: {
   selectedHarnessName: string;
   discovered: HarnessDiscoveryResult[];
   compressionConfig: CompressionConfig | null;
+  promptContext: SessionCreatePromptContext;
 }): Promise<number> {
   const processId = path.basename(args.processPath, path.extname(args.processPath));
   const state: OrchestrationState = {
@@ -1117,16 +1210,12 @@ async function runOrchestrationPhase(args: {
 
         const taskHarness = resolveTaskHarness(action, args.selectedHarnessName, args.discovered);
         let workerSession: PiSessionHandle | null = null;
-        if (action.kind === "shell" || taskHarness === "pi" || taskHarness === "oh-my-pi") {
-          workerSession = createPiSession({
+        if (action.kind === "shell" || isPiHarness(taskHarness)) {
+          workerSession = createPiSession(buildPiWorkerSessionOptions({
+            action,
             workspace: args.workspace,
             model: args.model,
-            toolsMode: "coding",
-            isolated: true,
-            ephemeral: true,
-            bashSandbox: "secure",
-            enableCompaction: true,
-          });
+          }));
         }
 
         try {
@@ -1287,11 +1376,8 @@ async function runOrchestrationPhase(args: {
     model: args.model,
     toolsMode: "readonly",
     customTools,
-    appendSystemPrompt: [buildOrchestrationSystemPrompt(args.selectedHarnessName)],
-    isolated: true,
+    appendSystemPrompt: [buildOrchestrationSystemPrompt(args.selectedHarnessName, args.promptContext)],
     ephemeral: true,
-    bashSandbox: "secure",
-    enableCompaction: true,
   });
 
   emitProgress(
@@ -1419,6 +1505,12 @@ export async function handleSessionCreate(
     const selected = selectHarness(discovered, preferredHarness);
     const selectedHarnessName = selected?.name ?? "pi";
     const compressionConfig = loadSessionCompressionConfig(workspace);
+    const promptContext = buildPromptContext({
+      workspace,
+      selectedHarnessName,
+      discovered,
+      compressionConfig,
+    });
 
     let processPath = providedProcessPath;
     if (processPath) {
@@ -1435,6 +1527,7 @@ export async function handleSessionCreate(
         json,
         verbose,
         compressionConfig,
+        promptContext,
       });
     }
 
@@ -1452,6 +1545,7 @@ export async function handleSessionCreate(
       selectedHarnessName,
       discovered,
       compressionConfig,
+      promptContext,
     });
   } finally {
     rl?.close();

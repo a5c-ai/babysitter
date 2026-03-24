@@ -10,6 +10,12 @@ import { defineTask } from "@a5c-ai/babysitter-sdk";
 const myTask = defineTask('task-id', (args, taskCtx) => ({
   kind: 'agent',  // ALWAYS use 'agent' kind, never 'node'
   title: 'Description of what this task does',
+  metadata: {
+    harness: 'pi',         // optional: route a task to a specific harness
+    bashSandbox: 'secure', // optional: opt into AgentSH for risky shell work
+    isolated: true,        // optional: disable repo/global PI skills/extensions
+    enableCompaction: true // optional: opt into PI compaction for long-lived workers
+  },
   agent: {
     name: 'general-purpose',
     prompt: {
@@ -52,6 +58,8 @@ which bypasses the agent orchestration model entirely. Every task MUST use `agen
 ## Rules
 - ALWAYS use kind: 'agent' for tasks (NEVER 'node')
 - Use kind: 'shell' ONLY for running existing CLI tools, test suites, git commands
+- Default internal PI execution is native/local and not isolated; opt into `metadata.bashSandbox = "secure"` and `metadata.isolated = true` only for subtasks that genuinely need AgentSH guardrails or stricter isolation
+- External CLI harnesses do not inherit AgentSH guardrails; keep risky shell/system-changing work on the internal PI worker
 - Use ctx.breakpoint() for human approval gates
 - Use ctx.parallel.all() with thunks (arrow functions) for concurrent tasks
 - Include quality gates and verification steps

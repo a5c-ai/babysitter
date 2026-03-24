@@ -76,6 +76,7 @@ jobs:
             e2e-tests/docker/sdk-cli.test.ts \
             e2e-tests/docker/stop-hook.test.ts \
             e2e-tests/docker/pi-harness.test.ts \
+            e2e-tests/docker/pi-secure-sandbox.test.ts \
             e2e-tests/docker/pi-workflow.test.ts \
             2>&1 | tee e2e-artifacts/structural-tests.log
 

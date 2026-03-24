@@ -42,6 +42,11 @@ vi.mock("../../../harness/piWrapper", () => {
       initialize: vi.fn().mockResolvedValue(undefined),
       subscribe: vi.fn(() => () => {}),
       dispose: vi.fn(),
+      executeBash: vi.fn(async () => ({
+        output: "ok",
+        exitCode: 0,
+        cancelled: false,
+      })),
       get sessionId() {
         return sessionId;
       },
@@ -118,6 +123,7 @@ vi.mock("node:fs", async () => {
 import { handleSessionCreate, selectHarness } from "../sessionCreate";
 import { discoverHarnesses } from "../../../harness/discovery";
 import { invokeHarness } from "../../../harness/invoker";
+import { createPiSession } from "../../../harness/piWrapper";
 import { createRun } from "../../../runtime/createRun";
 import { orchestrateIteration } from "../../../runtime/orchestrateIteration";
 import { commitEffectResult } from "../../../runtime/commitEffectResult";
@@ -305,6 +311,115 @@ describe("handleSessionCreate", () => {
       });
 
       expect(code).toBe(1);
+    });
+  });
+
+  describe("PI worker defaults", () => {
+    it("uses native local PI defaults for phase sessions instead of forced secure isolation", async () => {
+      (discoverHarnesses as Mock).mockResolvedValue([
+        makeDiscoveryResult({ name: "pi" }),
+      ]);
+      (createRun as Mock).mockResolvedValue({
+        runId: "run-1",
+        runDir: "/tmp/runs/run-1",
+        metadata: {},
+      });
+      (orchestrateIteration as Mock).mockResolvedValue({
+        status: "completed",
+        output: "done",
+      });
+
+      const code = await handleSessionCreate({
+        processPath: "/tmp/p.js",
+        runsDir: "/tmp/runs",
+        json: false,
+        verbose: false,
+        interactive: false,
+      });
+
+      expect(code).toBe(0);
+      expect(createPiSession).toHaveBeenCalledWith(
+        expect.objectContaining({
+          workspace: undefined,
+          toolsMode: "readonly",
+          ephemeral: true,
+        }),
+      );
+      expect(createPiSession).not.toHaveBeenCalledWith(
+        expect.objectContaining({
+          bashSandbox: "secure",
+        }),
+      );
+      expect(createPiSession).not.toHaveBeenCalledWith(
+        expect.objectContaining({
+          isolated: true,
+        }),
+      );
+      expect(createPiSession).not.toHaveBeenCalledWith(
+        expect.objectContaining({
+          enableCompaction: true,
+        }),
+      );
+    });
+
+    it("lets effect metadata opt a shell worker into secure AgentSH execution", async () => {
+      (discoverHarnesses as Mock).mockResolvedValue([
+        makeDiscoveryResult({ name: "codex" }),
+        makeDiscoveryResult({ name: "pi" }),
+      ]);
+      (createRun as Mock).mockResolvedValue({
+        runId: "run-1",
+        runDir: "/tmp/runs/run-1",
+        metadata: {},
+      });
+
+      const waitingResult: IterationResult = {
+        status: "waiting",
+        nextActions: [
+          {
+            effectId: "eff-shell",
+            invocationKey: "key-shell",
+            kind: "shell",
+            taskDef: {
+              kind: "shell",
+              title: "run secure shell task",
+              metadata: {
+                command: "npm",
+                args: ["test"],
+                bashSandbox: "secure",
+                isolated: true,
+                enableCompaction: true,
+              },
+            },
+          },
+        ],
+      };
+      (orchestrateIteration as Mock)
+        .mockResolvedValueOnce(waitingResult)
+        .mockResolvedValueOnce({
+          status: "completed",
+          output: "done",
+        });
+      (commitEffectResult as Mock).mockResolvedValue({});
+
+      const code = await handleSessionCreate({
+        processPath: "/tmp/p.js",
+        runsDir: "/tmp/runs",
+        json: false,
+        verbose: false,
+        interactive: false,
+      });
+
+      expect(code).toBe(0);
+      expect(createPiSession).toHaveBeenCalledWith(
+        expect.objectContaining({
+          toolsMode: "coding",
+          bashSandbox: "secure",
+          isolated: true,
+          enableCompaction: true,
+          ephemeral: true,
+        }),
+      );
     });
   });
 

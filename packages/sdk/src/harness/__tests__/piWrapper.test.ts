@@ -54,11 +54,16 @@ const mockCreateCodingTools = vi.fn((cwd: string, options?: Record<string, unkno
 const mockCreateReadOnlyTools = vi.fn((cwd: string, options?: Record<string, unknown>) => [`readonly:${cwd}`, options ?? null]);
 const mockSecureBashOperations = { exec: vi.fn() };
 const mockSecureBackendDispose = vi.fn<() => Promise<void>>().mockResolvedValue(undefined);
-const mockCreateSecureBashBackend = vi.fn(async () => ({
-  operations: mockSecureBashOperations,
-  dispose: mockSecureBackendDispose,
-  promptNote: "secure sandbox note",
-}));
+const mockCreateSecureBashBackend = vi.fn(async (options?: { mode?: string }) => {
+  if (options?.mode === "local") {
+    return null;
+  }
+  return {
+    operations: mockSecureBashOperations,
+    dispose: mockSecureBackendDispose,
+    promptNote: "secure sandbox note",
+  };
+});
 
 vi.mock("@mariozechner/pi-coding-agent", () => ({
   createAgentSession: (...args: unknown[]) => mockCreateAgentSession(...args),
@@ -196,7 +201,7 @@ describe("PiSessionHandle", () => {
       );
     });
 
-    test("builds isolated ephemeral sessions with readonly tools", async () => {
+    test("builds isolated ephemeral sessions with readonly tools and native local bash by default", async () => {
       mockPrompt.mockImplementation(async () => {
         emitEvent({ type: "agent_end" });
       });
@@ -215,7 +220,7 @@ describe("PiSessionHandle", () => {
       expect(mockSettingsManagerInMemory).toHaveBeenCalledTimes(1);
       expect(mockCreateSecureBashBackend).toHaveBeenCalledWith({
         workspace: "/tmp/project",
-        mode: "auto",
+        mode: "local",
       });
       expect(mockDefaultResourceLoader).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -228,22 +233,11 @@ describe("PiSessionHandle", () => {
       );
       expect(mockCreateReadOnlyTools).toHaveBeenCalledWith(
         "/tmp/project",
-        expect.objectContaining({
-          bash: expect.objectContaining({
-            operations: mockSecureBashOperations,
-          }),
-        }),
+        undefined,
       );
       expect(mockCreateAgentSession).toHaveBeenCalledWith(
         expect.objectContaining({
-          tools: expect.arrayContaining([
-            "readonly:/tmp/project",
-            expect.objectContaining({
-              bash: expect.objectContaining({
-                operations: mockSecureBashOperations,
-              }),
-            }),
-          ]),
+          tools: ["readonly:/tmp/project", null],
         }),
       );
       expect(mockSettingsManagerInMemory).toHaveBeenCalledWith(
@@ -253,6 +247,34 @@ describe("PiSessionHandle", () => {
           }),
         }),
       );
+    });
+
+    test("wires the secure sandbox only when explicitly requested", async () => {
+      mockPrompt.mockImplementation(async () => {
+        emitEvent({ type: "agent_end" });
+      });
+      mockGetLastAssistantText.mockReturnValue("ok");
+
+      const session = createPiSession({
+        workspace: "/tmp/project",
+        toolsMode: "coding",
+        bashSandbox: "secure",
+      });
+      await session.prompt("inspect");
+
+      expect(mockCreateSecureBashBackend).toHaveBeenCalledWith({
+        workspace: "/tmp/project",
+        mode: "secure",
+      });
+      expect(mockCreateCodingTools).toHaveBeenCalledWith(
+        "/tmp/project",
+        expect.objectContaining({
+          bash: expect.objectContaining({
+            operations: mockSecureBashOperations,
+          }),
+        }),
+      );
+      expect(mockSecureBackendDispose).not.toHaveBeenCalled();
     });
 
     test("skips secure sandbox bootstrap when no explicit tool mode is requested", async () => {
@@ -424,7 +446,7 @@ describe("PiSessionHandle", () => {
       });
       mockGetLastAssistantText.mockReturnValue("ok");
 
-      const session = createPiSession({ toolsMode: "coding" });
+      const session = createPiSession({ toolsMode: "coding", bashSandbox: "secure" });
       await session.prompt("start");
       session.dispose();
 
