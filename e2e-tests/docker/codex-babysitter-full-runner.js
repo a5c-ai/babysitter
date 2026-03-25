@@ -498,8 +498,9 @@ function executeCodexTask(runId, runDir, turnIndex, task) {
       : buildRepairPrompt(taskDef, verification || { reason: "side effect missing" });
     const codexArgs = [
       "exec",
+      "--dangerously-bypass-approvals-and-sandbox",
+      "--skip-git-repo-check",
       "-c", "approval_policy=never",
-      "-s", "workspace-write",
       prompt,
     ];
     result = run("codex", codexArgs, {
