@@ -6,7 +6,11 @@ This package is a Codex skill bundle plus installer assets. It is not a native
 Codex plugin manifest and it does not run an external orchestrator. The Codex
 plugin path is:
 
-- installed skill bundle under `~/.codex/skills/babysitter-codex`
+- installed skill bundle under `~/.codex/skills/babysit`
+- optional user-local prompt aliases under `~/.codex/prompts/call.md`,
+  `plan.md`, `resume.md`, `yolo.md`, and the rest of the Babysitter modes
+- repo-local skill bundle under `.codex/skills/babysit`
+- repo-local prompt aliases under `.codex/prompts/*.md`
 - workspace `.codex/hooks.json`
 - workspace `.codex/config.toml`
 - workspace `.a5c/` state
@@ -20,8 +24,7 @@ Global install copies the Codex-facing bundle into `CODEX_HOME`:
 - `SKILL.md`
 - `.codex/`
 - `agents/`
-- `commands/`
-- `bin/`
+- `prompts/` as the source for user-local prompt aliases
 - `scripts/`
 - `babysitter.lock.json`
 
@@ -52,6 +55,10 @@ Install the Codex package:
 npm install -g @a5c-ai/babysitter-codex
 ```
 
+This global install now also clones or updates the process library into
+`~/.a5c/process-library/babysitter-repo` and binds it as the default active
+process library in `~/.a5c/active/process-library.json` through the SDK CLI.
+
 Then install the Codex plugin payload into the target workspace:
 
 ```bash
@@ -71,16 +78,19 @@ It:
 
 1. Resolves the installed package root.
 2. Reads `babysitter.lock.json`.
-3. Clones or updates the upstream Babysitter repo into
+3. Installs the single repo-local Codex skill into `.codex/skills/babysit`.
+4. Installs the prompt aliases into `.codex/prompts`.
+5. Copies hook scripts into `.codex/hooks`.
+6. Clones or updates the upstream Babysitter repo into
    `<workspace>/.a5c/process-library/babysitter-repo`.
-4. Binds `<workspace>/.a5c/process-library/babysitter-repo/library` with
+7. Binds `<workspace>/.a5c/process-library/babysitter-repo/library` with
    `babysitter process-library:use`.
-5. Writes `<workspace>/.a5c/active/process-library.json`.
-6. Writes or refreshes `<workspace>/.codex/hooks.json`.
-7. Creates or merges `<workspace>/.codex/config.toml` so the workspace has the
+8. Writes `<workspace>/.a5c/active/process-library.json`.
+9. Writes or refreshes `<workspace>/.codex/hooks.json`.
+10. Creates or merges `<workspace>/.codex/config.toml` so the workspace has the
    required Codex settings.
-8. Writes `<workspace>/.a5c/team/install.json`.
-9. Creates `<workspace>/.a5c/team/profile.json` if it does not already exist.
+11. Writes `<workspace>/.a5c/team/install.json`.
+12. Creates `<workspace>/.a5c/team/profile.json` if it does not already exist.
 
 It does not create an external orchestrator, bundle the process library, or
 turn the workspace into a fake Codex plugin manifest.
@@ -89,6 +99,11 @@ turn the workspace into a fake Codex plugin manifest.
 
 After a successful workspace install, the important files are:
 
+- `.codex/skills/babysit/SKILL.md`
+- `.codex/prompts/call.md`
+- `.codex/prompts/plan.md`
+- `.codex/prompts/resume.md`
+- `.codex/hooks/`
 - `.codex/hooks.json`
 - `.codex/config.toml`
 - `.a5c/team/install.json`
@@ -98,18 +113,23 @@ After a successful workspace install, the important files are:
 
 ## Using It In Codex
 
-Use normal Codex chat phrases:
+Use the skill directly:
 
 ```text
-babysitter call implement authentication with tests
-babysitter resume
-babysitter doctor
-babysitter team-install
-babysitter project-install
+$babysit implement authentication with tests
 ```
 
-The Codex skill and hooks own the plugin flow. Low-level SDK commands are still
-the runtime mechanism, but they are not the user-facing interface.
+The optional prompt aliases are the mode shortcuts:
+
+```text
+/call implement authentication with tests
+/plan migration from monolith to services
+/resume latest
+```
+
+Each prompt alias should only forward into the `babysit` skill for the
+matching mode. Low-level SDK commands remain runtime mechanics, not the
+user-facing interface.
 
 ## Verification
 
@@ -117,9 +137,12 @@ Verify the installed skill bundle:
 
 ```bash
 npm ls -g @a5c-ai/babysitter-codex --depth=0
-ls -1 ~/.codex/skills/babysitter-codex
-test -f ~/.codex/skills/babysitter-codex/scripts/team-install.js
-test -f ~/.codex/skills/babysitter-codex/.codex/hooks/babysitter-stop-hook.sh
+ls -1 ~/.codex/skills/babysit
+test -f ~/.codex/skills/babysit/scripts/team-install.js
+test -f ~/.codex/skills/babysit/.codex/hooks/babysitter-stop-hook.sh
+test -f ~/.codex/prompts/call.md
+test -f ~/.codex/prompts/plan.md
+test -f ~/.codex/prompts/resume.md
 ```
 
 Verify the active process-library binding for a workspace:
@@ -127,11 +150,6 @@ Verify the active process-library binding for a workspace:
 ```bash
 babysitter process-library:active --state-dir /path/to/repo/.a5c --json
 ```
-
-## Docs
-
-- [commands/README.md](./commands/README.md)
-- Internal orchestration details: [.codex/skills/babysitter/call/SKILL.md](./.codex/skills/babysitter/call/SKILL.md)
 
 ## License
 

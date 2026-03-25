@@ -29,6 +29,13 @@ function readJson(filePath) {
   return JSON.parse(fs.readFileSync(filePath, 'utf8'));
 }
 
+function listPromptAliasFiles(root) {
+  return fs
+    .readdirSync(path.join(root, 'prompts'))
+    .filter((name) => name.endsWith('.md') && name !== 'README.md')
+    .sort();
+}
+
 function copyTree(src, dest) {
   fs.mkdirSync(path.dirname(dest), { recursive: true });
   fs.cpSync(src, dest, { recursive: true });
@@ -58,10 +65,12 @@ try {
   const extractDir = path.join(tmpRoot, 'extract');
   const codexHome = path.join(tmpRoot, 'codex-home');
   const workspaceRoot = path.join(tmpRoot, 'workspace');
+  const userHome = path.join(tmpRoot, 'home');
   const processLibraryRepoRoot = path.join(tmpRoot, 'process-library-source');
   fs.mkdirSync(extractDir, { recursive: true });
   fs.mkdirSync(codexHome, { recursive: true });
   fs.mkdirSync(workspaceRoot, { recursive: true });
+  fs.mkdirSync(userHome, { recursive: true });
   copyTree(
     path.join(PROJECT_ROOT, '..', '..', 'library'),
     path.join(processLibraryRepoRoot, 'library'),
@@ -91,26 +100,34 @@ try {
       BABYSITTER_SDK_CLI: path.join(PROJECT_ROOT, '..', '..', 'packages', 'sdk', 'dist', 'cli', 'main.js'),
       BABYSITTER_PROCESS_LIBRARY_REPO: processLibraryRepoRoot,
       CODEX_HOME: codexHome,
+      HOME: userHome,
+      USERPROFILE: userHome,
       INIT_CWD: workspaceRoot,
     },
   });
   assert.ok(installOutput.includes('Installation complete!'));
 
-  const installedSkillRoot = path.join(codexHome, 'skills', 'babysitter-codex');
+  const installedSkillRoot = path.join(codexHome, 'skills', 'babysit');
   [
     'SKILL.md',
     'README.md',
     'agents',
     '.codex',
-    'bin',
-    'commands',
     'scripts',
     'babysitter.lock.json',
   ].forEach((relativePath) => assertExists(installedSkillRoot, relativePath));
+  for (const promptName of listPromptAliasFiles(PROJECT_ROOT)) {
+    assertExists(codexHome, path.join('prompts', promptName));
+  }
+  assert.ok(!fs.existsSync(path.join(codexHome, 'prompts', 'babysit.md')), 'legacy /babysit alias should not be installed');
   assert.ok(!fs.existsSync(path.join(installedSkillRoot, 'AGENTS.md')), 'installed package should not ship a package-level AGENTS.md');
   assert.ok(!fs.existsSync(path.join(installedSkillRoot, 'upstream')), 'installed package should not bundle upstream content');
   assert.ok(!fs.existsSync(path.join(installedSkillRoot, 'config')), 'installed package should not ship redundant config payload');
   assert.ok(!fs.existsSync(path.join(installedSkillRoot, 'docs')), 'installed package should not ship redundant docs payload');
+  assert.ok(fs.existsSync(path.join(installedSkillRoot, 'prompts', 'call.md')), 'installed package should ship prompt alias source files');
+  assert.ok(!fs.existsSync(path.join(installedSkillRoot, 'bin')), 'installed skill should not ship installer binaries');
+  assert.ok(fs.existsSync(path.join(installedSkillRoot, '.codex', 'skills', 'babysit', 'SKILL.md')), 'installed skill should carry the repo-local skill template');
+  assert.ok(!fs.existsSync(path.join(installedSkillRoot, '.codex', 'skills', 'babysit', 'call')), 'installed skill should not embed nested mode directories');
   assert.ok(!fs.existsSync(path.join(installedSkillRoot, '.codex', 'AGENTS.md')), 'installed package should not ship redundant .codex AGENTS guidance');
   assert.ok(!fs.existsSync(path.join(installedSkillRoot, '.codex', 'plugin.json')), 'installed package should not ship fake plugin-manifest metadata');
   assert.ok(!fs.existsSync(path.join(installedSkillRoot, '.codex', 'command-catalog.json')), 'installed package should not ship fake command-catalog metadata');
@@ -121,9 +138,14 @@ try {
   const installedSkill = fs.readFileSync(path.join(installedSkillRoot, 'SKILL.md'), 'utf8');
   assert.ok(installedSkill.includes('SessionStart'));
   assert.ok(installedSkill.includes('Stop'));
+  assert.ok(installedSkill.includes('name: babysit'));
+  const installedCallPrompt = fs.readFileSync(path.join(codexHome, 'prompts', 'call.md'), 'utf8');
+  assert.ok(installedCallPrompt.includes('Use the installed `babysit` skill in `call` mode.'));
   const homeConfig = fs.readFileSync(path.join(codexHome, 'config.toml'), 'utf8');
   assert.ok(homeConfig.includes('codex_hooks = true'));
   assert.ok(homeConfig.includes('multi_agent = true'));
+  const globalProcessLibraryState = readJson(path.join(userHome, '.a5c', 'active', 'process-library.json'));
+  assert.strictEqual(path.resolve(globalProcessLibraryState.defaultBinding.dir), path.resolve(path.join(userHome, '.a5c', 'process-library', 'babysitter-repo', 'library')));
 
   const teamInstallOutput = run(process.execPath, [path.join(installedSkillRoot, 'scripts', 'team-install.js')], {
     cwd: workspaceRoot,
@@ -137,12 +159,26 @@ try {
   assert.ok(teamInstallOutput.includes('[team-install] complete'));
   assert.ok(fs.existsSync(path.join(workspaceRoot, '.codex', 'hooks.json')));
   assert.ok(fs.existsSync(path.join(workspaceRoot, '.codex', 'config.toml')));
+  assert.ok(fs.existsSync(path.join(workspaceRoot, '.codex', 'skills', 'babysit', 'SKILL.md')));
+  assert.ok(fs.existsSync(path.join(workspaceRoot, '.codex', 'prompts', 'call.md')));
+  assert.ok(fs.existsSync(path.join(workspaceRoot, '.codex', 'prompts', 'plan.md')));
+  assert.ok(fs.existsSync(path.join(workspaceRoot, '.codex', 'prompts', 'resume.md')));
+  assert.ok(!fs.existsSync(path.join(workspaceRoot, '.codex', 'skills', 'babysit', '.codex', 'skills')), 'workspace skill install should not contain nested alias/skill trees');
+  assert.ok(fs.existsSync(path.join(workspaceRoot, '.codex', 'hooks', 'babysitter-stop-hook.sh')));
 
   const installJson = readJson(path.join(workspaceRoot, '.a5c', 'team', 'install.json'));
   const profileJson = readJson(path.join(workspaceRoot, '.a5c', 'team', 'profile.json'));
 
   assert.strictEqual(path.resolve(installJson.packageRoot), path.resolve(installedSkillRoot));
   assert.strictEqual(path.resolve(installJson.workspaceRoot), path.resolve(workspaceRoot));
+  assert.strictEqual(
+    path.resolve(installJson.workspaceSkillRoot),
+    path.resolve(path.join(workspaceRoot, '.codex', 'skills', 'babysit')),
+  );
+  assert.strictEqual(
+    path.resolve(installJson.workspacePromptsRoot),
+    path.resolve(path.join(workspaceRoot, '.codex', 'prompts')),
+  );
   assert.strictEqual(
     path.resolve(installJson.workspaceHooksConfigPath),
     path.resolve(path.join(workspaceRoot, '.codex', 'hooks.json')),
@@ -153,7 +189,7 @@ try {
   );
   assert.strictEqual(
     path.resolve(installJson.hookScriptsRoot),
-    path.resolve(path.join(installedSkillRoot, '.codex', 'hooks')),
+    path.resolve(path.join(workspaceRoot, '.codex', 'hooks')),
   );
   assert.strictEqual(path.resolve(installJson.processLibraryCloneDir), path.resolve(path.join(workspaceRoot, '.a5c', 'process-library', 'babysitter-repo')));
   assert.strictEqual(path.resolve(installJson.processLibraryRoot), path.resolve(path.join(installJson.processLibraryCloneDir, 'library')));
@@ -162,7 +198,8 @@ try {
     path.resolve(installJson.processLibraryStateFile),
     path.resolve(path.join(workspaceRoot, '.a5c', 'active', 'process-library.json')),
   );
-  assert.strictEqual(path.resolve(profileJson.installedSkillRoot), path.resolve(installedSkillRoot));
+  assert.strictEqual(path.resolve(profileJson.installedSkillRoot), path.resolve(path.join(workspaceRoot, '.codex', 'skills', 'babysit')));
+  assert.strictEqual(path.resolve(profileJson.workspacePromptsRoot), path.resolve(path.join(workspaceRoot, '.codex', 'prompts')));
   assert.ok(!('processLibraryRoot' in profileJson), 'team profile should not pin an active process-library root');
   assert.ok(!('rulesLayer' in profileJson), 'team profile should not emit a missing rules layer path');
   assert.ok(String(profileJson.processLibraryLookupCommand || '').includes('process-library:active'));
@@ -176,10 +213,10 @@ try {
   );
   assert.strictEqual(
     path.resolve(profileJson.hookScriptsRoot),
-    path.resolve(path.join(installedSkillRoot, '.codex', 'hooks')),
+    path.resolve(path.join(workspaceRoot, '.codex', 'hooks')),
   );
 
-  console.log('  ok packed install includes the portable skill payload and team-install paths');
+  console.log('  ok packed install includes the portable skill payload, prompt alias, global process library, and workspace team-install paths');
   console.log('\nPackaged install tests passed!');
 } catch (err) {
   console.error('\nTest failed:', err.message);

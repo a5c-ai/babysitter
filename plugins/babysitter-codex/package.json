@@ -16,7 +16,7 @@
     "SKILL.md",
     "README.md",
     "agents/",
-    "commands/",
+    "prompts/",
     ".codex/",
     "bin/",
     "scripts/",

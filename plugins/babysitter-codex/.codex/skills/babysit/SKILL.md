@@ -13,6 +13,7 @@ description: >-
 Babysitter on Codex is implemented as:
 
 - the installed skill bundle under `~/.codex/skills/babysit` or `.codex/skills/babysit`
+- optional prompt aliases under `~/.codex/prompts/*.md` or `.codex/prompts/*.md`
 - workspace `.codex/hooks.json`
 - workspace `.codex/config.toml`
 - workspace `.a5c/`
@@ -101,11 +102,9 @@ Preferred discovery order:
 ## Codex-Specific Rules
 
 - Prefer invoking the skill directly with `$babysit`
-- Optional user-local prompt aliases such as `/call`, `/plan`, `/resume`, and
-  `/yolo` may exist, but they should only forward into the `babysit` skill for
-  the matching mode; they are not the primary integration surface
-- Do not depend on nested mode skills under `.codex/skills/babysit/*`; the
-  installed Codex skill is the single `babysit` skill
+- Optional prompt aliases such as `/call`, `/plan`, `/resume`, and `/yolo` may
+  exist, but they should only forward into the `babysit` skill for the matching
+  mode; they are not the primary integration surface
 - Never fabricate a session ID when none is available from Codex or the caller
 - Use `notify` only for monitoring and telemetry, never as the orchestration
   control loop

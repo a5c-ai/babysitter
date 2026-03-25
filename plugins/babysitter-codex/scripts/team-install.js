@@ -5,6 +5,23 @@ const fs = require('fs');
 const path = require('path');
 const { spawnSync } = require('child_process');
 
+const SKILL_NAME = 'babysit';
+const WORKSPACE_SKILL_ENTRIES = [
+  { source: 'SKILL.md', target: 'SKILL.md' },
+  { source: 'README.md', target: 'README.md' },
+  { source: 'agents', target: 'agents' },
+  { source: 'scripts', target: 'scripts' },
+  { source: 'babysitter.lock.json', target: 'babysitter.lock.json' },
+];
+
+function listPromptEntries(packageRoot) {
+  const promptsDir = path.join(packageRoot, 'prompts');
+  return fs
+    .readdirSync(promptsDir)
+    .filter((name) => name.endsWith('.md') && name !== 'README.md')
+    .sort();
+}
+
 function readJson(filePath) {
   return JSON.parse(fs.readFileSync(filePath, 'utf8'));
 }
@@ -54,6 +71,70 @@ function writeFileIfChanged(filePath, contents) {
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
   fs.writeFileSync(filePath, contents, 'utf8');
   return true;
+}
+
+function copyRecursive(src, dest) {
+  const stat = fs.statSync(src);
+  if (stat.isDirectory()) {
+    fs.mkdirSync(dest, { recursive: true });
+    for (const entry of fs.readdirSync(src)) {
+      if (['node_modules', '.a5c', '.git', 'test', '.gitignore'].includes(entry)) continue;
+      copyRecursive(path.join(src, entry), path.join(dest, entry));
+    }
+    return;
+  }
+
+  if (path.basename(src) === 'SKILL.md') {
+    const file = fs.readFileSync(src);
+    const hasBom = file.length >= 3 && file[0] === 0xef && file[1] === 0xbb && file[2] === 0xbf;
+    fs.mkdirSync(path.dirname(dest), { recursive: true });
+    fs.writeFileSync(dest, hasBom ? file.subarray(3) : file);
+    return;
+  }
+
+  fs.mkdirSync(path.dirname(dest), { recursive: true });
+  fs.copyFileSync(src, dest);
+}
+
+function installWorkspaceSkill(packageRoot, workspaceRoot, dryRun) {
+  const workspaceSkillRoot = path.join(workspaceRoot, '.codex', 'skills', SKILL_NAME);
+  const workspaceHookScriptsRoot = path.join(workspaceRoot, '.codex', 'hooks');
+  const workspacePromptsRoot = path.join(workspaceRoot, '.codex', 'prompts');
+
+  if (dryRun) {
+    return {
+      workspaceSkillRoot,
+      workspaceHookScriptsRoot,
+      workspacePromptsRoot,
+    };
+  }
+
+  fs.rmSync(workspaceSkillRoot, { recursive: true, force: true });
+  fs.mkdirSync(workspaceSkillRoot, { recursive: true });
+
+  for (const entry of WORKSPACE_SKILL_ENTRIES) {
+    copyRecursive(
+      path.join(packageRoot, entry.source),
+      path.join(workspaceSkillRoot, entry.target),
+    );
+  }
+
+  fs.mkdirSync(workspaceHookScriptsRoot, { recursive: true });
+  copyRecursive(path.join(packageRoot, '.codex', 'hooks'), workspaceHookScriptsRoot);
+
+  fs.mkdirSync(workspacePromptsRoot, { recursive: true });
+  for (const promptName of listPromptEntries(packageRoot)) {
+    copyRecursive(
+      path.join(packageRoot, 'prompts', promptName),
+      path.join(workspacePromptsRoot, promptName),
+    );
+  }
+
+  return {
+    workspaceSkillRoot,
+    workspaceHookScriptsRoot,
+    workspacePromptsRoot,
+  };
 }
 
 function insertRootKey(content, key, line) {
@@ -129,22 +210,33 @@ function mergeWorkspaceConfig(existing) {
   return `${content.trimEnd()}\n`;
 }
 
-function resolveSdkCli(packageRoot) {
+function resolveBabysitterCommand(packageRoot) {
   if (process.env.BABYSITTER_SDK_CLI) {
-    return path.resolve(process.env.BABYSITTER_SDK_CLI);
+    return {
+      command: process.execPath,
+      argsPrefix: [path.resolve(process.env.BABYSITTER_SDK_CLI)],
+    };
   }
   try {
-    return require.resolve('@a5c-ai/babysitter-sdk/dist/cli/main.js', {
-      paths: [packageRoot],
-    });
-  } catch (error) {
-    throw new Error(`could not resolve Babysitter SDK CLI entrypoint: ${error.message}`);
+    return {
+      command: process.execPath,
+      argsPrefix: [
+        require.resolve('@a5c-ai/babysitter-sdk/dist/cli/main.js', {
+          paths: [packageRoot],
+        }),
+      ],
+    };
+  } catch {
+    return {
+      command: 'babysitter',
+      argsPrefix: [],
+    };
   }
 }
 
 function runBabysitterCli(packageRoot, cliArgs, options = {}) {
-  const cliMain = resolveSdkCli(packageRoot);
-  const result = spawnSync(process.execPath, [cliMain, ...cliArgs], {
+  const resolved = resolveBabysitterCommand(packageRoot);
+  const result = spawnSync(resolved.command, [...resolved.argsPrefix, ...cliArgs], {
     cwd: options.cwd || process.cwd(),
     stdio: ['ignore', 'pipe', 'pipe'],
     encoding: 'utf8',
@@ -227,7 +319,7 @@ function ensureActiveProcessLibrary(packageRoot, lock, workspaceRoot, dryRun) {
   };
 }
 
-function buildHooksConfig(packageRoot) {
+function buildHooksConfig() {
   return {
     hooks: {
       SessionStart: [
@@ -236,7 +328,7 @@ function buildHooksConfig(packageRoot) {
           hooks: [
             {
               type: 'command',
-              command: path.join(packageRoot, '.codex', 'hooks', 'babysitter-session-start.sh'),
+              command: '.codex/hooks/babysitter-session-start.sh',
             },
           ],
         },
@@ -247,7 +339,7 @@ function buildHooksConfig(packageRoot) {
           hooks: [
             {
               type: 'command',
-              command: path.join(packageRoot, '.codex', 'hooks', 'user-prompt-submit.sh'),
+              command: '.codex/hooks/user-prompt-submit.sh',
             },
           ],
         },
@@ -258,7 +350,7 @@ function buildHooksConfig(packageRoot) {
           hooks: [
             {
               type: 'command',
-              command: path.join(packageRoot, '.codex', 'hooks', 'babysitter-stop-hook.sh'),
+              command: '.codex/hooks/babysitter-stop-hook.sh',
             },
           ],
         },
@@ -268,8 +360,8 @@ function buildHooksConfig(packageRoot) {
 }
 
 function main() {
-  const packageRoot = path.resolve(__dirname, '..');
   const args = parseArgs(process.argv);
+  const packageRoot = path.resolve(process.env.BABYSITTER_PACKAGE_ROOT || path.join(__dirname, '..'));
   const workspaceRoot = args.workspace;
   const lockPath = path.join(packageRoot, 'babysitter.lock.json');
   if (!fs.existsSync(lockPath)) {
@@ -278,6 +370,7 @@ function main() {
   const lock = readJson(lockPath);
   const workspaceHooksConfigPath = path.join(workspaceRoot, '.codex', 'hooks.json');
   const workspaceConfigPath = path.join(workspaceRoot, '.codex', 'config.toml');
+  const { workspaceSkillRoot, workspaceHookScriptsRoot, workspacePromptsRoot } = installWorkspaceSkill(packageRoot, workspaceRoot, args.dryRun);
   const processLibrary = ensureActiveProcessLibrary(packageRoot, lock, workspaceRoot, args.dryRun);
   const installInfo = {
     installedAt: new Date().toISOString(),
@@ -286,9 +379,11 @@ function main() {
     lockVersion: lock.version,
     packageRoot,
     workspaceRoot,
+    workspaceSkillRoot,
+    workspacePromptsRoot,
     workspaceConfigPath,
     workspaceHooksConfigPath,
-    hookScriptsRoot: path.join(packageRoot, '.codex', 'hooks'),
+    hookScriptsRoot: workspaceHookScriptsRoot,
     processLibraryRepo: processLibrary.repo,
     ...(processLibrary.ref ? { processLibraryRef: processLibrary.ref } : {}),
     processLibraryCloneDir: processLibrary.cloneDir,
@@ -318,7 +413,7 @@ function main() {
   const outDir = path.join(workspaceRoot, '.a5c', 'team');
   fs.mkdirSync(outDir, { recursive: true });
   fs.mkdirSync(path.dirname(workspaceHooksConfigPath), { recursive: true });
-  writeFileIfChanged(workspaceHooksConfigPath, `${JSON.stringify(buildHooksConfig(packageRoot), null, 2)}\n`);
+  writeFileIfChanged(workspaceHooksConfigPath, `${JSON.stringify(buildHooksConfig(), null, 2)}\n`);
   const existingWorkspaceConfig = fs.existsSync(workspaceConfigPath)
     ? fs.readFileSync(workspaceConfigPath, 'utf8')
     : renderWorkspaceConfigToml();
@@ -329,10 +424,11 @@ function main() {
   if (!fs.existsSync(profilePath)) {
     fs.writeFileSync(profilePath, JSON.stringify({
       teamName: 'default',
-      installedSkillRoot: packageRoot,
+      installedSkillRoot: workspaceSkillRoot,
+      workspacePromptsRoot,
       workspaceConfigPath,
       workspaceHooksConfigPath,
-      hookScriptsRoot: path.join(packageRoot, '.codex', 'hooks'),
+      hookScriptsRoot: workspaceHookScriptsRoot,
       processLibraryLookupCommand: 'babysitter process-library:active --state-dir .a5c --json',
     }, null, 2), 'utf8');
   }
