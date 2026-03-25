@@ -2,7 +2,10 @@
  * Tests for session:create command handler.
  */
 
-import { describe, it, expect, beforeEach, vi, type Mock } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi, type Mock } from "vitest";
+import { promises as fs, existsSync } from "node:fs";
+import * as os from "node:os";
+import * as path from "node:path";
 import type { HarnessDiscoveryResult, HarnessInvokeResult } from "../../../harness/types";
 import type { IterationResult } from "../../../runtime/types";
 
@@ -223,10 +226,21 @@ describe("selectHarness", () => {
 });
 
 describe("handleSessionCreate", () => {
+  let tempDirs: string[] = [];
+
   beforeEach(() => {
     vi.clearAllMocks();
     vi.spyOn(console, "log").mockImplementation(() => {});
     vi.spyOn(console, "error").mockImplementation(() => {});
+  });
+
+  afterEach(async () => {
+    await Promise.all(
+      tempDirs.map(async (dir) => {
+        await fs.rm(dir, { recursive: true, force: true });
+      }),
+    );
+    tempDirs = [];
   });
 
   describe("Phase A: --process flag skips generation", () => {
@@ -257,6 +271,111 @@ describe("handleSessionCreate", () => {
       // invokeHarness should NOT have been called for Phase A meta-prompt
       // It may be called for Phase C effects, but not for process generation
       expect(invokeHarness).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("Phase 1: process-definition recovery", () => {
+    it("recovers by writing a process code block returned by the phase-1 agent when the tool report is missing", async () => {
+      const workspace = await fs.mkdtemp(path.join(os.tmpdir(), "session-create-phase1-"));
+      tempDirs.push(workspace);
+
+      const accessMock = vi.mocked((await import("node:fs")).promises.access);
+      accessMock.mockImplementation(async (targetPath) => {
+        if (!existsSync(String(targetPath))) {
+          const error = Object.assign(new Error(`ENOENT: ${String(targetPath)}`), {
+            code: "ENOENT",
+          });
+          throw error;
+        }
+      });
+
+      (discoverHarnesses as Mock).mockResolvedValue([
+        makeDiscoveryResult({ name: "pi" }),
+      ]);
+      (createRun as Mock).mockResolvedValue({
+        runId: "run-fallback",
+        runDir: path.join(workspace, ".a5c", "runs", "run-fallback"),
+        metadata: {},
+      });
+      (orchestrateIteration as Mock).mockResolvedValue({
+        status: "completed",
+        output: "done",
+      });
+
+      vi.mocked(createPiSession).mockImplementationOnce(() => ({
+        initialize: vi.fn().mockResolvedValue(undefined),
+        subscribe: vi.fn(() => () => {}),
+        dispose: vi.fn(),
+        executeBash: vi.fn(async () => ({
+          output: "",
+          exitCode: 0,
+          cancelled: false,
+        })),
+        get sessionId() {
+          return "mock-session-id-phase1";
+        },
+        get isInitialized() {
+          return true;
+        },
+        prompt: vi
+          .fn()
+          .mockResolvedValueOnce({
+            success: true,
+            output: "I analyzed the request and drafted the process approach in plain text.",
+            exitCode: 0,
+            duration: 1,
+          })
+          .mockResolvedValueOnce({
+            success: true,
+            output: [
+              "```javascript",
+              'import { defineTask } from "@a5c-ai/babysitter-sdk";',
+              "",
+              'const buildGameTask = defineTask("build-game", (args, taskCtx) => ({',
+              '  kind: "agent",',
+              '  title: "Build the requested game",',
+              '  agent: {',
+              '    name: "general-purpose",',
+              '    prompt: {',
+              '      role: "Game developer",',
+              '      task: "Create the requested game in the repository.",',
+              '      context: { request: args.request },',
+              '      instructions: ["Inspect the repo", "Implement the game", "Summarize the result"],',
+              '      outputFormat: "JSON",',
+              '    },',
+              '    outputSchema: { type: "object", required: ["summary"] },',
+              '  },',
+              '  io: {',
+              '    inputJsonPath: `tasks/${taskCtx.effectId}/input.json`,',
+              '    outputJsonPath: `tasks/${taskCtx.effectId}/output.json`,',
+              '  },',
+              "}));",
+              "",
+              "export async function process(inputs, ctx) {",
+              '  return ctx.task(buildGameTask, { request: inputs.userPrompt ?? "create a game" });',
+              "}",
+              "```",
+            ].join("\n"),
+            exitCode: 0,
+            duration: 1,
+          }),
+      }));
+
+      const code = await handleSessionCreate({
+        prompt: "create a game",
+        workspace,
+        runsDir: path.join(workspace, ".a5c", "runs"),
+        json: false,
+        verbose: false,
+        interactive: false,
+      });
+
+      expect(code).toBe(0);
+      const generatedPath = path.join(workspace, "generated-process.js");
+      expect(existsSync(generatedPath)).toBe(true);
+      const source = await fs.readFile(generatedPath, "utf8");
+      expect(source).toContain('export async function process');
+      expect(source).toContain('defineTask("build-game"');
     });
   });
 

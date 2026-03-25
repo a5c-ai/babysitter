@@ -71,6 +71,7 @@ const GREEN = "\x1b[32m";
 const YELLOW = "\x1b[33m";
 const RED = "\x1b[31m";
 const MAGENTA = "\x1b[35m";
+const VERBOSE_LOG_LIMIT = 4_000;
 
 interface Phase1Progress {
   phase: "1";
@@ -126,6 +127,44 @@ interface OrchestrationState {
   pendingEffectResults: Map<string, Awaited<ReturnType<typeof resolveEffect>>>;
   lastAskUserQuestionResponse?: AskUserQuestionResponse;
   finished?: OrchestrationFinishReport;
+}
+
+function truncateForVerboseLog(text: string, maxChars: number = VERBOSE_LOG_LIMIT): string {
+  const normalized = text.replace(/\r\n/g, "\n");
+  if (normalized.length <= maxChars) {
+    return normalized;
+  }
+  return `${normalized.slice(0, maxChars)}\n... [truncated ${normalized.length - maxChars} chars]`;
+}
+
+function stringifyForVerboseLog(value: unknown, maxChars: number = VERBOSE_LOG_LIMIT): string {
+  try {
+    const raw = typeof value === "string" ? value : JSON.stringify(value, null, 2);
+    return truncateForVerboseLog(raw, maxChars);
+  } catch {
+    return truncateForVerboseLog(String(value), maxChars);
+  }
+}
+
+function writeVerboseLine(enabled: boolean, json: boolean, message: string): void {
+  if (!json && enabled) {
+    process.stderr.write(`${DIM}${message}${RESET}\n`);
+  }
+}
+
+function writeVerboseBlock(
+  enabled: boolean,
+  json: boolean,
+  label: string,
+  value: unknown,
+  maxChars: number = VERBOSE_LOG_LIMIT,
+): void {
+  if (json || !enabled) {
+    return;
+  }
+  process.stderr.write(
+    `${DIM}[${label}]${RESET}\n${DIM}${stringifyForVerboseLog(value, maxChars)}${RESET}\n`,
+  );
 }
 
 function loadSessionCompressionConfig(workspace?: string): CompressionConfig | null {
@@ -250,6 +289,126 @@ function buildMetaPrompt(userPrompt: string, workDir: string): string {
   template = template.replace("{{OUTPUT_PATH}}", path.join(workDir, "generated-process.js"));
   template = template.replace("{{INTERVIEW_CONTEXT}}", "");
   return template;
+}
+
+function looksLikeProcessDefinitionSource(source: string): boolean {
+  const normalized = source.trim();
+  if (!normalized) {
+    return false;
+  }
+  return (
+    normalized.includes("defineTask(") ||
+    /export\s+async\s+function\s+process\s*\(/.test(normalized) ||
+    /export\s+default\s+async\s+function/.test(normalized) ||
+    /export\s*\{\s*process\s*\}/.test(normalized)
+  );
+}
+
+function extractProcessDefinitionCodeBlock(text: string): string | null {
+  const codeBlockPattern = /```(?:javascript|js|mjs|ts)?\s*([\s\S]*?)```/gi;
+  let match: RegExpExecArray | null;
+  let fallback: string | null = null;
+
+  while ((match = codeBlockPattern.exec(text)) !== null) {
+    const candidate = match[1]?.trim();
+    if (!candidate) {
+      continue;
+    }
+    if (looksLikeProcessDefinitionSource(candidate)) {
+      return candidate;
+    }
+    fallback ??= candidate;
+  }
+
+  return fallback;
+}
+
+function normalizeReportedPath(candidate: string, workspace?: string): string {
+  const trimmed = candidate.trim().replace(/^['"`]|['"`]$/g, "");
+  if (path.isAbsolute(trimmed)) {
+    return path.resolve(trimmed);
+  }
+  return path.resolve(workspace ?? process.cwd(), trimmed);
+}
+
+function extractMentionedProcessPaths(text: string, workspace?: string): string[] {
+  const patterns = [
+    /([A-Za-z]:[\\/][^\r\n"'`]+?\.m?js)\b/g,
+    /((?:\.{0,2}[\\/]|\/)[^\r\n"'`]+?\.m?js)\b/g,
+    /\b([A-Za-z0-9_.\-\\/]+generated-process\.m?js)\b/g,
+  ];
+
+  const matches = new Set<string>();
+  for (const pattern of patterns) {
+    let match: RegExpExecArray | null;
+    while ((match = pattern.exec(text)) !== null) {
+      const raw = match[1];
+      if (raw) {
+        matches.add(normalizeReportedPath(raw, workspace));
+      }
+    }
+  }
+
+  return [...matches];
+}
+
+async function recoverProcessDefinitionFromOutputs(args: {
+  outputPath: string;
+  workspace?: string;
+  outputs: string[];
+}): Promise<ProcessDefinitionReport | null> {
+  const expectedPath = path.resolve(args.outputPath);
+
+  try {
+    await waitForProcessFile(expectedPath, 1_000);
+    return {
+      processPath: expectedPath,
+      summary: "Recovered from missing process-definition tool report by using the expected output path.",
+    };
+  } catch {
+    // continue to other recovery strategies
+  }
+
+  for (const output of args.outputs) {
+    for (const candidatePath of extractMentionedProcessPaths(output, args.workspace)) {
+      try {
+        await waitForProcessFile(candidatePath, 1_000);
+        return {
+          processPath: candidatePath,
+          summary: "Recovered process-definition output by using a path mentioned by the agent.",
+        };
+      } catch {
+        // keep trying
+      }
+    }
+  }
+
+  for (const output of args.outputs) {
+    const extracted = extractProcessDefinitionCodeBlock(output);
+    if (!extracted || !looksLikeProcessDefinitionSource(extracted)) {
+      continue;
+    }
+    await fs.mkdir(path.dirname(expectedPath), { recursive: true });
+    await fs.writeFile(expectedPath, extracted, "utf8");
+    return {
+      processPath: expectedPath,
+      summary: "Recovered process-definition output by writing a JavaScript code block returned by the agent.",
+    };
+  }
+
+  for (const output of args.outputs) {
+    if (!looksLikeProcessDefinitionSource(output)) {
+      continue;
+    }
+    await fs.mkdir(path.dirname(expectedPath), { recursive: true });
+    await fs.writeFile(expectedPath, output.trim(), "utf8");
+    return {
+      processPath: expectedPath,
+      summary: "Recovered process-definition output by writing the agent's direct JavaScript response.",
+    };
+  }
+
+  return null;
 }
 
 const POLL_INTERVAL_MS = 1_000;
@@ -804,6 +963,13 @@ async function runProcessDefinitionPhase(args: {
   promptContext: SessionCreatePromptContext;
 }): Promise<string> {
   const state: { report?: ProcessDefinitionReport } = {};
+  const phaseOutputs: string[] = [];
+  const writeVerbose = (message: string): void => {
+    writeVerboseLine(args.verbose, args.json, message);
+  };
+  const writeVerboseData = (label: string, value: unknown, maxChars?: number): void => {
+    writeVerboseBlock(args.verbose, args.json, label, value, maxChars);
+  };
   const customTools: unknown[] = [
     {
       name: "AskUserQuestion",
@@ -815,7 +981,9 @@ async function runProcessDefinitionPhase(args: {
         _toolCallId: string,
         params: AskUserQuestionRequest,
       ): Promise<ToolResultShape> => {
+        writeVerboseData("phase1 tool AskUserQuestion request", params);
         const response = await askUserQuestionViaTool(params, args.interactive, args.rl);
+        writeVerboseData("phase1 tool AskUserQuestion response", response);
         emitProgress(
           {
             phase: "1",
@@ -840,6 +1008,7 @@ async function runProcessDefinitionPhase(args: {
         _toolCallId: string,
         params: { processPath: string; summary?: string },
       ): ToolResultShape => {
+        writeVerboseData("phase1 tool babysitter_report_process_definition", params);
         state.report = {
           processPath: params.processPath,
           summary: params.summary,
@@ -855,12 +1024,35 @@ async function runProcessDefinitionPhase(args: {
     args.verbose,
   );
 
+  writeVerbose(
+    `[phase1 setup] workspace=${path.resolve(args.workspace ?? process.cwd())} model=${args.model ?? "(default)"} outputPath=${path.resolve(args.outputPath)}`,
+  );
+  writeVerboseData(
+    "phase1 tools",
+    (customTools as Array<{ name?: string; label?: string }>).map((tool) => ({
+      name: tool.name,
+      label: tool.label,
+    })),
+  );
+
+  const processDefinitionSystemPrompt = buildProcessDefinitionSystemPrompt(
+    args.outputPath,
+    args.promptContext,
+  );
+  const initialMetaPrompt = compressInternalHarnessPrompt(
+    buildMetaPrompt(args.prompt, args.workspace ?? process.cwd()),
+    args.compressionConfig,
+    "agent",
+  );
+  writeVerboseData("phase1 system prompt", processDefinitionSystemPrompt);
+  writeVerboseData("phase1 initial prompt", initialMetaPrompt);
+
   const session = createPiSession({
     workspace: args.workspace,
     model: args.model,
     toolsMode: "coding",
     customTools,
-    appendSystemPrompt: [buildProcessDefinitionSystemPrompt(args.outputPath, args.promptContext)],
+    appendSystemPrompt: [processDefinitionSystemPrompt],
     ephemeral: true,
   });
 
@@ -878,11 +1070,7 @@ async function runProcessDefinitionPhase(args: {
     }
 
     const result = await session.prompt(
-      compressInternalHarnessPrompt(
-        buildMetaPrompt(args.prompt, args.workspace ?? process.cwd()),
-        args.compressionConfig,
-        "agent",
-      ),
+      initialMetaPrompt,
       300_000,
     );
 
@@ -890,62 +1078,114 @@ async function runProcessDefinitionPhase(args: {
     if (!args.json) process.stderr.write("\n");
 
     if (!result.success) {
+      writeVerboseData("phase1 agent failure output", result.output);
       throw new BabysitterRuntimeError(
         "ProcessDefinitionFailed",
         result.output,
         { category: ErrorCategory.External },
       );
     }
+    phaseOutputs.push(result.output);
+    writeVerboseData("phase1 agent output", result.output);
 
     if (!state.report?.processPath) {
       writeVerboseProcessDefinitionRecovery(args.json);
+      const recoveryPrompt = compressInternalHarnessPrompt(
+        [
+          "Recovery step:",
+          `- Write the full process file now to ${args.outputPath}`,
+          "- Then call babysitter_report_process_definition exactly once.",
+          "- Do not just describe the process in plain text.",
+        ].join("\n"),
+        args.compressionConfig,
+        "agent",
+      );
+      writeVerboseData("phase1 recovery prompt", recoveryPrompt);
       const recovery = await session.prompt(
-        compressInternalHarnessPrompt(
-          [
-            "Recovery step:",
-            `- Write the full process file now to ${args.outputPath}`,
-            "- Then call babysitter_report_process_definition exactly once.",
-            "- Do not just describe the process in plain text.",
-          ].join("\n"),
-          args.compressionConfig,
-          "agent",
-        ),
+        recoveryPrompt,
         180_000,
       );
       if (!recovery.success) {
+        writeVerboseData("phase1 recovery failure output", recovery.output);
         throw new BabysitterRuntimeError(
           "ProcessDefinitionFailed",
           recovery.output,
           { category: ErrorCategory.External },
         );
       }
+      phaseOutputs.push(recovery.output);
+      writeVerboseData("phase1 recovery output", recovery.output);
     }
 
     if (!state.report?.processPath) {
-      try {
-        await waitForProcessFile(args.outputPath, 5_000);
-        state.report = {
-          processPath: args.outputPath,
-          summary: "Recovered from missing process-definition tool report by using the expected output path.",
-        };
-      } catch {
-        if (!args.interactive) {
-          throw new BabysitterRuntimeError(
-            "ProcessDefinitionReportMissing",
-            "The process-definition agent finished without calling babysitter_report_process_definition, and the expected process file was not created.",
-            { category: ErrorCategory.Runtime },
-          );
-        } else {
-          throw new BabysitterRuntimeError(
-            "ProcessDefinitionReportMissing",
-            "The process-definition agent finished without calling babysitter_report_process_definition.",
-            { category: ErrorCategory.Runtime },
-          );
-        }
+      writeVerbose("[phase1 recovery] attempting host-side recovery from agent outputs");
+      state.report = (await recoverProcessDefinitionFromOutputs({
+        outputPath: args.outputPath,
+        workspace: args.workspace,
+        outputs: phaseOutputs,
+      })) ?? undefined;
+      if (state.report) {
+        writeVerboseData("phase1 recovered report", state.report);
+      }
+    }
+
+    if (!state.report?.processPath) {
+      const finalRecoveryPrompt = compressInternalHarnessPrompt(
+        [
+          "Final recovery step:",
+          `- Write the complete JavaScript process file to ${args.outputPath}.`,
+          "- If you already wrote it, do not rewrite unnecessarily.",
+          "- Call babysitter_report_process_definition exactly once after the file exists.",
+          "- Do not answer with plain text only.",
+          "- If helpful, return the full JavaScript in a ```javascript fenced block, but the file must still be written and reported.",
+        ].join("\n"),
+        args.compressionConfig,
+        "agent",
+      );
+      writeVerboseData("phase1 final recovery prompt", finalRecoveryPrompt);
+      const finalRecovery = await session.prompt(
+        finalRecoveryPrompt,
+        180_000,
+      );
+      if (!finalRecovery.success) {
+        writeVerboseData("phase1 final recovery failure output", finalRecovery.output);
+        throw new BabysitterRuntimeError(
+          "ProcessDefinitionFailed",
+          finalRecovery.output,
+          { category: ErrorCategory.External },
+        );
+      }
+      phaseOutputs.push(finalRecovery.output);
+      writeVerboseData("phase1 final recovery output", finalRecovery.output);
+      state.report = (await recoverProcessDefinitionFromOutputs({
+        outputPath: args.outputPath,
+        workspace: args.workspace,
+        outputs: phaseOutputs,
+      })) ?? undefined;
+      if (state.report) {
+        writeVerboseData("phase1 recovered report", state.report);
+      }
+    }
+
+    if (!state.report?.processPath) {
+      writeVerboseData("phase1 unrecoverable outputs", phaseOutputs);
+      if (!args.interactive) {
+        throw new BabysitterRuntimeError(
+          "ProcessDefinitionReportMissing",
+          "The process-definition agent finished without calling babysitter_report_process_definition, and no recoverable process file or code output was produced.",
+          { category: ErrorCategory.Runtime },
+        );
+      } else {
+        throw new BabysitterRuntimeError(
+          "ProcessDefinitionReportMissing",
+          "The process-definition agent finished without calling babysitter_report_process_definition, and no recoverable process file or code output was produced.",
+          { category: ErrorCategory.Runtime },
+        );
       }
     }
 
     await waitForProcessFile(state.report.processPath);
+    writeVerbose(`[phase1 validate] validating process export from ${path.resolve(state.report.processPath)}`);
     await validateProcessExport(state.report.processPath);
 
     emitProgress(
@@ -961,6 +1201,16 @@ async function runProcessDefinitionPhase(args: {
 
     return state.report.processPath;
   } catch (error: unknown) {
+    writeVerboseData(
+      "phase1 error",
+      error instanceof Error
+        ? {
+            name: error.name,
+            message: error.message,
+            stack: error.stack,
+          }
+        : error,
+    );
     emitProgress(
       {
         phase: "1",
@@ -1002,9 +1252,10 @@ async function runOrchestrationPhase(args: {
 
   let orchestrationSession: PiSessionHandle | null = null;
   const writeVerbose = (message: string): void => {
-    if (!args.json && args.verbose) {
-      process.stderr.write(`${DIM}${message}${RESET}\n`);
-    }
+    writeVerboseLine(args.verbose, args.json, message);
+  };
+  const writeVerboseData = (label: string, value: unknown, maxChars?: number): void => {
+    writeVerboseBlock(args.verbose, args.json, label, value, maxChars);
   };
 
   const summarizeAgentText = (text: string): string => {
@@ -1048,8 +1299,10 @@ async function runOrchestrationPhase(args: {
         _toolCallId: string,
         params: AskUserQuestionRequest,
       ): Promise<ToolResultShape> => {
+        writeVerboseData("phase2 tool AskUserQuestion request", params);
         const response = await askUserQuestionViaTool(params, args.interactive, args.rl);
         state.lastAskUserQuestionResponse = response;
+        writeVerboseData("phase2 tool AskUserQuestion response", response);
         return formatToolResult(response, "AskUserQuestion completed.");
       },
     },
@@ -1064,7 +1317,9 @@ async function runOrchestrationPhase(args: {
         _toolCallId: string,
         params: { prompt?: string },
       ): Promise<ToolResultShape> => {
+        writeVerboseData("phase2 tool babysitter_run_create request", params);
         if (state.runId && state.runDir) {
+          writeVerboseData("phase2 tool babysitter_run_create result", { runId: state.runId, runDir: state.runDir });
           return formatToolResult({ runId: state.runId, runDir: state.runDir }, "Run already exists.");
         }
         const result = await createRun({
@@ -1090,6 +1345,7 @@ async function runOrchestrationPhase(args: {
           args.json,
           args.verbose,
         );
+        writeVerboseData("phase2 tool babysitter_run_create result", result);
         return formatToolResult(result, "Run created.");
       },
     },
@@ -1099,6 +1355,7 @@ async function runOrchestrationPhase(args: {
       description: "Bind the orchestration run to the current harness session.",
       parameters: Type.Object({}),
       execute: async (): Promise<ToolResultShape> => {
+        writeVerbose("[phase2 tool babysitter_bind_session request]");
         if (!state.runId || !state.runDir) {
           throw new BabysitterRuntimeError(
             "RunNotCreated",
@@ -1164,6 +1421,7 @@ async function runOrchestrationPhase(args: {
           args.json,
           args.verbose,
         );
+        writeVerboseData("phase2 tool babysitter_bind_session result", state.sessionBound);
         return formatToolResult(state.sessionBound, "Session bound.");
       },
     },
@@ -1173,6 +1431,9 @@ async function runOrchestrationPhase(args: {
       description: "Run the next orchestration iteration and return pending effects or a terminal result.",
       parameters: Type.Object({}),
       execute: async (): Promise<ToolResultShape> => {
+        writeVerbose(
+          `[phase2 tool babysitter_run_iterate request] runDir=${state.runDir ?? "(missing)"} nextIteration=${state.iteration + 1}`,
+        );
         if (!state.runDir) {
           throw new BabysitterRuntimeError(
             "RunNotCreated",
@@ -1204,6 +1465,13 @@ async function runOrchestrationPhase(args: {
         state.pendingEffectResults.clear();
         const result = await orchestrateIteration({ runDir: state.runDir });
         state.lastIterationResult = result;
+        writeVerboseData("phase2 tool babysitter_run_iterate result", {
+          iteration: state.iteration,
+          status: result.status,
+          nextActions: result.status === "waiting" ? result.nextActions : undefined,
+          output: result.status === "completed" ? result.output : undefined,
+          error: result.status === "failed" ? result.error : undefined,
+        });
 
         if (result.status === "waiting") {
           for (const action of result.nextActions) {
@@ -1273,6 +1541,7 @@ async function runOrchestrationPhase(args: {
         _toolCallId: string,
         params: { effectId: string },
       ): Promise<ToolResultShape> => {
+        writeVerboseData("phase2 tool babysitter_execute_effect request", params);
         const action = state.pendingActions.get(params.effectId);
         if (!action) {
           throw new BabysitterRuntimeError(
@@ -1293,9 +1562,22 @@ async function runOrchestrationPhase(args: {
         }
 
         const taskHarness = resolveTaskHarness(action, args.selectedHarnessName, args.discovered);
+        writeVerboseData("phase2 effect execution plan", {
+          effectId: params.effectId,
+          kind: action.kind,
+          title: action.taskDef?.title,
+          resolvedHarness: taskHarness,
+          selectedHarness: args.selectedHarnessName,
+          metadata: (action.taskDef?.metadata as Record<string, unknown> | undefined) ?? undefined,
+        });
         let workerSession: PiSessionHandle | null = null;
         if (action.kind === "shell" || isPiHarness(taskHarness)) {
           workerSession = createPiSession(buildPiWorkerSessionOptions({
+            action,
+            workspace: args.workspace,
+            model: args.model,
+          }));
+          writeVerboseData("phase2 worker session options", buildPiWorkerSessionOptions({
             action,
             workspace: args.workspace,
             model: args.model,
@@ -1318,6 +1600,10 @@ async function runOrchestrationPhase(args: {
             args.json,
           );
           state.pendingEffectResults.set(params.effectId, effectResult);
+          writeVerboseData("phase2 tool babysitter_execute_effect result", {
+            effectId: params.effectId,
+            effectResult,
+          });
           return formatToolResult(
             { effectId: params.effectId, effectResult },
             "Effect executed and staged for task posting.",
@@ -1338,6 +1624,7 @@ async function runOrchestrationPhase(args: {
         _toolCallId: string,
         params: { effectId: string },
       ): Promise<ToolResultShape> => {
+        writeVerboseData("phase2 tool babysitter_task_post_result request", params);
         if (!state.runDir) {
           throw new BabysitterRuntimeError(
             "RunNotCreated",
@@ -1401,6 +1688,14 @@ async function runOrchestrationPhase(args: {
             finishedAt,
           },
         });
+        writeVerboseData("phase2 tool babysitter_task_post_result result", {
+          effectId: params.effectId,
+          status: effectResult.status,
+          startedAt,
+          finishedAt,
+          valuePreview: effectResult.value,
+          error: effectResult.error,
+        });
 
         emitProgress(
           {
@@ -1449,6 +1744,7 @@ async function runOrchestrationPhase(args: {
         _toolCallId: string,
         params: { summary?: string },
       ): ToolResultShape => {
+        writeVerboseData("phase2 tool babysitter_finish_orchestration", params);
         state.finished = { summary: params.summary };
         return formatToolResult(state.finished, "Orchestration finish recorded.");
       },
@@ -1479,8 +1775,11 @@ async function runOrchestrationPhase(args: {
         { category: ErrorCategory.Internal },
       );
     }
+    writeVerboseData(`phase2 host invoke ${name} request`, params);
     const result = tool.execute(`host-${name}`, params);
-    return await Promise.resolve(result);
+    const resolved = await Promise.resolve(result);
+    writeVerboseData(`phase2 host invoke ${name} result`, resolved);
+    return resolved;
   };
 
   const runDeterministicPendingEffects = async (reason: string): Promise<void> => {
@@ -1528,6 +1827,7 @@ async function runOrchestrationPhase(args: {
       const label = options?.label ?? "phase2";
       process.stderr.write(`\n${DIM}[${label}] agent turn${RESET}\n`);
     }
+    writeVerboseData(`${options?.label ?? "phase2"} prompt`, message);
 
     const result = await orchestrationSession.prompt(
       compressInternalHarnessPrompt(
@@ -1539,6 +1839,7 @@ async function runOrchestrationPhase(args: {
     );
 
     if (!result.success) {
+      writeVerboseData(`${options?.label ?? "phase2"} agent failure output`, result.output);
       throw new BabysitterRuntimeError(
         "OrchestrationAgentFailed",
         result.output,
@@ -1563,6 +1864,21 @@ async function runOrchestrationPhase(args: {
     appendSystemPrompt: [buildOrchestrationSystemPrompt(args.selectedHarnessName, args.promptContext)],
     ephemeral: true,
   });
+
+  writeVerbose(
+    `[phase2 setup] harness=${args.selectedHarnessName} workspace=${path.resolve(args.workspace ?? process.cwd())} model=${args.model ?? "(default)"} processPath=${path.resolve(args.processPath)}`,
+  );
+  writeVerboseData(
+    "phase2 tools",
+    (customTools as Array<{ name?: string; label?: string }>).map((tool) => ({
+      name: tool.name,
+      label: tool.label,
+    })),
+  );
+  writeVerboseData(
+    "phase2 system prompt",
+    buildOrchestrationSystemPrompt(args.selectedHarnessName, args.promptContext),
+  );
 
   emitProgress(
     { phase: "2", status: "started", harness: args.selectedHarnessName },
@@ -1700,6 +2016,21 @@ async function runOrchestrationPhase(args: {
       { category: ErrorCategory.Runtime },
     );
   } catch (error: unknown) {
+    writeVerboseData(
+      "phase2 error",
+      error instanceof Error
+        ? {
+            name: error.name,
+            message: error.message,
+            stack: error.stack,
+            runId: state.runId,
+            runDir: state.runDir,
+            iteration: state.iteration,
+            pendingEffects: describePendingActions(),
+            lastIterationResult: state.lastIterationResult,
+          }
+        : error,
+    );
     emitProgress(
       {
         phase: "2",
