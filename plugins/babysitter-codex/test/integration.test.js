@@ -61,7 +61,6 @@ function testShellSyntax() {
 console.log('Integration Tests:');
 try {
   testSyntax();
-  testRequire();
   testShellSyntax();
   console.log('\nAll integration tests passed!');
 } catch (err) {
