@@ -1,8 +1,0 @@
-{
-  "taskId": "approval-gate",
-  "title": "Approve deployment to production",
-  "kind": "breakpoint",
-  "question": "Do you approve deploying version 2.0 to production?",
-  "invocationKey": "inv-key-bp-001",
-  "stepId": "S000001"
-}

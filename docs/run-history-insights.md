@@ -28,7 +28,7 @@ Plugin DX optimization, plugins feature-complete, marketplace plugin creation, a
 Harness integration docs, antigravity/process harnesses, methodology assimilation, and batch AI workflow assimilation. **All completed.**
 
 ### Testing & CI (5 runs)
-E2E Docker test suite, CI test assertion fixes, VSCode extension testing/CI convergence, and fix-gitignore. **All completed.**
+E2E Docker test suite, CI test assertion fixes, packaging/test convergence, and fix-gitignore. **All completed.**
 
 ### Catalog & Documentation (4 runs)
 Process library catalog, catalog sci-fi theme, README compaction, CLAUDE.md quality convergence. **All completed.**
@@ -37,7 +37,7 @@ Process library catalog, catalog sci-fi theme, README compaction, CLAUDE.md qual
 Bug fix run analysis, skill discovery fix, staging vulnerabilities, docs inconsistencies, breakpoint rejection docs, doubled A5C paths. **All completed.**
 
 ### Feature Development (3 runs)
-VSCode observer extension, SDK language porting analysis, cradle gap closure. **All completed.**
+Observer tooling experiments, SDK language porting analysis, cradle gap closure. **All completed.**
 
 ## Key Patterns & Insights
 

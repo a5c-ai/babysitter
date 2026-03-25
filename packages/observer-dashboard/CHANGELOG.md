@@ -295,8 +295,8 @@ All notable changes to this project will be documented in this file.
 - **Batched cache population** -- runs pre-populated in batches of 10 instead of all at once
 - **Breakpoint wait time** -- elapsed wait time displayed on breakpoint steps with `animate-pulse` animation
 ### Changed
-- Package renamed from `@a5c-ai/babysitter-observer` to `@a5c-ai/babysitter-observer-dashboard`
-- CLI binary renamed from `babysitter-observer` to `babysitter-observer-dashboard`
+- Package renamed from the legacy observer package name to `@a5c-ai/babysitter-observer-dashboard`
+- CLI binary renamed from the legacy observer binary name to `babysitter-observer-dashboard`
 - Digest API route uses cached digests instead of fresh calls, preventing notification spam
 - Run card layout redesigned: title on its own row; status badges, stale indicator, and tags on a second row
 - Breakpoint step card label changed from "Needs approval" to "Waiting for approval"
@@ -317,7 +317,7 @@ All notable changes to this project will be documented in this file.
 
 ## [0.1.1] - 2026-02-17
 ### Changed
-- Repository renamed from `babysitter-observer` to `babysitter-observer-dashboard` in package.json
+- Repository renamed from the legacy observer package id to `babysitter-observer-dashboard` in package.json
 
 ## [0.1.0] - 2026-02-18
 
