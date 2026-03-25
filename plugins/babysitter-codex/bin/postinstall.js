@@ -16,7 +16,6 @@ const PACKAGE_ROOT = path.resolve(__dirname, '..');
 const IS_WIN = process.platform === 'win32';
 const INSTALL_ENTRIES = [
   { source: 'SKILL.md', required: true },
-  { source: 'AGENTS.md', required: true },
   { source: 'README.md', required: true },
   { source: 'agents', required: true },
   { source: 'bin', required: true },

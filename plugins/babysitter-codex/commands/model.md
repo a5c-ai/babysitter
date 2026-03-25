@@ -24,4 +24,3 @@ babysitter model set plan=gpt-5 execute=gpt-5-codex
 ## Notes
 
 - Use command phrases in Codex chat (`babysitter ...`), not custom slash commands.
-- If SDK capabilities are missing in your installed version, babysitter-codex falls back to compatibility behavior where possible.

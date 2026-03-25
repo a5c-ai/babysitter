@@ -5,9 +5,8 @@
   "scripts": {
     "test": "node test/integration.test.js && node test/packaged-install.test.js",
     "test:integration": "node test/integration.test.js",
-    "check:mapping": "node scripts/check-mapping-contract.js",
     "team:install": "node scripts/team-install.js",
-    "lint": "find .codex -name '*.js' | xargs -I{} node --check {}",
+    "lint": "node -e \"const fs=require('fs'); const path=require('path'); const cp=require('child_process'); const walk=(dir)=>{for(const entry of fs.readdirSync(dir)){const file=path.join(dir, entry); const stat=fs.statSync(file); if(stat.isDirectory()) walk(file); else if(file.endsWith('.js')) cp.execFileSync(process.execPath,['--check',file],{stdio:'inherit'});}}; ['.codex','bin','scripts','test'].forEach((dir)=>{if(fs.existsSync(dir)) walk(dir);});\"",
     "deploy": "npm publish --access public",
     "deploy:staging": "npm publish --access public --tag staging",
     "postinstall": "node bin/postinstall.js",
@@ -15,16 +14,13 @@
   },
   "files": [
     "SKILL.md",
-    "AGENTS.md",
-    "CHANGELOG.md",
+    "README.md",
     "agents/",
     "commands/",
     ".codex/",
     "bin/",
     "scripts/",
-    "test/",
-    "babysitter.lock.json",
-    "README.md"
+    "babysitter.lock.json"
   ],
   "keywords": [
     "babysitter",

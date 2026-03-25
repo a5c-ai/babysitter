@@ -99,7 +99,6 @@ try {
   const installedSkillRoot = path.join(codexHome, 'skills', 'babysitter-codex');
   [
     'SKILL.md',
-    'AGENTS.md',
     'README.md',
     'agents',
     '.codex',
@@ -108,9 +107,13 @@ try {
     'scripts',
     'babysitter.lock.json',
   ].forEach((relativePath) => assertExists(installedSkillRoot, relativePath));
+  assert.ok(!fs.existsSync(path.join(installedSkillRoot, 'AGENTS.md')), 'installed package should not ship a package-level AGENTS.md');
   assert.ok(!fs.existsSync(path.join(installedSkillRoot, 'upstream')), 'installed package should not bundle upstream content');
   assert.ok(!fs.existsSync(path.join(installedSkillRoot, 'config')), 'installed package should not ship redundant config payload');
   assert.ok(!fs.existsSync(path.join(installedSkillRoot, 'docs')), 'installed package should not ship redundant docs payload');
+  assert.ok(!fs.existsSync(path.join(installedSkillRoot, '.codex', 'AGENTS.md')), 'installed package should not ship redundant .codex AGENTS guidance');
+  assert.ok(!fs.existsSync(path.join(installedSkillRoot, '.codex', 'plugin.json')), 'installed package should not ship fake plugin-manifest metadata');
+  assert.ok(!fs.existsSync(path.join(installedSkillRoot, '.codex', 'command-catalog.json')), 'installed package should not ship fake command-catalog metadata');
 
   const skillBytes = fs.readFileSync(path.join(installedSkillRoot, 'SKILL.md'));
   const hasBom = skillBytes.length >= 3 && skillBytes[0] === 0xef && skillBytes[1] === 0xbb && skillBytes[2] === 0xbf;

@@ -6,60 +6,57 @@ argument-hint: Specific instructions for project onboarding
 
 # babysitter:project-install
 
-Guide through onboarding a new or existing project for babysitter orchestration.
+Guide through onboarding a new or existing project for Babysitter orchestration.
 
 ## Workflow
 
 ### 1. Research the Codebase
 - Analyze project structure, language, framework, build tools
-- Check for existing `.a5c/` directory
-- Detect CI/CD configuration (GitHub Actions, Jenkins, etc.)
+- Check for existing `.a5c/` and `.codex/`
+- Detect CI/CD configuration
 - Identify key entry points and test suites
 
 ### 2. Interview
-- What are the project's goals?
 - What workflows should be orchestrated?
 - What quality gates matter most?
-- Any specific tools or frameworks to prefer?
+- Any harness, model, or tool preferences to preserve?
 
 ### 3. Install the Real Codex Payload
-- Verify the user has installed `@yaniv-tg/babysitter-codex`
-- Run the packaged team installer from the installed skill payload
+- Verify the user has installed `@a5c-ai/babysitter-sdk`
+- Verify the user has installed `@a5c-ai/babysitter-codex`
+- Run `babysitter harness:install-plugin codex --workspace <repo>`
 - Confirm:
+  - `.codex/hooks.json`
+  - `.codex/config.toml`
   - `.a5c/team/install.json`
-  - `.a5c/team/profile.json`
-- Treat the installed skill root as the source of truth for bundled rules,
-  docs, processes, and hook scripts
+  - `.a5c/active/process-library.json`
+
+Treat the installed skill root as the source of truth for Codex-facing assets
+only: hooks, skills, commands, and installer scripts. Treat the active
+process-library binding as the source of truth for process content.
 
 ### 4. Build Project Profile
-- If `babysitter profile:*` commands are supported, write the project profile
-  through the CLI
-- If the SDK is running in `compat-core`, do not block onboarding on profile
-  writes; instead record the discovered build/test/gate choices in workspace
-  onboarding notes under `.a5c/`
+- Prefer `babysitter profile:*` CLI commands for project profile work
+- Capture build/test/gate choices in the project profile or `.a5c` notes
 
-The profile or onboarding notes should cover:
-- Project name, description, language, framework
-- Build and test commands
-- Quality gates configuration
-- Preferred skills and agents
+The profile should cover:
+- project name, description, language, framework
+- build and test commands
+- quality gates configuration
+- preferred skills and agents
 - CI/CD integration settings
 
 ### 5. Install Project-Level Codex Settings
-- Ensure `@a5c-ai/babysitter-sdk` is available
-- Create `.a5c/` directory structure
-- Set up `.codex/config.toml` using real Codex settings (sandbox, approval, optional notify)
-- Set up `.codex/hooks.json` with `SessionStart`, `UserPromptSubmit`, and `Stop`
-- Create AGENTS.md if not present
-- Do not add fake manifest/plugin sections or external supervisor loops
+- Ensure `.codex/hooks.json` points at the installed hook scripts
+- Ensure `.codex/config.toml` contains the required Codex features and writable roots
+- Ensure `.a5c` contains active process-library binding state
+- Do not add a fake plugin manifest, command catalog, or external supervisor loop
 
 ### 6. Optional: Configure CI/CD
-- Add babysitter orchestration to CI pipeline
-- Set up automated quality gates
-- Configure deployment hooks
+- Add Babysitter orchestration to CI pipelines where relevant
+- Add verification or artifact capture around the native/internal harness
 
-### Done!
+### Done
 
-Project is ready for babysitting. Try `babysitter call ...` to start your first orchestrated workflow.
-
-Star the repo: https://github.com/a5c-ai/babysitter
+Project is ready for babysitting. Try `babysitter call ...` to start the first
+orchestrated workflow.

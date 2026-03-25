@@ -44,6 +44,91 @@ function renderWorkspaceConfigToml() {
   ].join('\n');
 }
 
+function writeFileIfChanged(filePath, contents) {
+  if (fs.existsSync(filePath)) {
+    const current = fs.readFileSync(filePath, 'utf8');
+    if (current === contents) {
+      return false;
+    }
+  }
+  fs.mkdirSync(path.dirname(filePath), { recursive: true });
+  fs.writeFileSync(filePath, contents, 'utf8');
+  return true;
+}
+
+function insertRootKey(content, key, line) {
+  const keyPattern = new RegExp(`^\\s*${key}\\s*=`, 'm');
+  if (keyPattern.test(content)) {
+    return content;
+  }
+  const sectionMatch = content.match(/^\[[^\]]+\]\s*$/m);
+  if (!sectionMatch || sectionMatch.index === undefined) {
+    return content.trim()
+      ? `${content.trimEnd()}\n${line}\n`
+      : `${line}\n`;
+  }
+  const before = content.slice(0, sectionMatch.index).trimEnd();
+  const after = content.slice(sectionMatch.index);
+  return before
+    ? `${before}\n${line}\n\n${after}`
+    : `${line}\n\n${after}`;
+}
+
+function ensureSectionLine(content, sectionName, lineKey, line) {
+  const keyPattern = new RegExp(`^\\s*${lineKey}\\s*=`, 'm');
+  if (keyPattern.test(content)) {
+    return content;
+  }
+  const sectionHeader = `[${sectionName}]`;
+  const sectionPattern = new RegExp(`^\\[${sectionName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\]\\s*$`, 'm');
+  if (sectionPattern.test(content)) {
+    return content.replace(sectionPattern, `${sectionHeader}\n${line}`);
+  }
+  return content.trim()
+    ? `${content.trimEnd()}\n\n${sectionHeader}\n${line}\n`
+    : `${sectionHeader}\n${line}\n`;
+}
+
+function ensureWritableRoots(content) {
+  const sectionPattern = /^\[sandbox_workspace_write\]\s*$/m;
+  const rootsPattern = /^writable_roots\s*=\s*\[(.*?)\]\s*$/m;
+  const requiredRoots = ['.a5c', '.codex'];
+
+  if (!sectionPattern.test(content)) {
+    return content.trim()
+      ? `${content.trimEnd()}\n\n[sandbox_workspace_write]\nwritable_roots = [".a5c", ".codex"]\n`
+      : '[sandbox_workspace_write]\nwritable_roots = [".a5c", ".codex"]\n';
+  }
+
+  if (!rootsPattern.test(content)) {
+    return content.replace(sectionPattern, '[sandbox_workspace_write]\nwritable_roots = [".a5c", ".codex"]');
+  }
+
+  return content.replace(rootsPattern, (_match, inner) => {
+    const values = inner
+      .split(',')
+      .map((part) => part.trim())
+      .filter(Boolean)
+      .map((part) => part.replace(/^"(.*)"$/, '$1'));
+    const merged = [...new Set([...values, ...requiredRoots])];
+    const rendered = merged.map((value) => `"${value}"`).join(', ');
+    return `writable_roots = [${rendered}]`;
+  });
+}
+
+function mergeWorkspaceConfig(existing) {
+  let content = existing.trim() ? existing : '';
+  content = insertRootKey(content, 'approval_policy', 'approval_policy = "on-request"');
+  content = insertRootKey(content, 'sandbox_mode', 'sandbox_mode = "workspace-write"');
+  content = insertRootKey(content, 'project_doc_max_bytes', 'project_doc_max_bytes = 65536');
+  content = ensureWritableRoots(content);
+  content = ensureSectionLine(content, 'features', 'codex_hooks', 'codex_hooks = true');
+  content = ensureSectionLine(content, 'features', 'multi_agent', 'multi_agent = true');
+  content = ensureSectionLine(content, 'agents', 'max_depth', 'max_depth = 3');
+  content = ensureSectionLine(content, 'agents', 'max_threads', 'max_threads = 4');
+  return `${content.trimEnd()}\n`;
+}
+
 function resolveSdkCli(packageRoot) {
   if (process.env.BABYSITTER_SDK_CLI) {
     return path.resolve(process.env.BABYSITTER_SDK_CLI);
@@ -233,10 +318,11 @@ function main() {
   const outDir = path.join(workspaceRoot, '.a5c', 'team');
   fs.mkdirSync(outDir, { recursive: true });
   fs.mkdirSync(path.dirname(workspaceHooksConfigPath), { recursive: true });
-  fs.writeFileSync(workspaceHooksConfigPath, JSON.stringify(buildHooksConfig(packageRoot), null, 2), 'utf8');
-  if (!fs.existsSync(workspaceConfigPath)) {
-    fs.writeFileSync(workspaceConfigPath, renderWorkspaceConfigToml(), 'utf8');
-  }
+  writeFileIfChanged(workspaceHooksConfigPath, `${JSON.stringify(buildHooksConfig(packageRoot), null, 2)}\n`);
+  const existingWorkspaceConfig = fs.existsSync(workspaceConfigPath)
+    ? fs.readFileSync(workspaceConfigPath, 'utf8')
+    : renderWorkspaceConfigToml();
+  writeFileIfChanged(workspaceConfigPath, mergeWorkspaceConfig(existingWorkspaceConfig));
   fs.writeFileSync(path.join(outDir, 'install.json'), JSON.stringify(installInfo, null, 2), 'utf8');
 
   const profilePath = path.join(outDir, 'profile.json');

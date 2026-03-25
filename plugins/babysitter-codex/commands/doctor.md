@@ -1,5 +1,5 @@
 ---
-description: Diagnose run/runtime health and compatibility.
+description: Diagnose run/runtime health and installation.
 argument-hint: [run-id|mcp]
 ---
 
@@ -7,7 +7,7 @@ argument-hint: [run-id|mcp]
 
 ## Purpose
 
-Diagnose run/runtime health and compatibility.
+Diagnose run/runtime health and installation.
 
 ## Usage
 
@@ -24,4 +24,4 @@ babysitter doctor mcp
 ## Notes
 
 - Use command phrases in Codex chat (`babysitter ...`), not custom slash commands.
-- If SDK capabilities are missing in your installed version, babysitter-codex falls back to compatibility behavior where possible.
+- Check the workspace hook/config install, active process-library binding, and run state.

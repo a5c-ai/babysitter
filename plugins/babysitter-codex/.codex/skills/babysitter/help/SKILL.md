@@ -6,8 +6,8 @@ argument-hint: "[command|process|skill|agent|methodology] topic to get help on"
 
 # babysitter:help
 
-Babysitter for Codex uses skills, AGENTS guidance, project config, and
-workspace lifecycle hooks so Codex stays in the orchestration loop.
+Babysitter for Codex uses the installed skill bundle, workspace Codex config,
+workspace hooks, and the SDK runtime so Codex stays in the orchestration loop.
 
 ## No Arguments
 
@@ -24,8 +24,7 @@ Primary examples:
   babysitter doctor current run
 
 Codex-native surfaces:
-  - skills
-  - AGENTS.md guidance
+  - installed skills under ~/.codex/skills/babysitter-codex
   - project .codex/config.toml
   - project .codex/hooks.json (SessionStart, UserPromptSubmit, Stop)
   - optional notify monitoring

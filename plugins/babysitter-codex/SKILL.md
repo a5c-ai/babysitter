@@ -1,9 +1,9 @@
 ---
 name: babysitter-codex
 description: >-
-  Run babysitter workflows from Codex using real Codex surfaces: skills,
-  AGENTS.md guidance, project config, lifecycle hooks, and the Babysitter SDK
-  runtime loop.
+  Run babysitter workflows from Codex using the installed skill bundle,
+  workspace Codex hooks, workspace Codex config, and the Babysitter SDK runtime
+  loop.
   Use when the user wants to babysit a task, resume a run, diagnose run health,
   install the Codex skill, or assimilate a methodology for Codex.
 ---
@@ -12,20 +12,16 @@ description: >-
 
 Babysitter on Codex is implemented as:
 
-- Codex-facing instructions and skills
-- A workspace `.codex/hooks.json` with `SessionStart`, `UserPromptSubmit`, and
-  `Stop` registrations
-- A `.a5c` state directory in the target workspace
-- The Babysitter SDK run/task loop that owns `run:create`, `run:iterate`,
-  `task:post`, breakpoint handling, and resume behavior
-- Optional `notify` monitoring only as secondary telemetry
+- the installed skill bundle under `~/.codex/skills/babysitter-codex`
+- workspace `.codex/hooks.json`
+- workspace `.codex/config.toml`
+- workspace `.a5c/`
+- the Babysitter SDK CLI for `run:create`, `run:iterate`, `run:status`,
+  `task:list`, `task:post`, and process-library binding
 
-Codex does expose real lifecycle hooks for this package on supported
-installations. Do not replace them with an external orchestrator or claim that
-`notify` owns continuation.
-Codex also does not expose a native installable plugin manifest for this
-package. Treat `.codex/command-catalog.json` as Babysitter compatibility
-metadata for the skill bundle, not as a Codex platform feature.
+This package supports only the hooks model for the Codex plugin path. Do not
+introduce an app-server loop, an external orchestrator, or fake plugin-manifest
+machinery for the Codex integration.
 
 ## Choosing a Mode
 
@@ -45,9 +41,9 @@ If the user intent is unclear, default to `call/SKILL.md`.
 | Install team-pinned setup | `team-install` |
 | Assimilate external methodology | `assimilate` |
 
-## Internal Runtime Contract
+## Runtime Contract
 
-Use the babysitter SDK CLI for orchestration:
+Use the Babysitter SDK CLI for orchestration:
 
 ```bash
 babysitter run:create   --process-id <id> --entry <path>#<export> ...
@@ -69,15 +65,33 @@ babysitter run:create ... --harness codex --session-id <id> --state-dir .a5c --j
 2. Post it with `babysitter task:post`
 3. Never write `result.json` directly
 
-## Codex Hook Loop
+## Hook Loop
 
-The workspace onboarding flow should install `.codex/config.toml` and
-`.codex/hooks.json` so:
+Workspace onboarding must install `.codex/hooks.json` and `.codex/config.toml`
+so:
 
 1. `SessionStart` seeds `.a5c` session state
 2. `UserPromptSubmit` performs prompt-time transformations when needed
 3. `Stop` decides whether the run is complete or Codex should receive the next
    Babysitter iteration context
+
+## Process Library Model
+
+The Codex package does not bundle the process library.
+
+Workspace onboarding must:
+
+1. clone or update the upstream Babysitter repo into
+   `.a5c/process-library/babysitter-repo`
+2. bind `.a5c/process-library/babysitter-repo/library` with
+   `babysitter process-library:use`
+3. resolve the active binding later with
+   `babysitter process-library:active --state-dir .a5c --json`
+
+Preferred discovery order:
+
+1. project-local `.a5c/processes`
+2. the active SDK-managed process-library binding
 
 ## Codex-Specific Rules
 

@@ -26,4 +26,3 @@ babysitter resume recent
 - Use command phrases in Codex chat (`babysitter ...`), not custom slash commands.
 - Resume should continue from `.a5c/current-run.json` or the indexed run selector, then rely on the Codex `Stop` hook to continue the loop after each yield.
 - This command doc is an internal home for resume mechanics that user-facing docs should not spell out, including persisted run selection, hook-owned continuation, and honest completion-proof handling.
-- If SDK capabilities are missing in your installed version, babysitter-codex falls back to compatibility behavior where possible.

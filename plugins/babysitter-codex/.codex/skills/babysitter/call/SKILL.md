@@ -16,18 +16,16 @@ Start a babysitter run with the Codex hook model. The workspace must have
 
 ### Babysitter SDK and CLI
 
-Read the SDK version from the plugin manifest to ensure version compatibility:
+Use the installed Babysitter SDK CLI:
 
 ```bash
-PLUGIN_ROOT="${CODEX_PLUGIN_ROOT:-$(pwd)/.codex}"
-SDK_VERSION=$(node -e "try{console.log(JSON.parse(require('fs').readFileSync('${PLUGIN_ROOT}/plugin.json','utf8')).sdkVersion||'latest')}catch{console.log('latest')}")
-sudo npm i -g @a5c-ai/babysitter-sdk@$SDK_VERSION
+sudo npm i -g @a5c-ai/babysitter-sdk
 # sudo is depending on the env and system
 ```
 
-then use the CLI alias: CLI="babysitter"
+then use the CLI alias: `CLI="babysitter"`
 
-**Alternatively, use the CLI alias:** `CLI="npx -y @a5c-ai/babysitter-sdk@$SDK_VERSION"`
+**Alternatively, use:** `CLI="npx -y @a5c-ai/babysitter-sdk@latest"`
 
 ### jq
 
@@ -52,7 +50,7 @@ The babysitter workflow has 4 steps:
 
 Interview the user for the intent, requirements, goal, scope, etc. through conversational interaction (before setting the in-session loop).
 
-A multi-step phase to understand the intent and perspective to approach the process building after researching the repo, short research online if needed, short research in the target repo, additional instructions, intent and library (processes, specializations, skills, subagents, methodologies, references, etc.) / guide for methodology building. (clarifications regarding the intent, requirements, goal, scope, etc.) - the library is at [skill-root]/process/specializations/**/**/** and [skill-root]/process/methodologies/ and under [skill-root]/process/contrib/[contributer-username]/]
+A multi-step phase to understand the intent and perspective to approach the process building after researching the repo, short research online if needed, short research in the target repo, additional instructions, intent and library (processes, specializations, skills, subagents, methodologies, references, etc.) / guide for methodology building. Use project-local `.a5c/processes` plus the active process-library binding returned by `babysitter process-library:active --state-dir .a5c --json`.
 
 The first step should be the look at the state of the repo, then find the most relevant processes, specializations, skills, subagents, methodologies, references, etc. to use as a reference. use the babysitter cli discover command to find the relevant processes, skills, subagents, etc at various stages.
 
@@ -557,9 +555,9 @@ prefer processes that have the following characteristics unless otherwise specif
   - if the user is very explicit about the flow and process, create a process that follows it closely and strictly. (ad hoc requests like: "try this functionality and make sure it works as expected, repeat until it works as expected")
   - search for processes (js files), skills and agents (SKILL.md and AGENT.md files) during the interactive process building phase to compose a comprehensive process that may combine various parts from different sources:
     - .a5c/processes/ (project level processes)
-    - plugins/babysitter/skills/babysit/process/specializations/[rnd-specialization-name-slugified]/ (rnd specializations)
-    - plugins/babysitter/skills/babysit/process/specializations/domains/[domain-name-slugified]/[specialization-name-slugified]/ (non rnd specializations)
-    - plugins/babysitter/skills/babysit/process/methodologies/ (methodologies)
+    - library/specializations/[specialization-name-slugified]/ (specializations)
+    - library/specializations/domains/[domain-name-slugified]/[specialization-name-slugified]/ (domain specializations)
+    - library/methodologies/ (methodologies)
     - When creating the process file, add `@skill` and `@agent` JSDoc markers for the relevant skills and agents found during this search (see "Process File Discovery Markers" above). This ensures only the needed dependencies are surfaced during orchestration instead of scanning all available specializations.
 
 ## Critical Rules
@@ -585,6 +583,6 @@ CRITICAL RULE: NEVER use `kind: 'node'` in generated process files. All tasks MU
 CRITICAL RULE: NEVER bypass, avoid or skip the babysitter orchestration model when the user explicitly requested this skill. Do not execute the tasks yourself, do not loop programmatically, do not create helper scripts to orchestrate the runs. Use the CLI to drive the orchestration loop and do not bypass it. not for simple tasks, and even if things get complicated or don't go smoothly. persist in executing the orchestration itself rather than simplifying the execution by bypassing the process above.
 
 ## See Also
-- `process/tdd-quality-convergence.js` - TDD quality convergence example - read and look for relevant processes and methodologies before creating the code process for a new run (create the run using the CLI, then use these process as a reference)
-- `process/reference/ADVANCED_PATTERNS.md` - Agent/skill patterns, iterative convergence
-- `process/reference/sdk.md` - SDK API reference
+- `library/tdd-quality-convergence.js` - TDD quality convergence example - read and look for relevant processes and methodologies before creating the code process for a new run
+- `library/reference/ADVANCED_PATTERNS.md` - Agent/skill patterns, iterative convergence
+- `library/reference/sdk.md` - SDK API reference

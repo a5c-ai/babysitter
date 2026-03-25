@@ -6,26 +6,30 @@ argument-hint: "[--dry-run]"
 
 # babysitter:team-install
 
-Install the team-standard babysitter-codex setup from the installed skill payload into the current workspace.
+Install or refresh the packaged Babysitter Codex workspace setup from the
+installed skill payload into the current workspace.
 
 ## Steps
 
-1. Resolve the installed skill root from this `SKILL.md` location, not from the repo `cwd`.
-2. Run the packaged installer against the current workspace.
-3. Confirm generated files:
-- `.a5c/team/install.json`
-- `.a5c/team/profile.json`
-- `.a5c/active/process-library.json`
+1. Resolve the installed skill root from this package, not from a repo checkout.
+2. Read `<skillRoot>/babysitter.lock.json`.
+3. Clone or update the upstream Babysitter repo under
+   `<workspace>/.a5c/process-library/babysitter-repo`.
+4. Bind `<workspace>/.a5c/process-library/babysitter-repo/library` through the
+   Babysitter SDK CLI.
+5. Write or refresh:
+   - `<workspace>/.codex/hooks.json`
+   - `<workspace>/.codex/config.toml`
+   - `<workspace>/.a5c/team/install.json`
+6. Create `<workspace>/.a5c/team/profile.json` if it does not already exist.
 
-The installer must read:
-- `<skillRoot>/babysitter.lock.json`
+The installer must also produce:
+- `<workspace>/.a5c/active/process-library.json`
 
-The installer must bootstrap the active process library through the Babysitter SDK CLI:
-- clone or update the original Babysitter repo under `<workspace>/.a5c/process-library/...`
-- bind the active process root with `babysitter process-library:use ...`
-- resolve the active path later with `babysitter process-library:active --state-dir <workspace>/.a5c --json`
+The installer must not:
+- bundle the process library into the package
+- create a fake Codex plugin manifest
+- depend on an external orchestrator or app-server loop
 
-The installer must write workspace state only under:
-- `<workspace>/.a5c/`
-
-Use this before onboarding new repos or contributors so command/process/rules mappings are deterministic and do not depend on the plugin repo being checked out beside the target project.
+Use this before onboarding new repos or contributors so the Codex-facing assets
+and the active process-library binding are deterministic.
