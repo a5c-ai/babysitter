@@ -343,6 +343,129 @@ function runHook(args, payload, options = {}) {
   });
 }
 
+function sleep(ms) {
+  Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms);
+}
+
+function listWorkspaceArtifacts() {
+  const artifactsDir = path.join(WORKSPACE, "codex-artifacts");
+  if (!fs.existsSync(artifactsDir)) {
+    return [];
+  }
+  return fs.readdirSync(artifactsDir).sort();
+}
+
+function verifyTaskSideEffects(taskDef) {
+  const effect = taskDef.effect || taskDef;
+  const context = effect.agent?.context || {};
+  const metadata = effect.metadata || {};
+  const stage = metadata.stage || null;
+
+  if (stage === "alpha" && typeof context.requiredPath === "string") {
+    const absolutePath = path.join(WORKSPACE, context.requiredPath);
+    if (!fs.existsSync(absolutePath)) {
+      return {
+        ok: false,
+        reason: "required alpha artifact is missing",
+        path: absolutePath,
+        stage,
+      };
+    }
+    if (typeof context.requiredContents === "string") {
+      const contents = fs.readFileSync(absolutePath, "utf8").trim();
+      if (contents !== context.requiredContents) {
+        return {
+          ok: false,
+          reason: "required alpha artifact contents are wrong",
+          path: absolutePath,
+          expected: context.requiredContents,
+          actual: contents,
+          stage,
+        };
+      }
+    }
+    return { ok: true, stage };
+  }
+
+  if (stage === "report" && typeof context.reportPath === "string") {
+    const absolutePath = path.join(WORKSPACE, context.reportPath);
+    if (!fs.existsSync(absolutePath)) {
+      return {
+        ok: false,
+        reason: "required final report artifact is missing",
+        path: absolutePath,
+        stage,
+      };
+    }
+    try {
+      const report = readJson(absolutePath);
+      if (report.alpha !== context.expectedAlpha) {
+        return {
+          ok: false,
+          reason: "final report alpha is wrong",
+          path: absolutePath,
+          expected: context.expectedAlpha,
+          actual: report.alpha,
+          stage,
+        };
+      }
+      if (report.releaseToken !== context.releaseToken) {
+        return {
+          ok: false,
+          reason: "final report release token is wrong",
+          path: absolutePath,
+          expected: context.releaseToken,
+          actual: report.releaseToken,
+          stage,
+        };
+      }
+      return { ok: true, stage };
+    } catch (error) {
+      return {
+        ok: false,
+        reason: "final report is not valid JSON",
+        path: absolutePath,
+        stage,
+        parseError: error.message,
+      };
+    }
+  }
+
+  return { ok: true, stage };
+}
+
+function buildRepairPrompt(taskDef, verification) {
+  const effect = taskDef.effect || taskDef;
+  const context = effect.agent?.context || {};
+  const prompt = buildPromptFromTaskDef(taskDef);
+  const parts = [
+    prompt,
+    "",
+    "The previous attempt did not produce the required filesystem side effect.",
+    `Failure reason: ${verification.reason}.`,
+    "Repair the workspace now and verify the artifact exists before you finish.",
+    "Use shell commands if needed to create, inspect, and confirm the files.",
+  ];
+
+  if (typeof context.requiredPath === "string") {
+    parts.push(`Required path: ${context.requiredPath}`);
+  }
+  if (typeof context.requiredContents === "string") {
+    parts.push(`Required contents: ${context.requiredContents}`);
+  }
+  if (typeof context.reportPath === "string") {
+    parts.push(`Report path: ${context.reportPath}`);
+  }
+  if (typeof context.expectedAlpha === "string") {
+    parts.push(`Expected alpha value: ${context.expectedAlpha}`);
+  }
+  if (typeof context.releaseToken === "string") {
+    parts.push(`Expected release token: ${context.releaseToken}`);
+  }
+  parts.push('When done, respond with the same plain-text completion marker as requested originally.');
+  return parts.join("\n");
+}
+
 function readTaskDefinition(runDir, effectId) {
   const taskPath = path.join(runDir, "tasks", effectId, "task.json");
   if (!fs.existsSync(taskPath)) {
@@ -361,37 +484,65 @@ function writeTaskValue(runDir, effectId, payload) {
 function executeCodexTask(runId, runDir, turnIndex, task) {
   const effectId = task.effectId;
   const taskDef = readTaskDefinition(runDir, effectId);
-  const prompt = buildPromptFromTaskDef(taskDef);
-  if (!prompt) {
+  const basePrompt = buildPromptFromTaskDef(taskDef);
+  if (!basePrompt) {
     fail("No Codex prompt could be derived for executable task", { effectId, taskDef });
   }
+  let result = null;
+  let verification = null;
+  const attempts = [];
 
-  const codexArgs = [
-    "exec",
-    "-c", "approval_policy=never",
-    "-s", "workspace-write",
-    prompt,
-  ];
-  const result = run("codex", codexArgs, {
-    cwd: WORKSPACE,
-    env: {
-      ...process.env,
-      CODEX_HOME,
-      REPO_ROOT: WORKSPACE,
-      BABYSITTER_RUN_ID: runId,
-      BABYSITTER_RUN_DIR: runDir,
-      CODEX_TURN_INDEX: String(turnIndex),
-    },
-    timeout: 900_000,
-  });
+  for (let attempt = 1; attempt <= 2; attempt += 1) {
+    const prompt = attempt === 1
+      ? basePrompt
+      : buildRepairPrompt(taskDef, verification || { reason: "side effect missing" });
+    const codexArgs = [
+      "exec",
+      "-c", "approval_policy=never",
+      "-s", "workspace-write",
+      prompt,
+    ];
+    result = run("codex", codexArgs, {
+      cwd: WORKSPACE,
+      env: {
+        ...process.env,
+        CODEX_HOME,
+        REPO_ROOT: WORKSPACE,
+        BABYSITTER_RUN_ID: runId,
+        BABYSITTER_RUN_DIR: runDir,
+        CODEX_TURN_INDEX: String(turnIndex),
+      },
+      timeout: 900_000,
+    });
 
-  if (result.status !== 0) {
-    fail("codex exec failed during hooks E2E", {
-      effectId,
-      codexArgs,
+    attempts.push({
+      attempt,
+      prompt,
       exitCode: result.status,
       stdout: result.stdout,
       stderr: result.stderr,
+    });
+
+    if (result.status !== 0) {
+      fail("codex exec failed during hooks E2E", {
+        effectId,
+        attempts,
+      });
+    }
+
+    sleep(750);
+    verification = verifyTaskSideEffects(taskDef);
+    if (verification.ok) {
+      break;
+    }
+  }
+
+  if (!verification || !verification.ok) {
+    fail("Codex reported task success but did not materialize the expected side effect", {
+      effectId,
+      verification,
+      attempts,
+      artifacts: listWorkspaceArtifacts(),
     });
   }
 
