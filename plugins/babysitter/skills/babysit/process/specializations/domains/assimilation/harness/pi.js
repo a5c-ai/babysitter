@@ -52,7 +52,7 @@ import {
  */
 export async function process(inputs, ctx) {
   const {
-    projectDir = 'plugins/pi',
+    projectDir = 'plugins/babysitter-pi',
     targetQuality = 80,
     maxIterations = 8
   } = inputs;
@@ -475,7 +475,7 @@ export const analyzeOmpDeepTask = defineTask('analyze-omp-deep', (args, taskCtx)
         '  - JSONL format, tree semantics, compaction',
         '  - Session init, switch, fork events',
         'Check existing .omp/ and .a5c/ directories',
-        'Create target directory if it does not exist: mkdir -p plugins/pi',
+        'Create target directory if it does not exist: mkdir -p plugins/babysitter-pi',
         'Return comprehensive analysis JSON'
       ],
       outputFormat: 'JSON with ompInstalled, ompVersion, hasTaskSystem, hasTodoTool, hasPluginSystem, hasTuiWidgets, hasAskTool, hasModelRoles, hasBackgroundJobs, hasMcpSupport, extensionEvents (array), tuiCapabilities (array), pluginManifestFormat, customToolApiSurface, sessionFormat, existingConfigFiles (array), nodeVersion, hasBabysitterSdk, recommendations (array)'

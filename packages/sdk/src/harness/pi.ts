@@ -89,7 +89,7 @@ export async function installPiFamilyPlugin(args: {
     );
   }
 
-  const pluginDir = path.join(repoRoot, "plugins", "pi");
+  const pluginDir = path.join(repoRoot, "plugins", "babysitter-pi");
   const command = "omp";
   const commandArgs = ["plugin", "link", pluginDir];
 

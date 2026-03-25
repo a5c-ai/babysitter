@@ -582,7 +582,7 @@ export async function process(inputs, ctx) {
 
 ## Resources
 
-- **SDK Reference**: `plugins/babysitter/skills/babysit/reference/sdk.md`
+- **SDK Reference**: `plugins/babysitter/skills/babysit/process/reference/sdk.md`
 - **Methodology Backlog**: `plugins/babysitter/skills/babysit/process/methodologies/backlog.md`
 - **Specializations Backlog**: `plugins/babysitter/skills/babysit/process/specializations/backlog.md`
 - **Example: ATDD/TDD**: `plugins/babysitter/skills/babysit/process/methodologies/atdd-tdd/`

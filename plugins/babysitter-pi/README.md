@@ -69,7 +69,7 @@ From a local checkout:
 ```bash
 git clone <repo-url> && cd babysitter
 npm install
-omp plugin link ./plugins/pi
+omp plugin link ./plugins/babysitter-pi
 ```
 
 From the Babysitter SDK CLI helper:
@@ -99,7 +99,7 @@ command implementation docs, not here.
 ## Tests
 
 ```bash
-cd plugins/pi && npm test
+cd plugins/babysitter-pi && npm test
 npm run test:integration
 npm run test:harness
 npm run test:tui

@@ -4,7 +4,7 @@
  * Actually imports and runs the real Pi extension code (activate(),
  * session-binder, sdk-bridge, loop-driver, effect-executor, guards)
  * inside Docker via tsx.  No simulation, no mirroring -- the actual
- * TypeScript modules from plugins/pi/extensions/babysitter/ are loaded
+ * TypeScript modules from plugins/babysitter-pi/extensions/babysitter/ are loaded
  * and exercised end-to-end.
  *
  * Two test tiers:
@@ -94,7 +94,7 @@ beforeAll(() => {
   dockerExec("npm install -g tsx 2>&1", { timeout: 120_000 });
   // Create state directory the session-binder uses for persistence (need root to chown under root-owned /app)
   execSync(
-    `docker exec -u root ${CONTAINER} bash -c "mkdir -p /app/plugins/pi/state && chown claude:claude /app/plugins/pi/state"`,
+    `docker exec -u root ${CONTAINER} bash -c "mkdir -p /app/plugins/babysitter-pi/state && chown claude:claude /app/plugins/babysitter-pi/state"`,
     { encoding: "utf-8", timeout: 10_000 },
   );
 }, 600_000);
@@ -110,7 +110,7 @@ afterAll(() => {
 describe("Pi extension module loading", () => {
   test("activate() is importable and is a function", () => {
     const result = runTsx<{ type: string }>(`
-      import activate from '/app/plugins/pi/extensions/babysitter/index.ts';
+      import activate from '/app/plugins/babysitter-pi/extensions/babysitter/index.ts';
       console.log(JSON.stringify({ type: typeof activate }));
     `);
     expect(result.type).toBe("function");
@@ -118,12 +118,12 @@ describe("Pi extension module loading", () => {
 
   test("all extension sub-modules are importable", () => {
     const result = runTsx<Record<string, string>>(`
-      import activate from '/app/plugins/pi/extensions/babysitter/index.ts';
-      import { bindRun, initSession, getActiveRun, setActiveRun, clearActiveRun } from '/app/plugins/pi/extensions/babysitter/session-binder.ts';
-      import { iterate, getRunStatus, postResult } from '/app/plugins/pi/extensions/babysitter/sdk-bridge.ts';
-      import { onAgentEnd, buildContinuationPrompt, extractPromiseTag } from '/app/plugins/pi/extensions/babysitter/loop-driver.ts';
-      import { executeEffect, postEffectResult } from '/app/plugins/pi/extensions/babysitter/effect-executor.ts';
-      import { checkGuards, resetGuardState, isDoomLoop } from '/app/plugins/pi/extensions/babysitter/guards.ts';
+      import activate from '/app/plugins/babysitter-pi/extensions/babysitter/index.ts';
+      import { bindRun, initSession, getActiveRun, setActiveRun, clearActiveRun } from '/app/plugins/babysitter-pi/extensions/babysitter/session-binder.ts';
+      import { iterate, getRunStatus, postResult } from '/app/plugins/babysitter-pi/extensions/babysitter/sdk-bridge.ts';
+      import { onAgentEnd, buildContinuationPrompt, extractPromiseTag } from '/app/plugins/babysitter-pi/extensions/babysitter/loop-driver.ts';
+      import { executeEffect, postEffectResult } from '/app/plugins/babysitter-pi/extensions/babysitter/effect-executor.ts';
+      import { checkGuards, resetGuardState, isDoomLoop } from '/app/plugins/babysitter-pi/extensions/babysitter/guards.ts';
 
       console.log(JSON.stringify({
         activate: typeof activate,
@@ -161,7 +161,7 @@ describe("Pi extension activate() registration", () => {
       renderers: string[];
       activationLogs: string[];
     }>(`
-      import activate from '/app/plugins/pi/extensions/babysitter/index.ts';
+      import activate from '/app/plugins/babysitter-pi/extensions/babysitter/index.ts';
 
       const handlers: Record<string, number> = {};
       const commands: string[] = [];
@@ -253,18 +253,18 @@ PROCEOF`,
       `
       import * as fs from 'fs';
       import * as path from 'path';
-      import activate from '/app/plugins/pi/extensions/babysitter/index.ts';
-      import { bindRun, setActiveRun, getActiveRun, initSession } from '/app/plugins/pi/extensions/babysitter/session-binder.ts';
-      import { iterate, getRunStatus } from '/app/plugins/pi/extensions/babysitter/sdk-bridge.ts';
-      import { onAgentEnd, buildContinuationPrompt } from '/app/plugins/pi/extensions/babysitter/loop-driver.ts';
-      import { postEffectResult } from '/app/plugins/pi/extensions/babysitter/effect-executor.ts';
-      import { resetGuardState } from '/app/plugins/pi/extensions/babysitter/guards.ts';
+      import activate from '/app/plugins/babysitter-pi/extensions/babysitter/index.ts';
+      import { bindRun, setActiveRun, getActiveRun, initSession } from '/app/plugins/babysitter-pi/extensions/babysitter/session-binder.ts';
+      import { iterate, getRunStatus } from '/app/plugins/babysitter-pi/extensions/babysitter/sdk-bridge.ts';
+      import { onAgentEnd, buildContinuationPrompt } from '/app/plugins/babysitter-pi/extensions/babysitter/loop-driver.ts';
+      import { postEffectResult } from '/app/plugins/babysitter-pi/extensions/babysitter/effect-executor.ts';
+      import { resetGuardState } from '/app/plugins/babysitter-pi/extensions/babysitter/guards.ts';
       import { loadJournal } from '@a5c-ai/babysitter-sdk';
 
       const SID = 'e2e-full-${tag}';
       const RUNS = '/tmp/${tag}/runs';
       fs.mkdirSync(RUNS, { recursive: true });
-      fs.mkdirSync('/app/plugins/pi/state', { recursive: true });
+      fs.mkdirSync('/app/plugins/babysitter-pi/state', { recursive: true });
       process.env.BABYSITTER_RUNS_DIR = RUNS;
 
       // Mock ExtensionAPI -- captures everything the extension does
@@ -424,18 +424,18 @@ PROCEOF`,
     }>(
       `
       import * as fs from 'fs';
-      import activate from '/app/plugins/pi/extensions/babysitter/index.ts';
-      import { bindRun, setActiveRun, getActiveRun, clearActiveRun } from '/app/plugins/pi/extensions/babysitter/session-binder.ts';
-      import { iterate, getRunStatus } from '/app/plugins/pi/extensions/babysitter/sdk-bridge.ts';
-      import { onAgentEnd } from '/app/plugins/pi/extensions/babysitter/loop-driver.ts';
-      import { postEffectResult } from '/app/plugins/pi/extensions/babysitter/effect-executor.ts';
-      import { checkGuards, resetGuardState } from '/app/plugins/pi/extensions/babysitter/guards.ts';
+      import activate from '/app/plugins/babysitter-pi/extensions/babysitter/index.ts';
+      import { bindRun, setActiveRun, getActiveRun, clearActiveRun } from '/app/plugins/babysitter-pi/extensions/babysitter/session-binder.ts';
+      import { iterate, getRunStatus } from '/app/plugins/babysitter-pi/extensions/babysitter/sdk-bridge.ts';
+      import { onAgentEnd } from '/app/plugins/babysitter-pi/extensions/babysitter/loop-driver.ts';
+      import { postEffectResult } from '/app/plugins/babysitter-pi/extensions/babysitter/effect-executor.ts';
+      import { checkGuards, resetGuardState } from '/app/plugins/babysitter-pi/extensions/babysitter/guards.ts';
       import { loadJournal } from '@a5c-ai/babysitter-sdk';
 
       const SID = 'e2e-2task-${tag}';
       const RUNS = '/tmp/${tag}/runs';
       fs.mkdirSync(RUNS, { recursive: true });
-      fs.mkdirSync('/app/plugins/pi/state', { recursive: true });
+      fs.mkdirSync('/app/plugins/babysitter-pi/state', { recursive: true });
       process.env.BABYSITTER_RUNS_DIR = RUNS;
 
       const handlers: Record<string, Function[]> = {};
@@ -554,7 +554,7 @@ describe("Pi extension: guard system", () => {
       doomLoopFewIter: boolean;
       resetWorks: boolean;
     }>(`
-      import { checkGuards, isDoomLoop, resetGuardState } from '/app/plugins/pi/extensions/babysitter/guards.ts';
+      import { checkGuards, isDoomLoop, resetGuardState } from '/app/plugins/babysitter-pi/extensions/babysitter/guards.ts';
 
       // Fresh state should pass
       resetGuardState();
@@ -627,7 +627,7 @@ describe("Pi extension: loop-driver utilities", () => {
       empty: string | null;
       first: string | null;
     }>(`
-      import { extractPromiseTag } from '/app/plugins/pi/extensions/babysitter/loop-driver.ts';
+      import { extractPromiseTag } from '/app/plugins/babysitter-pi/extensions/babysitter/loop-driver.ts';
 
       console.log(JSON.stringify({
         found: extractPromiseTag('output <promise>secret123</promise> more'),
@@ -661,7 +661,7 @@ describe("Pi extension: loop-driver utilities", () => {
     }>(
       `
       import * as fs from 'fs';
-      import { buildContinuationPrompt } from '/app/plugins/pi/extensions/babysitter/loop-driver.ts';
+      import { buildContinuationPrompt } from '/app/plugins/babysitter-pi/extensions/babysitter/loop-driver.ts';
       import { createRun, orchestrateIteration } from '@a5c-ai/babysitter-sdk';
 
       async function main() {
@@ -733,7 +733,7 @@ describe("Pi extension: session state persistence", () => {
       `
       import * as fs from 'fs';
       import * as path from 'path';
-      import { bindRun, getActiveRun, clearActiveRun } from '/app/plugins/pi/extensions/babysitter/session-binder.ts';
+      import { bindRun, getActiveRun, clearActiveRun } from '/app/plugins/babysitter-pi/extensions/babysitter/session-binder.ts';
 
       const SID = 'persist-${tag}';
       fs.mkdirSync('/tmp/${tag}/runs', { recursive: true });
@@ -751,7 +751,7 @@ describe("Pi extension: session state persistence", () => {
         const boundRunId = run.runId;
 
         // Check state file was persisted to disk
-        const stateDir = path.resolve('/app/plugins/pi/extensions/babysitter', '..', '..', 'state');
+        const stateDir = path.resolve('/app/plugins/babysitter-pi/extensions/babysitter', '..', '..', 'state');
         const stateFile = path.join(stateDir, SID + '.json');
         const stateFileExists = fs.existsSync(stateFile);
         let stateFileRunId = '';
@@ -811,12 +811,12 @@ describe("Pi extension: session_shutdown cleanup", () => {
     }>(
       `
       import * as fs from 'fs';
-      import activate from '/app/plugins/pi/extensions/babysitter/index.ts';
-      import { bindRun, getActiveRun, isRunActive } from '/app/plugins/pi/extensions/babysitter/session-binder.ts';
+      import activate from '/app/plugins/babysitter-pi/extensions/babysitter/index.ts';
+      import { bindRun, getActiveRun, isRunActive } from '/app/plugins/babysitter-pi/extensions/babysitter/session-binder.ts';
 
       const SID = 'shutdown-${tag}';
       fs.mkdirSync('/tmp/${tag}/runs', { recursive: true });
-      fs.mkdirSync('/app/plugins/pi/state', { recursive: true });
+      fs.mkdirSync('/app/plugins/babysitter-pi/state', { recursive: true });
       process.env.BABYSITTER_RUNS_DIR = '/tmp/${tag}/runs';
 
       const handlers: Record<string, Function[]> = {};
@@ -903,7 +903,7 @@ describe.skipIf(!HAS_AZURE_KEY)(
 
       // Link babysitter-pi as an omp package from local path
       // (plugin link is for local paths; plugin install is for npm packages)
-      dockerExec("omp plugin link /app/plugins/pi 2>&1", { timeout: 300_000 });
+      dockerExec("omp plugin link /app/plugins/babysitter-pi 2>&1", { timeout: 300_000 });
 
       // Configure Azure OpenAI provider in omp's models.yml
       // (Azure models aren't built-in; they need explicit provider config)
@@ -990,7 +990,7 @@ YAML`);
         hasResumeCommand: boolean;
       }>(
         `
-        import activate from '/app/plugins/pi/extensions/babysitter/index.ts';
+        import activate from '/app/plugins/babysitter-pi/extensions/babysitter/index.ts';
 
         const commands: string[] = [];
         const pi: any = {
@@ -1059,17 +1059,17 @@ PROCEOF`,
       }>(
         `
         import * as fs from 'fs';
-        import activate from '/app/plugins/pi/extensions/babysitter/index.ts';
-        import { bindRun, setActiveRun } from '/app/plugins/pi/extensions/babysitter/session-binder.ts';
-        import { iterate, getRunStatus } from '/app/plugins/pi/extensions/babysitter/sdk-bridge.ts';
-        import { postEffectResult } from '/app/plugins/pi/extensions/babysitter/effect-executor.ts';
-        import { resetGuardState } from '/app/plugins/pi/extensions/babysitter/guards.ts';
+        import activate from '/app/plugins/babysitter-pi/extensions/babysitter/index.ts';
+        import { bindRun, setActiveRun } from '/app/plugins/babysitter-pi/extensions/babysitter/session-binder.ts';
+        import { iterate, getRunStatus } from '/app/plugins/babysitter-pi/extensions/babysitter/sdk-bridge.ts';
+        import { postEffectResult } from '/app/plugins/babysitter-pi/extensions/babysitter/effect-executor.ts';
+        import { resetGuardState } from '/app/plugins/babysitter-pi/extensions/babysitter/guards.ts';
         import { loadJournal } from '@a5c-ai/babysitter-sdk';
 
         const SID = 'omp-orch-${tag}';
         const RUNS = '/tmp/${tag}/runs';
         fs.mkdirSync(RUNS, { recursive: true });
-        fs.mkdirSync('/app/plugins/pi/state', { recursive: true });
+        fs.mkdirSync('/app/plugins/babysitter-pi/state', { recursive: true });
         process.env.BABYSITTER_RUNS_DIR = RUNS;
 
         const handlers: Record<string, Function[]> = {};

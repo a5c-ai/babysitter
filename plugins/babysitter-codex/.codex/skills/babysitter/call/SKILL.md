@@ -586,5 +586,5 @@ CRITICAL RULE: NEVER bypass, avoid or skip the babysitter orchestration model wh
 
 ## See Also
 - `process/tdd-quality-convergence.js` - TDD quality convergence example - read and look for relevant processes and methodologies before creating the code process for a new run (create the run using the CLI, then use these process as a reference)
-- `reference/ADVANCED_PATTERNS.md` - Agent/skill patterns, iterative convergence
-- `packages/sdk/sdk.md` - SDK API reference
+- `process/reference/ADVANCED_PATTERNS.md` - Agent/skill patterns, iterative convergence
+- `process/reference/sdk.md` - SDK API reference

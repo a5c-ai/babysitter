@@ -518,7 +518,7 @@ babysitter run:iterate <runId> --json --iteration <n>
 
 If at any point the run fails due to SDK issues or corrupted state or journal, analyze the error and the journal events. Recover the state to the last known good state and adapt and try to continue the run.
 
-The session-binder extension persists run state to `plugins/pi/state/<sessionId>.json` using an atomic tmp+rename pattern. If the in-memory state is lost (e.g., after a restart), the session-binder automatically recovers from the persisted state file on the next `initSession()` call.
+The session-binder extension persists run state to `plugins/babysitter-pi/state/<sessionId>.json` using an atomic tmp+rename pattern. If the in-memory state is lost (e.g., after a restart), the session-binder automatically recovers from the persisted state file on the next `initSession()` call.
 
 ---
 
@@ -645,5 +645,5 @@ CRITICAL RULE: Always prefer the SDK bridge over the CLI for run operations. The
 
 ## See Also
 - `process/tdd-quality-convergence.js` - TDD quality convergence example - read and look for relevant processes and methodologies before creating the code process for a new run
-- `reference/ADVANCED_PATTERNS.md` - Agent/skill patterns, iterative convergence
-- `packages/sdk/sdk.md` - SDK API reference
+- `process/reference/ADVANCED_PATTERNS.md` - Agent/skill patterns, iterative convergence
+- `process/reference/sdk.md` - SDK API reference

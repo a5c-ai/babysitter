@@ -28,7 +28,7 @@ The Pi adaptation must preserve these rules from the original babysit skill and 
 ## Package Layout
 
 ```text
-plugins/pi/
+plugins/babysitter-pi/
   package.json
   extensions/babysitter/
     index.ts

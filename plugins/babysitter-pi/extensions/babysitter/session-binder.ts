@@ -4,7 +4,7 @@
  * Uses the babysitter SDK directly (no CLI subprocess) to create and
  * manage runs that are tracked for the lifetime of the oh-my-pi session.
  *
- * State is persisted to `plugins/pi/state/<sessionId>.json` so that
+ * State is persisted to `plugins/babysitter-pi/state/<sessionId>.json` so that
  * sessions can be recovered after restarts.
  *
  * @module session-binder
@@ -50,7 +50,7 @@ export interface RunState {
 
 /**
  * Resolve the directory used for persisting session state files.
- * Lives alongside the extension code at `plugins/pi/state/`.
+ * Lives alongside the extension code at `plugins/babysitter-pi/state/`.
  */
 function getStateDir(): string {
   // __dirname at runtime points to the compiled location of this file;
