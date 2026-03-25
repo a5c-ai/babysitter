@@ -227,11 +227,10 @@ describe("CodexAdapter", () => {
     expect(adapter.getMissingSessionIdHint?.()).toContain("Codex hook callback");
   });
 
-  it("advertises hook support on hook-capable platforms", () => {
+  it("advertises hook support for codex lifecycle hooks", () => {
     const adapter = createCodexAdapter();
-    const expectedHookSupport = process.platform !== "win32";
-    expect(adapter.supportsHookType?.("stop")).toBe(expectedHookSupport);
-    expect(adapter.supportsHookType?.("session-start")).toBe(expectedHookSupport);
+    expect(adapter.supportsHookType?.("stop")).toBe(true);
+    expect(adapter.supportsHookType?.("session-start")).toBe(true);
     expect(adapter.findHookDispatcherPath("/tmp")).toBeNull();
   });
 

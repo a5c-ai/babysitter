@@ -432,11 +432,14 @@ If the state file is missing, the setup script may have failed:
 
 **Session ID not persisted:**
 
-The SessionStart hook writes to `CLAUDE_ENV_FILE`. Ensure:
+Babysitter first looks for `CLAUDE_SESSION_ID`. If that is absent, the
+SessionStart hook can persist it through `CLAUDE_ENV_FILE` as a fallback.
+Check:
 
-1. `CLAUDE_ENV_FILE` environment variable is set
-2. The file is writable
-3. The hook is executable:
+1. whether `CLAUDE_SESSION_ID` is already present in the current Claude session
+2. if not, whether `CLAUDE_ENV_FILE` is set
+3. whether that file is writable
+4. whether the hook is executable:
    ```bash
    chmod +x plugins/babysitter/hooks/babysitter-session-start-hook.sh
    ```

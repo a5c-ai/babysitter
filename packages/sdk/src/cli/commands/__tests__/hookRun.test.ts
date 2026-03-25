@@ -242,22 +242,15 @@ describe("handleHookRun dispatcher", () => {
     expect(stderr).toContain("UNSUPPORTED_HARNESS");
   });
 
-  it("handles codex stop hooks according to platform support", async () => {
+  it("handles codex stop hooks on every platform", async () => {
     const code = await callWithStdin("{}", {
       hookType: "stop",
       harness: "codex",
       json: true,
     });
-    if (process.platform === "win32") {
-      expect(code).toBe(1);
-      const stderr = stderrChunks.join("");
-      expect(stderr).toContain("UNSUPPORTED_HOOK_TYPE");
-      expect(stderr).toContain("hook-capable Codex install");
-    } else {
-      expect(code).toBe(0);
-      const output = JSON.parse(getStdout().trim());
-      expect(output.decision).toBeUndefined();
-    }
+    expect(code).toBe(0);
+    const output = JSON.parse(getStdout().trim());
+    expect(output.decision).toBeUndefined();
   });
 });
 

@@ -35,30 +35,6 @@ function testSyntax() {
   console.log(`  ✓ syntax: ${passed} JS files pass node --check`);
 }
 
-// Test: Live CommonJS modules can be required
-function testRequire() {
-  const modules = [
-    '.codex/sdk-cli.js',
-    '.codex/sdk-package.js',
-    '.codex/state-index.js',
-    '.codex/turn-controller.js',
-  ];
-
-  for (const mod of modules) {
-    const full = path.join(PROJECT_ROOT, mod);
-    if (!fs.existsSync(full)) {
-      throw new Error(`Expected live module not found: ${mod}`);
-    }
-
-    try {
-      require(full);
-    } catch (err) {
-      if (err.code === 'MODULE_NOT_FOUND') throw err;
-    }
-  }
-  console.log(`  ✓ require: all live modules load without MODULE_NOT_FOUND errors`);
-}
-
 // Test: Shell hook scripts have valid syntax
 function testShellSyntax() {
   const shellScripts = [

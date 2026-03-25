@@ -84,11 +84,6 @@ function resolveCodexSessionId(parsed: { sessionId?: string }): string | undefin
   }
 }
 
-function supportsCodexLifecycleHooks(): boolean {
-  if (process.env.BABYSITTER_CODEX_FORCE_HOOKS === "1") return true;
-  return process.platform !== "win32";
-}
-
 function readStdin(): Promise<string> {
   return new Promise((resolve, reject) => {
     let data = "";
@@ -415,13 +410,6 @@ async function installCodexPlugin(
 
 export function createCodexAdapter(): HarnessAdapter {
   const claude = createClaudeCodeAdapter();
-  const unsupportedHookMessage = (
-    hookType: string,
-  ): string => (
-    `Codex lifecycle hook "${hookType}" is unavailable on this platform. ` +
-    `Use a hook-capable Codex install on Linux, macOS, or WSL for the ` +
-    `babysitter-codex plugin hook model.`
-  );
 
   return {
     name: "codex",
@@ -462,14 +450,8 @@ export function createCodexAdapter(): HarnessAdapter {
     },
 
     supportsHookType(hookType: string): boolean {
-      if (hookType === "stop" || hookType === "session-start") {
-        return supportsCodexLifecycleHooks();
-      }
+      void hookType;
       return true;
-    },
-
-    getUnsupportedHookMessage(hookType: string): string {
-      return unsupportedHookMessage(hookType);
     },
 
     async bindSession(opts: SessionBindOptions): Promise<SessionBindResult> {
@@ -488,11 +470,6 @@ export function createCodexAdapter(): HarnessAdapter {
     },
 
     async handleStopHook(args: HookHandlerArgs): Promise<number> {
-      if (!supportsCodexLifecycleHooks()) {
-        process.stderr.write(`${unsupportedHookMessage("stop")}\n`);
-        return 1;
-      }
-
       let rawInput = "";
       try {
         rawInput = await readStdin();
@@ -515,10 +492,6 @@ export function createCodexAdapter(): HarnessAdapter {
     },
 
     handleSessionStartHook(args: HookHandlerArgs): Promise<number> {
-      if (!supportsCodexLifecycleHooks()) {
-        process.stderr.write(`${unsupportedHookMessage("session-start")}\n`);
-        return Promise.resolve(1);
-      }
       return handleCodexSessionStartHookImpl(args);
     },
 

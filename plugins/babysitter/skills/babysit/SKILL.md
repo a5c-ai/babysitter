@@ -129,7 +129,7 @@ $CLI run:create \
 - `--process-id <id>` — unique identifier for the process definition
 - `--entry <path>#<export>` — path to the process JS file and its named export (e.g., `./my-process.js#process`)
 - `--prompt "$PROMPT"` — the user's initial prompt/request text
-- `--harness claude-code` — activates Claude Code session binding (init + associate in one step). The session ID is auto-detected from `CLAUDE_ENV_FILE` (written by the session-start hook).
+- `--harness claude-code` — activates Claude Code session binding (init + associate in one step). The session ID is auto-detected from `CLAUDE_SESSION_ID` when available, or from `CLAUDE_ENV_FILE` as a fallback written by the session-start hook.
 - `--plugin-root "${CLAUDE_PLUGIN_ROOT}"` — plugin root directory for state file resolution
 
 **Optional flags:**
