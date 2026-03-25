@@ -118,9 +118,7 @@ The plugin manifest declares two hooks, three skills, and metadata:
     "Stop": "hooks/babysitter-stop-hook.sh"
   },
   "skills": [
-    { "name": "babysitter", "file": "skills/babysit/SKILL.md" },
-    { "name": "babysitter-breakpoint", "file": "skills/babysitter-breakpoint/SKILL.md", "deprecated": true, "replacedBy": "babysitter" },
-    { "name": "babysitter-score", "file": "skills/babysitter-score/SKILL.md" }
+    { "name": "babysitter", "file": "skills/babysit/SKILL.md" }
   ]
 }
 ```

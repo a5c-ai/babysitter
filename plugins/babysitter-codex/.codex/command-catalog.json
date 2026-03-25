@@ -117,7 +117,7 @@
   "skills": [],
   "repository": {
     "type": "git",
-    "url": "https://github.com/yaniv-tg/babysitter-codex"
+    "url": "https://github.com/a5c-ai/babysitter/tree/main/plugins/babysitter-codex"
   },
   "keywords": [
     "orchestration",

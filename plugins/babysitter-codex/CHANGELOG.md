@@ -4,25 +4,17 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 
-### Added
-- Upstream-style command documentation set under `commands/`:
-  - `commands/README.md` index
-  - one doc per babysitter mode (`call`, `yolo`, `resume`, `plan`, `forever`, `doctor`, `observe`, `retrospect`, `model`, `issue`, `help`, `project-install`, `team-install`, `user-install`, `assimilate`)
-- README link to the new command reference documentation.
-
 ### Fixed
-- Removed UTF-8 BOM from top-level `SKILL.md` so Codex reliably detects YAML frontmatter.
-- Hardened installer copy logic (`bin/postinstall.js`) to strip BOM from any copied `SKILL.md`, preventing `missing YAML frontmatter delimited by ---` load errors after install.
-- Fixed `skill:discover` wrapper behavior for SDK builds that require `--plugin-root`:
-  - Added canonical plugin-root auto-resolution in `.codex/skill-loader.js`
-  - `discoverSkills()` now injects `--plugin-root` automatically and surfaces resolved `pluginRoot` in output
-  - Removed brittle plugin-root guessing from `.codex/orchestrate.js` discovery call
-  - Updated docs/examples to avoid bare `skill:discover --json` usage
+- Dropped the bundled `upstream/babysitter` snapshot from the plugin payload.
+- `team-install` and postinstall onboarding now rely on the SDK CLI to
+  clone/update/use the original process library for the active workspace.
+- Packaged docs and tests no longer claim deleted runtime artifacts such as the
+  old process-mining helper or maintainer runbook.
 
 ### Changed
-- Migrated npm package name to scoped publish target: `@yaniv-tg/babysitter-codex`.
-- Updated README install/uninstall/verify commands to use the scoped package.
-- Published scoped package to npm (`@yaniv-tg/babysitter-codex@0.1.5`) and documented the live install path.
+- Added manifest scripts and `prepack` regeneration so packaged integrity data
+  matches the actual shipped payload.
+- Updated packaged metadata to point at the `a5c-ai/babysitter` repository.
 
 ## [0.1.5] - 2026-03-11
 

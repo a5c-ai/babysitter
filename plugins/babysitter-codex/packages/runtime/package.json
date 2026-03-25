@@ -1,7 +1,0 @@
-{
-  "name": "@a5c/babysitter-codex-runtime",
-  "version": "0.1.5",
-  "private": true,
-  "description": "Runtime adapter helpers for hook-first babysitter-codex integration",
-  "main": "../../.codex/hook-dispatcher.js"
-}

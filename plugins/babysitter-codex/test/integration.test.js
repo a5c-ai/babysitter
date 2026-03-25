@@ -42,7 +42,6 @@ function testRequire() {
     '.codex/sdk-package.js',
     '.codex/state-index.js',
     '.codex/turn-controller.js',
-    '.codex/process-mining.js',
   ];
 
   for (const mod of modules) {

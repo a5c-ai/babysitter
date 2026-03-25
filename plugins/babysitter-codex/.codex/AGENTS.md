@@ -34,19 +34,16 @@ The installed skill must be self-contained. Required payload at
 - `agents/`
 - `bin/`
 - `commands/`
-- `config/`
-- `docs/`
 - `scripts/`
-- `upstream/`
 - `babysitter.lock.json`
 
 ## Team Install Contract
 
-- `scripts/team-install.js` and `scripts/verify-content-manifest.js` resolve the
-  package root from their own installed location, not from repo `cwd`.
+- `scripts/team-install.js` resolves the package root from its own installed
+  location, not from repo `cwd`.
 - They write workspace state only under `<workspace>/.a5c/team/`.
-- Generated profile paths may point back to the installed skill root when the
-  bundled process library or rules are needed.
+- Generated profile paths may point back to the installed skill root for hook
+  assets and skill metadata.
 
 ## Result Posting
 

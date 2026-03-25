@@ -22,10 +22,7 @@ const INSTALL_ENTRIES = [
   { source: 'bin', required: true },
   { source: '.codex', required: true },
   { source: 'commands', required: true },
-  { source: 'config', required: true },
-  { source: 'docs', required: true },
   { source: 'scripts', required: true },
-  { source: 'upstream', required: true },
   { source: 'babysitter.lock.json', required: true },
 ];
 

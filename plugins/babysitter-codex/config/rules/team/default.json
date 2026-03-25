@@ -1,9 +1,0 @@
-{
-  "approval": {
-    "default": "interactive",
-    "autoApproveIterationsLte": 2
-  },
-  "quality": {
-    "minScore": 85
-  }
-}

@@ -61,3 +61,4 @@ bug.task.md
 .claude/settings.local.json
 e2e-artifacts/test-results.json
 .tmp-agentsh/
+.tmp/

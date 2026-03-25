@@ -25,9 +25,11 @@ babysitter task:list .a5c/runs/<runId> --json
   - `.a5c/events/events.jsonl`
 
 3. Analyze against process library
-- Use bundled upstream process library at:
-  - `upstream/babysitter/skills/babysit/process`
-- Compare what was executed vs relevant methodologies/specializations.
+- Resolve the active process library first:
+```bash
+babysitter process-library:active --state-dir .a5c --json
+```
+- Compare what was executed vs the active process-library binding and relevant methodologies/specializations.
 
 4. Produce retrospective output
 - Include:

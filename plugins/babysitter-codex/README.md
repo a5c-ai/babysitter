@@ -1,4 +1,4 @@
-# babysitter-codex
+# @a5c-ai/babysitter-codex
 
 Babysitter integration package for OpenAI Codex CLI. It packages Codex-facing
 skills, install helpers, mapping docs, and the hook assets used to keep
@@ -12,21 +12,21 @@ active workspace when the global install is launched from that workspace.
 ## What This Package Owns
 
 - Codex skill payload under `~/.codex/skills/babysitter-codex`
-- Codex-facing command docs and install docs
+- Codex-facing command docs
 - Codex runtime hook helpers under `.codex/`
 - Codex mapping and compatibility policy for SDK-driven orchestration
 
 ## Active Process-Library Model
 
-`babysitter-codex` ships a bundled upstream snapshot, but that snapshot is not
-the primary process-library contract.
+`babysitter-codex` does not ship the process library. Workspace onboarding
+fetches the original Babysitter repo through the SDK CLI and binds the active
+process root in `.a5c/active/process-library.json`.
 
-Active-use process discovery should prefer layered roots in this order:
+Active-use process discovery should prefer:
 
 1. Project-local `.a5c/processes`
-2. Repo-local Babysitter plugin roots when the workspace contains them
-3. Installed skill/process roots under `~/.codex/skills/...`
-4. Bundled upstream snapshot as fallback/reference content only
+2. The SDK-managed active process-library binding returned by
+   `babysitter process-library:active --state-dir .a5c --json`
 
 `project-install` and `team-install` layer config, rules, profiles, and pinned
 content metadata. They should not be documented as creating an exclusive
@@ -68,6 +68,8 @@ If you run that command from inside the target repository, postinstall will:
 - merge `~/.codex/config.toml` so `codex_hooks` is enabled
 - materialize workspace `.codex/hooks.json` and `.codex/config.toml` for the
   active workspace
+- clone or update the original Babysitter repo into `.a5c/process-library/...`
+- bind the fetched process-library root for active use through the SDK CLI
 
 If you installed from somewhere else, run:
 
@@ -96,7 +98,11 @@ test -f ~/.codex/skills/babysitter-codex/.codex/hooks.json
 test -f ~/.codex/skills/babysitter-codex/.codex/hooks/babysitter-stop-hook.sh
 ```
 
-For the fuller install runbook, see [docs/INSTALL.md](./docs/INSTALL.md).
+Verify the active process-library binding:
+
+```bash
+babysitter process-library:active --state-dir /path/to/repo/.a5c --json
+```
 
 ## Quick Start
 
@@ -112,8 +118,8 @@ babysitter doctor current run
 
 For Codex users, the expected interface is the Codex command phrases plus the
 workspace hook install created by onboarding. Raw Babysitter CLI primitives are
-internal harness details and live in the Codex skill or maintainer docs, not in
-this user-facing README.
+internal harness details and live in the Codex skill, not in this user-facing
+README.
 
 ## Project And Team Install
 
@@ -124,11 +130,8 @@ truth for process discovery.
 
 ## Documentation
 
-- [docs/INSTALL.md](./docs/INSTALL.md)
-- [docs/CODEX_MAPPING.md](./docs/CODEX_MAPPING.md)
 - [commands/README.md](./commands/README.md)
 - Internal orchestration details: [.codex/skills/babysitter/call/SKILL.md](./.codex/skills/babysitter/call/SKILL.md)
-- Maintainer/operator runtime details: [docs/MAINTAINER_RUNBOOK.md](./docs/MAINTAINER_RUNBOOK.md)
 
 ## License
 
