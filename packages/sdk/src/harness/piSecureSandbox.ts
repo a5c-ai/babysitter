@@ -3,6 +3,7 @@ import { spawn } from "node:child_process";
 
 const AGENTSH_MODULE_ID = "@agentsh/secure-sandbox";
 const DEFAULT_SANDBOX_IMAGE = process.env.BABYSITTER_PI_SANDBOX_IMAGE || "node:22-bookworm";
+const DEFAULT_INSTALL_STRATEGY = process.env.BABYSITTER_PI_SANDBOX_INSTALL_STRATEGY || "download";
 const CONTAINER_WORKSPACE = "/workspace";
 
 export interface PiBashOperations {
@@ -155,6 +156,7 @@ function runCommand(
   },
 ): Promise<ExecResult> {
   return new Promise((resolve, reject) => {
+    let settled = false;
     const child = spawn(command, args, {
       cwd: options?.cwd,
       env: options?.env,
@@ -176,8 +178,26 @@ function runCommand(
 
     child.stdout.on("data", (chunk: Buffer) => stdout.push(chunk));
     child.stderr.on("data", (chunk: Buffer) => stderr.push(chunk));
-    child.on("error", reject);
+    child.stdin.on("error", (error: NodeJS.ErrnoException) => {
+      if (error.code === "EPIPE") {
+        return;
+      }
+      if (!settled) {
+        settled = true;
+        reject(error);
+      }
+    });
+    child.on("error", (error) => {
+      if (!settled) {
+        settled = true;
+        reject(error);
+      }
+    });
     child.on("close", (code) => {
+      if (settled) {
+        return;
+      }
+      settled = true;
       if (timer) clearTimeout(timer);
       if (timedOut) {
         reject(new Error(`${command} timed out after ${options?.timeout}ms`));
@@ -191,7 +211,16 @@ function runCommand(
     });
 
     if (options?.input !== undefined) {
-      child.stdin.write(options.input);
+      try {
+        child.stdin.write(options.input);
+      } catch (error) {
+        const err = error as NodeJS.ErrnoException;
+        if (err.code !== "EPIPE") {
+          settled = true;
+          reject(error);
+          return;
+        }
+      }
     }
     child.stdin.end();
   });
@@ -359,7 +388,7 @@ class DockerSecureBashBackend implements SecureBashBackend {
       this.securedSandbox = await mod.secureSandbox(this.adapter, {
         workspace: CONTAINER_WORKSPACE,
         realPaths: true,
-        installStrategy: "upload",
+        installStrategy: DEFAULT_INSTALL_STRATEGY,
       });
       return this.securedSandbox;
     } catch (error: unknown) {
