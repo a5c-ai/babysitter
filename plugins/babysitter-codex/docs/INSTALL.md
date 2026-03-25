@@ -3,12 +3,13 @@
 `babysitter-codex` installation has two layers:
 
 1. Install the global Codex skill payload into `~/.codex/skills/babysitter-codex`
-2. Optionally apply workspace onboarding with `team-install` and
-   `project-install`
+2. Materialize Codex hook/config wiring for the active workspace
 
-The second layer does not create a separate process-library universe. It adds
-config, profile, and pinned-content setup around the active process roots the
-runtime already uses.
+When you run `npm install -g @a5c-ai/babysitter-codex` from inside the target
+workspace, the postinstall now uses `INIT_CWD` to auto-apply the workspace
+hook/config wiring. If you install from somewhere else, use
+`babysitter harness:install-plugin codex --workspace <dir>` or the packaged
+`team-install` helper afterwards.
 
 ## 1. Global Skill Install
 
@@ -59,6 +60,9 @@ Test-Path "$HOME/.codex/skills/babysitter-codex/.codex/hooks.json"
 Test-Path "$HOME/.codex/skills/babysitter-codex/.codex/hooks/babysitter-stop-hook.sh"
 ```
 
+The installer also merges `~/.codex/config.toml` so `features.codex_hooks = true`
+is present for the local Codex install.
+
 ## 3. Active Process Roots After Install
 
 After install, Codex-facing docs and processes should prefer:
@@ -70,10 +74,20 @@ After install, Codex-facing docs and processes should prefer:
 
 Do not document the bundled upstream snapshot as the primary library root.
 
-## 4. Team And Project Onboarding
+## 4. Workspace Hook Onboarding
 
-After the package is installed, use the Codex command surface from the target
-workspace:
+If the global install was not launched from the target workspace, materialize
+the workspace-local `.codex/hooks.json` and `.codex/config.toml` after install:
+
+```bash
+npm install -g @a5c-ai/babysitter-sdk
+babysitter harness:install-plugin codex --workspace /path/to/repo
+```
+
+`babysitter harness:install-plugin ...` is provided by the Babysitter SDK CLI,
+so `@a5c-ai/babysitter-sdk` must already be installed.
+
+Equivalent packaged helper:
 
 ```text
 babysitter team-install
@@ -89,9 +103,8 @@ This setup:
   Codex hook model
 - prepares the repo for Codex-facing Babysitter usage
 
-It should be described as layering pinned configuration and install metadata.
-It should not be described as moving process discovery into a team-only or
-project-only library root.
+This onboarding layers pinned configuration and install metadata. It does not
+move process discovery into a team-only or project-only library root.
 
 ## 5. First Run Expectations
 

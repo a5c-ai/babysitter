@@ -6,7 +6,8 @@ Babysitter in the Codex lifecycle loop.
 
 This is a Codex skill bundle plus workspace hook templates. It is not a
 Claude-style manifest plugin, but it does rely on Codex's real lifecycle hook
-engine through `.codex/hooks.json`.
+engine through `.codex/hooks.json`, and the package postinstall now wires the
+active workspace when the global install is launched from that workspace.
 
 ## What This Package Owns
 
@@ -60,6 +61,23 @@ Install from npm:
 ```bash
 npm install -g @a5c-ai/babysitter-codex
 ```
+
+If you run that command from inside the target repository, postinstall will:
+
+- install the skill payload into `CODEX_HOME`
+- merge `~/.codex/config.toml` so `codex_hooks` is enabled
+- materialize workspace `.codex/hooks.json` and `.codex/config.toml` for the
+  active workspace
+
+If you installed from somewhere else, run:
+
+```bash
+npm install -g @a5c-ai/babysitter-sdk
+babysitter harness:install-plugin codex --workspace /path/to/repo
+```
+
+`babysitter harness:install-plugin ...` is provided by the SDK CLI, so make
+sure `@a5c-ai/babysitter-sdk` is installed first.
 
 Or from a local checkout:
 

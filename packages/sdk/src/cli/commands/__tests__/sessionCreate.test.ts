@@ -695,6 +695,60 @@ describe("handleSessionCreate", () => {
       expect(code).toBe(0);
     });
 
+    it("honors explicit --harness pi even when another installed harness is discovered", async () => {
+      (discoverHarnesses as Mock).mockResolvedValue([
+        makeDiscoveryResult({ name: "claude-code" }),
+      ]);
+      (createRun as Mock).mockResolvedValue({
+        runId: "run-1",
+        runDir: "/tmp/runs/run-1",
+        metadata: {},
+      });
+      (orchestrateIteration as Mock)
+        .mockResolvedValueOnce({
+          status: "waiting",
+          nextActions: [
+            {
+              effectId: "eff-1",
+              invocationKey: "key-1",
+              kind: "agent",
+              taskDef: {
+                kind: "agent",
+                title: "Implement the requested work",
+              },
+            },
+          ],
+        })
+        .mockResolvedValueOnce({
+          status: "completed",
+          output: "done",
+        });
+      (commitEffectResult as Mock).mockResolvedValue({});
+
+      const code = await handleSessionCreate({
+        processPath: "/tmp/p.js",
+        runsDir: "/tmp/runs",
+        harness: "pi",
+        json: false,
+        verbose: false,
+        interactive: false,
+      });
+
+      expect(code).toBe(0);
+      expect(createPiSession).toHaveBeenCalled();
+      expect(invokeHarness).not.toHaveBeenCalled();
+      expect(commitEffectResult).toHaveBeenCalledWith(
+        expect.objectContaining({
+          runDir: "/tmp/runs/run-1",
+          effectId: "eff-1",
+          invocationKey: "key-1",
+          result: expect.objectContaining({
+            status: "ok",
+          }),
+        }),
+      );
+    });
+
     it("returns 1 when neither --prompt nor --process is provided", async () => {
       const code = await handleSessionCreate({
         runsDir: "/tmp/runs",

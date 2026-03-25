@@ -69,6 +69,7 @@ try {
     env: {
       ...process.env,
       CODEX_HOME: codexHome,
+      INIT_CWD: workspaceRoot,
     },
   });
   assert.ok(installOutput.includes('Installation complete!'));
@@ -95,6 +96,11 @@ try {
   const installedSkill = fs.readFileSync(path.join(installedSkillRoot, 'SKILL.md'), 'utf8');
   assert.ok(installedSkill.includes('SessionStart'));
   assert.ok(installedSkill.includes('Stop'));
+  const homeConfig = fs.readFileSync(path.join(codexHome, 'config.toml'), 'utf8');
+  assert.ok(homeConfig.includes('codex_hooks = true'));
+  assert.ok(homeConfig.includes('multi_agent = true'));
+  assert.ok(fs.existsSync(path.join(workspaceRoot, '.codex', 'hooks.json')));
+  assert.ok(fs.existsSync(path.join(workspaceRoot, '.codex', 'config.toml')));
 
   const verifyOutput = run(process.execPath, [path.join(installedSkillRoot, 'scripts', 'verify-content-manifest.js')], {
     cwd: workspaceRoot,

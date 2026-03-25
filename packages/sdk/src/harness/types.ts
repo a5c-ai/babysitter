@@ -193,6 +193,23 @@ export interface HookHandlerArgs {
   verbose?: boolean;
 }
 
+export interface HarnessInstallOptions {
+  workspace?: string;
+  json: boolean;
+  dryRun: boolean;
+  verbose: boolean;
+}
+
+export interface HarnessInstallResult {
+  harness: string;
+  dryRun?: boolean;
+  warning?: string;
+  summary?: string;
+  command?: string;
+  output?: string;
+  location?: string;
+}
+
 // ---------------------------------------------------------------------------
 // Adapter interface
 // ---------------------------------------------------------------------------
@@ -249,4 +266,10 @@ export interface HarnessAdapter {
 
   /** List capabilities supported by this harness adapter. */
   getCapabilities?(): HarnessCapability[];
+
+  /** Install the harness CLI itself. */
+  installHarness?(options: HarnessInstallOptions): Promise<HarnessInstallResult>;
+
+  /** Install or materialize the Babysitter plugin/extension integration for this harness. */
+  installPlugin?(options: HarnessInstallOptions): Promise<HarnessInstallResult>;
 }

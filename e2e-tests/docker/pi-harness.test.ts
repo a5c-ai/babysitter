@@ -211,7 +211,7 @@ describe("Pi harness session binding tests", () => {
     );
 
     const createOut = dockerExec(
-      `PI_SESSION_ID=${sid} PI_PLUGIN_ROOT=${PLUGIN_DIR} babysitter run:create --process-id pi-test --entry ${processDir}/proc.js#process --prompt "pi harness test" --harness pi --session-id ${sid} --plugin-root ${PLUGIN_DIR} --json`,
+      `PI_SESSION_ID=${sid} PI_PLUGIN_ROOT=${PLUGIN_DIR} babysitter run:create --process-id pi-test --entry ${processDir}/proc.js#process --prompt "pi harness test" --harness pi --plugin-root ${PLUGIN_DIR} --json`,
     ).trim();
 
     const createResult = JSON.parse(createOut);
@@ -235,7 +235,7 @@ describe("Pi harness session binding tests", () => {
     );
 
     dockerExec(
-      `PI_SESSION_ID=${sid} PI_PLUGIN_ROOT=${PLUGIN_DIR} babysitter run:create --process-id pi-state-test --entry ${processDir}/proc.js#process --prompt "state check" --harness pi --session-id ${sid} --plugin-root ${PLUGIN_DIR} --json`,
+      `PI_SESSION_ID=${sid} PI_PLUGIN_ROOT=${PLUGIN_DIR} babysitter run:create --process-id pi-state-test --entry ${processDir}/proc.js#process --prompt "state check" --harness pi --plugin-root ${PLUGIN_DIR} --json`,
     );
 
     const stateOut = dockerExec(
@@ -341,7 +341,7 @@ describe("Pi plugin package structural tests", () => {
 // ============================================================================
 
 describe("Pi harness auto-detection", () => {
-  test("detectAdapter returns pi when OMP_SESSION_ID is set", () => {
+  test("detectAdapter returns oh-my-pi when OMP_SESSION_ID is set", () => {
     const out = dockerExec(
       `${NP} OMP_SESSION_ID=detect-test node -e "
         const {detectAdapter} = require('@a5c-ai/babysitter-sdk/dist/harness/registry');
@@ -349,7 +349,7 @@ describe("Pi harness auto-detection", () => {
         console.log(a.name);
       "`,
     ).trim();
-    expect(out).toBe("pi");
+    expect(out).toBe("oh-my-pi");
   });
 
   test("getAdapterByName('pi') returns the pi adapter", () => {

@@ -19,6 +19,10 @@ import { buildEffectIndex } from "../runtime/replay/effectIndex";
 import { resolveCompletionProof } from "../cli/completionProof";
 import { collapseDoubledA5cRuns } from "../cli/resolveInputPath";
 import type { EffectRecord } from "../runtime/types";
+import {
+  BabysitterRuntimeError,
+  ErrorCategory,
+} from "../runtime/exceptions";
 import { discoverSkillsInternal } from "../cli/commands/skill";
 import {
   readSessionFile,
@@ -41,10 +45,19 @@ import type {
   SessionBindOptions,
   SessionBindResult,
   HookHandlerArgs,
+  HarnessInstallOptions,
+  HarnessInstallResult,
 } from "./types";
 import { loadCompressionConfig } from "../compression/config-loader";
 import { densityFilterText, estimateTokens } from "../compression/density-filter";
 import { getOrCompressFile, findLibraryFiles } from "../compression/library-cache";
+import {
+  execFilePromise,
+  getClaudeInstalledPluginsPath,
+  installCliViaNpm,
+  isClaudePluginInstalled,
+  renderCommand,
+} from "./installSupport";
 
 // ---------------------------------------------------------------------------
 // Structured file logger (moved from hookRun.ts)
@@ -931,6 +944,64 @@ async function bindSessionImpl(
   return { harness: "claude-code", sessionId, stateFile: filePath };
 }
 
+async function installClaudeCodeHarness(
+  options: HarnessInstallOptions,
+): Promise<HarnessInstallResult> {
+  return installCliViaNpm({
+    harness: "claude-code",
+    cliCommand: "claude",
+    packageName: "@anthropic-ai/claude-code",
+    summary: "Install the Claude Code CLI globally via npm.",
+    options,
+  });
+}
+
+async function installClaudeCodePlugin(
+  options: HarnessInstallOptions,
+): Promise<HarnessInstallResult> {
+  if (isClaudePluginInstalled()) {
+    return {
+      harness: "claude-code",
+      warning: "The Claude Code Babysitter plugin already appears in installed_plugins.json; skipping reinstall.",
+      location: getClaudeInstalledPluginsPath(),
+    };
+  }
+
+  const command = "claude";
+  const args = ["plugin", "install", "--scope", "user", "babysitter@a5c.ai"];
+  if (options.dryRun) {
+    return {
+      harness: "claude-code",
+      dryRun: true,
+      summary: "Install the published Babysitter Claude Code plugin through Claude's plugin installer.",
+      command: renderCommand(command, args),
+    };
+  }
+
+  const result = await execFilePromise(command, args);
+  if (result.exitCode !== 0) {
+    throw new BabysitterRuntimeError(
+      "ClaudePluginInstallFailed",
+      `${renderCommand(command, args)} failed`,
+      {
+        category: ErrorCategory.External,
+        details: {
+          stdout: result.stdout,
+          stderr: result.stderr,
+          exitCode: result.exitCode,
+        },
+      },
+    );
+  }
+
+  return {
+    harness: "claude-code",
+    summary: "Installed the published Babysitter Claude Code plugin through Claude's plugin installer.",
+    command: renderCommand(command, args),
+    output: [result.stdout.trim(), result.stderr.trim()].filter(Boolean).join("\n"),
+  };
+}
+
 // ---------------------------------------------------------------------------
 // Adapter factory
 // ---------------------------------------------------------------------------
@@ -997,6 +1068,14 @@ export function createClaudeCodeAdapter(): HarnessAdapter {
         if (existsSync(candidate)) return candidate;
       }
       return null;
+    },
+
+    installHarness(options: HarnessInstallOptions): Promise<HarnessInstallResult> {
+      return installClaudeCodeHarness(options);
+    },
+
+    installPlugin(options: HarnessInstallOptions): Promise<HarnessInstallResult> {
+      return installClaudeCodePlugin(options);
     },
   };
 }

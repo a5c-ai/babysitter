@@ -85,6 +85,19 @@ Common hook points:
 - `plugins/babysitter/skills/babysit/SKILL.md`
 - `plugins/babysitter/skills/babysit/process/`
 
+## Installation
+
+Install the Claude Code plugin through the Claude plugin installer or the SDK
+CLI helper:
+
+```bash
+claude plugin install --scope user babysitter@a5c.ai
+```
+
+```bash
+babysitter harness:install-plugin claude-code
+```
+
 ## Quick Start
 
 In Claude Code, invoke the skill or the plugin commands and let the harness own

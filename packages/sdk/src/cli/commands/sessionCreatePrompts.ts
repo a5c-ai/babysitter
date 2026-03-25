@@ -139,7 +139,7 @@ export function buildOrchestrationSystemPrompt(
     `- Treat ${selectedHarnessName} as the target harness binding for this orchestration session.`,
     "- Call babysitter_run_create to create the run if it does not already exist.",
     "- Immediately call babysitter_bind_session after run creation and before the first orchestration iteration.",
-    "- Drive orchestration by repeatedly calling babysitter_run_iterate.",
+    "- Work in bounded host-driven turns. In each turn, call babysitter_run_iterate at most once unless the host explicitly tells you otherwise.",
     "- When babysitter_run_iterate reports pending effects, resolve each effect through tools.",
     "- For breakpoint effects, use AskUserQuestion to get the user decision, then call babysitter_task_post_result.",
     "- For non-breakpoint effects, call babysitter_execute_effect, then persist the returned result with babysitter_task_post_result.",
@@ -155,16 +155,79 @@ export function buildOrchestrationSystemPrompt(
   ].join("\n");
 }
 
-export function buildOrchestrationUserPrompt(
+export function buildOrchestrationBootstrapPrompt(
   processPath: string,
   userPrompt: string | undefined,
   maxIterations: number,
 ): string {
   return [
-    "Create and run the babysitter orchestration session.",
+    "Bootstrap the babysitter orchestration session.",
     "",
     `Process path: ${processPath}`,
     `User prompt: ${userPrompt ?? ""}`,
     `Maximum iterations: ${maxIterations}`,
+    "",
+    "Create the run if needed, bind the session immediately, and then stop.",
+    "Do not iterate the run yet unless the host explicitly asks for an iteration turn.",
   ].join("\n");
+}
+
+export function buildOrchestrationTurnPrompt(args: {
+  processPath: string;
+  userPrompt?: string;
+  maxIterations: number;
+  currentIteration: number;
+  runId?: string;
+  runDir?: string;
+  lastStatus?: string;
+  pendingEffects?: Array<{
+    effectId: string;
+    kind: string;
+    title?: string;
+    harness?: string;
+  }>;
+  fallbackReason?: string;
+}): string {
+  const lines = [
+    "Continue the babysitter orchestration session for exactly one bounded host turn.",
+    "",
+    `Process path: ${args.processPath}`,
+    `User prompt: ${args.userPrompt ?? ""}`,
+    `Maximum iterations: ${args.maxIterations}`,
+    `Current completed iterations: ${args.currentIteration}`,
+    `Run id: ${args.runId ?? "(not created)"}`,
+    `Run dir: ${args.runDir ?? "(not created)"}`,
+    `Last run status: ${args.lastStatus ?? "unknown"}`,
+  ];
+
+  if (args.fallbackReason) {
+    lines.push(`Fallback note: ${args.fallbackReason}`);
+  }
+
+  if (args.pendingEffects && args.pendingEffects.length > 0) {
+    lines.push("");
+    lines.push("Pending effects that still need resolution:");
+    for (const effect of args.pendingEffects) {
+      const parts = [
+        effect.effectId,
+        effect.kind,
+        effect.title || "(untitled)",
+      ];
+      if (effect.harness) {
+        parts.push(`harness=${effect.harness}`);
+      }
+      lines.push(`- ${parts.join(" | ")}`);
+    }
+    lines.push("");
+    lines.push("Resolve every listed pending effect and post its result in this turn. Do not call babysitter_run_iterate again after posting them.");
+  } else {
+    lines.push("");
+    lines.push("Call babysitter_run_iterate exactly once in this turn.");
+    lines.push("If it returns pending effects, resolve all of them and post every result before stopping.");
+    lines.push("If it returns completed or failed, stop after recording the terminal state.");
+  }
+
+  lines.push("");
+  lines.push("End with a short plain-text summary of what changed in this turn.");
+  return lines.join("\n");
 }

@@ -91,6 +91,7 @@ jobs:
             --reporter=default --reporter=json \
             --outputFile.json=e2e-artifacts/test-results-pi-azure.json \
             e2e-tests/docker/pi-workflow.test.ts \
+            e2e-tests/docker/session-create-full-run.test.ts \
             2>&1 | tee e2e-artifacts/pi-azure-tests.log
 
       - name: Upload test artifacts

@@ -72,6 +72,12 @@ npm install
 omp plugin link ./plugins/pi
 ```
 
+From the Babysitter SDK CLI helper:
+
+```bash
+babysitter harness:install-plugin pi
+```
+
 ## Usage
 
 Start a run:

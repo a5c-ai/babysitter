@@ -13,6 +13,8 @@ import {
   type HarnessDiscoveryResult,
   type HarnessInvokeOptions,
   type HarnessInvokeResult,
+  type HarnessInstallOptions,
+  type HarnessInstallResult,
   type PiSessionOptions,
   type PiPromptResult,
   type SessionBindOptions,
@@ -146,6 +148,18 @@ describe("PiPromptResult", () => {
 
 describe("HarnessAdapter extended interface", () => {
   it("allows an adapter with the new optional methods", () => {
+    const installOptions: HarnessInstallOptions = {
+      json: false,
+      dryRun: true,
+      verbose: false,
+      workspace: "/tmp/workspace",
+    };
+    const installResult: HarnessInstallResult = {
+      harness: "test-harness",
+      dryRun: true,
+      summary: "Install test harness",
+    };
+
     // Minimal adapter satisfying all required methods plus new optional ones
     const adapter: HarnessAdapter = {
       name: "test-harness",
@@ -172,12 +186,17 @@ describe("HarnessAdapter extended interface", () => {
         HarnessCapability.Programmatic,
         HarnessCapability.SessionBinding,
       ],
+      installHarness: async () => installResult,
+      installPlugin: async () => installResult,
     };
 
     expect(adapter.name).toBe("test-harness");
     expect(adapter.isCliInstalled).toBeDefined();
     expect(adapter.getCliInfo).toBeDefined();
     expect(adapter.getCapabilities).toBeDefined();
+    expect(adapter.installHarness).toBeDefined();
+    expect(adapter.installPlugin).toBeDefined();
+    void installOptions;
   });
 
   it("allows an adapter without the new optional methods", () => {

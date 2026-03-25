@@ -59,6 +59,11 @@ import { handleCompressionToggle } from "./commands/compressionToggle";
 import { handleCompressionReset } from "./commands/compressionReset";
 import { handleCompressionSet } from "./commands/compressionSet";
 import { handleCompressOutput } from "./commands/compressOutput";
+import {
+  handleHarnessInstall,
+  handleHarnessInstallPlugin,
+  formatHarnessInstallError,
+} from "./commands/harnessInstall";
 import { resolveCompletionProof } from "./completionProof";
 import { getAdapter, getAdapterByName } from "../harness";
 import type { SessionBindResult } from "../harness";
@@ -122,6 +127,8 @@ const USAGE = `Usage:
   babysitter session:create --prompt <text> [--harness <name>] [--process <path>] [--workspace <dir>] [--model <model>] [--max-iterations <n>] [--runs-dir <dir>] [--interactive|--no-interactive] [--json] [--verbose]
   babysitter harness:discover [--json]
   babysitter harness:list [--json]
+  babysitter harness:install <name> [--workspace <dir>] [--json] [--dry-run] [--verbose]
+  babysitter harness:install-plugin <name> [--workspace <dir>] [--json] [--dry-run] [--verbose]
   babysitter harness:invoke <name> --prompt <text> [--workspace <dir>] [--model <model>] [--timeout <ms>] [--json]
   babysitter mcp:serve [--json]
   babysitter health [--json] [--verbose]
@@ -640,7 +647,11 @@ function parseArgs(argv: string[]): ParsedArgs {
     parsed.compressionSetValue = value;
   } else if (parsed.command === "compress-output") {
     parsed.compressOutputArgs = positionals;
-  } else if (parsed.command === "harness:invoke") {
+  } else if (
+    parsed.command === "harness:invoke" ||
+    parsed.command === "harness:install" ||
+    parsed.command === "harness:install-plugin"
+  ) {
     parsed.positional = positionals;
   }
   return parsed;
@@ -2159,6 +2170,8 @@ const VALID_COMMANDS = [
   "plugin:remove-from-registry",
   "harness:discover",
   "harness:list",
+  "harness:install",
+  "harness:install-plugin",
   "harness:invoke",
   "mcp:serve",
   "health",
@@ -2645,6 +2658,24 @@ export function createBabysitterCli() {
         if (parsed.command === "harness:discover" || parsed.command === "harness:list") {
           return await handleHarnessDiscover(parsed);
         }
+        if (parsed.command === "harness:install") {
+          return await handleHarnessInstall({
+            harnessName: parsed.positional?.[0],
+            workspace: parsed.workspace,
+            json: parsed.json,
+            dryRun: parsed.dryRun,
+            verbose: parsed.verbose,
+          });
+        }
+        if (parsed.command === "harness:install-plugin") {
+          return await handleHarnessInstallPlugin({
+            harnessName: parsed.positional?.[0],
+            workspace: parsed.workspace,
+            json: parsed.json,
+            dryRun: parsed.dryRun,
+            verbose: parsed.verbose,
+          });
+        }
         if (parsed.command === "harness:invoke") {
           return await handleHarnessInvoke(parsed);
         }
@@ -2730,6 +2761,9 @@ export function createBabysitterCli() {
         // This should not be reached due to the VALID_COMMANDS check above
         return handleUnknownCommand(parsed.command, parsed.json);
       } catch (error) {
+        if (parsedJson && error instanceof BabysitterRuntimeError && error.name === "UnsupportedHarnessInstall") {
+          return formatHarnessInstallError(error, true);
+        }
         const err = error instanceof Error ? error : new Error(String(error));
         outputError(err, { json: parsedJson, verbose: parsedVerbose });
         return 1;

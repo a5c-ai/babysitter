@@ -52,7 +52,19 @@ import type {
   SessionBindOptions,
   SessionBindResult,
   HookHandlerArgs,
+  HarnessInstallOptions,
+  HarnessInstallResult,
 } from "./types";
+import {
+  copyGeminiExtension,
+  getGeminiExtensionDir,
+  installCliViaNpm,
+  resolveRepoRoot,
+} from "./installSupport";
+import {
+  BabysitterRuntimeError,
+  ErrorCategory,
+} from "../runtime/exceptions";
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -791,6 +803,39 @@ async function bindSessionImpl(
   return { harness: HARNESS_NAME, sessionId, stateFile: filePath };
 }
 
+async function installGeminiHarness(
+  options: HarnessInstallOptions,
+): Promise<HarnessInstallResult> {
+  return installCliViaNpm({
+    harness: HARNESS_NAME,
+    cliCommand: "gemini",
+    packageName: "@google/gemini-cli",
+    summary: "Install the Gemini CLI globally via npm.",
+    options,
+  });
+}
+
+async function installGeminiPlugin(
+  options: HarnessInstallOptions,
+): Promise<HarnessInstallResult> {
+  const repoRoot = resolveRepoRoot();
+  if (!repoRoot) {
+    throw new BabysitterRuntimeError(
+      "RepoRootNotFound",
+      "Could not resolve the babysitter repo root for the repo-local Gemini extension install.",
+      { category: ErrorCategory.Configuration },
+    );
+  }
+
+  return copyGeminiExtension({
+    harness: HARNESS_NAME,
+    summary: "Install the repo-local Gemini extension payload into the active workspace.",
+    sourceDir: path.join(repoRoot, "plugins", "babysitter-gemini"),
+    targetDir: getGeminiExtensionDir(options.workspace),
+    options,
+  });
+}
+
 // ---------------------------------------------------------------------------
 // Adapter factory
 // ---------------------------------------------------------------------------
@@ -863,6 +908,14 @@ export function createGeminiCliAdapter(): HarnessAdapter {
         if (existsSync(candidate)) return candidate;
       }
       return null;
+    },
+
+    installHarness(options: HarnessInstallOptions): Promise<HarnessInstallResult> {
+      return installGeminiHarness(options);
+    },
+
+    installPlugin(options: HarnessInstallOptions): Promise<HarnessInstallResult> {
+      return installGeminiPlugin(options);
     },
   };
 }

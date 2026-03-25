@@ -9,6 +9,7 @@
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
+const { spawnSync } = require('child_process');
 
 const SKILL_NAME = 'babysitter-codex';
 const PACKAGE_ROOT = path.resolve(__dirname, '..');
@@ -31,6 +32,113 @@ const INSTALL_ENTRIES = [
 function getCodexHome() {
   if (process.env.CODEX_HOME) return process.env.CODEX_HOME;
   return path.join(os.homedir(), '.codex');
+}
+
+function writeFileIfChanged(filePath, contents) {
+  if (fs.existsSync(filePath)) {
+    const current = fs.readFileSync(filePath, 'utf8');
+    if (current === contents) {
+      return false;
+    }
+  }
+  fs.mkdirSync(path.dirname(filePath), { recursive: true });
+  fs.writeFileSync(filePath, contents, 'utf8');
+  return true;
+}
+
+function mergeCodexHomeConfig(codexHome) {
+  const configPath = path.join(codexHome, 'config.toml');
+  const featureLines = [
+    '[features]',
+    'codex_hooks = true',
+    'multi_agent = true',
+  ];
+
+  if (!fs.existsSync(configPath)) {
+    writeFileIfChanged(
+      configPath,
+      [
+        'approval_policy = "on-request"',
+        'sandbox_mode = "workspace-write"',
+        '',
+        ...featureLines,
+        '',
+      ].join('\n')
+    );
+    console.log(`[babysitter-codex]   wrote ${configPath}`);
+    return;
+  }
+
+  let content = fs.readFileSync(configPath, 'utf8');
+  if (!/^\s*codex_hooks\s*=.*$/m.test(content)) {
+    if (/^\[features\]\s*$/m.test(content)) {
+      content = content.replace(
+        /^\[features\]\s*$/m,
+        ['[features]', 'codex_hooks = true', 'multi_agent = true'].join('\n')
+      );
+    } else {
+      content = [content.trimEnd(), '', ...featureLines, ''].join('\n');
+    }
+  } else if (!/^\s*multi_agent\s*=.*$/m.test(content) && /^\[features\]\s*$/m.test(content)) {
+    content = content.replace(
+      /^\[features\]\s*$/m,
+      ['[features]', 'multi_agent = true'].join('\n')
+    );
+  }
+
+  if (writeFileIfChanged(configPath, content)) {
+    console.log(`[babysitter-codex]   merged ${configPath}`);
+  }
+}
+
+function shouldAutoOnboardWorkspace(skillDir) {
+  const initCwd = process.env.INIT_CWD;
+  if (!initCwd) return null;
+
+  const resolved = path.resolve(initCwd);
+  if (!fs.existsSync(resolved)) return null;
+  if (!fs.statSync(resolved).isDirectory()) return null;
+
+  const normalizedWorkspace = resolved.toLowerCase();
+  const normalizedPackageRoot = PACKAGE_ROOT.toLowerCase();
+  const normalizedSkillDir = skillDir.toLowerCase();
+  if (normalizedWorkspace === normalizedPackageRoot || normalizedWorkspace === normalizedSkillDir) {
+    return null;
+  }
+
+  return resolved;
+}
+
+function autoOnboardWorkspace(skillDir) {
+  const workspace = shouldAutoOnboardWorkspace(skillDir);
+  if (!workspace) {
+    return;
+  }
+
+  const scriptPath = path.join(skillDir, 'scripts', 'team-install.js');
+  if (!fs.existsSync(scriptPath)) {
+    console.warn('[babysitter-codex] WARNING: team-install.js is missing; skipping workspace hook onboarding');
+    return;
+  }
+
+  const result = spawnSync(process.execPath, [scriptPath, '--workspace', workspace], {
+    cwd: workspace,
+    stdio: 'pipe',
+    encoding: 'utf8',
+    env: {
+      ...process.env,
+      BABYSITTER_PACKAGE_ROOT: skillDir,
+    },
+  });
+
+  if (result.status !== 0) {
+    console.warn(`[babysitter-codex] WARNING: workspace onboarding failed for ${workspace}`);
+    if (result.stdout) console.warn(result.stdout.trim());
+    if (result.stderr) console.warn(result.stderr.trim());
+    return;
+  }
+
+  console.log(`[babysitter-codex]   onboarded workspace hooks/config at ${workspace}`);
 }
 
 function copyRecursive(src, dest) {
@@ -92,6 +200,7 @@ function main() {
     }
 
     verifyInstalledPayload(skillDir);
+    mergeCodexHomeConfig(codexHome);
 
     if (!IS_WIN) {
       const hookDir = path.join(skillDir, '.codex', 'hooks');
@@ -106,8 +215,10 @@ function main() {
       }
     }
 
+    autoOnboardWorkspace(skillDir);
+
     console.log('[babysitter-codex] Installation complete!');
-    console.log('[babysitter-codex] Restart Codex to pick up the new skill.');
+    console.log('[babysitter-codex] Restart Codex to pick up the updated skill and hook config.');
   } catch (err) {
     console.error(`[babysitter-codex] Failed to install skill files: ${err.message}`);
     process.exitCode = 1;

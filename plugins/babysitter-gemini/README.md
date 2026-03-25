@@ -43,6 +43,14 @@ Gemini exposes slash commands:
 | `/babysitter:retrospect [run-id]` | Analyze a completed run |
 | `/babysitter:help [topic]` | Show help |
 
+## Installation
+
+Materialize the repo-local Gemini extension into the active workspace:
+
+```bash
+babysitter harness:install-plugin gemini-cli --workspace /path/to/repo
+```
+
 ## Orchestration Contract
 
 Gemini docs should follow the same active contract as Claude/Codex where

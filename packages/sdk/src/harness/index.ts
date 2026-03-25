@@ -7,6 +7,8 @@ export type {
   CallerHarnessResult,
   HarnessInvokeOptions,
   HarnessInvokeResult,
+  HarnessInstallOptions,
+  HarnessInstallResult,
   PiSessionOptions,
   PiPromptResult,
   PiSessionEvent,

@@ -11,7 +11,8 @@ const CODEX_HOME = process.env.CODEX_HOME || path.join(HOME, ".codex");
 const SKILL_DIR = path.join(CODEX_HOME, "skills", "babysitter-codex");
 const PROCESS_PATH = path.join(WORKSPACE, "ci-codex-process.js");
 const AGENTS_PATH = path.join(WORKSPACE, "AGENTS.md");
-const CONFIG_PATH = path.join(WORKSPACE, ".codex", "config.toml");
+const WORKSPACE_CONFIG_PATH = path.join(WORKSPACE, ".codex", "config.toml");
+const HOME_CONFIG_PATH = path.join(CODEX_HOME, "config.toml");
 const HOOKS_PATH = path.join(WORKSPACE, ".codex", "hooks.json");
 const ENV_FILE_PATH = path.join(WORKSPACE, ".codex", "codex.env.sh");
 const ALPHA_PATH = path.join(WORKSPACE, "codex-artifacts", "alpha.txt");
@@ -108,7 +109,7 @@ function resolveProviderConfig() {
       kind: "azure",
       model: String(process.env.AZURE_OPENAI_DEPLOYMENT || selectedModel || "gpt-5.4").trim(),
       modelProvider: "azure",
-      baseUrl: `https://${azureProject}.openai.azure.com/openai/v1`,
+      baseUrl: `https://${azureProject}.openai.azure.com/openai`,
       envKey: "AZURE_OPENAI_API_KEY",
     };
   }
@@ -145,6 +146,7 @@ function resolveProviderConfig() {
 function workspaceConfig(provider) {
   const lines = [
     `model = "${provider.model}"`,
+    `model_provider = "${provider.kind === "azure" ? "azure" : "openai"}"`,
     'approval_policy = "never"',
     'sandbox_mode = "workspace-write"',
     "",
@@ -152,9 +154,7 @@ function workspaceConfig(provider) {
     "codex_hooks = true",
   ];
 
-  if (provider.kind === "azure") {
-    lines.push('model_provider = "azure"');
-  } else if (provider.baseUrl) {
+  if (provider.kind !== "azure" && provider.baseUrl) {
     lines.push(`openai_base_url = "${provider.baseUrl}"`);
   }
 
@@ -165,7 +165,10 @@ function workspaceConfig(provider) {
     lines.push("", "[model_providers.azure]");
     lines.push('name = "Azure OpenAI"');
     lines.push(`base_url = "${provider.baseUrl}"`);
+    lines.push('wire_api = "responses"');
+    lines.push('query_params = { "api-version" = "2025-04-01-preview" }');
     lines.push(`env_key = "${provider.envKey}"`);
+    lines.push('supports_websockets = false');
   }
 
   lines.push("");
@@ -365,8 +368,8 @@ function executeCodexTask(runId, runDir, turnIndex, task) {
 
   const codexArgs = [
     "exec",
-    "--approval-policy", "never",
-    "--sandbox-mode", "workspace-write",
+    "-c", "approval_policy=never",
+    "-s", "workspace-write",
     prompt,
   ];
   const result = run("codex", codexArgs, {
@@ -435,13 +438,21 @@ function collectTaskSummaries(runDir) {
     const taskDef = fs.existsSync(path.join(taskDir, "task.json"))
       ? readJson(path.join(taskDir, "task.json"))
       : {};
-    const output = fs.existsSync(path.join(taskDir, "output.json"))
-      ? readJson(path.join(taskDir, "output.json"))
+    const result = fs.existsSync(path.join(taskDir, "result.json"))
+      ? readJson(path.join(taskDir, "result.json"))
       : null;
+    const output = result && typeof result === "object"
+      ? (result.value || result.result || null)
+      : (fs.existsSync(path.join(taskDir, "value.json"))
+          ? readJson(path.join(taskDir, "value.json"))
+          : (fs.existsSync(path.join(taskDir, "output.json"))
+              ? readJson(path.join(taskDir, "output.json"))
+              : null));
     return {
       effectId,
       kind: taskDef.kind || (taskDef.effect && taskDef.effect.kind) || null,
       title: taskDef.title || (taskDef.effect && taskDef.effect.title) || null,
+      result,
       output,
     };
   });
@@ -457,8 +468,10 @@ function main() {
   const provider = resolveProviderConfig();
   fs.rmSync(WORKSPACE, { recursive: true, force: true });
   ensureDir(WORKSPACE);
-  ensureDir(path.dirname(CONFIG_PATH));
-  writeFile(CONFIG_PATH, workspaceConfig(provider));
+  ensureDir(path.dirname(WORKSPACE_CONFIG_PATH));
+  ensureDir(CODEX_HOME);
+  writeFile(WORKSPACE_CONFIG_PATH, workspaceConfig(provider));
+  writeFile(HOME_CONFIG_PATH, workspaceConfig(provider));
   writeFile(HOOKS_PATH, JSON.stringify(workspaceHooksConfig(SKILL_DIR), null, 2));
   writeFile(AGENTS_PATH, workspaceAgents());
   writeFile(PROCESS_PATH, processSource());
@@ -489,11 +502,14 @@ function main() {
     "Run the full Codex hook integration validation flow.",
     "--harness",
     "codex",
-    "--session-id",
-    sessionId,
     "--plugin-root",
     path.join(WORKSPACE, ".codex"),
-  ]);
+  ], {
+    env: {
+      CODEX_SESSION_ID: sessionId,
+      CODEX_PLUGIN_ROOT: path.join(WORKSPACE, ".codex"),
+    },
+  });
 
   const runId = created.runId;
   if (!runId) {

@@ -134,6 +134,12 @@ beforeEach(() => {
 
 afterEach(() => {
   eventListeners = [];
+  delete process.env.AZURE_OPENAI_API_KEY;
+  delete process.env.AZURE_OPENAI_PROJECT_NAME;
+  delete process.env.AZURE_OPENAI_RESOURCE_NAME;
+  delete process.env.AZURE_OPENAI_BASE_URL;
+  delete process.env.AZURE_OPENAI_DEPLOYMENT;
+  delete process.env.AZURE_OPENAI_DEPLOYMENT_NAME_MAP;
 });
 
 describe("PiSessionHandle", () => {
@@ -197,6 +203,37 @@ describe("PiSessionHandle", () => {
           cwd: "/tmp/project",
           thinkingLevel: "high",
           agentDir: "/custom/agent",
+        }),
+      );
+    });
+
+    test("synthesizes an Azure model entry when a plain model id is provided with Azure env", async () => {
+      process.env.AZURE_OPENAI_API_KEY = "azure-key";
+      process.env.AZURE_OPENAI_PROJECT_NAME = "demo-resource";
+      process.env.AZURE_OPENAI_DEPLOYMENT = "gpt-5.4";
+
+      mockPrompt.mockImplementation(async () => {
+        emitEvent({ type: "agent_end" });
+      });
+      mockGetLastAssistantText.mockReturnValue("ok");
+
+      const session = createPiSession({
+        workspace: "/tmp/project",
+        model: "gpt-5.4",
+      });
+      await session.prompt("do azure work");
+
+      expect(process.env.AZURE_OPENAI_RESOURCE_NAME).toBe("demo-resource");
+      expect(process.env.AZURE_OPENAI_BASE_URL).toBe("https://demo-resource.openai.azure.com");
+      expect(process.env.AZURE_OPENAI_DEPLOYMENT_NAME_MAP).toBe("gpt-5.4=gpt-5.4");
+      expect(mockCreateAgentSession).toHaveBeenCalledWith(
+        expect.objectContaining({
+          model: expect.objectContaining({
+            id: "gpt-5.4",
+            provider: "azure-openai-responses",
+            api: "openai-responses",
+            baseUrl: "https://demo-resource.openai.azure.com",
+          }),
         }),
       );
     });

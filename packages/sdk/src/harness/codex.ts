@@ -8,7 +8,7 @@
  */
 
 import * as path from "node:path";
-import { appendFileSync, readFileSync } from "node:fs";
+import { appendFileSync, existsSync, readFileSync } from "node:fs";
 import { Readable } from "node:stream";
 import { createClaudeCodeAdapter } from "./claudeCode";
 import {
@@ -23,7 +23,21 @@ import type {
   HookHandlerArgs,
   SessionBindOptions,
   SessionBindResult,
+  HarnessInstallOptions,
+  HarnessInstallResult,
 } from "./types";
+import {
+  execFilePromise,
+  getInstalledCodexSkillDir,
+  installCliViaNpm,
+  isCodexPluginInstalled,
+  renderCommand,
+  resolveRepoRoot,
+} from "./installSupport";
+import {
+  BabysitterRuntimeError,
+  ErrorCategory,
+} from "../runtime/exceptions";
 
 function resolveCodexPluginRoot(
   args: { pluginRoot?: string } = {},
@@ -248,6 +262,157 @@ async function handleCodexSessionStartHookImpl(
   return 0;
 }
 
+async function runCodexWorkspaceOnboarding(
+  options: HarnessInstallOptions,
+  skillDir: string,
+): Promise<HarnessInstallResult> {
+  const workspace = path.resolve(options.workspace ?? process.cwd());
+  const scriptPath = path.join(skillDir, "scripts", "team-install.js");
+  if (!existsSync(scriptPath)) {
+    throw new BabysitterRuntimeError(
+      "CodexWorkspaceInstallerMissing",
+      `Codex workspace onboarding script is missing: ${scriptPath}`,
+      { category: ErrorCategory.Configuration },
+    );
+  }
+
+  const command = process.execPath;
+  const args = [scriptPath, "--workspace", workspace];
+  if (options.dryRun) {
+    return {
+      harness: "codex",
+      dryRun: true,
+      summary: "Materialize workspace-local Codex hooks/config for the active repo.",
+      command: renderCommand(command, args),
+      location: workspace,
+    };
+  }
+
+  const result = await execFilePromise(command, args, {
+    cwd: workspace,
+    env: {
+      ...process.env,
+      BABYSITTER_PACKAGE_ROOT: skillDir,
+    },
+  });
+  if (result.exitCode !== 0) {
+    throw new BabysitterRuntimeError(
+      "CodexWorkspaceOnboardingFailed",
+      "Failed to materialize workspace-local Codex hooks/config.",
+      {
+        category: ErrorCategory.External,
+        details: {
+          stdout: result.stdout,
+          stderr: result.stderr,
+          exitCode: result.exitCode,
+        },
+      },
+    );
+  }
+
+  return {
+    harness: "codex",
+    summary: "Materialized workspace-local Codex hooks/config for the active repo.",
+    location: workspace,
+    output: [result.stdout.trim(), result.stderr.trim()].filter(Boolean).join("\n"),
+  };
+}
+
+async function installCodexHarness(
+  options: HarnessInstallOptions,
+): Promise<HarnessInstallResult> {
+  return installCliViaNpm({
+    harness: "codex",
+    cliCommand: "codex",
+    packageName: "@openai/codex@latest",
+    summary: "Install the Codex CLI globally via npm.",
+    options,
+  });
+}
+
+async function installCodexPlugin(
+  options: HarnessInstallOptions,
+): Promise<HarnessInstallResult> {
+  const repoRoot = resolveRepoRoot();
+  if (!repoRoot) {
+    throw new BabysitterRuntimeError(
+      "RepoRootNotFound",
+      "Could not resolve the babysitter repo root for the repo-local Codex plugin install.",
+      { category: ErrorCategory.Configuration },
+    );
+  }
+
+  const installedSkillDir = getInstalledCodexSkillDir();
+  if (isCodexPluginInstalled()) {
+    if (options.workspace) {
+      return runCodexWorkspaceOnboarding(options, installedSkillDir);
+    }
+    return {
+      harness: "codex",
+      warning: "babysitter-codex is already installed in CODEX_HOME; skipping reinstall.",
+      location: installedSkillDir,
+    };
+  }
+
+  const packageDir = path.join(repoRoot, "plugins", "babysitter-codex");
+  const command = "npm";
+  const args = ["install", "-g", packageDir];
+  if (options.dryRun) {
+    return {
+      harness: "codex",
+      dryRun: true,
+      summary: "Install the repo-local babysitter-codex package globally.",
+      command: renderCommand(command, args),
+      location: packageDir,
+    };
+  }
+
+  const result = await execFilePromise(command, args, {
+    env: {
+      ...process.env,
+      INIT_CWD: path.resolve(options.workspace ?? process.cwd()),
+    },
+  });
+  if (result.exitCode !== 0) {
+    throw new BabysitterRuntimeError(
+      "CodexPluginInstallFailed",
+      "Failed to install the repo-local babysitter-codex package.",
+      {
+        category: ErrorCategory.External,
+        details: {
+          stdout: result.stdout,
+          stderr: result.stderr,
+          exitCode: result.exitCode,
+        },
+      },
+    );
+  }
+
+  if (options.workspace) {
+    const onboarding = await runCodexWorkspaceOnboarding(
+      { ...options, dryRun: false },
+      installedSkillDir,
+    );
+    return {
+      harness: "codex",
+      summary: "Installed the repo-local babysitter-codex package and materialized workspace-local Codex hooks/config.",
+      location: onboarding.location ?? installedSkillDir,
+      output: [
+        result.stdout.trim(),
+        result.stderr.trim(),
+        onboarding.output?.trim() ?? "",
+      ].filter(Boolean).join("\n"),
+    };
+  }
+
+  return {
+    harness: "codex",
+    summary: "Installed the repo-local babysitter-codex package and ran its postinstall wiring.",
+    location: installedSkillDir,
+    output: [result.stdout.trim(), result.stderr.trim()].filter(Boolean).join("\n"),
+  };
+}
+
 export function createCodexAdapter(): HarnessAdapter {
   const claude = createClaudeCodeAdapter();
   const unsupportedHookMessage = (
@@ -359,6 +524,14 @@ export function createCodexAdapter(): HarnessAdapter {
 
     findHookDispatcherPath(_startCwd: string): string | null {
       return null;
+    },
+
+    installHarness(options: HarnessInstallOptions): Promise<HarnessInstallResult> {
+      return installCodexHarness(options);
+    },
+
+    installPlugin(options: HarnessInstallOptions): Promise<HarnessInstallResult> {
+      return installCodexPlugin(options);
     },
   };
 }

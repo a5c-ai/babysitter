@@ -117,6 +117,54 @@ async function loadPiModule(): Promise<PiCodingAgentModule> {
   }
 }
 
+function configureAzureOpenAiEnvDefaults(requestedModel?: string): void {
+  const resourceName = process.env.AZURE_OPENAI_RESOURCE_NAME || process.env.AZURE_OPENAI_PROJECT_NAME;
+  if (!process.env.AZURE_OPENAI_RESOURCE_NAME && process.env.AZURE_OPENAI_PROJECT_NAME) {
+    process.env.AZURE_OPENAI_RESOURCE_NAME = process.env.AZURE_OPENAI_PROJECT_NAME;
+  }
+  if (!process.env.AZURE_OPENAI_BASE_URL && resourceName) {
+    process.env.AZURE_OPENAI_BASE_URL = `https://${resourceName}.openai.azure.com`;
+  }
+  if (
+    requestedModel &&
+    !requestedModel.includes(":") &&
+    process.env.AZURE_OPENAI_DEPLOYMENT &&
+    !process.env.AZURE_OPENAI_DEPLOYMENT_NAME_MAP
+  ) {
+    process.env.AZURE_OPENAI_DEPLOYMENT_NAME_MAP = `${requestedModel}=${process.env.AZURE_OPENAI_DEPLOYMENT}`;
+  }
+}
+
+function synthesizeAzureModelEntry(modelId: string): PiModelEntry | undefined {
+  if (!process.env.AZURE_OPENAI_API_KEY) {
+    return undefined;
+  }
+  const resourceName = process.env.AZURE_OPENAI_RESOURCE_NAME || process.env.AZURE_OPENAI_PROJECT_NAME;
+  const baseUrl = process.env.AZURE_OPENAI_BASE_URL ||
+    (resourceName ? `https://${resourceName}.openai.azure.com` : undefined);
+  if (!baseUrl) {
+    return undefined;
+  }
+
+  return {
+    id: modelId,
+    name: modelId,
+    provider: "azure-openai-responses",
+    api: "openai-responses",
+    baseUrl,
+    reasoning: true,
+    input: ["text"],
+    contextWindow: 128000,
+    maxTokens: 16384,
+    cost: {
+      input: 0,
+      output: 0,
+      cacheRead: 0,
+      cacheWrite: 0,
+    },
+  };
+}
+
 // ---------------------------------------------------------------------------
 // PiSessionHandle
 // ---------------------------------------------------------------------------
@@ -323,9 +371,9 @@ export class PiSessionHandle {
     // Bridge common Azure env var aliases that pi-coding-agent doesn't know
     // about.  Pi expects AZURE_OPENAI_RESOURCE_NAME; the user's profile may
     // set AZURE_OPENAI_PROJECT_NAME instead.
-    if (!process.env.AZURE_OPENAI_RESOURCE_NAME && process.env.AZURE_OPENAI_PROJECT_NAME) {
-      process.env.AZURE_OPENAI_RESOURCE_NAME = process.env.AZURE_OPENAI_PROJECT_NAME;
-    }
+    configureAzureOpenAiEnvDefaults(
+      typeof this.options.model === "string" ? this.options.model : undefined,
+    );
 
     const createOpts: Record<string, unknown> = {};
     const cwd = this.options.workspace ?? process.cwd();
@@ -441,6 +489,9 @@ export class PiSessionHandle {
             }
           }
         }
+      }
+      if (!resolved) {
+        resolved = synthesizeAzureModelEntry(modelStr);
       }
       if (resolved) {
         createOpts.model = resolved;

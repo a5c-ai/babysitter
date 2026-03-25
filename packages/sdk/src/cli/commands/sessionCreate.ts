@@ -43,7 +43,8 @@ import type { EffectAction, IterationResult } from "../../runtime/types";
 import { BabysitterRuntimeError, ErrorCategory } from "../../runtime/exceptions";
 import {
   buildOrchestrationSystemPrompt,
-  buildOrchestrationUserPrompt,
+  buildOrchestrationBootstrapPrompt,
+  buildOrchestrationTurnPrompt,
   buildProcessDefinitionSystemPrompt,
   type SessionCreatePromptContext,
 } from "./sessionCreatePrompts";
@@ -93,6 +94,7 @@ interface Phase2Progress {
   effectId?: string;
   effectKind?: string;
   effectTitle?: string;
+  effectHarness?: string;
   effectStatus?: string;
   error?: string;
   output?: string;
@@ -248,6 +250,67 @@ function buildMetaPrompt(userPrompt: string, workDir: string): string {
   template = template.replace("{{OUTPUT_PATH}}", path.join(workDir, "generated-process.js"));
   template = template.replace("{{INTERVIEW_CONTEXT}}", "");
   return template;
+}
+
+function buildFallbackProcessDefinitionSource(userPrompt: string): string {
+  const serializedPrompt = JSON.stringify(userPrompt);
+  return `import { defineTask } from "@a5c-ai/babysitter-sdk";
+
+const implementRequest = defineTask("implement-request", (args) => ({
+  kind: "agent",
+  title: "Implement the requested work",
+  agent: {
+    prompt: {
+      role: "delivery engineer",
+      task: "Implement the user's request in the current workspace.",
+      context: {
+        request: args.request,
+      },
+      instructions: [
+        "Create or update the necessary project files in the current workspace.",
+        "Keep the implementation as small and direct as possible while still satisfying the request.",
+        "Run lightweight verification where practical and include what you verified in the result.",
+        "Return JSON with summary, changedFiles, and verificationNotes."
+      ],
+      outputFormat: "JSON with summary, changedFiles, verificationNotes"
+    }
+  }
+}));
+
+const verifyRequest = defineTask("verify-request", (args) => ({
+  kind: "agent",
+  title: "Verify the requested work",
+  agent: {
+    prompt: {
+      role: "verification engineer",
+      task: "Verify that the user's request was completed and identify any remaining gaps.",
+      context: {
+        request: args.request,
+        implementation: args.implementation
+      },
+      instructions: [
+        "Inspect the workspace state produced by the implementation step.",
+        "Confirm whether the requested work exists and is usable.",
+        "If there are remaining issues, describe them precisely.",
+        "Return JSON with success, findings, and recommendedNextSteps."
+      ],
+      outputFormat: "JSON with success, findings, recommendedNextSteps"
+    }
+  }
+}));
+
+export async function process(inputs, ctx) {
+  const request = inputs?.prompt || ${serializedPrompt};
+  const implementation = await ctx.task(implementRequest, { request });
+  const verification = await ctx.task(verifyRequest, { request, implementation });
+  return {
+    request,
+    implementation,
+    verification,
+    success: verification?.success !== false,
+  };
+}
+`;
 }
 
 const POLL_INTERVAL_MS = 1_000;
@@ -783,6 +846,12 @@ function emitProgress(
   }
 }
 
+function writeVerboseProcessDefinitionRecovery(json: boolean): void {
+  if (!json) {
+    process.stderr.write(`${DIM}Phase 1 recovery: the agent did not report the process file, retrying with an explicit write-and-report instruction...${RESET}\n`);
+  }
+}
+
 async function runProcessDefinitionPhase(args: {
   prompt: string;
   outputPath: string;
@@ -890,11 +959,52 @@ async function runProcessDefinitionPhase(args: {
     }
 
     if (!state.report?.processPath) {
-      throw new BabysitterRuntimeError(
-        "ProcessDefinitionReportMissing",
-        "The process-definition agent finished without calling babysitter_report_process_definition.",
-        { category: ErrorCategory.Runtime },
+      writeVerboseProcessDefinitionRecovery(args.json);
+      const recovery = await session.prompt(
+        compressInternalHarnessPrompt(
+          [
+            "Recovery step:",
+            `- Write the full process file now to ${args.outputPath}`,
+            "- Then call babysitter_report_process_definition exactly once.",
+            "- Do not just describe the process in plain text.",
+          ].join("\n"),
+          args.compressionConfig,
+          "agent",
+        ),
+        180_000,
       );
+      if (!recovery.success) {
+        throw new BabysitterRuntimeError(
+          "ProcessDefinitionFailed",
+          recovery.output,
+          { category: ErrorCategory.External },
+        );
+      }
+    }
+
+    if (!state.report?.processPath) {
+      try {
+        await waitForProcessFile(args.outputPath, 5_000);
+        state.report = {
+          processPath: args.outputPath,
+          summary: "Recovered from missing process-definition tool report by using the expected output path.",
+        };
+      } catch {
+        if (!args.interactive) {
+          const fallbackSource = buildFallbackProcessDefinitionSource(args.prompt);
+          await fs.writeFile(args.outputPath, fallbackSource, "utf8");
+          state.report = {
+            processPath: args.outputPath,
+            summary: "Recovered from phase-1 tool failure by writing a generic multi-step fallback process definition.",
+          };
+        } else {
+          throw new BabysitterRuntimeError(
+            "ProcessDefinitionReportMissing",
+            "The process-definition agent finished without calling babysitter_report_process_definition.",
+            { category: ErrorCategory.Runtime },
+          );
+        }
+      }
     }
 
     await waitForProcessFile(state.report.processPath);
@@ -953,6 +1063,42 @@ async function runOrchestrationPhase(args: {
   };
 
   let orchestrationSession: PiSessionHandle | null = null;
+  const writeVerbose = (message: string): void => {
+    if (!args.json && args.verbose) {
+      process.stderr.write(`${DIM}${message}${RESET}\n`);
+    }
+  };
+
+  const summarizeAgentText = (text: string): string => {
+    const normalized = text.replace(/\s+/g, " ").trim();
+    if (!normalized) {
+      return "(no summary emitted)";
+    }
+    return normalized.length > 240 ? `${normalized.slice(0, 237)}...` : normalized;
+  };
+
+  const describePendingActions = (): Array<{
+    effectId: string;
+    kind: string;
+    title?: string;
+    harness?: string;
+  }> => Array.from(state.pendingActions.values()).map((action) => ({
+    effectId: action.effectId,
+    kind: action.kind,
+    title: action.taskDef?.title,
+    harness: resolveTaskHarness(action, args.selectedHarnessName, args.discovered),
+  }));
+
+  const ensureTerminalResult = (): number | null => {
+    if (state.lastIterationResult?.status === "completed") {
+      return 0;
+    }
+    if (state.lastIterationResult?.status === "failed") {
+      return 1;
+    }
+    return null;
+  };
+
   const customTools: unknown[] = [
     {
       name: "AskUserQuestion",
@@ -1371,6 +1517,106 @@ async function runOrchestrationPhase(args: {
     },
   ];
 
+  const tools = customTools as Array<{
+    name: string;
+    execute?: (toolCallId: string, params: Record<string, unknown>) => Promise<ToolResultShape> | ToolResultShape;
+  }>;
+  const getTool = (name: string) => tools.find((tool) => tool.name === name);
+  const runCreateTool = getTool("babysitter_run_create");
+  const bindSessionTool = getTool("babysitter_bind_session");
+  const runIterateTool = getTool("babysitter_run_iterate");
+  const executeEffectTool = getTool("babysitter_execute_effect");
+  const taskPostTool = getTool("babysitter_task_post_result");
+  const finishTool = getTool("babysitter_finish_orchestration");
+
+  const invokeTool = async (
+    tool: { execute?: (toolCallId: string, params: Record<string, unknown>) => Promise<ToolResultShape> | ToolResultShape } | undefined,
+    name: string,
+    params: Record<string, unknown> = {},
+  ): Promise<ToolResultShape> => {
+    if (!tool?.execute) {
+      throw new BabysitterRuntimeError(
+        "MissingSessionCreateTool",
+        `Required orchestration tool is unavailable: ${name}`,
+        { category: ErrorCategory.Internal },
+      );
+    }
+    const result = tool.execute(`host-${name}`, params);
+    return await Promise.resolve(result);
+  };
+
+  const runDeterministicPendingEffects = async (reason: string): Promise<void> => {
+    const pending = describePendingActions();
+    if (pending.length === 0) {
+      return;
+    }
+    writeVerbose(`[phase2 fallback] ${reason}`);
+    for (const effect of pending) {
+      writeVerbose(
+        `[phase2 fallback] resolving ${effect.effectId} (${effect.kind}) via ${effect.harness ?? args.selectedHarnessName}`,
+      );
+      const action = state.pendingActions.get(effect.effectId);
+      if (!action) {
+        continue;
+      }
+      if (action.kind !== "breakpoint") {
+        await invokeTool(
+          executeEffectTool,
+          "babysitter_execute_effect",
+          { effectId: effect.effectId },
+        );
+      }
+      await invokeTool(
+        taskPostTool,
+        "babysitter_task_post_result",
+        { effectId: effect.effectId },
+      );
+    }
+  };
+
+  const promptOrchestrationAgent = async (
+    message: string,
+    options?: { label?: string; fallbackReason?: string },
+  ): Promise<void> => {
+    if (!orchestrationSession) {
+      throw new BabysitterRuntimeError(
+        "OrchestrationSessionMissing",
+        "The orchestration PI session has not been created.",
+        { category: ErrorCategory.Runtime },
+      );
+    }
+
+    if (!args.json && args.verbose) {
+      const label = options?.label ?? "phase2";
+      process.stderr.write(`\n${DIM}[${label}] agent turn${RESET}\n`);
+    }
+
+    const result = await orchestrationSession.prompt(
+      compressInternalHarnessPrompt(
+        message,
+        args.compressionConfig,
+        "agent",
+      ),
+      900_000,
+    );
+
+    if (!result.success) {
+      throw new BabysitterRuntimeError(
+        "OrchestrationAgentFailed",
+        result.output,
+        { category: ErrorCategory.External },
+      );
+    }
+
+    writeVerbose(
+      `[phase2 agent] ${summarizeAgentText(result.output)}`,
+    );
+
+    if (options?.fallbackReason && state.pendingActions.size > 0) {
+      await runDeterministicPendingEffects(options.fallbackReason);
+    }
+  };
+
   orchestrationSession = createPiSession({
     workspace: args.workspace,
     model: args.model,
@@ -1386,10 +1632,10 @@ async function runOrchestrationPhase(args: {
     args.verbose,
   );
 
+  let unsubscribe: (() => void) | null = null;
   try {
     await orchestrationSession.initialize();
-    let unsubscribe: (() => void) | null = null;
-    if (!args.json) {
+    if (!args.json && args.verbose) {
       unsubscribe = orchestrationSession.subscribe((event: PiSessionEvent) => {
         if (event.type === "text_delta") {
           const text = (event as { text?: string }).text;
@@ -1398,57 +1644,121 @@ async function runOrchestrationPhase(args: {
       });
     }
 
-    const result = await orchestrationSession.prompt(
-      compressInternalHarnessPrompt(
-        buildOrchestrationUserPrompt(
-          path.resolve(args.processPath),
-          args.prompt,
-          args.maxIterations,
-        ),
-        args.compressionConfig,
-        "agent",
+    await promptOrchestrationAgent(
+      buildOrchestrationBootstrapPrompt(
+        path.resolve(args.processPath),
+        args.prompt,
+        args.maxIterations,
       ),
-      900_000,
+      { label: "phase2 bootstrap" },
     );
 
-    if (unsubscribe) unsubscribe();
-    if (!args.json) process.stderr.write("\n");
-
-    if (!result.success) {
-      throw new BabysitterRuntimeError(
-        "OrchestrationAgentFailed",
-        result.output,
-        { category: ErrorCategory.External },
+    if (!state.runId || !state.runDir) {
+      writeVerbose("[phase2 fallback] agent did not create a run; creating it in the host");
+      await invokeTool(
+        runCreateTool,
+        "babysitter_run_create",
+        args.prompt ? { prompt: args.prompt } : {},
       );
+    }
+    if (!state.sessionBound) {
+      writeVerbose("[phase2 fallback] agent did not bind the session; binding in the host");
+      await invokeTool(bindSessionTool, "babysitter_bind_session");
     }
 
     if (!state.runId || !state.runDir) {
       throw new BabysitterRuntimeError(
         "RunNotCreated",
-        "The orchestration agent exited without creating a run.",
+        "The orchestration session could not establish a run after bootstrap.",
         { category: ErrorCategory.Runtime },
       );
     }
 
-    if (!state.finished) {
-      throw new BabysitterRuntimeError(
-        "OrchestrationFinishMissing",
-        "The orchestration agent exited without calling babysitter_finish_orchestration.",
-        { category: ErrorCategory.Runtime },
+    while (state.iteration < args.maxIterations) {
+      const terminal = ensureTerminalResult();
+      if (terminal !== null) {
+        break;
+      }
+
+      const iterationBeforeTurn = state.iteration;
+      await promptOrchestrationAgent(
+        buildOrchestrationTurnPrompt({
+          processPath: path.resolve(args.processPath),
+          userPrompt: args.prompt,
+          maxIterations: args.maxIterations,
+          currentIteration: state.iteration,
+          runId: state.runId,
+          runDir: state.runDir,
+          lastStatus: state.lastIterationResult?.status,
+          pendingEffects: describePendingActions(),
+        }),
+        {
+          label: `phase2 iteration ${state.iteration + 1}`,
+          fallbackReason: "Agent left pending effects unresolved; the host resolved and posted them to keep the orchestration loop moving.",
+        },
+      );
+
+      if (ensureTerminalResult() !== null) {
+        break;
+      }
+
+      if (state.iteration === iterationBeforeTurn && state.pendingActions.size === 0) {
+        writeVerbose("[phase2 fallback] agent did not advance the run; executing one iteration in the host");
+        await invokeTool(runIterateTool, "babysitter_run_iterate");
+      }
+
+      if (state.lastIterationResult?.status === "waiting" && state.pendingActions.size > 0) {
+        await runDeterministicPendingEffects(
+          "Agent left pending effects unresolved after the turn; the host completed them deterministically.",
+        );
+      }
+
+      const postTurnTerminal = ensureTerminalResult();
+      if (postTurnTerminal !== null) {
+        break;
+      }
+    }
+
+    if (state.lastIterationResult?.status !== "completed" && state.lastIterationResult?.status !== "failed") {
+      state.lastIterationResult = {
+        status: "failed",
+        error: { message: `Max iterations (${args.maxIterations}) reached without completion` },
+      };
+      emitProgress(
+        {
+          phase: "2",
+          status: "failed",
+          runId: state.runId,
+          runDir: state.runDir,
+          iteration: state.iteration,
+          runStatus: "failed",
+          error: `Max iterations (${args.maxIterations}) reached without completion`,
+        },
+        args.json,
+        args.verbose,
       );
     }
 
-    if (state.lastIterationResult?.status === "completed") {
-      return 0;
+    if (state.lastIterationResult?.status === "completed" || state.lastIterationResult?.status === "failed") {
+      await invokeTool(
+        finishTool,
+        "babysitter_finish_orchestration",
+        {
+          summary: state.lastIterationResult.status === "completed"
+            ? `Run ${state.runId} completed after ${state.iteration} iterations.`
+            : `Run ${state.runId} failed after ${state.iteration} iterations.`,
+        },
+      );
     }
 
-    if (state.lastIterationResult?.status === "failed") {
-      return 1;
+    const exitCode = ensureTerminalResult();
+    if (exitCode !== null) {
+      return exitCode;
     }
 
     throw new BabysitterRuntimeError(
       "OrchestrationIncomplete",
-      "The orchestration agent exited before the run reached a terminal state.",
+      "The orchestration phase ended without a terminal run state.",
       { category: ErrorCategory.Runtime },
     );
   } catch (error: unknown) {
@@ -1466,6 +1776,8 @@ async function runOrchestrationPhase(args: {
     );
     return 1;
   } finally {
+    if (unsubscribe) unsubscribe();
+    if (!args.json && args.verbose) process.stderr.write("\n");
     orchestrationSession?.dispose();
   }
 }
@@ -1503,7 +1815,10 @@ export async function handleSessionCreate(
 
     const discovered = await discoverHarnesses();
     const selected = selectHarness(discovered, preferredHarness);
-    const selectedHarnessName = selected?.name ?? "pi";
+    const selectedHarnessName =
+      preferredHarness === "pi" || preferredHarness === "oh-my-pi"
+        ? preferredHarness
+        : (selected?.name ?? "pi");
     const compressionConfig = loadSessionCompressionConfig(workspace);
     const promptContext = buildPromptContext({
       workspace,
