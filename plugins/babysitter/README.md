@@ -23,9 +23,9 @@ Do not document multi-iteration loops inside a single turn.
 Process discovery should prefer:
 
 1. `.a5c/processes` in the current workspace
-2. Plugin-local process roots under `plugins/babysitter/skills/babysit/process`
-3. Other installed skill/plugin roots when present
-4. Reference/bundled content only as fallback
+2. The SDK-managed active process-library binding returned by `babysitter process-library:active --state-dir .a5c --json`
+3. Other installed skill/plugin roots only as compatibility fallback
+4. Reference/bundled content only as last resort
 
 The process library is active-use and layered. Docs should not frame it as a
 single bundled snapshot or as a team/project-scoped library only.
@@ -83,7 +83,7 @@ Common hook points:
 - `plugins/babysitter/plugin.json`
 - `plugins/babysitter/hooks/`
 - `plugins/babysitter/skills/babysit/SKILL.md`
-- `plugins/babysitter/skills/babysit/process/`
+- `library/`
 
 ## Installation
 
@@ -96,6 +96,14 @@ claude plugin install --scope user babysitter@a5c.ai
 
 ```bash
 babysitter harness:install-plugin claude-code
+```
+
+If the workspace does not already have an active process-library binding:
+
+```bash
+babysitter process-library:clone --repo https://github.com/a5c-ai/babysitter.git --dir .a5c/process-library/babysitter-repo
+babysitter process-library:use --dir .a5c/process-library/babysitter-repo/library --state-dir .a5c
+babysitter process-library:active --state-dir .a5c --json
 ```
 
 ## Quick Start

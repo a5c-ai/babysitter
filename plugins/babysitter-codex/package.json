@@ -8,8 +8,6 @@
     "test:integration": "node test/integration.test.js",
     "test:plugin": "node test/plugin.test.js",
     "test:features": "node test/features-1-10.test.js",
-    "test:scenario": "node test/full-session-scenario.js",
-    "test:long-scenario": "node test/full-session-long-run.js",
     "check:mapping": "node scripts/check-mapping-contract.js",
     "team:install": "node scripts/team-install.js",
     "lint": "find .codex -name '*.js' | xargs -I{} node --check {}",

@@ -10,9 +10,8 @@
     "version": "0.1.4",
     "processLibrary": {
       "repo": "https://github.com/a5c-ai/babysitter.git",
-      "path": "plugins/babysitter",
-      "processSubpath": "plugins/babysitter/skills/babysit/process",
-      "referenceSubpath": "plugins/babysitter/skills/babysit/reference",
+      "processSubpath": "library",
+      "referenceSubpath": "library/reference",
       "snapshotCommit": "unknown"
     }
   }

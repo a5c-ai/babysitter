@@ -75,8 +75,8 @@ export async function process(inputs, ctx) {
     outputDir,
     parsers: parsersResult,
     libraryPaths: [
-      'plugins/babysitter/skills/babysit/process/specializations',
-      'plugins/babysitter/skills/babysit/process/methodologies'
+      'library/specializations',
+      'library/methodologies'
     ]
   });
 

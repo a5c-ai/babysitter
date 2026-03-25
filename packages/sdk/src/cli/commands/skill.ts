@@ -3,9 +3,10 @@
  * Replaces bash logic from skill-context-resolver.sh and skill-discovery.sh
  */
 
-import { promises as fs, readFileSync } from 'node:fs';
+import { promises as fs, readFileSync, existsSync } from 'node:fs';
 import * as path from 'node:path';
 import * as os from 'node:os';
+import { resolveActiveProcessLibrary } from '../../processLibrary/active';
 
 /**
  * Parsed arguments for skill commands.
@@ -511,8 +512,7 @@ export interface ProcessDiscoveryResult {
  *   @skill <name> <relative-path-to-SKILL.md>
  *   @agent <name> <relative-path-to-AGENT.md>
  *
- * Paths are relative to the plugin's process root:
- *   pluginRoot/skills/babysit/process/
+ * Paths are relative to the active process-library root.
  */
 export function parseProcessFileMarkers(filePath: string): ProcessMarkersResult {
   let content: string;
@@ -563,16 +563,18 @@ export function parseProcessFileMarkers(filePath: string): ProcessMarkersResult 
 }
 
 /**
- * Resolve parsed markers to full file paths using the plugin process root.
- *
- * processRoot = pluginRoot/skills/babysit/process/
- * Each marker's relativePath is resolved against processRoot.
+ * Resolve parsed markers to full file paths using the active process-library
+ * root when known, or the legacy plugin-local process root as a compatibility
+ * fallback.
  */
 function resolveMarkersToMetadata(
   markers: ProcessMarkersResult,
-  pluginRoot: string,
+  options: {
+    pluginRoot?: string;
+    processRoot?: string;
+  },
 ): ProcessDiscoveryResult {
-  const processRoot = path.join(pluginRoot, 'skills', 'babysit', 'process');
+  const processRoot = resolveStaticProcessRoot(options);
 
   const resolveMarker = (marker: ProcessMarker): { name: string; file?: string } => {
     if (!marker.relativePath) {
@@ -595,13 +597,72 @@ function resolveMarkersToMetadata(
  */
 export function discoverFromProcessFile(options: {
   processFilePath: string;
-  pluginRoot: string;
+  pluginRoot?: string;
+  processRoot?: string;
 }): ProcessDiscoveryResult | null {
   const markers = parseProcessFileMarkers(options.processFilePath);
   if (!markers.hasMarkers) {
     return null;
   }
-  return resolveMarkersToMetadata(markers, options.pluginRoot);
+  return resolveMarkersToMetadata(markers, {
+    pluginRoot: options.pluginRoot,
+    processRoot: options.processRoot,
+  });
+}
+
+function resolveLegacyPluginProcessRoot(pluginRoot: string): string {
+  return path.join(pluginRoot, 'skills', 'babysit', 'process');
+}
+
+function findRepoLibraryRoot(start: string): string | null {
+  let current = path.resolve(start);
+  while (true) {
+    const candidate = path.join(current, 'library');
+    if (existsSync(candidate)) {
+      return candidate;
+    }
+    const parent = path.dirname(current);
+    if (parent === current) {
+      return null;
+    }
+    current = parent;
+  }
+}
+
+function resolveStaticProcessRoot(options: {
+  pluginRoot?: string;
+  processRoot?: string;
+}): string {
+  if (options.processRoot) {
+    return path.resolve(options.processRoot);
+  }
+  if (options.pluginRoot) {
+    const repoLibraryRoot = findRepoLibraryRoot(options.pluginRoot);
+    if (repoLibraryRoot) {
+      return repoLibraryRoot;
+    }
+    return resolveLegacyPluginProcessRoot(options.pluginRoot);
+  }
+  return path.resolve(process.cwd(), 'library');
+}
+
+async function resolveDiscoveryProcessRoot(options: {
+  pluginRoot: string;
+  runId?: string;
+}): Promise<string> {
+  try {
+    const active = await resolveActiveProcessLibrary({
+      stateDir: path.resolve(process.cwd(), '.a5c'),
+      runId: options.runId,
+    });
+    if (active.binding?.dir) {
+      return path.resolve(active.binding.dir);
+    }
+  } catch {
+    // Fall back to repo-local/library or legacy plugin-local roots.
+  }
+
+  return resolveStaticProcessRoot({ pluginRoot: options.pluginRoot });
 }
 
 // ---------------------------------------------------------------------------
@@ -661,7 +722,11 @@ export async function discoverSkillsInternal(options: {
     domain = await detectRunDomain(runId, runsDir);
   }
 
-  const specializationsDir = path.join(pluginRoot, 'skills', 'babysit', 'process', 'specializations');
+  const processRoot = await resolveDiscoveryProcessRoot({
+    pluginRoot,
+    runId,
+  });
+  const specializationsDir = path.join(processRoot, 'specializations');
 
   // ------------------------------------------------------------------
   // Skills
@@ -675,7 +740,9 @@ export async function discoverSkillsInternal(options: {
   // 2. Scan plugin-level skills
   const pluginSkillsDir = path.join(pluginRoot, 'skills');
   const pluginSkills = await scanSkillsDirectory(pluginSkillsDir, 'local-plugin');
-  const filteredPluginSkills = pluginSkills.filter(s => !s.file?.includes('/specializations/'));
+  const filteredPluginSkills = pluginSkills.filter(s =>
+    !(s.file?.replace(/\\/g, '/').includes('/specializations/'))
+  );
   allSkills.push(...filteredPluginSkills);
 
   // 3. Scan repo-level skills (.a5c/skills)
@@ -735,7 +802,7 @@ export async function discoverSkillsInternal(options: {
     }
 
     // 2. Methodology processes
-    const methodologiesDir = path.join(pluginRoot, 'skills', 'babysit', 'process', 'methodologies');
+    const methodologiesDir = path.join(processRoot, 'methodologies');
     try {
       // Top-level methodology files
       const topProcs = await scanProcessesDirectory(methodologiesDir, 'methodologies', 'library');

@@ -1,3 +1,0 @@
-# IAP Skill
-
-Mobile monetization.

@@ -81,7 +81,6 @@ function runBabysitterCli(packageRoot, cliArgs, options = {}) {
 
 function resolveProcessLibrarySpec(lock, workspaceRoot) {
   const processLibraryConfig = (lock && lock.content && (lock.content.processLibrary || lock.content.upstream)) || {};
-  const pluginPath = processLibraryConfig.path || 'plugins/babysitter';
   const repo = process.env.BABYSITTER_PROCESS_LIBRARY_REPO || processLibraryConfig.repo;
   if (!repo) {
     throw new Error('missing process-library repo configuration in babysitter.lock.json');
@@ -90,10 +89,10 @@ function resolveProcessLibrarySpec(lock, workspaceRoot) {
   const cloneDir = path.join(workspaceRoot, '.a5c', 'process-library', 'babysitter-repo');
   const processSubpath = process.env.BABYSITTER_PROCESS_LIBRARY_SUBPATH ||
     processLibraryConfig.processSubpath ||
-    path.posix.join(pluginPath.replace(/\\/g, '/'), 'skills', 'babysit', 'process');
+    'library';
   const referenceSubpath = process.env.BABYSITTER_PROCESS_LIBRARY_REFERENCE_SUBPATH ||
     processLibraryConfig.referenceSubpath ||
-    path.posix.join(pluginPath.replace(/\\/g, '/'), 'skills', 'babysit', 'reference');
+    'library/reference';
   return {
     repo,
     ref: ref || undefined,

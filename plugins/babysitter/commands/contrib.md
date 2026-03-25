@@ -8,7 +8,7 @@ Invoke the babysitter:babysit skill (using the Skill tool) and follow its instru
 
 ## Process Routing
 
-All contribution processes are in `skills/babysit/process/cradle/`. Route based on arguments:
+Contribution processes live under the active process library's `cradle/` directory. Resolve the active library root with `babysitter process-library:active --state-dir .a5c --json` and route based on arguments:
 
 ### Issue-based (opens a GitHub issue in a5c-ai/babysitter)
  * **Bug report** → `cradle/bug-report.js#process` — Report a bug in the SDK, CLI, process library, etc.

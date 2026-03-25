@@ -48,7 +48,7 @@ The babysitter workflow has 4 steps:
 Interview the user for the intent, requirements, goal, scope, etc.
 using AskUserQuestion tool (before setting the in-session loop).
 
-A multi-step phase to understand the intent and perspective to approach the process building after researching the repo, short research online if needed, short research in the target repo, additional instructions, intent and library (processes, specializations, skills, subagents, methodologies, references, etc.) / guide for methodology building. (clarifications regarding the intent, requirements, goal, scope, etc.) - the library is at [skill-root]/process/specializations/**/**/** and [skill-root]/process/methodologies/ and under [skill-root]/process/contrib/[contributer-username]/]
+A multi-step phase to understand the intent and perspective to approach the process building after researching the repo, short research online if needed, short research in the target repo, additional instructions, intent and library (processes, specializations, skills, subagents, methodologies, references, etc.) / guide for methodology building. Resolve the active library root with `babysitter process-library:active --state-dir .a5c --json`. If no binding exists, initialize it with `babysitter process-library:clone --repo https://github.com/a5c-ai/babysitter.git --dir .a5c/process-library/babysitter-repo` and `babysitter process-library:use --dir .a5c/process-library/babysitter-repo/library --state-dir .a5c`. After that, treat `specializations/**/**/**`, `methodologies/`, `contrib/`, and `reference/` as paths relative to that active library root.
 
 The first step should be the look at the state of the repo, then find the most relevant processes, specializations, skills, subagents, methodologies, references, etc. to use as a reference. use the babysitter cli discover command to find the relevant processes, skills, subagents, etc at various stages.
 
@@ -502,7 +502,7 @@ If at any point the run fails due to SDK issues or corrupted state or journal. a
 
 When creating process files, include `@skill` and `@agent` markers in the JSDoc header listing the skills and agents relevant to this process. The SDK reads these markers to provide targeted discovery results instead of scanning all available skills.
 
-**Format** (one per line, path relative to process root `pluginRoot/skills/babysit/process/`):
+**Format** (one per line, path relative to the active process-library root):
 ```javascript
 /**
  * @process specializations/web-development/react-app-development
@@ -518,13 +518,13 @@ When creating process files, include `@skill` and `@agent` markers in the JSDoc 
 1. Use `babysitter skill:discover --process-path <path> --plugin-root ... --json` to find relevant skills/agents in the specialization directory
 2. Select the ones actually needed by the process tasks
 3. Add them as `@skill`/`@agent` markers in the JSDoc header
-4. Use full relative path from the process root (`pluginRoot/skills/babysit/process/`)
+4. Use full relative path from the active process-library root returned by `babysitter process-library:active --state-dir .a5c --json`
 
 When these markers are present, `run:create` and `run:iterate` will return only the marked skills/agents (with full file paths) instead of scanning the entire plugin tree. Without markers, the SDK falls back to scanning ALL specializations, which can return dozens of irrelevant results (e.g., AI agent skills surfaced for a simple file-writing task) and degrade orchestration quality.
 
 - Unless otherwise specified, prefer processes that close the widest loop in the quality gates (for example e2e tests with a full browser or emulator/vm if it a mobile or desktop app) AND gates that make sure the work is accurate against the user request (all the specs is covered and no extra stuff was added unless permitted by the intent of the user).
 
-- Scan the methodologies and processes in the plugin and the sdk package to find relevant processes and methodologies to use as a reference. also search for process files bundled in active skills, processes in the repo (.a5c/processes/).
+- Scan the methodologies and processes in the active process library and the sdk package to find relevant processes and methodologies to use as a reference. Also search for process files bundled in active skills and processes in the repo (`.a5c/processes/`).
 
 - if you encounter a generic reusable part of a process that can be later reused and composed, build it in a modular way and organize it in the .a5c/processes directory. and import it to compose it to the specific process in the current user request. prefer architecting processes in such modular way for reusability and composition.
 
@@ -541,10 +541,10 @@ prefer processes that have the following characteristics unless otherwise specif
   - in case the scope includes work in an existing deployed application and the scope of the feedback loop requires validations at the deployed environment (or remote environment), analyze the deployment methods and understand how the existing delivery pipeline works. and how you can deliver changes to the sandbox/staging and verify the accuracy and completeness of the changes you are making on the remote environment. with observability on the ci pipelines, logs of the cluster/app/infra/etc. (for requests like: "fix this bug and make sure that it is fixed locally, then deploy to staging and verify that the bug is fixed there too")
   - if the user is very explicit about the flow and process, create a process that follows it closely and strictly. (ad hoc requests like: "try this functionality and make sure it works as expected, repeat until it works as expected")  
   - search for processes (js files), skills and agents (SKILL.md and AGENT.md files) in during the interactive process building phase to compose a comprehensive process that may combine various parts from different sources:
-    - .a5c/processes/ (project level processes)
-    - plugins/babysitter/skills/babysit/process/specializations/[rnd-specialization-name-slugified]/ (rnd specializations)
-    - plugins/babysitter/skills/babysit/process/specializations/domains/[domain-name-slugified]/[specialization-name-slugified]/ (non rnd specializations)
-    - plugins/babysitter/skills/babysit/process/methodologies/ (methodologies)
+    - `.a5c/processes/` (project level processes)
+    - `specializations/[rnd-specialization-name-slugified]/` under the active process-library root (rnd specializations)
+    - `specializations/domains/[domain-name-slugified]/[specialization-name-slugified]/` under the active process-library root (non rnd specializations)
+    - `methodologies/` under the active process-library root
     - When creating the process file, add `@skill` and `@agent` JSDoc markers for the relevant skills and agents found during this search (see "Process File Discovery Markers" above). This ensures only the needed dependencies are surfaced during orchestration instead of scanning all available specializations.
 
 ## Critical Rules
@@ -570,6 +570,6 @@ CRITICAL RULE: NEVER use `kind: 'node'` in generated process files. All tasks MU
 CRITICAL RULE: NEVER bypass, avoid or skip the babysitter orchestration model when the user explicitly requested this skill. Do not execute the tasks yourself, do not loop programmatically, do not create helper scripts to orchestrate the runs. Use the CLI to drive the orchestration loop and do not bypass it. not for simple tasks, and even if things get complicated or don't go smoothly. persist in executing the orchestration itself rather than simplifying the execution by bypassing the process above.
 
 ## See Also
-- `process/tdd-quality-convergence.js` - TDD quality convergence example - read and look for relevant processes and methodolies before creating the code process for a new run (create the run using the CLI, then use these process as a reference)
-- `process/reference/ADVANCED_PATTERNS.md` - Agent/skill patterns, iterative convergence
-- `process/reference/sdk.md` - SDK API reference
+- `library/tdd-quality-convergence.js` - TDD quality convergence example - read and look for relevant processes and methodologies before creating the code process for a new run
+- `library/reference/ADVANCED_PATTERNS.md` - Agent/skill patterns, iterative convergence
+- `library/reference/sdk.md` - SDK API reference

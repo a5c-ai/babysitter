@@ -63,12 +63,8 @@ try {
   fs.mkdirSync(codexHome, { recursive: true });
   fs.mkdirSync(workspaceRoot, { recursive: true });
   copyTree(
-    path.join(PROJECT_ROOT, '..', 'babysitter', 'skills', 'babysit', 'process'),
-    path.join(processLibraryRepoRoot, 'plugins', 'babysitter', 'skills', 'babysit', 'process'),
-  );
-  copyTree(
-    path.join(PROJECT_ROOT, '..', 'babysitter', 'skills', 'babysit', 'reference'),
-    path.join(processLibraryRepoRoot, 'plugins', 'babysitter', 'skills', 'babysit', 'reference'),
+    path.join(PROJECT_ROOT, '..', '..', 'library'),
+    path.join(processLibraryRepoRoot, 'library'),
   );
   run('git', ['init'], { cwd: processLibraryRepoRoot });
   run('git', ['add', '.'], { cwd: processLibraryRepoRoot });
@@ -155,8 +151,8 @@ try {
     path.resolve(path.join(installedSkillRoot, '.codex', 'hooks')),
   );
   assert.strictEqual(path.resolve(installJson.processLibraryCloneDir), path.resolve(path.join(workspaceRoot, '.a5c', 'process-library', 'babysitter-repo')));
-  assert.strictEqual(path.resolve(installJson.processLibraryRoot), path.resolve(path.join(installJson.processLibraryCloneDir, 'plugins', 'babysitter', 'skills', 'babysit', 'process')));
-  assert.strictEqual(path.resolve(installJson.processLibraryReferenceRoot), path.resolve(path.join(installJson.processLibraryCloneDir, 'plugins', 'babysitter', 'skills', 'babysit', 'reference')));
+  assert.strictEqual(path.resolve(installJson.processLibraryRoot), path.resolve(path.join(installJson.processLibraryCloneDir, 'library')));
+  assert.strictEqual(path.resolve(installJson.processLibraryReferenceRoot), path.resolve(path.join(installJson.processLibraryCloneDir, 'library', 'reference')));
   assert.strictEqual(
     path.resolve(installJson.processLibraryStateFile),
     path.resolve(path.join(workspaceRoot, '.a5c', 'active', 'process-library.json')),

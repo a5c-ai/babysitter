@@ -1,5 +1,0 @@
-{
-  "provider": "gcp",
-  "projectIdentifier": "my-project-id",
-  "region": "us-central1"
-}

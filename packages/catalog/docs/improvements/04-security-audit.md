@@ -246,7 +246,7 @@ The `.env.local` file exists and contains configuration. While `.gitignore` incl
 NEXT_PUBLIC_APP_NAME="Process Library Catalog"
 NEXT_PUBLIC_APP_URL="http://localhost:3000"
 DATABASE_PATH="./data/catalog.db"
-PROCESS_LIBRARY_PATH="../babysitter/skills/babysit/process"
+PROCESS_LIBRARY_PATH="../library"
 ```
 
 **Risk:**

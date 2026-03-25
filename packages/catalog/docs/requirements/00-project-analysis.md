@@ -583,8 +583,8 @@ interface ProcessRow {
 
 ### Content Sources
 The indexer scans these paths for content:
-- `plugins/babysitter/skills/babysit/process/specializations`
-- `plugins/babysitter/skills/babysit/process/methodologies`
+- `library/specializations`
+- `library/methodologies`
 
 Supported file types:
 - `.md` - Markdown files (agents, skills)

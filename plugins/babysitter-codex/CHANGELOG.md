@@ -134,7 +134,6 @@ All notable changes to this project are documented in this file.
   - strict `score == 100` pass gate
 - Full scenario runbook and helper scripts:
   - `test/FULL_SESSION_SCENARIO.md`
-  - `test/full-session-scenario.js`
   - npm scripts: `test:scenario`, `test:long-scenario`
 
 ### Changed

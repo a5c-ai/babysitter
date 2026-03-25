@@ -69,7 +69,7 @@ If you run that command from inside the target repository, postinstall will:
 - materialize workspace `.codex/hooks.json` and `.codex/config.toml` for the
   active workspace
 - clone or update the original Babysitter repo into `.a5c/process-library/...`
-- bind the fetched process-library root for active use through the SDK CLI
+- bind `.a5c/process-library/.../library` for active use through the SDK CLI
 
 If you installed from somewhere else, run:
 
@@ -102,6 +102,14 @@ Verify the active process-library binding:
 
 ```bash
 babysitter process-library:active --state-dir /path/to/repo/.a5c --json
+```
+
+Manual bootstrap uses the same SDK CLI flow:
+
+```bash
+babysitter process-library:clone --repo https://github.com/a5c-ai/babysitter.git --dir .a5c/process-library/babysitter-repo
+babysitter process-library:use --dir .a5c/process-library/babysitter-repo/library --state-dir .a5c
+babysitter process-library:active --state-dir .a5c --json
 ```
 
 ## Quick Start

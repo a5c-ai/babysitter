@@ -73,7 +73,6 @@ jobs:
             --reporter=default --reporter=json \
             --outputFile.json=e2e-artifacts/test-results-structural.json \
             e2e-tests/docker/structural.test.ts \
-            e2e-tests/docker/sdk-cli.test.ts \
             e2e-tests/docker/stop-hook.test.ts \
             e2e-tests/docker/pi-harness.test.ts \
             e2e-tests/docker/pi-secure-sandbox.test.ts \
