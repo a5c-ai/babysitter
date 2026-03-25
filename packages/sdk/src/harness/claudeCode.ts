@@ -210,6 +210,26 @@ async function cleanupSession(filePath: string): Promise<void> {
   }
 }
 
+/**
+ * Resolve the current session ID from environment, independent of the hook
+ * payload. After `/clear`, the hook payload may carry a stale session ID while
+ * CLAUDE_SESSION_ID or CLAUDE_ENV_FILE reflects the actual active session.
+ */
+function resolveCurrentSessionIdFromEnv(): string | undefined {
+  if (process.env.CLAUDE_SESSION_ID) return process.env.CLAUDE_SESSION_ID;
+  const envFile = process.env.CLAUDE_ENV_FILE;
+  if (envFile) {
+    try {
+      const content = readFileSync(envFile, "utf-8");
+      const match = content.match(/export CLAUDE_SESSION_ID="([^"]+)"/);
+      if (match?.[1]) return match[1];
+    } catch {
+      // Non-fatal
+    }
+  }
+  return undefined;
+}
+
 // ---------------------------------------------------------------------------
 // Stop hook handler
 // ---------------------------------------------------------------------------
@@ -236,7 +256,7 @@ async function handleStopHookImpl(args: HookHandlerArgs): Promise<number> {
   const hookInput = parseHookInput(rawInput) as ClaudeCodeStopHookInput;
   log.info("Hook input received");
 
-  const sessionId = safeStr(hookInput as Record<string, unknown>, "session_id");
+  let sessionId = safeStr(hookInput as Record<string, unknown>, "session_id");
   if (!sessionId) {
     log.info("No session ID in hook input — allowing exit");
     if (verbose) {
@@ -289,14 +309,44 @@ async function handleStopHookImpl(args: HookHandlerArgs): Promise<number> {
         filePath = fallbackPath;
         log.info(`Found session file at fallback path: ${filePath}`);
       } else {
-        log.info(`No active loop found at primary (${filePath}) or fallback (${fallbackPath}) — allowing exit`);
-        if (verbose) {
-          process.stderr.write(
-            `[hook:run stop] No active loop found for session ${sessionId}\n`,
-          );
+        // Fallback: the hook payload may carry a stale session ID (e.g. after
+        // /clear). Try resolving the *current* session ID from CLAUDE_SESSION_ID
+        // or CLAUDE_ENV_FILE and retry the lookup if it differs.
+        const envSessionId = resolveCurrentSessionIdFromEnv();
+        if (envSessionId && envSessionId !== sessionId) {
+          log.info(`Payload session ${sessionId} is stale; current env session is ${envSessionId} — retrying lookup`);
+          const primaryRetry = getSessionFilePath(stateDir, envSessionId);
+          const fallbackRetry = getSessionFilePath(fallbackStateDir, envSessionId);
+          if (await sessionFileExists(primaryRetry)) {
+            filePath = primaryRetry;
+            sessionId = envSessionId;
+            log.setContext("session", sessionId);
+            log.info(`Found session file for env session at primary: ${filePath}`);
+          } else if (await sessionFileExists(fallbackRetry)) {
+            filePath = fallbackRetry;
+            sessionId = envSessionId;
+            log.setContext("session", sessionId);
+            log.info(`Found session file for env session at fallback: ${filePath}`);
+          } else {
+            log.info(`No active loop found for payload session ${sessionId} or env session ${envSessionId} — allowing exit`);
+            if (verbose) {
+              process.stderr.write(
+                `[hook:run stop] No active loop found for session ${sessionId} or ${envSessionId}\n`,
+              );
+            }
+            process.stdout.write("{}\n");
+            return 0;
+          }
+        } else {
+          log.info(`No active loop found at primary (${filePath}) or fallback (${fallbackPath}) — allowing exit`);
+          if (verbose) {
+            process.stderr.write(
+              `[hook:run stop] No active loop found for session ${sessionId}\n`,
+            );
+          }
+          process.stdout.write("{}\n");
+          return 0;
         }
-        process.stdout.write("{}\n");
-        return 0;
       }
     }
     sessionFile = await readSessionFile(filePath);
