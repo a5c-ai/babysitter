@@ -67,6 +67,8 @@ try {
     path.join(processLibraryRepoRoot, 'library'),
   );
   run('git', ['init'], { cwd: processLibraryRepoRoot });
+  run('git', ['config', 'gc.auto', '0'], { cwd: processLibraryRepoRoot });
+  run('git', ['config', 'maintenance.auto', 'false'], { cwd: processLibraryRepoRoot });
   run('git', ['add', '.'], { cwd: processLibraryRepoRoot });
   run(
     'git',

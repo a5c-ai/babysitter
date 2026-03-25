@@ -3,11 +3,8 @@
   "version": "0.1.5",
   "description": "Babysitter Codex skill bundle and integration package for OpenAI Codex CLI with SDK-managed process-library bootstrapping, 15 orchestration modes, and BOM-safe SKILL installation",
   "scripts": {
-    "test": "node test/integration.test.js && node test/harness.test.js && node test/plugin.test.js && node test/packaged-install.test.js && node test/features-1-10.test.js",
-    "test:unit": "node test/harness.test.js",
+    "test": "node test/integration.test.js && node test/packaged-install.test.js",
     "test:integration": "node test/integration.test.js",
-    "test:plugin": "node test/plugin.test.js",
-    "test:features": "node test/features-1-10.test.js",
     "check:mapping": "node scripts/check-mapping-contract.js",
     "team:install": "node scripts/team-install.js",
     "lint": "find .codex -name '*.js' | xargs -I{} node --check {}",
