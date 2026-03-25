@@ -1,0 +1,103 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "cloud-ha-architecture-plan-inputs",
+  "title": "Cloud HA Architecture Plan — Input Schema",
+  "description": "Input parameters for the cloud-ha-architecture-plan babysitter process.",
+  "type": "object",
+  "required": ["projectIdentifier", "cloudProvider", "targetRegion", "currentArchitecture"],
+  "additionalProperties": false,
+  "properties": {
+    "projectIdentifier": {
+      "type": "string",
+      "description": "Cloud project or account identifier (e.g., GCP project ID, AWS account ID, Azure subscription ID)."
+    },
+    "cloudProvider": {
+      "type": "string",
+      "enum": ["gcp", "aws", "azure"],
+      "description": "Cloud provider. Determines CLI commands, pricing models, and which diagram skill to use."
+    },
+    "targetRegion": {
+      "type": "string",
+      "description": "Target region for HA consolidation (e.g., 'me-west1', 'us-east-1', 'westeurope')."
+    },
+    "slaTarget": {
+      "type": "string",
+      "default": "99.9%",
+      "description": "Target SLA percentage (e.g., '99.9%', '99.95%', '99.99%')."
+    },
+    "budgetCeiling": {
+      "type": "number",
+      "default": 100,
+      "minimum": 0,
+      "description": "Maximum monthly budget in USD for all HA improvements."
+    },
+    "currentArchitecture": {
+      "type": "object",
+      "description": "Description of the current cloud infrastructure to audit.",
+      "additionalProperties": false,
+      "required": ["services"],
+      "properties": {
+        "services": {
+          "type": "array",
+          "description": "List of current services with their configurations.",
+          "items": {
+            "type": "object",
+            "required": ["name", "type"],
+            "additionalProperties": true,
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "Service name (e.g., 'my-api', 'main-database')."
+              },
+              "type": {
+                "type": "string",
+                "description": "Service type (e.g., 'Cloud Run', 'EC2', 'RDS', 'Firestore', 'DynamoDB')."
+              },
+              "region": {
+                "type": "string",
+                "description": "Current region where this service runs."
+              }
+            }
+          }
+        },
+        "description": {
+          "type": "string",
+          "description": "Free-text description of the current architecture, known issues, and context."
+        }
+      }
+    },
+    "diagramConfig": {
+      "type": "object",
+      "description": "Configuration for architecture diagram generation.",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Whether to generate architecture diagrams."
+        },
+        "outputDir": {
+          "type": "string",
+          "default": "docs/architecture",
+          "description": "Directory where diagram files will be saved."
+        },
+        "generateCurrentState": {
+          "type": "boolean",
+          "default": true,
+          "description": "Generate a diagram of the current architecture."
+        },
+        "generateTargetState": {
+          "type": "boolean",
+          "default": true,
+          "description": "Generate a diagram of the target HA architecture."
+        }
+      }
+    },
+    "compositionPattern": {
+      "type": "string",
+      "enum": ["full-pipeline", "audit-only", "design-and-plan", "diagrams-only"],
+      "default": "full-pipeline",
+      "description": "Which phases to execute. full-pipeline runs all 8 phases. audit-only runs phase 1. design-and-plan runs phases 1-5. diagrams-only runs phase 6."
+    }
+  }
+}

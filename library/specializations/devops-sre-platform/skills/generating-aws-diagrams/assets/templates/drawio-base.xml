@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  DrawIO Base Template (AWS)
+
+  Usage:
+  1. Copy this template as starting point
+  2. Replace {TIMESTAMP} with current ISO timestamp
+  3. Add shapes and connections inside <root> after the two base mxCells
+  4. Adjust pageWidth/pageHeight as needed
+
+  Standard page sizes:
+  - Letter: 850 x 1100
+  - A4: 827 x 1169
+  - Wide: 1600 x 900
+  - Custom: any values
+-->
+<mxfile host="app.diagrams.net" modified="{TIMESTAMP}" agent="DrawIO Architect Skill" version="22.0.0" type="device">
+  <diagram name="Architecture" id="architecture-diagram">
+    <mxGraphModel dx="1434" dy="844" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="900" math="0" shadow="0">
+      <root>
+        <!-- Required base cells - do not remove -->
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!--
+          Add your diagram elements below this line.
+
+          Order of elements:
+          1. Containers (largest to smallest)
+          2. Service icons (set parent to container ID)
+          3. Connections (reference source/target IDs)
+
+          Example container (VPC):
+          <mxCell id="vpc1" value="VPC" style="...shape=mxgraph.aws4.group;grIcon=mxgraph.aws4.group_vpc2;..." vertex="1" parent="1">
+            <mxGeometry x="50" y="50" width="700" height="400" as="geometry" />
+          </mxCell>
+
+          Example service (inside container):
+          <mxCell id="lambda1" value="AWS Lambda" style="...shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.lambda" vertex="1" parent="vpc1">
+            <mxGeometry x="100" y="100" width="64" height="64" as="geometry" />
+          </mxCell>
+
+          Example connection:
+          <mxCell id="conn1" edge="1" parent="1" source="lambda1" target="ddb1" style="...strokeColor=#232F3E;strokeWidth=2;endArrow=open;endSize=4;">
+            <mxGeometry relative="1" as="geometry" />
+          </mxCell>
+        -->
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

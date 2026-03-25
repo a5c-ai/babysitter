@@ -991,12 +991,11 @@ async function runProcessDefinitionPhase(args: {
         };
       } catch {
         if (!args.interactive) {
-          const fallbackSource = buildFallbackProcessDefinitionSource(args.prompt);
-          await fs.writeFile(args.outputPath, fallbackSource, "utf8");
-          state.report = {
-            processPath: args.outputPath,
-            summary: "Recovered from phase-1 tool failure by writing a generic multi-step fallback process definition.",
-          };
+          throw new BabysitterRuntimeError(
+            "ProcessDefinitionReportMissing",
+            "The process-definition agent finished without calling babysitter_report_process_definition, and the expected process file was not created.",
+            { category: ErrorCategory.Runtime },
+          );
         } else {
           throw new BabysitterRuntimeError(
             "ProcessDefinitionReportMissing",

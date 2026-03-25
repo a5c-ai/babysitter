@@ -1,0 +1,19 @@
+{
+  "provider": "azure",
+  "projectIdentifier": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "region": "westeurope",
+  "chaosPrefix": "chaos",
+  "faultDomains": ["service-crashes", "network-latency", "data-layer"],
+  "executionMode": "automated",
+  "safetyControls": {
+    "autoAbort": true,
+    "maxErrorRatePercent": 30,
+    "rollbackTimeoutSeconds": 90
+  },
+  "healthCheckConfig": {
+    "sampleCount": 5,
+    "timeoutSeconds": 10
+  },
+  "reportOutputPath": "docs/chaos-report.html",
+  "reportTheme": "light"
+}

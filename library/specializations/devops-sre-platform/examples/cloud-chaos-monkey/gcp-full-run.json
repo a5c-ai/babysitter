@@ -1,0 +1,19 @@
+{
+  "provider": "gcp",
+  "projectIdentifier": "my-saas-app-prod",
+  "region": "us-central1",
+  "chaosPrefix": "chaos",
+  "faultDomains": ["service-crashes", "network-latency", "data-layer", "external-apis"],
+  "executionMode": "hybrid",
+  "safetyControls": {
+    "autoAbort": true,
+    "maxErrorRatePercent": 50,
+    "rollbackTimeoutSeconds": 120
+  },
+  "healthCheckConfig": {
+    "sampleCount": 5,
+    "timeoutSeconds": 10
+  },
+  "reportOutputPath": "docs/chaos-report.html",
+  "reportTheme": "dark"
+}
