@@ -615,18 +615,18 @@ function resolveLegacyPluginProcessRoot(pluginRoot: string): string {
 }
 
 function findRepoLibraryRoot(start: string): string | null {
-  let current = path.resolve(start);
-  while (true) {
+  for (let current = path.resolve(start); current; ) {
     const candidate = path.join(current, 'library');
     if (existsSync(candidate)) {
       return candidate;
     }
     const parent = path.dirname(current);
     if (parent === current) {
-      return null;
+      break;
     }
     current = parent;
   }
+  return null;
 }
 
 function resolveStaticProcessRoot(options: {

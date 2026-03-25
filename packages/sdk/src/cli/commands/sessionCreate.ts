@@ -252,67 +252,6 @@ function buildMetaPrompt(userPrompt: string, workDir: string): string {
   return template;
 }
 
-function buildFallbackProcessDefinitionSource(userPrompt: string): string {
-  const serializedPrompt = JSON.stringify(userPrompt);
-  return `import { defineTask } from "@a5c-ai/babysitter-sdk";
-
-const implementRequest = defineTask("implement-request", (args) => ({
-  kind: "agent",
-  title: "Implement the requested work",
-  agent: {
-    prompt: {
-      role: "delivery engineer",
-      task: "Implement the user's request in the current workspace.",
-      context: {
-        request: args.request,
-      },
-      instructions: [
-        "Create or update the necessary project files in the current workspace.",
-        "Keep the implementation as small and direct as possible while still satisfying the request.",
-        "Run lightweight verification where practical and include what you verified in the result.",
-        "Return JSON with summary, changedFiles, and verificationNotes."
-      ],
-      outputFormat: "JSON with summary, changedFiles, verificationNotes"
-    }
-  }
-}));
-
-const verifyRequest = defineTask("verify-request", (args) => ({
-  kind: "agent",
-  title: "Verify the requested work",
-  agent: {
-    prompt: {
-      role: "verification engineer",
-      task: "Verify that the user's request was completed and identify any remaining gaps.",
-      context: {
-        request: args.request,
-        implementation: args.implementation
-      },
-      instructions: [
-        "Inspect the workspace state produced by the implementation step.",
-        "Confirm whether the requested work exists and is usable.",
-        "If there are remaining issues, describe them precisely.",
-        "Return JSON with success, findings, and recommendedNextSteps."
-      ],
-      outputFormat: "JSON with success, findings, recommendedNextSteps"
-    }
-  }
-}));
-
-export async function process(inputs, ctx) {
-  const request = inputs?.prompt || ${serializedPrompt};
-  const implementation = await ctx.task(implementRequest, { request });
-  const verification = await ctx.task(verifyRequest, { request, implementation });
-  return {
-    request,
-    implementation,
-    verification,
-    success: verification?.success !== false,
-  };
-}
-`;
-}
-
 const POLL_INTERVAL_MS = 1_000;
 const POLL_TIMEOUT_MS = 60_000;
 
