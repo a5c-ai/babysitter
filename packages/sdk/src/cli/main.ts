@@ -124,7 +124,7 @@ const USAGE = `Usage:
   babysitter compression:toggle <layer> <on|off> [--json]
   babysitter compression:set <layer.key> <value> [--json]
   babysitter compression:reset [--json]
-  babysitter session:create --prompt <text> [--harness <name>] [--process <path>] [--workspace <dir>] [--model <model>] [--max-iterations <n>] [--runs-dir <dir>] [--interactive|--no-interactive] [--json] [--verbose]
+  babysitter session:create --prompt <text> [--harness <name>] [--process <path>] [--workspace <dir>] [--model <model>] [--max-iterations <n>] [--runs-dir <dir>] [--interactive|--no-interactive|--non-interactive] [--json] [--verbose]
   babysitter harness:discover [--json]
   babysitter harness:list [--json]
   babysitter harness:install <name> [--workspace <dir>] [--json] [--dry-run] [--verbose]
@@ -459,7 +459,7 @@ function parseArgs(argv: string[]): ParsedArgs {
       parsed.interactive = true;
       continue;
     }
-    if (arg === "--no-interactive") {
+    if (arg === "--no-interactive" || arg === "--non-interactive") {
       parsed.interactive = false;
       continue;
     }

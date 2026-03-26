@@ -13,10 +13,10 @@
 import * as path from "node:path";
 import * as readline from "node:readline";
 import { execFile } from "node:child_process";
-import { promises as fs, readFileSync } from "node:fs";
+import { promises as fs } from "node:fs";
 import { pathToFileURL } from "node:url";
 import { Type } from "@sinclair/typebox";
-import { discoverHarnesses } from "../../harness/discovery";
+import { detectCallerHarness, discoverHarnesses } from "../../harness/discovery";
 import { invokeHarness } from "../../harness/invoker";
 import { createPiSession, PiSessionHandle } from "../../harness/piWrapper";
 import type {
@@ -46,6 +46,7 @@ import {
   buildOrchestrationBootstrapPrompt,
   buildOrchestrationTurnPrompt,
   buildProcessDefinitionSystemPrompt,
+  buildProcessDefinitionUserPrompt,
   type SessionCreatePromptContext,
 } from "./sessionCreatePrompts";
 import type { CompressionConfig } from "../../compression/config";
@@ -72,6 +73,7 @@ const YELLOW = "\x1b[33m";
 const RED = "\x1b[31m";
 const MAGENTA = "\x1b[35m";
 const VERBOSE_LOG_LIMIT = 4_000;
+let processValidationImportNonce = 0;
 
 interface Phase1Progress {
   phase: "1";
@@ -104,7 +106,7 @@ interface Phase2Progress {
 type ProgressPayload = Phase1Progress | Phase2Progress;
 
 interface ToolResultShape {
-  content: string;
+  content: Array<{ type: "text"; text: string }>;
   details?: unknown;
 }
 
@@ -127,6 +129,11 @@ interface OrchestrationState {
   pendingEffectResults: Map<string, Awaited<ReturnType<typeof resolveEffect>>>;
   lastAskUserQuestionResponse?: AskUserQuestionResponse;
   finished?: OrchestrationFinishReport;
+}
+
+interface ExternalWorkspaceAssessment {
+  kind: "empty" | "non-empty";
+  entries: string[];
 }
 
 function truncateForVerboseLog(text: string, maxChars: number = VERBOSE_LOG_LIMIT): string {
@@ -252,6 +259,12 @@ export function selectHarness(
     if (match) return match;
   }
 
+  const caller = detectCallerHarness();
+  if (caller) {
+    const callerMatch = discovered.find((h) => h.name === caller.name && h.installed);
+    if (callerMatch) return callerMatch;
+  }
+
   for (const name of HARNESS_PRIORITY) {
     const match = discovered.find((h) => h.name === name && h.installed);
     if (match) return match;
@@ -268,27 +281,8 @@ function createReadlineInterface(): readline.Interface {
   });
 }
 
-const PROCESS_GENERATION_TEMPLATE_PATH = path.join(
-  __dirname,
-  "templates",
-  "process-generation-prompt.md",
-);
-
-let cachedTemplate: string | undefined;
-
-function loadProcessGenerationTemplate(): string {
-  if (cachedTemplate === undefined) {
-    cachedTemplate = readFileSync(PROCESS_GENERATION_TEMPLATE_PATH, "utf8");
-  }
-  return cachedTemplate;
-}
-
-function buildMetaPrompt(userPrompt: string, workDir: string): string {
-  let template = loadProcessGenerationTemplate();
-  template = template.replace("{{USER_PROMPT}}", userPrompt);
-  template = template.replace("{{OUTPUT_PATH}}", path.join(workDir, "generated-process.js"));
-  template = template.replace("{{INTERVIEW_CONTEXT}}", "");
-  return template;
+function getGeneratedProcessPath(workDir: string): string {
+  return path.join(workDir, "generated-process.mjs");
 }
 
 function looksLikeProcessDefinitionSource(source: string): boolean {
@@ -471,15 +465,190 @@ async function ensureSdkResolvable(workspaceDir: string): Promise<void> {
   }
 }
 
+function hasNamedProcessGlobalReferenceConflict(source: string): boolean {
+  const normalized = source.replace(/\r\n/g, "\n");
+  if (!/export\s+async\s+function\s+process\s*\(/.test(normalized)) {
+    return false;
+  }
+  return /(^|[^.\w$])process\./m.test(normalized);
+}
+
+function assumesRuntimeWorkspacePathWithoutModuleFallback(source: string): boolean {
+  const normalized = source.replace(/\r\n/g, "\n");
+  const usesContextWorkspacePath =
+    /\bctx\??\.workspaceDir\b/.test(normalized) ||
+    /\bctx\??\.cwd\b/.test(normalized);
+  if (!usesContextWorkspacePath) {
+    return false;
+  }
+  return !/\bimport\.meta\.url\b/.test(normalized);
+}
+
+function getDefineTaskBlocks(source: string): Array<{ id: string; body: string }> {
+  const normalized = source.replace(/\r\n/g, "\n");
+  const pattern =
+    /defineTask\(\s*(['"`])([^'"`]+)\1\s*,\s*(?:async\s*)?\([^)]*\)\s*=>\s*\(\{([\s\S]*?)\}\)\s*(?:,\s*\{[\s\S]*?\}\s*)?\)/g;
+  const blocks: Array<{ id: string; body: string }> = [];
+  let match: RegExpExecArray | null;
+  while ((match = pattern.exec(normalized)) !== null) {
+    blocks.push({
+      id: match[2],
+      body: match[3] ?? "",
+    });
+  }
+  return blocks;
+}
+
+function getDefineTaskIdsMissingKind(source: string): string[] {
+  return getDefineTaskBlocks(source)
+    .filter((block) => !/\bkind\s*:/.test(block.body))
+    .map((block) => block.id);
+}
+
+function getDefineTaskKindShapeMismatches(source: string): Array<{ id: string; expectedKind: string }> {
+  const mismatches: Array<{ id: string; expectedKind: string }> = [];
+  for (const block of getDefineTaskBlocks(source)) {
+    if (/\bagent\s*:/.test(block.body) && !/\bkind\s*:\s*["']agent["']/.test(block.body)) {
+      mismatches.push({ id: block.id, expectedKind: "agent" });
+    }
+    if (/\bshell\s*:/.test(block.body) && !/\bkind\s*:\s*["']shell["']/.test(block.body)) {
+      mismatches.push({ id: block.id, expectedKind: "shell" });
+    }
+    if (/\bnode\s*:/.test(block.body) && !/\bkind\s*:\s*["']node["']/.test(block.body)) {
+      mismatches.push({ id: block.id, expectedKind: "node" });
+    }
+  }
+  return mismatches;
+}
+
+function getInvalidCtxTaskTargets(source: string): string[] {
+  const normalized = source.replace(/\r\n/g, "\n");
+  const definedTaskBindings = new Set<string>();
+  const defineTaskBindingPattern = /\b(?:export\s+)?(?:const|let|var)\s+([A-Za-z_$][\w$]*)\s*=\s*defineTask\s*\(/g;
+  let defineTaskBindingMatch: RegExpExecArray | null;
+  while ((defineTaskBindingMatch = defineTaskBindingPattern.exec(normalized)) !== null) {
+    definedTaskBindings.add(defineTaskBindingMatch[1]);
+  }
+
+  const invalidTargets = new Set<string>();
+  const ctxTaskPattern = /\bctx\.task\s*\(\s*([^,\n]+?)\s*,/g;
+  let ctxTaskMatch: RegExpExecArray | null;
+  while ((ctxTaskMatch = ctxTaskPattern.exec(normalized)) !== null) {
+    const target = (ctxTaskMatch[1] ?? "").trim();
+    if (!target) {
+      continue;
+    }
+    if (/^[A-Za-z_$][\w$]*$/.test(target) && definedTaskBindings.has(target)) {
+      continue;
+    }
+    invalidTargets.add(target.replace(/\s+/g, " ").slice(0, 80));
+  }
+
+  return Array.from(invalidTargets);
+}
+
 async function validateProcessExport(filePath: string): Promise<void> {
+  const source = await fs.readFile(path.resolve(filePath), "utf8");
+  const syntaxCheck = await execShellEffect(process.execPath, ["--check", path.resolve(filePath)]);
+  if (syntaxCheck.exitCode !== 0) {
+    const diagnostic = [syntaxCheck.stdout, syntaxCheck.stderr]
+      .map((value) => value.trim())
+      .filter(Boolean)
+      .join("\n");
+    throw new BabysitterRuntimeError(
+      "InvalidProcessSyntaxError",
+      diagnostic
+        ? `Process file at ${filePath} failed \`node --check\`.\n${diagnostic}`
+        : `Process file at ${filePath} failed \`node --check\`.`,
+      {
+        category: ErrorCategory.Validation,
+        nextSteps: [
+          "Rewrite the file so it is syntactically valid ESM before runtime import",
+          "If the process writes HTML/CSS/JS assets, do not embed raw nested template literals inside outer template literals",
+          "Prefer String.raw, arrays joined with \"\\n\", or escaped inner backticks and \\${...} sequences when embedding source files",
+        ],
+      },
+    );
+  }
+  if (hasNamedProcessGlobalReferenceConflict(source)) {
+    throw new BabysitterRuntimeError(
+      "InvalidProcessSourceError",
+      `Process file at ${filePath} references \`process.\` inside the named 'process' export, which shadows Node's global process object`,
+      {
+        category: ErrorCategory.Validation,
+        nextSteps: [
+          "If the process needs the workspace root, resolve it from the module location with import.meta.url",
+          "If you need Node's global process object, use globalThis.process or import it under another name such as nodeProcess",
+        ],
+      },
+    );
+  }
+  if (assumesRuntimeWorkspacePathWithoutModuleFallback(source)) {
+    throw new BabysitterRuntimeError(
+      "InvalidProcessSourceError",
+      `Process file at ${filePath} assumes ctx.workspaceDir or ctx.cwd exists, but the runtime process context does not provide workspace paths`,
+      {
+        category: ErrorCategory.Validation,
+        nextSteps: [
+          "When the process needs the workspace root, derive it from the module location with import.meta.url",
+          "For a generated process in the workspace root, use path.dirname(fileURLToPath(import.meta.url)) or an equivalent import.meta.url-based approach",
+        ],
+      },
+    );
+  }
+  const taskIdsMissingKind = getDefineTaskIdsMissingKind(source);
+  if (taskIdsMissingKind.length > 0) {
+    throw new BabysitterRuntimeError(
+      "InvalidProcessSourceError",
+      `Process file at ${filePath} defines task(s) without a top-level kind: ${taskIdsMissingKind.join(", ")}`,
+      {
+        category: ErrorCategory.Validation,
+        nextSteps: [
+          "Every TaskDef returned from defineTask(...) must include a top-level kind string",
+          "Use kind: \"agent\" with agent: { ... }, kind: \"shell\" with shell: { command: ... }, or kind: \"node\" with node: { entry, args? } as appropriate",
+        ],
+      },
+    );
+  }
+  const taskKindShapeMismatches = getDefineTaskKindShapeMismatches(source);
+  if (taskKindShapeMismatches.length > 0) {
+    throw new BabysitterRuntimeError(
+      "InvalidProcessSourceError",
+      `Process file at ${filePath} has task definition kind mismatches: ${taskKindShapeMismatches
+        .map((mismatch) => `${mismatch.id} should use kind "${mismatch.expectedKind}"`)
+        .join(", ")}`,
+      {
+        category: ErrorCategory.Validation,
+        nextSteps: [
+          "Match each task's kind to its body shape",
+          "Agent tasks must use kind: \"agent\", shell tasks must use kind: \"shell\", and node tasks must use kind: \"node\"",
+        ],
+      },
+    );
+  }
+  const invalidCtxTaskTargets = getInvalidCtxTaskTargets(source);
+  if (invalidCtxTaskTargets.length > 0) {
+    throw new BabysitterRuntimeError(
+      "InvalidProcessSourceError",
+      `Process file at ${filePath} calls ctx.task(...) with values that are not DefinedTask bindings created via defineTask(...): ${invalidCtxTaskTargets.join(", ")}`,
+      {
+        category: ErrorCategory.Validation,
+        nextSteps: [
+          "Define each task with const taskName = defineTask(\"task-id\", (args, taskCtx) => ({ ... }))",
+          "Pass only those DefinedTask bindings to await ctx.task(taskName, args)",
+          "Do not pass plain object task definitions, inline literals, or ad-hoc task objects to ctx.task(...)",
+        ],
+      },
+    );
+  }
   await ensureSdkResolvable(path.dirname(path.resolve(filePath)));
-  const moduleUrl = pathToFileURL(path.resolve(filePath)).href;
+  const moduleUrl = `${pathToFileURL(path.resolve(filePath)).href}?t=${Date.now()}-${++processValidationImportNonce}`;
   const mod = await dynamicImportModule(moduleUrl);
-  const fn = mod.process ?? mod.default;
+  const fn = mod.process;
   if (typeof fn !== "function") {
     throw new BabysitterRuntimeError(
       "InvalidProcessExportError",
-      `Process file at ${filePath} does not export a function named 'process' or 'default'`,
+      `Process file at ${filePath} does not export a function named 'process'`,
       {
         category: ErrorCategory.Validation,
         nextSteps: [
@@ -558,17 +727,22 @@ function resolveTaskHarness(
     if (match) return match.name;
   }
 
-  const agent = action.taskDef?.agent as Record<string, unknown> | undefined;
-  if (typeof agent?.name === "string") {
-    const match = discovered.find((h) => h.name === agent.name && h.installed);
-    if (match) return match.name;
-  }
-
   return defaultHarness;
 }
 
 function isPiHarness(harnessName: string): boolean {
   return harnessName === "pi" || harnessName === "oh-my-pi";
+}
+
+function usesExternalHarness(harnessName: string): boolean {
+  return !isPiHarness(harnessName);
+}
+
+function shouldUseExternalHarness(harnessName: string): boolean {
+  if (!usesExternalHarness(harnessName)) {
+    return false;
+  }
+  return detectCallerHarness()?.name === harnessName;
 }
 
 function readBooleanMetadata(
@@ -851,12 +1025,24 @@ const ASK_USER_QUESTION_SCHEMA = Type.Object({
 
 function formatToolResult(data: unknown, message?: string): ToolResultShape {
   if (typeof data === "string") {
-    return { content: message ? `${message}\n${data}` : data, details: data };
+    return {
+      content: [{
+        type: "text",
+        text: message ? `${message}\n${data}` : data,
+      }],
+      details: data,
+    };
   }
   const content = message
     ? `${message}\n${JSON.stringify(data, null, 2)}`
     : JSON.stringify(data, null, 2);
-  return { content, details: data };
+  return {
+    content: [{
+      type: "text",
+      text: content,
+    }],
+    details: data,
+  };
 }
 
 function isApprovalAskRequest(request: AskUserQuestionRequest): boolean {
@@ -950,6 +1136,357 @@ function writeVerboseProcessDefinitionRecovery(json: boolean): void {
   }
 }
 
+function isIgnorablePiPromptFailure(output: string): boolean {
+  return output.includes("msg.content.filter is not a function");
+}
+
+function normalizeProcessDefinitionSource(source: string): string {
+  const trimmed = source.trim();
+  const fenced = trimmed.match(/^```(?:javascript|js|ts)?\s*\r?\n([\s\S]*?)\r?\n```$/i);
+  if (fenced?.[1]) {
+    return fenced[1];
+  }
+  return source;
+}
+
+async function recoverReportedProcessDefinition(args: {
+  state: { report?: ProcessDefinitionReport };
+  outputPath: string;
+  workspace?: string;
+  outputs: string[];
+  verbose: boolean;
+  json: boolean;
+}): Promise<ProcessDefinitionReport | undefined> {
+  if (args.state.report?.processPath) {
+    return args.state.report;
+  }
+
+  const recovered = await recoverProcessDefinitionFromOutputs({
+    outputPath: args.outputPath,
+    workspace: args.workspace,
+    outputs: args.outputs,
+  });
+  if (recovered) {
+    args.state.report = recovered;
+    writeVerboseBlock(args.verbose, args.json, "phase1 recovered report", recovered);
+  }
+  return recovered ?? undefined;
+}
+
+function buildExternalProcessDefinitionPrompt(args: {
+  prompt: string;
+  outputPath: string;
+  workspace?: string;
+  promptContext: SessionCreatePromptContext;
+  workspaceAssessment: ExternalWorkspaceAssessment;
+}): string {
+  const workspace = path.resolve(args.workspace ?? process.cwd());
+  const installedHarnesses = args.promptContext.discoveredHarnesses
+    .filter((h) => h.installed)
+    .map((h) => h.name);
+  const installedHarnessList = installedHarnesses.length > 0
+    ? installedHarnesses.join(", ")
+    : "(none)";
+  const workspaceSummary = args.workspaceAssessment.entries.length > 0
+    ? args.workspaceAssessment.entries.join(", ")
+    : "(no files)";
+  const emptyWorkspaceAuthoringGuide = [
+    "",
+    "Empty-workspace authoring guide:",
+    "- Do not perform extra exploration. You already know the workspace is empty.",
+    "- Write a concrete greenfield process immediately.",
+    "- Prefer a small process with explicit milestones such as: plan the game, scaffold the project, implement the game, verify the result.",
+    "- Use `agent` tasks for planning and implementation. Use `shell` tasks only for concrete runnable commands such as dependency install, build, or test commands that the later orchestration can execute.",
+    "- Keep the process practical for a brand-new directory: it should create the project, build the game, and verify that it runs or tests cleanly.",
+  ].join("\n");
+
+  return [
+    "You are running babysitter session:create phase 1 on an external CLI harness in non-interactive mode.",
+    "Do the real process-authoring work in the workspace and write the actual process file to disk.",
+    "",
+    "Task:",
+    `- User request: ${args.prompt}`,
+    `- Workspace: ${workspace}`,
+    `- Output path: ${path.resolve(args.outputPath)}`,
+    `- Workspace assessment: ${args.workspaceAssessment.kind} (${workspaceSummary})`,
+    "",
+    "Requirements:",
+    "- Start with one quick check of the workspace contents only if you need to confirm the assessment above.",
+    args.workspaceAssessment.kind === "empty"
+      ? "- The workspace is empty. Treat this as a greenfield request and move straight to authoring the process."
+      : "- Only tailor the process to existing code when the workspace actually contains relevant project files.",
+    "- Do not inspect paths outside the workspace unless the workspace itself points to them.",
+    "- Do not use web search, browse remote repositories, or fetch external documentation for this task.",
+    args.workspaceAssessment.kind === "empty"
+      ? "- Do not inspect global skill/plugin directories, home-directory config, or unrelated repositories for examples. You already have enough context to write the process."
+      : "- Keep research tight and relevant; do not wander through unrelated global skill/plugin directories.",
+    "- Do not ask the user questions. Infer missing details from the request and repo state.",
+    "- Write a complete ESM JavaScript module that can be imported from the output path.",
+    '- Import `defineTask` from `@a5c-ai/babysitter-sdk`.',
+    "- The module must export `async function process(inputs, ctx)`.",
+    "- Use `agent` tasks for planning, implementation, analysis, and verification work.",
+    "- Use `shell` tasks only for existing CLI tools such as tests, builds, linters, git, or package managers.",
+    "- Never use `node` kind effects.",
+    "- Any task passed to `ctx.task(...)` must be a DefinedTask created via `defineTask(...)`; never pass plain object task definitions or ad-hoc task objects.",
+    "- Include quality gates and verification/refinement steps that fit the request.",
+    "- For this request, a good default is a process that plans the game scope, scaffolds the project, implements the game loop and UI, and verifies the result with runnable checks.",
+    "- Keep the module syntactically valid ESM. If you embed HTML/CSS/JS asset contents inside the process source, avoid raw nested template literals; prefer arrays joined with \"\\n\", String.raw, or escaped inner backticks and \\${...} sequences.",
+    "- If task-level harness routing is needed, only use installed harness names from this list: "
+      + `${installedHarnessList}.`,
+    args.promptContext.selectedHarnessName
+      ? `- The selected orchestration harness for the session will be ${args.promptContext.selectedHarnessName}; encode task.metadata.harness only when a task should explicitly target a different harness or the selected one.`
+      : "- No orchestration harness has been preselected; keep harness routing explicit only where it materially matters.",
+    "- External harnesses do not provide PI sandbox guardrails for their own tool execution. Keep security-sensitive shell work on the internal PI worker by using shell effects without routing them to an external harness.",
+    "",
+    "Output rules:",
+    "- Write the file now to the exact output path.",
+    "- Return a short summary that confirms what you wrote and the final path.",
+    "- Do not rely on AskUserQuestion or babysitter_report_process_definition. Those tools are not available here.",
+    "- Do not return pseudocode, placeholders, or a plan without writing the file.",
+    ...(args.workspaceAssessment.kind === "empty" ? [emptyWorkspaceAuthoringGuide] : []),
+    "",
+    "Minimal shape reminder:",
+    "```javascript",
+    'import { defineTask } from "@a5c-ai/babysitter-sdk";',
+    "",
+    "export async function process(inputs, ctx) {",
+    "  // create and run tasks here",
+    "}",
+    "```",
+  ].join("\n");
+}
+
+function buildExternalProcessConformancePrompt(args: {
+  outputPath: string;
+  prompt: string;
+}): string {
+  return [
+    "Edit one existing JavaScript workflow file so it conforms to the SDK API used by this repository.",
+    `Target file: ${path.resolve(args.outputPath)}`,
+    `Original user request: ${args.prompt}`,
+    "",
+    "Conformance requirements:",
+    "- Preserve the overall task pipeline and intent.",
+    "- Do not use web search or remote documentation. Fix the file using only the local file contents and the requirements in this prompt.",
+    "- Every task must be defined with `defineTask(\"task-id\", (args, taskCtx) => ({ ... }))`.",
+    "- Never use `defineTask({ ... })` or helper factories that hide the required signature.",
+    "- Agent tasks must use `agent: { name, prompt, outputSchema }`.",
+    "- Every task returned from `defineTask(...)` must include a top-level `kind` field.",
+    "- Put instructions inside `agent.prompt.task`, `agent.prompt.instructions`, and related prompt fields rather than top-level `instructions` fields.",
+    "- Agent tasks must use `kind: \"agent\"` with `agent: { name, prompt, outputSchema }`.",
+    "- Shell tasks must use `kind: \"shell\"` with `shell: { command: \"...\" }`.",
+    "- Node tasks must use `kind: \"node\"` with `node: { entry, args? }`.",
+    "- Any task passed to `ctx.task(...)` must be a DefinedTask created via `defineTask(...)`; do not pass plain object task definitions or ad-hoc task objects.",
+    "- The exported `process(inputs, ctx)` function must run tasks with `await ctx.task(definedTask, args)`; do not invent alternate task runners.",
+    "- Inside the named `process(inputs, ctx)` export, never reference Node's global process object as `process.*`; use `globalThis.process` or an imported alias like `nodeProcess` instead.",
+    "- If the process needs the workspace root, do not assume `ctx.workspaceDir` or `ctx.cwd` exists. Resolve it from the module location using `import.meta.url`, for example with `path.dirname(fileURLToPath(import.meta.url))`.",
+    "- Keep the file as ESM and preserve the target path.",
+    "- After editing, run `node --check` on the file.",
+    "",
+    "Return only a short summary of the changes and the validation result.",
+  ].join("\n");
+}
+
+function buildInternalProcessConformancePrompt(args: {
+  outputPath: string;
+  prompt: string;
+  validationError: string;
+}): string {
+  return [
+    "Repair the generated babysitter process file so it conforms to the SDK API expected by this repository.",
+    `Target file: ${path.resolve(args.outputPath)}`,
+    `Original user request: ${args.prompt}`,
+    `Validation error: ${args.validationError}`,
+    "",
+    "Repair requirements:",
+    "- Preserve the overall task pipeline and user intent.",
+    "- The module must export a named `async function process(inputs, ctx)`.",
+    '- Import `defineTask` from `@a5c-ai/babysitter-sdk`.',
+    "- Use `defineTask(\"task-id\", (args, taskCtx) => ({ ... }))` for task definitions.",
+    "- Do not use `defineTask({ ... })` or object-only process exports.",
+    "- Every task returned from `defineTask(...)` must include a top-level `kind` field.",
+    "- Any task passed to `ctx.task(...)` must be a DefinedTask created via `defineTask(...)`; do not pass plain object task definitions or ad-hoc task objects.",
+    "- The rewritten module must be syntactically valid ESM and pass `node --check`.",
+    "- If the process writes HTML/CSS/JS assets, do not embed raw nested template literals inside outer template literals; prefer arrays joined with \"\\n\", String.raw, or escaped inner backticks and \\${...} sequences.",
+    "- Inside the named `process(inputs, ctx)` export, do not reference Node's global process object as `process.*`; use `globalThis.process` or an imported alias like `nodeProcess` instead.",
+    "- If the process needs the workspace root, do not assume `ctx.workspaceDir` or `ctx.cwd` exists. Resolve it from the module location using `import.meta.url`, for example with `path.dirname(fileURLToPath(import.meta.url))`.",
+    "- Agent tasks must use `kind: \"agent\"` with `agent: { name, prompt, outputSchema }`.",
+    "- Shell tasks must use `kind: \"shell\"` with `shell: { command: \"...\" }`.",
+    "- Node tasks must use `kind: \"node\"` with `node: { entry, args? }`.",
+    "- The exported `process(inputs, ctx)` function must call tasks with `await ctx.task(definedTask, args)`.",
+    "- Use `babysitter_write_process_definition` to rewrite the full file to the exact target path.",
+    "- After rewriting the file, call `babysitter_report_process_definition` exactly once with the same path.",
+    "- Do not answer with plain text only.",
+  ].join("\n");
+}
+
+async function assessWorkspaceForExternalAuthoring(
+  workspace?: string,
+): Promise<ExternalWorkspaceAssessment> {
+  const root = path.resolve(workspace ?? process.cwd());
+  try {
+    const entries = (await fs.readdir(root))
+      .filter((entry) => entry !== "." && entry !== "..")
+      .sort();
+    return {
+      kind: entries.length === 0 ? "empty" : "non-empty",
+      entries: entries.slice(0, 12),
+    };
+  } catch {
+    return {
+      kind: "empty",
+      entries: [],
+    };
+  }
+}
+
+async function runExternalProcessDefinitionPhase(args: {
+  prompt: string;
+  outputPath: string;
+  workspace?: string;
+  model?: string;
+  json: boolean;
+  verbose: boolean;
+  selectedHarnessName: string;
+  promptContext: SessionCreatePromptContext;
+}): Promise<string> {
+  const phaseOutputs: string[] = [];
+  const writeVerbose = (message: string): void => {
+    writeVerboseLine(args.verbose, args.json, message);
+  };
+  const writeVerboseData = (label: string, value: unknown, maxChars?: number): void => {
+    writeVerboseBlock(args.verbose, args.json, label, value, maxChars);
+  };
+
+  emitProgress(
+    { phase: "1", status: "started", harness: `${args.selectedHarnessName} (headless)` },
+    args.json,
+    args.verbose,
+  );
+
+  writeVerbose(
+    `[phase1 setup] workspace=${path.resolve(args.workspace ?? process.cwd())} model=${args.model ?? "(default)"} outputPath=${path.resolve(args.outputPath)} harness=${args.selectedHarnessName}`,
+  );
+
+  const workspaceAssessment = await assessWorkspaceForExternalAuthoring(args.workspace);
+  writeVerboseData("phase1 workspace assessment", workspaceAssessment);
+
+  const invokeProcessAuthor = async (label: string, prompt: string, timeout: number): Promise<void> => {
+    writeVerboseData(`${label} prompt`, prompt);
+    const result = await invokeHarness(args.selectedHarnessName, {
+      prompt,
+      workspace: args.workspace,
+      model: args.model,
+      timeout,
+    });
+    if (!result.success) {
+      writeVerboseData(`${label} failure output`, result.output);
+      throw new BabysitterRuntimeError(
+        "ProcessDefinitionFailed",
+        result.output,
+        { category: ErrorCategory.External },
+      );
+    }
+    phaseOutputs.push(result.output);
+    writeVerboseData(`${label} output`, result.output);
+  };
+
+  await invokeProcessAuthor(
+    "phase1 initial",
+    buildExternalProcessDefinitionPrompt({
+      prompt: args.prompt,
+      outputPath: args.outputPath,
+      workspace: args.workspace,
+      promptContext: args.promptContext,
+      workspaceAssessment,
+    }),
+    900_000,
+  );
+
+  let report = await recoverProcessDefinitionFromOutputs({
+    outputPath: args.outputPath,
+    workspace: args.workspace,
+    outputs: phaseOutputs,
+  });
+  if (report) {
+    writeVerboseData("phase1 recovered report", report);
+  }
+
+  if (!report) {
+    await invokeProcessAuthor(
+      "phase1 recovery",
+      [
+        `Write the full process file now to ${args.outputPath}.`,
+        "Do not describe the plan only; materialize the file in the workspace.",
+        "After writing it, return either a concise summary or the full file in a ```javascript fenced block.",
+      ].join("\n"),
+      300_000,
+    );
+    report = await recoverProcessDefinitionFromOutputs({
+      outputPath: args.outputPath,
+      workspace: args.workspace,
+      outputs: phaseOutputs,
+    });
+    if (report) {
+      writeVerboseData("phase1 recovered report", report);
+    }
+  }
+
+  if (!report) {
+    await invokeProcessAuthor(
+      "phase1 final recovery",
+      [
+        `Final recovery step: write the complete JavaScript process file to ${args.outputPath}.`,
+        "Return the full file in a ```javascript fenced block after it exists on disk.",
+        "Do not omit the file write.",
+      ].join("\n"),
+      300_000,
+    );
+    report = await recoverProcessDefinitionFromOutputs({
+      outputPath: args.outputPath,
+      workspace: args.workspace,
+      outputs: phaseOutputs,
+    });
+    if (report) {
+      writeVerboseData("phase1 recovered report", report);
+    }
+  }
+
+  if (!report?.processPath) {
+    writeVerboseData("phase1 unrecoverable outputs", phaseOutputs);
+    throw new BabysitterRuntimeError(
+      "ProcessDefinitionReportMissing",
+      "The process-definition harness did not produce a valid process file or recoverable JavaScript output.",
+      { category: ErrorCategory.Runtime },
+    );
+  }
+
+  await invokeProcessAuthor(
+    "phase1 sdk conformance",
+    buildExternalProcessConformancePrompt({
+      outputPath: report.processPath,
+      prompt: args.prompt,
+    }),
+    300_000,
+  );
+
+  await validateProcessExport(report.processPath);
+  emitProgress(
+    {
+      phase: "1",
+      status: "completed",
+      harness: `${args.selectedHarnessName} (headless)`,
+      processPath: report.processPath,
+    },
+    args.json,
+    args.verbose,
+  );
+  if (!args.json) {
+    process.stderr.write(`${GREEN}Phase 1 complete:${RESET} process=${CYAN}${report.processPath}${RESET}\n`);
+  }
+  return report.processPath;
+}
+
 async function runProcessDefinitionPhase(args: {
   prompt: string;
   outputPath: string;
@@ -961,9 +1498,11 @@ async function runProcessDefinitionPhase(args: {
   verbose: boolean;
   compressionConfig: CompressionConfig | null;
   promptContext: SessionCreatePromptContext;
+  selectedHarnessName: string;
 }): Promise<string> {
   const state: { report?: ProcessDefinitionReport } = {};
   const phaseOutputs: string[] = [];
+  let session: PiSessionHandle | null = null;
   const writeVerbose = (message: string): void => {
     writeVerboseLine(args.verbose, args.json, message);
   };
@@ -971,6 +1510,43 @@ async function runProcessDefinitionPhase(args: {
     writeVerboseBlock(args.verbose, args.json, label, value, maxChars);
   };
   const customTools: unknown[] = [
+    {
+      name: "babysitter_write_process_definition",
+      label: "Write Process Definition",
+      description: "Write the final JavaScript process file to the exact required output path.",
+      parameters: Type.Object({
+        source: Type.String(),
+        processPath: Type.Optional(Type.String()),
+      }),
+      execute: async (
+        _toolCallId: string,
+        params: { source: string; processPath?: string },
+      ): Promise<ToolResultShape> => {
+        const resolvedOutputPath = path.resolve(args.outputPath);
+        const requestedPath = params.processPath
+          ? path.resolve(params.processPath)
+          : resolvedOutputPath;
+        if (requestedPath !== resolvedOutputPath) {
+          throw new BabysitterRuntimeError(
+            "ProcessDefinitionPathMismatch",
+            `Process definitions must be written to ${resolvedOutputPath}.`,
+            { category: ErrorCategory.Runtime },
+          );
+        }
+
+        const normalizedSource = normalizeProcessDefinitionSource(params.source);
+        writeVerboseData("phase1 tool babysitter_write_process_definition", {
+          processPath: requestedPath,
+          sourcePreview: truncateForVerboseLog(normalizedSource, 600),
+        });
+        await fs.mkdir(path.dirname(resolvedOutputPath), { recursive: true });
+        await fs.writeFile(resolvedOutputPath, normalizedSource, "utf8");
+        return formatToolResult(
+          { processPath: resolvedOutputPath },
+          "Process definition written.",
+        );
+      },
+    },
     {
       name: "AskUserQuestion",
       label: "Ask User Question",
@@ -1013,6 +1589,14 @@ async function runProcessDefinitionPhase(args: {
           processPath: params.processPath,
           summary: params.summary,
         };
+        // Phase 1 is complete as soon as the process file is written and reported.
+        // Abort the live turn so the host can validate the file instead of waiting
+        // for PI to continue streaming after completion.
+        setTimeout(() => {
+          if (session?.isStreaming) {
+            void session.abort().catch(() => {});
+          }
+        }, 0);
         return formatToolResult(state.report, "Process definition reported.");
       },
     },
@@ -1034,25 +1618,37 @@ async function runProcessDefinitionPhase(args: {
       label: tool.label,
     })),
   );
+  const workspaceAssessment = await assessWorkspaceForExternalAuthoring(args.workspace);
+  writeVerboseData("phase1 workspace assessment", workspaceAssessment);
 
   const processDefinitionSystemPrompt = buildProcessDefinitionSystemPrompt(
     args.outputPath,
     args.promptContext,
   );
-  const initialMetaPrompt = compressInternalHarnessPrompt(
-    buildMetaPrompt(args.prompt, args.workspace ?? process.cwd()),
-    args.compressionConfig,
-    "agent",
+  const initialMetaPrompt = buildProcessDefinitionUserPrompt(
+    args.prompt,
+    args.outputPath,
+    {
+      interactive: args.interactive,
+      workspaceAssessment: workspaceAssessment.kind,
+      workspaceEntries: workspaceAssessment.entries,
+    },
   );
   writeVerboseData("phase1 system prompt", processDefinitionSystemPrompt);
   writeVerboseData("phase1 initial prompt", initialMetaPrompt);
+  const phase1ToolsMode: PiSessionOptions["toolsMode"] =
+    workspaceAssessment.kind === "empty"
+      ? "default"
+      : "readonly";
 
-  const session = createPiSession({
+  session = createPiSession({
     workspace: args.workspace,
     model: args.model,
-    toolsMode: "coding",
+    thinkingLevel: "low",
+    toolsMode: phase1ToolsMode,
     customTools,
-    appendSystemPrompt: [processDefinitionSystemPrompt],
+    systemPrompt: processDefinitionSystemPrompt,
+    isolated: true,
     ephemeral: true,
   });
 
@@ -1073,98 +1669,132 @@ async function runProcessDefinitionPhase(args: {
       initialMetaPrompt,
       300_000,
     );
+    phaseOutputs.push(result.output);
 
     if (unsubscribe) unsubscribe();
     if (!args.json) process.stderr.write("\n");
 
     if (!result.success) {
       writeVerboseData("phase1 agent failure output", result.output);
-      throw new BabysitterRuntimeError(
-        "ProcessDefinitionFailed",
-        result.output,
-        { category: ErrorCategory.External },
+      const recovered = await recoverReportedProcessDefinition({
+        state,
+        outputPath: args.outputPath,
+        workspace: args.workspace,
+        outputs: phaseOutputs,
+        verbose: args.verbose,
+        json: args.json,
+      });
+      if (!recovered?.processPath) {
+        throw new BabysitterRuntimeError(
+          "ProcessDefinitionFailed",
+          result.output,
+          { category: ErrorCategory.External },
+        );
+      }
+      writeVerbose(
+        "[phase1 recovery] proceeding with the reported process file after a late PI prompt failure",
       );
+    } else {
+      writeVerboseData("phase1 agent output", result.output);
     }
-    phaseOutputs.push(result.output);
-    writeVerboseData("phase1 agent output", result.output);
 
     if (!state.report?.processPath) {
       writeVerboseProcessDefinitionRecovery(args.json);
-      const recoveryPrompt = compressInternalHarnessPrompt(
-        [
-          "Recovery step:",
-          `- Write the full process file now to ${args.outputPath}`,
-          "- Then call babysitter_report_process_definition exactly once.",
-          "- Do not just describe the process in plain text.",
-        ].join("\n"),
-        args.compressionConfig,
-        "agent",
-      );
+      const recoveryPrompt = [
+        "Recovery step:",
+        `- Write the full process file now to ${args.outputPath}`,
+        "- Then call babysitter_report_process_definition exactly once.",
+        "- Do not just describe the process in plain text.",
+      ].join("\n");
       writeVerboseData("phase1 recovery prompt", recoveryPrompt);
       const recovery = await session.prompt(
         recoveryPrompt,
         180_000,
       );
+      phaseOutputs.push(recovery.output);
       if (!recovery.success) {
         writeVerboseData("phase1 recovery failure output", recovery.output);
-        throw new BabysitterRuntimeError(
-          "ProcessDefinitionFailed",
-          recovery.output,
-          { category: ErrorCategory.External },
+        const recovered = await recoverReportedProcessDefinition({
+          state,
+          outputPath: args.outputPath,
+          workspace: args.workspace,
+          outputs: phaseOutputs,
+          verbose: args.verbose,
+          json: args.json,
+        });
+        if (!recovered?.processPath) {
+          throw new BabysitterRuntimeError(
+            "ProcessDefinitionFailed",
+            recovery.output,
+            { category: ErrorCategory.External },
+          );
+        }
+        writeVerbose(
+          "[phase1 recovery] using the reported process file after the recovery prompt failed late",
         );
+      } else {
+        writeVerboseData("phase1 recovery output", recovery.output);
       }
-      phaseOutputs.push(recovery.output);
-      writeVerboseData("phase1 recovery output", recovery.output);
     }
 
     if (!state.report?.processPath) {
       writeVerbose("[phase1 recovery] attempting host-side recovery from agent outputs");
-      state.report = (await recoverProcessDefinitionFromOutputs({
+      await recoverReportedProcessDefinition({
+        state,
         outputPath: args.outputPath,
         workspace: args.workspace,
         outputs: phaseOutputs,
-      })) ?? undefined;
-      if (state.report) {
-        writeVerboseData("phase1 recovered report", state.report);
-      }
+        verbose: args.verbose,
+        json: args.json,
+      });
     }
 
     if (!state.report?.processPath) {
-      const finalRecoveryPrompt = compressInternalHarnessPrompt(
-        [
-          "Final recovery step:",
-          `- Write the complete JavaScript process file to ${args.outputPath}.`,
-          "- If you already wrote it, do not rewrite unnecessarily.",
-          "- Call babysitter_report_process_definition exactly once after the file exists.",
-          "- Do not answer with plain text only.",
-          "- If helpful, return the full JavaScript in a ```javascript fenced block, but the file must still be written and reported.",
-        ].join("\n"),
-        args.compressionConfig,
-        "agent",
-      );
+      const finalRecoveryPrompt = [
+        "Final recovery step:",
+        `- Write the complete JavaScript process file to ${args.outputPath}.`,
+        "- If you already wrote it, do not rewrite unnecessarily.",
+        "- Call babysitter_report_process_definition exactly once after the file exists.",
+        "- Do not answer with plain text only.",
+        "- If helpful, return the full JavaScript in a ```javascript fenced block, but the file must still be written and reported.",
+      ].join("\n");
       writeVerboseData("phase1 final recovery prompt", finalRecoveryPrompt);
       const finalRecovery = await session.prompt(
         finalRecoveryPrompt,
         180_000,
       );
+      phaseOutputs.push(finalRecovery.output);
       if (!finalRecovery.success) {
         writeVerboseData("phase1 final recovery failure output", finalRecovery.output);
-        throw new BabysitterRuntimeError(
-          "ProcessDefinitionFailed",
-          finalRecovery.output,
-          { category: ErrorCategory.External },
+        const recovered = await recoverReportedProcessDefinition({
+          state,
+          outputPath: args.outputPath,
+          workspace: args.workspace,
+          outputs: phaseOutputs,
+          verbose: args.verbose,
+          json: args.json,
+        });
+        if (!recovered?.processPath) {
+          throw new BabysitterRuntimeError(
+            "ProcessDefinitionFailed",
+            finalRecovery.output,
+            { category: ErrorCategory.External },
+          );
+        }
+        writeVerbose(
+          "[phase1 recovery] using the reported process file after the final recovery prompt failed late",
         );
+      } else {
+        writeVerboseData("phase1 final recovery output", finalRecovery.output);
       }
-      phaseOutputs.push(finalRecovery.output);
-      writeVerboseData("phase1 final recovery output", finalRecovery.output);
-      state.report = (await recoverProcessDefinitionFromOutputs({
+      await recoverReportedProcessDefinition({
+        state,
         outputPath: args.outputPath,
         workspace: args.workspace,
         outputs: phaseOutputs,
-      })) ?? undefined;
-      if (state.report) {
-        writeVerboseData("phase1 recovered report", state.report);
-      }
+        verbose: args.verbose,
+        json: args.json,
+      });
     }
 
     if (!state.report?.processPath) {
@@ -1186,7 +1816,40 @@ async function runProcessDefinitionPhase(args: {
 
     await waitForProcessFile(state.report.processPath);
     writeVerbose(`[phase1 validate] validating process export from ${path.resolve(state.report.processPath)}`);
-    await validateProcessExport(state.report.processPath);
+    for (let repairAttempt = 0; repairAttempt < 3; repairAttempt += 1) {
+      try {
+        await validateProcessExport(state.report.processPath);
+        break;
+      } catch (validationError: unknown) {
+        if (repairAttempt === 2) {
+          throw validationError;
+        }
+        const validationMessage = validationError instanceof Error
+          ? validationError.message
+          : String(validationError);
+        writeVerboseData("phase1 validate error", {
+          attempt: repairAttempt + 1,
+          message: validationMessage,
+        });
+        const conformancePrompt = buildInternalProcessConformancePrompt({
+          outputPath: state.report.processPath,
+          prompt: args.prompt,
+          validationError: validationMessage,
+        });
+        writeVerboseData("phase1 conformance repair prompt", conformancePrompt);
+        const repair = await session.prompt(
+          conformancePrompt,
+          180_000,
+        );
+        phaseOutputs.push(repair.output);
+        if (!repair.success) {
+          writeVerboseData("phase1 conformance repair failure output", repair.output);
+        } else {
+          writeVerboseData("phase1 conformance repair output", repair.output);
+        }
+        await waitForProcessFile(state.report.processPath);
+      }
+    }
 
     emitProgress(
       {
@@ -1258,6 +1921,227 @@ async function runOrchestrationPhase(args: {
     writeVerboseBlock(args.verbose, args.json, label, value, maxChars);
   };
 
+  if (shouldUseExternalHarness(args.selectedHarnessName)) {
+    emitProgress(
+      { phase: "2", status: "started", harness: args.selectedHarnessName },
+      args.json,
+      args.verbose,
+    );
+
+    writeVerbose(
+      `[phase2 host setup] harness=${args.selectedHarnessName} workspace=${path.resolve(args.workspace ?? process.cwd())} model=${args.model ?? "(default)"} processPath=${path.resolve(args.processPath)}`,
+    );
+
+    const created = await createRun({
+      runsDir: args.runsDir,
+      process: {
+        processId,
+        importPath: path.resolve(args.processPath),
+      },
+      prompt: args.prompt,
+      inputs: args.prompt ? { prompt: args.prompt } : undefined,
+    });
+    state.runId = created.runId;
+    state.runDir = created.runDir;
+    emitProgress(
+      {
+        phase: "2",
+        status: "run-created",
+        runId: created.runId,
+        runDir: created.runDir,
+      },
+      args.json,
+      args.verbose,
+    );
+    writeVerboseData("phase2 host run_create result", created);
+
+    const adapter = getAdapterByName(args.selectedHarnessName);
+    if (!adapter) {
+      throw new BabysitterRuntimeError(
+        "HarnessAdapterMissing",
+        `No harness adapter is registered for ${args.selectedHarnessName}.`,
+        { category: ErrorCategory.Configuration },
+      );
+    }
+    const sessionId = adapter.resolveSessionId({}) || process.env.CODEX_THREAD_ID || process.env.CODEX_SESSION_ID;
+    if (!sessionId) {
+      throw new BabysitterRuntimeError(
+        "MissingHarnessSessionId",
+        `Cannot resolve a session ID for harness ${args.selectedHarnessName}.`,
+        { category: ErrorCategory.Configuration },
+      );
+    }
+    state.sessionBound = await adapter.bindSession({
+      sessionId,
+      runId: created.runId,
+      runDir: created.runDir,
+      pluginRoot: adapter.resolvePluginRoot({}),
+      stateDir: path.resolve(args.workspace ?? process.cwd(), ".a5c"),
+      runsDir: args.runsDir,
+      maxIterations: args.maxIterations,
+      prompt: args.prompt ?? "",
+      verbose: args.verbose,
+      json: args.json,
+    });
+    if (state.sessionBound.fatal) {
+      throw new BabysitterRuntimeError(
+        "SessionBindFatal",
+        state.sessionBound.error ?? "Session binding failed fatally.",
+        { category: ErrorCategory.External },
+      );
+    }
+    emitProgress(
+      {
+        phase: "2",
+        status: "bound",
+        runId: created.runId,
+        runDir: created.runDir,
+        harness: state.sessionBound.harness,
+        sessionId: state.sessionBound.sessionId,
+        error: state.sessionBound.error,
+      },
+      args.json,
+      args.verbose,
+    );
+    writeVerboseData("phase2 host bind result", state.sessionBound);
+
+    while (state.iteration < args.maxIterations) {
+      state.iteration += 1;
+      const result = await orchestrateIteration({ runDir: created.runDir });
+      state.lastIterationResult = result;
+      writeVerboseData("phase2 host iterate result", {
+        iteration: state.iteration,
+        status: result.status,
+        nextActions: result.status === "waiting" ? result.nextActions : undefined,
+        output: result.status === "completed" ? result.output : undefined,
+        error: result.status === "failed" ? result.error : undefined,
+      });
+
+      if (result.status === "waiting") {
+        emitProgress(
+          {
+            phase: "2",
+            status: "iteration",
+            iteration: state.iteration,
+            runStatus: "waiting",
+            pendingEffects: result.nextActions.length,
+          },
+          args.json,
+          args.verbose,
+        );
+
+        for (const action of result.nextActions) {
+          const taskHarness = resolveTaskHarness(action, args.selectedHarnessName, args.discovered);
+          let workerSession: PiSessionHandle | null = null;
+          if (action.kind === "shell" || isPiHarness(taskHarness)) {
+            workerSession = createPiSession(buildPiWorkerSessionOptions({
+              action,
+              workspace: args.workspace,
+              model: args.model,
+            }));
+          }
+          try {
+            const effectResult = await resolveEffect(
+              action,
+              args.selectedHarnessName,
+              {
+                workspace: args.workspace,
+                model: args.model,
+                interactive: args.interactive,
+                compressionConfig: args.compressionConfig,
+              },
+              workerSession,
+              args.discovered,
+              args.rl,
+              args.json,
+            );
+            await commitEffectResult({
+              runDir: created.runDir,
+              effectId: action.effectId,
+              invocationKey: action.invocationKey,
+              result: {
+                status: effectResult.status,
+                value: effectResult.value,
+                error: effectResult.error,
+                stdout: effectResult.stdout,
+                stderr: effectResult.stderr,
+                startedAt: new Date().toISOString(),
+                finishedAt: new Date().toISOString(),
+              },
+            });
+            emitProgress(
+              {
+                phase: "2",
+                status: "effect",
+                effectId: action.effectId,
+                effectKind: action.kind,
+                effectTitle: action.taskDef?.title,
+                effectStatus: effectResult.status,
+                error: effectResult.status === "error"
+                  ? (effectResult.error instanceof Error
+                    ? effectResult.error.message
+                    : String(effectResult.error))
+                  : undefined,
+                output: typeof effectResult.value === "string"
+                  ? effectResult.value.slice(0, 200)
+                  : undefined,
+              },
+              args.json,
+              args.verbose,
+            );
+          } finally {
+            workerSession?.dispose();
+          }
+        }
+        continue;
+      }
+
+      if (result.status === "completed") {
+        emitProgress(
+          {
+            phase: "2",
+            status: "completed",
+            iteration: state.iteration,
+            runStatus: "completed",
+          },
+          args.json,
+          args.verbose,
+        );
+        return 0;
+      }
+
+      emitProgress(
+        {
+          phase: "2",
+          status: "failed",
+          iteration: state.iteration,
+          runStatus: "failed",
+          error: result.error instanceof Error
+            ? result.error.message
+            : typeof result.error === "object" && result.error !== null && "message" in result.error
+              ? String((result.error as Record<string, unknown>).message)
+              : String(result.error),
+        },
+        args.json,
+        args.verbose,
+      );
+      return 1;
+    }
+
+    emitProgress(
+      {
+        phase: "2",
+        status: "failed",
+        iteration: state.iteration,
+        runStatus: "failed",
+        error: `Max iterations (${args.maxIterations}) reached without completion`,
+      },
+      args.json,
+      args.verbose,
+    );
+    return 1;
+  }
+
   const summarizeAgentText = (text: string): string => {
     const normalized = text.replace(/\s+/g, " ").trim();
     if (!normalized) {
@@ -1286,6 +2170,35 @@ async function runOrchestrationPhase(args: {
       return 1;
     }
     return null;
+  };
+
+  const captureOrchestrationProgressSnapshot = () => ({
+    runId: state.runId,
+    runDir: state.runDir,
+    sessionBound: Boolean(state.sessionBound),
+    iteration: state.iteration,
+    pendingActionIds: Array.from(state.pendingActions.keys()).sort().join(","),
+    pendingResultIds: Array.from(state.pendingEffectResults.keys()).sort().join(","),
+    lastStatus: state.lastIterationResult?.status,
+    hasAskUserQuestionResponse: Boolean(state.lastAskUserQuestionResponse),
+    finished: Boolean(state.finished),
+  });
+
+  const orchestrationStateAdvanced = (
+    before: ReturnType<typeof captureOrchestrationProgressSnapshot>,
+  ): boolean => {
+    const after = captureOrchestrationProgressSnapshot();
+    return (
+      after.runId !== before.runId ||
+      after.runDir !== before.runDir ||
+      after.sessionBound !== before.sessionBound ||
+      after.iteration !== before.iteration ||
+      after.pendingActionIds !== before.pendingActionIds ||
+      after.pendingResultIds !== before.pendingResultIds ||
+      after.lastStatus !== before.lastStatus ||
+      after.hasAskUserQuestionResponse !== before.hasAskUserQuestionResponse ||
+      after.finished !== before.finished
+    );
   };
 
   const customTools: unknown[] = [
@@ -1322,15 +2235,16 @@ async function runOrchestrationPhase(args: {
           writeVerboseData("phase2 tool babysitter_run_create result", { runId: state.runId, runDir: state.runDir });
           return formatToolResult({ runId: state.runId, runDir: state.runDir }, "Run already exists.");
         }
+        const effectivePrompt = args.prompt ?? params.prompt;
         const result = await createRun({
           runsDir: args.runsDir,
           process: {
             processId,
             importPath: path.resolve(args.processPath),
           },
-          prompt: params.prompt ?? args.prompt,
-          inputs: (params.prompt ?? args.prompt)
-            ? { prompt: params.prompt ?? args.prompt }
+          prompt: effectivePrompt,
+          inputs: effectivePrompt
+            ? { prompt: effectivePrompt }
             : undefined,
         });
         state.runId = result.runId;
@@ -1828,6 +2742,7 @@ async function runOrchestrationPhase(args: {
       process.stderr.write(`\n${DIM}[${label}] agent turn${RESET}\n`);
     }
     writeVerboseData(`${options?.label ?? "phase2"} prompt`, message);
+    const progressSnapshot = captureOrchestrationProgressSnapshot();
 
     const result = await orchestrationSession.prompt(
       compressInternalHarnessPrompt(
@@ -1840,11 +2755,23 @@ async function runOrchestrationPhase(args: {
 
     if (!result.success) {
       writeVerboseData(`${options?.label ?? "phase2"} agent failure output`, result.output);
-      throw new BabysitterRuntimeError(
-        "OrchestrationAgentFailed",
-        result.output,
-        { category: ErrorCategory.External },
+      if (!orchestrationStateAdvanced(progressSnapshot)) {
+        if (!isIgnorablePiPromptFailure(result.output)) {
+          throw new BabysitterRuntimeError(
+            "OrchestrationAgentFailed",
+            result.output,
+            { category: ErrorCategory.External },
+          );
+        }
+        writeVerbose(
+          `[phase2 recovery] ignoring PI prompt failure and continuing with host-driven orchestration: ${result.output}`,
+        );
+        return;
+      }
+      writeVerbose(
+        `[phase2 recovery] continuing after a late PI prompt failure because orchestration state advanced: ${result.output}`,
       );
+      return;
     }
 
     writeVerbose(
@@ -1932,6 +2859,23 @@ async function runOrchestrationPhase(args: {
       const terminal = ensureTerminalResult();
       if (terminal !== null) {
         break;
+      }
+
+      if (!args.interactive) {
+        writeVerbose("[phase2 deterministic] running a host-driven non-interactive iteration turn");
+        await invokeTool(runIterateTool, "babysitter_run_iterate");
+
+        if (state.lastIterationResult?.status === "waiting" && state.pendingActions.size > 0) {
+          await runDeterministicPendingEffects(
+            "Host-driven non-interactive phase 2 resolved pending effects deterministically.",
+          );
+        }
+
+        const deterministicTerminal = ensureTerminalResult();
+        if (deterministicTerminal !== null) {
+          break;
+        }
+        continue;
       }
 
       const iterationBeforeTurn = state.iteration;
@@ -2083,11 +3027,9 @@ export async function handleSessionCreate(
     }
 
     const discovered = await discoverHarnesses();
-    const selected = selectHarness(discovered, preferredHarness);
-    const selectedHarnessName =
-      preferredHarness === "pi" || preferredHarness === "oh-my-pi"
-        ? preferredHarness
-        : (selected?.name ?? "pi");
+    const selectedHarnessName = preferredHarness === "oh-my-pi"
+      ? "oh-my-pi"
+      : "pi";
     const compressionConfig = loadSessionCompressionConfig(workspace);
     const promptContext = buildPromptContext({
       workspace,
@@ -2103,7 +3045,7 @@ export async function handleSessionCreate(
       const workDir = workspace ?? process.cwd();
       processPath = await runProcessDefinitionPhase({
         prompt: prompt!,
-        outputPath: path.join(workDir, "generated-process.js"),
+        outputPath: getGeneratedProcessPath(workDir),
         workspace: workDir,
         model,
         interactive,
@@ -2112,6 +3054,7 @@ export async function handleSessionCreate(
         verbose,
         compressionConfig,
         promptContext,
+        selectedHarnessName,
       });
     }
 

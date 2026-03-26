@@ -13,6 +13,7 @@ import type { IterationResult } from "../../../runtime/types";
 
 vi.mock("../../../harness/discovery", () => ({
   discoverHarnesses: vi.fn(),
+  detectCallerHarness: vi.fn(() => null),
 }));
 
 vi.mock("../../../harness/invoker", () => ({
@@ -56,11 +57,11 @@ vi.mock("../../../harness/piWrapper", () => {
       get isInitialized() {
         return true;
       },
-      prompt: vi.fn(async () => {
-        const reportProcess = getTool("babysitter_report_process_definition");
-        if (reportProcess?.execute) {
-          await reportProcess.execute("tool-process", {
-            processPath: "/tmp/generated-process.js",
+        prompt: vi.fn(async () => {
+          const reportProcess = getTool("babysitter_report_process_definition");
+          if (reportProcess?.execute) {
+            await reportProcess.execute("tool-process", {
+            processPath: "/tmp/generated-process.mjs",
             summary: "Generated process",
           });
           return { success: true, output: "phase1", exitCode: 0, duration: 1 };
@@ -124,12 +125,14 @@ vi.mock("node:fs", async () => {
 });
 
 import { handleSessionCreate, selectHarness } from "../sessionCreate";
-import { discoverHarnesses } from "../../../harness/discovery";
+import { discoverHarnesses, detectCallerHarness } from "../../../harness/discovery";
 import { invokeHarness } from "../../../harness/invoker";
 import { createPiSession } from "../../../harness/piWrapper";
 import { createRun } from "../../../runtime/createRun";
 import { orchestrateIteration } from "../../../runtime/orchestrateIteration";
 import { commitEffectResult } from "../../../runtime/commitEffectResult";
+
+const detectCallerHarnessMock = detectCallerHarness as Mock;
 
 // ── Helpers ───────────────────────────────────────────────────────────
 
@@ -162,6 +165,8 @@ function makeInvokeResult(
 // ── Tests ─────────────────────────────────────────────────────────────
 
 describe("selectHarness", () => {
+  const originalCodexThreadId = process.env.CODEX_THREAD_ID;
+  const originalCodexSessionId = process.env.CODEX_SESSION_ID;
   const harnesses: HarnessDiscoveryResult[] = [
     makeDiscoveryResult({ name: "claude-code" }),
     makeDiscoveryResult({ name: "codex" }),
@@ -169,6 +174,25 @@ describe("selectHarness", () => {
     makeDiscoveryResult({ name: "opencode" }),
     makeDiscoveryResult({ name: "pi" }),
   ];
+
+  beforeEach(() => {
+    delete process.env.CODEX_THREAD_ID;
+    delete process.env.CODEX_SESSION_ID;
+    detectCallerHarnessMock.mockReturnValue(null);
+  });
+
+  afterEach(() => {
+    if (originalCodexThreadId === undefined) {
+      delete process.env.CODEX_THREAD_ID;
+    } else {
+      process.env.CODEX_THREAD_ID = originalCodexThreadId;
+    }
+    if (originalCodexSessionId === undefined) {
+      delete process.env.CODEX_SESSION_ID;
+    } else {
+      process.env.CODEX_SESSION_ID = originalCodexSessionId;
+    }
+  });
 
   it("selects pi as highest priority when all are available", () => {
     const selected = selectHarness(harnesses);
@@ -202,6 +226,16 @@ describe("selectHarness", () => {
     expect(selected?.name).toBe("codex");
   });
 
+  it("prefers the active caller harness when no explicit preference is provided", () => {
+    detectCallerHarnessMock.mockReturnValue({
+      name: "codex",
+      matchedEnvVars: ["CODEX_THREAD_ID"],
+      capabilities: [],
+    });
+    const selected = selectHarness(harnesses);
+    expect(selected?.name).toBe("codex");
+  });
+
   it("falls back to priority when preferred harness is not installed", () => {
     const selected = selectHarness(harnesses, "cursor");
     expect(selected?.name).toBe("pi");
@@ -232,6 +266,7 @@ describe("handleSessionCreate", () => {
     vi.clearAllMocks();
     vi.spyOn(console, "log").mockImplementation(() => {});
     vi.spyOn(console, "error").mockImplementation(() => {});
+    detectCallerHarnessMock.mockReturnValue(null);
   });
 
   afterEach(async () => {
@@ -274,7 +309,386 @@ describe("handleSessionCreate", () => {
     });
   });
 
+  describe("Harness policy", () => {
+    it("uses the internal pi wrapper for phase 1 and as the default phase 2 harness even when external harnesses are discovered", async () => {
+      const workspace = await fs.mkdtemp(path.join(os.tmpdir(), "session-create-internal-default-"));
+      tempDirs.push(workspace);
+      const generatedPath = path.join(workspace, "generated-process.mjs");
+      let phase1Prompt = "";
+      await fs.writeFile(
+        generatedPath,
+        'export async function process() { return { success: true }; }\n',
+        "utf8",
+      );
+
+      (discoverHarnesses as Mock).mockResolvedValue([
+        makeDiscoveryResult({ name: "codex" }),
+        makeDiscoveryResult({ name: "claude-code" }),
+      ]);
+      detectCallerHarnessMock.mockReturnValue({
+        name: "codex",
+        matchedEnvVars: ["CODEX_THREAD_ID"],
+        capabilities: [],
+      });
+      vi.mocked(createPiSession).mockImplementationOnce((options?: { customTools?: Array<Record<string, unknown>> }) => {
+        const tools = options?.customTools ?? [];
+        const reportProcess = tools.find((tool) => tool.name === "babysitter_report_process_definition") as {
+          execute?: (toolCallId: string, params: Record<string, unknown>) => Promise<{ details?: unknown }>;
+        } | undefined;
+
+        return {
+          initialize: vi.fn().mockResolvedValue(undefined),
+          subscribe: vi.fn(() => () => {}),
+          dispose: vi.fn(),
+          executeBash: vi.fn(async () => ({
+            output: "ok",
+            exitCode: 0,
+            cancelled: false,
+          })),
+          get sessionId() {
+            return "mock-session-id-phase1-internal-default";
+          },
+          get isInitialized() {
+            return true;
+          },
+          prompt: vi.fn(async (prompt: string) => {
+            phase1Prompt = prompt;
+            await reportProcess?.execute?.("tool-process", {
+              processPath: generatedPath,
+              summary: "Generated process",
+            });
+            return { success: true, output: "phase1", exitCode: 0, duration: 1 };
+          }),
+        };
+      });
+      (createRun as Mock).mockResolvedValue({
+        runId: "run-internal-default",
+        runDir: "/tmp/runs/run-internal-default",
+        metadata: {},
+      });
+      (orchestrateIteration as Mock).mockResolvedValue({
+        status: "completed",
+        output: "done",
+      });
+
+      const code = await handleSessionCreate({
+        prompt: "create a game",
+        workspace,
+        runsDir: "/tmp/runs",
+        json: false,
+        verbose: false,
+        interactive: false,
+      });
+
+      expect(code).toBe(0);
+      expect(createPiSession).toHaveBeenCalled();
+      const phase1Options = vi.mocked(createPiSession).mock.calls[0]?.[0] as {
+        workspace?: string;
+        toolsMode?: string;
+        isolated?: boolean;
+        ephemeral?: boolean;
+      };
+      expect(phase1Options).toMatchObject({
+        workspace,
+        isolated: true,
+        ephemeral: true,
+      });
+      expect(["default", "readonly"]).toContain(phase1Options.toolsMode ?? "");
+      expect(invokeHarness).not.toHaveBeenCalled();
+      expect(phase1Prompt).toContain("Non-interactive mode. Do not call AskUserQuestion");
+      expect(phase1Prompt).toContain("Workspace assessment:");
+      expect(phase1Prompt).toContain("The generated process must directly execute the user's requested work");
+      expect(phase1Prompt).not.toContain("You are a babysitter process generator");
+    });
+
+    it("continues phase 2 after a late bootstrap prompt failure and preserves the original user prompt", async () => {
+      const workspace = await fs.mkdtemp(path.join(os.tmpdir(), "session-create-phase2-late-failure-"));
+      tempDirs.push(workspace);
+      const generatedPath = path.join(workspace, "generated-process.mjs");
+      await fs.writeFile(
+        generatedPath,
+        'export async function process() { return { success: true }; }\n',
+        "utf8",
+      );
+
+      (discoverHarnesses as Mock).mockResolvedValue([
+        makeDiscoveryResult({ name: "oh-my-pi" }),
+      ]);
+
+      let phase2PromptCount = 0;
+      vi.mocked(createPiSession)
+        .mockImplementationOnce((options?: { customTools?: Array<Record<string, unknown>> }) => {
+          const tools = options?.customTools ?? [];
+          const reportProcess = tools.find((tool) => tool.name === "babysitter_report_process_definition") as {
+            execute?: (toolCallId: string, params: Record<string, unknown>) => Promise<{ details?: unknown }>;
+          } | undefined;
+
+          return {
+            initialize: vi.fn().mockResolvedValue(undefined),
+            subscribe: vi.fn(() => () => {}),
+            dispose: vi.fn(),
+            executeBash: vi.fn(async () => ({
+              output: "ok",
+              exitCode: 0,
+              cancelled: false,
+            })),
+            get sessionId() {
+              return "mock-session-id-phase1";
+            },
+            get isInitialized() {
+              return true;
+            },
+            prompt: vi.fn(async () => {
+              await reportProcess?.execute?.("tool-process", {
+                processPath: generatedPath,
+                summary: "Generated process",
+              });
+              return { success: true, output: "phase1", exitCode: 0, duration: 1 };
+            }),
+          };
+        })
+        .mockImplementationOnce((options?: { customTools?: Array<Record<string, unknown>> }) => {
+          const tools = options?.customTools ?? [];
+          const runCreate = tools.find((tool) => tool.name === "babysitter_run_create") as {
+            execute?: (toolCallId: string, params: Record<string, unknown>) => Promise<{ details?: unknown }>;
+          } | undefined;
+
+          return {
+            initialize: vi.fn().mockResolvedValue(undefined),
+            subscribe: vi.fn(() => () => {}),
+            dispose: vi.fn(),
+            executeBash: vi.fn(async () => ({
+              output: "ok",
+              exitCode: 0,
+              cancelled: false,
+            })),
+            get sessionId() {
+              return "mock-session-id-phase2";
+            },
+            get isInitialized() {
+              return true;
+            },
+            prompt: vi.fn(async () => {
+              phase2PromptCount += 1;
+              if (phase2PromptCount === 1) {
+                await runCreate?.execute?.("tool-run-create", {
+                  prompt: [
+                    `Process path: ${generatedPath}`,
+                    "User prompt: create a game",
+                    "Maximum iterations: 256",
+                  ].join("\n"),
+                });
+                return {
+                  success: false,
+                  output: "msg.content.filter is not a function",
+                  exitCode: 1,
+                  duration: 1,
+                };
+              }
+              return { success: true, output: "noop", exitCode: 0, duration: 1 };
+            }),
+          };
+        });
+
+      (createRun as Mock).mockResolvedValue({
+        runId: "run-phase2-late-failure",
+        runDir: "/tmp/runs/run-phase2-late-failure",
+        metadata: {},
+      });
+      (orchestrateIteration as Mock).mockResolvedValue({
+        status: "completed",
+        output: "done",
+      });
+
+      const code = await handleSessionCreate({
+        prompt: "create a game",
+        workspace,
+        runsDir: "/tmp/runs",
+        json: false,
+        verbose: false,
+        interactive: false,
+      });
+
+      expect(code).toBe(0);
+      expect(createRun).toHaveBeenCalledWith(
+        expect.objectContaining({
+          prompt: "create a game",
+          inputs: { prompt: "create a game" },
+        }),
+      );
+    });
+
+    it("continues phase 2 with host-driven orchestration when pi returns the known post-turn failure before any progress", async () => {
+      const workspace = await fs.mkdtemp(path.join(os.tmpdir(), "session-create-phase2-host-fallback-"));
+      tempDirs.push(workspace);
+      const generatedPath = path.join(workspace, "generated-process.mjs");
+      await fs.writeFile(
+        generatedPath,
+        'export async function process() { return { success: true }; }\n',
+        "utf8",
+      );
+
+      (discoverHarnesses as Mock).mockResolvedValue([
+        makeDiscoveryResult({ name: "oh-my-pi" }),
+      ]);
+
+      vi.mocked(createPiSession)
+        .mockImplementationOnce((options?: { customTools?: Array<Record<string, unknown>> }) => {
+          const tools = options?.customTools ?? [];
+          const reportProcess = tools.find((tool) => tool.name === "babysitter_report_process_definition") as {
+            execute?: (toolCallId: string, params: Record<string, unknown>) => Promise<{ details?: unknown }>;
+          } | undefined;
+
+          return {
+            initialize: vi.fn().mockResolvedValue(undefined),
+            subscribe: vi.fn(() => () => {}),
+            dispose: vi.fn(),
+            executeBash: vi.fn(async () => ({
+              output: "ok",
+              exitCode: 0,
+              cancelled: false,
+            })),
+            get sessionId() {
+              return "mock-session-id-phase1";
+            },
+            get isInitialized() {
+              return true;
+            },
+            prompt: vi.fn(async () => {
+              await reportProcess?.execute?.("tool-process", {
+                processPath: generatedPath,
+                summary: "Generated process",
+              });
+              return { success: true, output: "phase1", exitCode: 0, duration: 1 };
+            }),
+          };
+        })
+        .mockImplementationOnce(() => ({
+          initialize: vi.fn().mockResolvedValue(undefined),
+          subscribe: vi.fn(() => () => {}),
+          dispose: vi.fn(),
+          executeBash: vi.fn(async () => ({
+            output: "ok",
+            exitCode: 0,
+            cancelled: false,
+          })),
+          get sessionId() {
+            return "mock-session-id-phase2";
+          },
+          get isInitialized() {
+            return true;
+          },
+          prompt: vi.fn(async () => ({
+            success: false,
+            output: "msg.content.filter is not a function",
+            exitCode: 1,
+            duration: 1,
+          })),
+        }));
+
+      (createRun as Mock).mockResolvedValue({
+        runId: "run-phase2-host-fallback",
+        runDir: "/tmp/runs/run-phase2-host-fallback",
+        metadata: {},
+      });
+      (orchestrateIteration as Mock).mockResolvedValue({
+        status: "completed",
+        output: "done",
+      });
+
+      const code = await handleSessionCreate({
+        prompt: "create a game",
+        workspace,
+        runsDir: "/tmp/runs",
+        json: false,
+        verbose: false,
+        interactive: false,
+      });
+
+      expect(code).toBe(0);
+      expect(createRun).toHaveBeenCalledWith(
+        expect.objectContaining({
+          prompt: "create a game",
+          inputs: { prompt: "create a game" },
+        }),
+      );
+      expect(orchestrateIteration).toHaveBeenCalled();
+    });
+  });
+
   describe("Phase 1: process-definition recovery", () => {
+    it("continues when the phase-1 tool report succeeds before pi returns a late prompt failure", async () => {
+      const workspace = await fs.mkdtemp(path.join(os.tmpdir(), "session-create-phase1-late-failure-"));
+      tempDirs.push(workspace);
+      const generatedPath = path.join(workspace, "generated-process.mjs");
+      await fs.writeFile(
+        generatedPath,
+        'export async function process() { return { success: true }; }\n',
+        "utf8",
+      );
+
+      (discoverHarnesses as Mock).mockResolvedValue([
+        makeDiscoveryResult({ name: "oh-my-pi" }),
+      ]);
+      vi.mocked(createPiSession).mockImplementationOnce((options?: { customTools?: Array<Record<string, unknown>> }) => {
+        const tools = options?.customTools ?? [];
+        const reportProcess = tools.find((tool) => tool.name === "babysitter_report_process_definition") as {
+          execute?: (toolCallId: string, params: Record<string, unknown>) => Promise<{ details?: unknown }>;
+        } | undefined;
+
+        return {
+          initialize: vi.fn().mockResolvedValue(undefined),
+          subscribe: vi.fn(() => () => {}),
+          dispose: vi.fn(),
+          executeBash: vi.fn(async () => ({
+            output: "ok",
+            exitCode: 0,
+            cancelled: false,
+          })),
+          get sessionId() {
+            return "mock-session-id-phase1-late-failure";
+          },
+          get isInitialized() {
+            return true;
+          },
+          prompt: vi.fn(async () => {
+            await reportProcess?.execute?.("tool-process", {
+              processPath: generatedPath,
+              summary: "Generated process before prompt failure",
+            });
+            return {
+              success: false,
+              output: "msg.content.filter is not a function",
+              exitCode: 1,
+              duration: 1,
+            };
+          }),
+        };
+      });
+      (createRun as Mock).mockResolvedValue({
+        runId: "run-phase1-late-failure",
+        runDir: "/tmp/runs/run-phase1-late-failure",
+        metadata: {},
+      });
+      (orchestrateIteration as Mock).mockResolvedValue({
+        status: "completed",
+        output: "done",
+      });
+
+      const code = await handleSessionCreate({
+        prompt: "create a game",
+        workspace,
+        runsDir: "/tmp/runs",
+        json: false,
+        verbose: false,
+        interactive: false,
+      });
+
+      expect(code).toBe(0);
+      expect(existsSync(generatedPath)).toBe(true);
+      expect(createRun).toHaveBeenCalled();
+    });
+
     it("recovers by writing a process code block returned by the phase-1 agent when the tool report is missing", async () => {
       const workspace = await fs.mkdtemp(path.join(os.tmpdir(), "session-create-phase1-"));
       tempDirs.push(workspace);
@@ -371,12 +785,757 @@ describe("handleSessionCreate", () => {
       });
 
       expect(code).toBe(0);
-      const generatedPath = path.join(workspace, "generated-process.js");
+      const generatedPath = path.join(workspace, "generated-process.mjs");
       expect(existsSync(generatedPath)).toBe(true);
       const source = await fs.readFile(generatedPath, "utf8");
       expect(source).toContain('export async function process');
       expect(source).toContain('defineTask("build-game"');
     });
+
+    it("repairs an invalid reported process export before moving to phase 2", async () => {
+      const workspace = await fs.mkdtemp(path.join(os.tmpdir(), "session-create-phase1-conformance-"));
+      tempDirs.push(workspace);
+      const generatedPath = path.join(workspace, "generated-process.mjs");
+      let promptCount = 0;
+
+      (discoverHarnesses as Mock).mockResolvedValue([
+        makeDiscoveryResult({ name: "pi" }),
+      ]);
+      (createRun as Mock).mockResolvedValue({
+        runId: "run-conformance-fix",
+        runDir: "/tmp/runs/run-conformance-fix",
+        metadata: {},
+      });
+      (orchestrateIteration as Mock).mockResolvedValue({
+        status: "completed",
+        output: "done",
+      });
+
+      vi.mocked(createPiSession).mockImplementationOnce((options?: { customTools?: Array<Record<string, unknown>> }) => {
+        const tools = options?.customTools ?? [];
+        const writeProcess = tools.find((tool) => tool.name === "babysitter_write_process_definition") as {
+          execute?: (toolCallId: string, params: Record<string, unknown>) => Promise<{ details?: unknown }>;
+        } | undefined;
+        const reportProcess = tools.find((tool) => tool.name === "babysitter_report_process_definition") as {
+          execute?: (toolCallId: string, params: Record<string, unknown>) => Promise<{ details?: unknown }>;
+        } | undefined;
+
+        return {
+          initialize: vi.fn().mockResolvedValue(undefined),
+          subscribe: vi.fn(() => () => {}),
+          dispose: vi.fn(),
+          executeBash: vi.fn(async () => ({
+            output: "ok",
+            exitCode: 0,
+            cancelled: false,
+          })),
+          abort: vi.fn().mockResolvedValue(undefined),
+          get sessionId() {
+            return "mock-session-id-phase1-conformance";
+          },
+          get isInitialized() {
+            return true;
+          },
+          get isStreaming() {
+            return false;
+          },
+          prompt: vi.fn(async (prompt: string) => {
+            promptCount += 1;
+            if (promptCount === 1) {
+              await writeProcess?.execute?.("tool-write-invalid", {
+                processPath: generatedPath,
+                source: 'export default { name: "bad-process", tasks: [] };\n',
+              });
+              await reportProcess?.execute?.("tool-report-invalid", {
+                processPath: generatedPath,
+                summary: "Generated process",
+              });
+              return { success: true, output: "phase1-invalid", exitCode: 0, duration: 1 };
+            }
+
+            expect(prompt).toContain("Repair the generated babysitter process file");
+            expect(prompt).toContain("named `async function process(inputs, ctx)`");
+            expect(prompt).not.toContain("export default async function process");
+            await writeProcess?.execute?.("tool-write-valid", {
+              processPath: generatedPath,
+              source: 'export async function process() { return { success: true }; }\n',
+            });
+            await reportProcess?.execute?.("tool-report-valid", {
+              processPath: generatedPath,
+              summary: "Repaired process",
+            });
+            return { success: true, output: "phase1-repaired", exitCode: 0, duration: 1 };
+          }),
+        };
+      });
+
+      const code = await handleSessionCreate({
+        prompt: "create a game",
+        workspace,
+        runsDir: "/tmp/runs",
+        json: false,
+        verbose: false,
+        interactive: false,
+      });
+
+      expect(code).toBe(0);
+      expect(promptCount).toBe(2);
+      const source = await fs.readFile(generatedPath, "utf8");
+      expect(source).toContain("export async function process");
+    });
+
+    it("rejects a default-exported process and repairs it to a named process export", async () => {
+      const workspace = await fs.mkdtemp(path.join(os.tmpdir(), "session-create-phase1-default-export-"));
+      tempDirs.push(workspace);
+      const generatedPath = path.join(workspace, "generated-process.mjs");
+      let promptCount = 0;
+
+      (discoverHarnesses as Mock).mockResolvedValue([
+        makeDiscoveryResult({ name: "pi" }),
+      ]);
+      (createRun as Mock).mockResolvedValue({
+        runId: "run-default-export-fix",
+        runDir: "/tmp/runs/run-default-export-fix",
+        metadata: {},
+      });
+      (orchestrateIteration as Mock).mockResolvedValue({
+        status: "completed",
+        output: "done",
+      });
+
+      vi.mocked(createPiSession).mockImplementationOnce((options?: { customTools?: Array<Record<string, unknown>> }) => {
+        const tools = options?.customTools ?? [];
+        const writeProcess = tools.find((tool) => tool.name === "babysitter_write_process_definition") as {
+          execute?: (toolCallId: string, params: Record<string, unknown>) => Promise<{ details?: unknown }>;
+        } | undefined;
+        const reportProcess = tools.find((tool) => tool.name === "babysitter_report_process_definition") as {
+          execute?: (toolCallId: string, params: Record<string, unknown>) => Promise<{ details?: unknown }>;
+        } | undefined;
+
+        return {
+          initialize: vi.fn().mockResolvedValue(undefined),
+          subscribe: vi.fn(() => () => {}),
+          dispose: vi.fn(),
+          executeBash: vi.fn(async () => ({
+            output: "ok",
+            exitCode: 0,
+            cancelled: false,
+          })),
+          abort: vi.fn().mockResolvedValue(undefined),
+          get sessionId() {
+            return "mock-session-id-phase1-default-export";
+          },
+          get isInitialized() {
+            return true;
+          },
+          get isStreaming() {
+            return false;
+          },
+          prompt: vi.fn(async (prompt: string) => {
+            promptCount += 1;
+            if (promptCount === 1) {
+              await writeProcess?.execute?.("tool-write-default-export", {
+                processPath: generatedPath,
+                source: 'export default async function process() { return { success: true }; }\n',
+              });
+              await reportProcess?.execute?.("tool-report-default-export", {
+                processPath: generatedPath,
+                summary: "Generated default-exported process",
+              });
+              return { success: true, output: "phase1-default-export", exitCode: 0, duration: 1 };
+            }
+
+            expect(prompt).toContain("does not export a function named 'process'");
+            expect(prompt).toContain("named `async function process(inputs, ctx)`");
+            await writeProcess?.execute?.("tool-write-named-export", {
+              processPath: generatedPath,
+              source: 'export async function process() { return { success: true }; }\n',
+            });
+            await reportProcess?.execute?.("tool-report-named-export", {
+              processPath: generatedPath,
+              summary: "Repaired named process export",
+            });
+            return { success: true, output: "phase1-repaired", exitCode: 0, duration: 1 };
+          }),
+        };
+      });
+
+      const code = await handleSessionCreate({
+        prompt: "create a game",
+        workspace,
+        runsDir: "/tmp/runs",
+        json: false,
+        verbose: false,
+        interactive: false,
+      });
+
+      expect(code).toBe(0);
+      expect(promptCount).toBe(2);
+      const source = await fs.readFile(generatedPath, "utf8");
+      expect(source).toContain("export async function process");
+      expect(source).not.toContain("export default async function process");
+    });
+
+    it("repairs a named process export that incorrectly references process.cwd()", async () => {
+      const workspace = await fs.mkdtemp(path.join(os.tmpdir(), "session-create-phase1-process-shadow-"));
+      tempDirs.push(workspace);
+      const generatedPath = path.join(workspace, "generated-process.mjs");
+      let promptCount = 0;
+
+      (discoverHarnesses as Mock).mockResolvedValue([
+        makeDiscoveryResult({ name: "pi" }),
+      ]);
+      (createRun as Mock).mockResolvedValue({
+        runId: "run-process-shadow-fix",
+        runDir: "/tmp/runs/run-process-shadow-fix",
+        metadata: {},
+      });
+      (orchestrateIteration as Mock).mockResolvedValue({
+        status: "completed",
+        output: "done",
+      });
+
+      vi.mocked(createPiSession).mockImplementationOnce((options?: { customTools?: Array<Record<string, unknown>> }) => {
+        const tools = options?.customTools ?? [];
+        const writeProcess = tools.find((tool) => tool.name === "babysitter_write_process_definition") as {
+          execute?: (toolCallId: string, params: Record<string, unknown>) => Promise<{ details?: unknown }>;
+        } | undefined;
+        const reportProcess = tools.find((tool) => tool.name === "babysitter_report_process_definition") as {
+          execute?: (toolCallId: string, params: Record<string, unknown>) => Promise<{ details?: unknown }>;
+        } | undefined;
+
+        return {
+          initialize: vi.fn().mockResolvedValue(undefined),
+          subscribe: vi.fn(() => () => {}),
+          dispose: vi.fn(),
+          executeBash: vi.fn(async () => ({
+            output: "ok",
+            exitCode: 0,
+            cancelled: false,
+          })),
+          abort: vi.fn().mockResolvedValue(undefined),
+          get sessionId() {
+            return "mock-session-id-phase1-process-shadow";
+          },
+          get isInitialized() {
+            return true;
+          },
+          get isStreaming() {
+            return false;
+          },
+          prompt: vi.fn(async (prompt: string) => {
+            promptCount += 1;
+            if (promptCount === 1) {
+              await writeProcess?.execute?.("tool-write-process-shadow", {
+                processPath: generatedPath,
+                source: [
+                  'export async function process(inputs, ctx) {',
+                  '  const root = process.cwd();',
+                  '  return { root };',
+                  '}',
+                  '',
+                ].join("\n"),
+              });
+              await reportProcess?.execute?.("tool-report-process-shadow", {
+                processPath: generatedPath,
+                summary: "Generated named process export with process cwd lookup",
+              });
+              return { success: true, output: "phase1-process-shadow", exitCode: 0, duration: 1 };
+            }
+
+            expect(prompt).toContain("references `process.` inside the named 'process' export");
+            expect(prompt).toContain("globalThis.process");
+            expect(prompt).toContain("nodeProcess");
+            await writeProcess?.execute?.("tool-write-process-shadow-fixed", {
+              processPath: generatedPath,
+              source: [
+                'export async function process(inputs, ctx) {',
+                '  const root = globalThis.process.cwd();',
+                '  return { root };',
+                '}',
+                '',
+              ].join("\n"),
+            });
+            await reportProcess?.execute?.("tool-report-process-shadow-fixed", {
+              processPath: generatedPath,
+              summary: "Repaired named process export to avoid global process shadowing",
+            });
+            return { success: true, output: "phase1-repaired", exitCode: 0, duration: 1 };
+          }),
+        };
+      });
+
+      const code = await handleSessionCreate({
+        prompt: "create a game",
+        workspace,
+        runsDir: "/tmp/runs",
+        json: false,
+        verbose: false,
+        interactive: false,
+      });
+
+      expect(code).toBe(0);
+      expect(promptCount).toBe(2);
+      const source = await fs.readFile(generatedPath, "utf8");
+      expect(source).toContain("export async function process");
+      expect(source).toContain("globalThis.process.cwd()");
+      expect(source).not.toContain("const root = process.cwd();");
+    });
+
+    it("repairs a process that assumes ctx.workspaceDir or ctx.cwd exists", async () => {
+      const workspace = await fs.mkdtemp(path.join(os.tmpdir(), "session-create-phase1-workspace-context-"));
+      tempDirs.push(workspace);
+      const generatedPath = path.join(workspace, "generated-process.mjs");
+      let promptCount = 0;
+
+      (discoverHarnesses as Mock).mockResolvedValue([
+        makeDiscoveryResult({ name: "pi" }),
+      ]);
+      (createRun as Mock).mockResolvedValue({
+        runId: "run-workspace-context-fix",
+        runDir: "/tmp/runs/run-workspace-context-fix",
+        metadata: {},
+      });
+      (orchestrateIteration as Mock).mockResolvedValue({
+        status: "completed",
+        output: "done",
+      });
+
+      vi.mocked(createPiSession).mockImplementationOnce((options?: { customTools?: Array<Record<string, unknown>> }) => {
+        const tools = options?.customTools ?? [];
+        const writeProcess = tools.find((tool) => tool.name === "babysitter_write_process_definition") as {
+          execute?: (toolCallId: string, params: Record<string, unknown>) => Promise<{ details?: unknown }>;
+        } | undefined;
+        const reportProcess = tools.find((tool) => tool.name === "babysitter_report_process_definition") as {
+          execute?: (toolCallId: string, params: Record<string, unknown>) => Promise<{ details?: unknown }>;
+        } | undefined;
+
+        return {
+          initialize: vi.fn().mockResolvedValue(undefined),
+          subscribe: vi.fn(() => () => {}),
+          dispose: vi.fn(),
+          executeBash: vi.fn(async () => ({
+            output: "ok",
+            exitCode: 0,
+            cancelled: false,
+          })),
+          abort: vi.fn().mockResolvedValue(undefined),
+          get sessionId() {
+            return "mock-session-id-phase1-workspace-context";
+          },
+          get isInitialized() {
+            return true;
+          },
+          get isStreaming() {
+            return false;
+          },
+          prompt: vi.fn(async (prompt: string) => {
+            promptCount += 1;
+            if (promptCount === 1) {
+              await writeProcess?.execute?.("tool-write-workspace-context", {
+                processPath: generatedPath,
+                source: [
+                  'export async function process(inputs, ctx) {',
+                  '  const root = ctx.workspaceDir || ctx.cwd;',
+                  '  if (!root) throw new Error("missing root");',
+                  '  return { root };',
+                  '}',
+                  '',
+                ].join("\n"),
+              });
+              await reportProcess?.execute?.("tool-report-workspace-context", {
+                processPath: generatedPath,
+                summary: "Generated process that assumes runtime workspace paths exist",
+              });
+              return { success: true, output: "phase1-workspace-context", exitCode: 0, duration: 1 };
+            }
+
+            expect(prompt).toContain("assumes ctx.workspaceDir or ctx.cwd exists");
+            expect(prompt).toContain("import.meta.url");
+            expect(prompt).toContain("fileURLToPath");
+            await writeProcess?.execute?.("tool-write-workspace-context-fixed", {
+              processPath: generatedPath,
+              source: [
+                'import path from "node:path";',
+                'import { fileURLToPath } from "node:url";',
+                '',
+                'const workspaceDir = path.dirname(fileURLToPath(import.meta.url));',
+                '',
+                'export async function process(inputs, ctx) {',
+                '  return { root: workspaceDir };',
+                '}',
+                '',
+              ].join("\n"),
+            });
+            await reportProcess?.execute?.("tool-report-workspace-context-fixed", {
+              processPath: generatedPath,
+              summary: "Repaired process to derive workspace from import.meta.url",
+            });
+            return { success: true, output: "phase1-repaired", exitCode: 0, duration: 1 };
+          }),
+        };
+      });
+
+      const code = await handleSessionCreate({
+        prompt: "create a game",
+        workspace,
+        runsDir: "/tmp/runs",
+        json: false,
+        verbose: false,
+        interactive: false,
+      });
+
+      expect(code).toBe(0);
+      expect(promptCount).toBe(2);
+      const source = await fs.readFile(generatedPath, "utf8");
+      expect(source).toContain("fileURLToPath(import.meta.url)");
+      expect(source).toContain("const workspaceDir = path.dirname");
+      expect(source).not.toContain("ctx.workspaceDir || ctx.cwd");
+    });
+
+    it("repairs a syntactically invalid process that embeds raw nested template literals", async () => {
+      const workspace = await fs.mkdtemp(path.join(os.tmpdir(), "session-create-phase1-syntax-error-"));
+      tempDirs.push(workspace);
+      const generatedPath = path.join(workspace, "generated-process.mjs");
+      let promptCount = 0;
+
+      (discoverHarnesses as Mock).mockResolvedValue([
+        makeDiscoveryResult({ name: "pi" }),
+      ]);
+      (createRun as Mock).mockResolvedValue({
+        runId: "run-syntax-error-fix",
+        runDir: "/tmp/runs/run-syntax-error-fix",
+        metadata: {},
+      });
+      (orchestrateIteration as Mock).mockResolvedValue({
+        status: "completed",
+        output: "done",
+      });
+
+      vi.mocked(createPiSession).mockImplementationOnce((options?: { customTools?: Array<Record<string, unknown>> }) => {
+        const tools = options?.customTools ?? [];
+        const writeProcess = tools.find((tool) => tool.name === "babysitter_write_process_definition") as {
+          execute?: (toolCallId: string, params: Record<string, unknown>) => Promise<{ details?: unknown }>;
+        } | undefined;
+        const reportProcess = tools.find((tool) => tool.name === "babysitter_report_process_definition") as {
+          execute?: (toolCallId: string, params: Record<string, unknown>) => Promise<{ details?: unknown }>;
+        } | undefined;
+
+        return {
+          initialize: vi.fn().mockResolvedValue(undefined),
+          subscribe: vi.fn(() => () => {}),
+          dispose: vi.fn(),
+          executeBash: vi.fn(async () => ({
+            output: "ok",
+            exitCode: 0,
+            cancelled: false,
+          })),
+          abort: vi.fn().mockResolvedValue(undefined),
+          get sessionId() {
+            return "mock-session-id-phase1-syntax-error";
+          },
+          get isInitialized() {
+            return true;
+          },
+          get isStreaming() {
+            return false;
+          },
+          prompt: vi.fn(async (prompt: string) => {
+            promptCount += 1;
+            if (promptCount === 1) {
+              await writeProcess?.execute?.("tool-write-syntax-error", {
+                processPath: generatedPath,
+                source: [
+                  "export async function process(inputs, ctx) {",
+                  "  const embeddedScript = `",
+                  "const view = `",
+                  "<div class=\"card\">Hello</div>",
+                  "`;",
+                  "  `;",
+                  "  return { embeddedScript };",
+                  "}",
+                  "",
+                ].join("\n"),
+              });
+              await reportProcess?.execute?.("tool-report-syntax-error", {
+                processPath: generatedPath,
+                summary: "Generated process with nested template literal syntax bug",
+              });
+              return { success: true, output: "phase1-syntax-error", exitCode: 0, duration: 1 };
+            }
+
+            expect(prompt).toContain("failed `node --check`");
+            expect(prompt).toContain("Unexpected token 'class'");
+            expect(prompt).toContain("raw nested template literals");
+            expect(prompt).toContain("String.raw");
+            await writeProcess?.execute?.("tool-write-syntax-error-fixed", {
+              processPath: generatedPath,
+              source: [
+                "export async function process(inputs, ctx) {",
+                "  const embeddedScript = [",
+                "    \"const view = `<div class=\\\"card\\\">Hello</div>`;\",",
+                "  ].join(\"\\n\");",
+                "  return { embeddedScript };",
+                "}",
+                "",
+              ].join("\n"),
+            });
+            await reportProcess?.execute?.("tool-report-syntax-error-fixed", {
+              processPath: generatedPath,
+              summary: "Repaired process to avoid nested template literal syntax bugs",
+            });
+            return { success: true, output: "phase1-repaired", exitCode: 0, duration: 1 };
+          }),
+        };
+      });
+
+      const code = await handleSessionCreate({
+        prompt: "create a game",
+        workspace,
+        runsDir: "/tmp/runs",
+        json: false,
+        verbose: false,
+        interactive: false,
+      });
+
+      expect(code).toBe(0);
+      expect(promptCount).toBe(2);
+      const source = await fs.readFile(generatedPath, "utf8");
+      expect(source).toContain('].join("\\n")');
+      expect(source).not.toContain("const embeddedScript = `");
+    });
+
+    it("repairs ctx.task calls that pass plain task objects instead of defineTask bindings", async () => {
+      const workspace = await fs.mkdtemp(path.join(os.tmpdir(), "session-create-phase1-plain-task-object-"));
+      tempDirs.push(workspace);
+      const generatedPath = path.join(workspace, "generated-process.mjs");
+      let promptCount = 0;
+
+      (discoverHarnesses as Mock).mockResolvedValue([
+        makeDiscoveryResult({ name: "pi" }),
+      ]);
+      (createRun as Mock).mockResolvedValue({
+        runId: "run-plain-task-object-fix",
+        runDir: "/tmp/runs/run-plain-task-object-fix",
+        metadata: {},
+      });
+      (orchestrateIteration as Mock).mockResolvedValue({
+        status: "completed",
+        output: "done",
+      });
+
+      vi.mocked(createPiSession).mockImplementationOnce((options?: { customTools?: Array<Record<string, unknown>> }) => {
+        const tools = options?.customTools ?? [];
+        const writeProcess = tools.find((tool) => tool.name === "babysitter_write_process_definition") as {
+          execute?: (toolCallId: string, params: Record<string, unknown>) => Promise<{ details?: unknown }>;
+        } | undefined;
+        const reportProcess = tools.find((tool) => tool.name === "babysitter_report_process_definition") as {
+          execute?: (toolCallId: string, params: Record<string, unknown>) => Promise<{ details?: unknown }>;
+        } | undefined;
+
+        return {
+          initialize: vi.fn().mockResolvedValue(undefined),
+          subscribe: vi.fn(() => () => {}),
+          dispose: vi.fn(),
+          executeBash: vi.fn(async () => ({
+            output: "ok",
+            exitCode: 0,
+            cancelled: false,
+          })),
+          abort: vi.fn().mockResolvedValue(undefined),
+          get sessionId() {
+            return "mock-session-id-phase1-plain-task-object";
+          },
+          get isInitialized() {
+            return true;
+          },
+          get isStreaming() {
+            return false;
+          },
+          prompt: vi.fn(async (prompt: string) => {
+            promptCount += 1;
+            if (promptCount === 1) {
+              await writeProcess?.execute?.("tool-write-plain-task-object", {
+                processPath: generatedPath,
+                source: [
+                  "export async function process(inputs, ctx) {",
+                  '  const verifyTask = { kind: "shell", shell: { command: "echo hi" } };',
+                  "  await ctx.task(verifyTask, {});",
+                  "  return { ok: true };",
+                  "}",
+                  "",
+                ].join("\n"),
+              });
+              await reportProcess?.execute?.("tool-report-plain-task-object", {
+                processPath: generatedPath,
+                summary: "Generated process that passes a plain task object to ctx.task",
+              });
+              return { success: true, output: "phase1-plain-task-object", exitCode: 0, duration: 1 };
+            }
+
+            expect(prompt).toContain("calls ctx.task(...) with values that are not DefinedTask bindings");
+            expect(prompt).toContain("verifyTask");
+            expect(prompt).toContain("do not pass plain object task definitions");
+            await writeProcess?.execute?.("tool-write-plain-task-object-fixed", {
+              processPath: generatedPath,
+              source: [
+                'import { defineTask } from "@a5c-ai/babysitter-sdk";',
+                "",
+                'const verifyTask = defineTask("verify-task", () => ({',
+                '  kind: "shell",',
+                '  shell: { command: "echo hi" },',
+                "}));",
+                "",
+                "export async function process(inputs, ctx) {",
+                "  await ctx.task(verifyTask, {});",
+                "  return { ok: true };",
+                "}",
+                "",
+              ].join("\n"),
+            });
+            await reportProcess?.execute?.("tool-report-plain-task-object-fixed", {
+              processPath: generatedPath,
+              summary: "Repaired process to use defineTask before ctx.task",
+            });
+            return { success: true, output: "phase1-repaired", exitCode: 0, duration: 1 };
+          }),
+        };
+      });
+
+      const code = await handleSessionCreate({
+        prompt: "create a game",
+        workspace,
+        runsDir: "/tmp/runs",
+        json: false,
+        verbose: false,
+        interactive: false,
+      });
+
+      expect(code).toBe(0);
+      expect(promptCount).toBe(2);
+      const source = await fs.readFile(generatedPath, "utf8");
+      expect(source).toContain('const verifyTask = defineTask("verify-task"');
+      expect(source).toContain("await ctx.task(verifyTask, {})");
+      expect(source).not.toContain('const verifyTask = { kind: "shell"');
+    });
+
+    it("repairs defineTask outputs that omit their top-level kind", async () => {
+      const workspace = await fs.mkdtemp(path.join(os.tmpdir(), "session-create-phase1-missing-kind-"));
+      tempDirs.push(workspace);
+      const generatedPath = path.join(workspace, "generated-process.mjs");
+      let promptCount = 0;
+
+      (discoverHarnesses as Mock).mockResolvedValue([
+        makeDiscoveryResult({ name: "pi" }),
+      ]);
+      (createRun as Mock).mockResolvedValue({
+        runId: "run-missing-kind-fix",
+        runDir: "/tmp/runs/run-missing-kind-fix",
+        metadata: {},
+      });
+      (orchestrateIteration as Mock).mockResolvedValue({
+        status: "completed",
+        output: "done",
+      });
+
+      vi.mocked(createPiSession).mockImplementationOnce((options?: { customTools?: Array<Record<string, unknown>> }) => {
+        const tools = options?.customTools ?? [];
+        const writeProcess = tools.find((tool) => tool.name === "babysitter_write_process_definition") as {
+          execute?: (toolCallId: string, params: Record<string, unknown>) => Promise<{ details?: unknown }>;
+        } | undefined;
+        const reportProcess = tools.find((tool) => tool.name === "babysitter_report_process_definition") as {
+          execute?: (toolCallId: string, params: Record<string, unknown>) => Promise<{ details?: unknown }>;
+        } | undefined;
+
+        return {
+          initialize: vi.fn().mockResolvedValue(undefined),
+          subscribe: vi.fn(() => () => {}),
+          dispose: vi.fn(),
+          executeBash: vi.fn(async () => ({
+            output: "ok",
+            exitCode: 0,
+            cancelled: false,
+          })),
+          abort: vi.fn().mockResolvedValue(undefined),
+          get sessionId() {
+            return "mock-session-id-phase1-missing-kind";
+          },
+          get isInitialized() {
+            return true;
+          },
+          get isStreaming() {
+            return false;
+          },
+          prompt: vi.fn(async (prompt: string) => {
+            promptCount += 1;
+            if (promptCount === 1) {
+              await writeProcess?.execute?.("tool-write-missing-kind", {
+                processPath: generatedPath,
+                source: [
+                  'import { defineTask } from "@a5c-ai/babysitter-sdk";',
+                  '',
+                  'const badShellTask = defineTask("bad-shell", () => ({',
+                  '  shell: { command: "echo hi" },',
+                  '}));',
+                  '',
+                  'export async function process(inputs, ctx) {',
+                  '  return ctx.task(badShellTask, {});',
+                  '}',
+                  '',
+                ].join("\n"),
+              });
+              await reportProcess?.execute?.("tool-report-missing-kind", {
+                processPath: generatedPath,
+                summary: "Generated task definition without kind",
+              });
+              return { success: true, output: "phase1-missing-kind", exitCode: 0, duration: 1 };
+            }
+
+            expect(prompt).toContain("defines task(s) without a top-level kind");
+            expect(prompt).toContain('kind: "shell"');
+            expect(prompt).toContain("await ctx.task(definedTask, args)");
+            await writeProcess?.execute?.("tool-write-missing-kind-fixed", {
+              processPath: generatedPath,
+              source: [
+                'import { defineTask } from "@a5c-ai/babysitter-sdk";',
+                '',
+                'const goodShellTask = defineTask("good-shell", () => ({',
+                '  kind: "shell",',
+                '  shell: { command: "echo hi" },',
+                '}));',
+                '',
+                'export async function process(inputs, ctx) {',
+                '  return await ctx.task(goodShellTask, {});',
+                '}',
+                '',
+              ].join("\n"),
+            });
+            await reportProcess?.execute?.("tool-report-missing-kind-fixed", {
+              processPath: generatedPath,
+              summary: "Repaired task definition to include top-level kind",
+            });
+            return { success: true, output: "phase1-repaired", exitCode: 0, duration: 1 };
+          }),
+        };
+      });
+
+      const code = await handleSessionCreate({
+        prompt: "create a game",
+        workspace,
+        runsDir: "/tmp/runs",
+        json: false,
+        verbose: false,
+        interactive: false,
+      });
+
+      expect(code).toBe(0);
+      expect(promptCount).toBe(2);
+      const source = await fs.readFile(generatedPath, "utf8");
+      expect(source).toContain('kind: "shell"');
+      expect(source).toContain("await ctx.task(goodShellTask, {})");
+      expect(source).not.toContain("const badShellTask");
+    });
+
   });
 
   describe("Phase B: run creation", () => {
@@ -631,7 +1790,7 @@ describe("handleSessionCreate", () => {
       );
     });
 
-    it("invokes harness for node-kind effects", async () => {
+    it("invokes an explicit task metadata harness for node-kind effects", async () => {
       (discoverHarnesses as Mock).mockResolvedValue([
         makeDiscoveryResult({ name: "claude-code" }),
       ]);
@@ -648,7 +1807,13 @@ describe("handleSessionCreate", () => {
             effectId: "eff-2",
             invocationKey: "key-2",
             kind: "node",
-            taskDef: { kind: "node", title: "do something" },
+            taskDef: {
+              kind: "node",
+              title: "do something",
+              metadata: {
+                harness: "claude-code",
+              },
+            },
           },
         ],
       };

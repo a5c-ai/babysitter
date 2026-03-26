@@ -7,6 +7,9 @@
  */
 
 import { execFile } from "node:child_process";
+import { promises as fs } from "node:fs";
+import * as os from "node:os";
+import * as path from "node:path";
 import type { HarnessInvokeOptions, HarnessInvokeResult } from "./types";
 import { checkCliAvailable } from "./discovery";
 import { BabysitterRuntimeError, ErrorCategory } from "../runtime/exceptions";
@@ -23,20 +26,79 @@ interface HarnessCliSpec {
   workspaceFlag?: string;
   /** Whether the harness accepts a --model flag. */
   supportsModel: boolean;
+  /** Whether the prompt is passed positionally or via a named flag. */
+  promptStyle?: "positional" | "flag";
+  /** Optional leading args required for non-interactive invocation. */
+  baseArgs?: string[];
+}
+
+interface LaunchSpec {
+  command: string;
+  args: string[];
+  shell: boolean;
 }
 
 /**
  * Mapping from harness identifier to CLI command and flag details.
  */
 export const HARNESS_CLI_MAP: Readonly<Record<string, HarnessCliSpec>> = {
-  "claude-code": { cli: "claude", workspaceFlag: "--workspace", supportsModel: true },
-  codex: { cli: "codex", workspaceFlag: "--cwd", supportsModel: true },
-  pi: { cli: "pi", workspaceFlag: "--workspace", supportsModel: true },
-  "oh-my-pi": { cli: "omp", workspaceFlag: "--workspace", supportsModel: true },
-  "gemini-cli": { cli: "gemini", supportsModel: true },
-  cursor: { cli: "cursor", supportsModel: false },
-  opencode: { cli: "opencode", supportsModel: false },
+  "claude-code": { cli: "claude", supportsModel: true, promptStyle: "flag" },
+  codex: {
+    cli: "codex",
+    workspaceFlag: "-C",
+    supportsModel: true,
+    promptStyle: "positional",
+    baseArgs: ["exec", "--dangerously-bypass-approvals-and-sandbox", "--skip-git-repo-check"],
+  },
+  pi: { cli: "pi", workspaceFlag: "--workspace", supportsModel: true, promptStyle: "flag" },
+  "oh-my-pi": { cli: "omp", workspaceFlag: "--workspace", supportsModel: true, promptStyle: "flag" },
+  "gemini-cli": { cli: "gemini", supportsModel: true, promptStyle: "flag" },
+  cursor: { cli: "cursor", supportsModel: false, promptStyle: "flag" },
+  opencode: { cli: "opencode", supportsModel: false, promptStyle: "flag" },
 } as const;
+
+function quotePowerShellArg(value: string): string {
+  return `'${value.replace(/'/g, "''")}'`;
+}
+
+function buildLaunchSpec(
+  name: string,
+  spec: HarnessCliSpec,
+  cliPath: string | undefined,
+  args: string[],
+  promptFilePath?: string,
+): LaunchSpec {
+  if (process.platform === "win32" && name === "codex") {
+    const commandLine = [
+      "Get-Content -Raw",
+      quotePowerShellArg(promptFilePath ?? ""),
+      "|",
+      "&",
+      quotePowerShellArg(spec.cli),
+      ...args.map(quotePowerShellArg),
+    ].join(" ");
+
+    return {
+      command: "powershell.exe",
+      args: ["-NoProfile", "-Command", commandLine],
+      shell: false,
+    };
+  }
+
+  if (process.platform === "win32") {
+    return {
+      command: spec.cli,
+      args,
+      shell: true,
+    };
+  }
+
+  return {
+    command: cliPath ?? spec.cli,
+    args,
+    shell: false,
+  };
+}
 
 // ---------------------------------------------------------------------------
 // Arg builder (pure function)
@@ -67,7 +129,13 @@ export function buildHarnessArgs(
     );
   }
 
-  const args: string[] = ["--prompt", options.prompt];
+  const args: string[] = [...(spec.baseArgs ?? [])];
+
+  if ((spec.promptStyle ?? "flag") === "positional") {
+    args.push(name === "codex" ? "-" : options.prompt);
+  } else {
+    args.push("--prompt", options.prompt);
+  }
 
   if (options.model && spec.supportsModel) {
     args.push("--model", options.model);
@@ -94,7 +162,8 @@ const DEFAULT_TIMEOUT_MS = 900_000;
  *   1. Validate that `name` is a known harness.
  *   2. Check that the CLI binary is installed via `checkCliAvailable`.
  *   3. Build args via `buildHarnessArgs`.
- *   4. Spawn via `child_process.execFile` (never shell=true).
+ *   4. Spawn via `child_process.execFile`. On Windows, enable shell mode so
+ *      PATH-resolved `.cmd` shims (for example npm-installed CLIs) can launch.
  *   5. Capture stdout + stderr, measure wall-clock duration.
  *   6. Return a `HarnessInvokeResult`.
  *
@@ -136,6 +205,15 @@ export async function invokeHarness(
 
   const args = buildHarnessArgs(name, options);
   const timeoutMs = options.timeout ?? DEFAULT_TIMEOUT_MS;
+  let promptTempDir: string | undefined;
+  let promptFilePath: string | undefined;
+  if (process.platform === "win32" && name === "codex") {
+    promptTempDir = await fs.mkdtemp(path.join(os.tmpdir(), "babysitter-codex-"));
+    promptFilePath = path.join(promptTempDir, "prompt.txt");
+    await fs.writeFile(promptFilePath, options.prompt, "utf8");
+  }
+  const launch = buildLaunchSpec(name, spec, cliCheck.path, args, promptFilePath);
+  const childCwd = name === "codex" ? process.cwd() : options.workspace;
 
   const startTime = Date.now();
 
@@ -143,18 +221,27 @@ export async function invokeHarness(
     const childEnv = options.env
       ? { ...process.env, ...options.env }
       : process.env;
+    const cleanupPromptFile = async (): Promise<void> => {
+      if (!promptTempDir) {
+        return;
+      }
+      await fs.rm(promptTempDir, { recursive: true, force: true }).catch(() => {});
+    };
 
     try {
-      execFile(
-        spec.cli,
-        args,
+      const child = execFile(
+        launch.command,
+        launch.args,
         {
+          cwd: childCwd,
           timeout: timeoutMs,
           windowsHide: true,
           maxBuffer: 50 * 1024 * 1024, // 50 MiB
           env: childEnv,
+          shell: launch.shell,
         },
         (error: Error | null, stdout: string | Buffer, stderr: string | Buffer) => {
+          void cleanupPromptFile();
           const duration = Date.now() - startTime;
           const stderrStr = String(stderr);
           const output = stderrStr.length > 0
@@ -187,7 +274,11 @@ export async function invokeHarness(
           });
         },
       );
+      if (name === "codex" && process.platform !== "win32" && child.stdin) {
+        child.stdin.end(options.prompt);
+      }
     } catch (err: unknown) {
+      void cleanupPromptFile();
       reject(
         new BabysitterRuntimeError(
           "HarnessSpawnError",

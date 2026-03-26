@@ -15,6 +15,12 @@ export interface SessionCreatePromptContext {
   envFlags: Array<{ name: string; value: string }>;
 }
 
+export interface ProcessDefinitionUserPromptOptions {
+  interactive: boolean;
+  workspaceAssessment?: "empty" | "non-empty";
+  workspaceEntries?: string[];
+}
+
 function formatHarnessCatalog(context: SessionCreatePromptContext): string[] {
   const lines = ["Discovered harnesses:"];
   for (const harness of context.discoveredHarnesses) {
@@ -104,8 +110,19 @@ export function buildProcessDefinitionSystemPrompt(
     "- This phase is unbound. Do not create a run, bind a session, iterate a run, or post task results.",
     "- Use the AskUserQuestion tool when clarification is useful. Ask focused, high-signal questions in batches when possible.",
     "- Research the workspace before finalizing the process. Use your available read/search/bash/write tools as needed.",
-    "- Write the final JavaScript process file to the exact output path provided below.",
-    "- After the file is written, call babysitter_report_process_definition exactly once with the final path and a concise summary.",
+    "- Treat the provided workspace as the only relevant filesystem root unless the user explicitly points you somewhere else.",
+    "- Do not read files outside the workspace just to find process examples, SDK patterns, or inspiration.",
+    "- Use babysitter_write_process_definition to write the final JavaScript process file to the exact output path provided below.",
+    "- The module must export a named `async function process(inputs, ctx)`.",
+    "- If you define tasks with `defineTask(...)`, every returned TaskDef must include a top-level `kind` field.",
+    "- Agent tasks must use `kind: \"agent\"` with `agent: { name, prompt, outputSchema }`; shell tasks must use `kind: \"shell\"` with `shell: { command: \"...\" }`; node tasks must use `kind: \"node\"` with `node: { entry, args? }`.",
+    "- Call defined tasks with `await ctx.task(definedTask, args)`; do not invent alternate task runners.",
+    "- Any task passed to `ctx.task(...)` must be a DefinedTask created via `defineTask(...)`; never pass plain object task definitions or ad-hoc task objects.",
+    "- Inside that named `process(inputs, ctx)` export, do not reference Node's global process object as `process.*`; use `globalThis.process` or an imported alias like `nodeProcess` instead.",
+    "- If the process needs the workspace root, do not assume `ctx.workspaceDir` or `ctx.cwd` exists in runtime context. Resolve it from the module location using `import.meta.url`, for example with `path.dirname(fileURLToPath(import.meta.url))`.",
+    "- Keep the generated module syntactically valid ESM. If you embed HTML/CSS/JS asset contents inside the process source, do not use raw nested template literals; prefer arrays joined with \"\\n\", String.raw, or escaped inner backticks and \\${...} sequences.",
+    "- The generated process must directly execute the user's requested work. Do not generate a meta-process that writes another babysitter process unless the user explicitly asked for process authoring.",
+    "- After the file is written through babysitter_write_process_definition, call babysitter_report_process_definition exactly once with the final path and a concise summary.",
     "- Do not claim completion in plain text without calling babysitter_report_process_definition.",
     "- If different tasks should run on different harnesses, encode that in the process definition rather than leaving it implicit.",
     "- Encode internal worker guardrails explicitly in task metadata when needed. Use `task.metadata.bashSandbox`, `task.metadata.isolated`, and `task.metadata.enableCompaction` instead of assuming every internal task is secure or isolated by default.",
@@ -118,13 +135,47 @@ export function buildProcessDefinitionSystemPrompt(
 export function buildProcessDefinitionUserPrompt(
   userPrompt: string,
   outputPath: string,
+  options?: ProcessDefinitionUserPromptOptions,
 ): string {
-  return [
-    "Interview the user as needed, research the codebase, define the process, and write the process file.",
+  const interactive = options?.interactive ?? true;
+  const workspaceAssessment = options?.workspaceAssessment;
+  const workspaceEntries = options?.workspaceEntries ?? [];
+  const workspaceSummary = workspaceEntries.length > 0
+    ? workspaceEntries.join(", ")
+    : "(no files)";
+
+  const lines = [
+    interactive
+      ? "Interactive mode. Ask focused clarification questions only when they materially improve the process."
+      : "Non-interactive mode. Do not call AskUserQuestion; infer missing details from the request and workspace state.",
     "",
     `User request: ${userPrompt}`,
     `Output path: ${outputPath}`,
-  ].join("\n");
+  ];
+
+  if (workspaceAssessment === "empty") {
+      lines.push(
+        "Workspace assessment: empty.",
+        `Workspace entries: ${workspaceSummary}`,
+        "Treat this as a greenfield request and move straight to authoring the process.",
+        "Do not inspect unrelated directories, home-directory configs, or global skill/plugin folders.",
+        "Keep the process practical for a brand-new workspace: plan, scaffold, implement, verify.",
+        "Keep generated asset strings syntax-safe. If the process writes JS/HTML/CSS files, avoid raw nested template literals inside the process module; prefer arrays joined with \"\\n\", String.raw, or escaped inner backticks and \\${...} sequences.",
+      );
+  } else if (workspaceAssessment === "non-empty") {
+    lines.push(
+      `Workspace assessment: non-empty (${workspaceSummary}).`,
+      "Inspect only the workspace files that are relevant to the request before finalizing the process.",
+      "Do not wander through unrelated global directories or repositories.",
+    );
+  }
+
+  lines.push(
+    "The generated process must directly execute the user's requested work rather than write another babysitter process.",
+    "Use babysitter_write_process_definition to write the file now, then call babysitter_report_process_definition exactly once.",
+  );
+
+  return lines.join("\n");
 }
 
 export function buildOrchestrationSystemPrompt(

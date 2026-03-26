@@ -109,7 +109,7 @@ export function resolveRepoRoot(): string | null {
     const resolved = path.resolve(candidate);
     if (
       existsSync(path.join(resolved, "plugins", "babysitter-codex")) &&
-      existsSync(path.join(resolved, "plugins", "pi")) &&
+      existsSync(path.join(resolved, "plugins", "babysitter-pi")) &&
       existsSync(path.join(resolved, "packages", "sdk"))
     ) {
       return resolved;
@@ -123,7 +123,7 @@ export function getCodexHome(): string {
 }
 
 export function getInstalledCodexSkillDir(): string {
-  return path.join(getCodexHome(), "skills", "babysitter-codex");
+  return path.join(getCodexHome(), "skills", "babysit");
 }
 
 export function isCodexPluginInstalled(): boolean {

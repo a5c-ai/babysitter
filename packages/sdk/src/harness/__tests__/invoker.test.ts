@@ -67,9 +67,16 @@ describe("buildHarnessArgs", () => {
     expect(args).toEqual(["--prompt", "Hello world"]);
   });
 
-  it("builds args for codex (--prompt, --cwd for workspace)", () => {
+  it("builds args for codex exec mode with positional prompt and working dir", () => {
     const args = buildHarnessArgs("codex", { ...baseOptions, workspace: "/tmp/project" });
-    expect(args).toEqual(["--prompt", "Hello world", "--cwd", "/tmp/project"]);
+    expect(args).toEqual([
+      "exec",
+      "--dangerously-bypass-approvals-and-sandbox",
+      "--skip-git-repo-check",
+      "-",
+      "-C",
+      "/tmp/project",
+    ]);
   });
 
   it("builds args for pi (--prompt, --workspace for workspace)", () => {
@@ -103,7 +110,16 @@ describe("buildHarnessArgs", () => {
       model: "gpt-4",
       workspace: "/work",
     });
-    expect(args).toEqual(["--prompt", "Hello world", "--model", "gpt-4", "--cwd", "/work"]);
+    expect(args).toEqual([
+      "exec",
+      "--dangerously-bypass-approvals-and-sandbox",
+      "--skip-git-repo-check",
+      "-",
+      "--model",
+      "gpt-4",
+      "-C",
+      "/work",
+    ]);
   });
 
   it("does not include --model for cursor (unsupported)", () => {
@@ -116,9 +132,9 @@ describe("buildHarnessArgs", () => {
     expect(args).toEqual(["--prompt", "Hello world"]);
   });
 
-  it("includes workspace for claude-code", () => {
+  it("keeps claude-code args stable when workspace is provided", () => {
     const args = buildHarnessArgs("claude-code", { ...baseOptions, workspace: "/tmp" });
-    expect(args).toEqual(["--prompt", "Hello world", "--workspace", "/tmp"]);
+    expect(args).toEqual(["--prompt", "Hello world"]);
   });
 
   it("ignores workspace for gemini-cli (no workspace flag)", () => {
@@ -226,6 +242,56 @@ describe("invokeHarness", () => {
 
     const env = capturedOpts?.env as Record<string, string>;
     expect(env.MY_VAR).toBe("my_value");
+  });
+
+  it("passes workspace as cwd to the child process", async () => {
+    mockCheckCliAvailable.mockResolvedValue({ available: true, path: "/usr/bin/claude" });
+
+    let capturedOpts: Record<string, unknown> | undefined;
+    mockExecFile.mockImplementation((_cmd, _args, opts, callback) => {
+      capturedOpts = opts as Record<string, unknown>;
+      (callback as (err: Error | null, stdout: string, stderr: string) => void)(null, "ok", "");
+      return {} as ReturnType<typeof execFile>;
+    });
+
+    await invokeHarness("claude-code", {
+      prompt: "test",
+      workspace: "/tmp/project",
+    });
+
+    expect(capturedOpts?.cwd).toBe("/tmp/project");
+  });
+
+  it("wraps codex through PowerShell on Windows so stdin piping matches direct CLI behavior", async () => {
+    mockCheckCliAvailable.mockResolvedValue({ available: true, path: "C:/Users/test/AppData/Roaming/npm/codex.cmd" });
+
+    let capturedCmd: string | undefined;
+    let capturedOpts: Record<string, unknown> | undefined;
+    let capturedArgs: string[] | undefined;
+    mockExecFile.mockImplementation((cmd, args, opts, callback) => {
+      capturedCmd = cmd as string;
+      capturedArgs = args as string[];
+      capturedOpts = opts as Record<string, unknown>;
+      (callback as (err: Error | null, stdout: string, stderr: string) => void)(null, "ok", "");
+      return {} as ReturnType<typeof execFile>;
+    });
+
+    await invokeHarness("codex", {
+      prompt: "test",
+      workspace: "/tmp/project",
+    });
+
+    if (process.platform === "win32") {
+      expect(capturedCmd).toBe("powershell.exe");
+      expect(capturedArgs?.slice(0, 2)).toEqual(["-NoProfile", "-Command"]);
+      expect(String(capturedArgs?.[2])).toContain("Get-Content -Raw");
+      expect(capturedOpts?.shell).toBe(false);
+      expect(capturedOpts?.cwd).toBe(process.cwd());
+    } else {
+      expect(capturedCmd).toBe("/usr/bin/codex.cmd");
+      expect(capturedOpts?.shell).toBe(false);
+      expect(capturedOpts?.cwd).toBe(process.cwd());
+    }
   });
 
   it("uses correct CLI command from HARNESS_CLI_MAP", async () => {

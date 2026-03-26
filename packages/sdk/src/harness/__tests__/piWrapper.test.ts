@@ -172,6 +172,29 @@ describe("PiSessionHandle", () => {
       expect(result.output).toContain("model rate limited");
     });
 
+    test("treats assistant-side provider errors at agent_end as prompt failures", async () => {
+      mockGetLastAssistantText.mockReturnValue("");
+      mockPrompt.mockImplementation(async () => {
+        emitEvent({
+          type: "agent_end",
+          messages: [
+            {
+              role: "assistant",
+              stopReason: "error",
+              errorMessage: "404 Resource not found",
+            },
+          ],
+        });
+      });
+
+      const session = createPiSession();
+      const result = await session.prompt("use provider");
+
+      expect(result.success).toBe(false);
+      expect(result.exitCode).toBe(1);
+      expect(result.output).toBe("404 Resource not found");
+    });
+
     test("timeout exceeded rejects with PiTimeoutError", async () => {
       // prompt never resolves, no agent_end emitted
       mockPrompt.mockImplementation(
@@ -224,7 +247,7 @@ describe("PiSessionHandle", () => {
       await session.prompt("do azure work");
 
       expect(process.env.AZURE_OPENAI_RESOURCE_NAME).toBe("demo-resource");
-      expect(process.env.AZURE_OPENAI_BASE_URL).toBe("https://demo-resource.openai.azure.com");
+      expect(process.env.AZURE_OPENAI_BASE_URL).toBe("https://demo-resource.openai.azure.com/openai/v1");
       expect(process.env.AZURE_OPENAI_DEPLOYMENT_NAME_MAP).toBe("gpt-5.4=gpt-5.4");
       expect(mockCreateAgentSession).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -232,7 +255,32 @@ describe("PiSessionHandle", () => {
             id: "gpt-5.4",
             provider: "azure-openai-responses",
             api: "openai-responses",
-            baseUrl: "https://demo-resource.openai.azure.com",
+            baseUrl: "https://demo-resource.openai.azure.com/openai/v1",
+          }),
+        }),
+      );
+    });
+
+    test("normalizes Azure base URLs that omit the responses v1 path", async () => {
+      process.env.AZURE_OPENAI_API_KEY = "azure-key";
+      process.env.AZURE_OPENAI_BASE_URL = "https://demo-resource.openai.azure.com";
+
+      mockPrompt.mockImplementation(async () => {
+        emitEvent({ type: "agent_end" });
+      });
+      mockGetLastAssistantText.mockReturnValue("ok");
+
+      const session = createPiSession({
+        workspace: "/tmp/project",
+        model: "gpt-5.4",
+      });
+      await session.prompt("do azure work");
+
+      expect(process.env.AZURE_OPENAI_BASE_URL).toBe("https://demo-resource.openai.azure.com/openai/v1");
+      expect(mockCreateAgentSession).toHaveBeenCalledWith(
+        expect.objectContaining({
+          model: expect.objectContaining({
+            baseUrl: "https://demo-resource.openai.azure.com/openai/v1",
           }),
         }),
       );

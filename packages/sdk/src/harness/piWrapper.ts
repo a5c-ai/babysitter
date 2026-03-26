@@ -117,13 +117,42 @@ async function loadPiModule(): Promise<PiCodingAgentModule> {
   }
 }
 
+function normalizeAzureOpenAiBaseUrl(value: string): string {
+  const trimmed = value.trim().replace(/\/+$/, "");
+  if (!trimmed) {
+    return trimmed;
+  }
+
+  try {
+    const parsed = new URL(trimmed);
+    const normalizedPath = parsed.pathname.replace(/\/+$/, "");
+    const isAzureOpenAiHost = /\.openai\.azure\.com$/i.test(parsed.hostname);
+
+    if (normalizedPath === "/openai/v1") {
+      return `${parsed.origin}${normalizedPath}`;
+    }
+    if (normalizedPath === "/openai") {
+      return `${parsed.origin}/openai/v1`;
+    }
+    if (isAzureOpenAiHost && (normalizedPath === "" || normalizedPath === "/")) {
+      return `${parsed.origin}/openai/v1`;
+    }
+  } catch {
+    // Fall back to the raw value when the URL cannot be parsed.
+  }
+
+  return trimmed;
+}
+
 function configureAzureOpenAiEnvDefaults(requestedModel?: string): void {
   const resourceName = process.env.AZURE_OPENAI_RESOURCE_NAME || process.env.AZURE_OPENAI_PROJECT_NAME;
   if (!process.env.AZURE_OPENAI_RESOURCE_NAME && process.env.AZURE_OPENAI_PROJECT_NAME) {
     process.env.AZURE_OPENAI_RESOURCE_NAME = process.env.AZURE_OPENAI_PROJECT_NAME;
   }
-  if (!process.env.AZURE_OPENAI_BASE_URL && resourceName) {
-    process.env.AZURE_OPENAI_BASE_URL = `https://${resourceName}.openai.azure.com`;
+  if (process.env.AZURE_OPENAI_BASE_URL) {
+    process.env.AZURE_OPENAI_BASE_URL = normalizeAzureOpenAiBaseUrl(process.env.AZURE_OPENAI_BASE_URL);
+  } else if (resourceName) {
+    process.env.AZURE_OPENAI_BASE_URL = normalizeAzureOpenAiBaseUrl(`https://${resourceName}.openai.azure.com`);
   }
   if (
     requestedModel &&
@@ -140,8 +169,9 @@ function synthesizeAzureModelEntry(modelId: string): PiModelEntry | undefined {
     return undefined;
   }
   const resourceName = process.env.AZURE_OPENAI_RESOURCE_NAME || process.env.AZURE_OPENAI_PROJECT_NAME;
-  const baseUrl = process.env.AZURE_OPENAI_BASE_URL ||
-    (resourceName ? `https://${resourceName}.openai.azure.com` : undefined);
+  const baseUrl = process.env.AZURE_OPENAI_BASE_URL
+    ? normalizeAzureOpenAiBaseUrl(process.env.AZURE_OPENAI_BASE_URL)
+    : (resourceName ? normalizeAzureOpenAiBaseUrl(`https://${resourceName}.openai.azure.com`) : undefined);
   if (!baseUrl) {
     return undefined;
   }
@@ -163,6 +193,32 @@ function synthesizeAzureModelEntry(modelId: string): PiModelEntry | undefined {
       cacheWrite: 0,
     },
   };
+}
+
+function extractAssistantFailure(messages: unknown[] | undefined): string | undefined {
+  if (!Array.isArray(messages) || messages.length === 0) {
+    return undefined;
+  }
+
+  for (let index = messages.length - 1; index >= 0; index -= 1) {
+    const message = messages[index];
+    if (!message || typeof message !== "object") {
+      continue;
+    }
+    const candidate = message as {
+      role?: unknown;
+      stopReason?: unknown;
+      errorMessage?: unknown;
+    };
+    if (candidate.role !== "assistant") {
+      continue;
+    }
+    if (candidate.stopReason === "error" && typeof candidate.errorMessage === "string" && candidate.errorMessage.trim()) {
+      return candidate.errorMessage.trim();
+    }
+  }
+
+  return undefined;
 }
 
 // ---------------------------------------------------------------------------
@@ -220,6 +276,7 @@ export class PiSessionHandle {
     return new Promise<PiPromptResult>((resolve, reject) => {
       let settled = false;
       let timer: ReturnType<typeof setTimeout> | undefined;
+      let lastAgentEndMessages: unknown[] | undefined;
 
       // Set up timeout
       if (effectiveTimeout > 0) {
@@ -243,16 +300,23 @@ export class PiSessionHandle {
         if (settled) return;
 
         if (event.type === "agent_end") {
+          lastAgentEndMessages = Array.isArray((event as { messages?: unknown[] }).messages)
+            ? (event as { messages?: unknown[] }).messages
+            : undefined;
           settled = true;
           if (timer) clearTimeout(timer);
           unsubscribe();
 
-          const output = session.getLastAssistantText() ?? "";
+          const assistantFailure = extractAssistantFailure(lastAgentEndMessages);
+          const assistantText = session.getLastAssistantText();
+          const output = assistantText && assistantText.trim().length > 0
+            ? assistantText
+            : assistantFailure ?? "";
           resolve({
             output,
-            exitCode: 0,
+            exitCode: assistantFailure ? 1 : 0,
             duration: Date.now() - start,
-            success: true,
+            success: !assistantFailure,
           });
         }
       });

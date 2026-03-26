@@ -344,7 +344,7 @@ async function installCodexPlugin(
     }
     return {
       harness: "codex",
-      warning: "babysitter-codex is already installed in CODEX_HOME; skipping reinstall.",
+      warning: "babysit is already installed in CODEX_HOME; skipping reinstall.",
       location: installedSkillDir,
     };
   }
@@ -356,7 +356,7 @@ async function installCodexPlugin(
     return {
       harness: "codex",
       dryRun: true,
-      summary: "Install the repo-local babysitter-codex package globally.",
+      summary: "Install the repo-local @a5c-ai/babysitter-codex package globally.",
       command: renderCommand(command, args),
       location: packageDir,
     };
@@ -371,7 +371,7 @@ async function installCodexPlugin(
   if (result.exitCode !== 0) {
     throw new BabysitterRuntimeError(
       "CodexPluginInstallFailed",
-      "Failed to install the repo-local babysitter-codex package.",
+      "Failed to install the repo-local @a5c-ai/babysitter-codex package.",
       {
         category: ErrorCategory.External,
         details: {
@@ -390,7 +390,7 @@ async function installCodexPlugin(
     );
     return {
       harness: "codex",
-      summary: "Installed the repo-local babysitter-codex package and materialized workspace-local Codex hooks/config.",
+      summary: "Installed the repo-local @a5c-ai/babysitter-codex package, cloned the global process library, and materialized workspace-local Codex skill/hooks/config.",
       location: onboarding.location ?? installedSkillDir,
       output: [
         result.stdout.trim(),
@@ -402,7 +402,7 @@ async function installCodexPlugin(
 
   return {
     harness: "codex",
-    summary: "Installed the repo-local babysitter-codex package and ran its postinstall wiring.",
+    summary: "Installed the repo-local @a5c-ai/babysitter-codex package, the global babysit skill, and the global process-library binding.",
     location: installedSkillDir,
     output: [result.stdout.trim(), result.stderr.trim()].filter(Boolean).join("\n"),
   };
