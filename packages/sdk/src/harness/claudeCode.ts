@@ -1017,28 +1017,51 @@ async function installClaudeCodePlugin(
     };
   }
 
-  const command = "claude";
-  const args = ["plugin", "install", "--scope", "user", "babysitter@a5c.ai"];
   if (options.dryRun) {
     return {
       harness: "claude-code",
       dryRun: true,
-      summary: "Install the published Babysitter Claude Code plugin through Claude's plugin installer.",
-      command: renderCommand(command, args),
+      summary: "Add the published Babysitter Claude Code plugin to the marketplace and install it at user scope.",
+      command: [
+        renderCommand("claude", ["plugin", "marketplace", "add", "a5c-ai/babysitter"]),
+        renderCommand("claude", ["plugin", "install", "--scope", "user", "babysitter@a5c.ai"]),
+      ].join(" && "),
     };
   }
 
-  const result = await execFilePromise(command, args);
-  if (result.exitCode !== 0) {
+  const marketplaceResult = await execFilePromise("claude", [
+    "plugin",
+    "marketplace",
+    "add",
+    "a5c-ai/babysitter",
+  ]);
+  if (marketplaceResult.exitCode !== 0) {
     throw new BabysitterRuntimeError(
-      "ClaudePluginInstallFailed",
-      `${renderCommand(command, args)} failed`,
+      "ClaudePluginMarketplaceAddFailed",
+      "claude plugin marketplace add a5c-ai/babysitter failed",
       {
         category: ErrorCategory.External,
         details: {
-          stdout: result.stdout,
-          stderr: result.stderr,
-          exitCode: result.exitCode,
+          stdout: marketplaceResult.stdout,
+          stderr: marketplaceResult.stderr,
+          exitCode: marketplaceResult.exitCode,
+        },
+      },
+    );
+  }
+
+  const installArgs = ["plugin", "install", "--scope", "user", "babysitter@a5c.ai"];
+  const installResult = await execFilePromise("claude", installArgs);
+  if (installResult.exitCode !== 0) {
+    throw new BabysitterRuntimeError(
+      "ClaudePluginInstallFailed",
+      `${renderCommand("claude", installArgs)} failed`,
+      {
+        category: ErrorCategory.External,
+        details: {
+          stdout: installResult.stdout,
+          stderr: installResult.stderr,
+          exitCode: installResult.exitCode,
         },
       },
     );
@@ -1046,9 +1069,17 @@ async function installClaudeCodePlugin(
 
   return {
     harness: "claude-code",
-    summary: "Installed the published Babysitter Claude Code plugin through Claude's plugin installer.",
-    command: renderCommand(command, args),
-    output: [result.stdout.trim(), result.stderr.trim()].filter(Boolean).join("\n"),
+    summary: "Added the published Babysitter Claude Code plugin to the marketplace and installed it at user scope.",
+    command: [
+      renderCommand("claude", ["plugin", "marketplace", "add", "a5c-ai/babysitter"]),
+      renderCommand("claude", installArgs),
+    ].join(" && "),
+    output: [
+      marketplaceResult.stdout.trim(),
+      marketplaceResult.stderr.trim(),
+      installResult.stdout.trim(),
+      installResult.stderr.trim(),
+    ].filter(Boolean).join("\n"),
   };
 }
 

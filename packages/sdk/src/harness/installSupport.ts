@@ -1,6 +1,5 @@
 import { execFile } from "node:child_process";
-import { existsSync, mkdirSync, readFileSync } from "node:fs";
-import { cp } from "node:fs/promises";
+import { existsSync, readFileSync } from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
 import { checkCliAvailable } from "./discovery";
@@ -42,6 +41,62 @@ export async function execFilePromise(
 
 export function renderCommand(command: string, args: string[]): string {
   return [command, ...args].join(" ");
+}
+
+export function getNpxCommand(): string {
+  return process.platform === "win32" ? "npx.cmd" : "npx";
+}
+
+export async function runPackageBinaryViaNpx(args: {
+  harness: string;
+  packageName: string;
+  packageArgs: string[];
+  summary: string;
+  options: HarnessInstallOptions;
+  cwd?: string;
+  env?: NodeJS.ProcessEnv;
+  location?: string;
+}): Promise<HarnessInstallResult> {
+  const displayCommand = "npx";
+  const command = getNpxCommand();
+  const commandArgs = ["--yes", args.packageName, ...args.packageArgs];
+
+  if (args.options.dryRun) {
+    return {
+      harness: args.harness,
+      dryRun: true,
+      summary: args.summary,
+      command: renderCommand(displayCommand, commandArgs),
+      location: args.location,
+    };
+  }
+
+  const result = await execFilePromise(command, commandArgs, {
+    cwd: args.cwd,
+    env: args.env,
+  });
+  if (result.exitCode !== 0) {
+    throw new BabysitterRuntimeError(
+      "HarnessPluginInstallFailed",
+      `${renderCommand(displayCommand, commandArgs)} failed`,
+      {
+        category: ErrorCategory.External,
+        details: {
+          stdout: result.stdout,
+          stderr: result.stderr,
+          exitCode: result.exitCode,
+        },
+      },
+    );
+  }
+
+  return {
+    harness: args.harness,
+    summary: args.summary,
+    command: renderCommand(displayCommand, commandArgs),
+    location: args.location,
+    output: [result.stdout.trim(), result.stderr.trim()].filter(Boolean).join("\n"),
+  };
 }
 
 export async function installCliViaNpm(args: {
@@ -95,29 +150,6 @@ export async function installCliViaNpm(args: {
   };
 }
 
-export function repoRootCandidates(): string[] {
-  return [
-    process.env.BABYSITTER_REPO_ROOT ?? "",
-    process.env.REPO_ROOT ?? "",
-    process.cwd(),
-    path.resolve(__dirname, "..", "..", "..", "..", ".."),
-  ].filter(Boolean);
-}
-
-export function resolveRepoRoot(): string | null {
-  for (const candidate of repoRootCandidates()) {
-    const resolved = path.resolve(candidate);
-    if (
-      existsSync(path.join(resolved, "plugins", "babysitter-codex")) &&
-      existsSync(path.join(resolved, "plugins", "babysitter-pi")) &&
-      existsSync(path.join(resolved, "packages", "sdk"))
-    ) {
-      return resolved;
-    }
-  }
-  return null;
-}
-
 export function getCodexHome(): string {
   return process.env.CODEX_HOME || path.join(os.homedir(), ".codex");
 }
@@ -150,51 +182,10 @@ export function isClaudePluginInstalled(): boolean {
 }
 
 export function getGeminiExtensionDir(workspace?: string): string {
-  const base = path.resolve(workspace ?? process.cwd());
+  const base = path.resolve(workspace ?? os.homedir());
   return path.join(base, ".gemini", "extensions", "babysitter-gemini");
 }
 
 export function isGeminiPluginInstalled(workspace?: string): boolean {
   return existsSync(getGeminiExtensionDir(workspace));
-}
-
-export async function copyGeminiExtension(args: {
-  harness: string;
-  summary: string;
-  sourceDir: string;
-  targetDir: string;
-  options: HarnessInstallOptions;
-}): Promise<HarnessInstallResult> {
-  if (existsSync(args.targetDir)) {
-    return {
-      harness: args.harness,
-      warning: "babysitter-gemini is already present in the active workspace; skipping reinstall.",
-      location: args.targetDir,
-    };
-  }
-
-  if (args.options.dryRun) {
-    return {
-      harness: args.harness,
-      dryRun: true,
-      summary: args.summary,
-      location: args.targetDir,
-    };
-  }
-
-  mkdirSync(path.dirname(args.targetDir), { recursive: true });
-  await cp(args.sourceDir, args.targetDir, {
-    recursive: true,
-    force: true,
-    filter: (entry) => {
-      const name = path.basename(entry);
-      return !["node_modules", ".git", ".a5c", ".DS_Store"].includes(name);
-    },
-  });
-
-  return {
-    harness: args.harness,
-    summary: args.summary,
-    location: args.targetDir,
-  };
 }

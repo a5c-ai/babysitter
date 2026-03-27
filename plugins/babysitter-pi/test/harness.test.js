@@ -10,11 +10,9 @@
 import { describe, it, beforeEach } from 'node:test';
 import assert from 'node:assert';
 
-// SDK harness imports (compiled CJS, always available)
-import {
-  createPiAdapter,
-  getAdapterByName,
-} from '@a5c-ai/babysitter-sdk';
+// SDK harness imports from the local repo build output.
+import * as piHarnessModule from '../../../packages/sdk/dist/harness/pi.js';
+import * as harnessRegistryModule from '../../../packages/sdk/dist/harness/registry.js';
 
 // Extension module imports (TypeScript source -- requires --experimental-strip-types)
 import {
@@ -43,12 +41,12 @@ import {
 
 describe('Pi harness adapter', () => {
   it('has correct name "pi"', () => {
-    const adapter = createPiAdapter();
+    const adapter = piHarnessModule.createPiAdapter();
     assert.strictEqual(adapter.name, 'pi');
   });
 
   it('is retrievable by name from registry', () => {
-    const adapter = getAdapterByName('pi');
+    const adapter = harnessRegistryModule.getAdapterByName('pi');
     assert.ok(adapter, 'getAdapterByName("pi") must return an adapter');
     assert.strictEqual(adapter.name, 'pi');
   });
@@ -63,7 +61,7 @@ describe('Pi harness adapter', () => {
     }
 
     try {
-      const adapter = createPiAdapter();
+      const adapter = piHarnessModule.createPiAdapter();
       assert.strictEqual(adapter.isActive(), false, 'isActive() should be false without Pi env vars');
     } finally {
       // Restore env
@@ -76,7 +74,7 @@ describe('Pi harness adapter', () => {
   });
 
   it('resolveSessionId returns sessionId from parsed args', () => {
-    const adapter = createPiAdapter();
+    const adapter = piHarnessModule.createPiAdapter();
     const sessionId = adapter.resolveSessionId({ sessionId: 'test-session-42' });
     assert.strictEqual(sessionId, 'test-session-42');
   });
@@ -90,7 +88,7 @@ describe('Pi harness adapter', () => {
     delete process.env.PI_SESSION_ID;
 
     try {
-      const adapter = createPiAdapter();
+      const adapter = piHarnessModule.createPiAdapter();
       const sessionId = adapter.resolveSessionId({});
       assert.strictEqual(sessionId, undefined);
     } finally {
@@ -105,7 +103,7 @@ describe('Pi harness adapter', () => {
     process.env.OMP_SESSION_ID = 'env-session-99';
 
     try {
-      const adapter = createPiAdapter();
+      const adapter = piHarnessModule.createPiAdapter();
       const sessionId = adapter.resolveSessionId({});
       assert.strictEqual(sessionId, 'env-session-99');
     } finally {
@@ -118,7 +116,7 @@ describe('Pi harness adapter', () => {
   });
 
   it('exposes required adapter methods', () => {
-    const adapter = createPiAdapter();
+    const adapter = piHarnessModule.createPiAdapter();
     const requiredMethods = [
       'isActive',
       'resolveSessionId',

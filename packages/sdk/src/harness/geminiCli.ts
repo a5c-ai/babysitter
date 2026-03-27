@@ -56,10 +56,10 @@ import type {
   HarnessInstallResult,
 } from "./types";
 import {
-  copyGeminiExtension,
   getGeminiExtensionDir,
   installCliViaNpm,
-  resolveRepoRoot,
+  isGeminiPluginInstalled,
+  runPackageBinaryViaNpx,
 } from "./installSupport";
 import {
   BabysitterRuntimeError,
@@ -818,21 +818,29 @@ async function installGeminiHarness(
 async function installGeminiPlugin(
   options: HarnessInstallOptions,
 ): Promise<HarnessInstallResult> {
-  const repoRoot = resolveRepoRoot();
-  if (!repoRoot) {
-    throw new BabysitterRuntimeError(
-      "RepoRootNotFound",
-      "Could not resolve the babysitter repo root for the repo-local Gemini extension install.",
-      { category: ErrorCategory.Configuration },
-    );
+  const targetDir = getGeminiExtensionDir(options.workspace);
+  if (isGeminiPluginInstalled(options.workspace)) {
+    return {
+      harness: HARNESS_NAME,
+      warning: "The Babysitter Gemini extension is already installed at the target location; skipping reinstall.",
+      location: targetDir,
+    };
   }
 
-  return copyGeminiExtension({
+  const packageArgs = options.workspace
+    ? ["install", "--workspace", path.resolve(options.workspace)]
+    : ["install", "--global"];
+
+  return runPackageBinaryViaNpx({
     harness: HARNESS_NAME,
-    summary: "Install the repo-local Gemini extension payload into the active workspace.",
-    sourceDir: path.join(repoRoot, "plugins", "babysitter-gemini"),
-    targetDir: getGeminiExtensionDir(options.workspace),
+    packageName: "@a5c-ai/babysitter-gemini",
+    packageArgs,
+    summary: options.workspace
+      ? "Install the published Babysitter Gemini extension into the target workspace."
+      : "Install the published Babysitter Gemini extension into the user-level Gemini extension directory.",
     options,
+    env: process.env,
+    location: targetDir,
   });
 }
 

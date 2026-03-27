@@ -8,6 +8,7 @@
 
 import * as path from "node:path";
 import { existsSync } from "node:fs";
+import * as os from "node:os";
 import { createClaudeCodeAdapter } from "./claudeCode";
 import type {
   HarnessAdapter,
@@ -18,10 +19,8 @@ import type {
   SessionBindResult,
 } from "./types";
 import {
-  execFilePromise,
   installCliViaNpm,
-  renderCommand,
-  resolveRepoRoot,
+  runPackageBinaryViaNpx,
 } from "./installSupport";
 import {
   BabysitterRuntimeError,
@@ -76,55 +75,51 @@ async function installPiFamilyHarness(args: {
   });
 }
 
+function getPiPluginInstallRoot(args: {
+  harness: "pi" | "oh-my-pi";
+  workspace?: string;
+}): string {
+  const base = path.resolve(args.workspace ?? os.homedir());
+  const pluginsDir = args.harness === "oh-my-pi"
+    ? path.join(base, ".omp", "plugins")
+    : path.join(base, ".pi", "plugins");
+  return path.join(pluginsDir, "babysitter-pi");
+}
+
 export async function installPiFamilyPlugin(args: {
   harness: "pi" | "oh-my-pi";
   options: HarnessInstallOptions;
 }): Promise<HarnessInstallResult> {
-  const repoRoot = resolveRepoRoot();
-  if (!repoRoot) {
-    throw new BabysitterRuntimeError(
-      "RepoRootNotFound",
-      "Could not resolve the babysitter repo root for the repo-local pi plugin install.",
-      { category: ErrorCategory.Configuration },
-    );
-  }
-
-  const pluginDir = path.join(repoRoot, "plugins", "babysitter-pi");
-  const command = "omp";
-  const commandArgs = ["plugin", "link", pluginDir];
-
-  if (args.options.dryRun) {
+  const targetDir = getPiPluginInstallRoot({
+    harness: args.harness,
+    workspace: args.options.workspace,
+  });
+  if (existsSync(targetDir)) {
     return {
       harness: args.harness,
-      dryRun: true,
-      summary: "Link the repo-local babysitter-pi package into oh-my-pi.",
-      command: renderCommand(command, commandArgs),
-      location: pluginDir,
+      warning: "The Babysitter PI plugin is already installed at the target location; skipping reinstall.",
+      location: targetDir,
     };
   }
 
-  const result = await execFilePromise(command, commandArgs);
-  if (result.exitCode !== 0) {
-    throw new BabysitterRuntimeError(
-      "PiPluginInstallFailed",
-      "Failed to link the repo-local babysitter-pi package into oh-my-pi.",
-      {
-        category: ErrorCategory.External,
-        details: {
-          stdout: result.stdout,
-          stderr: result.stderr,
-          exitCode: result.exitCode,
-        },
-      },
-    );
+  const packageArgs = ["install", "--harness", args.harness];
+  if (args.options.workspace) {
+    packageArgs.push("--workspace", path.resolve(args.options.workspace));
+  } else {
+    packageArgs.push("--global");
   }
 
-  return {
+  return runPackageBinaryViaNpx({
     harness: args.harness,
-    summary: "Linked the repo-local babysitter-pi package into oh-my-pi.",
-    location: pluginDir,
-    output: [result.stdout.trim(), result.stderr.trim()].filter(Boolean).join("\n"),
-  };
+    packageName: "@a5c-ai/babysitter-pi",
+    packageArgs,
+    summary: args.options.workspace
+      ? `Install the published Babysitter PI plugin into the target workspace for ${args.harness}.`
+      : `Install the published Babysitter PI plugin into the user-level ${args.harness} plugin directory.`,
+    options: args.options,
+    env: process.env,
+    location: targetDir,
+  });
 }
 
 export function createPiAdapter(): HarnessAdapter {

@@ -75,6 +75,33 @@
       "packagePath": "plugins/agentsh",
       "tags": ["security", "sandbox", "agentsh", "hooks", "bash-wrapper", "command-control", "network-filter", "file-protection", "policy"],
       "author": "a5c-ai"
+    },
+    "dev-browser": {
+      "name": "dev-browser",
+      "description": "Install dev-browser for sandboxed browser automation in AI agent sessions. Adds the skill with full Playwright API reference, pre-approves Bash permissions, and configures CLAUDE.md. Supports headless mode, persistent named pages, AI-optimized DOM snapshots, and screenshots.",
+      "latestVersion": "1.0.0",
+      "versions": ["1.0.0"],
+      "packagePath": "plugins/dev-browser",
+      "tags": ["browser", "automation", "playwright", "screenshots", "scraping", "testing", "web", "sandbox", "skill"],
+      "author": "a5c-ai"
+    },
+    "qmd": {
+      "name": "qmd",
+      "description": "Install qmd on-device hybrid search engine for markdown files. Combines BM25, vector semantic search, and LLM re-ranking running locally with GGUF models. Sets up MCP server integration, indexes project collections, installs skill and CLAUDE.md config.",
+      "latestVersion": "1.0.0",
+      "versions": ["1.0.0"],
+      "packagePath": "plugins/qmd",
+      "tags": ["search", "documentation", "markdown", "vector-search", "embeddings", "mcp", "knowledge-base", "local", "rag"],
+      "author": "a5c-ai"
+    },
+    "claude-mem": {
+      "name": "claude-mem",
+      "description": "Install claude-mem persistent memory for Claude Code sessions. Automatically captures session context via lifecycle hooks, compresses observations with AI, and provides cross-session knowledge retrieval via MCP search tools and web UI. Token-efficient 3-layer search workflow.",
+      "latestVersion": "1.0.0",
+      "versions": ["1.0.0"],
+      "packagePath": "plugins/claude-mem",
+      "tags": ["memory", "persistence", "context", "sessions", "mcp", "hooks", "search", "observations", "claude-code"],
+      "author": "a5c-ai"
     }
   }
 }

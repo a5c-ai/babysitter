@@ -91,12 +91,18 @@ Install the Claude Code plugin through the Claude plugin installer or the SDK
 CLI helper:
 
 ```bash
+claude plugin marketplace add a5c-ai/babysitter
 claude plugin install --scope user babysitter@a5c.ai
 ```
+
+The SDK helper runs the same published Claude plugin flow:
 
 ```bash
 babysitter harness:install-plugin claude-code
 ```
+
+Then restart Claude Code. The installer does not materialize a repo-local
+plugin copy.
 
 If the workspace does not already have an active process-library binding, this command bootstraps the shared global SDK process library automatically:
 

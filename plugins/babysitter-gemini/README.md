@@ -1,4 +1,4 @@
-# Babysitter for Gemini CLI
+# @a5c-ai/babysitter-gemini
 
 Babysitter integrates with Gemini CLI to run SDK-backed orchestration through
 Gemini's lifecycle hooks and turn loop.
@@ -19,9 +19,9 @@ Gemini uses hook-driven continuation:
 Process discovery should prefer active roots:
 
 1. `.a5c/processes` in the current workspace
-2. Repo-local Babysitter plugin roots when present
-3. Installed plugin/extension process roots
-4. Bundled reference content only as fallback
+2. The SDK-managed active process-library binding returned by `babysitter process-library:active --json`
+3. The cloned process-library repo root from `defaultSpec.cloneDir` when adjacent reference material is needed
+4. Installed extension content only as a compatibility fallback
 
 Do not document bundled snapshot content as the primary library root.
 
@@ -45,10 +45,31 @@ Gemini exposes slash commands:
 
 ## Installation
 
-Materialize the repo-local Gemini extension into the active workspace:
+Install the published Gemini extension into the user-level Gemini extension
+directory:
 
 ```bash
+npx @a5c-ai/babysitter-gemini install
+```
+
+Install it into a specific workspace:
+
+```bash
+npx @a5c-ai/babysitter-gemini install --workspace /path/to/repo
+```
+
+Or use the Babysitter SDK helper, which runs the same published package flow:
+
+```bash
+babysitter harness:install-plugin gemini-cli
 babysitter harness:install-plugin gemini-cli --workspace /path/to/repo
+```
+
+If the workspace does not already have an active process-library binding, the
+installer bootstraps the shared global SDK process library automatically:
+
+```bash
+babysitter process-library:active --json
 ```
 
 ## Orchestration Contract

@@ -1,7 +1,8 @@
-# babysitter-pi
+# @a5c-ai/babysitter-pi
 
-Babysitter integration plugin for oh-my-pi. It adapts Babysitter's harness
-contract to pi's session lifecycle, command system, and agent execution model.
+Babysitter integration plugin for pi and oh-my-pi. It adapts Babysitter's
+harness contract to the PI-family session lifecycle, command system, and agent
+execution model.
 
 ## Integration Model
 
@@ -19,8 +20,8 @@ Process discovery should prefer active roots:
 
 1. `.a5c/processes` in the current workspace
 2. The SDK-managed active process-library binding returned by `babysitter process-library:active --json`
-3. Installed plugin process roots only as compatibility fallback
-4. Bundled/reference content only as fallback
+3. The cloned process-library repo root from `defaultSpec.cloneDir` when adjacent reference material is needed
+4. Installed plugin content only as a compatibility fallback
 
 Do not document team-only or plugin-bundled process roots as the primary source
 of truth.
@@ -58,24 +59,32 @@ Do not present `node` as an active generated effect kind in pi docs.
 
 ## Installation
 
-From npm:
+Install the published PI plugin globally:
 
 ```bash
-omp plugin install babysitter-pi
+npx @a5c-ai/babysitter-pi install --harness pi
 ```
 
-From a local checkout:
+Install the published oh-my-pi plugin globally:
 
 ```bash
-git clone <repo-url> && cd babysitter
-npm install
-omp plugin link ./plugins/babysitter-pi
+npx @a5c-ai/babysitter-pi install --harness oh-my-pi
 ```
 
-From the Babysitter SDK CLI helper:
+Install into a specific workspace instead of the user profile:
+
+```bash
+npx @a5c-ai/babysitter-pi install --harness pi --workspace /path/to/repo
+npx @a5c-ai/babysitter-pi install --harness oh-my-pi --workspace /path/to/repo
+```
+
+Or use the Babysitter SDK helpers, which run the same published package flow:
 
 ```bash
 babysitter harness:install-plugin pi
+babysitter harness:install-plugin pi --workspace /path/to/repo
+babysitter harness:install-plugin oh-my-pi
+babysitter harness:install-plugin oh-my-pi --workspace /path/to/repo
 ```
 
 If the workspace does not already have an active process-library binding, this command bootstraps the shared global SDK process library automatically:
@@ -105,7 +114,8 @@ command implementation docs, not here.
 ## Tests
 
 ```bash
-cd plugins/babysitter-pi && npm test
+cd plugins/babysitter-pi
+npm test
 npm run test:integration
 npm run test:harness
 npm run test:tui

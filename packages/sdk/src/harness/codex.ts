@@ -32,7 +32,7 @@ import {
   installCliViaNpm,
   isCodexPluginInstalled,
   renderCommand,
-  resolveRepoRoot,
+  runPackageBinaryViaNpx,
 } from "./installSupport";
 import {
   BabysitterRuntimeError,
@@ -259,58 +259,18 @@ async function handleCodexSessionStartHookImpl(
 
 async function runCodexWorkspaceOnboarding(
   options: HarnessInstallOptions,
-  skillDir: string,
 ): Promise<HarnessInstallResult> {
   const workspace = path.resolve(options.workspace ?? process.cwd());
-  const scriptPath = path.join(skillDir, "scripts", "team-install.js");
-  if (!existsSync(scriptPath)) {
-    throw new BabysitterRuntimeError(
-      "CodexWorkspaceInstallerMissing",
-      `Codex workspace onboarding script is missing: ${scriptPath}`,
-      { category: ErrorCategory.Configuration },
-    );
-  }
-
-  const command = process.execPath;
-  const args = [scriptPath, "--workspace", workspace];
-  if (options.dryRun) {
-    return {
-      harness: "codex",
-      dryRun: true,
-      summary: "Materialize workspace-local Codex hooks/config for the active repo.",
-      command: renderCommand(command, args),
-      location: workspace,
-    };
-  }
-
-  const result = await execFilePromise(command, args, {
-    cwd: workspace,
-    env: {
-      ...process.env,
-      BABYSITTER_PACKAGE_ROOT: skillDir,
-    },
-  });
-  if (result.exitCode !== 0) {
-    throw new BabysitterRuntimeError(
-      "CodexWorkspaceOnboardingFailed",
-      "Failed to materialize workspace-local Codex hooks/config.",
-      {
-        category: ErrorCategory.External,
-        details: {
-          stdout: result.stdout,
-          stderr: result.stderr,
-          exitCode: result.exitCode,
-        },
-      },
-    );
-  }
-
-  return {
+  return runPackageBinaryViaNpx({
     harness: "codex",
-    summary: "Materialized workspace-local Codex hooks/config for the active repo.",
+    packageName: "@a5c-ai/babysitter-codex",
+    packageArgs: ["install", "--workspace", workspace],
+    summary: "Run the published Babysitter Codex workspace installer for the target repo.",
+    options,
+    cwd: workspace,
+    env: process.env,
     location: workspace,
-    output: [result.stdout.trim(), result.stderr.trim()].filter(Boolean).join("\n"),
-  };
+  });
 }
 
 async function installCodexHarness(
@@ -328,19 +288,10 @@ async function installCodexHarness(
 async function installCodexPlugin(
   options: HarnessInstallOptions,
 ): Promise<HarnessInstallResult> {
-  const repoRoot = resolveRepoRoot();
-  if (!repoRoot) {
-    throw new BabysitterRuntimeError(
-      "RepoRootNotFound",
-      "Could not resolve the babysitter repo root for the repo-local Codex plugin install.",
-      { category: ErrorCategory.Configuration },
-    );
-  }
-
   const installedSkillDir = getInstalledCodexSkillDir();
   if (isCodexPluginInstalled()) {
     if (options.workspace) {
-      return runCodexWorkspaceOnboarding(options, installedSkillDir);
+      return runCodexWorkspaceOnboarding(options);
     }
     return {
       harness: "codex",
@@ -349,51 +300,27 @@ async function installCodexPlugin(
     };
   }
 
-  const packageDir = path.join(repoRoot, "plugins", "babysitter-codex");
-  const command = process.execPath;
-  const args = [path.join(packageDir, "bin", "cli.js"), "install", "--global"];
-  if (options.dryRun) {
-    return {
-      harness: "codex",
-      dryRun: true,
-      summary: "Run the repo-local @a5c-ai/babysitter-codex installer explicitly for global Codex setup.",
-      command: renderCommand(command, args),
-      location: packageDir,
-    };
-  }
-
-  const result = await execFilePromise(command, args, {
-    env: {
-      ...process.env,
-    },
+  const globalInstall = await runPackageBinaryViaNpx({
+    harness: "codex",
+    packageName: "@a5c-ai/babysitter-codex",
+    packageArgs: ["install", "--global"],
+    summary: "Install the published Babysitter Codex package and materialize the global Codex skill/hooks/config.",
+    options,
+    env: process.env,
+    location: installedSkillDir,
   });
-  if (result.exitCode !== 0) {
-    throw new BabysitterRuntimeError(
-      "CodexPluginInstallFailed",
-      "Failed to run the repo-local @a5c-ai/babysitter-codex installer.",
-      {
-        category: ErrorCategory.External,
-        details: {
-          stdout: result.stdout,
-          stderr: result.stderr,
-          exitCode: result.exitCode,
-        },
-      },
-    );
-  }
 
   if (options.workspace) {
-    const onboarding = await runCodexWorkspaceOnboarding(
-      { ...options, dryRun: false },
-      installedSkillDir,
-    );
+    const onboarding = await runCodexWorkspaceOnboarding({
+      ...options,
+      dryRun: false,
+    });
     return {
       harness: "codex",
-      summary: "Ran the repo-local @a5c-ai/babysitter-codex installer for global Codex setup, cloned the global process library, and materialized workspace-local Codex skill/hooks/config.",
+      summary: "Ran the published Babysitter Codex installer for global Codex setup and then the published workspace installer for the target repo.",
       location: onboarding.location ?? installedSkillDir,
       output: [
-        result.stdout.trim(),
-        result.stderr.trim(),
+        globalInstall.output?.trim() ?? "",
         onboarding.output?.trim() ?? "",
       ].filter(Boolean).join("\n"),
     };
@@ -401,9 +328,9 @@ async function installCodexPlugin(
 
   return {
     harness: "codex",
-    summary: "Ran the repo-local @a5c-ai/babysitter-codex installer for global Codex skill/hooks/config and the global process-library binding.",
-    location: installedSkillDir,
-    output: [result.stdout.trim(), result.stderr.trim()].filter(Boolean).join("\n"),
+    summary: "Ran the published Babysitter Codex installer for global Codex skill/hooks/config and the global process-library binding.",
+    location: globalInstall.location ?? installedSkillDir,
+    output: globalInstall.output,
   };
 }
 

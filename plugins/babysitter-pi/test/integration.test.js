@@ -41,18 +41,17 @@ describe('package.json', () => {
   });
 
   it('has correct name', () => {
-    assert.strictEqual(pkg.name, 'babysitter-pi');
+    assert.strictEqual(pkg.name, '@a5c-ai/babysitter-pi');
   });
 
   it('has a version', () => {
     assert.ok(typeof pkg.version === 'string' && pkg.version.length > 0, 'version must be a non-empty string');
   });
 
-  it('has omp manifest with extensions, skills, tools', () => {
+  it('has omp manifest with extensions and skills', () => {
     assert.ok(pkg.omp, 'omp field must exist');
     assert.ok(Array.isArray(pkg.omp.extensions), 'omp.extensions must be an array');
     assert.ok(Array.isArray(pkg.omp.skills), 'omp.skills must be an array');
-    assert.ok(Array.isArray(pkg.omp.tools), 'omp.tools must be an array');
   });
 
   it('depends on @a5c-ai/babysitter-sdk', () => {
@@ -124,10 +123,6 @@ describe('command files', () => {
 // ---------------------------------------------------------------------------
 
 describe('documentation and metadata', () => {
-  it('AGENTS.md exists', () => {
-    assert.ok(fileExists('AGENTS.md'), 'AGENTS.md must exist');
-  });
-
   it('SKILL.md exists (under skills/babysitter/)', () => {
     assert.ok(
       fileExists('skills', 'babysitter', 'SKILL.md'),
@@ -137,16 +132,20 @@ describe('documentation and metadata', () => {
 });
 
 // ---------------------------------------------------------------------------
-// Scripts
+// Installer assets
 // ---------------------------------------------------------------------------
 
-describe('scripts', () => {
-  it('scripts/postinstall.js exists', () => {
-    assert.ok(fileExists('scripts', 'postinstall.js'), 'scripts/postinstall.js must exist');
+describe('installer assets', () => {
+  it('bin/cli.cjs exists', () => {
+    assert.ok(fileExists('bin', 'cli.cjs'), 'bin/cli.cjs must exist');
   });
 
-  it('scripts/preuninstall.js exists', () => {
-    assert.ok(fileExists('scripts', 'preuninstall.js'), 'scripts/preuninstall.js must exist');
+  it('bin/install.cjs exists', () => {
+    assert.ok(fileExists('bin', 'install.cjs'), 'bin/install.cjs must exist');
+  });
+
+  it('bin/uninstall.cjs exists', () => {
+    assert.ok(fileExists('bin', 'uninstall.cjs'), 'bin/uninstall.cjs must exist');
   });
 
   it('scripts/setup.sh exists', () => {
@@ -199,33 +198,5 @@ describe('SDK availability', () => {
       'function',
       'readRunMetadata must be a function',
     );
-  });
-});
-
-// ---------------------------------------------------------------------------
-// SDK harness registry includes "pi" adapter
-// ---------------------------------------------------------------------------
-
-describe('SDK harness registry', () => {
-  it('includes "pi" in supported harnesses', async () => {
-    const harness = await import('@a5c-ai/babysitter-sdk');
-    // The harness exports are re-exported from the SDK index
-    const { listSupportedHarnesses } = harness;
-    assert.ok(
-      typeof listSupportedHarnesses === 'function',
-      'listSupportedHarnesses must be exported',
-    );
-    const harnesses = listSupportedHarnesses();
-    assert.ok(
-      harnesses.includes('pi'),
-      `Supported harnesses must include "pi", got: [${harnesses.join(', ')}]`,
-    );
-  });
-
-  it('createPiAdapter returns an adapter with name "pi"', async () => {
-    const { createPiAdapter } = await import('@a5c-ai/babysitter-sdk');
-    assert.ok(typeof createPiAdapter === 'function', 'createPiAdapter must be exported');
-    const adapter = createPiAdapter();
-    assert.strictEqual(adapter.name, 'pi');
   });
 });

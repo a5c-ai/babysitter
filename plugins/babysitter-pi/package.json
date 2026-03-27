@@ -2,12 +2,11 @@
   "name": "@a5c-ai/babysitter-pi",
   "version": "0.1.0",
   "type": "module",
-  "description": "Babysitter SDK deep integration for oh-my-pi - makes babysitter a mandatory first-class orchestration layer with session auto-binding, task interception, TUI widgets, and harness adapter",
+  "description": "Babysitter PI-family plugin bundle with explicit installer commands for pi and oh-my-pi plugin roots",
   "keywords": ["pi-package", "omp", "babysitter", "orchestration", "ai-agent"],
   "omp": {
     "extensions": ["./extensions"],
-    "skills": ["./skills"],
-    "tools": ["./tools"]
+    "skills": ["./skills"]
   },
   "dependencies": {
     "@a5c-ai/babysitter-sdk": "^0.0.180"
@@ -20,20 +19,28 @@
     "test:integration": "node --test test/integration.test.js",
     "test:harness": "npx tsx --test test/harness.test.js",
     "test:tui": "npx tsx --test test/tui.test.js",
-    "postinstall": "node scripts/postinstall.cjs",
-    "preuninstall": "node scripts/preuninstall.cjs"
+    "deploy": "npm publish --access public",
+    "deploy:staging": "npm publish --access public --tag staging"
+  },
+  "bin": {
+    "babysitter-pi": "bin/cli.cjs"
   },
   "files": [
+    "bin/",
+    "package.json",
     "extensions/",
-    "tools/",
     "skills/",
     "commands/",
-    "scripts/",
-    "test/",
-    "docs/",
-    "AGENTS.md",
-    "README.md"
+    "scripts/"
   ],
   "author": "a5c.ai",
-  "license": "MIT"
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/a5c-ai/babysitter"
+  },
+  "homepage": "https://github.com/a5c-ai/babysitter/tree/main/plugins/babysitter-pi#readme"
 }
