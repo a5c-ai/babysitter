@@ -2,10 +2,14 @@
 'use strict';
 
 const fs = require('fs');
+const os = require('os');
 const path = require('path');
 const { spawnSync } = require('child_process');
 
 const SKILL_NAME = 'babysit';
+const DEFAULT_PROCESS_LIBRARY_REPO = 'https://github.com/a5c-ai/babysitter.git';
+const DEFAULT_PROCESS_LIBRARY_SUBPATH = 'library';
+const DEFAULT_PROCESS_LIBRARY_REFERENCE_SUBPATH = 'library/reference';
 const WORKSPACE_SKILL_ENTRIES = [
   { source: 'SKILL.md', target: 'SKILL.md' },
   { source: 'README.md', target: 'README.md' },
@@ -39,6 +43,20 @@ function parseArgs(argv) {
     }
   }
   return args;
+}
+
+function getGlobalStateDir() {
+  if (process.env.BABYSITTER_GLOBAL_STATE_DIR) {
+    return path.resolve(process.env.BABYSITTER_GLOBAL_STATE_DIR);
+  }
+  return path.join(os.homedir(), '.a5c');
+}
+
+function splitProcessLibrarySubpath(value) {
+  return String(value)
+    .split(/[\\/]+/)
+    .map((part) => part.trim())
+    .filter(Boolean);
 }
 
 function renderWorkspaceConfigToml() {
@@ -256,48 +274,30 @@ function runBabysitterCli(packageRoot, cliArgs, options = {}) {
   return result.stdout;
 }
 
-function resolveProcessLibrarySpec(lock, workspaceRoot) {
-  const processLibraryConfig = (lock && lock.content && (lock.content.processLibrary || lock.content.upstream)) || {};
-  const repo = process.env.BABYSITTER_PROCESS_LIBRARY_REPO || processLibraryConfig.repo;
-  if (!repo) {
-    throw new Error('missing process-library repo configuration in babysitter.lock.json');
-  }
-  const ref = process.env.BABYSITTER_PROCESS_LIBRARY_REF || processLibraryConfig.ref || '';
-  const cloneDir = path.join(workspaceRoot, '.a5c', 'process-library', 'babysitter-repo');
-  const processSubpath = process.env.BABYSITTER_PROCESS_LIBRARY_SUBPATH ||
-    processLibraryConfig.processSubpath ||
-    'library';
-  const referenceSubpath = process.env.BABYSITTER_PROCESS_LIBRARY_REFERENCE_SUBPATH ||
-    processLibraryConfig.referenceSubpath ||
-    'library/reference';
+function resolveProcessLibrarySpec() {
+  const stateDir = getGlobalStateDir();
+  const repo = process.env.BABYSITTER_PROCESS_LIBRARY_REPO || DEFAULT_PROCESS_LIBRARY_REPO;
+  const ref = process.env.BABYSITTER_PROCESS_LIBRARY_REF || '';
+  const cloneDir = path.join(stateDir, 'process-library', 'babysitter-repo');
+  const processSubpath = process.env.BABYSITTER_PROCESS_LIBRARY_SUBPATH || DEFAULT_PROCESS_LIBRARY_SUBPATH;
+  const referenceSubpath = process.env.BABYSITTER_PROCESS_LIBRARY_REFERENCE_SUBPATH || DEFAULT_PROCESS_LIBRARY_REFERENCE_SUBPATH;
   return {
     repo,
     ref: ref || undefined,
     cloneDir,
-    processRoot: path.join(cloneDir, ...processSubpath.split('/')),
-    referenceRoot: path.join(cloneDir, ...referenceSubpath.split('/')),
-    stateDir: path.join(workspaceRoot, '.a5c'),
+    processRoot: path.join(cloneDir, ...splitProcessLibrarySubpath(processSubpath)),
+    referenceRoot: path.join(cloneDir, ...splitProcessLibrarySubpath(referenceSubpath)),
+    stateDir,
   };
 }
 
-function ensureActiveProcessLibrary(packageRoot, lock, workspaceRoot, dryRun) {
-  const spec = resolveProcessLibrarySpec(lock, workspaceRoot);
-  const cloneExists = fs.existsSync(path.join(spec.cloneDir, '.git'));
-  const cloneArgs = cloneExists
-    ? ['process-library:update', '--dir', spec.cloneDir, '--json']
-    : ['process-library:clone', '--repo', spec.repo, '--dir', spec.cloneDir, '--json'];
-  if (spec.ref) {
-    cloneArgs.splice(cloneExists ? 3 : 5, 0, '--ref', spec.ref);
-  }
-  const useArgs = ['process-library:use', '--dir', spec.processRoot, '--state-dir', spec.stateDir, '--json'];
+function ensureActiveProcessLibrary(packageRoot, dryRun) {
+  const spec = resolveProcessLibrarySpec();
   const activeArgs = ['process-library:active', '--state-dir', spec.stateDir, '--json'];
-
   if (dryRun) {
     return {
       ...spec,
       plannedCommands: [
-        `babysitter ${cloneArgs.join(' ')}`,
-        `babysitter ${useArgs.join(' ')}`,
         `babysitter ${activeArgs.join(' ')}`,
       ],
       activeStateFile: path.join(spec.stateDir, 'active', 'process-library.json'),
@@ -305,12 +305,7 @@ function ensureActiveProcessLibrary(packageRoot, lock, workspaceRoot, dryRun) {
     };
   }
 
-  runBabysitterCli(packageRoot, cloneArgs, { cwd: workspaceRoot });
-  if (!fs.existsSync(spec.processRoot)) {
-    throw new Error(`fetched process library root is missing: ${spec.processRoot}`);
-  }
-  runBabysitterCli(packageRoot, useArgs, { cwd: workspaceRoot });
-  const active = JSON.parse(runBabysitterCli(packageRoot, activeArgs, { cwd: workspaceRoot }));
+  const active = JSON.parse(runBabysitterCli(packageRoot, activeArgs, { cwd: packageRoot }));
   return {
     ...spec,
     plannedCommands: [],
@@ -371,7 +366,7 @@ function main() {
   const workspaceHooksConfigPath = path.join(workspaceRoot, '.codex', 'hooks.json');
   const workspaceConfigPath = path.join(workspaceRoot, '.codex', 'config.toml');
   const { workspaceSkillRoot, workspaceHookScriptsRoot, workspacePromptsRoot } = installWorkspaceSkill(packageRoot, workspaceRoot, args.dryRun);
-  const processLibrary = ensureActiveProcessLibrary(packageRoot, lock, workspaceRoot, args.dryRun);
+  const processLibrary = ensureActiveProcessLibrary(packageRoot, args.dryRun);
   const installInfo = {
     installedAt: new Date().toISOString(),
     runtime: lock.runtime,
@@ -429,7 +424,7 @@ function main() {
       workspaceConfigPath,
       workspaceHooksConfigPath,
       hookScriptsRoot: workspaceHookScriptsRoot,
-      processLibraryLookupCommand: 'babysitter process-library:active --state-dir .a5c --json',
+      processLibraryLookupCommand: 'babysitter process-library:active --json',
     }, null, 2), 'utf8');
   }
 

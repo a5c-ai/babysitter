@@ -54,7 +54,7 @@ The babysitter workflow has 8 steps:
 
 Interview the user for the intent, requirements, goal, scope, etc. In pi, use the TUI prompt capabilities to gather user input before the loop-driver takes over.
 
-A multi-step phase to understand the intent and perspective to approach the process building after researching the repo, short research online if needed, short research in the target repo, additional instructions, intent and library (processes, specializations, skills, subagents, methodologies, references, etc.) / guide for methodology building. Resolve the active library root with `babysitter process-library:active --state-dir .a5c --json`. If no binding exists, initialize it with `babysitter process-library:clone --repo https://github.com/a5c-ai/babysitter.git --dir .a5c/process-library/babysitter-repo` and `babysitter process-library:use --dir .a5c/process-library/babysitter-repo/library --state-dir .a5c`. After that, treat `specializations/**/**/**`, `methodologies/`, `contrib/`, and `reference/` as paths relative to that active library root.
+A multi-step phase to understand the intent and perspective to approach the process building after researching the repo, short research online if needed, short research in the target repo, additional instructions, intent and library (processes, specializations, skills, subagents, methodologies, references, etc.) / guide for methodology building. You MUST resolve the active library root with `babysitter process-library:active --json` before process authoring, and you MUST conduct an actual search against that active process library instead of skipping directly to writing a process. The `process-library:active` command now bootstraps the shared global SDK process library automatically if no binding exists yet. Read `binding.dir` from the returned JSON to get the active process-library root that must be searched. If you need the cloned repo root itself, read `defaultSpec.cloneDir` from the same JSON. After that, treat `specializations/**/**/**`, `methodologies/`, `contrib/`, and `reference/` as paths relative to `binding.dir`.
 
 The first step should be the look at the state of the repo, then find the most relevant processes, specializations, skills, subagents, methodologies, references, etc. to use as a reference. Use the babysitter CLI discover command to find the relevant processes, skills, subagents, etc at various stages.
 
@@ -65,7 +65,7 @@ Then this phase can have: research online, research the repo, user questions, an
 When running non-interactively, skip the interview phase entirely. Instead:
 1. Parse the initial prompt to extract intent, scope, and requirements.
 2. Research the repo structure to understand the codebase.
-3. Search the process library for the most relevant specialization/methodology.
+3. Resolve the active process-library root with `babysitter process-library:active --json`, then search that active library for the most relevant specialization/methodology. Do not skip this search step.
 4. Proceed directly to the process creation phase using the extracted requirements.
 
 #### User Profile Integration
@@ -566,7 +566,7 @@ When these markers are present, `run:create` and `run:iterate` will return only 
 
 - Unless otherwise specified, prefer processes that close the widest loop in the quality gates (for example e2e tests with a full browser or emulator/vm if it a mobile or desktop app) AND gates that make sure the work is accurate against the user request (all the specs is covered and no extra stuff was added unless permitted by the intent of the user).
 
-- Scan the methodologies and processes in the active process library and the sdk package to find relevant processes and methodologies to use as a reference. Also search for process files bundled in active skills and processes in the repo (`.a5c/processes/`).
+- Scan the methodologies and processes in the active process library and the sdk package to find relevant processes and methodologies to use as a reference. This search is mandatory before writing the process. Also search for process files bundled in active skills and processes in the repo (`.a5c/processes/`).
 
 - If you encounter a generic reusable part of a process that can be later reused and composed, build it in a modular way and organize it in the .a5c/processes directory. And import it to compose it to the specific process in the current user request. Prefer architecting processes in such modular way for reusability and composition.
 

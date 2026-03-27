@@ -101,9 +101,9 @@ const USAGE = `Usage:
   babysitter hook:run --hook-type <stop|session-start|user-prompt-submit|pre-tool-use> [--harness <claude-code|gemini-cli>] [--plugin-root <dir>] [--state-dir <dir>] [--runs-dir <dir>] [--json] [--verbose]
   babysitter compress-output <command and args...>
   babysitter skill:fetch-remote --source-type <github|well-known> --url <url> [--json]
-  babysitter process-library:clone --repo <url> --dir <path> [--ref <ref>] [--json]
-  babysitter process-library:update --dir <path> [--ref <ref>] [--json]
-  babysitter process-library:use --dir <path> [--run-id <id>] [--session-id <id>] [--state-dir <dir>] [--ref <ref>] [--json]
+  babysitter process-library:clone [--repo <url>] [--dir <path>] [--ref <ref>] [--state-dir <dir>] [--json]
+  babysitter process-library:update [--dir <path>] [--ref <ref>] [--state-dir <dir>] [--json]
+  babysitter process-library:use [--dir <path>] [--run-id <id>] [--session-id <id>] [--state-dir <dir>] [--ref <ref>] [--json]
   babysitter process-library:active [--run-id <id>] [--session-id <id>] [--state-dir <dir>] [--json]
   babysitter profile:read --user|--project [--dir <dir>] [--json]
   babysitter profile:write --user|--project --input <file> [--dir <dir>] [--json]

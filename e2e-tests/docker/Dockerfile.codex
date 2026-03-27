@@ -37,7 +37,15 @@ USER codex
 
 RUN npm install -g @openai/codex@latest
 RUN npm install -g /app/packages/sdk
-RUN npm install -g /app/plugins/babysitter-codex
+RUN mkdir -p /tmp/babysitter-process-library-source/library && \
+    cp -R /app/library/. /tmp/babysitter-process-library-source/library/ && \
+    cd /tmp/babysitter-process-library-source && \
+    git init -q && \
+    git config user.name "Babysitter E2E" && \
+    git config user.email "e2e@example.com" && \
+    git add . && \
+    git commit -qm "seed process library"
+RUN BABYSITTER_PROCESS_LIBRARY_REPO=/tmp/babysitter-process-library-source npm install -g /app/plugins/babysitter-codex
 
 WORKDIR /workspace
 

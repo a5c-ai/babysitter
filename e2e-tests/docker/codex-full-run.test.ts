@@ -30,16 +30,20 @@ describeCodex("Codex Docker E2E", () => {
     const codexVersion = dockerExec("codex --version").trim();
     const babysitterVersion = dockerExec("babysitter --version").trim();
     const skillManifest = dockerExec(`test -f ${CODEX_SKILL_DIR}/SKILL.md && echo ok`).trim();
-    const commandCatalog = dockerExec(`test -f ${CODEX_SKILL_DIR}/.codex/command-catalog.json && echo ok`).trim();
-    const hooksJson = dockerExec(`test -f ${CODEX_SKILL_DIR}/.codex/hooks.json && echo ok`).trim();
+    const repoLocalSkillTemplate = dockerExec(`test -f ${CODEX_SKILL_DIR}/.codex/skills/babysit/SKILL.md && echo ok`).trim();
     const stopHook = dockerExec(`test -f ${CODEX_SKILL_DIR}/.codex/hooks/babysitter-stop-hook.sh && echo ok`).trim();
+    const callPrompt = dockerExec("test -f /home/codex/.codex/prompts/call.md && echo ok").trim();
+    const planPrompt = dockerExec("test -f /home/codex/.codex/prompts/plan.md && echo ok").trim();
+    const resumePrompt = dockerExec("test -f /home/codex/.codex/prompts/resume.md && echo ok").trim();
 
     expect(codexVersion).toBeTruthy();
     expect(babysitterVersion).toMatch(/^\d+\.\d+\.\d+$/);
     expect(skillManifest).toBe("ok");
-    expect(commandCatalog).toBe("ok");
-    expect(hooksJson).toBe("ok");
+    expect(repoLocalSkillTemplate).toBe("ok");
     expect(stopHook).toBe("ok");
+    expect(callPrompt).toBe("ok");
+    expect(planPrompt).toBe("ok");
+    expect(resumePrompt).toBe("ok");
   });
 
   test("runs a full babysitter orchestration with real Codex through the hook model", () => {

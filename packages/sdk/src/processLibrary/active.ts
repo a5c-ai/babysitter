@@ -1,10 +1,14 @@
 import { promises as fs } from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import { execFile as execFileCb } from "node:child_process";
 import { promisify } from "node:util";
 
 const execFile = promisify(execFileCb);
 const ACTIVE_PROCESS_LIBRARY_FILENAME = "process-library.json";
+const DEFAULT_PROCESS_LIBRARY_REPO = "https://github.com/a5c-ai/babysitter.git";
+const DEFAULT_PROCESS_LIBRARY_SUBPATH = "library";
+const DEFAULT_PROCESS_LIBRARY_REFERENCE_SUBPATH = "library/reference";
 
 export interface ProcessLibraryBinding {
   dir: string;
@@ -75,11 +79,94 @@ export interface ResolveActiveProcessLibraryResult {
   binding: ProcessLibraryBinding | null;
 }
 
+export interface DefaultProcessLibrarySpec {
+  stateDir: string;
+  repo: string;
+  ref?: string;
+  cloneDir: string;
+  processRoot: string;
+  referenceRoot: string;
+}
+
+export interface EnsureActiveProcessLibraryOptions
+  extends ResolveActiveProcessLibraryOptions {
+  repo?: string;
+  cloneDir?: string;
+  processDir?: string;
+  ref?: string;
+}
+
+export interface EnsureActiveProcessLibraryResult
+  extends ResolveActiveProcessLibraryResult {
+  bootstrapped: boolean;
+  defaultSpec: DefaultProcessLibrarySpec;
+}
+
 function resolveStateDir(stateDir?: string): string {
   if (stateDir && stateDir.trim()) {
     return path.resolve(stateDir);
   }
-  return path.resolve(process.cwd(), ".a5c");
+  if (process.env.BABYSITTER_GLOBAL_STATE_DIR?.trim()) {
+    return path.resolve(process.env.BABYSITTER_GLOBAL_STATE_DIR);
+  }
+  return path.join(os.homedir(), ".a5c");
+}
+
+function splitProcessLibrarySubpath(value: string): string[] {
+  return value
+    .split(/[\\/]+/)
+    .map((part) => part.trim())
+    .filter(Boolean);
+}
+
+async function pathExists(targetPath: string): Promise<boolean> {
+  try {
+    await fs.access(targetPath);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export function getDefaultProcessLibrarySpec(options: {
+  stateDir?: string;
+  repo?: string;
+  cloneDir?: string;
+  processDir?: string;
+  ref?: string;
+} = {}): DefaultProcessLibrarySpec {
+  const stateDir = resolveStateDir(options.stateDir);
+  const repo =
+    options.repo?.trim() ||
+    process.env.BABYSITTER_PROCESS_LIBRARY_REPO?.trim() ||
+    DEFAULT_PROCESS_LIBRARY_REPO;
+  const ref =
+    options.ref?.trim() || process.env.BABYSITTER_PROCESS_LIBRARY_REF?.trim() || undefined;
+  const cloneDir = path.resolve(
+    options.cloneDir?.trim() || path.join(stateDir, "process-library", "babysitter-repo")
+  );
+  const processSubpath =
+    process.env.BABYSITTER_PROCESS_LIBRARY_SUBPATH?.trim() ||
+    DEFAULT_PROCESS_LIBRARY_SUBPATH;
+  const referenceSubpath =
+    process.env.BABYSITTER_PROCESS_LIBRARY_REFERENCE_SUBPATH?.trim() ||
+    DEFAULT_PROCESS_LIBRARY_REFERENCE_SUBPATH;
+  const processRoot = path.resolve(
+    options.processDir?.trim() ||
+      path.join(cloneDir, ...splitProcessLibrarySubpath(processSubpath))
+  );
+  const referenceRoot = options.processDir?.trim()
+    ? path.resolve(options.processDir, "reference")
+    : path.resolve(cloneDir, ...splitProcessLibrarySubpath(referenceSubpath));
+
+  return {
+    stateDir,
+    repo,
+    ...(ref ? { ref } : {}),
+    cloneDir,
+    processRoot,
+    referenceRoot,
+  };
 }
 
 export function getActiveProcessLibraryStatePath(stateDir?: string): string {
@@ -155,7 +242,11 @@ async function runGit(
   args: string[],
   cwd?: string
 ): Promise<{ stdout: string; stderr: string }> {
-  return execFile("git", args, {
+  const gitArgs =
+    process.platform === "win32"
+      ? ["-c", "core.longpaths=true", ...args]
+      : args;
+  return execFile("git", gitArgs, {
     ...(cwd ? { cwd } : {}),
     encoding: "utf8",
   });
@@ -189,19 +280,10 @@ export async function cloneProcessLibrary(
   const dir = path.resolve(options.dir);
   await fs.mkdir(path.dirname(dir), { recursive: true });
 
-  try {
-    await fs.access(dir);
-  } catch (error) {
-    const code = (error as NodeJS.ErrnoException)?.code;
-    if (code === "ENOENT") {
-      // Directory does not exist yet.
-    } else if (code) {
-      throw error;
-    } else {
-      throw new Error(
-        `Process-library directory already exists at ${dir}. Choose a new --dir or update it instead.`
-      );
-    }
+  if (await pathExists(dir)) {
+    throw new Error(
+      `Process-library directory already exists at ${dir}. Choose a new --dir or update it instead.`
+    );
   }
 
   const cloneArgs = ["clone", "--depth", "1"];
@@ -209,7 +291,12 @@ export async function cloneProcessLibrary(
     cloneArgs.push("--branch", options.ref);
   }
   cloneArgs.push(options.repo, dir);
-  await runGit(cloneArgs);
+  try {
+    await runGit(cloneArgs);
+  } catch (error) {
+    await fs.rm(dir, { recursive: true, force: true });
+    throw error;
+  }
   const { revision } = await readGitMetadata(dir);
   if (!revision) {
     throw new Error(`Unable to determine cloned revision for ${dir}`);
@@ -307,5 +394,52 @@ export async function resolveActiveProcessLibrary(
     stateFile,
     bindingScope: state.defaultBinding ? "default" : null,
     binding: state.defaultBinding ?? null,
+  };
+}
+
+export async function ensureActiveProcessLibrary(
+  options: EnsureActiveProcessLibraryOptions = {}
+): Promise<EnsureActiveProcessLibraryResult> {
+  const defaultSpec = getDefaultProcessLibrarySpec(options);
+  const resolved = await resolveActiveProcessLibrary(options);
+
+  if (resolved.binding && (await pathExists(resolved.binding.dir))) {
+    return {
+      ...resolved,
+      bootstrapped: false,
+      defaultSpec,
+    };
+  }
+
+  const cloneExists = await pathExists(path.join(defaultSpec.cloneDir, ".git"));
+  if (cloneExists) {
+    await updateProcessLibrary({
+      dir: defaultSpec.cloneDir,
+      ...(defaultSpec.ref ? { ref: defaultSpec.ref } : {}),
+    });
+  } else {
+    await cloneProcessLibrary({
+      repo: defaultSpec.repo,
+      dir: defaultSpec.cloneDir,
+      ...(defaultSpec.ref ? { ref: defaultSpec.ref } : {}),
+    });
+  }
+
+  const bound = await bindActiveProcessLibrary({
+    stateDir: defaultSpec.stateDir,
+    dir: defaultSpec.processRoot,
+    runId: options.runId,
+    sessionId: options.sessionId,
+    ref: defaultSpec.ref,
+  });
+
+  return {
+    stateFile: bound.stateFile,
+    bindingScope:
+      bound.bindingScope === "run+session" ? "run" : bound.bindingScope,
+    ...(bound.bindingKey ? { bindingKey: bound.bindingKey } : {}),
+    binding: bound.binding,
+    bootstrapped: true,
+    defaultSpec,
   };
 }

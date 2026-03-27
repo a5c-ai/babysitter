@@ -48,7 +48,7 @@ The babysitter workflow has 4 steps:
 Interview the user for the intent, requirements, goal, scope, etc.
 using AskUserQuestion tool (before setting the in-session loop).
 
-A multi-step phase to understand the intent and perspective to approach the process building after researching the repo, short research online if needed, short research in the target repo, additional instructions, intent and library (processes, specializations, skills, subagents, methodologies, references, etc.) / guide for methodology building. Resolve the active library root with `babysitter process-library:active --state-dir .a5c --json`. If no binding exists, initialize it with `babysitter process-library:clone --repo https://github.com/a5c-ai/babysitter.git --dir .a5c/process-library/babysitter-repo` and `babysitter process-library:use --dir .a5c/process-library/babysitter-repo/library --state-dir .a5c`. After that, treat `specializations/**/**/**`, `methodologies/`, `contrib/`, and `reference/` as paths relative to that active library root.
+A multi-step phase to understand the intent and perspective to approach the process building after researching the repo, short research online if needed, short research in the target repo, additional instructions, intent and library (processes, specializations, skills, subagents, methodologies, references, etc.) / guide for methodology building. You MUST resolve the active library root with `babysitter process-library:active --json` before process authoring, and you MUST conduct an actual search against that active process library instead of skipping directly to writing a process. The `process-library:active` command now bootstraps the shared global SDK process library automatically if no binding exists yet. Read `binding.dir` from the returned JSON to get the active process-library root that must be searched. If you need the cloned repo root itself, read `defaultSpec.cloneDir` from the same JSON. After that, treat `specializations/**/**/**`, `methodologies/`, `contrib/`, and `reference/` as paths relative to `binding.dir`.
 
 The first step should be the look at the state of the repo, then find the most relevant processes, specializations, skills, subagents, methodologies, references, etc. to use as a reference. use the babysitter cli discover command to find the relevant processes, skills, subagents, etc at various stages.
 
@@ -59,7 +59,7 @@ Then this phase can have: research online, research the repo, user questions, an
 When running non-interactively, skip the interview phase entirely. Instead:
 1. Parse the initial prompt to extract intent, scope, and requirements.
 2. Research the repo structure to understand the codebase.
-3. Search the process library for the most relevant specialization/methodology.
+3. Resolve the active process-library root with `babysitter process-library:active --json`, then search that active library for the most relevant specialization/methodology. Do not skip this search step.
 4. Proceed directly to the process creation phase using the extracted requirements.
 
 #### User Profile Integration
@@ -97,7 +97,7 @@ Before building the process, check for an existing user profile to personalize t
 
 #### Process creation phase
 
-after the interview phase, create the complete custom process files (js and jsons) for the run according to the Process Creation Guidelines and methodologies section. also install the babysitter-sdk inside .a5c if it is not already installed. (install it in .a5c/package.json if it is not already installed, make sure to use the latest version). **IMPORTANT**: When installing into `.a5c/`, use `npm i --prefix .a5c @a5c-ai/babysitter-sdk@latest` or a subshell `(cd .a5c && npm i @a5c-ai/babysitter-sdk@latest)` to avoid leaving CWD inside `.a5c/`, which causes doubled path resolution bugs.
+after the interview phase, create the complete custom process files (js and jsons) for the run according to the Process Creation Guidelines and methodologies section. also install the babysitter-sdk inside .a5c if it is not already installed. (install it in .a5c/package.json if it is not already installed, make sure to use the latest version). **IMPORTANT**: When installing into `.a5c/`, use `npm i --prefix .a5c @a5c-ai/babysitter-sdk@$SDK_VERSION` or a subshell `(cd .a5c && npm i @a5c-ai/babysitter-sdk@$SDK_VERSION)` to avoid leaving CWD inside `.a5c/`, which causes doubled path resolution bugs.
 you must abide the syntax and structure of the process files from the process library.
 
 **IMPORTANT — Path resolution**: Always use **absolute paths** for `--entry` when calling `run:create`, and always run the CLI from the **project root** directory (not from `.a5c/`). Using relative paths while CWD is inside `.a5c/` causes doubled paths like `.a5c/.a5c/runs/` or `.a5c/.a5c/processes/`.
@@ -109,6 +109,20 @@ you must abide the syntax and structure of the process files from the process li
 After the process is created and before creating the run:
 - **Interactive mode**: describe the process at high level (not the code or implementation details) to the user and ask for confirmation to use it, also generate it as a [process-name].diagram.md and [process-name].process.md file. If the user is not satisfied with the process, go back to the process creation phase and modify the process according to the feedback of the user until the user is satisfied with the process.
 - **Non-interactive mode**: proceed directly to creating the run without user confirmation.
+
+**common mistakes to avoid:**
+- ❌ WRONG: Creating the process file with tasks that use `node` kind effects, which bypasses the orchestration model and breaks the loop.
+- ✅ CORRECT: Always use `agent` or `skill` kind for tasks in the process file. Use `node` and `shell` kind is strictly forbidden.
+- ❌ WRONG: Calling important logic directly from the orchestration process.
+- ✅ CORRECT: Always encapsulate important logic inside agents or skills and call them from the process file. This ensures proper orchestration, error handling, and observability.
+- ❌ WRONG: Not including quality gates, verification steps, looping for convergence, or breakpoint questions in the process.
+- ✅ CORRECT: Design the process with appropriate milestones, quality gates, verification steps, and breakpoints to ensure reliability and user control.
+- ❌ WRONG: Not using the profiles to personalize the process design and breakpoint placement.
+- ✅ CORRECT: Use the user profile to adjust the process design, select preferred tools,
+and calibrate breakpoint density according to the user's expertise and tolerance.
+- ❌ WRONG: Skipping research the repo for existing relevant processes, skills, agents, methodologies, and references.
+- ❌ WRONG: Skipping research the process library for relevant patterns and reusable components.
+- ✅ CORRECT: Always research the repo structure and the process library to find relevant existing processes, skills, agents, methodologies, and references to use as a starting point or inspiration for the new process design. (must call process-library:active to find the active library root and then treat the references paths as relative to that root)
 
 ### 2. Create run and bind session (single command):
 
@@ -138,6 +152,12 @@ $CLI run:create \
 - `--runs-dir <dir>` — override runs directory (default: `.a5c/runs`)
 
 This single command creates the run AND binds the session (initializing the stop-hook loop). The JSON output includes `runId`, `runDir`, and `session` binding status.
+
+**common mistakes to avoid:**
+- ❌ WRONG: Calling `session:init` explicitly
+- ❌ WRONG: Fabricating a session ID when none is available from the environment.
+- ❌ WRONG: Trying to bind the session in a separate step after run creation instead of using `--harness claude-code` to do both in one step.
+- ✅ CORRECT: Using `--harness claude-code` with `run:create` to create the run AND auto-bind the session without manual intervention and relying on the environment variables set by the hooks for honest session binding.
 
 **For resuming existing runs:**
 
@@ -518,13 +538,13 @@ When creating process files, include `@skill` and `@agent` markers in the JSDoc 
 1. Use `babysitter skill:discover --process-path <path> --plugin-root ... --json` to find relevant skills/agents in the specialization directory
 2. Select the ones actually needed by the process tasks
 3. Add them as `@skill`/`@agent` markers in the JSDoc header
-4. Use full relative path from the active process-library root returned by `babysitter process-library:active --state-dir .a5c --json`
+4. Use full relative path from the active process-library root returned in `binding.dir` by `babysitter process-library:active --json`
 
 When these markers are present, `run:create` and `run:iterate` will return only the marked skills/agents (with full file paths) instead of scanning the entire plugin tree. Without markers, the SDK falls back to scanning ALL specializations, which can return dozens of irrelevant results (e.g., AI agent skills surfaced for a simple file-writing task) and degrade orchestration quality.
 
 - Unless otherwise specified, prefer processes that close the widest loop in the quality gates (for example e2e tests with a full browser or emulator/vm if it a mobile or desktop app) AND gates that make sure the work is accurate against the user request (all the specs is covered and no extra stuff was added unless permitted by the intent of the user).
 
-- Scan the methodologies and processes in the active process library and the sdk package to find relevant processes and methodologies to use as a reference. Also search for process files bundled in active skills and processes in the repo (`.a5c/processes/`).
+- Scan the methodologies and processes in the active process library and the sdk package to find relevant processes and methodologies to use as a reference. This search is mandatory before writing the process. Also search for process files bundled in active skills and processes in the repo (`.a5c/processes/`).
 
 - if you encounter a generic reusable part of a process that can be later reused and composed, build it in a modular way and organize it in the .a5c/processes directory. and import it to compose it to the specific process in the current user request. prefer architecting processes in such modular way for reusability and composition.
 

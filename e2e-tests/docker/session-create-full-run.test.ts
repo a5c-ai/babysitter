@@ -117,7 +117,7 @@ describeInternalHarness("session:create full internal-harness run", () => {
     expect(status.state).toBe("completed");
     expect(status.completionProof).toBeTruthy();
 
-    const processFileExists = dockerExec("test -f /workspace/session-create-internal/generated-process.js && echo ok").trim();
+    const processFileExists = dockerExec("test -f /workspace/session-create-internal/generated-process.mjs && echo ok").trim();
     expect(processFileExists).toBe("ok");
 
     const outputExists = dockerExec(`test -f ${runDir}/state/output.json && echo ok`).trim();

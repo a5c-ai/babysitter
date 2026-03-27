@@ -18,6 +18,7 @@ import { createSecureBashBackend } from "./piSecureSandbox";
 
 const DEFAULT_TIMEOUT_MS = 120_000;
 const DEFAULT_BASH_SANDBOX_MODE: NonNullable<PiSessionOptions["bashSandbox"]> = "local";
+const AGENT_END_PROMPT_SETTLE_GRACE_MS = 250;
 
 /** Listener for Pi session events. */
 export type PiEventListener = (event: PiSessionEvent) => void;
@@ -276,6 +277,7 @@ export class PiSessionHandle {
     return new Promise<PiPromptResult>((resolve, reject) => {
       let settled = false;
       let timer: ReturnType<typeof setTimeout> | undefined;
+      let agentEndGraceTimer: ReturnType<typeof setTimeout> | undefined;
       let agentEndResult: PiPromptResult | null = null;
       let promptSettled = false;
 
@@ -283,6 +285,7 @@ export class PiSessionHandle {
         if (settled) return;
         settled = true;
         if (timer) clearTimeout(timer);
+        if (agentEndGraceTimer) clearTimeout(agentEndGraceTimer);
         resolve(result);
       };
 
@@ -290,6 +293,7 @@ export class PiSessionHandle {
         if (settled) return;
         settled = true;
         if (timer) clearTimeout(timer);
+        if (agentEndGraceTimer) clearTimeout(agentEndGraceTimer);
         const message = err instanceof Error ? err.message : String(err);
         resolve({
           output: message,
@@ -339,7 +343,13 @@ export class PiSessionHandle {
           };
           if (promptSettled) {
             finishWithResult(agentEndResult);
+            return;
           }
+          agentEndGraceTimer = setTimeout(() => {
+            if (agentEndResult) {
+              finishWithResult(agentEndResult);
+            }
+          }, AGENT_END_PROMPT_SETTLE_GRACE_MS);
         }
       });
 

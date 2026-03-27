@@ -161,32 +161,19 @@ describe("PiSessionHandle", () => {
       expect(mockPrompt).toHaveBeenCalledWith("say hello");
     });
 
-    test("waits for the underlying prompt promise to settle after agent_end", async () => {
+    test("returns promptly after agent_end even if the underlying prompt promise does not settle", async () => {
       mockGetLastAssistantText.mockReturnValue("Hello from Pi!");
-      let resolvePrompt: (() => void) | undefined;
       mockPrompt.mockImplementation(() => {
         emitEvent({ type: "agent_end" });
-        return new Promise<void>((resolve) => {
-          resolvePrompt = resolve;
+        return new Promise<void>(() => {
+          // Simulate a tool-only turn where the provider never settles the
+          // outer prompt promise even though the session already emitted agent_end.
         });
       });
 
       const session = createPiSession();
-      let settled = false;
-      const pending = session.prompt("say hello").then((result) => {
-        settled = true;
-        return result;
-      });
+      const result = await session.prompt("say hello");
 
-      await vi.waitFor(() => {
-        expect(resolvePrompt).toBeTypeOf("function");
-      });
-      expect(settled).toBe(false);
-
-      resolvePrompt?.();
-      const result = await pending;
-
-      expect(settled).toBe(true);
       expect(result.success).toBe(true);
       expect(result.output).toBe("Hello from Pi!");
     });

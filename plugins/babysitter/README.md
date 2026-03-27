@@ -23,7 +23,7 @@ Do not document multi-iteration loops inside a single turn.
 Process discovery should prefer:
 
 1. `.a5c/processes` in the current workspace
-2. The SDK-managed active process-library binding returned by `babysitter process-library:active --state-dir .a5c --json`
+2. The SDK-managed active process-library binding returned by `babysitter process-library:active --json`
 3. Other installed skill/plugin roots only as compatibility fallback
 4. Reference/bundled content only as last resort
 
@@ -98,12 +98,10 @@ claude plugin install --scope user babysitter@a5c.ai
 babysitter harness:install-plugin claude-code
 ```
 
-If the workspace does not already have an active process-library binding:
+If the workspace does not already have an active process-library binding, this command bootstraps the shared global SDK process library automatically:
 
 ```bash
-babysitter process-library:clone --repo https://github.com/a5c-ai/babysitter.git --dir .a5c/process-library/babysitter-repo
-babysitter process-library:use --dir .a5c/process-library/babysitter-repo/library --state-dir .a5c
-babysitter process-library:active --state-dir .a5c --json
+babysitter process-library:active --json
 ```
 
 ## Quick Start

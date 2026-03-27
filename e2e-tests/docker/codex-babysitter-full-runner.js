@@ -8,7 +8,7 @@ const { spawnSync } = require("child_process");
 const HOME = process.env.HOME || "/home/codex";
 const WORKSPACE = "/workspace/codex-full-run";
 const CODEX_HOME = process.env.CODEX_HOME || path.join(HOME, ".codex");
-const SKILL_DIR = path.join(CODEX_HOME, "skills", "babysitter-codex");
+const SKILL_DIR = path.join(CODEX_HOME, "skills", "babysit");
 const PROCESS_PATH = path.join(WORKSPACE, "ci-codex-process.js");
 const AGENTS_PATH = path.join(WORKSPACE, "AGENTS.md");
 const WORKSPACE_CONFIG_PATH = path.join(WORKSPACE, ".codex", "config.toml");
@@ -612,7 +612,7 @@ function collectTaskSummaries(runDir) {
 
 function main() {
   if (!fs.existsSync(path.join(SKILL_DIR, ".codex", "hooks", "babysitter-stop-hook.sh"))) {
-    fail("Installed babysitter-codex skill is missing stop hook script", {
+    fail("Installed babysit skill is missing stop hook script", {
       expectedPath: path.join(SKILL_DIR, ".codex", "hooks", "babysitter-stop-hook.sh"),
     });
   }

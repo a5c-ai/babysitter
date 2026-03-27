@@ -43,10 +43,6 @@ function getGlobalStateDir() {
   return path.join(os.homedir(), '.a5c');
 }
 
-function readJson(filePath) {
-  return JSON.parse(fs.readFileSync(filePath, 'utf8'));
-}
-
 function writeFileIfChanged(filePath, contents) {
   if (fs.existsSync(filePath)) {
     const current = fs.readFileSync(filePath, 'utf8');
@@ -156,56 +152,18 @@ function runBabysitterCli(packageRoot, cliArgs, options = {}) {
   return result.stdout;
 }
 
-function resolveProcessLibrarySpec(packageRoot) {
-  const lock = readJson(path.join(packageRoot, 'babysitter.lock.json'));
-  const processLibraryConfig =
-    (lock && lock.content && (lock.content.processLibrary || lock.content.upstream)) || {};
-  const repo = process.env.BABYSITTER_PROCESS_LIBRARY_REPO || processLibraryConfig.repo;
-  if (!repo) {
-    throw new Error('missing process-library repo configuration in babysitter.lock.json');
-  }
-  const ref = process.env.BABYSITTER_PROCESS_LIBRARY_REF || processLibraryConfig.ref || '';
-  const stateDir = getGlobalStateDir();
-  const cloneDir = path.join(stateDir, 'process-library', 'babysitter-repo');
-  const processSubpath =
-    process.env.BABYSITTER_PROCESS_LIBRARY_SUBPATH ||
-    processLibraryConfig.processSubpath ||
-    'library';
-  return {
-    repo,
-    ref: ref || undefined,
-    stateDir,
-    cloneDir,
-    processRoot: path.join(cloneDir, ...processSubpath.split('/')),
-  };
-}
-
 function ensureGlobalProcessLibrary(packageRoot) {
-  const spec = resolveProcessLibrarySpec(packageRoot);
-  const cloneExists = fs.existsSync(path.join(spec.cloneDir, '.git'));
-  const cloneArgs = cloneExists
-    ? ['process-library:update', '--dir', spec.cloneDir, '--json']
-    : ['process-library:clone', '--repo', spec.repo, '--dir', spec.cloneDir, '--json'];
-  if (spec.ref) {
-    cloneArgs.splice(cloneExists ? 3 : 5, 0, '--ref', spec.ref);
-  }
-  runBabysitterCli(packageRoot, cloneArgs, { cwd: packageRoot });
-  if (!fs.existsSync(spec.processRoot)) {
-    throw new Error(`fetched process library root is missing: ${spec.processRoot}`);
-  }
-  runBabysitterCli(
-    packageRoot,
-    ['process-library:use', '--dir', spec.processRoot, '--state-dir', spec.stateDir, '--json'],
-    { cwd: packageRoot },
-  );
   const active = JSON.parse(
     runBabysitterCli(
       packageRoot,
-      ['process-library:active', '--state-dir', spec.stateDir, '--json'],
+      ['process-library:active', '--state-dir', getGlobalStateDir(), '--json'],
       { cwd: packageRoot },
     ),
   );
-  console.log(`[babysitter-codex]   process library: ${spec.processRoot}`);
+  console.log(`[babysitter-codex]   process library: ${active.binding?.dir}`);
+  if (active.defaultSpec?.cloneDir) {
+    console.log(`[babysitter-codex]   process library clone: ${active.defaultSpec.cloneDir}`);
+  }
   console.log(`[babysitter-codex]   process library state: ${active.stateFile}`);
 }
 

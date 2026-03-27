@@ -8,12 +8,10 @@ Invoke the babysitter:babysit skill (using the Skill tool) and follow its instru
 
 Use the assimilation domain processes from the active process library to convert external sources into well-defined babysitter process definitions with accompanying skills/ and agents/ directories.
 
-If the workspace does not already have an active process-library binding, initialize it first:
+If the workspace does not already have an active process-library binding, initialize it first through the shared global SDK binding:
 
 ```bash
-babysitter process-library:clone --repo https://github.com/a5c-ai/babysitter.git --dir .a5c/process-library/babysitter-repo
-babysitter process-library:use --dir .a5c/process-library/babysitter-repo/library --state-dir .a5c
-babysitter process-library:active --state-dir .a5c --json
+babysitter process-library:active --json
 ```
 
 Run the process after formalizing it.

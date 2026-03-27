@@ -18,7 +18,7 @@ The pi plugin keeps Babysitter as the orchestration layer for pi sessions:
 Process discovery should prefer active roots:
 
 1. `.a5c/processes` in the current workspace
-2. The SDK-managed active process-library binding returned by `babysitter process-library:active --state-dir .a5c --json`
+2. The SDK-managed active process-library binding returned by `babysitter process-library:active --json`
 3. Installed plugin process roots only as compatibility fallback
 4. Bundled/reference content only as fallback
 
@@ -78,12 +78,10 @@ From the Babysitter SDK CLI helper:
 babysitter harness:install-plugin pi
 ```
 
-If the workspace does not already have an active process-library binding:
+If the workspace does not already have an active process-library binding, this command bootstraps the shared global SDK process library automatically:
 
 ```bash
-babysitter process-library:clone --repo https://github.com/a5c-ai/babysitter.git --dir .a5c/process-library/babysitter-repo
-babysitter process-library:use --dir .a5c/process-library/babysitter-repo/library --state-dir .a5c
-babysitter process-library:active --state-dir .a5c --json
+babysitter process-library:active --json
 ```
 
 ## Usage

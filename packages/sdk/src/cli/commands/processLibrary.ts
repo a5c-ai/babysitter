@@ -1,7 +1,8 @@
 import {
   bindActiveProcessLibrary,
   cloneProcessLibrary,
-  resolveActiveProcessLibrary,
+  ensureActiveProcessLibrary,
+  getDefaultProcessLibrarySpec,
   updateProcessLibrary,
 } from "../../processLibrary/active";
 
@@ -16,31 +17,17 @@ export interface ProcessLibraryCommandArgs {
   json: boolean;
 }
 
-function requireArg(
-  value: string | undefined,
-  name: string,
-  command: string,
-  json: boolean
-): string | null {
-  if (!value) {
-    const message = `[${command}] ${name} is required`;
-    if (json) {
-      console.log(JSON.stringify({ error: "missing_argument", message }));
-    } else {
-      console.error(message);
-    }
-    return null;
-  }
-  return value;
-}
-
 export async function handleProcessLibraryClone(
   args: ProcessLibraryCommandArgs
 ): Promise<number> {
-  const repo = requireArg(args.repo, "--repo", "process-library:clone", args.json);
-  if (!repo) return 1;
-  const dir = requireArg(args.dir, "--dir", "process-library:clone", args.json);
-  if (!dir) return 1;
+  const defaults = getDefaultProcessLibrarySpec({
+    stateDir: args.stateDir,
+    repo: args.repo,
+    cloneDir: args.dir,
+    ref: args.ref,
+  });
+  const repo = args.repo ?? defaults.repo;
+  const dir = args.dir ?? defaults.cloneDir;
 
   try {
     const result = await cloneProcessLibrary({ repo, dir, ref: args.ref });
@@ -66,8 +53,12 @@ export async function handleProcessLibraryClone(
 export async function handleProcessLibraryUpdate(
   args: ProcessLibraryCommandArgs
 ): Promise<number> {
-  const dir = requireArg(args.dir, "--dir", "process-library:update", args.json);
-  if (!dir) return 1;
+  const defaults = getDefaultProcessLibrarySpec({
+    stateDir: args.stateDir,
+    cloneDir: args.dir,
+    ref: args.ref,
+  });
+  const dir = args.dir ?? defaults.cloneDir;
 
   try {
     const result = await updateProcessLibrary({ dir, ref: args.ref });
@@ -93,22 +84,27 @@ export async function handleProcessLibraryUpdate(
 export async function handleProcessLibraryUse(
   args: ProcessLibraryCommandArgs
 ): Promise<number> {
-  const dir = requireArg(args.dir, "--dir", "process-library:use", args.json);
-  if (!dir) return 1;
-
   try {
-    const result = await bindActiveProcessLibrary({
-      dir,
-      stateDir: args.stateDir,
-      runId: args.runId,
-      sessionId: args.sessionId,
-      ref: args.ref,
-    });
+    const result = args.dir
+      ? await bindActiveProcessLibrary({
+          dir: args.dir,
+          stateDir: args.stateDir,
+          runId: args.runId,
+          sessionId: args.sessionId,
+          ref: args.ref,
+        })
+      : await ensureActiveProcessLibrary({
+          stateDir: args.stateDir,
+          runId: args.runId,
+          sessionId: args.sessionId,
+          ref: args.ref,
+        });
     if (args.json) {
       console.log(JSON.stringify({ success: true, ...result }, null, 2));
     } else {
+      const boundDir = result.binding?.dir ?? "(missing)";
       console.log(
-        `Active process library updated.\n  Scope: ${result.bindingScope}\n  Dir: ${result.binding.dir}\n  State: ${result.stateFile}`
+        `Active process library updated.\n  Scope: ${result.bindingScope}\n  Dir: ${boundDir}\n  State: ${result.stateFile}`
       );
     }
     return 0;
@@ -127,19 +123,25 @@ export async function handleProcessLibraryActive(
   args: ProcessLibraryCommandArgs
 ): Promise<number> {
   try {
-    const result = await resolveActiveProcessLibrary({
+    const result = await ensureActiveProcessLibrary({
       stateDir: args.stateDir,
       runId: args.runId,
       sessionId: args.sessionId,
     });
     if (args.json) {
       console.log(JSON.stringify(result, null, 2));
-    } else if (!result.binding) {
-      console.log(`No active process-library binding found.\n  State: ${result.stateFile}`);
     } else {
-      console.log(
-        `Active process library.\n  Scope: ${result.bindingScope}\n  Dir: ${result.binding.dir}\n  Revision: ${result.binding.revision ?? "unknown"}`
-      );
+      const lines = [
+        "Active process library.",
+        `  Scope: ${result.bindingScope}`,
+        `  Dir: ${result.binding?.dir ?? "(missing)"}`,
+        `  Revision: ${result.binding?.revision ?? "unknown"}`,
+        `  State: ${result.stateFile}`,
+      ];
+      if (result.bootstrapped) {
+        lines.push(`  Bootstrapped: yes (${result.defaultSpec.cloneDir})`);
+      }
+      console.log(lines.join("\n"));
     }
     return 0;
   } catch (error) {

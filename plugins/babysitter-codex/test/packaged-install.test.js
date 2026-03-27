@@ -154,6 +154,8 @@ try {
       BABYSITTER_PACKAGE_ROOT: installedSkillRoot,
       BABYSITTER_SDK_CLI: path.join(PROJECT_ROOT, '..', '..', 'packages', 'sdk', 'dist', 'cli', 'main.js'),
       BABYSITTER_PROCESS_LIBRARY_REPO: processLibraryRepoRoot,
+      HOME: userHome,
+      USERPROFILE: userHome,
     },
   });
   assert.ok(teamInstallOutput.includes('[team-install] complete'));
@@ -191,18 +193,18 @@ try {
     path.resolve(installJson.hookScriptsRoot),
     path.resolve(path.join(workspaceRoot, '.codex', 'hooks')),
   );
-  assert.strictEqual(path.resolve(installJson.processLibraryCloneDir), path.resolve(path.join(workspaceRoot, '.a5c', 'process-library', 'babysitter-repo')));
+  assert.strictEqual(path.resolve(installJson.processLibraryCloneDir), path.resolve(path.join(userHome, '.a5c', 'process-library', 'babysitter-repo')));
   assert.strictEqual(path.resolve(installJson.processLibraryRoot), path.resolve(path.join(installJson.processLibraryCloneDir, 'library')));
   assert.strictEqual(path.resolve(installJson.processLibraryReferenceRoot), path.resolve(path.join(installJson.processLibraryCloneDir, 'library', 'reference')));
   assert.strictEqual(
     path.resolve(installJson.processLibraryStateFile),
-    path.resolve(path.join(workspaceRoot, '.a5c', 'active', 'process-library.json')),
+    path.resolve(path.join(userHome, '.a5c', 'active', 'process-library.json')),
   );
   assert.strictEqual(path.resolve(profileJson.installedSkillRoot), path.resolve(path.join(workspaceRoot, '.codex', 'skills', 'babysit')));
   assert.strictEqual(path.resolve(profileJson.workspacePromptsRoot), path.resolve(path.join(workspaceRoot, '.codex', 'prompts')));
   assert.ok(!('processLibraryRoot' in profileJson), 'team profile should not pin an active process-library root');
   assert.ok(!('rulesLayer' in profileJson), 'team profile should not emit a missing rules layer path');
-  assert.ok(String(profileJson.processLibraryLookupCommand || '').includes('process-library:active'));
+  assert.strictEqual(String(profileJson.processLibraryLookupCommand || ''), 'babysitter process-library:active --json');
   assert.strictEqual(
     path.resolve(profileJson.workspaceHooksConfigPath),
     path.resolve(path.join(workspaceRoot, '.codex', 'hooks.json')),

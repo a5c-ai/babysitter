@@ -59,7 +59,7 @@ describe("sessionCreatePrompts", () => {
     expect(prompt).toContain("Do not set `task.metadata.bashSandbox`, `task.metadata.isolated`, or `task.metadata.enableCompaction`");
     expect(prompt).toContain("bashSandbox: \"secure\"");
     expect(prompt).toContain("follow a real interview phase");
-    expect(prompt).toContain("search the local babysitter process library");
+    expect(prompt).toContain("resolve the active process-library root with `babysitter process-library:active --json`");
     expect(prompt).toContain("project `.a5c/processes/`");
     expect(prompt).toContain("babysitter profile:read --user --json");
     expect(prompt).toContain("only relevant filesystem root");
