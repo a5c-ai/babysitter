@@ -427,6 +427,8 @@ describe("handleSessionCreate", () => {
         toolsMode?: string;
         isolated?: boolean;
         ephemeral?: boolean;
+        customTools?: Array<{ name?: string }>;
+        systemPrompt?: string;
       };
       expect(phase1Options).toMatchObject({
         workspace,
@@ -434,9 +436,20 @@ describe("handleSessionCreate", () => {
         ephemeral: true,
       });
       expect(["default", "readonly"]).toContain(phase1Options.toolsMode ?? "");
+      expect(phase1Options.customTools?.map((tool) => tool.name)).toEqual(
+        expect.arrayContaining([
+          "babysitter_write_process_definition",
+          "babysitter_resolve_process_library",
+          "babysitter_search_process_library",
+          "babysitter_read_process_library_file",
+          "babysitter_report_process_definition",
+        ]),
+      );
       expect(invokeHarness).not.toHaveBeenCalled();
       expect(phase1Prompt).toContain("Non-interactive mode. Do not call AskUserQuestion");
       expect(phase1Prompt).toContain("Workspace assessment:");
+      expect(phase1Options.systemPrompt).toContain("babysitter_resolve_process_library");
+      expect(phase1Options.systemPrompt).toContain("babysitter_search_process_library");
       expect(phase1Prompt).toContain("The generated process must directly execute the user's requested work");
       expect(phase1Prompt).not.toContain("You are a babysitter process generator");
     });

@@ -84,19 +84,33 @@ so:
 
 The Codex package does not bundle the process library.
 
-Workspace onboarding must:
+The shared SDK-managed process library lives in the global Babysitter state dir
+(`$BABYSITTER_GLOBAL_STATE_DIR` when set, otherwise `~/.a5c`), not per repo.
+First use must rely on `babysitter process-library:active --json`, which
+auto-clones and binds the default library if no active binding exists yet.
 
-1. clone or update the upstream Babysitter repo into
-   `.a5c/process-library/babysitter-repo`
-2. bind `.a5c/process-library/babysitter-repo/library` with
-   `babysitter process-library:use`
-3. resolve the active binding later with
-   `babysitter process-library:active --state-dir .a5c --json`
+Read:
+
+- `binding.dir` as the active process-library root that must be searched before
+  authoring a process
+- `defaultSpec.cloneDir` as the cloned repo root when adjacent library material
+  is needed
+
+Do not skip the active-library search step during process authoring.
+
+Workspace onboarding and runtime flows must:
+
+1. resolve the active shared binding with `babysitter process-library:active --json`
+2. use the returned `binding.dir` as the active library root
+3. only consult `defaultSpec.cloneDir` when adjacent repo-level material is
+   needed beyond the active root itself
 
 Preferred discovery order:
 
 1. project-local `.a5c/processes`
-2. the active SDK-managed process-library binding
+2. the active SDK-managed process-library binding from `binding.dir`
+3. the cloned process-library repo root from `defaultSpec.cloneDir` when
+   adjacent reference material is needed
 
 ## Codex-Specific Rules
 

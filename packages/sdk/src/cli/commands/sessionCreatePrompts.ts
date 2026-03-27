@@ -110,11 +110,13 @@ export function buildProcessDefinitionSystemPrompt(
     "Rules:",
     "- This phase is unbound. Do not create a run, bind a session, iterate a run, or post task results.",
     "- Use the AskUserQuestion tool when clarification is useful. Ask focused, high-signal questions in batches when possible.",
-    "- In interactive mode, follow a real interview phase: inspect the repo/workspace state first, then inspect the most relevant local babysitter process references, then ask only the next highest-signal question. Do not plan more than one interview step ahead.",
-    "- In non-interactive mode, skip user questions but still parse the request, inspect the repo/workspace structure, resolve the active process-library root with `babysitter process-library:active --json`, and search that active library for the most relevant specialization or methodology before authoring the process. Do not skip the process-library search step.",
+    "- Before authoring the process in any mode, resolve the active shared process-library and conduct a real search against it. In this built-in PI path, use `babysitter_resolve_process_library`, `babysitter_search_process_library`, and `babysitter_read_process_library_file`; those tools are the internal `session:create` harness surface for process-library work. Outside this built-in path, use `babysitter process-library:active --json`, then search the returned `binding.dir`. Do not skip this process-library search step.",
+    "- Treat `binding.dir` as the active process-library root that must be searched first. If you need the cloned repo root itself for adjacent material, use `defaultSpec.cloneDir`. Treat `reference/` under the active root or `defaultSpec.referenceRoot` as the canonical reference area.",
+    "- In interactive mode, follow a real interview phase: inspect the repo/workspace state first, inspect the most relevant process-library references through the active binding, then ask only the next highest-signal question. Do not plan more than one interview step ahead.",
+    "- In non-interactive mode, skip user questions but still parse the request, inspect the repo/workspace structure, resolve the active process-library root, and search that active library for the most relevant specialization or methodology before authoring the process.",
     "- Research the workspace before finalizing the process. Use your available read/search/bash/write tools as needed.",
     "- Treat the provided workspace as the only relevant filesystem root unless the user explicitly points you somewhere else.",
-    "- You may inspect local babysitter process references when they materially improve the process design. Prefer project `.a5c/processes/`, the active process-library root returned in `binding.dir` by `babysitter process-library:active --json`, the cloned repo root returned in `defaultSpec.cloneDir` when you need adjacent reference material, local plugin paths such as `plugins/babysitter/skills/babysit/process/`, repository `library/` materials, and local babysitter discover/profile CLI commands when available.",
+    "- You may inspect local babysitter process references when they materially improve the process design. Prefer project `.a5c/processes/`, the active process-library root returned in `binding.dir`, the cloned repo root returned in `defaultSpec.cloneDir` when you need adjacent reference material, local plugin paths such as `plugins/babysitter/skills/babysit/process/`, repository `library/` materials, and local babysitter discover/profile CLI commands when available.",
     "- If you use user profile context, read it through the babysitter CLI only, for example `babysitter profile:read --user --json`. Never import or call SDK profile helpers directly from generated processes or task instructions.",
     "- Use babysitter_write_process_definition to write the final JavaScript process file to the exact output path provided below.",
     "- The module must export a named `async function process(inputs, ctx)`.",
@@ -169,6 +171,7 @@ export function buildProcessDefinitionUserPrompt(
         "Workspace assessment: empty.",
         `Workspace entries: ${workspaceSummary}`,
         "Treat this as a greenfield request and move straight to authoring the process.",
+        "You still must resolve the active shared process-library and search it before writing the process.",
         "Start with the repo/workspace state, then inspect only the most relevant local babysitter process references or discover output before you author the process.",
         "Do not inspect unrelated directories, home-directory configs, or irrelevant global skill/plugin folders.",
         "Keep the process practical for a brand-new workspace: plan, scaffold, implement, verify.",
@@ -200,7 +203,7 @@ export function buildOrchestrationSystemPrompt(
   return [
     "You are the babysitter session:create phase 2 orchestration agent.",
     "Your job is to run the babysitter orchestration loop through tools, not by narrating what should happen.",
-    "Follow the babysit workflow directly: run one iteration, inspect the returned effects, perform the requested effects with tools or harness dispatch, post the results, and repeat until the run reaches a terminal state.",
+    "Follow the babysit workflow directly: run one iteration, inspect the returned effects, perform the requested effects through the babysitter effect tools and available coding tools, post the results, and repeat until the run reaches a terminal state.",
     "",
     "Rules:",
     `- Treat ${selectedHarnessName} as the target harness binding for this orchestration session.`,
@@ -210,9 +213,10 @@ export function buildOrchestrationSystemPrompt(
     "- Work in bounded turns. In each turn, call babysitter_run_iterate at most once unless the prompt explicitly tells you otherwise.",
     "- When babysitter_run_iterate reports pending effects, resolve each effect through tools.",
     "- For breakpoint effects, use AskUserQuestion in interactive mode. In non-interactive mode, select the best option according to the user intent and current context. Then call babysitter_task_post_result.",
-    "- For `shell` effects, inspect the effect payload and either run the command yourself with your bash/coding tools or call babysitter_run_shell_effect so the command executes on an internal PI worker that respects task metadata. Then call babysitter_task_post_result with the explicit outcome.",
-    "- For `agent`, `node`, and `orchestrator_task` effects, prefer babysitter_dispatch_effect_harness when the work should run on a harness wrapper. If you fulfill an effect directly with your own coding tools, you must still call babysitter_task_post_result with the explicit outcome.",
+    "- For `shell` effects, prefer `babysitter_run_shell_effect` so the command executes on an internal PI worker that respects task metadata. Use raw bash/coding tools only when the effect payload clearly requires manual inspection or direct intervention before posting the explicit outcome with babysitter_task_post_result.",
+    "- For `agent`, `node`, and `orchestrator_task` effects, prefer babysitter_dispatch_effect_harness so the pending effect is fulfilled through the intended harness wrapper. These babysitter effect tools are the built-in internal `session:create` harness surface for phase 2. If you fulfill an effect directly with your own coding tools, you must still call babysitter_task_post_result with the explicit outcome.",
     "- Do not rely on a hidden host-side effect executor. Perform or dispatch each effect intentionally based on the effect payload you received from babysitter_run_iterate.",
+    "- Shell effects are first-class pending effects. Do not skip them, narrate them, or assume the host will run them for you.",
     "- When choosing how to execute pending work, respect task-level harness metadata and the installed harness catalog provided below.",
     "- Shell effects execute on internal PI worker sessions. Respect `task.metadata.bashSandbox`, `task.metadata.isolated`, and `task.metadata.enableCompaction` when the process encoded stronger guardrails for that worker.",
     "- Internal secure execution is available through opt-in PI worker sessions; prefer that path for shell or security-sensitive work instead of assuming an external CLI harness is guarded.",
@@ -290,8 +294,8 @@ export function buildOrchestrationTurnPrompt(args: {
     lines.push("");
     lines.push("Resolve every listed pending effect and post its result in this turn. Do not call babysitter_run_iterate again after posting them.");
     lines.push("Handling rules:");
-    lines.push("- For `shell` effects, either run the requested command with your bash/coding tools from the correct workspace or call babysitter_run_shell_effect, then call babysitter_task_post_result with explicit status/stdout/stderr/value fields.");
-    lines.push("- For `agent`, `node`, or `orchestrator_task` effects, prefer babysitter_dispatch_effect_harness unless direct coding-tool execution is clearly better.");
+    lines.push("- For `shell` effects, prefer babysitter_run_shell_effect, then call babysitter_task_post_result with explicit status/stdout/stderr/value fields.");
+    lines.push("- For `agent`, `node`, or `orchestrator_task` effects, prefer babysitter_dispatch_effect_harness unless direct coding-tool execution is clearly better for the requested effect.");
     lines.push("- For `breakpoint` effects, use AskUserQuestion in interactive mode or choose the best option non-interactively, then post the result.");
   } else {
     lines.push("");

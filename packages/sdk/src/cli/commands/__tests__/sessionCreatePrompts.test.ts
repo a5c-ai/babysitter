@@ -59,7 +59,12 @@ describe("sessionCreatePrompts", () => {
     expect(prompt).toContain("Do not set `task.metadata.bashSandbox`, `task.metadata.isolated`, or `task.metadata.enableCompaction`");
     expect(prompt).toContain("bashSandbox: \"secure\"");
     expect(prompt).toContain("follow a real interview phase");
-    expect(prompt).toContain("resolve the active process-library root with `babysitter process-library:active --json`");
+    expect(prompt).toContain("resolve the active shared process-library");
+    expect(prompt).toContain("babysitter_resolve_process_library");
+    expect(prompt).toContain("babysitter_search_process_library");
+    expect(prompt).toContain("babysitter_read_process_library_file");
+    expect(prompt).toContain("binding.dir");
+    expect(prompt).toContain("defaultSpec.cloneDir");
     expect(prompt).toContain("project `.a5c/processes/`");
     expect(prompt).toContain("babysitter profile:read --user --json");
     expect(prompt).toContain("only relevant filesystem root");
@@ -88,6 +93,8 @@ describe("sessionCreatePrompts", () => {
     expect(prompt).toContain("respect task-level harness metadata");
     expect(prompt).toContain("babysitter_run_shell_effect");
     expect(prompt).toContain("babysitter_dispatch_effect_harness");
+    expect(prompt).toContain("prefer `babysitter_run_shell_effect`");
+    expect(prompt).toContain("Shell effects are first-class pending effects");
     expect(prompt).toContain("Shell effects execute on internal PI worker sessions");
     expect(prompt).toContain("opt-in PI worker sessions");
     expect(prompt).toContain("env.CI=true");
@@ -102,6 +109,7 @@ describe("sessionCreatePrompts", () => {
 
     expect(prompt).toContain("Non-interactive mode. Do not call AskUserQuestion");
     expect(prompt).toContain("Workspace assessment: empty.");
+    expect(prompt).toContain("resolve the active shared process-library");
     expect(prompt).toContain("inspect only the most relevant local babysitter process references");
     expect(prompt).toContain("Do not inspect unrelated directories");
     expect(prompt).toContain("real babysitter process, not a direct one-shot script");

@@ -43,6 +43,7 @@ import { commitEffectResult } from "../../runtime/commitEffectResult";
 import type { EffectAction, IterationResult } from "../../runtime/types";
 import { BabysitterRuntimeError, ErrorCategory } from "../../runtime/exceptions";
 import { resetGlobalTaskRegistry } from "../../tasks/registry";
+import { ensureActiveProcessLibrary } from "../../processLibrary/active";
 import {
   buildOrchestrationSystemPrompt,
   buildOrchestrationBootstrapPrompt,
@@ -75,6 +76,8 @@ const YELLOW = "\x1b[33m";
 const RED = "\x1b[31m";
 const MAGENTA = "\x1b[35m";
 const VERBOSE_LOG_LIMIT = 4_000;
+const PROCESS_LIBRARY_READ_MAX_CHARS = 24_000;
+const PROCESS_LIBRARY_SEARCH_DEFAULT_LIMIT = 12;
 let processValidationImportNonce = 0;
 
 interface Phase1Progress {
@@ -1187,6 +1190,217 @@ function execShellEffect(
       },
     );
   });
+}
+
+type ProcessLibraryToolScope = "binding" | "clone" | "reference";
+
+function isPathWithinRoot(root: string, candidate: string): boolean {
+  const relative = path.relative(root, candidate);
+  return relative === "" || (!relative.startsWith("..") && !path.isAbsolute(relative));
+}
+
+async function resolvePhase1ProcessLibraryRoot(
+  scope: ProcessLibraryToolScope = "binding",
+): Promise<{
+  scope: ProcessLibraryToolScope;
+  root: string;
+  active: Awaited<ReturnType<typeof ensureActiveProcessLibrary>>;
+}> {
+  const active = await ensureActiveProcessLibrary();
+  const bindingRoot = active.binding?.dir;
+  if (!bindingRoot) {
+    throw new BabysitterRuntimeError(
+      "ProcessLibraryNotResolved",
+      "No active process library binding is available.",
+      { category: ErrorCategory.Runtime },
+    );
+  }
+
+  const root =
+    scope === "clone"
+      ? active.defaultSpec.cloneDir
+      : scope === "reference"
+        ? active.defaultSpec.referenceRoot
+        : bindingRoot;
+
+  return {
+    scope,
+    root,
+    active,
+  };
+}
+
+function parseRipgrepMatchLine(
+  line: string,
+  root: string,
+): { path: string; line: number; excerpt: string } | null {
+  const match = line.match(/^(.*):([0-9]+):(.*)$/);
+  if (!match) {
+    return null;
+  }
+  const absolutePath = path.resolve(match[1] ?? "");
+  if (!isPathWithinRoot(root, absolutePath)) {
+    return null;
+  }
+  return {
+    path: path.relative(root, absolutePath) || path.basename(absolutePath),
+    line: Number(match[2] ?? "0"),
+    excerpt: (match[3] ?? "").trim(),
+  };
+}
+
+async function searchProcessLibrary(
+  query: string,
+  scope: ProcessLibraryToolScope = "binding",
+  limit = PROCESS_LIBRARY_SEARCH_DEFAULT_LIMIT,
+): Promise<{
+  scope: ProcessLibraryToolScope;
+  root: string;
+  query: string;
+  matches: Array<{
+    kind: "content" | "path";
+    path: string;
+    line?: number;
+    excerpt?: string;
+  }>;
+}> {
+  const trimmedQuery = query.trim();
+  if (!trimmedQuery) {
+    throw new BabysitterRuntimeError(
+      "ProcessLibrarySearchQueryMissing",
+      "Process-library search query must not be empty.",
+      { category: ErrorCategory.Validation },
+    );
+  }
+
+  const normalizedLimit = Math.max(1, Math.min(limit, 40));
+  const { root } = await resolvePhase1ProcessLibraryRoot(scope);
+  const matches: Array<{
+    kind: "content" | "path";
+    path: string;
+    line?: number;
+    excerpt?: string;
+  }> = [];
+  const seen = new Set<string>();
+
+  const contentResult = await execShellEffect(
+    "rg",
+    [
+      "-n",
+      "--no-heading",
+      "--color",
+      "never",
+      "--max-count",
+      "2",
+      "--max-filesize",
+      "256K",
+      "-S",
+      trimmedQuery,
+      root,
+    ],
+    root,
+  );
+  if (contentResult.exitCode === 0 || contentResult.exitCode === 1) {
+    for (const line of contentResult.stdout.split(/\r?\n/)) {
+      if (!line.trim()) {
+        continue;
+      }
+      const parsed = parseRipgrepMatchLine(line, root);
+      if (!parsed) {
+        continue;
+      }
+      const key = `content:${parsed.path}:${parsed.line}`;
+      if (seen.has(key)) {
+        continue;
+      }
+      seen.add(key);
+      matches.push({
+        kind: "content",
+        path: parsed.path,
+        line: parsed.line,
+        excerpt: parsed.excerpt,
+      });
+      if (matches.length >= normalizedLimit) {
+        break;
+      }
+    }
+  }
+
+  if (matches.length < normalizedLimit) {
+    const filesResult = await execShellEffect("rg", ["--files", root], root);
+    if (filesResult.exitCode === 0 || filesResult.exitCode === 1) {
+      const loweredQuery = trimmedQuery.toLowerCase();
+      for (const entry of filesResult.stdout.split(/\r?\n/)) {
+        const relativePath = entry.trim();
+        if (!relativePath) {
+          continue;
+        }
+        if (!relativePath.toLowerCase().includes(loweredQuery)) {
+          continue;
+        }
+        const key = `path:${relativePath}`;
+        if (seen.has(key)) {
+          continue;
+        }
+        seen.add(key);
+        matches.push({
+          kind: "path",
+          path: relativePath,
+        });
+        if (matches.length >= normalizedLimit) {
+          break;
+        }
+      }
+    }
+  }
+
+  return {
+    scope,
+    root,
+    query: trimmedQuery,
+    matches,
+  };
+}
+
+async function readProcessLibraryFile(
+  relativePath: string,
+  scope: ProcessLibraryToolScope = "binding",
+): Promise<{
+  scope: ProcessLibraryToolScope;
+  root: string;
+  relativePath: string;
+  absolutePath: string;
+  content: string;
+  truncated: boolean;
+}> {
+  const trimmedPath = relativePath.trim();
+  if (!trimmedPath) {
+    throw new BabysitterRuntimeError(
+      "ProcessLibraryReadPathMissing",
+      "Process-library file path must not be empty.",
+      { category: ErrorCategory.Validation },
+    );
+  }
+
+  const { root } = await resolvePhase1ProcessLibraryRoot(scope);
+  const absolutePath = path.resolve(root, trimmedPath);
+  if (!isPathWithinRoot(root, absolutePath)) {
+    throw new BabysitterRuntimeError(
+      "ProcessLibraryReadPathOutsideRoot",
+      `Process-library file must stay under ${root}.`,
+      { category: ErrorCategory.Validation },
+    );
+  }
+
+  const content = await fs.readFile(absolutePath, "utf8");
+  return {
+    scope,
+    root,
+    relativePath: trimmedPath,
+    absolutePath,
+    content: content.slice(0, PROCESS_LIBRARY_READ_MAX_CHARS),
+    truncated: content.length > PROCESS_LIBRARY_READ_MAX_CHARS,
+  };
 }
 
 function buildAgentPrompt(taskDef: Record<string, unknown>): string {
@@ -2323,6 +2537,95 @@ async function runProcessDefinitionPhase(args: {
       },
     },
     {
+      name: "babysitter_resolve_process_library",
+      label: "Resolve Process Library",
+      description:
+        "Resolve the active shared process-library binding, bootstrapping it if needed, and return the active roots that phase 1 must inspect.",
+      parameters: Type.Object({}),
+      execute: async (): Promise<ToolResultShape> => {
+        const active = await ensureActiveProcessLibrary();
+        writeVerboseData("phase1 tool babysitter_resolve_process_library", active, 1200);
+        return formatToolResult(
+          active,
+          "Active shared process library resolved.",
+        );
+      },
+    },
+    {
+      name: "babysitter_search_process_library",
+      label: "Search Process Library",
+      description:
+        "Search the active shared process library by content and path before authoring a process.",
+      parameters: Type.Object({
+        query: Type.String(),
+        scope: Type.Optional(Type.Union([
+          Type.Literal("binding"),
+          Type.Literal("clone"),
+          Type.Literal("reference"),
+        ])),
+        limit: Type.Optional(Type.Number({ minimum: 1, maximum: 40 })),
+      }),
+      execute: async (
+        _toolCallId: string,
+        params: {
+          query: string;
+          scope?: ProcessLibraryToolScope;
+          limit?: number;
+        },
+      ): Promise<ToolResultShape> => {
+        writeVerboseData("phase1 tool babysitter_search_process_library request", params);
+        const result = await searchProcessLibrary(
+          params.query,
+          params.scope ?? "binding",
+          params.limit,
+        );
+        writeVerboseData("phase1 tool babysitter_search_process_library result", result, 2000);
+        return formatToolResult(
+          result,
+          "Process-library search completed.",
+        );
+      },
+    },
+    {
+      name: "babysitter_read_process_library_file",
+      label: "Read Process Library File",
+      description:
+        "Read a specific file from the active shared process library after you identify it via search.",
+      parameters: Type.Object({
+        relativePath: Type.String(),
+        scope: Type.Optional(Type.Union([
+          Type.Literal("binding"),
+          Type.Literal("clone"),
+          Type.Literal("reference"),
+        ])),
+      }),
+      execute: async (
+        _toolCallId: string,
+        params: {
+          relativePath: string;
+          scope?: ProcessLibraryToolScope;
+        },
+      ): Promise<ToolResultShape> => {
+        writeVerboseData("phase1 tool babysitter_read_process_library_file request", params);
+        const result = await readProcessLibraryFile(
+          params.relativePath,
+          params.scope ?? "binding",
+        );
+        writeVerboseData(
+          "phase1 tool babysitter_read_process_library_file result",
+          {
+            ...result,
+            contentPreview: truncateForVerboseLog(result.content, 1200),
+          },
+          2000,
+        );
+        return formatToolResult(
+          result,
+          "Process-library file read completed.",
+        );
+      },
+    },
+    {
       name: "AskUserQuestion",
       label: "Ask User Question",
       description: "Ask the user one to four structured clarification questions and receive structured answers.",
@@ -3341,20 +3644,48 @@ async function runOrchestrationPhase(args: {
             "Breakpoint effects require explicit AskUserQuestion handling.",
           );
         }
-        if (action.kind === "shell") {
-          return formatToolResult(
-            {
-              effectId: params.effectId,
-              kind: action.kind,
-              message: "Shell effects should be fulfilled with the orchestration agent's own bash/coding tools, then posted with babysitter_task_post_result.",
-            },
-            "Shell effects are not dispatched through harness wrappers by this tool.",
-          );
-        }
-
         const requestedHarness = typeof params.harness === "string" && params.harness.trim().length > 0
           ? params.harness.trim()
           : undefined;
+
+        if (action.kind === "shell") {
+          const workerSessionOptions = buildPiWorkerSessionOptions({
+            action,
+            workspace: args.workspace,
+            model: args.model,
+          });
+          writeVerboseData("phase2 worker session options", workerSessionOptions);
+          const workerSession = createPiSession(workerSessionOptions);
+          try {
+            const effectResult = await resolveEffect(
+              action,
+              requestedHarness ?? "pi",
+              {
+                workspace: args.workspace,
+                model: args.model,
+                interactive: false,
+                compressionConfig: args.compressionConfig,
+              },
+              workerSession,
+              args.discovered,
+              null,
+              args.json,
+            );
+            state.pendingEffectResults.set(params.effectId, effectResult);
+            writeVerboseData("phase2 tool babysitter_dispatch_effect_harness result", {
+              effectId: params.effectId,
+              selectedHarness: "pi",
+              effectResult,
+            });
+            return formatToolResult(
+              { effectId: params.effectId, selectedHarness: "pi", effectResult },
+              "Shell effect executed on the internal PI worker and staged for task posting.",
+            );
+          } finally {
+            workerSession.dispose();
+          }
+        }
+
         const taskHarness = requestedHarness ?? resolveTaskHarness(action, args.selectedHarnessName, args.discovered);
         writeVerboseData("phase2 effect execution plan", {
           effectId: params.effectId,
