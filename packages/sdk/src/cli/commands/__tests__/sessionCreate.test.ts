@@ -8,6 +8,7 @@ import * as os from "node:os";
 import * as path from "node:path";
 import type { HarnessDiscoveryResult, HarnessInvokeResult } from "../../../harness/types";
 import type { IterationResult } from "../../../runtime/types";
+import { RunFailedError } from "../../../runtime/exceptions";
 
 // ── Mocks ─────────────────────────────────────────────────────────────
 
@@ -70,7 +71,8 @@ vi.mock("../../../harness/piWrapper", () => {
         const runCreate = getTool("babysitter_run_create");
         const bindSession = getTool("babysitter_bind_session");
         const runIterate = getTool("babysitter_run_iterate");
-        const executeEffect = getTool("babysitter_execute_effect");
+        const runShellEffect = getTool("babysitter_run_shell_effect");
+        const dispatchEffectHarness = getTool("babysitter_dispatch_effect_harness");
         const taskPost = getTool("babysitter_task_post_result");
         const finish = getTool("babysitter_finish_orchestration");
 
@@ -88,8 +90,11 @@ vi.mock("../../../harness/piWrapper", () => {
                 const effectId = String(action.effectId);
                 if (action.kind === "breakpoint") {
                   await taskPost?.execute?.("tool-post-breakpoint", { effectId });
+                } else if (action.kind === "shell") {
+                  await runShellEffect?.execute?.("tool-run-shell", { effectId });
+                  await taskPost?.execute?.("tool-post-shell", { effectId });
                 } else {
-                  await executeEffect?.execute?.("tool-execute-effect", { effectId });
+                  await dispatchEffectHarness?.execute?.("tool-dispatch-effect", { effectId });
                   await taskPost?.execute?.("tool-post-effect", { effectId });
                 }
               }
@@ -160,6 +165,41 @@ function makeInvokeResult(
     harness: "pi",
     ...overrides,
   };
+}
+
+function buildMinimalAgentProcessSource(args?: {
+  preludeLines?: string[];
+  processLines?: string[];
+  taskId?: string;
+  taskVarName?: string;
+  taskPrompt?: string;
+}): string {
+  const taskId = args?.taskId ?? "main-task";
+  const taskVarName = args?.taskVarName ?? "mainTask";
+  const taskPrompt = args?.taskPrompt ?? "Complete the requested work.";
+  return [
+    ...(args?.preludeLines ?? []),
+    "function defineTask(taskId, build) {",
+    "  return { taskId, build };",
+    "}",
+    "",
+    `const ${taskVarName} = defineTask("${taskId}", () => ({`,
+    '  kind: "agent",',
+    "  agent: {",
+    '    name: "general-purpose",',
+    "    prompt: {",
+    `      task: ${JSON.stringify(taskPrompt)},`,
+    "      instructions: [],",
+    "    },",
+    '    outputSchema: { type: "object" },',
+    "  },",
+    "}));",
+    "",
+    "export async function process(inputs, ctx) {",
+    ...(args?.processLines ?? [`  return await ctx.task(${taskVarName}, {});`]),
+    "}",
+    "",
+  ].join("\n");
 }
 
 // ── Tests ─────────────────────────────────────────────────────────────
@@ -317,7 +357,7 @@ describe("handleSessionCreate", () => {
       let phase1Prompt = "";
       await fs.writeFile(
         generatedPath,
-        'export async function process() { return { success: true }; }\n',
+        buildMinimalAgentProcessSource(),
         "utf8",
       );
 
@@ -407,7 +447,7 @@ describe("handleSessionCreate", () => {
       const generatedPath = path.join(workspace, "generated-process.mjs");
       await fs.writeFile(
         generatedPath,
-        'export async function process() { return { success: true }; }\n',
+        buildMinimalAgentProcessSource(),
         "utf8",
       );
 
@@ -452,6 +492,12 @@ describe("handleSessionCreate", () => {
           const runCreate = tools.find((tool) => tool.name === "babysitter_run_create") as {
             execute?: (toolCallId: string, params: Record<string, unknown>) => Promise<{ details?: unknown }>;
           } | undefined;
+          const bindSession = tools.find((tool) => tool.name === "babysitter_bind_session") as {
+            execute?: (toolCallId: string, params: Record<string, unknown>) => Promise<{ details?: unknown }>;
+          } | undefined;
+          const runIterate = tools.find((tool) => tool.name === "babysitter_run_iterate") as {
+            execute?: (toolCallId: string, params: Record<string, unknown>) => Promise<{ details?: unknown }>;
+          } | undefined;
 
           return {
             initialize: vi.fn().mockResolvedValue(undefined),
@@ -485,6 +531,14 @@ describe("handleSessionCreate", () => {
                   duration: 1,
                 };
               }
+              if (phase2PromptCount === 2) {
+                await bindSession?.execute?.("tool-bind-session", {});
+                return { success: true, output: "bootstrap recovered", exitCode: 0, duration: 1 };
+              }
+              if (phase2PromptCount === 3) {
+                await runIterate?.execute?.("tool-run-iterate", {});
+                return { success: true, output: "iteration complete", exitCode: 0, duration: 1 };
+              }
               return { success: true, output: "noop", exitCode: 0, duration: 1 };
             }),
           };
@@ -516,15 +570,16 @@ describe("handleSessionCreate", () => {
           inputs: { prompt: "create a game" },
         }),
       );
+      expect(phase2PromptCount).toBe(3);
     });
 
-    it("continues phase 2 with host-driven orchestration when pi returns the known post-turn failure before any progress", async () => {
+    it("fails phase 2 when pi returns the known post-turn failure before any progress", async () => {
       const workspace = await fs.mkdtemp(path.join(os.tmpdir(), "session-create-phase2-host-fallback-"));
       tempDirs.push(workspace);
       const generatedPath = path.join(workspace, "generated-process.mjs");
       await fs.writeFile(
         generatedPath,
-        'export async function process() { return { success: true }; }\n',
+        buildMinimalAgentProcessSource(),
         "utf8",
       );
 
@@ -605,14 +660,9 @@ describe("handleSessionCreate", () => {
         interactive: false,
       });
 
-      expect(code).toBe(0);
-      expect(createRun).toHaveBeenCalledWith(
-        expect.objectContaining({
-          prompt: "create a game",
-          inputs: { prompt: "create a game" },
-        }),
-      );
-      expect(orchestrateIteration).toHaveBeenCalled();
+      expect(code).toBe(1);
+      expect(createRun).not.toHaveBeenCalled();
+      expect(orchestrateIteration).not.toHaveBeenCalled();
     });
   });
 
@@ -623,7 +673,7 @@ describe("handleSessionCreate", () => {
       const generatedPath = path.join(workspace, "generated-process.mjs");
       await fs.writeFile(
         generatedPath,
-        'export async function process() { return { success: true }; }\n',
+        buildMinimalAgentProcessSource(),
         "utf8",
       );
 
@@ -687,6 +737,81 @@ describe("handleSessionCreate", () => {
       expect(code).toBe(0);
       expect(existsSync(generatedPath)).toBe(true);
       expect(createRun).toHaveBeenCalled();
+    });
+
+    it("retries a transient phase-1 PI service failure before failing the command", async () => {
+      const workspace = await fs.mkdtemp(path.join(os.tmpdir(), "session-create-phase1-transient-retry-"));
+      tempDirs.push(workspace);
+      const generatedPath = path.join(workspace, "generated-process.mjs");
+      let promptCount = 0;
+
+      (discoverHarnesses as Mock).mockResolvedValue([
+        makeDiscoveryResult({ name: "pi" }),
+      ]);
+      (createRun as Mock).mockResolvedValue({
+        runId: "run-phase1-transient-retry",
+        runDir: "/tmp/runs/run-phase1-transient-retry",
+        metadata: {},
+      });
+      (orchestrateIteration as Mock).mockResolvedValue({
+        status: "completed",
+        output: "done",
+      });
+
+      vi.mocked(createPiSession).mockImplementationOnce((options?: { customTools?: Array<Record<string, unknown>> }) => {
+        const tools = options?.customTools ?? [];
+        const reportProcess = tools.find((tool) => tool.name === "babysitter_report_process_definition") as {
+          execute?: (toolCallId: string, params: Record<string, unknown>) => Promise<{ details?: unknown }>;
+        } | undefined;
+
+        return {
+          initialize: vi.fn().mockResolvedValue(undefined),
+          subscribe: vi.fn(() => () => {}),
+          dispose: vi.fn(),
+          executeBash: vi.fn(async () => ({
+            output: "ok",
+            exitCode: 0,
+            cancelled: false,
+          })),
+          get sessionId() {
+            return "mock-session-id-phase1-transient-retry";
+          },
+          get isInitialized() {
+            return true;
+          },
+          prompt: vi.fn(async () => {
+            promptCount += 1;
+            if (promptCount === 1) {
+              return {
+                success: false,
+                output: "The server had an error processing your request. Sorry about that! You can retry your request.",
+                exitCode: 1,
+                duration: 1,
+              };
+            }
+
+            await fs.writeFile(generatedPath, buildMinimalAgentProcessSource(), "utf8");
+            await reportProcess?.execute?.("tool-report-transient-retry", {
+              processPath: generatedPath,
+              summary: "Generated process after transient retry",
+            });
+            return { success: true, output: "phase1-success", exitCode: 0, duration: 1 };
+          }),
+        };
+      });
+
+      const code = await handleSessionCreate({
+        prompt: "create a game",
+        workspace,
+        runsDir: "/tmp/runs",
+        json: false,
+        verbose: false,
+        interactive: false,
+      });
+
+      expect(code).toBe(0);
+      expect(promptCount).toBe(2);
+      expect(existsSync(generatedPath)).toBe(true);
     });
 
     it("recovers by writing a process code block returned by the phase-1 agent when the tool report is missing", async () => {
@@ -858,7 +983,7 @@ describe("handleSessionCreate", () => {
             expect(prompt).not.toContain("export default async function process");
             await writeProcess?.execute?.("tool-write-valid", {
               processPath: generatedPath,
-              source: 'export async function process() { return { success: true }; }\n',
+              source: buildMinimalAgentProcessSource(),
             });
             await reportProcess?.execute?.("tool-report-valid", {
               processPath: generatedPath,
@@ -949,7 +1074,7 @@ describe("handleSessionCreate", () => {
             expect(prompt).toContain("named `async function process(inputs, ctx)`");
             await writeProcess?.execute?.("tool-write-named-export", {
               processPath: generatedPath,
-              source: 'export async function process() { return { success: true }; }\n',
+              source: buildMinimalAgentProcessSource(),
             });
             await reportProcess?.execute?.("tool-report-named-export", {
               processPath: generatedPath,
@@ -1048,13 +1173,12 @@ describe("handleSessionCreate", () => {
             expect(prompt).toContain("nodeProcess");
             await writeProcess?.execute?.("tool-write-process-shadow-fixed", {
               processPath: generatedPath,
-              source: [
-                'export async function process(inputs, ctx) {',
-                '  const root = globalThis.process.cwd();',
-                '  return { root };',
-                '}',
-                '',
-              ].join("\n"),
+              source: buildMinimalAgentProcessSource({
+                processLines: [
+                  '  const root = globalThis.process.cwd();',
+                  '  return await ctx.task(mainTask, { root });',
+                ],
+              }),
             });
             await reportProcess?.execute?.("tool-report-process-shadow-fixed", {
               processPath: generatedPath,
@@ -1155,17 +1279,18 @@ describe("handleSessionCreate", () => {
             expect(prompt).toContain("fileURLToPath");
             await writeProcess?.execute?.("tool-write-workspace-context-fixed", {
               processPath: generatedPath,
-              source: [
-                'import path from "node:path";',
-                'import { fileURLToPath } from "node:url";',
-                '',
-                'const workspaceDir = path.dirname(fileURLToPath(import.meta.url));',
-                '',
-                'export async function process(inputs, ctx) {',
-                '  return { root: workspaceDir };',
-                '}',
-                '',
-              ].join("\n"),
+              source: buildMinimalAgentProcessSource({
+                preludeLines: [
+                  'import path from "node:path";',
+                  'import { fileURLToPath } from "node:url";',
+                  '',
+                  'const workspaceDir = path.dirname(fileURLToPath(import.meta.url));',
+                  '',
+                ],
+                processLines: [
+                  '  return await ctx.task(mainTask, { root: workspaceDir });',
+                ],
+              }),
             });
             await reportProcess?.execute?.("tool-report-workspace-context-fixed", {
               processPath: generatedPath,
@@ -1270,15 +1395,14 @@ describe("handleSessionCreate", () => {
             expect(prompt).toContain("String.raw");
             await writeProcess?.execute?.("tool-write-syntax-error-fixed", {
               processPath: generatedPath,
-              source: [
-                "export async function process(inputs, ctx) {",
-                "  const embeddedScript = [",
-                "    \"const view = `<div class=\\\"card\\\">Hello</div>`;\",",
-                "  ].join(\"\\n\");",
-                "  return { embeddedScript };",
-                "}",
-                "",
-              ].join("\n"),
+              source: buildMinimalAgentProcessSource({
+                processLines: [
+                  "  const embeddedScript = [",
+                  "    \"const view = `<div class=\\\"card\\\">Hello</div>`;\",",
+                  "  ].join(\"\\n\");",
+                  "  return await ctx.task(mainTask, { embeddedScript });",
+                ],
+              }),
             });
             await reportProcess?.execute?.("tool-report-syntax-error-fixed", {
               processPath: generatedPath,
@@ -1303,6 +1427,208 @@ describe("handleSessionCreate", () => {
       const source = await fs.readFile(generatedPath, "utf8");
       expect(source).toContain('].join("\\n")');
       expect(source).not.toContain("const embeddedScript = `");
+    });
+
+    it("repairs a direct process that does not define any babysitter tasks", async () => {
+      const workspace = await fs.mkdtemp(path.join(os.tmpdir(), "session-create-phase1-no-tasks-"));
+      tempDirs.push(workspace);
+      const generatedPath = path.join(workspace, "generated-process.mjs");
+      let promptCount = 0;
+
+      (discoverHarnesses as Mock).mockResolvedValue([
+        makeDiscoveryResult({ name: "pi" }),
+      ]);
+      (createRun as Mock).mockResolvedValue({
+        runId: "run-no-tasks-fix",
+        runDir: "/tmp/runs/run-no-tasks-fix",
+        metadata: {},
+      });
+      (orchestrateIteration as Mock).mockResolvedValue({
+        status: "completed",
+        output: "done",
+      });
+
+      vi.mocked(createPiSession).mockImplementationOnce((options?: { customTools?: Array<Record<string, unknown>> }) => {
+        const tools = options?.customTools ?? [];
+        const writeProcess = tools.find((tool) => tool.name === "babysitter_write_process_definition") as {
+          execute?: (toolCallId: string, params: Record<string, unknown>) => Promise<{ details?: unknown }>;
+        } | undefined;
+        const reportProcess = tools.find((tool) => tool.name === "babysitter_report_process_definition") as {
+          execute?: (toolCallId: string, params: Record<string, unknown>) => Promise<{ details?: unknown }>;
+        } | undefined;
+
+        return {
+          initialize: vi.fn().mockResolvedValue(undefined),
+          subscribe: vi.fn(() => () => {}),
+          dispose: vi.fn(),
+          executeBash: vi.fn(async () => ({
+            output: "ok",
+            exitCode: 0,
+            cancelled: false,
+          })),
+          abort: vi.fn().mockResolvedValue(undefined),
+          get sessionId() {
+            return "mock-session-id-phase1-no-tasks";
+          },
+          get isInitialized() {
+            return true;
+          },
+          get isStreaming() {
+            return false;
+          },
+          prompt: vi.fn(async (prompt: string) => {
+            promptCount += 1;
+            if (promptCount === 1) {
+              await writeProcess?.execute?.("tool-write-no-tasks", {
+                processPath: generatedPath,
+                source: [
+                  "export async function process(inputs, ctx) {",
+                  "  return { ok: true };",
+                  "}",
+                  "",
+                ].join("\n"),
+              });
+              await reportProcess?.execute?.("tool-report-no-tasks", {
+                processPath: generatedPath,
+                summary: "Generated direct process without babysitter tasks",
+              });
+              return { success: true, output: "phase1-no-tasks", exitCode: 0, duration: 1 };
+            }
+
+            expect(prompt).toContain("does not define any babysitter tasks via defineTask(...)");
+            expect(prompt).toContain("orchestrate real work through defined tasks");
+            expect(prompt).toContain('Define at least one `agent` task');
+            await writeProcess?.execute?.("tool-write-no-tasks-fixed", {
+              processPath: generatedPath,
+              source: buildMinimalAgentProcessSource(),
+            });
+            await reportProcess?.execute?.("tool-report-no-tasks-fixed", {
+              processPath: generatedPath,
+              summary: "Repaired direct process into a task-orchestrating process",
+            });
+            return { success: true, output: "phase1-repaired", exitCode: 0, duration: 1 };
+          }),
+        };
+      });
+
+      const code = await handleSessionCreate({
+        prompt: "create a game",
+        workspace,
+        runsDir: "/tmp/runs",
+        json: false,
+        verbose: false,
+        interactive: false,
+      });
+
+      expect(code).toBe(0);
+      expect(promptCount).toBe(2);
+      const source = await fs.readFile(generatedPath, "utf8");
+      expect(source).toContain('defineTask("main-task"');
+      expect(source).toContain("await ctx.task(mainTask, {})");
+    });
+
+    it("repairs task-orchestrating processes that never define an agent task", async () => {
+      const workspace = await fs.mkdtemp(path.join(os.tmpdir(), "session-create-phase1-no-agent-task-"));
+      tempDirs.push(workspace);
+      const generatedPath = path.join(workspace, "generated-process.mjs");
+      let promptCount = 0;
+
+      (discoverHarnesses as Mock).mockResolvedValue([
+        makeDiscoveryResult({ name: "pi" }),
+      ]);
+      (createRun as Mock).mockResolvedValue({
+        runId: "run-no-agent-task-fix",
+        runDir: "/tmp/runs/run-no-agent-task-fix",
+        metadata: {},
+      });
+      (orchestrateIteration as Mock).mockResolvedValue({
+        status: "completed",
+        output: "done",
+      });
+
+      vi.mocked(createPiSession).mockImplementationOnce((options?: { customTools?: Array<Record<string, unknown>> }) => {
+        const tools = options?.customTools ?? [];
+        const writeProcess = tools.find((tool) => tool.name === "babysitter_write_process_definition") as {
+          execute?: (toolCallId: string, params: Record<string, unknown>) => Promise<{ details?: unknown }>;
+        } | undefined;
+        const reportProcess = tools.find((tool) => tool.name === "babysitter_report_process_definition") as {
+          execute?: (toolCallId: string, params: Record<string, unknown>) => Promise<{ details?: unknown }>;
+        } | undefined;
+
+        return {
+          initialize: vi.fn().mockResolvedValue(undefined),
+          subscribe: vi.fn(() => () => {}),
+          dispose: vi.fn(),
+          executeBash: vi.fn(async () => ({
+            output: "ok",
+            exitCode: 0,
+            cancelled: false,
+          })),
+          abort: vi.fn().mockResolvedValue(undefined),
+          get sessionId() {
+            return "mock-session-id-phase1-no-agent-task";
+          },
+          get isInitialized() {
+            return true;
+          },
+          get isStreaming() {
+            return false;
+          },
+          prompt: vi.fn(async (prompt: string) => {
+            promptCount += 1;
+            if (promptCount === 1) {
+              await writeProcess?.execute?.("tool-write-no-agent-task", {
+                processPath: generatedPath,
+                source: [
+                  'import { defineTask } from "@a5c-ai/babysitter-sdk";',
+                  "",
+                  'const verifyTask = defineTask("verify-task", () => ({',
+                  '  kind: "shell",',
+                  '  shell: { command: "echo hi" },',
+                  "}));",
+                  "",
+                  "export async function process(inputs, ctx) {",
+                  "  return await ctx.task(verifyTask, {});",
+                  "}",
+                  "",
+                ].join("\n"),
+              });
+              await reportProcess?.execute?.("tool-report-no-agent-task", {
+                processPath: generatedPath,
+                summary: "Generated shell-only task process",
+              });
+              return { success: true, output: "phase1-no-agent-task", exitCode: 0, duration: 1 };
+            }
+
+            expect(prompt).toContain("does not define any agent tasks");
+            expect(prompt).toContain('kind: "agent"');
+            await writeProcess?.execute?.("tool-write-no-agent-task-fixed", {
+              processPath: generatedPath,
+              source: buildMinimalAgentProcessSource(),
+            });
+            await reportProcess?.execute?.("tool-report-no-agent-task-fixed", {
+              processPath: generatedPath,
+              summary: "Repaired process to include an agent task",
+            });
+            return { success: true, output: "phase1-repaired", exitCode: 0, duration: 1 };
+          }),
+        };
+      });
+
+      const code = await handleSessionCreate({
+        prompt: "create a game",
+        workspace,
+        runsDir: "/tmp/runs",
+        json: false,
+        verbose: false,
+        interactive: false,
+      });
+
+      expect(code).toBe(0);
+      expect(promptCount).toBe(2);
+      const source = await fs.readFile(generatedPath, "utf8");
+      expect(source).toContain('kind: "agent"');
+      expect(source).toContain("await ctx.task(mainTask, {})");
     });
 
     it("repairs ctx.task calls that pass plain task objects instead of defineTask bindings", async () => {
@@ -1358,9 +1684,19 @@ describe("handleSessionCreate", () => {
               await writeProcess?.execute?.("tool-write-plain-task-object", {
                 processPath: generatedPath,
                 source: [
+                  "function defineTask(taskId, build) {",
+                  "  return { taskId, build };",
+                  "}",
+                  "",
+                  'const helperTask = defineTask("helper-task", () => ({',
+                  '  kind: "agent",',
+                  '  agent: { name: "general-purpose", prompt: { task: "Help.", instructions: [] }, outputSchema: { type: "object" } },',
+                  "}));",
+                  "",
                   "export async function process(inputs, ctx) {",
                   '  const verifyTask = { kind: "shell", shell: { command: "echo hi" } };',
                   "  await ctx.task(verifyTask, {});",
+                  "  await ctx.task(helperTask, {});",
                   "  return { ok: true };",
                   "}",
                   "",
@@ -1378,20 +1714,7 @@ describe("handleSessionCreate", () => {
             expect(prompt).toContain("do not pass plain object task definitions");
             await writeProcess?.execute?.("tool-write-plain-task-object-fixed", {
               processPath: generatedPath,
-              source: [
-                'import { defineTask } from "@a5c-ai/babysitter-sdk";',
-                "",
-                'const verifyTask = defineTask("verify-task", () => ({',
-                '  kind: "shell",',
-                '  shell: { command: "echo hi" },',
-                "}));",
-                "",
-                "export async function process(inputs, ctx) {",
-                "  await ctx.task(verifyTask, {});",
-                "  return { ok: true };",
-                "}",
-                "",
-              ].join("\n"),
+              source: buildMinimalAgentProcessSource(),
             });
             await reportProcess?.execute?.("tool-report-plain-task-object-fixed", {
               processPath: generatedPath,
@@ -1414,8 +1737,8 @@ describe("handleSessionCreate", () => {
       expect(code).toBe(0);
       expect(promptCount).toBe(2);
       const source = await fs.readFile(generatedPath, "utf8");
-      expect(source).toContain('const verifyTask = defineTask("verify-task"');
-      expect(source).toContain("await ctx.task(verifyTask, {})");
+      expect(source).toContain('const mainTask = defineTask("main-task"');
+      expect(source).toContain("await ctx.task(mainTask, {})");
       expect(source).not.toContain('const verifyTask = { kind: "shell"');
     });
 
@@ -1474,12 +1797,16 @@ describe("handleSessionCreate", () => {
                 source: [
                   'import { defineTask } from "@a5c-ai/babysitter-sdk";',
                   '',
-                  'const badShellTask = defineTask("bad-shell", () => ({',
-                  '  shell: { command: "echo hi" },',
+                  'const badAgentTask = defineTask("bad-agent", () => ({',
+                  '  agent: {',
+                  '    name: "general-purpose",',
+                  '    prompt: { task: "Do the work.", instructions: [] },',
+                  '    outputSchema: { type: "object" },',
+                  '  },',
                   '}));',
                   '',
                   'export async function process(inputs, ctx) {',
-                  '  return ctx.task(badShellTask, {});',
+                  '  return ctx.task(badAgentTask, {});',
                   '}',
                   '',
                 ].join("\n"),
@@ -1492,20 +1819,24 @@ describe("handleSessionCreate", () => {
             }
 
             expect(prompt).toContain("defines task(s) without a top-level kind");
-            expect(prompt).toContain('kind: "shell"');
+            expect(prompt).toContain('kind: "agent"');
             expect(prompt).toContain("await ctx.task(definedTask, args)");
             await writeProcess?.execute?.("tool-write-missing-kind-fixed", {
               processPath: generatedPath,
               source: [
                 'import { defineTask } from "@a5c-ai/babysitter-sdk";',
                 '',
-                'const goodShellTask = defineTask("good-shell", () => ({',
-                '  kind: "shell",',
-                '  shell: { command: "echo hi" },',
+                'const goodAgentTask = defineTask("good-agent", () => ({',
+                '  kind: "agent",',
+                '  agent: {',
+                '    name: "general-purpose",',
+                '    prompt: { task: "Do the work.", instructions: [] },',
+                '    outputSchema: { type: "object" },',
+                '  },',
                 '}));',
                 '',
                 'export async function process(inputs, ctx) {',
-                '  return await ctx.task(goodShellTask, {});',
+                '  return await ctx.task(goodAgentTask, {});',
                 '}',
                 '',
               ].join("\n"),
@@ -1531,9 +1862,116 @@ describe("handleSessionCreate", () => {
       expect(code).toBe(0);
       expect(promptCount).toBe(2);
       const source = await fs.readFile(generatedPath, "utf8");
+      expect(source).toContain('kind: "agent"');
+      expect(source).toContain("await ctx.task(goodAgentTask, {})");
+      expect(source).not.toContain("const badAgentTask");
+    });
+
+    it("does not infer a node-kind mismatch from quoted node: specifiers inside task strings", async () => {
+      const workspace = await fs.mkdtemp(path.join(os.tmpdir(), "session-create-phase1-node-specifier-"));
+      tempDirs.push(workspace);
+      const generatedPath = path.join(workspace, "generated-process.mjs");
+      let promptCount = 0;
+
+      (discoverHarnesses as Mock).mockResolvedValue([
+        makeDiscoveryResult({ name: "pi" }),
+      ]);
+      (createRun as Mock).mockResolvedValue({
+        runId: "run-node-specifier-fix",
+        runDir: "/tmp/runs/run-node-specifier-fix",
+        metadata: {},
+      });
+      (orchestrateIteration as Mock).mockResolvedValue({
+        status: "completed",
+        output: "done",
+      });
+
+      vi.mocked(createPiSession).mockImplementationOnce((options?: { customTools?: Array<Record<string, unknown>> }) => {
+        const tools = options?.customTools ?? [];
+        const writeProcess = tools.find((tool) => tool.name === "babysitter_write_process_definition") as {
+          execute?: (toolCallId: string, params: Record<string, unknown>) => Promise<{ details?: unknown }>;
+        } | undefined;
+        const reportProcess = tools.find((tool) => tool.name === "babysitter_report_process_definition") as {
+          execute?: (toolCallId: string, params: Record<string, unknown>) => Promise<{ details?: unknown }>;
+        } | undefined;
+
+        return {
+          initialize: vi.fn().mockResolvedValue(undefined),
+          subscribe: vi.fn(() => () => {}),
+          dispose: vi.fn(),
+          executeBash: vi.fn(async () => ({
+            output: "ok",
+            exitCode: 0,
+            cancelled: false,
+          })),
+          abort: vi.fn().mockResolvedValue(undefined),
+          get sessionId() {
+            return "mock-session-id-phase1-node-specifier";
+          },
+          get isInitialized() {
+            return true;
+          },
+          get isStreaming() {
+            return false;
+          },
+          prompt: vi.fn(async (prompt: string) => {
+            promptCount += 1;
+            if (promptCount > 1) {
+              throw new Error(`unexpected repair prompt: ${prompt}`);
+            }
+
+            await writeProcess?.execute?.("tool-write-node-specifier", {
+              processPath: generatedPath,
+              source: [
+                'import { defineTask } from "@a5c-ai/babysitter-sdk";',
+                "",
+                'const mainTask = defineTask("main-task", () => ({',
+                '  kind: "agent",',
+                '  agent: {',
+                '    name: "general-purpose",',
+                '    prompt: {',
+                '      task: "Create the game and mention node:fs in the notes.",',
+                '      instructions: [],',
+                "    },",
+                '    outputSchema: { type: "object" },',
+                "  },",
+                "}));",
+                "",
+                'const verifyTask = defineTask("verify-task", () => ({',
+                '  kind: "shell",',
+                '  shell: { command: "node ./verify-game-files.mjs && echo node:fs" },',
+                "}));",
+                "",
+                "export async function process(inputs, ctx) {",
+                "  await ctx.task(mainTask, {});",
+                "  return await ctx.task(verifyTask, {});",
+                "}",
+                "",
+              ].join("\n"),
+            });
+            await reportProcess?.execute?.("tool-report-node-specifier", {
+              processPath: generatedPath,
+              summary: "Generated process with quoted node: specifiers inside task strings",
+            });
+            return { success: true, output: "phase1-node-specifier", exitCode: 0, duration: 1 };
+          }),
+        };
+      });
+
+      const code = await handleSessionCreate({
+        prompt: "create a game",
+        workspace,
+        runsDir: "/tmp/runs",
+        json: false,
+        verbose: false,
+        interactive: false,
+      });
+
+      expect(code).toBe(0);
+      expect(promptCount).toBe(1);
+      const source = await fs.readFile(generatedPath, "utf8");
       expect(source).toContain('kind: "shell"');
-      expect(source).toContain("await ctx.task(goodShellTask, {})");
-      expect(source).not.toContain("const badShellTask");
+      expect(source).toContain('echo node:fs');
     });
 
   });
@@ -1619,7 +2057,7 @@ describe("handleSessionCreate", () => {
       expect(createPiSession).toHaveBeenCalledWith(
         expect.objectContaining({
           workspace: undefined,
-          toolsMode: "readonly",
+          toolsMode: "coding",
           ephemeral: true,
         }),
       );
@@ -1661,9 +2099,10 @@ describe("handleSessionCreate", () => {
             taskDef: {
               kind: "shell",
               title: "run secure shell task",
+              shell: {
+                command: "npm test",
+              },
               metadata: {
-                command: "npm",
-                args: ["test"],
                 bashSandbox: "secure",
                 isolated: true,
                 enableCompaction: true,
@@ -1691,10 +2130,64 @@ describe("handleSessionCreate", () => {
       expect(code).toBe(0);
       expect(createPiSession).toHaveBeenCalledWith(
         expect.objectContaining({
+          timeout: 900_000,
           toolsMode: "coding",
           bashSandbox: "secure",
           isolated: true,
           enableCompaction: true,
+          ephemeral: true,
+        }),
+      );
+    });
+
+    it("uses the longer PI worker timeout for default internal agent execution", async () => {
+      (discoverHarnesses as Mock).mockResolvedValue([
+        makeDiscoveryResult({ name: "pi" }),
+      ]);
+      (createRun as Mock).mockResolvedValue({
+        runId: "run-1",
+        runDir: "/tmp/runs/run-1",
+        metadata: {},
+      });
+
+      (orchestrateIteration as Mock)
+        .mockResolvedValueOnce({
+          status: "waiting",
+          nextActions: [
+            {
+              effectId: "eff-agent",
+              invocationKey: "key-agent",
+              kind: "agent",
+              taskDef: {
+                kind: "agent",
+                title: "Implement the requested work",
+                agent: {
+                  name: "builder",
+                  prompt: "Do the work.",
+                },
+              },
+            },
+          ],
+        })
+        .mockResolvedValueOnce({
+          status: "completed",
+          output: "done",
+        });
+      (commitEffectResult as Mock).mockResolvedValue({});
+
+      const code = await handleSessionCreate({
+        processPath: "/tmp/p.js",
+        runsDir: "/tmp/runs",
+        json: false,
+        verbose: false,
+        interactive: false,
+      });
+
+      expect(code).toBe(0);
+      expect(createPiSession).toHaveBeenCalledWith(
+        expect.objectContaining({
+          timeout: 900_000,
+          toolsMode: "coding",
           ephemeral: true,
         }),
       );
@@ -1727,6 +2220,34 @@ describe("handleSessionCreate", () => {
 
       expect(code).toBe(0);
       expect(orchestrateIteration).toHaveBeenCalledTimes(1);
+    });
+
+    it("retries a transient process-module load failure before failing the run", async () => {
+      (discoverHarnesses as Mock).mockResolvedValue([
+        makeDiscoveryResult({ name: "pi" }),
+      ]);
+      (createRun as Mock).mockResolvedValue({
+        runId: "run-1",
+        runDir: "/tmp/runs/run-1",
+        metadata: {},
+      });
+      (orchestrateIteration as Mock)
+        .mockRejectedValueOnce(new RunFailedError("Failed to load process module at /tmp/p.js"))
+        .mockResolvedValueOnce({
+          status: "completed",
+          output: "done",
+        });
+
+      const code = await handleSessionCreate({
+        processPath: "/tmp/p.js",
+        runsDir: "/tmp/runs",
+        json: false,
+        verbose: false,
+        interactive: false,
+      });
+
+      expect(code).toBe(0);
+      expect(orchestrateIteration).toHaveBeenCalledTimes(2);
     });
 
     it("resolves pending effects and re-iterates", async () => {

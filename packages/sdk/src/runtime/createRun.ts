@@ -12,7 +12,8 @@ import { callRuntimeHook } from "./hooks/runtime";
 export async function createRun(options: CreateRunOptions): Promise<CreateRunResult> {
   const runId = options.runId ?? nextUlid();
   validateRunId(runId);
-  const runDir = getRunDir(options.runsDir, runId);
+  const runsDir = path.resolve(options.runsDir);
+  const runDir = getRunDir(runsDir, runId);
   const normalizedEntrypoint = normalizeEntrypoint(runDir, options.process.importPath, options.process.exportName);
   const requestId = options.request ?? options.process.processId ?? runId;
   const providedProof =
@@ -23,7 +24,7 @@ export async function createRun(options: CreateRunOptions): Promise<CreateRunRes
     completionProof,
   };
   const { metadata } = await createRunDir({
-    runsRoot: options.runsDir,
+    runsRoot: runsDir,
     runId,
     request: requestId,
     processId: options.process.processId,

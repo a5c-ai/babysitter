@@ -161,6 +161,36 @@ describe("PiSessionHandle", () => {
       expect(mockPrompt).toHaveBeenCalledWith("say hello");
     });
 
+    test("waits for the underlying prompt promise to settle after agent_end", async () => {
+      mockGetLastAssistantText.mockReturnValue("Hello from Pi!");
+      let resolvePrompt: (() => void) | undefined;
+      mockPrompt.mockImplementation(() => {
+        emitEvent({ type: "agent_end" });
+        return new Promise<void>((resolve) => {
+          resolvePrompt = resolve;
+        });
+      });
+
+      const session = createPiSession();
+      let settled = false;
+      const pending = session.prompt("say hello").then((result) => {
+        settled = true;
+        return result;
+      });
+
+      await vi.waitFor(() => {
+        expect(resolvePrompt).toBeTypeOf("function");
+      });
+      expect(settled).toBe(false);
+
+      resolvePrompt?.();
+      const result = await pending;
+
+      expect(settled).toBe(true);
+      expect(result.success).toBe(true);
+      expect(result.output).toBe("Hello from Pi!");
+    });
+
     test("prompt error returns success=false with error message", async () => {
       mockPrompt.mockRejectedValue(new Error("model rate limited"));
 
@@ -501,6 +531,23 @@ describe("PiSessionHandle", () => {
       expect(result.exitCode).toBe(0);
       expect(result.cancelled).toBe(false);
       expect(mockExecuteBash).toHaveBeenCalledWith("ls", undefined);
+    });
+
+    test("lazy-initializes the session before executing bash", async () => {
+      mockExecuteBash.mockResolvedValue({
+        output: "ok",
+        exitCode: 0,
+        cancelled: false,
+        truncated: false,
+      });
+
+      const session = createPiSession();
+      const result = await session.executeBash("pwd");
+
+      expect(result.output).toBe("ok");
+      expect(session.isInitialized).toBe(true);
+      expect(mockCreateAgentSession).toHaveBeenCalledTimes(1);
+      expect(mockExecuteBash).toHaveBeenCalledWith("pwd", undefined);
     });
   });
 

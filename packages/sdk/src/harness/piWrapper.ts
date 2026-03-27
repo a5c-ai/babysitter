@@ -276,7 +276,28 @@ export class PiSessionHandle {
     return new Promise<PiPromptResult>((resolve, reject) => {
       let settled = false;
       let timer: ReturnType<typeof setTimeout> | undefined;
-      let lastAgentEndMessages: unknown[] | undefined;
+      let agentEndResult: PiPromptResult | null = null;
+      let promptSettled = false;
+
+      const finishWithResult = (result: PiPromptResult): void => {
+        if (settled) return;
+        settled = true;
+        if (timer) clearTimeout(timer);
+        resolve(result);
+      };
+
+      const finishWithPromptError = (err: unknown): void => {
+        if (settled) return;
+        settled = true;
+        if (timer) clearTimeout(timer);
+        const message = err instanceof Error ? err.message : String(err);
+        resolve({
+          output: message,
+          exitCode: 1,
+          duration: Date.now() - start,
+          success: false,
+        });
+      };
 
       // Set up timeout
       if (effectiveTimeout > 0) {
@@ -300,42 +321,45 @@ export class PiSessionHandle {
         if (settled) return;
 
         if (event.type === "agent_end") {
-          lastAgentEndMessages = Array.isArray((event as { messages?: unknown[] }).messages)
+          const messages = Array.isArray((event as { messages?: unknown[] }).messages)
             ? (event as { messages?: unknown[] }).messages
             : undefined;
-          settled = true;
-          if (timer) clearTimeout(timer);
           unsubscribe();
 
-          const assistantFailure = extractAssistantFailure(lastAgentEndMessages);
+          const assistantFailure = extractAssistantFailure(messages);
           const assistantText = session.getLastAssistantText();
           const output = assistantText && assistantText.trim().length > 0
             ? assistantText
             : assistantFailure ?? "";
-          resolve({
+          agentEndResult = {
             output,
             exitCode: assistantFailure ? 1 : 0,
             duration: Date.now() - start,
             success: !assistantFailure,
-          });
+          };
+          if (promptSettled) {
+            finishWithResult(agentEndResult);
+          }
         }
       });
 
       // Fire the prompt — errors are caught and resolved as failures
-      session.prompt(text).catch((err: unknown) => {
-        if (settled) return;
-        settled = true;
-        if (timer) clearTimeout(timer);
-        unsubscribe();
-
-        const message = err instanceof Error ? err.message : String(err);
-        resolve({
-          output: message,
-          exitCode: 1,
-          duration: Date.now() - start,
-          success: false,
+      session.prompt(text)
+        .then(() => {
+          promptSettled = true;
+          if (agentEndResult) {
+            finishWithResult(agentEndResult);
+          }
+        })
+        .catch((err: unknown) => {
+          promptSettled = true;
+          if (agentEndResult) {
+            finishWithResult(agentEndResult);
+            return;
+          }
+          unsubscribe();
+          finishWithPromptError(err);
         });
-      });
     });
   }
 
@@ -375,6 +399,7 @@ export class PiSessionHandle {
     command: string,
     onChunk?: (chunk: string) => void,
   ): Promise<{ output: string; exitCode: number | undefined; cancelled: boolean }> {
+    await this.initialize();
     const session = this.requireSession();
     const result = await session.executeBash(command, onChunk);
     return {

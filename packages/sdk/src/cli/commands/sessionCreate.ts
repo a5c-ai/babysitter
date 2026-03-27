@@ -22,6 +22,7 @@ import { createPiSession, PiSessionHandle } from "../../harness/piWrapper";
 import type {
   HarnessDiscoveryResult,
   PiSessionEvent,
+  PiPromptResult,
   PiSessionOptions,
   SessionBindResult,
 } from "../../harness/types";
@@ -41,6 +42,7 @@ import { orchestrateIteration } from "../../runtime/orchestrateIteration";
 import { commitEffectResult } from "../../runtime/commitEffectResult";
 import type { EffectAction, IterationResult } from "../../runtime/types";
 import { BabysitterRuntimeError, ErrorCategory } from "../../runtime/exceptions";
+import { resetGlobalTaskRegistry } from "../../tasks/registry";
 import {
   buildOrchestrationSystemPrompt,
   buildOrchestrationBootstrapPrompt,
@@ -466,7 +468,7 @@ async function ensureSdkResolvable(workspaceDir: string): Promise<void> {
 }
 
 function hasNamedProcessGlobalReferenceConflict(source: string): boolean {
-  const normalized = source.replace(/\r\n/g, "\n");
+  const normalized = sanitizeJavaScriptForStructuralChecks(source).replace(/\r\n/g, "\n");
   if (!/export\s+async\s+function\s+process\s*\(/.test(normalized)) {
     return false;
   }
@@ -474,7 +476,7 @@ function hasNamedProcessGlobalReferenceConflict(source: string): boolean {
 }
 
 function assumesRuntimeWorkspacePathWithoutModuleFallback(source: string): boolean {
-  const normalized = source.replace(/\r\n/g, "\n");
+  const normalized = sanitizeJavaScriptForStructuralChecks(source).replace(/\r\n/g, "\n");
   const usesContextWorkspacePath =
     /\bctx\??\.workspaceDir\b/.test(normalized) ||
     /\bctx\??\.cwd\b/.test(normalized);
@@ -501,24 +503,435 @@ function getDefineTaskBlocks(source: string): Array<{ id: string; body: string }
 
 function getDefineTaskIdsMissingKind(source: string): string[] {
   return getDefineTaskBlocks(source)
-    .filter((block) => !/\bkind\s*:/.test(block.body))
+    .filter((block) => !getTopLevelTaskProperties(block.body).has("kind"))
     .map((block) => block.id);
 }
 
 function getDefineTaskKindShapeMismatches(source: string): Array<{ id: string; expectedKind: string }> {
   const mismatches: Array<{ id: string; expectedKind: string }> = [];
   for (const block of getDefineTaskBlocks(source)) {
-    if (/\bagent\s*:/.test(block.body) && !/\bkind\s*:\s*["']agent["']/.test(block.body)) {
+    const properties = getTopLevelTaskProperties(block.body);
+    const kindValue = properties.get("kind")?.trim();
+    if (properties.has("agent") && kindValue !== "\"agent\"" && kindValue !== "'agent'" && kindValue !== "`agent`") {
       mismatches.push({ id: block.id, expectedKind: "agent" });
     }
-    if (/\bshell\s*:/.test(block.body) && !/\bkind\s*:\s*["']shell["']/.test(block.body)) {
+    if (properties.has("shell") && kindValue !== "\"shell\"" && kindValue !== "'shell'" && kindValue !== "`shell`") {
       mismatches.push({ id: block.id, expectedKind: "shell" });
     }
-    if (/\bnode\s*:/.test(block.body) && !/\bkind\s*:\s*["']node["']/.test(block.body)) {
+    if (properties.has("node") && kindValue !== "\"node\"" && kindValue !== "'node'" && kindValue !== "`node`") {
       mismatches.push({ id: block.id, expectedKind: "node" });
     }
   }
   return mismatches;
+}
+
+function getTopLevelTaskProperties(body: string): Map<string, string> {
+  const normalized = body.replace(/\r\n/g, "\n");
+  const properties = new Map<string, string>();
+  let index = 0;
+
+  while (index < normalized.length) {
+    index = skipWhitespaceAndComments(normalized, index);
+    if (index >= normalized.length) {
+      break;
+    }
+    if (normalized[index] === ",") {
+      index += 1;
+      continue;
+    }
+    if (normalized.startsWith("...", index)) {
+      index = scanTopLevelValueEnd(normalized, index + 3);
+      continue;
+    }
+
+    const key = readTopLevelPropertyKey(normalized, index);
+    if (!key) {
+      index = scanTopLevelValueEnd(normalized, index);
+      if (normalized[index] === ",") {
+        index += 1;
+      }
+      continue;
+    }
+
+    index = key.nextIndex;
+    index = skipWhitespaceAndComments(normalized, index);
+    if (normalized[index] !== ":") {
+      index = scanTopLevelValueEnd(normalized, index);
+      if (normalized[index] === ",") {
+        index += 1;
+      }
+      continue;
+    }
+
+    const valueStart = index + 1;
+    const valueEnd = scanTopLevelValueEnd(normalized, valueStart);
+    properties.set(key.name, normalized.slice(valueStart, valueEnd).trim());
+    index = valueEnd;
+    if (normalized[index] === ",") {
+      index += 1;
+    }
+  }
+
+  return properties;
+}
+
+function readTopLevelPropertyKey(
+  source: string,
+  index: number,
+): { name: string; nextIndex: number } | null {
+  const ch = source[index] ?? "";
+  if (/[A-Za-z_$]/.test(ch)) {
+    let nextIndex = index + 1;
+    while (/[\w$]/.test(source[nextIndex] ?? "")) {
+      nextIndex += 1;
+    }
+    return {
+      name: source.slice(index, nextIndex),
+      nextIndex,
+    };
+  }
+
+  if (ch === "\"" || ch === "'" || ch === "`") {
+    let nextIndex = index + 1;
+    let name = "";
+    while (nextIndex < source.length) {
+      const current = source[nextIndex] ?? "";
+      if (current === "\\") {
+        name += current;
+        nextIndex += 1;
+        if (nextIndex < source.length) {
+          name += source[nextIndex] ?? "";
+          nextIndex += 1;
+        }
+        continue;
+      }
+      if (current === ch) {
+        return { name, nextIndex: nextIndex + 1 };
+      }
+      name += current;
+      nextIndex += 1;
+    }
+  }
+
+  return null;
+}
+
+function skipWhitespaceAndComments(source: string, start: number): number {
+  let index = start;
+  while (index < source.length) {
+    const ch = source[index] ?? "";
+    const next = source[index + 1] ?? "";
+    if (/\s/.test(ch)) {
+      index += 1;
+      continue;
+    }
+    if (ch === "/" && next === "/") {
+      index += 2;
+      while (index < source.length && source[index] !== "\n") {
+        index += 1;
+      }
+      continue;
+    }
+    if (ch === "/" && next === "*") {
+      index += 2;
+      while (index < source.length && !(source[index] === "*" && source[index + 1] === "/")) {
+        index += 1;
+      }
+      index = Math.min(index + 2, source.length);
+      continue;
+    }
+    break;
+  }
+  return index;
+}
+
+function scanTopLevelValueEnd(source: string, start: number): number {
+  let index = start;
+  let depthParen = 0;
+  let depthBracket = 0;
+  let depthBrace = 0;
+  let state:
+    | "normal"
+    | "single"
+    | "double"
+    | "template"
+    | "line-comment"
+    | "block-comment" = "normal";
+  const templateExpressionBraceStack: number[] = [];
+
+  while (index < source.length) {
+    const ch = source[index] ?? "";
+    const next = source[index + 1] ?? "";
+
+    if (state === "line-comment") {
+      if (ch === "\n") {
+        state = "normal";
+      }
+      index += 1;
+      continue;
+    }
+
+    if (state === "block-comment") {
+      if (ch === "*" && next === "/") {
+        index += 2;
+        state = "normal";
+        continue;
+      }
+      index += 1;
+      continue;
+    }
+
+    if (state === "single") {
+      if (ch === "\\") {
+        index += 2;
+        continue;
+      }
+      if (ch === "'") {
+        state = "normal";
+      }
+      index += 1;
+      continue;
+    }
+
+    if (state === "double") {
+      if (ch === "\\") {
+        index += 2;
+        continue;
+      }
+      if (ch === "\"") {
+        state = "normal";
+      }
+      index += 1;
+      continue;
+    }
+
+    if (state === "template") {
+      if (ch === "\\") {
+        index += 2;
+        continue;
+      }
+      if (ch === "$" && next === "{") {
+        templateExpressionBraceStack.push(0);
+        index += 2;
+        state = "normal";
+        continue;
+      }
+      if (ch === "`") {
+        state = "normal";
+      }
+      index += 1;
+      continue;
+    }
+
+    if (ch === "/" && next === "/") {
+      index += 2;
+      state = "line-comment";
+      continue;
+    }
+    if (ch === "/" && next === "*") {
+      index += 2;
+      state = "block-comment";
+      continue;
+    }
+    if (ch === "'") {
+      index += 1;
+      state = "single";
+      continue;
+    }
+    if (ch === "\"") {
+      index += 1;
+      state = "double";
+      continue;
+    }
+    if (ch === "`") {
+      index += 1;
+      state = "template";
+      continue;
+    }
+
+    if (ch === "," && depthParen === 0 && depthBracket === 0 && depthBrace === 0 && templateExpressionBraceStack.length === 0) {
+      return index;
+    }
+
+    if (ch === "(") {
+      depthParen += 1;
+    } else if (ch === ")") {
+      depthParen = Math.max(0, depthParen - 1);
+    } else if (ch === "[") {
+      depthBracket += 1;
+    } else if (ch === "]") {
+      depthBracket = Math.max(0, depthBracket - 1);
+    } else if (ch === "{") {
+      depthBrace += 1;
+      if (templateExpressionBraceStack.length > 0) {
+        templateExpressionBraceStack[templateExpressionBraceStack.length - 1] += 1;
+      }
+    } else if (ch === "}") {
+      if (templateExpressionBraceStack.length > 0) {
+        const templateDepthIndex = templateExpressionBraceStack.length - 1;
+        if (templateExpressionBraceStack[templateDepthIndex] === 0) {
+          templateExpressionBraceStack.pop();
+          state = "template";
+          index += 1;
+          continue;
+        }
+        templateExpressionBraceStack[templateDepthIndex] -= 1;
+        depthBrace = Math.max(0, depthBrace - 1);
+      } else {
+        depthBrace = Math.max(0, depthBrace - 1);
+      }
+    }
+
+    index += 1;
+  }
+
+  return index;
+}
+
+function sanitizeJavaScriptForStructuralChecks(source: string): string {
+  const normalized = source.replace(/\r\n/g, "\n");
+  let result = "";
+  let i = 0;
+  let state:
+    | "normal"
+    | "single"
+    | "double"
+    | "template"
+    | "line-comment"
+    | "block-comment" = "normal";
+  const templateExpressionBraceStack: number[] = [];
+
+  const mask = (ch: string): string => (ch === "\n" ? "\n" : " ");
+
+  while (i < normalized.length) {
+    const ch = normalized[i] ?? "";
+    const next = normalized[i + 1] ?? "";
+
+    if (state === "line-comment") {
+      result += mask(ch);
+      if (ch === "\n") {
+        state = "normal";
+      }
+      i += 1;
+      continue;
+    }
+
+    if (state === "block-comment") {
+      result += mask(ch);
+      if (ch === "*" && next === "/") {
+        result += " ";
+        i += 2;
+        state = "normal";
+        continue;
+      }
+      i += 1;
+      continue;
+    }
+
+    if (state === "single") {
+      result += mask(ch);
+      if (ch === "\\") {
+        result += mask(next);
+        i += 2;
+        continue;
+      }
+      if (ch === "'") {
+        state = "normal";
+      }
+      i += 1;
+      continue;
+    }
+
+    if (state === "double") {
+      result += mask(ch);
+      if (ch === "\\") {
+        result += mask(next);
+        i += 2;
+        continue;
+      }
+      if (ch === "\"") {
+        state = "normal";
+      }
+      i += 1;
+      continue;
+    }
+
+    if (state === "template") {
+      if (ch === "$" && next === "{") {
+        result += "${";
+        templateExpressionBraceStack.push(0);
+        i += 2;
+        state = "normal";
+        continue;
+      }
+      result += mask(ch);
+      if (ch === "\\") {
+        result += mask(next);
+        i += 2;
+        continue;
+      }
+      if (ch === "`") {
+        state = "normal";
+      }
+      i += 1;
+      continue;
+    }
+
+    if (ch === "/" && next === "/") {
+      result += "  ";
+      i += 2;
+      state = "line-comment";
+      continue;
+    }
+
+    if (ch === "/" && next === "*") {
+      result += "  ";
+      i += 2;
+      state = "block-comment";
+      continue;
+    }
+
+    if (ch === "'") {
+      result += " ";
+      i += 1;
+      state = "single";
+      continue;
+    }
+
+    if (ch === "\"") {
+      result += " ";
+      i += 1;
+      state = "double";
+      continue;
+    }
+
+    if (ch === "`") {
+      result += " ";
+      i += 1;
+      state = "template";
+      continue;
+    }
+
+    result += ch;
+
+    if (templateExpressionBraceStack.length > 0) {
+      const topIndex = templateExpressionBraceStack.length - 1;
+      if (ch === "{") {
+        templateExpressionBraceStack[topIndex] += 1;
+      } else if (ch === "}") {
+        if (templateExpressionBraceStack[topIndex] === 0) {
+          templateExpressionBraceStack.pop();
+          state = "template";
+        } else {
+          templateExpressionBraceStack[topIndex] -= 1;
+        }
+      }
+    }
+
+    i += 1;
+  }
+
+  return result;
 }
 
 function getInvalidCtxTaskTargets(source: string): string[] {
@@ -545,6 +958,29 @@ function getInvalidCtxTaskTargets(source: string): string[] {
   }
 
   return Array.from(invalidTargets);
+}
+
+function hasCtxTaskInvocation(source: string): boolean {
+  return /\bctx\.task\s*\(/.test(source.replace(/\r\n/g, "\n"));
+}
+
+function getUnresolvedTemplatePlaceholders(source: string): string[] {
+  const normalized = source.replace(/\r\n/g, "\n");
+  const matches = normalized.match(/\{\{\s*[A-Za-z_$][\w$.]*\s*\}\}/g) ?? [];
+  const unique = new Set<string>();
+  for (const match of matches) {
+    unique.add(match.replace(/\s+/g, ""));
+  }
+  return Array.from(unique).slice(0, 8);
+}
+
+function getDefineTaskIdsByKind(source: string, kind: "agent" | "shell" | "node"): string[] {
+  return getDefineTaskBlocks(source)
+    .filter((block) => {
+      const kindValue = getTopLevelTaskProperties(block.body).get("kind")?.trim();
+      return kindValue === `"${kind}"` || kindValue === `'${kind}'` || kindValue === `\`${kind}\``;
+    })
+    .map((block) => block.id);
 }
 
 async function validateProcessExport(filePath: string): Promise<void> {
@@ -596,6 +1032,71 @@ async function validateProcessExport(filePath: string): Promise<void> {
       },
     );
   }
+  const unresolvedPlaceholders = getUnresolvedTemplatePlaceholders(source);
+  if (unresolvedPlaceholders.length > 0) {
+    throw new BabysitterRuntimeError(
+      "InvalidProcessSourceError",
+      `Process file at ${filePath} contains unresolved template placeholders: ${unresolvedPlaceholders.join(", ")}`,
+      {
+        category: ErrorCategory.Validation,
+        nextSteps: [
+          "Do not leave {{workspaceDir}}, {{gameRequest}}, or similar template placeholders in task prompts, shell commands, or node args",
+          "Build concrete prompt text and shell commands from defineTask(args, taskCtx) inputs when returning each TaskDef",
+          "If a task needs workspaceDir or request text, interpolate the actual args value into the returned TaskDef before runtime",
+        ],
+      },
+    );
+  }
+  await ensureSdkResolvable(path.dirname(path.resolve(filePath)));
+  const moduleUrl = `${pathToFileURL(path.resolve(filePath)).href}?t=${Date.now()}-${++processValidationImportNonce}`;
+  resetGlobalTaskRegistry();
+  let mod: Record<string, unknown>;
+  try {
+    mod = await dynamicImportModule(moduleUrl);
+  } finally {
+    resetGlobalTaskRegistry();
+  }
+  const fn = mod.process;
+  if (typeof fn !== "function") {
+    throw new BabysitterRuntimeError(
+      "InvalidProcessExportError",
+      `Process file at ${filePath} does not export a function named 'process'`,
+      {
+        category: ErrorCategory.Validation,
+        nextSteps: [
+          "Ensure the file exports: async function process(inputs, ctx) { ... }",
+        ],
+      },
+    );
+  }
+  const defineTaskBlocks = getDefineTaskBlocks(source);
+  if (defineTaskBlocks.length === 0) {
+    throw new BabysitterRuntimeError(
+      "InvalidProcessSourceError",
+      `Process file at ${filePath} does not define any babysitter tasks via defineTask(...)`,
+      {
+        category: ErrorCategory.Validation,
+        nextSteps: [
+          "Create at least one task with const taskName = defineTask(\"task-id\", (args, taskCtx) => ({ ... }))",
+          "Move the main implementation and verification work into those tasks instead of doing it directly in process(inputs, ctx)",
+          "Have process(inputs, ctx) orchestrate the work by awaiting ctx.task(taskName, args)",
+        ],
+      },
+    );
+  }
+  if (!hasCtxTaskInvocation(source)) {
+    throw new BabysitterRuntimeError(
+      "InvalidProcessSourceError",
+      `Process file at ${filePath} does not invoke any babysitter tasks through ctx.task(...)`,
+      {
+        category: ErrorCategory.Validation,
+        nextSteps: [
+          "After defining tasks with defineTask(...), run them from process(inputs, ctx) via await ctx.task(taskName, args)",
+          "Do not perform the main implementation directly in process(inputs, ctx)",
+        ],
+      },
+    );
+  }
   const taskIdsMissingKind = getDefineTaskIdsMissingKind(source);
   if (taskIdsMissingKind.length > 0) {
     throw new BabysitterRuntimeError(
@@ -626,6 +1127,20 @@ async function validateProcessExport(filePath: string): Promise<void> {
       },
     );
   }
+  const agentTaskIds = getDefineTaskIdsByKind(source, "agent");
+  if (agentTaskIds.length === 0) {
+    throw new BabysitterRuntimeError(
+      "InvalidProcessSourceError",
+      `Process file at ${filePath} does not define any agent tasks`,
+      {
+        category: ErrorCategory.Validation,
+        nextSteps: [
+          "Define at least one agent task with kind: \"agent\" for the main planning, implementation, or refinement work",
+          "Use shell tasks only for concrete runnable commands such as tests, builds, package installs, or linters",
+        ],
+      },
+    );
+  }
   const invalidCtxTaskTargets = getInvalidCtxTaskTargets(source);
   if (invalidCtxTaskTargets.length > 0) {
     throw new BabysitterRuntimeError(
@@ -637,22 +1152,6 @@ async function validateProcessExport(filePath: string): Promise<void> {
           "Define each task with const taskName = defineTask(\"task-id\", (args, taskCtx) => ({ ... }))",
           "Pass only those DefinedTask bindings to await ctx.task(taskName, args)",
           "Do not pass plain object task definitions, inline literals, or ad-hoc task objects to ctx.task(...)",
-        ],
-      },
-    );
-  }
-  await ensureSdkResolvable(path.dirname(path.resolve(filePath)));
-  const moduleUrl = `${pathToFileURL(path.resolve(filePath)).href}?t=${Date.now()}-${++processValidationImportNonce}`;
-  const mod = await dynamicImportModule(moduleUrl);
-  const fn = mod.process;
-  if (typeof fn !== "function") {
-    throw new BabysitterRuntimeError(
-      "InvalidProcessExportError",
-      `Process file at ${filePath} does not export a function named 'process'`,
-      {
-        category: ErrorCategory.Validation,
-        nextSteps: [
-          "Ensure the file exports: async function process(inputs, ctx) { ... }",
         ],
       },
     );
@@ -693,8 +1192,36 @@ function execShellEffect(
 function buildAgentPrompt(taskDef: Record<string, unknown>): string {
   const agent = taskDef.agent as Record<string, unknown> | undefined;
   if (!agent) return (taskDef.title as string) ?? "Execute task";
-  const prompt = agent.prompt as Record<string, unknown> | undefined;
-  if (!prompt) return (taskDef.title as string) ?? "Execute task";
+  const structuredOutputInstructions = buildStructuredAgentOutputInstructions(agent);
+  const rawPrompt = agent.prompt;
+  if (typeof rawPrompt === "string" && rawPrompt.trim()) {
+    return [
+      "You are an autonomous agent. PERFORM the task below using your available tools.",
+      "Do not just describe what you would do. Execute the work and then summarize what you changed.",
+      ...structuredOutputInstructions,
+      "",
+      "Task:",
+      rawPrompt.trim(),
+    ].join("\n");
+  }
+  if (Array.isArray(rawPrompt) && rawPrompt.length > 0) {
+    const lines = rawPrompt
+      .filter((entry): entry is string => typeof entry === "string" && entry.trim().length > 0)
+      .map((entry) => entry.trim());
+    if (lines.length > 0) {
+      return [
+        "You are an autonomous agent. PERFORM the task below using your available tools.",
+        "Do not just describe what you would do. Execute the work and then summarize what you changed.",
+        ...structuredOutputInstructions,
+        "",
+        "Task:",
+        ...lines,
+      ].join("\n");
+    }
+  }
+
+  const prompt = rawPrompt as Record<string, unknown> | undefined;
+  if (!prompt || typeof prompt !== "object") return (taskDef.title as string) ?? "Execute task";
 
   const parts: string[] = [];
   parts.push(
@@ -709,7 +1236,66 @@ function buildAgentPrompt(taskDef: Record<string, unknown>): string {
     parts.push(`\nInstructions:\n${(prompt.instructions as string[]).map((item, index) => `${index + 1}. ${item}`).join("\n")}`);
   }
   if (typeof prompt.outputFormat === "string") parts.push(`\nOutput format: ${prompt.outputFormat}`);
+  if (structuredOutputInstructions.length > 0) {
+    parts.push(`\n${structuredOutputInstructions.join("\n")}`);
+  }
   return parts.join("\n");
+}
+
+function buildStructuredAgentOutputInstructions(agent: Record<string, unknown>): string[] {
+  const outputSchema = agent.outputSchema;
+  if (!outputSchema || typeof outputSchema !== "object") {
+    return [];
+  }
+  return [
+    "Return ONLY a JSON object that matches the declared output schema.",
+    "Do not wrap the JSON in markdown fences, and do not prepend or append prose.",
+    `Output schema: ${JSON.stringify(outputSchema, null, 2)}`,
+  ];
+}
+
+function extractJsonObjectFromText(text: string): string | null {
+  const trimmed = text.trim();
+  if (!trimmed) return null;
+  if ((trimmed.startsWith("{") && trimmed.endsWith("}")) || (trimmed.startsWith("[") && trimmed.endsWith("]"))) {
+    return trimmed;
+  }
+  const fenced = trimmed.match(/```(?:json)?\s*([\s\S]*?)```/i);
+  if (fenced?.[1]) {
+    return fenced[1].trim();
+  }
+  const firstBrace = trimmed.indexOf("{");
+  const lastBrace = trimmed.lastIndexOf("}");
+  if (firstBrace >= 0 && lastBrace > firstBrace) {
+    return trimmed.slice(firstBrace, lastBrace + 1);
+  }
+  return null;
+}
+
+function coerceAgentResultValue(taskDef: Record<string, unknown>, output: string): unknown {
+  const agent = taskDef.agent as Record<string, unknown> | undefined;
+  if (!agent?.outputSchema || typeof agent.outputSchema !== "object") {
+    return output;
+  }
+  const candidate = extractJsonObjectFromText(output);
+  if (!candidate) {
+    throw new BabysitterRuntimeError(
+      "AgentOutputSchemaMismatch",
+      "Agent task declared outputSchema but did not return JSON output",
+      { category: ErrorCategory.External },
+    );
+  }
+  try {
+    return JSON.parse(candidate) as unknown;
+  } catch (error: unknown) {
+    throw new BabysitterRuntimeError(
+      "AgentOutputSchemaMismatch",
+      error instanceof Error
+        ? `Agent task declared outputSchema but returned invalid JSON: ${error.message}`
+        : "Agent task declared outputSchema but returned invalid JSON",
+      { category: ErrorCategory.External },
+    );
+  }
 }
 
 function shellQuoteArg(value: string): string {
@@ -784,12 +1370,141 @@ function buildPiWorkerSessionOptions(args: {
   return {
     workspace: args.workspace,
     model: args.model,
+    timeout: 900_000,
     toolsMode: "coding",
     ephemeral: true,
     ...(isolated !== undefined ? { isolated } : {}),
     ...(enableCompaction !== undefined ? { enableCompaction } : {}),
     ...(bashSandbox ? { bashSandbox } : {}),
   };
+}
+
+const PROCESS_MODULE_LOAD_RETRY_DELAYS_MS = process.env.VITEST
+  ? [0, 0]
+  : [100, 250, 500];
+const PI_WORKER_TIMEOUT_MS = 900_000;
+const TRANSIENT_PI_PROMPT_RETRY_DELAYS_MS = process.env.VITEST
+  ? [0, 0]
+  : [1_000, 3_000];
+
+function isProcessModuleLoadFailure(error: unknown): boolean {
+  return error instanceof Error && /^Failed to load process module at /.test(error.message);
+}
+
+function isRetryablePiPromptFailure(error: unknown): boolean {
+  const message =
+    typeof error === "string"
+      ? error
+      : error instanceof Error
+        ? error.message
+        : typeof error === "object" && error !== null && "output" in error
+          ? String((error as { output?: unknown }).output ?? "")
+          : "";
+
+  if (!message) {
+    return false;
+  }
+
+  const normalized = message.toLowerCase();
+  return normalized.includes("the server had an error processing your request") ||
+    normalized.includes("please retry your request") ||
+    normalized.includes("temporarily unavailable") ||
+    normalized.includes("rate limit") ||
+    normalized.includes("too many requests");
+}
+
+async function promptPiWithRetry(args: {
+  session: PiSessionHandle;
+  message: string;
+  timeout: number;
+  label: string;
+  writeVerbose?: (message: string) => void;
+  writeVerboseData?: (label: string, value: unknown, maxChars?: number) => void;
+}): Promise<PiPromptResult> {
+  let attempt = 0;
+
+  while (true) {
+    try {
+      const result = await args.session.prompt(args.message, args.timeout);
+      if (
+        result.success ||
+        !isRetryablePiPromptFailure(result.output) ||
+        attempt >= TRANSIENT_PI_PROMPT_RETRY_DELAYS_MS.length
+      ) {
+        return result;
+      }
+
+      const delayMs = TRANSIENT_PI_PROMPT_RETRY_DELAYS_MS[attempt] ?? 0;
+      attempt += 1;
+      args.writeVerbose?.(
+        `[${args.label} retry] transient PI failure; retrying prompt attempt ${attempt}/${TRANSIENT_PI_PROMPT_RETRY_DELAYS_MS.length} after ${delayMs}ms`,
+      );
+      args.writeVerboseData?.(`${args.label} retry failure output`, result.output);
+      if (delayMs > 0) {
+        await new Promise<void>((resolve) => setTimeout(resolve, delayMs));
+      }
+    } catch (error: unknown) {
+      if (!isRetryablePiPromptFailure(error) || attempt >= TRANSIENT_PI_PROMPT_RETRY_DELAYS_MS.length) {
+        throw error;
+      }
+
+      const delayMs = TRANSIENT_PI_PROMPT_RETRY_DELAYS_MS[attempt] ?? 0;
+      attempt += 1;
+      args.writeVerbose?.(
+        `[${args.label} retry] transient PI exception; retrying prompt attempt ${attempt}/${TRANSIENT_PI_PROMPT_RETRY_DELAYS_MS.length} after ${delayMs}ms`,
+      );
+      args.writeVerboseData?.(`${args.label} retry error`, error);
+      if (delayMs > 0) {
+        await new Promise<void>((resolve) => setTimeout(resolve, delayMs));
+      }
+    }
+  }
+}
+
+async function orchestrateIterationWithProcessLoadRetry(args: {
+  runDir: string;
+  writeVerbose?: (message: string) => void;
+  writeVerboseData?: (label: string, value: unknown, maxChars?: number) => void;
+}): Promise<IterationResult> {
+  let attempt = 0;
+
+  while (true) {
+    try {
+      return await orchestrateIteration({ runDir: args.runDir });
+    } catch (error: unknown) {
+      if (!isProcessModuleLoadFailure(error) || attempt >= PROCESS_MODULE_LOAD_RETRY_DELAYS_MS.length) {
+        throw error;
+      }
+
+      const delayMs = PROCESS_MODULE_LOAD_RETRY_DELAYS_MS[attempt] ?? 0;
+      attempt += 1;
+      args.writeVerbose?.(
+        `[phase2 retry] process module load failed for ${args.runDir}; retrying iteration import (attempt ${attempt}/${PROCESS_MODULE_LOAD_RETRY_DELAYS_MS.length}) after ${delayMs}ms`,
+      );
+      args.writeVerboseData?.(
+        "phase2 retry cause",
+        error instanceof Error
+          ? {
+              name: error.name,
+              message: error.message,
+              stack: error.stack,
+              cause:
+                error.cause instanceof Error
+                  ? {
+                      name: error.cause.name,
+                      message: error.cause.message,
+                      stack: error.cause.stack,
+                    }
+                  : error.cause,
+            }
+          : error,
+      );
+
+      if (delayMs > 0) {
+        await new Promise<void>((resolve) => setTimeout(resolve, delayMs));
+      }
+    }
+  }
 }
 
 async function resolveEffect(
@@ -832,7 +1547,12 @@ async function resolveEffect(
       : harnessName;
 
     if ((taskHarness === "pi" || taskHarness === "oh-my-pi") && piSession) {
-      const piResult = await piSession.prompt(effectivePrompt);
+      const piResult = await promptPiWithRetry({
+        session: piSession,
+        message: effectivePrompt,
+        timeout: PI_WORKER_TIMEOUT_MS,
+        label: `effect ${action.effectId}`,
+      });
       return {
         status: piResult.success ? "ok" : "error",
         value: piResult.success ? piResult.output : undefined,
@@ -856,12 +1576,23 @@ async function resolveEffect(
   }
 
   if (kind === "shell") {
+    const shellDef = action.taskDef?.shell as Record<string, unknown> | undefined;
     const shellMeta = action.taskDef?.metadata as Record<string, unknown> | undefined;
-    const command = typeof shellMeta?.command === "string" ? shellMeta.command : "echo";
-    const shellArgs = Array.isArray(shellMeta?.args)
-      ? (shellMeta.args as string[]).filter((arg): arg is string => typeof arg === "string")
+    const command = typeof shellDef?.command === "string"
+      ? shellDef.command
+      : typeof shellMeta?.command === "string"
+        ? shellMeta.command
+        : "echo";
+    const shellArgs = Array.isArray(shellDef?.args)
+      ? (shellDef.args as string[]).filter((arg): arg is string => typeof arg === "string")
+      : Array.isArray(shellMeta?.args)
+        ? (shellMeta.args as string[]).filter((arg): arg is string => typeof arg === "string")
       : [];
-    const cwd = typeof shellMeta?.cwd === "string" ? shellMeta.cwd : options.workspace;
+    const cwd = typeof shellDef?.cwd === "string"
+      ? shellDef.cwd
+      : typeof shellMeta?.cwd === "string"
+        ? shellMeta.cwd
+        : options.workspace;
     if (piSession) {
       const bashCommand = [command, ...shellArgs.map(shellQuoteArg)].join(" ");
       const bashResult = await piSession.executeBash(bashCommand);
@@ -962,10 +1693,18 @@ async function resolveEffect(
     }
 
     if (piSession) {
-      const piResult = await piSession.prompt(textPrompt);
+      const piResult = await promptPiWithRetry({
+        session: piSession,
+        message: textPrompt,
+        timeout: PI_WORKER_TIMEOUT_MS,
+        label: `effect ${action.effectId}`,
+      });
+      const parsedValue = piResult.success
+        ? coerceAgentResultValue(action.taskDef as unknown as Record<string, unknown>, piResult.output)
+        : undefined;
       return {
         status: piResult.success ? "ok" : "error",
-        value: piResult.success ? piResult.output : undefined,
+        value: parsedValue,
         error: piResult.success ? undefined : new Error(piResult.output),
         stdout: piResult.output,
       };
@@ -976,9 +1715,12 @@ async function resolveEffect(
       workspace: options.workspace,
       model: options.model,
     });
+    const parsedValue = result.success
+      ? coerceAgentResultValue(action.taskDef as unknown as Record<string, unknown>, result.output)
+      : undefined;
     return {
       status: result.success ? "ok" : "error",
-      value: result.success ? result.output : undefined,
+      value: parsedValue,
       error: result.success ? undefined : new Error(result.output),
       stdout: result.output,
     };
@@ -1002,6 +1744,31 @@ async function resolveEffect(
     error: result.success ? undefined : new Error(result.output),
     stdout: result.output,
   };
+}
+
+function parseExplicitToolResultValue(args: {
+  valueJson?: string;
+  valueText?: string;
+}): unknown {
+  if (typeof args.valueJson === "string" && args.valueJson.trim().length > 0) {
+    try {
+      return JSON.parse(args.valueJson);
+    } catch (error: unknown) {
+      throw new BabysitterRuntimeError(
+        "InvalidToolResultValueJson",
+        error instanceof Error
+          ? `valueJson is not valid JSON: ${error.message}`
+          : "valueJson is not valid JSON",
+        { category: ErrorCategory.Validation },
+      );
+    }
+  }
+
+  if (typeof args.valueText === "string") {
+    return args.valueText;
+  }
+
+  return undefined;
 }
 
 const ASK_OPTION_SCHEMA = Type.Object({
@@ -1224,18 +1991,22 @@ function buildExternalProcessDefinitionPrompt(args: {
     "- Write a complete ESM JavaScript module that can be imported from the output path.",
     '- Import `defineTask` from `@a5c-ai/babysitter-sdk`.',
     "- The module must export `async function process(inputs, ctx)`.",
+    "- The process must orchestrate the work through babysitter tasks instead of doing the main implementation directly in `process(inputs, ctx)`.",
+    "- Define at least one task with `defineTask(...)`, and invoke tasks from `process(inputs, ctx)` via `await ctx.task(...)`.",
     "- Use `agent` tasks for planning, implementation, analysis, and verification work.",
     "- Use `shell` tasks only for existing CLI tools such as tests, builds, linters, git, or package managers.",
     "- Never use `node` kind effects.",
+    "- At least one defined task must be an `agent` task for the main work. Shell tasks are for concrete runnable commands only.",
     "- Any task passed to `ctx.task(...)` must be a DefinedTask created via `defineTask(...)`; never pass plain object task definitions or ad-hoc task objects.",
     "- Include quality gates and verification/refinement steps that fit the request.",
     "- For this request, a good default is a process that plans the game scope, scaffolds the project, implements the game loop and UI, and verifies the result with runnable checks.",
     "- Keep the module syntactically valid ESM. If you embed HTML/CSS/JS asset contents inside the process source, avoid raw nested template literals; prefer arrays joined with \"\\n\", String.raw, or escaped inner backticks and \\${...} sequences.",
-    "- If task-level harness routing is needed, only use installed harness names from this list: "
+    "- Default every task to the internal PI worker. If task-level harness routing is needed, only use `task.metadata.harness` for explicit overrides to installed harness names from this list: "
       + `${installedHarnessList}.`,
     args.promptContext.selectedHarnessName
-      ? `- The selected orchestration harness for the session will be ${args.promptContext.selectedHarnessName}; encode task.metadata.harness only when a task should explicitly target a different harness or the selected one.`
+      ? `- The selected orchestration harness for the session will be ${args.promptContext.selectedHarnessName}; keep ` + "`task.metadata.harness`" + " unset for default internal execution and only encode it when a task must explicitly override that default."
       : "- No orchestration harness has been preselected; keep harness routing explicit only where it materially matters.",
+    "- Do not set `task.metadata.bashSandbox`, `task.metadata.isolated`, or `task.metadata.enableCompaction` for ordinary internal PI work. Leave them unset unless the task truly requires stronger guardrails or long-running compaction.",
     "- External harnesses do not provide PI sandbox guardrails for their own tool execution. Keep security-sensitive shell work on the internal PI worker by using shell effects without routing them to an external harness.",
     "",
     "Output rules:",
@@ -1270,8 +2041,10 @@ function buildExternalProcessConformancePrompt(args: {
     "- Do not use web search or remote documentation. Fix the file using only the local file contents and the requirements in this prompt.",
     "- Every task must be defined with `defineTask(\"task-id\", (args, taskCtx) => ({ ... }))`.",
     "- Never use `defineTask({ ... })` or helper factories that hide the required signature.",
+    "- The module must orchestrate real work through those tasks; do not perform the main implementation directly in `process(inputs, ctx)`.",
     "- Agent tasks must use `agent: { name, prompt, outputSchema }`.",
     "- Every task returned from `defineTask(...)` must include a top-level `kind` field.",
+    "- Define at least one `agent` task for the main work. Use shell tasks only for concrete runnable commands.",
     "- Put instructions inside `agent.prompt.task`, `agent.prompt.instructions`, and related prompt fields rather than top-level `instructions` fields.",
     "- Agent tasks must use `kind: \"agent\"` with `agent: { name, prompt, outputSchema }`.",
     "- Shell tasks must use `kind: \"shell\"` with `shell: { command: \"...\" }`.",
@@ -1304,6 +2077,8 @@ function buildInternalProcessConformancePrompt(args: {
     '- Import `defineTask` from `@a5c-ai/babysitter-sdk`.',
     "- Use `defineTask(\"task-id\", (args, taskCtx) => ({ ... }))` for task definitions.",
     "- Do not use `defineTask({ ... })` or object-only process exports.",
+    "- The module must orchestrate real work through defined tasks instead of doing the main implementation directly in `process(inputs, ctx)`.",
+    "- Define at least one `agent` task for the main work. Use shell tasks only for concrete runnable commands.",
     "- Every task returned from `defineTask(...)` must include a top-level `kind` field.",
     "- Any task passed to `ctx.task(...)` must be a DefinedTask created via `defineTask(...)`; do not pass plain object task definitions or ad-hoc task objects.",
     "- The rewritten module must be syntactically valid ESM and pass `node --check`.",
@@ -1665,10 +2440,14 @@ async function runProcessDefinitionPhase(args: {
       });
     }
 
-    const result = await session.prompt(
-      initialMetaPrompt,
-      300_000,
-    );
+    const result = await promptPiWithRetry({
+      session,
+      message: initialMetaPrompt,
+      timeout: 300_000,
+      label: "phase1 initial",
+      writeVerbose,
+      writeVerboseData,
+    });
     phaseOutputs.push(result.output);
 
     if (unsubscribe) unsubscribe();
@@ -1707,10 +2486,14 @@ async function runProcessDefinitionPhase(args: {
         "- Do not just describe the process in plain text.",
       ].join("\n");
       writeVerboseData("phase1 recovery prompt", recoveryPrompt);
-      const recovery = await session.prompt(
-        recoveryPrompt,
-        180_000,
-      );
+      const recovery = await promptPiWithRetry({
+        session,
+        message: recoveryPrompt,
+        timeout: 180_000,
+        label: "phase1 recovery",
+        writeVerbose,
+        writeVerboseData,
+      });
       phaseOutputs.push(recovery.output);
       if (!recovery.success) {
         writeVerboseData("phase1 recovery failure output", recovery.output);
@@ -1759,10 +2542,14 @@ async function runProcessDefinitionPhase(args: {
         "- If helpful, return the full JavaScript in a ```javascript fenced block, but the file must still be written and reported.",
       ].join("\n");
       writeVerboseData("phase1 final recovery prompt", finalRecoveryPrompt);
-      const finalRecovery = await session.prompt(
-        finalRecoveryPrompt,
-        180_000,
-      );
+      const finalRecovery = await promptPiWithRetry({
+        session,
+        message: finalRecoveryPrompt,
+        timeout: 180_000,
+        label: "phase1 final recovery",
+        writeVerbose,
+        writeVerboseData,
+      });
       phaseOutputs.push(finalRecovery.output);
       if (!finalRecovery.success) {
         writeVerboseData("phase1 final recovery failure output", finalRecovery.output);
@@ -1837,10 +2624,14 @@ async function runProcessDefinitionPhase(args: {
           validationError: validationMessage,
         });
         writeVerboseData("phase1 conformance repair prompt", conformancePrompt);
-        const repair = await session.prompt(
-          conformancePrompt,
-          180_000,
-        );
+        const repair = await promptPiWithRetry({
+          session,
+          message: conformancePrompt,
+          timeout: 180_000,
+          label: "phase1 conformance repair",
+          writeVerbose,
+          writeVerboseData,
+        });
         phaseOutputs.push(repair.output);
         if (!repair.success) {
           writeVerboseData("phase1 conformance repair failure output", repair.output);
@@ -2007,7 +2798,11 @@ async function runOrchestrationPhase(args: {
 
     while (state.iteration < args.maxIterations) {
       state.iteration += 1;
-      const result = await orchestrateIteration({ runDir: created.runDir });
+      const result = await orchestrateIterationWithProcessLoadRetry({
+        runDir: created.runDir,
+        writeVerbose,
+        writeVerboseData,
+      });
       state.lastIterationResult = result;
       writeVerboseData("phase2 host iterate result", {
         iteration: state.iteration,
@@ -2377,7 +3172,11 @@ async function runOrchestrationPhase(args: {
         state.iteration += 1;
         state.pendingActions.clear();
         state.pendingEffectResults.clear();
-        const result = await orchestrateIteration({ runDir: state.runDir });
+        const result = await orchestrateIterationWithProcessLoadRetry({
+          runDir: state.runDir,
+          writeVerbose,
+          writeVerboseData,
+        });
         state.lastIterationResult = result;
         writeVerboseData("phase2 tool babysitter_run_iterate result", {
           iteration: state.iteration,
@@ -2445,9 +3244,9 @@ async function runOrchestrationPhase(args: {
       },
     },
     {
-      name: "babysitter_execute_effect",
-      label: "Babysitter Execute Effect",
-      description: "Execute a non-breakpoint pending effect and stage the result for task posting.",
+      name: "babysitter_run_shell_effect",
+      label: "Babysitter Run Shell Effect",
+      description: "Run a pending shell effect through an internal PI worker session that respects task metadata, and stage the result for task posting.",
       parameters: Type.Object({
         effectId: Type.String(),
       }),
@@ -2455,7 +3254,75 @@ async function runOrchestrationPhase(args: {
         _toolCallId: string,
         params: { effectId: string },
       ): Promise<ToolResultShape> => {
-        writeVerboseData("phase2 tool babysitter_execute_effect request", params);
+        writeVerboseData("phase2 tool babysitter_run_shell_effect request", params);
+        const action = state.pendingActions.get(params.effectId);
+        if (!action) {
+          throw new BabysitterRuntimeError(
+            "PendingEffectNotFound",
+            `No pending effect found for ${params.effectId}.`,
+            { category: ErrorCategory.Validation },
+          );
+        }
+        if (action.kind !== "shell") {
+          return formatToolResult(
+            {
+              effectId: params.effectId,
+              kind: action.kind,
+              message: "Use babysitter_dispatch_effect_harness for non-shell effects.",
+            },
+            "This tool is only for shell effects.",
+          );
+        }
+
+        const workerSessionOptions = buildPiWorkerSessionOptions({
+          action,
+          workspace: args.workspace,
+          model: args.model,
+        });
+        writeVerboseData("phase2 worker session options", workerSessionOptions);
+        const workerSession = createPiSession(workerSessionOptions);
+        try {
+          const effectResult = await resolveEffect(
+            action,
+            "pi",
+            {
+              workspace: args.workspace,
+              model: args.model,
+              interactive: false,
+              compressionConfig: args.compressionConfig,
+            },
+            workerSession,
+            args.discovered,
+            null,
+            args.json,
+          );
+          state.pendingEffectResults.set(params.effectId, effectResult);
+          writeVerboseData("phase2 tool babysitter_run_shell_effect result", {
+            effectId: params.effectId,
+            effectResult,
+          });
+          return formatToolResult(
+            { effectId: params.effectId, effectResult },
+            "Shell effect executed on the internal PI worker and staged for task posting.",
+          );
+        } finally {
+          workerSession.dispose();
+        }
+      },
+    },
+    {
+      name: "babysitter_dispatch_effect_harness",
+      label: "Babysitter Dispatch Effect Harness",
+      description: "Dispatch a pending non-shell effect through an internal or external harness wrapper and stage the result for task posting.",
+      parameters: Type.Object({
+        effectId: Type.String(),
+        harness: Type.Optional(Type.String()),
+      }),
+      execute: async (
+        _toolCallId: string,
+        params: { effectId: string; harness?: string },
+      ): Promise<ToolResultShape> => {
+        writeVerboseData("phase2 tool babysitter_dispatch_effect_harness request", params);
         const action = state.pendingActions.get(params.effectId);
         if (!action) {
           throw new BabysitterRuntimeError(
@@ -2474,8 +3341,21 @@ async function runOrchestrationPhase(args: {
             "Breakpoint effects require explicit AskUserQuestion handling.",
           );
         }
+        if (action.kind === "shell") {
+          return formatToolResult(
+            {
+              effectId: params.effectId,
+              kind: action.kind,
+              message: "Shell effects should be fulfilled with the orchestration agent's own bash/coding tools, then posted with babysitter_task_post_result.",
+            },
+            "Shell effects are not dispatched through harness wrappers by this tool.",
+          );
+        }
 
-        const taskHarness = resolveTaskHarness(action, args.selectedHarnessName, args.discovered);
+        const requestedHarness = typeof params.harness === "string" && params.harness.trim().length > 0
+          ? params.harness.trim()
+          : undefined;
+        const taskHarness = requestedHarness ?? resolveTaskHarness(action, args.selectedHarnessName, args.discovered);
         writeVerboseData("phase2 effect execution plan", {
           effectId: params.effectId,
           kind: action.kind,
@@ -2485,7 +3365,7 @@ async function runOrchestrationPhase(args: {
           metadata: (action.taskDef?.metadata as Record<string, unknown> | undefined) ?? undefined,
         });
         let workerSession: PiSessionHandle | null = null;
-        if (action.kind === "shell" || isPiHarness(taskHarness)) {
+        if (isPiHarness(taskHarness)) {
           workerSession = createPiSession(buildPiWorkerSessionOptions({
             action,
             workspace: args.workspace,
@@ -2501,7 +3381,7 @@ async function runOrchestrationPhase(args: {
         try {
           const effectResult = await resolveEffect(
             action,
-            args.selectedHarnessName,
+            taskHarness,
             {
               workspace: args.workspace,
               model: args.model,
@@ -2514,13 +3394,14 @@ async function runOrchestrationPhase(args: {
             args.json,
           );
           state.pendingEffectResults.set(params.effectId, effectResult);
-          writeVerboseData("phase2 tool babysitter_execute_effect result", {
+          writeVerboseData("phase2 tool babysitter_dispatch_effect_harness result", {
             effectId: params.effectId,
+            selectedHarness: taskHarness,
             effectResult,
           });
           return formatToolResult(
-            { effectId: params.effectId, effectResult },
-            "Effect executed and staged for task posting.",
+            { effectId: params.effectId, selectedHarness: taskHarness, effectResult },
+            "Effect dispatched through the selected harness and staged for task posting.",
           );
         } finally {
           workerSession?.dispose();
@@ -2530,13 +3411,27 @@ async function runOrchestrationPhase(args: {
     {
       name: "babysitter_task_post_result",
       label: "Babysitter Task Post Result",
-      description: "Persist the staged effect result, or post a breakpoint decision after AskUserQuestion.",
+      description: "Persist a staged result, or post an explicit effect result payload after you fulfilled the work yourself.",
       parameters: Type.Object({
         effectId: Type.String(),
+        status: Type.Optional(Type.Union([Type.Literal("ok"), Type.Literal("error")])),
+        valueText: Type.Optional(Type.String()),
+        valueJson: Type.Optional(Type.String()),
+        error: Type.Optional(Type.String()),
+        stdout: Type.Optional(Type.String()),
+        stderr: Type.Optional(Type.String()),
       }),
       execute: async (
         _toolCallId: string,
-        params: { effectId: string },
+        params: {
+          effectId: string;
+          status?: "ok" | "error";
+          valueText?: string;
+          valueJson?: string;
+          error?: string;
+          stdout?: string;
+          stderr?: string;
+        },
       ): Promise<ToolResultShape> => {
         writeVerboseData("phase2 tool babysitter_task_post_result request", params);
         if (!state.runDir) {
@@ -2557,6 +3452,21 @@ async function runOrchestrationPhase(args: {
 
         const startedAt = new Date().toISOString();
         let effectResult = state.pendingEffectResults.get(params.effectId);
+
+        if (params.status) {
+          effectResult = {
+            status: params.status,
+            value: parseExplicitToolResultValue({
+              valueJson: params.valueJson,
+              valueText: params.valueText,
+            }),
+            error: params.status === "error"
+              ? new Error(params.error ?? "Effect failed")
+              : undefined,
+            stdout: params.stdout,
+            stderr: params.stderr,
+          };
+        }
 
         if (!effectResult && action.kind === "breakpoint") {
           const question =
@@ -2670,11 +3580,6 @@ async function runOrchestrationPhase(args: {
     execute?: (toolCallId: string, params: Record<string, unknown>) => Promise<ToolResultShape> | ToolResultShape;
   }>;
   const getTool = (name: string) => tools.find((tool) => tool.name === name);
-  const runCreateTool = getTool("babysitter_run_create");
-  const bindSessionTool = getTool("babysitter_bind_session");
-  const runIterateTool = getTool("babysitter_run_iterate");
-  const executeEffectTool = getTool("babysitter_execute_effect");
-  const taskPostTool = getTool("babysitter_task_post_result");
   const finishTool = getTool("babysitter_finish_orchestration");
 
   const invokeTool = async (
@@ -2696,38 +3601,9 @@ async function runOrchestrationPhase(args: {
     return resolved;
   };
 
-  const runDeterministicPendingEffects = async (reason: string): Promise<void> => {
-    const pending = describePendingActions();
-    if (pending.length === 0) {
-      return;
-    }
-    writeVerbose(`[phase2 fallback] ${reason}`);
-    for (const effect of pending) {
-      writeVerbose(
-        `[phase2 fallback] resolving ${effect.effectId} (${effect.kind}) via ${effect.harness ?? args.selectedHarnessName}`,
-      );
-      const action = state.pendingActions.get(effect.effectId);
-      if (!action) {
-        continue;
-      }
-      if (action.kind !== "breakpoint") {
-        await invokeTool(
-          executeEffectTool,
-          "babysitter_execute_effect",
-          { effectId: effect.effectId },
-        );
-      }
-      await invokeTool(
-        taskPostTool,
-        "babysitter_task_post_result",
-        { effectId: effect.effectId },
-      );
-    }
-  };
-
   const promptOrchestrationAgent = async (
     message: string,
-    options?: { label?: string; fallbackReason?: string },
+    options?: { label?: string },
   ): Promise<void> => {
     if (!orchestrationSession) {
       throw new BabysitterRuntimeError(
@@ -2744,29 +3620,34 @@ async function runOrchestrationPhase(args: {
     writeVerboseData(`${options?.label ?? "phase2"} prompt`, message);
     const progressSnapshot = captureOrchestrationProgressSnapshot();
 
-    const result = await orchestrationSession.prompt(
-      compressInternalHarnessPrompt(
+    const result = await promptPiWithRetry({
+      session: orchestrationSession,
+      message: compressInternalHarnessPrompt(
         message,
         args.compressionConfig,
         "agent",
       ),
-      900_000,
-    );
+      timeout: 900_000,
+      label: options?.label ?? "phase2",
+      writeVerbose,
+      writeVerboseData,
+    });
 
     if (!result.success) {
       writeVerboseData(`${options?.label ?? "phase2"} agent failure output`, result.output);
       if (!orchestrationStateAdvanced(progressSnapshot)) {
-        if (!isIgnorablePiPromptFailure(result.output)) {
-          throw new BabysitterRuntimeError(
-            "OrchestrationAgentFailed",
-            result.output,
-            { category: ErrorCategory.External },
-          );
-        }
-        writeVerbose(
-          `[phase2 recovery] ignoring PI prompt failure and continuing with host-driven orchestration: ${result.output}`,
+        throw new BabysitterRuntimeError(
+          "OrchestrationAgentFailed",
+          result.output,
+          { category: ErrorCategory.External },
         );
-        return;
+      }
+      if (!isIgnorablePiPromptFailure(result.output)) {
+        throw new BabysitterRuntimeError(
+          "OrchestrationAgentFailed",
+          result.output,
+          { category: ErrorCategory.External },
+        );
       }
       writeVerbose(
         `[phase2 recovery] continuing after a late PI prompt failure because orchestration state advanced: ${result.output}`,
@@ -2777,16 +3658,64 @@ async function runOrchestrationPhase(args: {
     writeVerbose(
       `[phase2 agent] ${summarizeAgentText(result.output)}`,
     );
+  };
 
-    if (options?.fallbackReason && state.pendingActions.size > 0) {
-      await runDeterministicPendingEffects(options.fallbackReason);
+  const completeBootstrapAgentically = async (): Promise<void> => {
+    const bootstrapPrompts = [
+      {
+        label: "phase2 bootstrap",
+        message: buildOrchestrationBootstrapPrompt(
+          path.resolve(args.processPath),
+          args.prompt,
+          args.maxIterations,
+        ),
+      },
+      {
+        label: "phase2 bootstrap recovery",
+        message: [
+          "Complete the babysitter orchestration bootstrap.",
+          "",
+          `Process path: ${path.resolve(args.processPath)}`,
+          `User prompt: ${args.prompt ?? ""}`,
+          `Maximum iterations: ${args.maxIterations}`,
+          `Run id: ${state.runId ?? "(not created)"}`,
+          `Run dir: ${state.runDir ?? "(not created)"}`,
+          `Session bound: ${state.sessionBound ? "yes" : "no"}`,
+          "",
+          !state.runId || !state.runDir
+            ? "Create the run now."
+            : "Do not create another run.",
+          !state.sessionBound
+            ? "Bind the session now."
+            : "The session is already bound.",
+          "Do not iterate the run yet.",
+          "End with a short plain-text summary.",
+        ].join("\n"),
+      },
+    ] as const;
+
+    for (const attempt of bootstrapPrompts) {
+      const bootstrapSnapshot = captureOrchestrationProgressSnapshot();
+      await promptOrchestrationAgent(attempt.message, { label: attempt.label });
+      if (state.runId && state.runDir && state.sessionBound) {
+        return;
+      }
+      if (!orchestrationStateAdvanced(bootstrapSnapshot)) {
+        break;
+      }
     }
+
+    throw new BabysitterRuntimeError(
+      "OrchestrationBootstrapIncomplete",
+      "The orchestration agent did not create and bind the run during bootstrap.",
+      { category: ErrorCategory.Runtime },
+    );
   };
 
   orchestrationSession = createPiSession({
     workspace: args.workspace,
     model: args.model,
-    toolsMode: "readonly",
+    toolsMode: "coding",
     customTools,
     appendSystemPrompt: [buildOrchestrationSystemPrompt(args.selectedHarnessName, args.promptContext)],
     ephemeral: true,
@@ -2825,27 +3754,7 @@ async function runOrchestrationPhase(args: {
       });
     }
 
-    await promptOrchestrationAgent(
-      buildOrchestrationBootstrapPrompt(
-        path.resolve(args.processPath),
-        args.prompt,
-        args.maxIterations,
-      ),
-      { label: "phase2 bootstrap" },
-    );
-
-    if (!state.runId || !state.runDir) {
-      writeVerbose("[phase2 fallback] agent did not create a run; creating it in the host");
-      await invokeTool(
-        runCreateTool,
-        "babysitter_run_create",
-        args.prompt ? { prompt: args.prompt } : {},
-      );
-    }
-    if (!state.sessionBound) {
-      writeVerbose("[phase2 fallback] agent did not bind the session; binding in the host");
-      await invokeTool(bindSessionTool, "babysitter_bind_session");
-    }
+    await completeBootstrapAgentically();
 
     if (!state.runId || !state.runDir) {
       throw new BabysitterRuntimeError(
@@ -2861,24 +3770,7 @@ async function runOrchestrationPhase(args: {
         break;
       }
 
-      if (!args.interactive) {
-        writeVerbose("[phase2 deterministic] running a host-driven non-interactive iteration turn");
-        await invokeTool(runIterateTool, "babysitter_run_iterate");
-
-        if (state.lastIterationResult?.status === "waiting" && state.pendingActions.size > 0) {
-          await runDeterministicPendingEffects(
-            "Host-driven non-interactive phase 2 resolved pending effects deterministically.",
-          );
-        }
-
-        const deterministicTerminal = ensureTerminalResult();
-        if (deterministicTerminal !== null) {
-          break;
-        }
-        continue;
-      }
-
-      const iterationBeforeTurn = state.iteration;
+      const progressBeforeTurn = captureOrchestrationProgressSnapshot();
       await promptOrchestrationAgent(
         buildOrchestrationTurnPrompt({
           processPath: path.resolve(args.processPath),
@@ -2890,30 +3782,19 @@ async function runOrchestrationPhase(args: {
           lastStatus: state.lastIterationResult?.status,
           pendingEffects: describePendingActions(),
         }),
-        {
-          label: `phase2 iteration ${state.iteration + 1}`,
-          fallbackReason: "Agent left pending effects unresolved; the host resolved and posted them to keep the orchestration loop moving.",
-        },
+        { label: `phase2 iteration ${state.iteration + 1}` },
       );
 
       if (ensureTerminalResult() !== null) {
         break;
       }
 
-      if (state.iteration === iterationBeforeTurn && state.pendingActions.size === 0) {
-        writeVerbose("[phase2 fallback] agent did not advance the run; executing one iteration in the host");
-        await invokeTool(runIterateTool, "babysitter_run_iterate");
-      }
-
-      if (state.lastIterationResult?.status === "waiting" && state.pendingActions.size > 0) {
-        await runDeterministicPendingEffects(
-          "Agent left pending effects unresolved after the turn; the host completed them deterministically.",
+      if (!orchestrationStateAdvanced(progressBeforeTurn)) {
+        throw new BabysitterRuntimeError(
+          "OrchestrationAgentStalled",
+          "The orchestration agent did not advance the run or resolve pending effects in this turn.",
+          { category: ErrorCategory.Runtime },
         );
-      }
-
-      const postTurnTerminal = ensureTerminalResult();
-      if (postTurnTerminal !== null) {
-        break;
       }
     }
 
@@ -2937,7 +3818,10 @@ async function runOrchestrationPhase(args: {
       );
     }
 
-    if (state.lastIterationResult?.status === "completed" || state.lastIterationResult?.status === "failed") {
+    if (
+      !state.finished &&
+      (state.lastIterationResult?.status === "completed" || state.lastIterationResult?.status === "failed")
+    ) {
       await invokeTool(
         finishTool,
         "babysitter_finish_orchestration",

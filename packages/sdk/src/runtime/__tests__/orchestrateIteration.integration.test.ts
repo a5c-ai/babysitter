@@ -123,4 +123,52 @@ describe("orchestrateIteration integration", () => {
     expect(replayMetrics.map((entry) => entry.status as string)).toEqual(["waiting", "completed"]);
     replayMetrics.forEach((entry) => expect(entry.runId as string).toBe(runId));
   });
+
+  test("completes replay correctly after cwd changes when the run was created from a relative runsDir", async () => {
+    const workspace = await fs.mkdtemp(path.join(tmpRoot, "relative-run-workspace-"));
+    const processPath = await writeProcessFile(workspace, "relative.mjs");
+    const originalCwd = process.cwd();
+    process.chdir(workspace);
+
+    try {
+      const { createRun } = await import("../createRun");
+      const created = await createRun({
+        runsDir: path.join(".a5c", "runs"),
+        runId: "run-relative-cwd",
+        request: "integration",
+        process: {
+          processId: "relative/process",
+          importPath: processPath,
+        },
+        inputs: { value: 7 },
+      });
+
+      expect(path.isAbsolute(created.runDir)).toBe(true);
+
+      const firstIteration = await orchestrateIteration({ runDir: created.runDir });
+      expect(firstIteration.status).toBe("waiting");
+      if (firstIteration.status !== "waiting") {
+        throw new Error("Expected waiting status");
+      }
+
+      await commitEffectResult({
+        runDir: created.runDir,
+        effectId: firstIteration.nextActions[0].effectId,
+        result: {
+          status: "ok",
+          value: { value: 7 },
+        },
+      });
+
+      process.chdir(tmpRoot);
+
+      const secondIteration = await orchestrateIteration({ runDir: created.runDir });
+      expect(secondIteration.status).toBe("completed");
+      if (secondIteration.status === "completed") {
+        expect(secondIteration.output).toEqual({ doubled: 14 });
+      }
+    } finally {
+      process.chdir(originalCwd);
+    }
+  });
 });

@@ -192,7 +192,10 @@ async function loadProcessFunction(
     mod = await dynamicImportModule(moduleUrl);
   } catch (error) {
     throw new RunFailedError(`Failed to load process module at ${resolvedPath}`, {
-      error: serializeUnknownError(error),
+      details: {
+        error: serializeUnknownError(error),
+      },
+      cause: error instanceof Error ? error : undefined,
     });
   }
 
