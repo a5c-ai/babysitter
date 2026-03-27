@@ -350,13 +350,13 @@ async function installCodexPlugin(
   }
 
   const packageDir = path.join(repoRoot, "plugins", "babysitter-codex");
-  const command = "npm";
-  const args = ["install", "-g", packageDir];
+  const command = process.execPath;
+  const args = [path.join(packageDir, "bin", "cli.js"), "install", "--global"];
   if (options.dryRun) {
     return {
       harness: "codex",
       dryRun: true,
-      summary: "Install the repo-local @a5c-ai/babysitter-codex package globally.",
+      summary: "Run the repo-local @a5c-ai/babysitter-codex installer explicitly for global Codex setup.",
       command: renderCommand(command, args),
       location: packageDir,
     };
@@ -365,13 +365,12 @@ async function installCodexPlugin(
   const result = await execFilePromise(command, args, {
     env: {
       ...process.env,
-      INIT_CWD: path.resolve(options.workspace ?? process.cwd()),
     },
   });
   if (result.exitCode !== 0) {
     throw new BabysitterRuntimeError(
       "CodexPluginInstallFailed",
-      "Failed to install the repo-local @a5c-ai/babysitter-codex package.",
+      "Failed to run the repo-local @a5c-ai/babysitter-codex installer.",
       {
         category: ErrorCategory.External,
         details: {
@@ -390,7 +389,7 @@ async function installCodexPlugin(
     );
     return {
       harness: "codex",
-      summary: "Installed the repo-local @a5c-ai/babysitter-codex package, cloned the global process library, and materialized workspace-local Codex skill/hooks/config.",
+      summary: "Ran the repo-local @a5c-ai/babysitter-codex installer for global Codex setup, cloned the global process library, and materialized workspace-local Codex skill/hooks/config.",
       location: onboarding.location ?? installedSkillDir,
       output: [
         result.stdout.trim(),
@@ -402,7 +401,7 @@ async function installCodexPlugin(
 
   return {
     harness: "codex",
-    summary: "Installed the repo-local @a5c-ai/babysitter-codex package, the global babysit skill, and the global process-library binding.",
+    summary: "Ran the repo-local @a5c-ai/babysitter-codex installer for global Codex skill/hooks/config and the global process-library binding.",
     location: installedSkillDir,
     output: [result.stdout.trim(), result.stderr.trim()].filter(Boolean).join("\n"),
   };

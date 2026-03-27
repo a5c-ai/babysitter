@@ -31,6 +31,11 @@ const PROMPT_NAMES = [
   'yolo.md',
   'babysit.md',
 ];
+const HOOK_SCRIPT_NAMES = [
+  'babysitter-session-start.sh',
+  'babysitter-stop-hook.sh',
+  'user-prompt-submit.sh',
+];
 
 function getCodexHome() {
   if (process.env.CODEX_HOME) return process.env.CODEX_HOME;
@@ -66,6 +71,43 @@ function main() {
       removedAny = true;
     } catch (err) {
       console.warn(`[babysitter-codex] Warning: Could not remove prompt ${promptPath}: ${err.message}`);
+    }
+  }
+
+  for (const hookName of HOOK_SCRIPT_NAMES) {
+    const hookPath = path.join(codexHome, 'hooks', hookName);
+    if (!fs.existsSync(hookPath)) {
+      continue;
+    }
+    try {
+      fs.rmSync(hookPath, { force: true });
+      console.log(`[babysitter-codex] Removed ${hookPath}`);
+      removedAny = true;
+    } catch (err) {
+      console.warn(`[babysitter-codex] Warning: Could not remove hook script ${hookPath}: ${err.message}`);
+    }
+  }
+
+  const hooksConfigPath = path.join(codexHome, 'hooks.json');
+  if (fs.existsSync(hooksConfigPath)) {
+    try {
+      fs.rmSync(hooksConfigPath, { force: true });
+      console.log(`[babysitter-codex] Removed ${hooksConfigPath}`);
+      removedAny = true;
+    } catch (err) {
+      console.warn(`[babysitter-codex] Warning: Could not remove hook config ${hooksConfigPath}: ${err.message}`);
+    }
+  }
+
+  const hooksDir = path.join(codexHome, 'hooks');
+  if (fs.existsSync(hooksDir)) {
+    try {
+      if (fs.readdirSync(hooksDir).length === 0) {
+        fs.rmSync(hooksDir, { recursive: true, force: true });
+        console.log(`[babysitter-codex] Removed ${hooksDir}`);
+      }
+    } catch (err) {
+      console.warn(`[babysitter-codex] Warning: Could not clean hook directory ${hooksDir}: ${err.message}`);
     }
   }
 

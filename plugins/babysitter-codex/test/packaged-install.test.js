@@ -51,6 +51,11 @@ function cliPath(filePath) {
   return process.platform === 'win32' ? String(filePath).replace(/\\/g, '/') : filePath;
 }
 
+function hookCommand(filePath) {
+  const normalized = cliPath(filePath);
+  return normalized.includes(' ') ? `"${normalized}"` : normalized;
+}
+
 function resolveNpmCommand() {
   if (process.platform !== 'win32') return 'npm';
   return path.join(path.dirname(process.execPath), 'npm.cmd');
@@ -93,7 +98,7 @@ try {
   run('tar', tarArgs);
 
   const packagedRoot = path.join(extractDir, 'package');
-  const installOutput = run(process.execPath, ['bin/postinstall.js'], {
+  const installOutput = run(process.execPath, ['bin/cli.js', 'install', '--global'], {
     cwd: packagedRoot,
     env: {
       ...process.env,
@@ -102,7 +107,6 @@ try {
       CODEX_HOME: codexHome,
       HOME: userHome,
       USERPROFILE: userHome,
-      INIT_CWD: workspaceRoot,
     },
   });
   assert.ok(installOutput.includes('Installation complete!'));
@@ -110,8 +114,6 @@ try {
   const installedSkillRoot = path.join(codexHome, 'skills', 'babysit');
   [
     'SKILL.md',
-    'README.md',
-    'agents',
     '.codex',
     'scripts',
     'babysitter.lock.json',
@@ -120,7 +122,7 @@ try {
     assertExists(codexHome, path.join('prompts', promptName));
   }
   assert.ok(!fs.existsSync(path.join(codexHome, 'prompts', 'babysit.md')), 'legacy /babysit alias should not be installed');
-  assert.ok(!fs.existsSync(path.join(installedSkillRoot, 'AGENTS.md')), 'installed package should not ship a package-level AGENTS.md');
+  assert.ok(!fs.existsSync(path.join(installedSkillRoot, 'README.md')), 'installed skill should not ship package README content');
   assert.ok(!fs.existsSync(path.join(installedSkillRoot, 'upstream')), 'installed package should not bundle upstream content');
   assert.ok(!fs.existsSync(path.join(installedSkillRoot, 'config')), 'installed package should not ship redundant config payload');
   assert.ok(!fs.existsSync(path.join(installedSkillRoot, 'docs')), 'installed package should not ship redundant docs payload');
@@ -128,7 +130,6 @@ try {
   assert.ok(!fs.existsSync(path.join(installedSkillRoot, 'bin')), 'installed skill should not ship installer binaries');
   assert.ok(fs.existsSync(path.join(installedSkillRoot, '.codex', 'skills', 'babysit', 'SKILL.md')), 'installed skill should carry the repo-local skill template');
   assert.ok(!fs.existsSync(path.join(installedSkillRoot, '.codex', 'skills', 'babysit', 'call')), 'installed skill should not embed nested mode directories');
-  assert.ok(!fs.existsSync(path.join(installedSkillRoot, '.codex', 'AGENTS.md')), 'installed package should not ship redundant .codex AGENTS guidance');
   assert.ok(!fs.existsSync(path.join(installedSkillRoot, '.codex', 'plugin.json')), 'installed package should not ship fake plugin-manifest metadata');
   assert.ok(!fs.existsSync(path.join(installedSkillRoot, '.codex', 'command-catalog.json')), 'installed package should not ship fake command-catalog metadata');
 
@@ -142,16 +143,40 @@ try {
   const installedCallPrompt = fs.readFileSync(path.join(codexHome, 'prompts', 'call.md'), 'utf8');
   assert.ok(installedCallPrompt.includes('Use the installed `babysit` skill in `call` mode.'));
   const homeConfig = fs.readFileSync(path.join(codexHome, 'config.toml'), 'utf8');
+  assert.ok(homeConfig.includes('project_doc_max_bytes = 65536'));
+  assert.ok(homeConfig.includes('writable_roots = [".a5c", ".codex"]'));
   assert.ok(homeConfig.includes('codex_hooks = true'));
   assert.ok(homeConfig.includes('multi_agent = true'));
+  assert.ok(homeConfig.includes('max_depth = 3'));
+  assert.ok(homeConfig.includes('max_threads = 4'));
+  assert.ok(fs.existsSync(path.join(codexHome, 'hooks.json')));
+  assert.ok(fs.existsSync(path.join(codexHome, 'hooks', 'babysitter-session-start.sh')));
+  assert.ok(fs.existsSync(path.join(codexHome, 'hooks', 'user-prompt-submit.sh')));
+  assert.ok(fs.existsSync(path.join(codexHome, 'hooks', 'babysitter-stop-hook.sh')));
+  const globalHooks = readJson(path.join(codexHome, 'hooks.json'));
+  assert.strictEqual(
+    globalHooks.hooks.SessionStart[0].hooks[0].command,
+    hookCommand(path.join(codexHome, 'hooks', 'babysitter-session-start.sh')),
+  );
+  assert.strictEqual(
+    globalHooks.hooks.UserPromptSubmit[0].hooks[0].command,
+    hookCommand(path.join(codexHome, 'hooks', 'user-prompt-submit.sh')),
+  );
+  assert.strictEqual(
+    globalHooks.hooks.Stop[0].hooks[0].command,
+    hookCommand(path.join(codexHome, 'hooks', 'babysitter-stop-hook.sh')),
+  );
   const globalProcessLibraryState = readJson(path.join(userHome, '.a5c', 'active', 'process-library.json'));
   assert.strictEqual(path.resolve(globalProcessLibraryState.defaultBinding.dir), path.resolve(path.join(userHome, '.a5c', 'process-library', 'babysitter-repo', 'library')));
+  assert.ok(!fs.existsSync(path.join(workspaceRoot, '.codex', 'hooks.json')), 'global install should not write workspace hooks');
+  assert.ok(!fs.existsSync(path.join(workspaceRoot, '.codex', 'config.toml')), 'global install should not write workspace config');
+  assert.ok(!fs.existsSync(path.join(workspaceRoot, '.codex', 'skills', 'babysit', 'SKILL.md')), 'global install should not install workspace skills');
+  assert.ok(!fs.existsSync(path.join(workspaceRoot, '.codex', 'prompts', 'call.md')), 'global install should not install workspace prompts');
 
-  const teamInstallOutput = run(process.execPath, [path.join(installedSkillRoot, 'scripts', 'team-install.js')], {
-    cwd: workspaceRoot,
+  const teamInstallOutput = run(process.execPath, ['bin/cli.js', 'install', '--workspace', workspaceRoot], {
+    cwd: packagedRoot,
     env: {
       ...process.env,
-      BABYSITTER_PACKAGE_ROOT: installedSkillRoot,
       BABYSITTER_SDK_CLI: path.join(PROJECT_ROOT, '..', '..', 'packages', 'sdk', 'dist', 'cli', 'main.js'),
       BABYSITTER_PROCESS_LIBRARY_REPO: processLibraryRepoRoot,
       HOME: userHome,
@@ -165,13 +190,18 @@ try {
   assert.ok(fs.existsSync(path.join(workspaceRoot, '.codex', 'prompts', 'call.md')));
   assert.ok(fs.existsSync(path.join(workspaceRoot, '.codex', 'prompts', 'plan.md')));
   assert.ok(fs.existsSync(path.join(workspaceRoot, '.codex', 'prompts', 'resume.md')));
+  assert.ok(!fs.existsSync(path.join(workspaceRoot, '.codex', 'skills', 'babysit', 'README.md')), 'workspace skill install should not copy package README content');
   assert.ok(!fs.existsSync(path.join(workspaceRoot, '.codex', 'skills', 'babysit', '.codex', 'skills')), 'workspace skill install should not contain nested alias/skill trees');
   assert.ok(fs.existsSync(path.join(workspaceRoot, '.codex', 'hooks', 'babysitter-stop-hook.sh')));
+  const workspaceHooks = readJson(path.join(workspaceRoot, '.codex', 'hooks.json'));
+  assert.strictEqual(workspaceHooks.hooks.SessionStart[0].hooks[0].command, '.codex/hooks/babysitter-session-start.sh');
+  assert.strictEqual(workspaceHooks.hooks.UserPromptSubmit[0].hooks[0].command, '.codex/hooks/user-prompt-submit.sh');
+  assert.strictEqual(workspaceHooks.hooks.Stop[0].hooks[0].command, '.codex/hooks/babysitter-stop-hook.sh');
 
   const installJson = readJson(path.join(workspaceRoot, '.a5c', 'team', 'install.json'));
   const profileJson = readJson(path.join(workspaceRoot, '.a5c', 'team', 'profile.json'));
 
-  assert.strictEqual(path.resolve(installJson.packageRoot), path.resolve(installedSkillRoot));
+  assert.strictEqual(path.resolve(installJson.packageRoot), path.resolve(packagedRoot));
   assert.strictEqual(path.resolve(installJson.workspaceRoot), path.resolve(workspaceRoot));
   assert.strictEqual(
     path.resolve(installJson.workspaceSkillRoot),
@@ -218,7 +248,7 @@ try {
     path.resolve(path.join(workspaceRoot, '.codex', 'hooks')),
   );
 
-  console.log('  ok packed install includes the portable skill payload, prompt alias, global process library, and workspace team-install paths');
+  console.log('  ok packed install uses the explicit CLI, omits README baggage, installs global hooks/config, and supports explicit workspace onboarding');
   console.log('\nPackaged install tests passed!');
 } catch (err) {
   console.error('\nTest failed:', err.message);

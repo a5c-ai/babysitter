@@ -13,9 +13,12 @@ description: >-
 Babysitter on Codex is implemented as:
 
 - the installed skill bundle under `~/.codex/skills/babysit` or `.codex/skills/babysit`
-- workspace `.codex/hooks.json`
-- workspace `.codex/config.toml`
+- global `~/.codex/hooks.json` and `~/.codex/hooks/`
+- global `~/.codex/config.toml`
+- optional workspace `.codex/hooks.json` and `.codex/hooks/`
+- optional workspace `.codex/config.toml`
 - workspace `.a5c/`
+- shared global `.a5c/` process-library state
 - the Babysitter SDK CLI for `run:create`, `run:iterate`, `run:status`,
   `task:list`, `task:post`, and process-library binding
 
@@ -72,8 +75,13 @@ babysitter run:create ... --harness codex --session-id <id> --state-dir .a5c --j
 
 ## Hook Loop
 
-Workspace onboarding must install `.codex/hooks.json` and `.codex/config.toml`
-so:
+Global install must materialize `~/.codex/hooks.json`, `~/.codex/hooks/`, and
+`~/.codex/config.toml`.
+
+Workspace onboarding may also materialize `.codex/hooks.json`,
+`.codex/hooks/`, and `.codex/config.toml` for repo-local pinning.
+
+Both levels must provide:
 
 1. `SessionStart` seeds `.a5c` session state
 2. `UserPromptSubmit` performs prompt-time transformations when needed

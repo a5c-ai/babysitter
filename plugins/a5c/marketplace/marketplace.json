@@ -66,6 +66,15 @@
       "packagePath": "plugins/themes",
       "tags": ["themes", "design-system", "sounds", "hooks", "ux", "branding", "conversational-style", "assets", "claude-code"],
       "author": "a5c-ai"
+    },
+    "agentsh": {
+      "name": "agentsh",
+      "description": "Install and integrate agentsh sandbox enforcement for AI agent sessions. Intercepts all Bash tool calls via hooks, routing them through agentsh exec for policy-based command control, file protection, and network filtering. Auto-detects current harness (Claude Code, Codex, Gemini CLI) and installs appropriate hooks. Includes default sandbox policy, session lifecycle management, and platform detection.",
+      "latestVersion": "1.0.0",
+      "versions": ["1.0.0"],
+      "packagePath": "plugins/agentsh",
+      "tags": ["security", "sandbox", "agentsh", "hooks", "bash-wrapper", "command-control", "network-filter", "file-protection", "policy"],
+      "author": "a5c-ai"
     }
   }
 }

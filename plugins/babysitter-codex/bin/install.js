@@ -2,13 +2,11 @@
 'use strict';
 
 /**
- * postinstall.js
+ * install.js
  *
  * Installs the Codex-facing Babysitter skill bundle globally under CODEX_HOME,
  * installs optional mode prompt aliases such as `/call` and `/plan`,
- * clones/updates the process library into ~/.a5c via the SDK CLI, and
- * optionally onboards the current workspace when npm was run from inside a
- * repo.
+ * clones/updates the process library into ~/.a5c via the SDK CLI.
  */
 
 const fs = require('fs');
@@ -20,10 +18,13 @@ const SKILL_NAME = 'babysit';
 const LEGACY_SKILL_NAME = 'babysitter-codex';
 const PACKAGE_ROOT = path.resolve(__dirname, '..');
 const IS_WIN = process.platform === 'win32';
+const GLOBAL_HOOK_SPECS = [
+  { event: 'SessionStart', script: 'babysitter-session-start.sh' },
+  { event: 'UserPromptSubmit', script: 'user-prompt-submit.sh' },
+  { event: 'Stop', script: 'babysitter-stop-hook.sh' },
+];
 const INSTALL_ENTRIES = [
   { source: 'SKILL.md', required: true },
-  { source: 'README.md', required: true },
-  { source: 'agents', required: true },
   { source: 'prompts', required: true },
   { source: '.codex', required: true },
   { source: 'scripts', required: true },
@@ -93,6 +94,142 @@ function listPromptEntries() {
     }));
 }
 
+function renderCodexConfigToml() {
+  return [
+    'approval_policy = "on-request"',
+    'sandbox_mode = "workspace-write"',
+    'project_doc_max_bytes = 65536',
+    '',
+    '[sandbox_workspace_write]',
+    'writable_roots = [".a5c", ".codex"]',
+    '',
+    '[features]',
+    'codex_hooks = true',
+    'multi_agent = true',
+    '',
+    '[agents]',
+    'max_depth = 3',
+    'max_threads = 4',
+    '',
+  ].join('\n');
+}
+
+function insertRootKey(content, key, line) {
+  const keyPattern = new RegExp(`^\\s*${key}\\s*=`, 'm');
+  if (keyPattern.test(content)) {
+    return content;
+  }
+  const sectionMatch = content.match(/^\[[^\]]+\]\s*$/m);
+  if (!sectionMatch || sectionMatch.index === undefined) {
+    return content.trim()
+      ? `${content.trimEnd()}\n${line}\n`
+      : `${line}\n`;
+  }
+  const before = content.slice(0, sectionMatch.index).trimEnd();
+  const after = content.slice(sectionMatch.index);
+  return before
+    ? `${before}\n${line}\n\n${after}`
+    : `${line}\n\n${after}`;
+}
+
+function ensureSectionLine(content, sectionName, lineKey, line) {
+  const keyPattern = new RegExp(`^\\s*${lineKey}\\s*=`, 'm');
+  if (keyPattern.test(content)) {
+    return content;
+  }
+  const sectionHeader = `[${sectionName}]`;
+  const escapedSection = sectionName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const sectionPattern = new RegExp(`^\\[${escapedSection}\\]\\s*$`, 'm');
+  if (sectionPattern.test(content)) {
+    return content.replace(sectionPattern, `${sectionHeader}\n${line}`);
+  }
+  return content.trim()
+    ? `${content.trimEnd()}\n\n${sectionHeader}\n${line}\n`
+    : `${sectionHeader}\n${line}\n`;
+}
+
+function ensureWritableRoots(content) {
+  const sectionPattern = /^\[sandbox_workspace_write\]\s*$/m;
+  const rootsPattern = /^writable_roots\s*=\s*\[(.*?)\]\s*$/m;
+  const requiredRoots = ['.a5c', '.codex'];
+
+  if (!sectionPattern.test(content)) {
+    return content.trim()
+      ? `${content.trimEnd()}\n\n[sandbox_workspace_write]\nwritable_roots = [".a5c", ".codex"]\n`
+      : '[sandbox_workspace_write]\nwritable_roots = [".a5c", ".codex"]\n';
+  }
+
+  if (!rootsPattern.test(content)) {
+    return content.replace(
+      sectionPattern,
+      '[sandbox_workspace_write]\nwritable_roots = [".a5c", ".codex"]',
+    );
+  }
+
+  return content.replace(rootsPattern, (_match, inner) => {
+    const values = inner
+      .split(',')
+      .map((part) => part.trim())
+      .filter(Boolean)
+      .map((part) => part.replace(/^"(.*)"$/, '$1'));
+    const merged = [...new Set([...values, ...requiredRoots])];
+    const rendered = merged.map((value) => `"${value}"`).join(', ');
+    return `writable_roots = [${rendered}]`;
+  });
+}
+
+function mergeCodexConfig(existing) {
+  let content = existing.trim() ? existing : '';
+  content = insertRootKey(content, 'approval_policy', 'approval_policy = "on-request"');
+  content = insertRootKey(content, 'sandbox_mode', 'sandbox_mode = "workspace-write"');
+  content = insertRootKey(content, 'project_doc_max_bytes', 'project_doc_max_bytes = 65536');
+  content = ensureWritableRoots(content);
+  content = ensureSectionLine(content, 'features', 'codex_hooks', 'codex_hooks = true');
+  content = ensureSectionLine(content, 'features', 'multi_agent', 'multi_agent = true');
+  content = ensureSectionLine(content, 'agents', 'max_depth', 'max_depth = 3');
+  content = ensureSectionLine(content, 'agents', 'max_threads', 'max_threads = 4');
+  return `${content.trimEnd()}\n`;
+}
+
+function renderHookCommand(filePath) {
+  const normalized = String(filePath).replace(/\\/g, '/');
+  return normalized.includes(' ') ? `"${normalized}"` : normalized;
+}
+
+function buildHooksConfig(hooksRoot) {
+  return {
+    hooks: Object.fromEntries(
+      GLOBAL_HOOK_SPECS.map(({ event, script }) => [
+        event,
+        [
+          {
+            matcher: '*',
+            hooks: [
+              {
+                type: 'command',
+                command: renderHookCommand(path.join(hooksRoot, script)),
+              },
+            ],
+          },
+        ],
+      ]),
+    ),
+  };
+}
+
+function ensureExecutableHooks(hookDir) {
+  if (IS_WIN || !fs.existsSync(hookDir)) {
+    return;
+  }
+  for (const name of fs.readdirSync(hookDir)) {
+    const hookPath = path.join(hookDir, name);
+    if (name.endsWith('.sh') && fs.statSync(hookPath).isFile()) {
+      fs.chmodSync(hookPath, 0o755);
+    }
+  }
+  console.log(`[babysitter-codex]   +x ${hookDir}`);
+}
+
 function resolveBabysitterCommand(packageRoot) {
   if (process.env.BABYSITTER_SDK_CLI) {
     return {
@@ -114,19 +251,6 @@ function resolveBabysitterCommand(packageRoot) {
       command: 'babysitter',
       argsPrefix: [],
     };
-  }
-}
-
-function resolveLocalSdkCli(packageRoot) {
-  if (process.env.BABYSITTER_SDK_CLI) {
-    return path.resolve(process.env.BABYSITTER_SDK_CLI);
-  }
-  try {
-    return require.resolve('@a5c-ai/babysitter-sdk/dist/cli/main.js', {
-      paths: [packageRoot],
-    });
-  } catch {
-    return undefined;
   }
 }
 
@@ -169,47 +293,36 @@ function ensureGlobalProcessLibrary(packageRoot) {
 
 function mergeCodexHomeConfig(codexHome) {
   const configPath = path.join(codexHome, 'config.toml');
-  const featureLines = [
-    '[features]',
-    'codex_hooks = true',
-    'multi_agent = true',
-  ];
-
   if (!fs.existsSync(configPath)) {
-    writeFileIfChanged(
-      configPath,
-      [
-        'approval_policy = "on-request"',
-        'sandbox_mode = "workspace-write"',
-        '',
-        ...featureLines,
-        '',
-      ].join('\n'),
-    );
+    writeFileIfChanged(configPath, renderCodexConfigToml());
     console.log(`[babysitter-codex]   wrote ${configPath}`);
     return;
   }
 
-  let content = fs.readFileSync(configPath, 'utf8');
-  if (!/^\s*codex_hooks\s*=.*$/m.test(content)) {
-    if (/^\[features\]\s*$/m.test(content)) {
-      content = content.replace(
-        /^\[features\]\s*$/m,
-        ['[features]', 'codex_hooks = true', 'multi_agent = true'].join('\n'),
-      );
-    } else {
-      content = [content.trimEnd(), '', ...featureLines, ''].join('\n');
-    }
-  } else if (!/^\s*multi_agent\s*=.*$/m.test(content) && /^\[features\]\s*$/m.test(content)) {
-    content = content.replace(
-      /^\[features\]\s*$/m,
-      ['[features]', 'multi_agent = true'].join('\n'),
-    );
-  }
-
+  const content = mergeCodexConfig(fs.readFileSync(configPath, 'utf8'));
   if (writeFileIfChanged(configPath, content)) {
     console.log(`[babysitter-codex]   merged ${configPath}`);
   }
+}
+
+function installGlobalHooks(codexHome) {
+  const srcHooksDir = path.join(PACKAGE_ROOT, '.codex', 'hooks');
+  if (!fs.existsSync(srcHooksDir)) {
+    throw new Error(`required hook payload is missing: ${srcHooksDir}`);
+  }
+
+  const hooksDir = path.join(codexHome, 'hooks');
+  copyRecursive(srcHooksDir, hooksDir);
+  console.log('[babysitter-codex]   hooks/');
+
+  const hooksConfigPath = path.join(codexHome, 'hooks.json');
+  writeFileIfChanged(
+    hooksConfigPath,
+    `${JSON.stringify(buildHooksConfig(hooksDir), null, 2)}\n`,
+  );
+  console.log('[babysitter-codex]   hooks.json');
+
+  ensureExecutableHooks(hooksDir);
 }
 
 function removeLegacySkillDir(codexHome) {
@@ -230,59 +343,6 @@ function removeLegacyPrompts(codexHome) {
     fs.rmSync(promptPath, { force: true });
     console.log(`[babysitter-codex]   removed legacy prompt ${promptPath}`);
   }
-}
-
-function shouldAutoOnboardWorkspace(skillDir) {
-  const initCwd = process.env.INIT_CWD;
-  if (!initCwd) return null;
-
-  const resolved = path.resolve(initCwd);
-  if (!fs.existsSync(resolved)) return null;
-  if (!fs.statSync(resolved).isDirectory()) return null;
-
-  const normalizedWorkspace = resolved.toLowerCase();
-  const normalizedPackageRoot = PACKAGE_ROOT.toLowerCase();
-  const normalizedSkillDir = skillDir.toLowerCase();
-  if (normalizedWorkspace === normalizedPackageRoot || normalizedWorkspace === normalizedSkillDir) {
-    return null;
-  }
-
-  return resolved;
-}
-
-function autoOnboardWorkspace(skillDir) {
-  const workspace = shouldAutoOnboardWorkspace(skillDir);
-  if (!workspace) {
-    return;
-  }
-
-  const scriptPath = path.join(skillDir, 'scripts', 'team-install.js');
-  if (!fs.existsSync(scriptPath)) {
-    console.warn('[babysitter-codex] WARNING: team-install.js is missing; skipping workspace hook onboarding');
-    return;
-  }
-
-  const result = spawnSync(process.execPath, [scriptPath, '--workspace', workspace], {
-    cwd: workspace,
-    stdio: 'pipe',
-    encoding: 'utf8',
-    env: {
-      ...process.env,
-      BABYSITTER_PACKAGE_ROOT: skillDir,
-      ...(resolveLocalSdkCli(PACKAGE_ROOT)
-        ? { BABYSITTER_SDK_CLI: resolveLocalSdkCli(PACKAGE_ROOT) }
-        : {}),
-    },
-  });
-
-  if (result.status !== 0) {
-    console.warn(`[babysitter-codex] WARNING: workspace onboarding failed for ${workspace}`);
-    if (result.stdout) console.warn(result.stdout.trim());
-    if (result.stderr) console.warn(result.stderr.trim());
-    return;
-  }
-
-  console.log(`[babysitter-codex]   onboarded workspace hooks/config at ${workspace}`);
 }
 
 function installEntry(skillDir, entry) {
@@ -345,25 +405,14 @@ function main() {
     removeLegacySkillDir(codexHome);
     removeLegacyPrompts(codexHome);
     mergeCodexHomeConfig(codexHome);
+    installGlobalHooks(codexHome);
 
-    if (!IS_WIN) {
-      const hookDir = path.join(skillDir, '.codex', 'hooks');
-      if (fs.existsSync(hookDir)) {
-        for (const name of fs.readdirSync(hookDir)) {
-          const hookPath = path.join(hookDir, name);
-          if (name.endsWith('.sh') && fs.statSync(hookPath).isFile()) {
-            fs.chmodSync(hookPath, 0o755);
-          }
-        }
-        console.log('[babysitter-codex]   +x hooks/*.sh');
-      }
-    }
+    ensureExecutableHooks(path.join(skillDir, '.codex', 'hooks'));
 
     ensureGlobalProcessLibrary(PACKAGE_ROOT);
-    autoOnboardWorkspace(skillDir);
 
     console.log('[babysitter-codex] Installation complete!');
-    console.log('[babysitter-codex] Restart Codex to pick up the updated skill and hook config.');
+    console.log('[babysitter-codex] Restart Codex to pick up the updated global skill and prompt config.');
   } catch (err) {
     console.error(`[babysitter-codex] Failed to install skill files: ${err.message}`);
     process.exitCode = 1;

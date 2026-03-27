@@ -8,14 +8,13 @@
     "team:install": "node scripts/team-install.js",
     "lint": "node -e \"const fs=require('fs'); const path=require('path'); const cp=require('child_process'); const walk=(dir)=>{for(const entry of fs.readdirSync(dir)){const file=path.join(dir, entry); const stat=fs.statSync(file); if(stat.isDirectory()) walk(file); else if(file.endsWith('.js')) cp.execFileSync(process.execPath,['--check',file],{stdio:'inherit'});}}; ['.codex','bin','scripts','test'].forEach((dir)=>{if(fs.existsSync(dir)) walk(dir);});\"",
     "deploy": "npm publish --access public",
-    "deploy:staging": "npm publish --access public --tag staging",
-    "postinstall": "node bin/postinstall.js",
-    "preuninstall": "node bin/uninstall.js"
+    "deploy:staging": "npm publish --access public --tag staging"
+  },
+  "bin": {
+    "babysitter-codex": "bin/cli.js"
   },
   "files": [
     "SKILL.md",
-    "README.md",
-    "agents/",
     "prompts/",
     ".codex/",
     "bin/",

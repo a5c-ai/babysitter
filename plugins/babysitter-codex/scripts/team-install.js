@@ -12,8 +12,6 @@ const DEFAULT_PROCESS_LIBRARY_SUBPATH = 'library';
 const DEFAULT_PROCESS_LIBRARY_REFERENCE_SUBPATH = 'library/reference';
 const WORKSPACE_SKILL_ENTRIES = [
   { source: 'SKILL.md', target: 'SKILL.md' },
-  { source: 'README.md', target: 'README.md' },
-  { source: 'agents', target: 'agents' },
   { source: 'scripts', target: 'scripts' },
   { source: 'babysitter.lock.json', target: 'babysitter.lock.json' },
 ];

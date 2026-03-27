@@ -5,8 +5,9 @@
 # - `features.codex_hooks = true` enables that engine on supported platforms
 # - `.a5c` stores babysitter session and run state
 #
-# `team-install` / `project-install` should materialize a workspace-local
-# `.codex/hooks.json` that points at the installed hook scripts.
+# Global install should materialize `~/.codex/hooks.json` and `~/.codex/hooks/`.
+# `team-install` / `project-install` should materialize workspace-local
+# `.codex/hooks.json` and `.codex/hooks/` for repo-level pinning.
 
 approval_policy = "on-request"
 sandbox_mode = "workspace-write"
