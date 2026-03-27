@@ -1423,7 +1423,7 @@ async function promptPiWithRetry(args: {
 }): Promise<PiPromptResult> {
   let attempt = 0;
 
-  while (true) {
+  for (;;) {
     try {
       const result = await args.session.prompt(args.message, args.timeout);
       if (
@@ -1468,7 +1468,7 @@ async function orchestrateIterationWithProcessLoadRetry(args: {
 }): Promise<IterationResult> {
   let attempt = 0;
 
-  while (true) {
+  for (;;) {
     try {
       return await orchestrateIteration({ runDir: args.runDir });
     } catch (error: unknown) {
@@ -2115,7 +2115,7 @@ async function assessWorkspaceForExternalAuthoring(
   }
 }
 
-async function runExternalProcessDefinitionPhase(args: {
+async function _runExternalProcessDefinitionPhase(args: {
   prompt: string;
   outputPath: string;
   workspace?: string;
