@@ -263,7 +263,8 @@ describe("invokeHarness", () => {
   });
 
   it("wraps codex through PowerShell on Windows so stdin piping matches direct CLI behavior", async () => {
-    mockCheckCliAvailable.mockResolvedValue({ available: true, path: "C:/Users/test/AppData/Roaming/npm/codex.cmd" });
+    const resolvedCodexPath = "C:/Users/test/AppData/Roaming/npm/codex.cmd";
+    mockCheckCliAvailable.mockResolvedValue({ available: true, path: resolvedCodexPath });
 
     let capturedCmd: string | undefined;
     let capturedOpts: Record<string, unknown> | undefined;
@@ -288,14 +289,15 @@ describe("invokeHarness", () => {
       expect(capturedOpts?.shell).toBe(false);
       expect(capturedOpts?.cwd).toBe(process.cwd());
     } else {
-      expect(capturedCmd).toBe("/usr/bin/codex.cmd");
+      expect(capturedCmd).toBe(resolvedCodexPath);
       expect(capturedOpts?.shell).toBe(false);
       expect(capturedOpts?.cwd).toBe(process.cwd());
     }
   });
 
   it("uses correct CLI command from HARNESS_CLI_MAP", async () => {
-    mockCheckCliAvailable.mockResolvedValue({ available: true, path: "/usr/bin/gemini" });
+    const resolvedGeminiPath = "/usr/bin/gemini";
+    mockCheckCliAvailable.mockResolvedValue({ available: true, path: resolvedGeminiPath });
 
     let capturedCmd: string | undefined;
     mockExecFile.mockImplementation((cmd, _args, _opts, callback) => {
@@ -306,6 +308,6 @@ describe("invokeHarness", () => {
 
     await invokeHarness("gemini-cli", { prompt: "test" });
 
-    expect(capturedCmd).toBe("gemini");
+    expect(capturedCmd).toBe(process.platform === "win32" ? "gemini" : resolvedGeminiPath);
   });
 });
