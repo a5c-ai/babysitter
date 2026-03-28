@@ -220,6 +220,23 @@ describe("CodexAdapter", () => {
       const adapter = createCodexAdapter();
       expect(adapter.resolveStateDir({})).toBe(path.resolve(".a5c"));
     });
+
+    it("keeps session state in the active workspace when pluginRoot is global CODEX_HOME", async () => {
+      const adapter = createCodexAdapter();
+      const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "codex-state-dir-test-"));
+      const originalCwd = process.cwd();
+      try {
+        process.chdir(tmpDir);
+        expect(
+          adapter.resolveStateDir({
+            pluginRoot: path.join(os.homedir(), ".codex"),
+          }),
+        ).toBe(path.join(tmpDir, ".a5c"));
+      } finally {
+        process.chdir(originalCwd);
+        await fs.rm(tmpDir, { recursive: true, force: true });
+      }
+    });
   });
 
   it("reports codex-specific missing session ID guidance", () => {

@@ -198,6 +198,7 @@ $CLI run:create \
   --inputs <file> \
   --prompt "$PROMPT" \
   --harness codex \
+  --state-dir .a5c \
   --plugin-root "${CODEX_PLUGIN_ROOT}" \
   --json
 ```
@@ -208,6 +209,7 @@ Required flags:
 - `--entry <absolute-path>#<export>` - process JS file plus named export
 - `--prompt "$PROMPT"` - the user's initial request
 - `--harness codex` - activates Codex session binding
+- `--state-dir .a5c` - required for honest workspace-local Codex session state
 - `--plugin-root "${CODEX_PLUGIN_ROOT}"` - plugin root used for session/state
   resolution
 
@@ -222,6 +224,10 @@ explicitly. The Codex adapter auto-resolves the session/thread id from
 `CODEX_THREAD_ID`, `CODEX_SESSION_ID`, or `CODEX_ENV_FILE`. Only pass
 `--session-id` in out-of-band recovery flows where no ambient Codex session
 identity exists.
+
+In normal Codex usage, `run:create` must bind the session into the active
+workspace `.a5c`, not the global `~/.a5c`, so the Stop hook can find the same
+session state file in later turns.
 
 For resuming existing runs in a manual recovery flow:
 
@@ -296,8 +302,9 @@ Workflow:
 
 ### 7. Stop after every phase after run-session association
 
-After `run:create` or any posted effect result, stop and yield back to the
-Codex hook loop. Do not run multiple `run:iterate` steps in the same turn.
+After `run:create` or any posted effect result, end the current assistant turn
+and yield back to the Codex hook loop. Do not run multiple `run:iterate` steps
+in the same turn.
 
 ### 8. Completion proof
 

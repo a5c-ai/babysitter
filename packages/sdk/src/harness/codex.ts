@@ -51,10 +51,27 @@ function resolveCodexStateDir(args: {
 
   const pluginRoot = resolveCodexPluginRoot(args);
   if (pluginRoot) {
-    // Codex plugins conventionally live under ".codex", while state is in ".a5c".
-    return path.resolve(pluginRoot, "..", ".a5c");
+    const cwd = path.resolve(process.cwd());
+    const normalizedPluginRoot = path.resolve(pluginRoot);
+    // Workspace-local installs place ".codex" beside ".a5c", so derive from
+    // the plugin root only when that root lives under the active workspace.
+    if (
+      normalizedPluginRoot === cwd ||
+      normalizedPluginRoot.startsWith(`${cwd}${path.sep}`)
+    ) {
+      return path.resolve(normalizedPluginRoot, "..", ".a5c");
+    }
   }
 
+  if (pluginRoot) {
+    // Global Codex installs live under "~/.codex", but Babysitter run/session
+    // state must still default to the active workspace ".a5c".
+    // Falling through here keeps global skill installs honest.
+    return path.resolve(".a5c");
+  }
+
+  // Without any explicit state binding, Codex state belongs to the current
+  // workspace, not a user-global directory.
   return path.resolve(".a5c");
 }
 
