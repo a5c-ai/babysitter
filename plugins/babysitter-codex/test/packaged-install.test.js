@@ -125,10 +125,10 @@ try {
   assert.ok(fs.existsSync(path.join(installedPluginRoot, 'skills', 'babysit', 'SKILL.md')), 'installed plugin should carry the core skill');
   assert.ok(!fs.existsSync(path.join(installedPluginRoot, 'bin')), 'installed plugin should not ship installer binaries');
 
-  const skillBytes = fs.readFileSync(path.join(installedPluginRoot, 'SKILL.md'));
+  const skillBytes = fs.readFileSync(path.join(installedPluginRoot, 'skills', 'babysit', 'SKILL.md'));
   const hasBom = skillBytes.length >= 3 && skillBytes[0] === 0xef && skillBytes[1] === 0xbb && skillBytes[2] === 0xbf;
-  assert.strictEqual(hasBom, false, 'Installed SKILL.md should not contain a UTF-8 BOM');
-  const installedSkill = fs.readFileSync(path.join(installedPluginRoot, 'SKILL.md'), 'utf8');
+  assert.strictEqual(hasBom, false, 'Installed babysit skill should not contain a UTF-8 BOM');
+  const installedSkill = fs.readFileSync(path.join(installedPluginRoot, 'skills', 'babysit', 'SKILL.md'), 'utf8');
   assert.ok(installedSkill.includes('SessionStart'));
   assert.ok(installedSkill.includes('Stop'));
   assert.ok(installedSkill.includes('name: babysit'));

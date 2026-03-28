@@ -62,7 +62,6 @@ const PLUGIN_BUNDLE_ENTRIES = [
   'hooks.json',
   'skills',
   'README.md',
-  'SKILL.md',
   'babysitter.lock.json',
 ];
 
