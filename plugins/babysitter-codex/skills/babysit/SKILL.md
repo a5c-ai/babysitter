@@ -26,6 +26,13 @@ This package supports only the hooks model for the Codex plugin path. Do not
 introduce an app-server loop, an external orchestrator, or fake plugin-manifest
 machinery for the Codex integration.
 
+Native Windows caveat: Codex does not execute hooks on Windows yet. When the
+current Codex session is running on native Windows, do not yield the turn and
+wait for the `Stop` hook. Keep driving the Babysitter loop in the current turn
+until the run completes or you hit a real user breakpoint that requires chat
+input. Only rely on the `SessionStart`/`Stop` hook handoff on platforms where
+Codex hook execution is actually available.
+
 ## Choosing a Mode
 
 Use this skill whenever it is invoked directly, and whenever one of the
@@ -92,7 +99,9 @@ The Babysitter workflow has 8 steps:
 5. **Perform effects** - execute the requested tasks through skills, agents, or
    shell work
 6. **Post results** - commit results back through `task:post`
-7. **Stop and yield** - the Codex stop hook decides whether to continue
+7. **Stop and yield** - on platforms with working Codex hooks, the Codex stop
+   hook decides whether to continue; on native Windows, stay in-turn and
+   continue the loop yourself instead of waiting for a hook that will not run
 8. **Completion proof** - finish only when the emitted proof is returned
 
 ### 1. Create or find the process for the run
@@ -229,6 +238,11 @@ In normal Codex usage, `run:create` must bind the session into the active
 workspace `.a5c`, not the global `~/.a5c`, so the Stop hook can find the same
 session state file in later turns.
 
+On native Windows, still bind the session honestly with `run:create`, but do
+not assume that later turns will be resumed by Codex hooks. After `run:create`
+you must keep executing the orchestration loop yourself in the current turn
+until completion or a real user-facing breakpoint.
+
 For resuming existing runs in a manual recovery flow:
 
 ```bash
@@ -306,6 +320,12 @@ After `run:create` or any posted effect result, end the current assistant turn
 and yield back to the Codex hook loop. Do not run multiple `run:iterate` steps
 in the same turn.
 
+Native Windows exception: because Codex does not execute hooks on Windows yet,
+do not end the turn and wait for the hook loop there. Continue with the next
+`run:iterate`, inspect tasks, perform effects, and post results in the same
+turn until the run completes or you need explicit user input for a breakpoint.
+Do not tell the user you are waiting for the stop hook on Windows.
+
 ### 8. Completion proof
 
 When `run:iterate` or `run:status` returns `completionProof`, return that exact
@@ -328,6 +348,10 @@ Both levels must provide:
 2. `UserPromptSubmit` performs prompt-time transformations when needed
 3. `Stop` decides whether the run is complete or Codex should receive the next
    Babysitter iteration context
+
+On native Windows, treat these hook registrations as installation/configuration
+state only. Codex currently does not execute them there, so the skill must keep
+the orchestration loop moving in-turn instead of waiting for hook callbacks.
 
 ## Task Kinds
 
@@ -370,6 +394,8 @@ in:
 - do not fabricate a session id
 - use `notify` only for telemetry or monitoring, never as the orchestration
   control loop
+- on native Windows, never claim that you are yielding to or waiting for the
+  Codex stop hook; continue the Babysitter loop in the current turn instead
 
 ## Critical Rules
 
