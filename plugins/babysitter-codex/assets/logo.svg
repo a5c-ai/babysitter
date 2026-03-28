@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 80" role="img" aria-label="Babysitter logo">
+  <rect x="0" y="8" width="64" height="64" rx="14" fill="#0F766E"/>
+  <path d="M16 26h32v28H16z" fill="#ECFEFF"/>
+  <circle cx="24" cy="40" r="3" fill="#0F766E"/>
+  <circle cx="32" cy="40" r="3" fill="#0F766E"/>
+  <circle cx="40" cy="40" r="3" fill="#0F766E"/>
+  <text x="80" y="50" font-family="Arial, sans-serif" font-size="34" fill="#0F766E">Babysitter</text>
+</svg>

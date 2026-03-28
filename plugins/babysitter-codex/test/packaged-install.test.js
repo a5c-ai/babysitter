@@ -114,6 +114,8 @@ try {
   const installedPluginRoot = path.join(homePluginsRoot, 'babysitter-codex');
   [
     '.codex-plugin',
+    '.app.json',
+    'assets',
     'hooks',
     'hooks.json',
     'skills',
@@ -129,6 +131,9 @@ try {
   assert.ok(fs.existsSync(path.join(codexHome, 'hooks', 'babysitter-stop-hook.sh')), 'global install should install global hook scripts');
   assert.ok(!fs.existsSync(path.join(codexHome, 'prompts', 'call.md')), 'global install should not restore deprecated prompt aliases');
   assert.ok(fs.existsSync(path.join(installedPluginRoot, '.codex-plugin', 'plugin.json')), 'installed plugin should carry a plugin manifest');
+  assert.ok(fs.existsSync(path.join(installedPluginRoot, '.app.json')), 'installed plugin should carry app manifest');
+  assert.ok(fs.existsSync(path.join(installedPluginRoot, 'assets', 'icon.svg')), 'installed plugin should carry composer icon asset');
+  assert.ok(fs.existsSync(path.join(installedPluginRoot, 'assets', 'logo.svg')), 'installed plugin should carry logo asset');
   assert.ok(fs.existsSync(path.join(installedPluginRoot, 'hooks', 'babysitter-stop-hook.sh')), 'installed plugin should carry hook scripts');
   assert.ok(fs.existsSync(path.join(installedPluginRoot, 'skills', 'babysit', 'SKILL.md')), 'installed plugin should carry the core skill');
   assert.ok(!fs.existsSync(path.join(installedPluginRoot, 'bin')), 'installed plugin should not ship installer binaries');

@@ -19,6 +19,7 @@
   ],
   "skills": "./skills/",
   "hooks": "./hooks.json",
+  "apps": "./.app.json",
   "interface": {
     "displayName": "Babysitter",
     "shortDescription": "Run Babysitter orchestration flows from Codex",
@@ -39,6 +40,8 @@
       "Resume the latest Babysitter run in this workspace"
     ],
     "brandColor": "#0F766E",
+    "composerIcon": "./assets/icon.svg",
+    "logo": "./assets/logo.svg",
     "screenshots": []
   }
 }

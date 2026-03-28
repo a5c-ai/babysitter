@@ -58,6 +58,8 @@ const DEFAULT_MARKETPLACE = {
 };
 const PLUGIN_BUNDLE_ENTRIES = [
   '.codex-plugin',
+  '.app.json',
+  'assets',
   'hooks',
   'hooks.json',
   'skills',
