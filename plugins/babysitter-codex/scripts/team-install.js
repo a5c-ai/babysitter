@@ -7,6 +7,23 @@ const path = require('path');
 const { spawnSync } = require('child_process');
 
 const SKILL_NAME = 'babysit';
+const MODE_SKILL_NAMES = [
+  'assimilate',
+  'call',
+  'doctor',
+  'forever',
+  'help',
+  'issue',
+  'model',
+  'observe',
+  'plan',
+  'project-install',
+  'resume',
+  'retrospect',
+  'team-install',
+  'user-install',
+  'yolo',
+];
 const DEFAULT_PROCESS_LIBRARY_REPO = 'https://github.com/a5c-ai/babysitter.git';
 const DEFAULT_PROCESS_LIBRARY_SUBPATH = 'library';
 const DEFAULT_PROCESS_LIBRARY_REFERENCE_SUBPATH = 'library/reference';
@@ -16,12 +33,20 @@ const WORKSPACE_SKILL_ENTRIES = [
   { source: 'babysitter.lock.json', target: 'babysitter.lock.json' },
 ];
 
-function listPromptEntries(packageRoot) {
-  const promptsDir = path.join(packageRoot, 'prompts');
+function listModeSkillEntries(packageRoot) {
+  const skillsDir = path.join(packageRoot, '.codex', 'skills');
   return fs
-    .readdirSync(promptsDir)
-    .filter((name) => name.endsWith('.md') && name !== 'README.md')
-    .sort();
+    .readdirSync(skillsDir, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory() && entry.name !== SKILL_NAME)
+    .sort((a, b) => a.name.localeCompare(b.name))
+    .map((entry) => {
+      const skillName = entry.name;
+      const skillFile = path.join(skillsDir, skillName, 'SKILL.md');
+      if (!fs.existsSync(skillFile)) {
+        throw new Error(`missing mode skill template: ${skillFile}`);
+      }
+      return skillName;
+    });
 }
 
 function readJson(filePath) {
@@ -113,19 +138,21 @@ function copyRecursive(src, dest) {
 }
 
 function installWorkspaceSkill(packageRoot, workspaceRoot, dryRun) {
+  const workspaceSkillsRoot = path.join(workspaceRoot, '.codex', 'skills');
   const workspaceSkillRoot = path.join(workspaceRoot, '.codex', 'skills', SKILL_NAME);
   const workspaceHookScriptsRoot = path.join(workspaceRoot, '.codex', 'hooks');
-  const workspacePromptsRoot = path.join(workspaceRoot, '.codex', 'prompts');
+  const modeSkillNames = listModeSkillEntries(packageRoot);
 
   if (dryRun) {
     return {
+      workspaceSkillsRoot,
       workspaceSkillRoot,
       workspaceHookScriptsRoot,
-      workspacePromptsRoot,
     };
   }
 
   fs.rmSync(workspaceSkillRoot, { recursive: true, force: true });
+  fs.mkdirSync(workspaceSkillsRoot, { recursive: true });
   fs.mkdirSync(workspaceSkillRoot, { recursive: true });
 
   for (const entry of WORKSPACE_SKILL_ENTRIES) {
@@ -138,18 +165,17 @@ function installWorkspaceSkill(packageRoot, workspaceRoot, dryRun) {
   fs.mkdirSync(workspaceHookScriptsRoot, { recursive: true });
   copyRecursive(path.join(packageRoot, '.codex', 'hooks'), workspaceHookScriptsRoot);
 
-  fs.mkdirSync(workspacePromptsRoot, { recursive: true });
-  for (const promptName of listPromptEntries(packageRoot)) {
+  for (const skillName of modeSkillNames) {
     copyRecursive(
-      path.join(packageRoot, 'prompts', promptName),
-      path.join(workspacePromptsRoot, promptName),
+      path.join(packageRoot, '.codex', 'skills', skillName),
+      path.join(workspaceSkillsRoot, skillName),
     );
   }
 
   return {
+    workspaceSkillsRoot,
     workspaceSkillRoot,
     workspaceHookScriptsRoot,
-    workspacePromptsRoot,
   };
 }
 
@@ -289,6 +315,25 @@ function resolveProcessLibrarySpec() {
   };
 }
 
+function removeLegacyWorkspacePrompts(workspaceRoot) {
+  const promptsRoot = path.join(workspaceRoot, '.codex', 'prompts');
+  for (const promptFile of MODE_SKILL_NAMES.map((name) => `${name}.md`).concat('babysit.md')) {
+    const promptPath = path.join(promptsRoot, promptFile);
+    if (fs.existsSync(promptPath)) {
+      fs.rmSync(promptPath, { force: true });
+    }
+  }
+  if (fs.existsSync(promptsRoot)) {
+    try {
+      if (fs.readdirSync(promptsRoot).length === 0) {
+        fs.rmSync(promptsRoot, { recursive: true, force: true });
+      }
+    } catch {
+      // Best effort cleanup only.
+    }
+  }
+}
+
 function ensureActiveProcessLibrary(packageRoot, dryRun) {
   const spec = resolveProcessLibrarySpec();
   const activeArgs = ['process-library:active', '--state-dir', spec.stateDir, '--json'];
@@ -363,7 +408,7 @@ function main() {
   const lock = readJson(lockPath);
   const workspaceHooksConfigPath = path.join(workspaceRoot, '.codex', 'hooks.json');
   const workspaceConfigPath = path.join(workspaceRoot, '.codex', 'config.toml');
-  const { workspaceSkillRoot, workspaceHookScriptsRoot, workspacePromptsRoot } = installWorkspaceSkill(packageRoot, workspaceRoot, args.dryRun);
+  const { workspaceSkillsRoot, workspaceSkillRoot, workspaceHookScriptsRoot } = installWorkspaceSkill(packageRoot, workspaceRoot, args.dryRun);
   const processLibrary = ensureActiveProcessLibrary(packageRoot, args.dryRun);
   const installInfo = {
     installedAt: new Date().toISOString(),
@@ -372,8 +417,8 @@ function main() {
     lockVersion: lock.version,
     packageRoot,
     workspaceRoot,
+    workspaceSkillsRoot,
     workspaceSkillRoot,
-    workspacePromptsRoot,
     workspaceConfigPath,
     workspaceHooksConfigPath,
     hookScriptsRoot: workspaceHookScriptsRoot,
@@ -405,6 +450,7 @@ function main() {
 
   const outDir = path.join(workspaceRoot, '.a5c', 'team');
   fs.mkdirSync(outDir, { recursive: true });
+  removeLegacyWorkspacePrompts(workspaceRoot);
   fs.mkdirSync(path.dirname(workspaceHooksConfigPath), { recursive: true });
   writeFileIfChanged(workspaceHooksConfigPath, `${JSON.stringify(buildHooksConfig(), null, 2)}\n`);
   const existingWorkspaceConfig = fs.existsSync(workspaceConfigPath)
@@ -417,8 +463,8 @@ function main() {
   if (!fs.existsSync(profilePath)) {
     fs.writeFileSync(profilePath, JSON.stringify({
       teamName: 'default',
+      workspaceSkillsRoot,
       installedSkillRoot: workspaceSkillRoot,
-      workspacePromptsRoot,
       workspaceConfigPath,
       workspaceHooksConfigPath,
       hookScriptsRoot: workspaceHookScriptsRoot,

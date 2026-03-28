@@ -5,7 +5,7 @@
  * install.js
  *
  * Installs the Codex-facing Babysitter skill bundle globally under CODEX_HOME,
- * installs optional mode prompt aliases such as `/call` and `/plan`,
+ * installs Codex mode-wrapper skills such as `$call` and `$plan`,
  * clones/updates the process library into ~/.a5c via the SDK CLI.
  */
 
@@ -16,6 +16,23 @@ const { spawnSync } = require('child_process');
 
 const SKILL_NAME = 'babysit';
 const LEGACY_SKILL_NAME = 'babysitter-codex';
+const MODE_SKILL_NAMES = [
+  'assimilate',
+  'call',
+  'doctor',
+  'forever',
+  'help',
+  'issue',
+  'model',
+  'observe',
+  'plan',
+  'project-install',
+  'resume',
+  'retrospect',
+  'team-install',
+  'user-install',
+  'yolo',
+];
 const PACKAGE_ROOT = path.resolve(__dirname, '..');
 const IS_WIN = process.platform === 'win32';
 const GLOBAL_HOOK_SPECS = [
@@ -25,12 +42,11 @@ const GLOBAL_HOOK_SPECS = [
 ];
 const INSTALL_ENTRIES = [
   { source: 'SKILL.md', required: true },
-  { source: 'prompts', required: true },
   { source: '.codex', required: true },
   { source: 'scripts', required: true },
   { source: 'babysitter.lock.json', required: true },
 ];
-const LEGACY_PROMPT_NAMES = ['babysit.md'];
+const LEGACY_PROMPT_NAMES = ['babysit.md', ...MODE_SKILL_NAMES.map((name) => `${name}.md`)];
 
 function getCodexHome() {
   if (process.env.CODEX_HOME) return process.env.CODEX_HOME;
@@ -79,19 +95,26 @@ function copyRecursive(src, dest) {
   fs.copyFileSync(src, dest);
 }
 
-function listPromptEntries() {
-  const promptsDir = path.join(PACKAGE_ROOT, 'prompts');
-  if (!fs.existsSync(promptsDir)) {
-    throw new Error(`required prompt alias directory is missing: ${promptsDir}`);
+function listModeSkillEntries() {
+  const skillsDir = path.join(PACKAGE_ROOT, '.codex', 'skills');
+  if (!fs.existsSync(skillsDir)) {
+    throw new Error(`required Codex skills directory is missing: ${skillsDir}`);
   }
   return fs
-    .readdirSync(promptsDir)
-    .filter((name) => name.endsWith('.md') && name.toLowerCase() !== 'readme.md')
-    .sort()
-    .map((name) => ({
-      source: path.join('prompts', name),
-      targetName: name,
-    }));
+    .readdirSync(skillsDir, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory() && entry.name !== SKILL_NAME)
+    .sort((a, b) => a.name.localeCompare(b.name))
+    .map((entry) => {
+      const skillName = entry.name;
+      const skillFile = path.join(skillsDir, skillName, 'SKILL.md');
+      if (!fs.existsSync(skillFile)) {
+        throw new Error(`required mode skill payload is missing: ${skillFile}`);
+      }
+      return {
+        skillName,
+        sourceDir: path.join('.codex', 'skills', skillName),
+      };
+    });
 }
 
 function renderCodexConfigToml() {
@@ -334,6 +357,15 @@ function removeLegacySkillDir(codexHome) {
   console.log(`[babysitter-codex]   removed legacy skill ${legacyDir}`);
 }
 
+function removeEmbeddedPromptSource(skillDir) {
+  const embeddedPromptsDir = path.join(skillDir, 'prompts');
+  if (!fs.existsSync(embeddedPromptsDir)) {
+    return;
+  }
+  fs.rmSync(embeddedPromptsDir, { recursive: true, force: true });
+  console.log(`[babysitter-codex]   removed embedded prompt source ${embeddedPromptsDir}`);
+}
+
 function removeLegacyPrompts(codexHome) {
   for (const promptName of LEGACY_PROMPT_NAMES) {
     const promptPath = path.join(codexHome, 'prompts', promptName);
@@ -359,27 +391,24 @@ function installEntry(skillDir, entry) {
   return true;
 }
 
-function installPromptEntry(codexHome, entry) {
-  const src = path.join(PACKAGE_ROOT, entry.source);
-  if (!fs.existsSync(src)) {
-    throw new Error(`required prompt payload is missing: ${src}`);
-  }
-  const dest = path.join(codexHome, 'prompts', entry.targetName);
+function installModeSkillEntry(codexHome, entry) {
+  const src = path.join(PACKAGE_ROOT, entry.sourceDir);
+  const dest = path.join(codexHome, 'skills', entry.skillName);
   copyRecursive(src, dest);
-  console.log(`[babysitter-codex]   prompts/${entry.targetName}`);
+  console.log(`[babysitter-codex]   skills/${entry.skillName}/`);
 }
 
 function verifyInstalledPayload(skillDir, codexHome) {
-  const promptEntries = listPromptEntries();
+  const modeSkillEntries = listModeSkillEntries();
   const missing = INSTALL_ENTRIES
     .map((entry) => entry.source)
     .filter((source) => !fs.existsSync(path.join(skillDir, source)));
   if (missing.length > 0) {
     throw new Error(`installed skill is incomplete; missing: ${missing.join(', ')}`);
   }
-  for (const entry of promptEntries) {
-    if (!fs.existsSync(path.join(codexHome, 'prompts', entry.targetName))) {
-      throw new Error(`installed prompt is missing: ${entry.targetName}`);
+  for (const entry of modeSkillEntries) {
+    if (!fs.existsSync(path.join(codexHome, 'skills', entry.skillName, 'SKILL.md'))) {
+      throw new Error(`installed mode skill is missing: ${entry.skillName}`);
     }
   }
 }
@@ -387,7 +416,7 @@ function verifyInstalledPayload(skillDir, codexHome) {
 function main() {
   const codexHome = getCodexHome();
   const skillDir = path.join(codexHome, 'skills', SKILL_NAME);
-  const promptEntries = listPromptEntries();
+  const modeSkillEntries = listModeSkillEntries();
 
   console.log(`[babysitter-codex] Installing skill to ${skillDir}`);
 
@@ -397,11 +426,12 @@ function main() {
     for (const entry of INSTALL_ENTRIES) {
       installEntry(skillDir, entry);
     }
-    for (const entry of promptEntries) {
-      installPromptEntry(codexHome, entry);
+    for (const entry of modeSkillEntries) {
+      installModeSkillEntry(codexHome, entry);
     }
 
     verifyInstalledPayload(skillDir, codexHome);
+    removeEmbeddedPromptSource(skillDir);
     removeLegacySkillDir(codexHome);
     removeLegacyPrompts(codexHome);
     mergeCodexHomeConfig(codexHome);
@@ -412,7 +442,7 @@ function main() {
     ensureGlobalProcessLibrary(PACKAGE_ROOT);
 
     console.log('[babysitter-codex] Installation complete!');
-    console.log('[babysitter-codex] Restart Codex to pick up the updated global skill and prompt config.');
+    console.log('[babysitter-codex] Restart Codex to pick up the updated global skill and mode-skill config.');
   } catch (err) {
     console.error(`[babysitter-codex] Failed to install skill files: ${err.message}`);
     process.exitCode = 1;

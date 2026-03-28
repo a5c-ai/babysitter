@@ -29,10 +29,11 @@ function readJson(filePath) {
   return JSON.parse(fs.readFileSync(filePath, 'utf8'));
 }
 
-function listPromptAliasFiles(root) {
+function listModeSkillNames(root) {
   return fs
-    .readdirSync(path.join(root, 'prompts'))
-    .filter((name) => name.endsWith('.md') && name !== 'README.md')
+    .readdirSync(path.join(root, '.codex', 'skills'), { withFileTypes: true })
+    .filter((entry) => entry.isDirectory() && entry.name !== 'babysit')
+    .map((entry) => entry.name)
     .sort();
 }
 
@@ -118,15 +119,16 @@ try {
     'scripts',
     'babysitter.lock.json',
   ].forEach((relativePath) => assertExists(installedSkillRoot, relativePath));
-  for (const promptName of listPromptAliasFiles(PROJECT_ROOT)) {
-    assertExists(codexHome, path.join('prompts', promptName));
+  for (const skillName of listModeSkillNames(PROJECT_ROOT)) {
+    assertExists(codexHome, path.join('skills', skillName, 'SKILL.md'));
+    assertExists(installedSkillRoot, path.join('.codex', 'skills', skillName, 'SKILL.md'));
   }
-  assert.ok(!fs.existsSync(path.join(codexHome, 'prompts', 'babysit.md')), 'legacy /babysit alias should not be installed');
+  assert.ok(!fs.existsSync(path.join(codexHome, 'prompts', 'babysit.md')), 'legacy prompt aliases should not survive install');
   assert.ok(!fs.existsSync(path.join(installedSkillRoot, 'README.md')), 'installed skill should not ship package README content');
   assert.ok(!fs.existsSync(path.join(installedSkillRoot, 'upstream')), 'installed package should not bundle upstream content');
   assert.ok(!fs.existsSync(path.join(installedSkillRoot, 'config')), 'installed package should not ship redundant config payload');
   assert.ok(!fs.existsSync(path.join(installedSkillRoot, 'docs')), 'installed package should not ship redundant docs payload');
-  assert.ok(fs.existsSync(path.join(installedSkillRoot, 'prompts', 'call.md')), 'installed package should ship prompt alias source files');
+  assert.ok(!fs.existsSync(path.join(installedSkillRoot, 'prompts')), 'installed skill should not embed Codex custom prompts');
   assert.ok(!fs.existsSync(path.join(installedSkillRoot, 'bin')), 'installed skill should not ship installer binaries');
   assert.ok(fs.existsSync(path.join(installedSkillRoot, '.codex', 'skills', 'babysit', 'SKILL.md')), 'installed skill should carry the repo-local skill template');
   assert.ok(!fs.existsSync(path.join(installedSkillRoot, '.codex', 'skills', 'babysit', 'call')), 'installed skill should not embed nested mode directories');
@@ -140,8 +142,8 @@ try {
   assert.ok(installedSkill.includes('SessionStart'));
   assert.ok(installedSkill.includes('Stop'));
   assert.ok(installedSkill.includes('name: babysit'));
-  const installedCallPrompt = fs.readFileSync(path.join(codexHome, 'prompts', 'call.md'), 'utf8');
-  assert.ok(installedCallPrompt.includes('Use the installed `babysit` skill in `call` mode.'));
+  const installedCallSkill = fs.readFileSync(path.join(codexHome, 'skills', 'call', 'SKILL.md'), 'utf8');
+  assert.ok(installedCallSkill.includes('Load and use the installed `babysit` skill.'));
   const homeConfig = fs.readFileSync(path.join(codexHome, 'config.toml'), 'utf8');
   assert.ok(homeConfig.includes('project_doc_max_bytes = 65536'));
   assert.ok(homeConfig.includes('writable_roots = [".a5c", ".codex"]'));
@@ -171,7 +173,7 @@ try {
   assert.ok(!fs.existsSync(path.join(workspaceRoot, '.codex', 'hooks.json')), 'global install should not write workspace hooks');
   assert.ok(!fs.existsSync(path.join(workspaceRoot, '.codex', 'config.toml')), 'global install should not write workspace config');
   assert.ok(!fs.existsSync(path.join(workspaceRoot, '.codex', 'skills', 'babysit', 'SKILL.md')), 'global install should not install workspace skills');
-  assert.ok(!fs.existsSync(path.join(workspaceRoot, '.codex', 'prompts', 'call.md')), 'global install should not install workspace prompts');
+  assert.ok(!fs.existsSync(path.join(workspaceRoot, '.codex', 'skills', 'call', 'SKILL.md')), 'global install should not install workspace mode skills');
 
   const teamInstallOutput = run(process.execPath, ['bin/cli.js', 'install', '--workspace', workspaceRoot], {
     cwd: packagedRoot,
@@ -187,9 +189,9 @@ try {
   assert.ok(fs.existsSync(path.join(workspaceRoot, '.codex', 'hooks.json')));
   assert.ok(fs.existsSync(path.join(workspaceRoot, '.codex', 'config.toml')));
   assert.ok(fs.existsSync(path.join(workspaceRoot, '.codex', 'skills', 'babysit', 'SKILL.md')));
-  assert.ok(fs.existsSync(path.join(workspaceRoot, '.codex', 'prompts', 'call.md')));
-  assert.ok(fs.existsSync(path.join(workspaceRoot, '.codex', 'prompts', 'plan.md')));
-  assert.ok(fs.existsSync(path.join(workspaceRoot, '.codex', 'prompts', 'resume.md')));
+  assert.ok(fs.existsSync(path.join(workspaceRoot, '.codex', 'skills', 'call', 'SKILL.md')));
+  assert.ok(fs.existsSync(path.join(workspaceRoot, '.codex', 'skills', 'plan', 'SKILL.md')));
+  assert.ok(fs.existsSync(path.join(workspaceRoot, '.codex', 'skills', 'resume', 'SKILL.md')));
   assert.ok(!fs.existsSync(path.join(workspaceRoot, '.codex', 'skills', 'babysit', 'README.md')), 'workspace skill install should not copy package README content');
   assert.ok(!fs.existsSync(path.join(workspaceRoot, '.codex', 'skills', 'babysit', '.codex', 'skills')), 'workspace skill install should not contain nested alias/skill trees');
   assert.ok(fs.existsSync(path.join(workspaceRoot, '.codex', 'hooks', 'babysitter-stop-hook.sh')));
@@ -206,10 +208,6 @@ try {
   assert.strictEqual(
     path.resolve(installJson.workspaceSkillRoot),
     path.resolve(path.join(workspaceRoot, '.codex', 'skills', 'babysit')),
-  );
-  assert.strictEqual(
-    path.resolve(installJson.workspacePromptsRoot),
-    path.resolve(path.join(workspaceRoot, '.codex', 'prompts')),
   );
   assert.strictEqual(
     path.resolve(installJson.workspaceHooksConfigPath),
@@ -231,7 +229,6 @@ try {
     path.resolve(path.join(userHome, '.a5c', 'active', 'process-library.json')),
   );
   assert.strictEqual(path.resolve(profileJson.installedSkillRoot), path.resolve(path.join(workspaceRoot, '.codex', 'skills', 'babysit')));
-  assert.strictEqual(path.resolve(profileJson.workspacePromptsRoot), path.resolve(path.join(workspaceRoot, '.codex', 'prompts')));
   assert.ok(!('processLibraryRoot' in profileJson), 'team profile should not pin an active process-library root');
   assert.ok(!('rulesLayer' in profileJson), 'team profile should not emit a missing rules layer path');
   assert.strictEqual(String(profileJson.processLibraryLookupCommand || ''), 'babysitter process-library:active --json');
@@ -248,7 +245,7 @@ try {
     path.resolve(path.join(workspaceRoot, '.codex', 'hooks')),
   );
 
-  console.log('  ok packed install uses the explicit CLI, omits README baggage, installs global hooks/config, and supports explicit workspace onboarding');
+  console.log('  ok packed install uses the explicit CLI, omits README baggage, installs global hooks/config, and installs mode-wrapper skills through explicit workspace onboarding');
   console.log('\nPackaged install tests passed!');
 } catch (err) {
   console.error('\nTest failed:', err.message);

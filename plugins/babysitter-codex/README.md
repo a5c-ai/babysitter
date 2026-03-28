@@ -6,12 +6,11 @@ This package is a Codex skill bundle plus installer assets. It is not a native
 Codex plugin manifest and it does not run an external orchestrator. The Codex
 plugin path is:
 
-- installed skill bundle under `~/.codex/skills/babysit`
+- installed core skill under `~/.codex/skills/babysit`
+- installed mode-wrapper skills under `~/.codex/skills/<mode>`
 - global `~/.codex/hooks.json`
 - global `~/.codex/hooks/`
 - global `~/.codex/config.toml`
-- optional user-local prompt aliases under `~/.codex/prompts/call.md`,
-  `plan.md`, `resume.md`, `yolo.md`, and the rest of the Babysitter modes
 - optional workspace `.codex/hooks.json`
 - optional workspace `.codex/hooks/`
 - optional workspace `.codex/config.toml`
@@ -26,7 +25,6 @@ Global install copies the Codex-facing runtime bundle into `CODEX_HOME`:
 
 - `SKILL.md`
 - `.codex/`
-- `prompts/` as the source for user-local prompt aliases
 - `scripts/`
 - `babysitter.lock.json`
 - `hooks/`
@@ -86,7 +84,7 @@ It:
 1. Resolves the installed package root.
 2. Reads `babysitter.lock.json`.
 3. Installs the workspace-local Codex skill into `.codex/skills/babysit`.
-4. Installs the prompt aliases into `.codex/prompts`.
+4. Installs the workspace-local mode-wrapper skills into `.codex/skills/<mode>`.
 5. Copies hook scripts into `.codex/hooks`.
 6. Resolves the active shared process library with
    `babysitter process-library:active --json`.
@@ -104,9 +102,9 @@ turn the workspace into a fake Codex plugin manifest.
 After a successful workspace install, the important files are:
 
 - `.codex/skills/babysit/SKILL.md`
-- `.codex/prompts/call.md`
-- `.codex/prompts/plan.md`
-- `.codex/prompts/resume.md`
+- `.codex/skills/call/SKILL.md`
+- `.codex/skills/plan/SKILL.md`
+- `.codex/skills/resume/SKILL.md`
 - `.codex/hooks/`
 - `.codex/hooks.json`
 - `.codex/config.toml`
@@ -121,15 +119,16 @@ Use the skill directly:
 $babysit implement authentication with tests
 ```
 
-The optional prompt aliases are the mode shortcuts:
+The mode-wrapper skills are thin entrypoints that only load `babysit` in the
+matching mode:
 
 ```text
-/call implement authentication with tests
-/plan migration from monolith to services
-/resume latest
+$call implement authentication with tests
+$plan migration from monolith to services
+$resume latest
 ```
 
-Each prompt alias should only forward into the `babysit` skill for the
+Each mode-wrapper skill should only forward into the `babysit` skill for the
 matching mode. Low-level SDK commands remain runtime mechanics, not the
 user-facing interface.
 
@@ -144,9 +143,9 @@ test -f ~/.codex/hooks.json
 test -f ~/.codex/hooks/babysitter-stop-hook.sh
 test -f ~/.codex/skills/babysit/scripts/team-install.js
 test -f ~/.codex/skills/babysit/.codex/hooks/babysitter-stop-hook.sh
-test -f ~/.codex/prompts/call.md
-test -f ~/.codex/prompts/plan.md
-test -f ~/.codex/prompts/resume.md
+test -f ~/.codex/skills/call/SKILL.md
+test -f ~/.codex/skills/plan/SKILL.md
+test -f ~/.codex/skills/resume/SKILL.md
 ```
 
 Verify the active shared process-library binding:

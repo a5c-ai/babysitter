@@ -4,15 +4,34 @@
 /**
  * uninstall.js
  *
- * Removes the globally installed Codex Babysitter skill and its optional
- * prompt alias. The globally cloned process library is intentionally kept.
+ * Removes the globally installed Codex Babysitter skill, its mode-wrapper
+ * skills, and any legacy prompt aliases left from older installs. The globally
+ * cloned process library is intentionally kept.
  */
 
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
 
-const SKILL_NAMES = ['babysit', 'babysitter-codex'];
+const SKILL_NAMES = [
+  'babysit',
+  'babysitter-codex',
+  'assimilate',
+  'call',
+  'doctor',
+  'forever',
+  'help',
+  'issue',
+  'model',
+  'observe',
+  'plan',
+  'project-install',
+  'resume',
+  'retrospect',
+  'team-install',
+  'user-install',
+  'yolo',
+];
 const PROMPT_NAMES = [
   'assimilate.md',
   'call.md',
