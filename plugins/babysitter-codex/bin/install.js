@@ -9,8 +9,8 @@ const {
   getCodexHome,
   getHomeMarketplacePath,
   getHomePluginRoot,
+  installCodexSurface,
   mergeCodexConfigFile,
-  removeLegacyCodexSurface,
   warnWindowsHooks,
 } = require('./install-shared');
 
@@ -27,7 +27,7 @@ function main() {
     copyPluginBundle(PACKAGE_ROOT, pluginRoot);
     ensureMarketplaceEntry(marketplacePath, './plugins/babysitter-codex');
     mergeCodexConfigFile(path.join(codexHome, 'config.toml'));
-    removeLegacyCodexSurface(codexHome);
+    installCodexSurface(PACKAGE_ROOT, codexHome);
 
     const active = ensureGlobalProcessLibrary(PACKAGE_ROOT);
     console.log(`[babysitter-codex]   marketplace: ${marketplacePath}`);

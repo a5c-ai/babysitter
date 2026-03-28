@@ -7,6 +7,7 @@ const {
   copyPluginBundle,
   ensureGlobalProcessLibrary,
   ensureMarketplaceEntry,
+  installCodexSurface,
   mergeCodexConfigFile,
   warnWindowsHooks,
   writeJson,
@@ -56,6 +57,7 @@ function main() {
   copyPluginBundle(packageRoot, workspacePluginRoot);
   ensureMarketplaceEntry(workspaceMarketplacePath, './plugins/babysitter-codex');
   mergeCodexConfigFile(workspaceConfigPath);
+  installCodexSurface(packageRoot, path.join(workspaceRoot, '.codex'));
 
   const active = ensureGlobalProcessLibrary(packageRoot);
   installInfo.processLibraryStateFile = active.stateFile;

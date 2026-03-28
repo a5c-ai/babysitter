@@ -61,7 +61,6 @@ const PLUGIN_BUNDLE_ENTRIES = [
   'hooks',
   'hooks.json',
   'skills',
-  'README.md',
   'babysitter.lock.json',
 ];
 
@@ -306,6 +305,14 @@ function writeJson(filePath, value) {
   writeFileIfChanged(filePath, `${JSON.stringify(value, null, 2)}\n`);
 }
 
+function ensureExecutable(filePath) {
+  try {
+    fs.chmodSync(filePath, 0o755);
+  } catch {
+    // Best-effort only. Windows and some filesystems may ignore mode changes.
+  }
+}
+
 function ensureMarketplaceEntry(marketplacePath, pluginSourcePath) {
   const marketplace = fs.existsSync(marketplacePath)
     ? readJson(marketplacePath)
@@ -401,6 +408,69 @@ function removeLegacyCodexSurface(codexHome) {
   }
 }
 
+function installManagedSkills(packageRoot, codexHome) {
+  const sourceRoot = path.join(packageRoot, 'skills');
+  const targetRoot = path.join(codexHome, 'skills');
+  fs.mkdirSync(targetRoot, { recursive: true });
+
+  for (const entry of fs.readdirSync(sourceRoot, { withFileTypes: true })) {
+    if (!entry.isDirectory()) continue;
+    copyRecursive(
+      path.join(sourceRoot, entry.name),
+      path.join(targetRoot, entry.name),
+    );
+  }
+}
+
+function mergeManagedHooksConfig(packageRoot, codexHome) {
+  const managedHooks = readJson(path.join(packageRoot, 'hooks.json')).hooks || {};
+  const hooksConfigPath = path.join(codexHome, 'hooks.json');
+  const existing = fs.existsSync(hooksConfigPath)
+    ? readJson(hooksConfigPath)
+    : { hooks: {} };
+  if (!existing.hooks || typeof existing.hooks !== 'object') {
+    existing.hooks = {};
+  }
+
+  for (const [eventName, matchers] of Object.entries(managedHooks)) {
+    const existingMatchers = Array.isArray(existing.hooks[eventName]) ? existing.hooks[eventName] : [];
+    const filteredMatchers = existingMatchers
+      .map((matcher) => {
+        const hooks = Array.isArray(matcher.hooks) ? matcher.hooks : [];
+        const keptHooks = hooks.filter((hook) => {
+          const command = String(hook.command || '');
+          return !LEGACY_HOOK_SCRIPT_NAMES.some((name) => command.includes(name));
+        });
+        return keptHooks.length > 0 ? { ...matcher, hooks: keptHooks } : null;
+      })
+      .filter(Boolean);
+    existing.hooks[eventName] = [...filteredMatchers, ...matchers];
+  }
+
+  writeJson(hooksConfigPath, existing);
+}
+
+function installManagedHooks(packageRoot, codexHome) {
+  const sourceRoot = path.join(packageRoot, 'hooks');
+  const targetRoot = path.join(codexHome, 'hooks');
+  fs.mkdirSync(targetRoot, { recursive: true });
+
+  for (const scriptName of LEGACY_HOOK_SCRIPT_NAMES) {
+    const sourcePath = path.join(sourceRoot, scriptName);
+    const targetPath = path.join(targetRoot, scriptName);
+    copyRecursive(sourcePath, targetPath);
+    ensureExecutable(targetPath);
+  }
+
+  mergeManagedHooksConfig(packageRoot, codexHome);
+}
+
+function installCodexSurface(packageRoot, codexHome) {
+  removeLegacyCodexSurface(codexHome);
+  installManagedSkills(packageRoot, codexHome);
+  installManagedHooks(packageRoot, codexHome);
+}
+
 function warnWindowsHooks() {
   if (process.platform !== 'win32') {
     return;
@@ -416,6 +486,7 @@ module.exports = {
   getCodexHome,
   getHomeMarketplacePath,
   getHomePluginRoot,
+  installCodexSurface,
   mergeCodexConfigFile,
   removeLegacyCodexSurface,
   removeMarketplaceEntry,

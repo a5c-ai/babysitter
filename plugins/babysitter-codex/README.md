@@ -2,7 +2,7 @@
 
 Babysitter integration package for OpenAI Codex CLI.
 
-This package now ships as a real Codex plugin bundle:
+This package ships a real Codex plugin bundle:
 
 - `.codex-plugin/plugin.json`
 - `skills/`
@@ -10,8 +10,9 @@ This package now ships as a real Codex plugin bundle:
 - `hooks/`
 
 It still uses the Babysitter SDK CLI and the shared `~/.a5c` process-library
-state, but it no longer installs itself by copying fake skill and hook payloads
-into `~/.codex/skills` and `~/.codex/hooks.json`.
+state. The installer registers the plugin bundle and also materializes the
+active Codex `skills/`, `hooks/`, and `hooks.json` surface at the selected
+scope so Codex can execute the Babysitter commands and hook scripts directly.
 
 ## Installation
 
@@ -29,8 +30,9 @@ npx @a5c-ai/babysitter-codex install
 
 This copies the plugin into `~/.codex/plugins/babysitter-codex`, registers it
 in `~/.agents/plugins/marketplace.json`, merges the required global Codex
-config into `~/.codex/config.toml`, and ensures the Babysitter process library
-is active in `~/.a5c`.
+config into `~/.codex/config.toml`, installs the active global Codex
+`skills/`, `hooks/`, and `hooks.json` surface under `~/.codex/`, and ensures
+the Babysitter process library is active in `~/.a5c`.
 
 Install the plugin into a specific workspace:
 
@@ -40,8 +42,9 @@ npx @a5c-ai/babysitter-codex install --workspace /path/to/repo
 
 This copies the plugin into `<workspace>/plugins/babysitter-codex`, registers
 it in `<workspace>/.agents/plugins/marketplace.json`, merges
-`<workspace>/.codex/config.toml`, and records install metadata under
-`<workspace>/.a5c/team/`.
+`<workspace>/.codex/config.toml`, installs the active workspace Codex
+`skills/`, `hooks/`, and `hooks.json` surface under `<workspace>/.codex/`, and
+records install metadata under `<workspace>/.a5c/team/`.
 
 ## Integration Model
 
@@ -62,6 +65,9 @@ After `install --workspace`, the important files are:
 - `plugins/babysitter-codex/.codex-plugin/plugin.json`
 - `plugins/babysitter-codex/skills/babysit/SKILL.md`
 - `plugins/babysitter-codex/hooks.json`
+- `.codex/skills/`
+- `.codex/hooks/`
+- `.codex/hooks.json`
 - `.agents/plugins/marketplace.json`
 - `.codex/config.toml`
 - `.a5c/team/install.json`
@@ -77,6 +83,9 @@ test -f ~/.codex/plugins/babysitter-codex/.codex-plugin/plugin.json
 test -f ~/.codex/plugins/babysitter-codex/hooks.json
 test -f ~/.codex/plugins/babysitter-codex/hooks/babysitter-stop-hook.sh
 test -f ~/.codex/plugins/babysitter-codex/skills/babysit/SKILL.md
+test -f ~/.codex/hooks.json
+test -f ~/.codex/hooks/babysitter-stop-hook.sh
+test -f ~/.codex/skills/babysit/SKILL.md
 test -f ~/.agents/plugins/marketplace.json
 ```
 

@@ -116,10 +116,13 @@ try {
   ].forEach((relativePath) => assertExists(installedPluginRoot, relativePath));
   for (const skillName of listModeSkillNames(PROJECT_ROOT)) {
     assertExists(installedPluginRoot, path.join('skills', skillName, 'SKILL.md'));
+    assertExists(codexHome, path.join('skills', skillName, 'SKILL.md'));
   }
 
-  assert.ok(!fs.existsSync(path.join(codexHome, 'skills', 'babysit')), 'global install should not create legacy skill folders');
-  assert.ok(!fs.existsSync(path.join(codexHome, 'hooks.json')), 'global install should not write legacy hooks.json');
+  assert.ok(fs.existsSync(path.join(codexHome, 'skills', 'babysit', 'SKILL.md')), 'global install should install Codex skills');
+  assert.ok(fs.existsSync(path.join(codexHome, 'hooks.json')), 'global install should install hooks.json');
+  assert.ok(fs.existsSync(path.join(codexHome, 'hooks', 'babysitter-stop-hook.sh')), 'global install should install global hook scripts');
+  assert.ok(!fs.existsSync(path.join(codexHome, 'prompts', 'call.md')), 'global install should not restore deprecated prompt aliases');
   assert.ok(fs.existsSync(path.join(installedPluginRoot, '.codex-plugin', 'plugin.json')), 'installed plugin should carry a plugin manifest');
   assert.ok(fs.existsSync(path.join(installedPluginRoot, 'hooks', 'babysitter-stop-hook.sh')), 'installed plugin should carry hook scripts');
   assert.ok(fs.existsSync(path.join(installedPluginRoot, 'skills', 'babysit', 'SKILL.md')), 'installed plugin should carry the core skill');
@@ -147,6 +150,10 @@ try {
   assert.strictEqual(pluginHooks.hooks.SessionStart[0].hooks[0].command, './hooks/babysitter-session-start.sh');
   assert.strictEqual(pluginHooks.hooks.UserPromptSubmit[0].hooks[0].command, './hooks/user-prompt-submit.sh');
   assert.strictEqual(pluginHooks.hooks.Stop[0].hooks[0].command, './hooks/babysitter-stop-hook.sh');
+  const globalHooks = readJson(path.join(codexHome, 'hooks.json'));
+  assert.strictEqual(globalHooks.hooks.SessionStart[0].hooks[0].command, './hooks/babysitter-session-start.sh');
+  assert.strictEqual(globalHooks.hooks.UserPromptSubmit[0].hooks[0].command, './hooks/user-prompt-submit.sh');
+  assert.strictEqual(globalHooks.hooks.Stop[0].hooks[0].command, './hooks/babysitter-stop-hook.sh');
 
   assert.ok(fs.existsSync(homeMarketplacePath));
   const homeMarketplace = readJson(homeMarketplacePath);
@@ -177,6 +184,9 @@ try {
   assert.ok(teamInstallOutput.includes('[team-install] complete'));
 
   assert.ok(fs.existsSync(path.join(workspaceRoot, '.codex', 'config.toml')));
+  assert.ok(fs.existsSync(path.join(workspaceRoot, '.codex', 'hooks.json')));
+  assert.ok(fs.existsSync(path.join(workspaceRoot, '.codex', 'hooks', 'babysitter-stop-hook.sh')));
+  assert.ok(fs.existsSync(path.join(workspaceRoot, '.codex', 'skills', 'call', 'SKILL.md')));
   assert.ok(fs.existsSync(path.join(workspaceRoot, 'plugins', 'babysitter-codex', '.codex-plugin', 'plugin.json')));
   assert.ok(fs.existsSync(path.join(workspaceRoot, 'plugins', 'babysitter-codex', 'skills', 'babysit', 'SKILL.md')));
   assert.ok(fs.existsSync(path.join(workspaceRoot, '.agents', 'plugins', 'marketplace.json')));
