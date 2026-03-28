@@ -48,6 +48,11 @@ function assertExists(root, relativePath) {
   return full;
 }
 
+function toMarketplaceRelativePath(marketplacePath, pluginRoot) {
+  const rel = path.relative(path.dirname(marketplacePath), pluginRoot).replace(/\\/g, '/');
+  return rel.startsWith('./') || rel.startsWith('../') ? rel : `./${rel}`;
+}
+
 function resolveNpmCommand() {
   if (process.platform !== 'win32') return 'npm';
   return path.join(path.dirname(process.execPath), 'npm.cmd');
@@ -159,7 +164,7 @@ try {
   const homeMarketplace = readJson(homeMarketplacePath);
   const homeEntry = homeMarketplace.plugins.find((entry) => entry.name === 'babysitter-codex');
   assert.ok(homeEntry, 'home marketplace should register the plugin');
-  assert.strictEqual(homeEntry.source.path, './plugins/babysitter-codex');
+  assert.strictEqual(homeEntry.source.path, toMarketplaceRelativePath(homeMarketplacePath, installedPluginRoot));
 
   const globalProcessLibraryState = readJson(path.join(userHome, '.a5c', 'active', 'process-library.json'));
   assert.strictEqual(
@@ -194,7 +199,13 @@ try {
   const workspaceMarketplace = readJson(path.join(workspaceRoot, '.agents', 'plugins', 'marketplace.json'));
   const workspaceEntry = workspaceMarketplace.plugins.find((entry) => entry.name === 'babysitter-codex');
   assert.ok(workspaceEntry, 'workspace marketplace should register the plugin');
-  assert.strictEqual(workspaceEntry.source.path, './plugins/babysitter-codex');
+  assert.strictEqual(
+    workspaceEntry.source.path,
+    toMarketplaceRelativePath(
+      path.join(workspaceRoot, '.agents', 'plugins', 'marketplace.json'),
+      path.join(workspaceRoot, 'plugins', 'babysitter-codex'),
+    ),
+  );
 
   const installJson = readJson(path.join(workspaceRoot, '.a5c', 'team', 'install.json'));
   const profileJson = readJson(path.join(workspaceRoot, '.a5c', 'team', 'profile.json'));

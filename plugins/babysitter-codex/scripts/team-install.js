@@ -55,7 +55,7 @@ function main() {
   }
 
   copyPluginBundle(packageRoot, workspacePluginRoot);
-  ensureMarketplaceEntry(workspaceMarketplacePath, './plugins/babysitter-codex');
+  ensureMarketplaceEntry(workspaceMarketplacePath, workspacePluginRoot);
   mergeCodexConfigFile(workspaceConfigPath);
   installCodexSurface(packageRoot, path.join(workspaceRoot, '.codex'));
 

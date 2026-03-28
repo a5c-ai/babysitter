@@ -313,6 +313,18 @@ function ensureExecutable(filePath) {
   }
 }
 
+function normalizeMarketplaceSourcePath(marketplacePath, pluginSourcePath) {
+  let next = pluginSourcePath;
+  if (path.isAbsolute(next)) {
+    next = path.relative(path.dirname(marketplacePath), next);
+  }
+  next = String(next || '').replace(/\\/g, '/');
+  if (!next.startsWith('./') && !next.startsWith('../')) {
+    next = `./${next}`;
+  }
+  return next;
+}
+
 function ensureMarketplaceEntry(marketplacePath, pluginSourcePath) {
   const marketplace = fs.existsSync(marketplacePath)
     ? readJson(marketplacePath)
@@ -325,7 +337,7 @@ function ensureMarketplaceEntry(marketplacePath, pluginSourcePath) {
     name: PLUGIN_NAME,
     source: {
       source: 'local',
-      path: pluginSourcePath,
+      path: normalizeMarketplaceSourcePath(marketplacePath, pluginSourcePath),
     },
     policy: {
       installation: 'AVAILABLE',
