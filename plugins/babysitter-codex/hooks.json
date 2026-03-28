@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": ".codex/hooks/babysitter-session-start.sh"
+            "command": "./hooks/babysitter-session-start.sh"
           }
         ]
       }
@@ -17,7 +17,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": ".codex/hooks/user-prompt-submit.sh"
+            "command": "./hooks/user-prompt-submit.sh"
           }
         ]
       }
@@ -28,7 +28,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": ".codex/hooks/babysitter-stop-hook.sh"
+            "command": "./hooks/babysitter-stop-hook.sh"
           }
         ]
       }

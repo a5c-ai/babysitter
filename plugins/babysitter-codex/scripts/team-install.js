@@ -2,56 +2,15 @@
 'use strict';
 
 const fs = require('fs');
-const os = require('os');
 const path = require('path');
-const { spawnSync } = require('child_process');
-
-const SKILL_NAME = 'babysit';
-const MODE_SKILL_NAMES = [
-  'assimilate',
-  'call',
-  'doctor',
-  'forever',
-  'help',
-  'issue',
-  'model',
-  'observe',
-  'plan',
-  'project-install',
-  'resume',
-  'retrospect',
-  'team-install',
-  'user-install',
-  'yolo',
-];
-const DEFAULT_PROCESS_LIBRARY_REPO = 'https://github.com/a5c-ai/babysitter.git';
-const DEFAULT_PROCESS_LIBRARY_SUBPATH = 'library';
-const DEFAULT_PROCESS_LIBRARY_REFERENCE_SUBPATH = 'library/reference';
-const WORKSPACE_SKILL_ENTRIES = [
-  { source: 'SKILL.md', target: 'SKILL.md' },
-  { source: 'scripts', target: 'scripts' },
-  { source: 'babysitter.lock.json', target: 'babysitter.lock.json' },
-];
-
-function listModeSkillEntries(packageRoot) {
-  const skillsDir = path.join(packageRoot, '.codex', 'skills');
-  return fs
-    .readdirSync(skillsDir, { withFileTypes: true })
-    .filter((entry) => entry.isDirectory() && entry.name !== SKILL_NAME)
-    .sort((a, b) => a.name.localeCompare(b.name))
-    .map((entry) => {
-      const skillName = entry.name;
-      const skillFile = path.join(skillsDir, skillName, 'SKILL.md');
-      if (!fs.existsSync(skillFile)) {
-        throw new Error(`missing mode skill template: ${skillFile}`);
-      }
-      return skillName;
-    });
-}
-
-function readJson(filePath) {
-  return JSON.parse(fs.readFileSync(filePath, 'utf8'));
-}
+const {
+  copyPluginBundle,
+  ensureGlobalProcessLibrary,
+  ensureMarketplaceEntry,
+  mergeCodexConfigFile,
+  warnWindowsHooks,
+  writeJson,
+} = require('../bin/install-shared');
 
 function parseArgs(argv) {
   const args = {
@@ -68,366 +27,21 @@ function parseArgs(argv) {
   return args;
 }
 
-function getGlobalStateDir() {
-  if (process.env.BABYSITTER_GLOBAL_STATE_DIR) {
-    return path.resolve(process.env.BABYSITTER_GLOBAL_STATE_DIR);
-  }
-  return path.join(os.homedir(), '.a5c');
-}
-
-function splitProcessLibrarySubpath(value) {
-  return String(value)
-    .split(/[\\/]+/)
-    .map((part) => part.trim())
-    .filter(Boolean);
-}
-
-function renderWorkspaceConfigToml() {
-  return [
-    'approval_policy = "on-request"',
-    'sandbox_mode = "workspace-write"',
-    'project_doc_max_bytes = 65536',
-    '',
-    '[sandbox_workspace_write]',
-    'writable_roots = [".a5c", ".codex"]',
-    '',
-    '[features]',
-    'codex_hooks = true',
-    'multi_agent = true',
-    '',
-    '[agents]',
-    'max_depth = 3',
-    'max_threads = 4',
-    '',
-  ].join('\n');
-}
-
-function writeFileIfChanged(filePath, contents) {
-  if (fs.existsSync(filePath)) {
-    const current = fs.readFileSync(filePath, 'utf8');
-    if (current === contents) {
-      return false;
-    }
-  }
-  fs.mkdirSync(path.dirname(filePath), { recursive: true });
-  fs.writeFileSync(filePath, contents, 'utf8');
-  return true;
-}
-
-function copyRecursive(src, dest) {
-  const stat = fs.statSync(src);
-  if (stat.isDirectory()) {
-    fs.mkdirSync(dest, { recursive: true });
-    for (const entry of fs.readdirSync(src)) {
-      if (['node_modules', '.a5c', '.git', 'test', '.gitignore'].includes(entry)) continue;
-      copyRecursive(path.join(src, entry), path.join(dest, entry));
-    }
-    return;
-  }
-
-  if (path.basename(src) === 'SKILL.md') {
-    const file = fs.readFileSync(src);
-    const hasBom = file.length >= 3 && file[0] === 0xef && file[1] === 0xbb && file[2] === 0xbf;
-    fs.mkdirSync(path.dirname(dest), { recursive: true });
-    fs.writeFileSync(dest, hasBom ? file.subarray(3) : file);
-    return;
-  }
-
-  fs.mkdirSync(path.dirname(dest), { recursive: true });
-  fs.copyFileSync(src, dest);
-}
-
-function installWorkspaceSkill(packageRoot, workspaceRoot, dryRun) {
-  const workspaceSkillsRoot = path.join(workspaceRoot, '.codex', 'skills');
-  const workspaceSkillRoot = path.join(workspaceRoot, '.codex', 'skills', SKILL_NAME);
-  const workspaceHookScriptsRoot = path.join(workspaceRoot, '.codex', 'hooks');
-  const modeSkillNames = listModeSkillEntries(packageRoot);
-
-  if (dryRun) {
-    return {
-      workspaceSkillsRoot,
-      workspaceSkillRoot,
-      workspaceHookScriptsRoot,
-    };
-  }
-
-  fs.rmSync(workspaceSkillRoot, { recursive: true, force: true });
-  fs.mkdirSync(workspaceSkillsRoot, { recursive: true });
-  fs.mkdirSync(workspaceSkillRoot, { recursive: true });
-
-  for (const entry of WORKSPACE_SKILL_ENTRIES) {
-    copyRecursive(
-      path.join(packageRoot, entry.source),
-      path.join(workspaceSkillRoot, entry.target),
-    );
-  }
-
-  fs.mkdirSync(workspaceHookScriptsRoot, { recursive: true });
-  copyRecursive(path.join(packageRoot, '.codex', 'hooks'), workspaceHookScriptsRoot);
-
-  for (const skillName of modeSkillNames) {
-    copyRecursive(
-      path.join(packageRoot, '.codex', 'skills', skillName),
-      path.join(workspaceSkillsRoot, skillName),
-    );
-  }
-
-  return {
-    workspaceSkillsRoot,
-    workspaceSkillRoot,
-    workspaceHookScriptsRoot,
-  };
-}
-
-function insertRootKey(content, key, line) {
-  const keyPattern = new RegExp(`^\\s*${key}\\s*=`, 'm');
-  if (keyPattern.test(content)) {
-    return content;
-  }
-  const sectionMatch = content.match(/^\[[^\]]+\]\s*$/m);
-  if (!sectionMatch || sectionMatch.index === undefined) {
-    return content.trim()
-      ? `${content.trimEnd()}\n${line}\n`
-      : `${line}\n`;
-  }
-  const before = content.slice(0, sectionMatch.index).trimEnd();
-  const after = content.slice(sectionMatch.index);
-  return before
-    ? `${before}\n${line}\n\n${after}`
-    : `${line}\n\n${after}`;
-}
-
-function ensureSectionLine(content, sectionName, lineKey, line) {
-  const keyPattern = new RegExp(`^\\s*${lineKey}\\s*=`, 'm');
-  if (keyPattern.test(content)) {
-    return content;
-  }
-  const sectionHeader = `[${sectionName}]`;
-  const sectionPattern = new RegExp(`^\\[${sectionName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\]\\s*$`, 'm');
-  if (sectionPattern.test(content)) {
-    return content.replace(sectionPattern, `${sectionHeader}\n${line}`);
-  }
-  return content.trim()
-    ? `${content.trimEnd()}\n\n${sectionHeader}\n${line}\n`
-    : `${sectionHeader}\n${line}\n`;
-}
-
-function ensureWritableRoots(content) {
-  const sectionPattern = /^\[sandbox_workspace_write\]\s*$/m;
-  const rootsPattern = /^writable_roots\s*=\s*\[(.*?)\]\s*$/m;
-  const requiredRoots = ['.a5c', '.codex'];
-
-  if (!sectionPattern.test(content)) {
-    return content.trim()
-      ? `${content.trimEnd()}\n\n[sandbox_workspace_write]\nwritable_roots = [".a5c", ".codex"]\n`
-      : '[sandbox_workspace_write]\nwritable_roots = [".a5c", ".codex"]\n';
-  }
-
-  if (!rootsPattern.test(content)) {
-    return content.replace(sectionPattern, '[sandbox_workspace_write]\nwritable_roots = [".a5c", ".codex"]');
-  }
-
-  return content.replace(rootsPattern, (_match, inner) => {
-    const values = inner
-      .split(',')
-      .map((part) => part.trim())
-      .filter(Boolean)
-      .map((part) => part.replace(/^"(.*)"$/, '$1'));
-    const merged = [...new Set([...values, ...requiredRoots])];
-    const rendered = merged.map((value) => `"${value}"`).join(', ');
-    return `writable_roots = [${rendered}]`;
-  });
-}
-
-function mergeWorkspaceConfig(existing) {
-  let content = existing.trim() ? existing : '';
-  content = insertRootKey(content, 'approval_policy', 'approval_policy = "on-request"');
-  content = insertRootKey(content, 'sandbox_mode', 'sandbox_mode = "workspace-write"');
-  content = insertRootKey(content, 'project_doc_max_bytes', 'project_doc_max_bytes = 65536');
-  content = ensureWritableRoots(content);
-  content = ensureSectionLine(content, 'features', 'codex_hooks', 'codex_hooks = true');
-  content = ensureSectionLine(content, 'features', 'multi_agent', 'multi_agent = true');
-  content = ensureSectionLine(content, 'agents', 'max_depth', 'max_depth = 3');
-  content = ensureSectionLine(content, 'agents', 'max_threads', 'max_threads = 4');
-  return `${content.trimEnd()}\n`;
-}
-
-function resolveBabysitterCommand(packageRoot) {
-  if (process.env.BABYSITTER_SDK_CLI) {
-    return {
-      command: process.execPath,
-      argsPrefix: [path.resolve(process.env.BABYSITTER_SDK_CLI)],
-    };
-  }
-  try {
-    return {
-      command: process.execPath,
-      argsPrefix: [
-        require.resolve('@a5c-ai/babysitter-sdk/dist/cli/main.js', {
-          paths: [packageRoot],
-        }),
-      ],
-    };
-  } catch {
-    return {
-      command: 'babysitter',
-      argsPrefix: [],
-    };
-  }
-}
-
-function runBabysitterCli(packageRoot, cliArgs, options = {}) {
-  const resolved = resolveBabysitterCommand(packageRoot);
-  const result = spawnSync(resolved.command, [...resolved.argsPrefix, ...cliArgs], {
-    cwd: options.cwd || process.cwd(),
-    stdio: ['ignore', 'pipe', 'pipe'],
-    encoding: 'utf8',
-    env: {
-      ...process.env,
-      ...(options.env || {}),
-    },
-  });
-  if (result.status !== 0) {
-    const stderr = (result.stderr || '').trim();
-    const stdout = (result.stdout || '').trim();
-    throw new Error(
-      `babysitter ${cliArgs.join(' ')} failed` +
-      (stderr ? `: ${stderr}` : stdout ? `: ${stdout}` : ''),
-    );
-  }
-  return result.stdout;
-}
-
-function resolveProcessLibrarySpec() {
-  const stateDir = getGlobalStateDir();
-  const repo = process.env.BABYSITTER_PROCESS_LIBRARY_REPO || DEFAULT_PROCESS_LIBRARY_REPO;
-  const ref = process.env.BABYSITTER_PROCESS_LIBRARY_REF || '';
-  const cloneDir = path.join(stateDir, 'process-library', 'babysitter-repo');
-  const processSubpath = process.env.BABYSITTER_PROCESS_LIBRARY_SUBPATH || DEFAULT_PROCESS_LIBRARY_SUBPATH;
-  const referenceSubpath = process.env.BABYSITTER_PROCESS_LIBRARY_REFERENCE_SUBPATH || DEFAULT_PROCESS_LIBRARY_REFERENCE_SUBPATH;
-  return {
-    repo,
-    ref: ref || undefined,
-    cloneDir,
-    processRoot: path.join(cloneDir, ...splitProcessLibrarySubpath(processSubpath)),
-    referenceRoot: path.join(cloneDir, ...splitProcessLibrarySubpath(referenceSubpath)),
-    stateDir,
-  };
-}
-
-function removeLegacyWorkspacePrompts(workspaceRoot) {
-  const promptsRoot = path.join(workspaceRoot, '.codex', 'prompts');
-  for (const promptFile of MODE_SKILL_NAMES.map((name) => `${name}.md`).concat('babysit.md')) {
-    const promptPath = path.join(promptsRoot, promptFile);
-    if (fs.existsSync(promptPath)) {
-      fs.rmSync(promptPath, { force: true });
-    }
-  }
-  if (fs.existsSync(promptsRoot)) {
-    try {
-      if (fs.readdirSync(promptsRoot).length === 0) {
-        fs.rmSync(promptsRoot, { recursive: true, force: true });
-      }
-    } catch {
-      // Best effort cleanup only.
-    }
-  }
-}
-
-function ensureActiveProcessLibrary(packageRoot, dryRun) {
-  const spec = resolveProcessLibrarySpec();
-  const activeArgs = ['process-library:active', '--state-dir', spec.stateDir, '--json'];
-  if (dryRun) {
-    return {
-      ...spec,
-      plannedCommands: [
-        `babysitter ${activeArgs.join(' ')}`,
-      ],
-      activeStateFile: path.join(spec.stateDir, 'active', 'process-library.json'),
-      binding: null,
-    };
-  }
-
-  const active = JSON.parse(runBabysitterCli(packageRoot, activeArgs, { cwd: packageRoot }));
-  return {
-    ...spec,
-    plannedCommands: [],
-    activeStateFile: active.stateFile,
-    binding: active.binding || null,
-  };
-}
-
-function buildHooksConfig() {
-  return {
-    hooks: {
-      SessionStart: [
-        {
-          matcher: '*',
-          hooks: [
-            {
-              type: 'command',
-              command: '.codex/hooks/babysitter-session-start.sh',
-            },
-          ],
-        },
-      ],
-      UserPromptSubmit: [
-        {
-          matcher: '*',
-          hooks: [
-            {
-              type: 'command',
-              command: '.codex/hooks/user-prompt-submit.sh',
-            },
-          ],
-        },
-      ],
-      Stop: [
-        {
-          matcher: '*',
-          hooks: [
-            {
-              type: 'command',
-              command: '.codex/hooks/babysitter-stop-hook.sh',
-            },
-          ],
-        },
-      ],
-    },
-  };
-}
-
 function main() {
   const args = parseArgs(process.argv);
   const packageRoot = path.resolve(process.env.BABYSITTER_PACKAGE_ROOT || path.join(__dirname, '..'));
   const workspaceRoot = args.workspace;
-  const lockPath = path.join(packageRoot, 'babysitter.lock.json');
-  if (!fs.existsSync(lockPath)) {
-    throw new Error(`missing lock file: ${lockPath}`);
-  }
-  const lock = readJson(lockPath);
-  const workspaceHooksConfigPath = path.join(workspaceRoot, '.codex', 'hooks.json');
+  const workspacePluginRoot = path.join(workspaceRoot, 'plugins', 'babysitter-codex');
+  const workspaceMarketplacePath = path.join(workspaceRoot, '.agents', 'plugins', 'marketplace.json');
   const workspaceConfigPath = path.join(workspaceRoot, '.codex', 'config.toml');
-  const { workspaceSkillsRoot, workspaceSkillRoot, workspaceHookScriptsRoot } = installWorkspaceSkill(packageRoot, workspaceRoot, args.dryRun);
-  const processLibrary = ensureActiveProcessLibrary(packageRoot, args.dryRun);
+
   const installInfo = {
     installedAt: new Date().toISOString(),
-    runtime: lock.runtime,
-    content: lock.content,
-    lockVersion: lock.version,
     packageRoot,
     workspaceRoot,
-    workspaceSkillsRoot,
-    workspaceSkillRoot,
-    workspaceConfigPath,
-    workspaceHooksConfigPath,
-    hookScriptsRoot: workspaceHookScriptsRoot,
-    processLibraryRepo: processLibrary.repo,
-    ...(processLibrary.ref ? { processLibraryRef: processLibrary.ref } : {}),
-    processLibraryCloneDir: processLibrary.cloneDir,
-    processLibraryRoot: processLibrary.processRoot,
-    processLibraryReferenceRoot: processLibrary.referenceRoot,
-    processLibraryStateFile: processLibrary.activeStateFile,
+    pluginRoot: workspacePluginRoot,
+    marketplacePath: workspaceMarketplacePath,
+    codexConfigPath: workspaceConfigPath,
   };
 
   if (args.dryRun) {
@@ -435,43 +49,35 @@ function main() {
       ok: true,
       dryRun: true,
       installInfo,
-      processLibrary: {
-        repo: processLibrary.repo,
-        ...(processLibrary.ref ? { ref: processLibrary.ref } : {}),
-        cloneDir: processLibrary.cloneDir,
-        processRoot: processLibrary.processRoot,
-        referenceRoot: processLibrary.referenceRoot,
-        stateFile: processLibrary.activeStateFile,
-        plannedCommands: processLibrary.plannedCommands,
-      },
     }, null, 2));
     return;
   }
 
+  copyPluginBundle(packageRoot, workspacePluginRoot);
+  ensureMarketplaceEntry(workspaceMarketplacePath, './plugins/babysitter-codex');
+  mergeCodexConfigFile(workspaceConfigPath);
+
+  const active = ensureGlobalProcessLibrary(packageRoot);
+  installInfo.processLibraryStateFile = active.stateFile;
+  installInfo.processLibraryRoot = active.binding?.dir || '';
+  installInfo.processLibraryCloneDir = active.defaultSpec?.cloneDir || '';
+
   const outDir = path.join(workspaceRoot, '.a5c', 'team');
   fs.mkdirSync(outDir, { recursive: true });
-  removeLegacyWorkspacePrompts(workspaceRoot);
-  fs.mkdirSync(path.dirname(workspaceHooksConfigPath), { recursive: true });
-  writeFileIfChanged(workspaceHooksConfigPath, `${JSON.stringify(buildHooksConfig(), null, 2)}\n`);
-  const existingWorkspaceConfig = fs.existsSync(workspaceConfigPath)
-    ? fs.readFileSync(workspaceConfigPath, 'utf8')
-    : renderWorkspaceConfigToml();
-  writeFileIfChanged(workspaceConfigPath, mergeWorkspaceConfig(existingWorkspaceConfig));
-  fs.writeFileSync(path.join(outDir, 'install.json'), JSON.stringify(installInfo, null, 2), 'utf8');
+  writeJson(path.join(outDir, 'install.json'), installInfo);
 
   const profilePath = path.join(outDir, 'profile.json');
   if (!fs.existsSync(profilePath)) {
-    fs.writeFileSync(profilePath, JSON.stringify({
+    writeJson(profilePath, {
       teamName: 'default',
-      workspaceSkillsRoot,
-      installedSkillRoot: workspaceSkillRoot,
-      workspaceConfigPath,
-      workspaceHooksConfigPath,
-      hookScriptsRoot: workspaceHookScriptsRoot,
+      pluginRoot: workspacePluginRoot,
+      marketplacePath: workspaceMarketplacePath,
+      codexConfigPath: workspaceConfigPath,
       processLibraryLookupCommand: 'babysitter process-library:active --json',
-    }, null, 2), 'utf8');
+    });
   }
 
+  warnWindowsHooks();
   console.log('[team-install] complete');
 }
 

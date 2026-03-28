@@ -6,7 +6,7 @@
     "test": "node test/integration.test.js && node test/packaged-install.test.js",
     "test:integration": "node test/integration.test.js",
     "team:install": "node scripts/team-install.js",
-    "lint": "node -e \"const fs=require('fs'); const path=require('path'); const cp=require('child_process'); const walk=(dir)=>{for(const entry of fs.readdirSync(dir)){const file=path.join(dir, entry); const stat=fs.statSync(file); if(stat.isDirectory()) walk(file); else if(file.endsWith('.js')) cp.execFileSync(process.execPath,['--check',file],{stdio:'inherit'});}}; ['.codex','bin','scripts','test'].forEach((dir)=>{if(fs.existsSync(dir)) walk(dir);});\"",
+    "lint": "node -e \"const fs=require('fs'); const path=require('path'); const cp=require('child_process'); const walk=(dir)=>{for(const entry of fs.readdirSync(dir)){const file=path.join(dir, entry); const stat=fs.statSync(file); if(stat.isDirectory()) walk(file); else if(file.endsWith('.js')) cp.execFileSync(process.execPath,['--check',file],{stdio:'inherit'});}}; ['skills','bin','scripts','test'].forEach((dir)=>{if(fs.existsSync(dir)) walk(dir);});\"",
     "deploy": "npm publish --access public",
     "deploy:staging": "npm publish --access public --tag staging"
   },
@@ -14,8 +14,11 @@
     "babysitter-codex": "bin/cli.js"
   },
   "files": [
+    ".codex-plugin/",
     "SKILL.md",
-    ".codex/",
+    "hooks/",
+    "hooks.json",
+    "skills/",
     "bin/",
     "scripts/",
     "babysitter.lock.json"

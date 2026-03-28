@@ -11,11 +11,11 @@ description: >-
 
 Babysitter on Codex is implemented as:
 
-- the installed core skill under `~/.codex/skills/babysit` or `.codex/skills/babysit`
-- installed mode-wrapper skills under `~/.codex/skills/<mode>` or `.codex/skills/<mode>`
-- global `~/.codex/hooks.json` and `~/.codex/hooks/`
+- the installed plugin under `~/.codex/plugins/babysitter-codex` or `<workspace>/plugins/babysitter-codex`
+- the plugin skill tree under `skills/babysit` and `skills/<mode>`
+- the plugin hook registry at `hooks.json`
+- the plugin hook scripts under `hooks/`
 - global `~/.codex/config.toml`
-- optional workspace `.codex/hooks.json` and `.codex/hooks/`
 - optional workspace `.codex/config.toml`
 - workspace `.a5c/`
 - shared global `.a5c/` process-library state
@@ -313,11 +313,14 @@ value wrapped in `<promise>...</promise>`.
 
 ## Hook Loop
 
-Global install must materialize `~/.codex/hooks.json`, `~/.codex/hooks/`, and
+Global install must register the plugin in `~/.agents/plugins/marketplace.json`
+with the plugin bundle at `~/.codex/plugins/babysitter-codex`, and must merge
 `~/.codex/config.toml`.
 
-Workspace onboarding may also materialize `.codex/hooks.json`,
-`.codex/hooks/`, and `.codex/config.toml` for repo-local pinning.
+Workspace onboarding may also register the plugin in
+`<workspace>/.agents/plugins/marketplace.json` with the plugin bundle at
+`<workspace>/plugins/babysitter-codex`, and may merge `.codex/config.toml` for
+repo-local pinning.
 
 Both levels must provide:
 

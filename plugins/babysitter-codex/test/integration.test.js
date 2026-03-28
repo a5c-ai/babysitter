@@ -5,8 +5,10 @@ const path = require('path');
 const assert = require('assert');
 
 const PROJECT_ROOT = path.resolve(__dirname, '..');
-const CODEX_DIR = path.join(PROJECT_ROOT, '.codex');
+const SKILLS_DIR = path.join(PROJECT_ROOT, 'skills');
+const HOOKS_DIR = path.join(PROJECT_ROOT, 'hooks');
 const BIN_DIR = path.join(PROJECT_ROOT, 'bin');
+const SCRIPTS_DIR = path.join(PROJECT_ROOT, 'scripts');
 
 // Test: All JS files pass node --check
 function testSyntax() {
@@ -19,8 +21,9 @@ function testSyntax() {
       else if (entry.isFile() && entry.name.endsWith('.js')) jsFiles.push(full);
     }
   }
-  collectJs(CODEX_DIR);
+  collectJs(SKILLS_DIR);
   if (fs.existsSync(BIN_DIR)) collectJs(BIN_DIR);
+  if (fs.existsSync(SCRIPTS_DIR)) collectJs(SCRIPTS_DIR);
 
   let passed = 0;
   for (const file of jsFiles) {
@@ -38,13 +41,13 @@ function testSyntax() {
 // Test: Shell hook scripts have valid syntax
 function testShellSyntax() {
   const shellScripts = [
-    'hooks/babysitter-session-start.sh',
-    'hooks/babysitter-stop-hook.sh',
-    'hooks/user-prompt-submit.sh',
+    'babysitter-session-start.sh',
+    'babysitter-stop-hook.sh',
+    'user-prompt-submit.sh',
   ];
 
   for (const script of shellScripts) {
-    const shellFile = path.join(CODEX_DIR, script);
+    const shellFile = path.join(HOOKS_DIR, script);
     if (!fs.existsSync(shellFile)) {
       throw new Error(`Expected shell script not found: ${script}`);
     }
