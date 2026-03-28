@@ -82,6 +82,7 @@ interface PiAgentSession {
   steer(text: string): Promise<void>;
   followUp(text: string): Promise<void>;
   subscribe(listener: (event: PiSessionEvent) => void): () => void;
+  bindExtensions?(bindings: { uiContext?: unknown }): Promise<void>;
   executeBash(
     command: string,
     onChunk?: (chunk: string) => void,
@@ -637,6 +638,9 @@ export class PiSessionHandle {
 
     try {
       const { session } = await mod.createAgentSession(createOpts);
+      if (this.options.uiContext && typeof session.bindExtensions === "function") {
+        await session.bindExtensions({ uiContext: this.options.uiContext });
+      }
       this.session = session;
     } catch (error: unknown) {
       while (this.cleanupTasks.length > 0) {

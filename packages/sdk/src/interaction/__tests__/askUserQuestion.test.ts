@@ -2,6 +2,7 @@ import type * as readline from "node:readline";
 import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
 import {
   createApprovalAskUserQuestion,
+  promptAskUserQuestionWithUiContext,
   promptAskUserQuestionWithReadline,
   validateAskUserQuestionRequest,
 } from "../askUserQuestion";
@@ -72,6 +73,21 @@ describe("AskUserQuestion", () => {
 
     expect(response.answers).toEqual({
       Targets: "frontend, backend",
+    });
+  });
+
+  it("uses UI context selectors for single-select questions", async () => {
+    const response = await promptAskUserQuestionWithUiContext(
+      {
+        select: vi.fn(async () => "Reject"),
+        input: vi.fn(async () => undefined),
+        confirm: vi.fn(async () => false),
+      },
+      createApprovalAskUserQuestion("Continue?"),
+    );
+
+    expect(response.answers).toEqual({
+      Decision: "Reject",
     });
   });
 

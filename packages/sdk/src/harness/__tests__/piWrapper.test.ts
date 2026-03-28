@@ -10,6 +10,7 @@ const mockSteer = vi.fn<(text: string) => Promise<void>>();
 const mockFollowUp = vi.fn<(text: string) => Promise<void>>();
 const mockAbort = vi.fn<() => Promise<void>>();
 const mockDispose = vi.fn<() => void>();
+const mockBindExtensions = vi.fn<(bindings: { uiContext?: unknown }) => Promise<void>>();
 const mockGetLastAssistantText = vi.fn<() => string | undefined>();
 const mockExecuteBash = vi.fn<(command: string, onChunk?: (chunk: string) => void) => Promise<{ output: string; exitCode: number | undefined; cancelled: boolean; truncated: boolean }>>();
 
@@ -29,6 +30,7 @@ const mockSession = {
       eventListeners = eventListeners.filter((l) => l !== listener);
     };
   },
+  bindExtensions: mockBindExtensions,
   get sessionId() {
     return "mock-session-id";
   },
@@ -128,6 +130,8 @@ beforeEach(() => {
   mockFollowUp.mockReset();
   mockAbort.mockReset();
   mockDispose.mockReset();
+  mockBindExtensions.mockReset();
+  mockBindExtensions.mockResolvedValue(undefined);
   mockGetLastAssistantText.mockReset();
   mockExecuteBash.mockReset();
   mockCreateAgentSession.mockReset();
@@ -278,6 +282,25 @@ describe("PiSessionHandle", () => {
           agentDir: "/custom/agent",
         }),
       );
+    });
+
+    test("binds a provided UI context into the PI session", async () => {
+      mockPrompt.mockImplementation(async () => {
+        emitEvent({ type: "agent_end" });
+      });
+      mockGetLastAssistantText.mockReturnValue("ok");
+
+      const uiContext = {
+        select: vi.fn(async () => undefined),
+        input: vi.fn(async () => undefined),
+        confirm: vi.fn(async () => false),
+      };
+      const session = createPiSession({
+        uiContext,
+      });
+      await session.prompt("ask later");
+
+      expect(mockBindExtensions).toHaveBeenCalledWith({ uiContext });
     });
 
     test("supports modern ModelRegistry implementations that do not expose getApiKey()", async () => {

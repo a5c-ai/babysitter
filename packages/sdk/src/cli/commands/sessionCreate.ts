@@ -30,10 +30,13 @@ import { loadCompressionConfig } from "../../compression/config-loader";
 import { densityFilterText, estimateTokens } from "../../compression/density-filter";
 import { getAdapterByName } from "../../harness";
 import {
+  createReadlineAskUserQuestionUiContext,
   createApprovalAskUserQuestion,
   createAskUserQuestionResponse,
+  promptAskUserQuestionWithUiContext,
   promptAskUserQuestionWithReadline,
   validateAskUserQuestionRequest,
+  type AskUserQuestionUiContext,
   type AskUserQuestionRequest,
   type AskUserQuestionResponse,
 } from "../../interaction";
@@ -139,6 +142,11 @@ interface OrchestrationState {
 interface ExternalWorkspaceAssessment {
   kind: "empty" | "non-empty";
   entries: string[];
+}
+
+interface AskUserQuestionToolContext {
+  hasUI?: boolean;
+  ui?: AskUserQuestionUiContext;
 }
 
 function truncateForVerboseLog(text: string, maxChars: number = VERBOSE_LOG_LIMIT): string {
@@ -2042,11 +2050,17 @@ async function askUserQuestionViaTool(
   request: AskUserQuestionRequest,
   interactive: boolean,
   rl: readline.Interface | null,
+  toolContext?: AskUserQuestionToolContext,
 ): Promise<AskUserQuestionResponse> {
   validateAskUserQuestionRequest(request);
 
-  if (interactive && rl) {
-    return promptAskUserQuestionWithReadline(rl, request);
+  if (interactive) {
+    if (toolContext?.hasUI && toolContext.ui) {
+      return promptAskUserQuestionWithUiContext(toolContext.ui, request);
+    }
+    if (rl) {
+      return promptAskUserQuestionWithReadline(rl, request);
+    }
   }
 
   const answers: Record<string, string> = {};
@@ -2492,6 +2506,9 @@ async function runProcessDefinitionPhase(args: {
   const state: { report?: ProcessDefinitionReport } = {};
   const phaseOutputs: string[] = [];
   let session: PiSessionHandle | null = null;
+  const interactiveUiContext = args.interactive && args.rl
+    ? createReadlineAskUserQuestionUiContext(args.rl)
+    : undefined;
   const writeVerbose = (message: string): void => {
     writeVerboseLine(args.verbose, args.json, message);
   };
@@ -2634,9 +2651,17 @@ async function runProcessDefinitionPhase(args: {
       execute: async (
         _toolCallId: string,
         params: AskUserQuestionRequest,
+        _signal?: AbortSignal,
+        _onUpdate?: unknown,
+        toolContext?: AskUserQuestionToolContext,
       ): Promise<ToolResultShape> => {
         writeVerboseData("phase1 tool AskUserQuestion request", params);
-        const response = await askUserQuestionViaTool(params, args.interactive, args.rl);
+        const response = await askUserQuestionViaTool(
+          params,
+          args.interactive,
+          args.rl,
+          toolContext,
+        );
         writeVerboseData("phase1 tool AskUserQuestion response", response);
         emitProgress(
           {
@@ -2725,6 +2750,7 @@ async function runProcessDefinitionPhase(args: {
     thinkingLevel: "low",
     toolsMode: phase1ToolsMode,
     customTools,
+    uiContext: interactiveUiContext,
     systemPrompt: processDefinitionSystemPrompt,
     isolated: true,
     ephemeral: true,
@@ -2776,9 +2802,9 @@ async function runProcessDefinitionPhase(args: {
       writeVerbose(
         "[phase1 recovery] proceeding with the reported process file after a late PI prompt failure",
       );
-    } else {
-      writeVerboseData("phase1 agent output", result.output);
-    }
+      } else {
+        writeVerboseData("phase1 agent output", result.output);
+      }
 
     if (!state.report?.processPath) {
       writeVerboseProcessDefinitionRecovery(args.json);
@@ -3309,9 +3335,17 @@ async function runOrchestrationPhase(args: {
       execute: async (
         _toolCallId: string,
         params: AskUserQuestionRequest,
+        _signal?: AbortSignal,
+        _onUpdate?: unknown,
+        toolContext?: AskUserQuestionToolContext,
       ): Promise<ToolResultShape> => {
         writeVerboseData("phase2 tool AskUserQuestion request", params);
-        const response = await askUserQuestionViaTool(params, args.interactive, args.rl);
+        const response = await askUserQuestionViaTool(
+          params,
+          args.interactive,
+          args.rl,
+          toolContext,
+        );
         state.lastAskUserQuestionResponse = response;
         writeVerboseData("phase2 tool AskUserQuestion response", response);
         return formatToolResult(response, "AskUserQuestion completed.");
@@ -3800,6 +3834,13 @@ async function runOrchestrationPhase(args: {
         }
 
         if (!effectResult && action.kind === "breakpoint") {
+          if (args.interactive && !state.lastAskUserQuestionResponse) {
+            throw new BabysitterRuntimeError(
+              "InteractiveBreakpointDecisionMissing",
+              "Interactive breakpoint results require AskUserQuestion before babysitter_task_post_result.",
+              { category: ErrorCategory.Runtime },
+            );
+          }
           const question =
             (action.taskDef as Record<string, unknown>)?.question as string | undefined ??
             action.taskDef?.title ??
@@ -4048,6 +4089,9 @@ async function runOrchestrationPhase(args: {
     model: args.model,
     toolsMode: "coding",
     customTools,
+    uiContext: args.interactive && args.rl
+      ? createReadlineAskUserQuestionUiContext(args.rl)
+      : undefined,
     appendSystemPrompt: [buildOrchestrationSystemPrompt(args.selectedHarnessName, args.promptContext)],
     ephemeral: true,
   });

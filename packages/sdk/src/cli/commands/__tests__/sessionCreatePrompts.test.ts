@@ -59,6 +59,7 @@ describe("sessionCreatePrompts", () => {
     expect(prompt).toContain("Do not set `task.metadata.bashSandbox`, `task.metadata.isolated`, or `task.metadata.enableCompaction`");
     expect(prompt).toContain("bashSandbox: \"secure\"");
     expect(prompt).toContain("follow a real interview phase");
+    expect(prompt).toContain("AskUserQuestion is the only in-loop way to ask the user");
     expect(prompt).toContain("resolve the active shared process-library");
     expect(prompt).toContain("babysitter_resolve_process_library");
     expect(prompt).toContain("babysitter_search_process_library");
@@ -89,6 +90,7 @@ describe("sessionCreatePrompts", () => {
     const prompt = buildOrchestrationSystemPrompt("pi", context);
     expect(prompt).toContain("Treat pi as the target harness binding");
     expect(prompt).toContain("Follow the babysit workflow directly");
+    expect(prompt).toContain("AskUserQuestion is the in-loop user interaction tool");
     expect(prompt).toContain("built-in coding tools");
     expect(prompt).toContain("respect task-level harness metadata");
     expect(prompt).toContain("babysitter_run_shell_effect");
@@ -120,5 +122,18 @@ describe("sessionCreatePrompts", () => {
     expect(prompt).toContain("call babysitter_report_process_definition exactly once");
     expect(prompt).toContain("Keep generated asset strings syntax-safe");
     expect(prompt).toContain("raw nested template literals");
+  });
+
+  test("phase 1 user prompt reinforces AskUserQuestion for interactive discovery", () => {
+    const prompt = buildProcessDefinitionUserPrompt("create a game", "/tmp/out.mjs", {
+      interactive: true,
+      workspaceAssessment: "empty",
+      workspaceEntries: [],
+    });
+
+    expect(prompt).toContain("Interactive mode. Run the interview step first.");
+    expect(prompt).toContain("Treat this as a greenfield request, but do not skip the interview");
+    expect(prompt).toContain("use AskUserQuestion rather than plain-text questions");
+    expect(prompt).toContain("ask the next highest-signal AskUserQuestion");
   });
 });

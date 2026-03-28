@@ -804,3 +804,162 @@ describe("stop hook stale session fallback (Issue #69)", () => {
     expect(parsed.decision).toBe("block");
   });
 });
+
+// ---------------------------------------------------------------------------
+// Stop hook: breakpoint-only waiting allows exit
+// ---------------------------------------------------------------------------
+
+describe("stop hook allows exit when only breakpoints are pending", () => {
+  let tmpDir: string;
+  let stateDir: string;
+  let runsDir: string;
+
+  beforeEach(async () => {
+    tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "harness-breakpoint-test-"));
+    stateDir = path.join(tmpDir, "state");
+    runsDir = path.join(tmpDir, "runs");
+    await fs.mkdir(stateDir, { recursive: true });
+    await fs.mkdir(runsDir, { recursive: true });
+  });
+
+  afterEach(async () => {
+    await fs.rm(tmpDir, { recursive: true, force: true });
+  });
+
+  function makeSessionState(runId: string) {
+    return {
+      active: true,
+      iteration: 1,
+      maxIterations: 256,
+      runId,
+      startedAt: "2026-01-01T00:00:00Z",
+      lastIterationAt: "2026-01-01T00:00:00Z",
+      iterationTimes: [],
+    };
+  }
+
+  async function createRunWithBreakpoint(runId: string) {
+    const runDir = path.join(runsDir, runId);
+    await fs.mkdir(runDir, { recursive: true });
+    await fs.writeFile(
+      path.join(runDir, "run.json"),
+      JSON.stringify({
+        runId,
+        processId: "test-process",
+        layoutVersion: "2026.01",
+        createdAt: "2026-01-01T00:00:00Z",
+        prompt: "test",
+      }),
+    );
+    await appendEvent({
+      runDir,
+      event: { runId },
+      eventType: "RUN_CREATED",
+    });
+    await appendEvent({
+      runDir,
+      event: {
+        effectId: "bp-001",
+        invocationKey: "test:S000001:bp-task",
+        stepId: "S000001",
+        taskId: "bp-task",
+        taskDefRef: "tasks/bp-001/task.json",
+        kind: "breakpoint",
+        label: "manual",
+      },
+      eventType: "EFFECT_REQUESTED",
+    });
+  }
+
+  async function createRunWithBreakpointAndAgent(runId: string) {
+    const runDir = path.join(runsDir, runId);
+    await fs.mkdir(runDir, { recursive: true });
+    await fs.writeFile(
+      path.join(runDir, "run.json"),
+      JSON.stringify({
+        runId,
+        processId: "test-process",
+        layoutVersion: "2026.01",
+        createdAt: "2026-01-01T00:00:00Z",
+        prompt: "test",
+      }),
+    );
+    await appendEvent({
+      runDir,
+      event: { runId },
+      eventType: "RUN_CREATED",
+    });
+    await appendEvent({
+      runDir,
+      event: {
+        effectId: "bp-001",
+        invocationKey: "test:S000001:bp-task",
+        stepId: "S000001",
+        taskId: "bp-task",
+        taskDefRef: "tasks/bp-001/task.json",
+        kind: "breakpoint",
+        label: "manual",
+      },
+      eventType: "EFFECT_REQUESTED",
+    });
+    await appendEvent({
+      runDir,
+      event: {
+        effectId: "agent-001",
+        invocationKey: "test:S000002:agent-task",
+        stepId: "S000002",
+        taskId: "agent-task",
+        taskDefRef: "tasks/agent-001/task.json",
+        kind: "agent",
+        label: "auto",
+      },
+      eventType: "EFFECT_REQUESTED",
+    });
+  }
+
+  it("allows exit when only breakpoints are pending", async () => {
+    const sessionId = "bp-session-001";
+    const runId = "bp-run-001";
+
+    const filePath = getSessionFilePath(stateDir, sessionId);
+    await writeSessionFile(filePath, makeSessionState(runId), "test prompt");
+    await createRunWithBreakpoint(runId);
+
+    const adapter = createClaudeCodeAdapter();
+    const { stdout } = await withSyntheticStdinAndCapturedStdout(
+      JSON.stringify({ session_id: sessionId }),
+      () => adapter.handleStopHook({
+        stateDir,
+        runsDir,
+        pluginRoot: "",
+        verbose: false,
+      }),
+    );
+
+    const parsed = stdout.trim() ? JSON.parse(stdout.trim()) : {};
+    expect(parsed).toEqual({});
+  });
+
+  it("blocks exit when breakpoints AND other effects are pending", async () => {
+    const sessionId = "bp-session-002";
+    const runId = "bp-run-002";
+
+    const filePath = getSessionFilePath(stateDir, sessionId);
+    await writeSessionFile(filePath, makeSessionState(runId), "test prompt");
+    await createRunWithBreakpointAndAgent(runId);
+
+    const adapter = createClaudeCodeAdapter();
+    const { stdout } = await withSyntheticStdinAndCapturedStdout(
+      JSON.stringify({ session_id: sessionId }),
+      () => adapter.handleStopHook({
+        stateDir,
+        runsDir,
+        pluginRoot: "",
+        verbose: false,
+      }),
+    );
+
+    const parsed = stdout.trim() ? JSON.parse(stdout.trim()) : {};
+    expect(parsed.decision).toBe("block");
+  });
+});

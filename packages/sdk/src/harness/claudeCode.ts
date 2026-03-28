@@ -198,6 +198,16 @@ function countPendingByKind(records: EffectRecord[]): Record<string, number> {
   );
 }
 
+/**
+ * Returns true when every pending effect is a breakpoint (human-approval gate).
+ * Breakpoints require external human action, so the stop hook should allow exit
+ * rather than spinning the orchestration loop uselessly.
+ */
+function isOnlyBreakpoints(pendingByKind: Record<string, number>): boolean {
+  const keys = Object.keys(pendingByKind);
+  return keys.length === 1 && keys[0] === "breakpoint";
+}
+
 // ---------------------------------------------------------------------------
 // Cleanup helper
 // ---------------------------------------------------------------------------
@@ -483,6 +493,7 @@ async function handleStopHookImpl(args: HookHandlerArgs): Promise<number> {
   let runState = "";
   let completionProof = "";
   let pendingKinds = "";
+  let onlyBreakpointsPending = false;
   let entrypointImportPath: string | undefined;
 
   if (runId) {
@@ -521,6 +532,7 @@ async function handleStopHookImpl(args: HookHandlerArgs): Promise<number> {
       if (kindKeys.length > 0) {
         pendingKinds = kindKeys.join(", ");
       }
+      onlyBreakpointsPending = pendingRecords.length > 0 && isOnlyBreakpoints(pendingByKind);
 
       if (hasCompleted) {
         runState = "completed";
@@ -565,6 +577,32 @@ async function handleStopHookImpl(args: HookHandlerArgs): Promise<number> {
       process.stdout.write("{}\n");
       return 0;
     }
+  }
+
+  // 5b. If the run is waiting but ONLY on breakpoints, allow exit.
+  // Breakpoints require human interaction — spinning the orchestration loop
+  // accomplishes nothing and wastes iterations. The user (or an external
+  // system) must resolve breakpoints before the run can proceed.
+  if (runState === "waiting" && onlyBreakpointsPending) {
+    log.info(`Run waiting on breakpoints only (${pendingKinds}) — allowing exit`);
+    if (verbose) {
+      process.stderr.write(
+        `[hook:run stop] Run waiting on breakpoint(s) — allowing exit for human resolution\n`,
+      );
+    }
+    if (runId) {
+      await appendStopHookEvent(path.join(runsDir, runId), {
+        sessionId,
+        iteration: state.iteration,
+        decision: "approve",
+        reason: "breakpoint_waiting",
+        runState,
+        pendingKinds,
+        hasPromise,
+      });
+    }
+    process.stdout.write("{}\n");
+    return 0;
   }
 
   // 6. If completionProof matches promiseValue → complete

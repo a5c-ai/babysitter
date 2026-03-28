@@ -33,6 +33,21 @@ vi.mock("../../../runtime/commitEffectResult", () => ({
   commitEffectResult: vi.fn(),
 }));
 
+vi.mock("../../../interaction", async () => {
+  const actual = await vi.importActual<typeof import("../../../interaction")>("../../../interaction");
+  return {
+    ...actual,
+    promptAskUserQuestionWithReadline: vi.fn(async (_rl, request) => {
+      const firstQuestion = request.questions[0];
+      const key = firstQuestion?.header?.trim() || "Question 1";
+      const answer = firstQuestion?.options?.[0]?.label || "mock answer";
+      return actual.createAskUserQuestionResponse(request, {
+        [key]: answer,
+      });
+    }),
+  };
+});
+
 vi.mock("../../../harness/piWrapper", () => {
   let sessionCounter = 0;
   const createPiSession = vi.fn((options?: { customTools?: Array<Record<string, unknown>> }) => {
@@ -454,6 +469,202 @@ describe("handleSessionCreate", () => {
       expect(phase1Prompt).not.toContain("You are a babysitter process generator");
     });
 
+    it("binds an interactive UI context into the internal PI sessions", async () => {
+      const workspace = await fs.mkdtemp(path.join(os.tmpdir(), "session-create-interactive-ui-"));
+      tempDirs.push(workspace);
+      const generatedPath = path.join(workspace, "generated-process.mjs");
+
+      (discoverHarnesses as Mock).mockResolvedValue([
+        makeDiscoveryResult({ name: "pi" }),
+      ]);
+      (createRun as Mock).mockResolvedValue({
+        runId: "run-interactive-ui",
+        runDir: "/tmp/runs/run-interactive-ui",
+        metadata: {},
+      });
+      (orchestrateIteration as Mock).mockResolvedValue({
+        status: "completed",
+        output: "done",
+      });
+      vi.mocked(createPiSession)
+        .mockImplementationOnce((options?: { customTools?: Array<Record<string, unknown>> }) => {
+          const tools = options?.customTools ?? [];
+          const writeProcess = tools.find((tool) => tool.name === "babysitter_write_process_definition") as {
+            execute?: (toolCallId: string, params: Record<string, unknown>) => Promise<{ details?: unknown }>;
+          } | undefined;
+          const reportProcess = tools.find((tool) => tool.name === "babysitter_report_process_definition") as {
+            execute?: (toolCallId: string, params: Record<string, unknown>) => Promise<{ details?: unknown }>;
+          } | undefined;
+
+          return {
+            initialize: vi.fn().mockResolvedValue(undefined),
+            subscribe: vi.fn(() => () => {}),
+            dispose: vi.fn(),
+            executeBash: vi.fn(async () => ({
+              output: "ok",
+              exitCode: 0,
+              cancelled: false,
+            })),
+            get sessionId() {
+              return "mock-session-id-phase1-interactive-ui";
+            },
+            get isInitialized() {
+              return true;
+            },
+            prompt: vi.fn(async () => {
+              await writeProcess?.execute?.("tool-write-process", {
+                processPath: generatedPath,
+                source: buildMinimalAgentProcessSource(),
+              });
+              await reportProcess?.execute?.("tool-report-process", {
+                processPath: generatedPath,
+                summary: "Generated process",
+              });
+              return { success: true, output: "phase1", exitCode: 0, duration: 1 };
+            }),
+          };
+        })
+        .mockImplementationOnce((options?: { customTools?: Array<Record<string, unknown>> }) => {
+          const tools = options?.customTools ?? [];
+          const runCreate = tools.find((tool) => tool.name === "babysitter_run_create") as {
+            execute?: (toolCallId: string, params: Record<string, unknown>) => Promise<{ details?: unknown }>;
+          } | undefined;
+          const bindSession = tools.find((tool) => tool.name === "babysitter_bind_session") as {
+            execute?: (toolCallId: string, params: Record<string, unknown>) => Promise<{ details?: unknown }>;
+          } | undefined;
+          const runIterate = tools.find((tool) => tool.name === "babysitter_run_iterate") as {
+            execute?: (toolCallId: string, params: Record<string, unknown>) => Promise<{ details?: unknown }>;
+          } | undefined;
+          const finish = tools.find((tool) => tool.name === "babysitter_finish_orchestration") as {
+            execute?: (toolCallId: string, params: Record<string, unknown>) => Promise<{ details?: unknown }>;
+          } | undefined;
+
+          return {
+            initialize: vi.fn().mockResolvedValue(undefined),
+            subscribe: vi.fn(() => () => {}),
+            dispose: vi.fn(),
+            executeBash: vi.fn(async () => ({
+              output: "ok",
+              exitCode: 0,
+              cancelled: false,
+            })),
+            get sessionId() {
+              return "mock-session-id-phase2-interactive-ui";
+            },
+            get isInitialized() {
+              return true;
+            },
+            prompt: vi.fn(async () => {
+              await runCreate?.execute?.("tool-run-create", {});
+              await bindSession?.execute?.("tool-bind-session", {});
+              await runIterate?.execute?.("tool-run-iterate", {});
+              await finish?.execute?.("tool-finish", { summary: "done" });
+              return { success: true, output: "phase2", exitCode: 0, duration: 1 };
+            }),
+          };
+        });
+
+      const code = await handleSessionCreate({
+        prompt: "create a game",
+        workspace,
+        runsDir: "/tmp/runs",
+        json: false,
+        verbose: false,
+        interactive: true,
+      });
+
+      expect(code).toBe(0);
+      expect(vi.mocked(createPiSession).mock.calls[0]?.[0]).toEqual(
+        expect.objectContaining({
+          uiContext: expect.any(Object),
+        }),
+      );
+      expect(vi.mocked(createPiSession).mock.calls[1]?.[0]).toEqual(
+        expect.objectContaining({
+          uiContext: expect.any(Object),
+        }),
+      );
+    });
+
+    it("fails interactive breakpoint posting when AskUserQuestion was skipped", async () => {
+      const workspace = await fs.mkdtemp(path.join(os.tmpdir(), "session-create-interactive-breakpoint-"));
+      tempDirs.push(workspace);
+
+      (discoverHarnesses as Mock).mockResolvedValue([
+        makeDiscoveryResult({ name: "pi" }),
+      ]);
+      (createRun as Mock).mockResolvedValue({
+        runId: "run-breakpoint-ui",
+        runDir: "/tmp/runs/run-breakpoint-ui",
+        metadata: {},
+      });
+      (orchestrateIteration as Mock).mockResolvedValueOnce({
+        status: "waiting",
+        nextActions: [
+          {
+            effectId: "eff-breakpoint",
+            invocationKey: "key-breakpoint",
+            kind: "breakpoint",
+            taskDef: { kind: "breakpoint", title: "Approve the plan?" },
+          },
+        ],
+      });
+      vi.mocked(createPiSession).mockImplementationOnce((options?: { customTools?: Array<Record<string, unknown>> }) => {
+        const tools = options?.customTools ?? [];
+        const runCreate = tools.find((tool) => tool.name === "babysitter_run_create") as {
+          execute?: (toolCallId: string, params: Record<string, unknown>) => Promise<{ details?: unknown }>;
+        } | undefined;
+        const bindSession = tools.find((tool) => tool.name === "babysitter_bind_session") as {
+          execute?: (toolCallId: string, params: Record<string, unknown>) => Promise<{ details?: unknown }>;
+        } | undefined;
+        const runIterate = tools.find((tool) => tool.name === "babysitter_run_iterate") as {
+          execute?: (toolCallId: string, params: Record<string, unknown>) => Promise<{ details?: unknown }>;
+        } | undefined;
+        const taskPost = tools.find((tool) => tool.name === "babysitter_task_post_result") as {
+          execute?: (toolCallId: string, params: Record<string, unknown>) => Promise<{ details?: unknown }>;
+        } | undefined;
+
+        return {
+          initialize: vi.fn().mockResolvedValue(undefined),
+          subscribe: vi.fn(() => () => {}),
+          dispose: vi.fn(),
+          executeBash: vi.fn(async () => ({
+            output: "ok",
+            exitCode: 0,
+            cancelled: false,
+          })),
+          get sessionId() {
+            return "mock-session-id-interactive-breakpoint";
+          },
+          get isInitialized() {
+            return true;
+          },
+          prompt: vi.fn(async () => {
+            await runCreate?.execute?.("tool-run-create", {});
+            await bindSession?.execute?.("tool-bind-session", {});
+            const iterationResult = await runIterate?.execute?.("tool-run-iterate", {});
+            const details = iterationResult?.details as { nextActions?: Array<{ effectId?: string }> } | undefined;
+            const effectId = details?.nextActions?.[0]?.effectId;
+            if (effectId) {
+              await taskPost?.execute?.("tool-post-breakpoint", { effectId });
+            }
+            return { success: true, output: "phase2", exitCode: 0, duration: 1 };
+          }),
+        };
+      });
+
+      const code = await handleSessionCreate({
+        processPath: "/tmp/p.js",
+        runsDir: "/tmp/runs",
+        json: false,
+        verbose: false,
+        interactive: true,
+      });
+
+      expect(code).toBe(1);
+      expect(commitEffectResult).not.toHaveBeenCalled();
+    });
+
     it("continues phase 2 after a late bootstrap prompt failure and preserves the original user prompt", async () => {
       const workspace = await fs.mkdtemp(path.join(os.tmpdir(), "session-create-phase2-late-failure-"));
       tempDirs.push(workspace);
@@ -511,6 +722,9 @@ describe("handleSessionCreate", () => {
           const runIterate = tools.find((tool) => tool.name === "babysitter_run_iterate") as {
             execute?: (toolCallId: string, params: Record<string, unknown>) => Promise<{ details?: unknown }>;
           } | undefined;
+          const finish = tools.find((tool) => tool.name === "babysitter_finish_orchestration") as {
+            execute?: (toolCallId: string, params: Record<string, unknown>) => Promise<{ details?: unknown }>;
+          } | undefined;
 
           return {
             initialize: vi.fn().mockResolvedValue(undefined),
@@ -548,8 +762,9 @@ describe("handleSessionCreate", () => {
                 await bindSession?.execute?.("tool-bind-session", {});
                 return { success: true, output: "bootstrap recovered", exitCode: 0, duration: 1 };
               }
-              if (phase2PromptCount === 3) {
+              if (phase2PromptCount >= 3) {
                 await runIterate?.execute?.("tool-run-iterate", {});
+                await finish?.execute?.("tool-finish", { summary: "done" });
                 return { success: true, output: "iteration complete", exitCode: 0, duration: 1 };
               }
               return { success: true, output: "noop", exitCode: 0, duration: 1 };
@@ -583,7 +798,7 @@ describe("handleSessionCreate", () => {
           inputs: { prompt: "create a game" },
         }),
       );
-      expect(phase2PromptCount).toBe(3);
+      expect(phase2PromptCount).toBe(4);
     });
 
     it("fails phase 2 when pi returns the known post-turn failure before any progress", async () => {

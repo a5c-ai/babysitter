@@ -109,10 +109,11 @@ export function buildProcessDefinitionSystemPrompt(
     "",
     "Rules:",
     "- This phase is unbound. Do not create a run, bind a session, iterate a run, or post task results.",
+    "- In interactive mode, AskUserQuestion is the only in-loop way to ask the user for clarification. If you need missing requirements, call AskUserQuestion instead of asking in plain text.",
     "- Use the AskUserQuestion tool when clarification is useful. Ask focused, high-signal questions in batches when possible.",
     "- Before authoring the process in any mode, resolve the active shared process-library and conduct a real search against it. In this built-in PI path, use `babysitter_resolve_process_library`, `babysitter_search_process_library`, and `babysitter_read_process_library_file`; those tools are the internal `session:create` harness surface for process-library work. Outside this built-in path, use `babysitter process-library:active --json`, then search the returned `binding.dir`. Do not skip this process-library search step.",
     "- Treat `binding.dir` as the active process-library root that must be searched first. If you need the cloned repo root itself for adjacent material, use `defaultSpec.cloneDir`. Treat `reference/` under the active root or `defaultSpec.referenceRoot` as the canonical reference area.",
-    "- In interactive mode, follow a real interview phase: inspect the repo/workspace state first, inspect the most relevant process-library references through the active binding, then ask only the next highest-signal question. Do not plan more than one interview step ahead.",
+    "- In interactive mode, follow a real interview phase: inspect the repo/workspace state first, inspect the most relevant process-library references through the active binding, then ask only the next highest-signal AskUserQuestion when material ambiguity remains. Do not plan more than one interview step ahead.",
     "- In non-interactive mode, skip user questions but still parse the request, inspect the repo/workspace structure, resolve the active process-library root, and search that active library for the most relevant specialization or methodology before authoring the process.",
     "- Research the workspace before finalizing the process. Use your available read/search/bash/write tools as needed.",
     "- Treat the provided workspace as the only relevant filesystem root unless the user explicitly points you somewhere else.",
@@ -159,7 +160,7 @@ export function buildProcessDefinitionUserPrompt(
 
   const lines = [
     interactive
-      ? "Interactive mode. Ask focused clarification questions only when they materially improve the process."
+      ? "Interactive mode. Run the interview step first. If material requirements are missing, use AskUserQuestion rather than plain-text questions."
       : "Non-interactive mode. Do not call AskUserQuestion; infer missing details from the request and workspace state.",
     "",
     `User request: ${userPrompt}`,
@@ -167,19 +168,30 @@ export function buildProcessDefinitionUserPrompt(
   ];
 
   if (workspaceAssessment === "empty") {
+    lines.push(
+      "Workspace assessment: empty.",
+      `Workspace entries: ${workspaceSummary}`,
+    );
+    if (interactive) {
       lines.push(
-        "Workspace assessment: empty.",
-        `Workspace entries: ${workspaceSummary}`,
-        "Treat this as a greenfield request and move straight to authoring the process.",
-        "You still must resolve the active shared process-library and search it before writing the process.",
-        "Start with the repo/workspace state, then inspect only the most relevant local babysitter process references or discover output before you author the process.",
-        "Do not inspect unrelated directories, home-directory configs, or irrelevant global skill/plugin folders.",
-        "Keep the process practical for a brand-new workspace: plan, scaffold, implement, verify.",
-        "Write a real babysitter process, not a direct one-shot script. The top-level `process()` should orchestrate work through `defineTask(...)` and `ctx.task(...)`.",
-        "Put the main implementation in one or more `agent` tasks. Use `shell` tasks only for concrete runnable verification or tooling commands.",
-        "Do not add internal worker guardrail metadata such as `task.metadata.bashSandbox`, `task.metadata.isolated`, or `task.metadata.enableCompaction` unless the task truly requires them.",
-        "Keep generated asset strings syntax-safe. If the process writes JS/HTML/CSS files, avoid raw nested template literals inside the process module; prefer arrays joined with \"\\n\", String.raw, or escaped inner backticks and \\${...} sequences.",
+        "Treat this as a greenfield request, but do not skip the interview just because the workspace is empty.",
+        "If material product or delivery constraints remain ambiguous after workspace and process-library inspection, ask the next highest-signal AskUserQuestion before you finalize the process.",
       );
+    } else {
+      lines.push(
+        "Treat this as a greenfield request and move straight to authoring the process.",
+      );
+    }
+    lines.push(
+      "You still must resolve the active shared process-library and search it before writing the process.",
+      "Start with the repo/workspace state, then inspect only the most relevant local babysitter process references or discover output before you author the process.",
+      "Do not inspect unrelated directories, home-directory configs, or irrelevant global skill/plugin folders.",
+      "Keep the process practical for a brand-new workspace: plan, scaffold, implement, verify.",
+      "Write a real babysitter process, not a direct one-shot script. The top-level `process()` should orchestrate work through `defineTask(...)` and `ctx.task(...)`.",
+      "Put the main implementation in one or more `agent` tasks. Use `shell` tasks only for concrete runnable verification or tooling commands.",
+      "Do not add internal worker guardrail metadata such as `task.metadata.bashSandbox`, `task.metadata.isolated`, or `task.metadata.enableCompaction` unless the task truly requires them.",
+      "Keep generated asset strings syntax-safe. If the process writes JS/HTML/CSS files, avoid raw nested template literals inside the process module; prefer arrays joined with \"\\n\", String.raw, or escaped inner backticks and \\${...} sequences.",
+    );
   } else if (workspaceAssessment === "non-empty") {
     lines.push(
       `Workspace assessment: non-empty (${workspaceSummary}).`,
@@ -208,11 +220,12 @@ export function buildOrchestrationSystemPrompt(
     "Rules:",
     `- Treat ${selectedHarnessName} as the target harness binding for this orchestration session.`,
     "- You have your built-in coding tools (bash/read/write/edit/search) plus the custom babysitter tools below. Use them to do the orchestration work itself.",
+    "- AskUserQuestion is the in-loop user interaction tool for this phase. In interactive mode, use it instead of asking the user in plain text.",
     "- Call babysitter_run_create to create the run if it does not already exist.",
     "- Immediately call babysitter_bind_session after run creation and before the first orchestration iteration.",
     "- Work in bounded turns. In each turn, call babysitter_run_iterate at most once unless the prompt explicitly tells you otherwise.",
     "- When babysitter_run_iterate reports pending effects, resolve each effect through tools.",
-    "- For breakpoint effects, use AskUserQuestion in interactive mode. In non-interactive mode, select the best option according to the user intent and current context. Then call babysitter_task_post_result.",
+    "- For breakpoint effects, use AskUserQuestion in interactive mode with explicit approval options, then call babysitter_task_post_result. Never auto-approve or fabricate an approval response. In non-interactive mode, select the best option according to the user intent and current context, then call babysitter_task_post_result.",
     "- For `shell` effects, prefer `babysitter_run_shell_effect` so the command executes on an internal PI worker that respects task metadata. Use raw bash/coding tools only when the effect payload clearly requires manual inspection or direct intervention before posting the explicit outcome with babysitter_task_post_result.",
     "- For `agent`, `node`, and `orchestrator_task` effects, prefer babysitter_dispatch_effect_harness so the pending effect is fulfilled through the intended harness wrapper. These babysitter effect tools are the built-in internal `session:create` harness surface for phase 2. If you fulfill an effect directly with your own coding tools, you must still call babysitter_task_post_result with the explicit outcome.",
     "- Do not rely on a hidden host-side effect executor. Perform or dispatch each effect intentionally based on the effect payload you received from babysitter_run_iterate.",
@@ -296,7 +309,7 @@ export function buildOrchestrationTurnPrompt(args: {
     lines.push("Handling rules:");
     lines.push("- For `shell` effects, prefer babysitter_run_shell_effect, then call babysitter_task_post_result with explicit status/stdout/stderr/value fields.");
     lines.push("- For `agent`, `node`, or `orchestrator_task` effects, prefer babysitter_dispatch_effect_harness unless direct coding-tool execution is clearly better for the requested effect.");
-    lines.push("- For `breakpoint` effects, use AskUserQuestion in interactive mode or choose the best option non-interactively, then post the result.");
+    lines.push("- For `breakpoint` effects, use AskUserQuestion in interactive mode with explicit approval options or choose the best option non-interactively, then post the result.");
   } else {
     lines.push("");
     lines.push("Call babysitter_run_iterate exactly once in this turn.");

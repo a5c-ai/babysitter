@@ -7,6 +7,8 @@
  * so the SDK core remains harness-agnostic.
  */
 
+import type { AskUserQuestionUiContext } from "../interaction";
+
 // ---------------------------------------------------------------------------
 // Harness capability enum
 // ---------------------------------------------------------------------------
@@ -118,6 +120,8 @@ export interface PiSessionOptions {
   toolsMode?: "default" | "coding" | "readonly";
   /** Custom tool definitions to register with the session. */
   customTools?: unknown[];
+  /** Optional extension-style UI context exposed to custom tools inside the PI loop. */
+  uiContext?: AskUserQuestionUiContext;
   /** Replace the discovered system prompt with a custom one. */
   systemPrompt?: string;
   /** Append custom system prompt instructions. */
