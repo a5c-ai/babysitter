@@ -64,6 +64,20 @@ const mockCreateSecureBashBackend = vi.fn(async (options?: { mode?: string }) =>
     promptNote: "secure sandbox note",
   };
 });
+const mockRegistryGetAll = vi.fn(() => []);
+const mockRegistryFind = vi.fn(() => undefined);
+const mockRegistryGetApiKey = vi.fn(() => Promise.resolve<string | null>(null));
+const mockRegistryHasConfiguredAuth = vi.fn(() => false);
+const mockRegistryGetApiKeyAndHeaders = vi.fn(() => Promise.resolve({ ok: false as const, error: "missing auth" }));
+const mockRegistryGetApiKeyForProvider = vi.fn(() => Promise.resolve<string | undefined>(undefined));
+const mockModelRegistryFactory = vi.fn(() => ({
+  getAll: mockRegistryGetAll,
+  find: mockRegistryFind,
+  getApiKey: mockRegistryGetApiKey,
+  hasConfiguredAuth: mockRegistryHasConfiguredAuth,
+  getApiKeyAndHeaders: mockRegistryGetApiKeyAndHeaders,
+  getApiKeyForProvider: mockRegistryGetApiKeyForProvider,
+}));
 
 vi.mock("@mariozechner/pi-coding-agent", () => ({
   createAgentSession: (...args: unknown[]) => mockCreateAgentSession(...args),
@@ -71,11 +85,9 @@ vi.mock("@mariozechner/pi-coding-agent", () => ({
   AuthStorage: {
     create: () => ({}),
   },
-  ModelRegistry: class {
-    getAll() { return []; }
-    find() { return undefined; }
-    getApiKey() { return Promise.resolve(null); }
-  },
+  ModelRegistry: vi.fn(function MockModelRegistry() {
+    return mockModelRegistryFactory();
+  }),
   SessionManager: {
     inMemory: mockSessionManagerInMemory,
   },
@@ -129,6 +141,27 @@ beforeEach(() => {
   mockCreateReadOnlyTools.mockClear();
   mockCreateSecureBashBackend.mockClear();
   mockSecureBackendDispose.mockClear();
+  mockRegistryGetAll.mockReset();
+  mockRegistryGetAll.mockReturnValue([]);
+  mockRegistryFind.mockReset();
+  mockRegistryFind.mockReturnValue(undefined);
+  mockRegistryGetApiKey.mockReset();
+  mockRegistryGetApiKey.mockResolvedValue(null);
+  mockRegistryHasConfiguredAuth.mockReset();
+  mockRegistryHasConfiguredAuth.mockReturnValue(false);
+  mockRegistryGetApiKeyAndHeaders.mockReset();
+  mockRegistryGetApiKeyAndHeaders.mockResolvedValue({ ok: false, error: "missing auth" });
+  mockRegistryGetApiKeyForProvider.mockReset();
+  mockRegistryGetApiKeyForProvider.mockResolvedValue(undefined);
+  mockModelRegistryFactory.mockReset();
+  mockModelRegistryFactory.mockImplementation(() => ({
+    getAll: mockRegistryGetAll,
+    find: mockRegistryFind,
+    getApiKey: mockRegistryGetApiKey,
+    hasConfiguredAuth: mockRegistryHasConfiguredAuth,
+    getApiKeyAndHeaders: mockRegistryGetApiKeyAndHeaders,
+    getApiKeyForProvider: mockRegistryGetApiKeyForProvider,
+  }));
   eventListeners = [];
 });
 
@@ -243,6 +276,44 @@ describe("PiSessionHandle", () => {
           cwd: "/tmp/project",
           thinkingLevel: "high",
           agentDir: "/custom/agent",
+        }),
+      );
+    });
+
+    test("supports modern ModelRegistry implementations that do not expose getApiKey()", async () => {
+      mockRegistryGetAll.mockReturnValue([
+        {
+          id: "gpt-5.4",
+          provider: "openai-responses",
+          api: "openai-responses",
+          baseUrl: "https://api.openai.com/v1",
+        },
+      ]);
+      mockRegistryHasConfiguredAuth.mockReturnValue(true);
+      mockModelRegistryFactory.mockImplementation(() => ({
+        getAll: mockRegistryGetAll,
+        find: mockRegistryFind,
+        hasConfiguredAuth: mockRegistryHasConfiguredAuth,
+        getApiKeyAndHeaders: mockRegistryGetApiKeyAndHeaders,
+        getApiKeyForProvider: mockRegistryGetApiKeyForProvider,
+      }));
+      mockPrompt.mockImplementation(async () => {
+        emitEvent({ type: "agent_end" });
+      });
+      mockGetLastAssistantText.mockReturnValue("ok");
+
+      const session = createPiSession({
+        workspace: "/tmp/project",
+        model: "gpt-5.4",
+      });
+      await session.prompt("use explicit model");
+
+      expect(mockCreateAgentSession).toHaveBeenCalledWith(
+        expect.objectContaining({
+          model: expect.objectContaining({
+            id: "gpt-5.4",
+            provider: "openai-responses",
+          }),
         }),
       );
     });

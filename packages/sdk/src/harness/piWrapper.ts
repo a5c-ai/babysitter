@@ -30,7 +30,15 @@ export type PiEventListener = (event: PiSessionEvent) => void;
 interface PiModelRegistry {
   find(provider: string, modelId: string): PiModelEntry | undefined;
   getAll(): PiModelEntry[];
-  getApiKey(model: PiModelEntry): Promise<string | null>;
+  getApiKey?(model: PiModelEntry): Promise<string | null>;
+  hasConfiguredAuth?(model: PiModelEntry): boolean;
+  getApiKeyAndHeaders?(model: PiModelEntry): Promise<{
+    ok: boolean;
+    apiKey?: string;
+    headers?: Record<string, string>;
+    error?: string;
+  }>;
+  getApiKeyForProvider?(provider: string): Promise<string | undefined>;
 }
 
 interface PiModelEntry {
@@ -220,6 +228,36 @@ function extractAssistantFailure(messages: unknown[] | undefined): string | unde
   }
 
   return undefined;
+}
+
+async function modelHasUsableAuth(
+  registry: PiModelRegistry,
+  model: PiModelEntry,
+): Promise<boolean> {
+  if (typeof registry.hasConfiguredAuth === "function") {
+    return registry.hasConfiguredAuth(model);
+  }
+
+  if (typeof registry.getApiKey === "function") {
+    const key = await registry.getApiKey(model);
+    return Boolean(key);
+  }
+
+  if (typeof registry.getApiKeyAndHeaders === "function") {
+    const result = await registry.getApiKeyAndHeaders(model);
+    return Boolean(
+      result.ok &&
+      ((typeof result.apiKey === "string" && result.apiKey.length > 0) ||
+        (result.headers && Object.keys(result.headers).length > 0)),
+    );
+  }
+
+  if (typeof registry.getApiKeyForProvider === "function") {
+    const key = await registry.getApiKeyForProvider(model.provider);
+    return Boolean(key);
+  }
+
+  return false;
 }
 
 // ---------------------------------------------------------------------------
@@ -581,8 +619,7 @@ export class PiSessionHandle {
         // Prefer models with a working API key
         for (const m of all) {
           if (m.id === modelStr || m.id === modelStr.split(":").pop()) {
-            const key = await registry.getApiKey(m);
-            if (key) {
+            if (await modelHasUsableAuth(registry, m)) {
               resolved = m;
               break;
             }
