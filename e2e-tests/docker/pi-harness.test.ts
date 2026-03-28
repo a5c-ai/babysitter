@@ -277,11 +277,11 @@ describe("Pi harness session binding tests", () => {
 // ============================================================================
 
 describe("Pi plugin package structural tests", () => {
-  test("plugins/babysitter-pi/package.json exists and has name babysitter-pi", () => {
+  test("plugins/babysitter-pi/package.json exists and has scoped npm package name", () => {
     const name = dockerExec(
       `node -e "console.log(JSON.parse(require('fs').readFileSync('/app/plugins/babysitter-pi/package.json','utf8')).name)"`,
     ).trim();
-    expect(name).toBe("babysitter-pi");
+    expect(name).toBe("@a5c-ai/babysitter-pi");
   });
 
   test("plugins/babysitter-pi/extensions/babysitter/index.ts exists", () => {

@@ -31,19 +31,27 @@ describeCodex("Codex Docker E2E", () => {
     const babysitterVersion = dockerExec("babysitter --version").trim();
     const skillManifest = dockerExec(`test -f ${CODEX_SKILL_DIR}/SKILL.md && echo ok`).trim();
     const repoLocalSkillTemplate = dockerExec(`test -f ${CODEX_SKILL_DIR}/.codex/skills/babysit/SKILL.md && echo ok`).trim();
-    const stopHook = dockerExec(`test -f ${CODEX_SKILL_DIR}/.codex/hooks/babysitter-stop-hook.sh && echo ok`).trim();
-    const callPrompt = dockerExec("test -f /home/codex/.codex/prompts/call.md && echo ok").trim();
-    const planPrompt = dockerExec("test -f /home/codex/.codex/prompts/plan.md && echo ok").trim();
-    const resumePrompt = dockerExec("test -f /home/codex/.codex/prompts/resume.md && echo ok").trim();
+    const globalStopHook = dockerExec("test -f /home/codex/.codex/hooks/babysitter-stop-hook.sh && echo ok").trim();
+    const globalHooksConfig = dockerExec("test -f /home/codex/.codex/hooks.json && echo ok").trim();
+    const callSkill = dockerExec("test -f /home/codex/.codex/skills/call/SKILL.md && echo ok").trim();
+    const planSkill = dockerExec("test -f /home/codex/.codex/skills/plan/SKILL.md && echo ok").trim();
+    const resumeSkill = dockerExec("test -f /home/codex/.codex/skills/resume/SKILL.md && echo ok").trim();
+    const callPromptRemoved = dockerExec("if [ ! -f /home/codex/.codex/prompts/call.md ]; then echo ok; fi").trim();
+    const planPromptRemoved = dockerExec("if [ ! -f /home/codex/.codex/prompts/plan.md ]; then echo ok; fi").trim();
+    const resumePromptRemoved = dockerExec("if [ ! -f /home/codex/.codex/prompts/resume.md ]; then echo ok; fi").trim();
 
     expect(codexVersion).toBeTruthy();
     expect(babysitterVersion).toMatch(/^\d+\.\d+\.\d+$/);
     expect(skillManifest).toBe("ok");
     expect(repoLocalSkillTemplate).toBe("ok");
-    expect(stopHook).toBe("ok");
-    expect(callPrompt).toBe("ok");
-    expect(planPrompt).toBe("ok");
-    expect(resumePrompt).toBe("ok");
+    expect(globalStopHook).toBe("ok");
+    expect(globalHooksConfig).toBe("ok");
+    expect(callSkill).toBe("ok");
+    expect(planSkill).toBe("ok");
+    expect(resumeSkill).toBe("ok");
+    expect(callPromptRemoved).toBe("ok");
+    expect(planPromptRemoved).toBe("ok");
+    expect(resumePromptRemoved).toBe("ok");
   });
 
   test("runs a full babysitter orchestration with real Codex through the hook model", () => {

@@ -8,6 +8,7 @@ const { spawnSync } = require("child_process");
 const HOME = process.env.HOME || "/home/codex";
 const WORKSPACE = "/workspace/codex-full-run";
 const CODEX_HOME = process.env.CODEX_HOME || path.join(HOME, ".codex");
+const HOOKS_DIR = path.join(CODEX_HOME, "hooks");
 const SKILL_DIR = path.join(CODEX_HOME, "skills", "babysit");
 const PROCESS_PATH = path.join(WORKSPACE, "ci-codex-process.js");
 const AGENTS_PATH = path.join(WORKSPACE, "AGENTS.md");
@@ -186,8 +187,7 @@ function workspaceAgents() {
   ].join("\n");
 }
 
-function workspaceHooksConfig(skillDir) {
-  const hooksDir = path.join(skillDir, ".codex", "hooks");
+function workspaceHooksConfig(hooksDir) {
   return {
     hooks: {
       SessionStart: [
@@ -611,9 +611,9 @@ function collectTaskSummaries(runDir) {
 }
 
 function main() {
-  if (!fs.existsSync(path.join(SKILL_DIR, ".codex", "hooks", "babysitter-stop-hook.sh"))) {
-    fail("Installed babysit skill is missing stop hook script", {
-      expectedPath: path.join(SKILL_DIR, ".codex", "hooks", "babysitter-stop-hook.sh"),
+  if (!fs.existsSync(path.join(HOOKS_DIR, "babysitter-stop-hook.sh"))) {
+    fail("Installed Codex global hooks are missing the stop hook script", {
+      expectedPath: path.join(HOOKS_DIR, "babysitter-stop-hook.sh"),
     });
   }
 
@@ -624,7 +624,7 @@ function main() {
   ensureDir(CODEX_HOME);
   writeFile(WORKSPACE_CONFIG_PATH, workspaceConfig(provider));
   writeFile(HOME_CONFIG_PATH, workspaceConfig(provider));
-  writeFile(HOOKS_PATH, JSON.stringify(workspaceHooksConfig(SKILL_DIR), null, 2));
+  writeFile(HOOKS_PATH, JSON.stringify(workspaceHooksConfig(HOOKS_DIR), null, 2));
   writeFile(AGENTS_PATH, workspaceAgents());
   writeFile(PROCESS_PATH, processSource());
   writeFile(ENV_FILE_PATH, "");
@@ -758,6 +758,7 @@ function main() {
     runId,
     runDir,
     installedSkillDir: SKILL_DIR,
+    installedHooksDir: HOOKS_DIR,
     provider,
     hookModel: "codex-hooks",
     hooksConfigPath: HOOKS_PATH,
