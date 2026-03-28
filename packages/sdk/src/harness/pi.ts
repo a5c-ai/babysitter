@@ -22,10 +22,6 @@ import {
   installCliViaNpm,
   runPackageBinaryViaNpx,
 } from "./installSupport";
-import {
-  BabysitterRuntimeError,
-  ErrorCategory,
-} from "../runtime/exceptions";
 
 function resolvePiPluginRoot(
   args: { pluginRoot?: string } = {},

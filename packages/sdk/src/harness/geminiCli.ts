@@ -61,10 +61,6 @@ import {
   isGeminiPluginInstalled,
   runPackageBinaryViaNpx,
 } from "./installSupport";
-import {
-  BabysitterRuntimeError,
-  ErrorCategory,
-} from "../runtime/exceptions";
 
 // ---------------------------------------------------------------------------
 // Constants

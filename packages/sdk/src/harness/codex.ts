@@ -8,7 +8,7 @@
  */
 
 import * as path from "node:path";
-import { appendFileSync, existsSync, readFileSync } from "node:fs";
+import { appendFileSync, readFileSync } from "node:fs";
 import { Readable } from "node:stream";
 import { createClaudeCodeAdapter } from "./claudeCode";
 import {
@@ -27,17 +27,11 @@ import type {
   HarnessInstallResult,
 } from "./types";
 import {
-  execFilePromise,
   getInstalledCodexSkillDir,
   installCliViaNpm,
   isCodexPluginInstalled,
-  renderCommand,
   runPackageBinaryViaNpx,
 } from "./installSupport";
-import {
-  BabysitterRuntimeError,
-  ErrorCategory,
-} from "../runtime/exceptions";
 
 function resolveCodexPluginRoot(
   args: { pluginRoot?: string } = {},
