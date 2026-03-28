@@ -209,12 +209,13 @@ export function createReadlineAskUserQuestionUiContext(
       for (const [index, option] of options.entries()) {
         process.stderr.write(`  ${index + 1}. ${option}\n`);
       }
-      while (true) {
+      let matched: AskUserQuestionOption | undefined;
+      while (!matched) {
         const answer = await askLine(rl, "Choose an option (number or label)");
         if (!answer) {
           return undefined;
         }
-        const matched = resolveOption(answer, options.map((label) => ({ label })));
+        matched = resolveOption(answer, options.map((label) => ({ label })));
         if (matched) {
           return matched.label;
         }
@@ -247,37 +248,41 @@ export async function promptAskUserQuestionWithUiContext(
     const options = question.options ?? [];
 
     if (options.length === 0) {
-      while (true) {
+      let resolved = false;
+      while (!resolved) {
         const answer = (await ui.input(
           buildUiTitle(question),
           question.required ? "Answer (required)" : "Answer",
         ))?.trim();
         if (answer) {
           answers[key] = answer;
-          break;
+          resolved = true;
+          continue;
         }
         if (!question.required) {
           answers[key] = "";
-          break;
+          resolved = true;
         }
       }
       continue;
     }
 
     if (question.multiSelect) {
-      while (true) {
+      let resolved = false;
+      while (!resolved) {
         const rawAnswer = (await ui.input(
           buildUiTitle(question),
           "Enter one or more options (numbers or labels, comma-separated)",
         ))?.trim() ?? "";
         if (!rawAnswer && !question.required) {
           answers[key] = "";
-          break;
+          resolved = true;
+          continue;
         }
         const parsed = parseOptionAnswer(rawAnswer, question);
         if (parsed !== undefined) {
           answers[key] = parsed;
-          break;
+          resolved = true;
         }
       }
       continue;
@@ -288,7 +293,8 @@ export async function promptAskUserQuestionWithUiContext(
     const selectOptions = allowOther
       ? [...optionLabels, "Other (type a custom answer)"]
       : optionLabels;
-    while (true) {
+    let resolved = false;
+    while (!resolved) {
       const selection = await ui.select(
         buildUiTitle(question),
         selectOptions,
@@ -298,7 +304,8 @@ export async function promptAskUserQuestionWithUiContext(
           continue;
         }
         answers[key] = "";
-        break;
+        resolved = true;
+        continue;
       }
       if (allowOther && selection === "Other (type a custom answer)") {
         const other = (await ui.input(
@@ -307,11 +314,12 @@ export async function promptAskUserQuestionWithUiContext(
         ))?.trim();
         if (other) {
           answers[key] = other;
-          break;
+          resolved = true;
+          continue;
         }
         if (!question.required) {
           answers[key] = "";
-          break;
+          resolved = true;
         }
         continue;
       }
@@ -321,7 +329,7 @@ export async function promptAskUserQuestionWithUiContext(
       });
       if (parsed !== undefined) {
         answers[key] = parsed;
-        break;
+        resolved = true;
       }
     }
   }
