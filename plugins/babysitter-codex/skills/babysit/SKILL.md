@@ -15,6 +15,18 @@ running on native Windows, do not yield the turn and wait for the Stop hook.
 Keep driving the Babysitter loop in the current turn until the run completes or
 you hit a real user breakpoint that requires chat input.
 
+## Non-Negotiables
+
+- Preserve user intent over speed. Never optimize for "get any completion proof"
+  at the expense of the requested scope, quality, or process style.
+- Do not create temporary/minimal throwaway processes to force completion unless
+  the user explicitly approves a reduced-scope recovery path.
+- If blocked, repair the current run/session first. Only switch strategy after
+  stating the blocker and getting user approval when the new strategy changes
+  intent or scope.
+- Use the Babysitter orchestration model end-to-end. Do not bypass with ad-hoc
+  execution, fake outputs, or side workflows that are not represented as tasks.
+
 ## Dependencies
 
 ### Babysitter SDK and CLI
@@ -188,6 +200,21 @@ After the process is created and before creating the run:
 - **Non-interactive mode**: proceed directly to creating the run without user
   confirmation.
 
+#### Intent Fidelity Checks (required before `run:create`)
+
+Before calling `run:create`, verify and document in your working notes:
+
+1. The process scope matches the user prompt (no silent scope cuts).
+2. The process structure follows library style/composition patterns rather than
+   a one-off minimal flow.
+3. Quality gates exist (verification/refinement loops, integration checks,
+   and/or breakpoints appropriate for the task).
+4. Any scope reduction, simplification, or recovery tradeoff is explicitly
+   approved by the user before execution.
+
+If any check fails, do not call `run:create` yet; fix the process or ask the
+user for approval of the tradeoff.
+
 **Common mistakes to avoid:**
 - wrong: skipping repo/process-library research before writing the process
 - wrong: bypassing the orchestration model with helper scripts or inline logic
@@ -321,6 +348,16 @@ IMPORTANT:
 
 #### 5.1 Breakpoint Handling
 
+##### 5.1.0 Mode Detection and Breakpoint Policy
+
+- If the user is present in chat, default to interactive breakpoint handling.
+- Use non-interactive handling only when execution context is explicitly
+  non-interactive (for example no question tool / explicit non-interactive run).
+- Never auto-approve breakpoints when mode is ambiguous. Treat ambiguity as
+  interactive and ask explicitly.
+- Any mode switch that changes approval behavior must be stated explicitly in
+  the run notes.
+
 ##### 5.1.1 Interactive mode
 
 Ask the user explicitly for approval. Include explicit approve/reject options
@@ -444,6 +481,11 @@ Common mistakes to avoid:
 - correct: Calling run:iterate once, then stopping and letting the hook call you
   back for the next iteration until completion.
 
+On native Windows, an in-turn loop across `run:iterate` -> `task:list` ->
+effect execution -> `task:post` is expected and valid because hooks do not
+resume the session. This is not considered bypassing the orchestration model as
+long as each iteration/effect is handled through the CLI and run journal.
+
 ### 8. Completion Proof
 
 When the run is completed, the CLI will emit a `completionProof` value in the
@@ -508,7 +550,7 @@ export const agentTask = defineTask('agent-scorer', (args, taskCtx) => ({
 
   io: {
     inputJsonPath: `tasks/${taskCtx.effectId}/input.json`,
-    outputJsonPath: `tasks/${taskCtx.effectId}/result.json`
+    outputJsonPath: `tasks/${taskCtx.effectId}/output.json`
   }
 }));
 ```
@@ -544,7 +586,7 @@ export const skillTask = defineTask('analyzer-skill', (args, taskCtx) => ({
 
   io: {
     inputJsonPath: `tasks/${taskCtx.effectId}/input.json`,
-    outputJsonPath: `tasks/${taskCtx.effectId}/result.json`
+    outputJsonPath: `tasks/${taskCtx.effectId}/output.json`
   }
 }));
 ```
@@ -595,6 +637,19 @@ $CLI run:iterate <runId> --json --iteration <n> --plugin-root "${CODEX_PLUGIN_RO
 If at any point the run fails due to SDK issues or corrupted state or journal,
 analyze the error and the journal events. Recover the state and journal to the
 last known good state, adapt, and try to continue the run.
+
+### Failure Protocol (required)
+
+When blocked or failed, follow this order:
+
+1. Report the concrete blocker and root cause (command/output based, not vague).
+2. Attempt repair of current run/session/journal first.
+3. Present recovery options when strategy changes intent/scope:
+   - Option A: continue intent-faithful repair path (recommended)
+   - Option B: reduced-scope fallback (requires explicit user approval)
+4. Do not create a new simplified process without explicit approval if it
+   reduces scope or quality expectations.
+5. Resume orchestration only after the chosen recovery path is explicit.
 
 ## Process Creation Guidelines and methodologies
 
@@ -709,8 +764,7 @@ performing a delegated task as a subagent, you must actually perform the task
 yourself and not orchestrate or babysit.
 
 CRITICAL RULE: Never build a wrapper, python, or helper scripts to orchestrate
-the runs. Use the CLI to drive the orchestration loop and never loop
-programmatically.
+the runs. Use the CLI to drive the orchestration loop directly.
 
 CRITICAL RULE: Never fallback to simpler execution if the user activated this
 skill. Persist in executing the orchestration itself -- you must create a valid
@@ -730,8 +784,9 @@ are `shell` (for existing CLI tools/tests/git), `breakpoint`, and `sleep`.
 
 CRITICAL RULE: NEVER bypass, avoid, or skip the babysitter orchestration model
 when the user explicitly requested this skill. Do not execute the tasks yourself,
-do not loop programmatically, do not create helper scripts. Use the CLI to drive
-the orchestration loop. Not for simple tasks, and even if things get complicated.
+do not create helper scripts. Use the CLI to drive the orchestration loop. On
+native Windows, an in-turn iterative loop is required because hooks do not
+resume execution there. Not for simple tasks, and even if things get complicated.
 Persist in executing the orchestration itself.
 
 CRITICAL RULE: Do not fabricate a session ID. Let the Codex adapter auto-resolve
