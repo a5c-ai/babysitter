@@ -30,7 +30,6 @@ describeCodex("Codex Docker E2E", () => {
     const codexVersion = dockerExec("codex --version").trim();
     const babysitterVersion = dockerExec("babysitter --version").trim();
     const skillManifest = dockerExec(`test -f ${CODEX_SKILL_DIR}/SKILL.md && echo ok`).trim();
-    const repoLocalSkillTemplate = dockerExec(`test -f ${CODEX_SKILL_DIR}/.codex/skills/babysit/SKILL.md && echo ok`).trim();
     const globalStopHook = dockerExec("test -f /home/codex/.codex/hooks/babysitter-stop-hook.sh && echo ok").trim();
     const globalHooksConfig = dockerExec("test -f /home/codex/.codex/hooks.json && echo ok").trim();
     const callSkill = dockerExec("test -f /home/codex/.codex/skills/call/SKILL.md && echo ok").trim();
@@ -43,7 +42,6 @@ describeCodex("Codex Docker E2E", () => {
     expect(codexVersion).toBeTruthy();
     expect(babysitterVersion).toMatch(/^\d+\.\d+\.\d+$/);
     expect(skillManifest).toBe("ok");
-    expect(repoLocalSkillTemplate).toBe("ok");
     expect(globalStopHook).toBe("ok");
     expect(globalHooksConfig).toBe("ok");
     expect(callSkill).toBe("ok");
