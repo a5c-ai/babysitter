@@ -35,7 +35,7 @@ babysitter mcp:serve [--json]                        # Start MCP server over std
 babysitter harness:discover [--json]                  # Discover installed harness CLIs (claude, codex, pi, gemini, etc.)
 babysitter harness:list [--json]                      # Alias for harness:discover
 babysitter harness:invoke <name> --prompt <text> [--workspace <dir>] [--model <model>] [--timeout <ms>] [--json]  # Invoke a harness CLI
-babysitter session:create --prompt <text> [--harness <name>] [--process <path>] [--workspace <dir>] [--model <model>] [--max-iterations <n>] [--runs-dir <dir>] [--json] [--verbose]  # Create and run a programmatic orchestration session
+babysitter harness:create-run --prompt <text> [--harness <name>] [--process <path>] [--workspace <dir>] [--model <model>] [--max-iterations <n>] [--runs-dir <dir>] [--json] [--verbose]  # Create and run a programmatic orchestration session
 ```
 
 ### Plugin Management

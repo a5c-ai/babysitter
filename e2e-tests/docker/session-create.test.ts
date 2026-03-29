@@ -24,18 +24,18 @@ afterAll(() => {
 // ============================================================================
 
 describe("Session create CLI", () => {
-  test("session:create --help shows usage information", () => {
+  test("harness:create-run --help shows usage information", () => {
     const { stdout, exitCode } = dockerExecSafe(
-      "babysitter session:create --help",
+      "babysitter harness:create-run --help",
     );
     // --help may exit 0 or 1 depending on implementation; check output content
-    expect(stdout).toContain("session:create");
+    expect(stdout).toContain("harness:create-run");
     expect(stdout).toContain("prompt");
   });
 
-  test("session:create without --prompt or --process returns error", () => {
+  test("harness:create-run without --prompt or --process returns error", () => {
     const { stdout, exitCode } = dockerExecSafe(
-      "babysitter session:create --json 2>&1",
+      "babysitter harness:create-run --json 2>&1",
     );
     expect(exitCode).not.toBe(0);
 
@@ -43,17 +43,17 @@ describe("Session create CLI", () => {
     expect(stdout.toLowerCase()).toMatch(/prompt|process|error|missing/i);
   });
 
-  test("session:create --help mentions agent or harness", () => {
+  test("harness:create-run --help mentions agent or harness", () => {
     const { stdout } = dockerExecSafe(
-      "babysitter session:create --help",
+      "babysitter harness:create-run --help",
     );
     // Help output should reference harness or agent concepts
     expect(stdout.toLowerCase()).toMatch(/agent|harness/i);
   });
 
-  test("session:create with nonexistent process file returns error", () => {
+  test("harness:create-run with nonexistent process file returns error", () => {
     const { stdout, exitCode } = dockerExecSafe(
-      "babysitter session:create --process ./nonexistent.js --json 2>&1",
+      "babysitter harness:create-run --process ./nonexistent.js --json 2>&1",
     );
     expect(exitCode).not.toBe(0);
 
@@ -69,9 +69,9 @@ describe("Session create CLI", () => {
 describe.skipIf(!process.env.ANTHROPIC_API_KEY)(
   "Session create with API key",
   () => {
-    test("session:create --prompt without --harness or --process returns error", () => {
+    test("harness:create-run --prompt without --harness or --process returns error", () => {
       const { stdout, exitCode } = dockerExecSafe(
-        'babysitter session:create --prompt "test session" --json',
+        'babysitter harness:create-run --prompt "test session" --json',
       );
       // Without a harness or process, it should fail
       expect(exitCode).not.toBe(0);

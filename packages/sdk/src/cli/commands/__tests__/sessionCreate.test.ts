@@ -1,5 +1,5 @@
 /**
- * Tests for session:create command handler.
+ * Tests for harness:create-run command handler.
  */
 
 import { describe, it, expect, beforeEach, afterEach, vi, type Mock } from "vitest";
@@ -2723,7 +2723,7 @@ describe("handleSessionCreate", () => {
         interactive: false,
       });
 
-      // No CLI harness found, but session:create proceeds using pi
+      // No CLI harness found, but harness:create-run proceeds using pi
       // programmatic API as the default — does not exit with error
       expect(code).toBe(0);
     });

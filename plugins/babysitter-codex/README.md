@@ -22,29 +22,17 @@ Install the SDK CLI first:
 npm install -g @a5c-ai/babysitter-sdk
 ```
 
-Install the Codex plugin globally:
+clone the repo and install the plugin globally:
 
 ```bash
-npx @a5c-ai/babysitter-codex install
+git clone https://github.com/a5c-ai/babysitter.git
+cd babysitter
+codex
+
+> /plugins
 ```
 
-This copies the plugin into `~/.codex/plugins/babysitter-codex`, registers it
-in `~/.agents/plugins/marketplace.json`, merges the required global Codex
-config into `~/.codex/config.toml`, installs the active global Codex
-`skills/`, `hooks/`, and `hooks.json` surface under `~/.codex/`, and ensures
-the Babysitter process library is active in `~/.a5c`.
-
-Install the plugin into a specific workspace:
-
-```bash
-npx @a5c-ai/babysitter-codex install --workspace /path/to/repo
-```
-
-This copies the plugin into `<workspace>/plugins/babysitter-codex`, registers
-it in `<workspace>/.agents/plugins/marketplace.json`, merges
-`<workspace>/.codex/config.toml`, installs the active workspace Codex
-`skills/`, `hooks/`, and `hooks.json` surface under `<workspace>/.codex/`, and
-records install metadata under `<workspace>/.a5c/team/`.
+then navigate to the 'babysitter' entry and select 'Install'.
 
 ## Integration Model
 

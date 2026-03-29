@@ -57,7 +57,7 @@ afterAll(() => {
   stopContainer();
 });
 
-describeInternalHarness("session:create full internal-harness run", () => {
+describeInternalHarness("harness:create-run full internal-harness run", () => {
   test("runs the repo-installed sdk CLI non-interactively and completes a real internal harness session", () => {
     const agents = [
       "# Session-create CI guardrails",
@@ -94,7 +94,7 @@ describeInternalHarness("session:create full internal-harness run", () => {
           `export AZURE_OPENAI_RESOURCE_NAME=${shellEscape(process.env.AZURE_OPENAI_PROJECT_NAME || "")}`,
           `export AZURE_OPENAI_BASE_URL=${shellEscape(`https://${process.env.AZURE_OPENAI_PROJECT_NAME}.openai.azure.com`)}`,
           `export AZURE_OPENAI_DEPLOYMENT=${shellEscape(process.env.AZURE_OPENAI_DEPLOYMENT || "gpt-5.4")}`,
-          "babysitter session:create --prompt \"create a game\" --harness pi --model gpt-5.4 --workspace /workspace/session-create-internal --runs-dir /workspace/session-create-internal/.a5c/runs --no-interactive --verbose 2>&1 | tee /tmp/session-create-internal.log",
+          "babysitter harness:create-run --prompt \"create a game\" --harness pi --model gpt-5.4 --workspace /workspace/session-create-internal --runs-dir /workspace/session-create-internal/.a5c/runs --no-interactive --verbose 2>&1 | tee /tmp/session-create-internal.log",
         ].join("\n"),
         {
           timeout: 900_000,

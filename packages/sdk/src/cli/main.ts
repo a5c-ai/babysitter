@@ -124,7 +124,7 @@ const USAGE = `Usage:
   babysitter compression:toggle <layer> <on|off> [--json]
   babysitter compression:set <layer.key> <value> [--json]
   babysitter compression:reset [--json]
-  babysitter session:create --prompt <text> [--harness <name>] [--process <path>] [--workspace <dir>] [--model <model>] [--max-iterations <n>] [--runs-dir <dir>] [--interactive|--no-interactive|--non-interactive] [--json] [--verbose]
+  babysitter harness:create-run --prompt <text> [--harness <name>] [--process <path>] [--workspace <dir>] [--model <model>] [--max-iterations <n>] [--runs-dir <dir>] [--interactive|--no-interactive|--non-interactive] [--json] [--verbose]
   babysitter harness:discover [--json]
   babysitter harness:list [--json]
   babysitter harness:install <name> [--workspace <dir>] [--json] [--dry-run] [--verbose]
@@ -2145,7 +2145,7 @@ const VALID_COMMANDS = [
   "session:check-iteration",
   "session:last-message",
   "session:iteration-message",
-  "session:create",
+  "harness:create-run",
   "hook:log",
   "hook:run",
   "skill:discover",
@@ -2679,7 +2679,7 @@ export function createBabysitterCli() {
         if (parsed.command === "harness:invoke") {
           return await handleHarnessInvoke(parsed);
         }
-        if (parsed.command === "session:create") {
+        if (parsed.command === "harness:create-run") {
           const { handleSessionCreate } = await import("./commands/sessionCreate");
           return await handleSessionCreate({
             prompt: parsed.prompt,

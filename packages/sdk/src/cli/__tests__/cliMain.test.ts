@@ -160,10 +160,10 @@ describe("CLI main entry", () => {
     );
   });
 
-  it("accepts session:create --non-interactive as an alias for --no-interactive", async () => {
+  it("accepts harness:create-run --non-interactive as an alias for --no-interactive", async () => {
     const cli = createBabysitterCli();
     const exitCode = await cli.run([
-      "session:create",
+      "harness:create-run",
       "--process",
       "/tmp/generated-process.mjs",
       "--non-interactive",

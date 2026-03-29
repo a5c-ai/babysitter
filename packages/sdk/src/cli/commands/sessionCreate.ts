@@ -1,5 +1,5 @@
 /**
- * session:create command handler.
+ * harness:create-run command handler.
  *
  * Drives a full babysitter session lifecycle through two agentic phases:
  *   Phase 1 - Unbound interview / intent / process-definition
@@ -2196,7 +2196,7 @@ function buildExternalProcessDefinitionPrompt(args: {
   ].join("\n");
 
   return [
-    "You are running babysitter session:create phase 1 on an external CLI harness in non-interactive mode.",
+    "You are running babysitter harness:create-run phase 1 on an external CLI harness in non-interactive mode.",
     "Do the real process-authoring work in the workspace and write the actual process file to disk.",
     "",
     "Task:",
