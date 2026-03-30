@@ -69,6 +69,9 @@ export interface SessionCreateArgs {
   json: boolean;
   verbose: boolean;
   interactive?: boolean;
+  existingRunId?: string;
+  existingRunDir?: string;
+  planOnly?: boolean;
 }
 
 const DIM = "\x1b[2m";
@@ -95,7 +98,7 @@ interface Phase1Progress {
 
 interface Phase2Progress {
   phase: "2";
-  status: "started" | "run-created" | "bound" | "iteration" | "effect" | "completed" | "failed";
+  status: "started" | "resuming" | "skipped-plan-only" | "run-created" | "bound" | "iteration" | "effect" | "completed" | "failed";
   runId?: string;
   runDir?: string;
   harness?: string;
@@ -110,6 +113,7 @@ interface Phase2Progress {
   effectStatus?: string;
   error?: string;
   output?: string;
+  processPath?: string;
 }
 
 type ProgressPayload = Phase1Progress | Phase2Progress;
@@ -3338,7 +3342,7 @@ async function runProcessDefinitionPhase(args: {
   }
 }
 
-async function runOrchestrationPhase(args: {
+export async function runOrchestrationPhase(args: {
   processPath: string;
   prompt?: string;
   workspace?: string;
@@ -3353,6 +3357,8 @@ async function runOrchestrationPhase(args: {
   discovered: HarnessDiscoveryResult[];
   compressionConfig: CompressionConfig | null;
   promptContext: SessionCreatePromptContext;
+  existingRunId?: string;
+  existingRunDir?: string;
 }): Promise<number> {
   const processId = path.basename(args.processPath, path.extname(args.processPath));
   const state: OrchestrationState = {
@@ -3380,28 +3386,40 @@ async function runOrchestrationPhase(args: {
       `[phase2 host setup] harness=${args.selectedHarnessName} workspace=${path.resolve(args.workspace ?? process.cwd())} model=${args.model ?? "(default)"} processPath=${path.resolve(args.processPath)}`,
     );
 
-    const created = await createRun({
-      runsDir: args.runsDir,
-      process: {
-        processId,
-        importPath: path.resolve(args.processPath),
-      },
-      prompt: args.prompt,
-      inputs: args.prompt ? { prompt: args.prompt } : undefined,
-    });
-    state.runId = created.runId;
-    state.runDir = created.runDir;
-    emitProgress(
-      {
-        phase: "2",
-        status: "run-created",
-        runId: created.runId,
-        runDir: created.runDir,
-      },
-      args.json,
-      args.verbose,
-    );
-    writeVerboseData("phase2 host run_create result", created);
+    if (args.existingRunId && args.existingRunDir) {
+      // Resume path: use existing run
+      state.runId = args.existingRunId;
+      state.runDir = args.existingRunDir;
+      emitProgress(
+        { phase: "2", status: "resuming", runId: args.existingRunId, runDir: args.existingRunDir },
+        args.json,
+        args.verbose,
+      );
+    } else {
+      // Create new run
+      const created = await createRun({
+        runsDir: args.runsDir,
+        process: {
+          processId,
+          importPath: path.resolve(args.processPath),
+        },
+        prompt: args.prompt,
+        inputs: args.prompt ? { prompt: args.prompt } : undefined,
+      });
+      state.runId = created.runId;
+      state.runDir = created.runDir;
+      emitProgress(
+        {
+          phase: "2",
+          status: "run-created",
+          runId: created.runId,
+          runDir: created.runDir,
+        },
+        args.json,
+        args.verbose,
+      );
+      writeVerboseData("phase2 host run_create result", created);
+    }
 
     const adapter = getAdapterByName(args.selectedHarnessName);
     if (!adapter) {
@@ -3421,8 +3439,8 @@ async function runOrchestrationPhase(args: {
     }
     state.sessionBound = await adapter.bindSession({
       sessionId,
-      runId: created.runId,
-      runDir: created.runDir,
+      runId: state.runId,
+      runDir: state.runDir,
       pluginRoot: adapter.resolvePluginRoot({}),
       stateDir: path.resolve(args.workspace ?? process.cwd(), ".a5c"),
       runsDir: args.runsDir,
@@ -3442,8 +3460,8 @@ async function runOrchestrationPhase(args: {
       {
         phase: "2",
         status: "bound",
-        runId: created.runId,
-        runDir: created.runDir,
+        runId: state.runId,
+        runDir: state.runDir,
         harness: state.sessionBound.harness,
         sessionId: state.sessionBound.sessionId,
         error: state.sessionBound.error,
@@ -3456,7 +3474,7 @@ async function runOrchestrationPhase(args: {
     while (state.iteration < args.maxIterations) {
       state.iteration += 1;
       const result = await orchestrateIterationWithProcessLoadRetry({
-        runDir: created.runDir,
+        runDir: state.runDir,
         writeVerbose,
         writeVerboseData,
       });
@@ -3516,7 +3534,7 @@ async function runOrchestrationPhase(args: {
               piSessionFactory,
             );
             await commitEffectResult({
-              runDir: created.runDir,
+              runDir: state.runDir,
               effectId: action.effectId,
               invocationKey: action.invocationKey,
               result: {
@@ -4783,6 +4801,17 @@ export async function handleSessionCreate(
       });
     }
 
+    if (parsed.planOnly) {
+      emitProgress({ phase: "2", status: "skipped-plan-only", processPath }, json, verbose);
+      if (json) {
+        process.stdout.write(JSON.stringify({ ok: true, planOnly: true, processPath }) + "\n");
+      } else {
+        process.stderr.write(`${GREEN}Process definition created: ${BOLD}${processPath}${RESET}\n`);
+        process.stderr.write(`${DIM}Run /babysitter:call or harness:create-run --process ${processPath} to execute.${RESET}\n`);
+      }
+      return 0;
+    }
+
     return await runOrchestrationPhase({
       processPath,
       prompt,
@@ -4798,6 +4827,8 @@ export async function handleSessionCreate(
       discovered,
       compressionConfig,
       promptContext,
+      existingRunId: parsed.existingRunId,
+      existingRunDir: parsed.existingRunDir,
     });
   } finally {
     rl?.close();

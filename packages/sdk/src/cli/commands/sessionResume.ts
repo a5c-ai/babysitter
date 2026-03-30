@@ -454,6 +454,8 @@ export async function handleSessionResume(args: SessionResumeArgs): Promise<numb
             json: args.json,
             verbose: args.verbose,
             interactive: args.interactive,
+            existingRunId: selectedRun.runId,
+            existingRunDir: selectedRun.runDir,
           });
 
           return formatToolResult(

@@ -125,7 +125,12 @@ const USAGE = `Usage:
   babysitter compression:set <layer.key> <value> [--json]
   babysitter compression:reset [--json]
   babysitter harness:create-run [--prompt <text>] [--harness <name>] [--process <path>] [--workspace <dir>] [--model <model>] [--max-iterations <n>] [--runs-dir <dir>] [--interactive|--no-interactive|--non-interactive] [--json] [--verbose]
+  babysitter harness:call [...]                  (alias for harness:create-run)
+  babysitter harness:yolo [...]                  (alias for harness:create-run --non-interactive)
+  babysitter harness:plan [...]                  (alias for harness:create-run, stops after Phase 1)
+  babysitter harness:forever [...]               (alias for harness:create-run, infinite loop process)
   babysitter harness:resume-run [--run-id <id>] [--runs-dir <dir>] [--harness <name>] [--workspace <dir>] [--model <model>] [--max-iterations <n>] [--interactive|--no-interactive] [--json] [--verbose]
+  babysitter harness:resume [...]                (alias for harness:resume-run)
   babysitter harness:discover [--json]
   babysitter harness:list [--json]
   babysitter harness:install <name> [--workspace <dir>] [--json] [--dry-run] [--verbose]
@@ -2147,7 +2152,12 @@ const VALID_COMMANDS = [
   "session:last-message",
   "session:iteration-message",
   "harness:create-run",
+  "harness:call",
+  "harness:yolo",
+  "harness:plan",
+  "harness:forever",
   "harness:resume-run",
+  "harness:resume",
   "hook:log",
   "hook:run",
   "skill:discover",
@@ -2681,7 +2691,7 @@ export function createBabysitterCli() {
         if (parsed.command === "harness:invoke") {
           return await handleHarnessInvoke(parsed);
         }
-        if (parsed.command === "harness:create-run") {
+        if (parsed.command === "harness:create-run" || parsed.command === "harness:call") {
           const { handleSessionCreate } = await import("./commands/sessionCreate");
           return await handleSessionCreate({
             prompt: parsed.prompt,
@@ -2696,7 +2706,55 @@ export function createBabysitterCli() {
             interactive: parsed.interactive,
           });
         }
-        if (parsed.command === "harness:resume-run") {
+        if (parsed.command === "harness:yolo") {
+          const { handleSessionCreate } = await import("./commands/sessionCreate");
+          return await handleSessionCreate({
+            prompt: parsed.prompt,
+            harness: parsed.harness,
+            processPath: parsed.processPath,
+            workspace: parsed.workspace,
+            model: parsed.model,
+            maxIterations: parsed.maxIterations,
+            runsDir: parsed.runsDir,
+            json: parsed.json,
+            verbose: parsed.verbose,
+            interactive: false,
+          });
+        }
+        if (parsed.command === "harness:plan") {
+          const { handleSessionCreate } = await import("./commands/sessionCreate");
+          return await handleSessionCreate({
+            prompt: parsed.prompt,
+            harness: parsed.harness,
+            processPath: parsed.processPath,
+            workspace: parsed.workspace,
+            model: parsed.model,
+            maxIterations: parsed.maxIterations,
+            runsDir: parsed.runsDir,
+            json: parsed.json,
+            verbose: parsed.verbose,
+            interactive: parsed.interactive,
+            planOnly: true,
+          });
+        }
+        if (parsed.command === "harness:forever") {
+          const { handleSessionCreate } = await import("./commands/sessionCreate");
+          const foreverSuffix = "\n\n[IMPORTANT: Design this process as an infinite loop. The process should never complete — use ctx.sleepUntil() to pause between iterations and loop forever.]";
+          const foreverPrompt = parsed.prompt ? parsed.prompt + foreverSuffix : foreverSuffix.trim();
+          return await handleSessionCreate({
+            prompt: foreverPrompt,
+            harness: parsed.harness,
+            processPath: parsed.processPath,
+            workspace: parsed.workspace,
+            model: parsed.model,
+            maxIterations: parsed.maxIterations,
+            runsDir: parsed.runsDir,
+            json: parsed.json,
+            verbose: parsed.verbose,
+            interactive: parsed.interactive,
+          });
+        }
+        if (parsed.command === "harness:resume-run" || parsed.command === "harness:resume") {
           const { handleSessionResume: handleHarnessResumeRun } = await import("./commands/sessionResume");
           return await handleHarnessResumeRun({
             runId: parsed.runIdOverride,
