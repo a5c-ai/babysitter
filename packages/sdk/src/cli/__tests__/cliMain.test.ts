@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { MockInstance } from "vitest";
 import path from "path";
 import { createBabysitterCli } from "../main";
-import { handleSessionCreate } from "../commands/sessionCreate";
+import { handleHarnessCreateRun } from "../commands/harnessCreateRun";
 import { buildEffectIndex } from "../../runtime/replay/effectIndex";
 import { readRunMetadata } from "../../storage/runFiles";
 import { commitEffectResult } from "../../runtime/commitEffectResult";
@@ -20,14 +20,14 @@ vi.mock("../../runtime/commitEffectResult", () => ({
   commitEffectResult: vi.fn(),
 }));
 
-vi.mock("../commands/sessionCreate", () => ({
-  handleSessionCreate: vi.fn().mockResolvedValue(0),
+vi.mock("../commands/harnessCreateRun", () => ({
+  handleHarnessCreateRun: vi.fn().mockResolvedValue(0),
 }));
 
 const buildEffectIndexMock = buildEffectIndex as unknown as ReturnType<typeof vi.fn>;
 const readRunMetadataMock = readRunMetadata as unknown as ReturnType<typeof vi.fn>;
 const commitEffectResultMock = commitEffectResult as unknown as ReturnType<typeof vi.fn>;
-const handleSessionCreateMock = handleSessionCreate as unknown as ReturnType<typeof vi.fn>;
+const handleSessionCreateMock = handleHarnessCreateRun as unknown as ReturnType<typeof vi.fn>;
 
 describe("CLI main entry", () => {
   let logSpy: MockInstance<[message?: any, ...optionalParams: any[]], void>;

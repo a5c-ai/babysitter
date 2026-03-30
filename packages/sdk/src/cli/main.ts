@@ -131,6 +131,15 @@ const USAGE = `Usage:
   babysitter harness:forever [...]               (alias for harness:create-run, infinite loop process)
   babysitter harness:resume-run [--run-id <id>] [--runs-dir <dir>] [--harness <name>] [--workspace <dir>] [--model <model>] [--max-iterations <n>] [--interactive|--no-interactive] [--json] [--verbose]
   babysitter harness:resume [...]                (alias for harness:resume-run)
+  babysitter harness:retrospect [--run-id <id>] [--prompt <text>] [--harness <name>] [--workspace <dir>] [--model <model>] [--max-iterations <n>] [--runs-dir <dir>] [--json] [--verbose]
+  babysitter harness:cleanup [--dry-run] [--keep-days <n>] [--prompt <text>] [--harness <name>] [--workspace <dir>] [--model <model>] [--runs-dir <dir>] [--json] [--verbose]
+  babysitter harness:assimilate [--prompt <text>] [--harness <name>] [--workspace <dir>] [--model <model>] [--max-iterations <n>] [--runs-dir <dir>] [--json] [--verbose]
+  babysitter harness:doctor [--run-id <id>] [--runs-dir <dir>] [--json] [--verbose]
+  babysitter harness:contrib [--prompt <text>] [--harness <name>] [--workspace <dir>] [--model <model>] [--max-iterations <n>] [--runs-dir <dir>] [--json] [--verbose]
+  babysitter harness:help [<topic>]
+  babysitter harness:observe [--workspace <dir>]
+  babysitter harness:user-install [--harness <name>] [--workspace <dir>] [--model <model>] [--runs-dir <dir>] [--json] [--verbose]
+  babysitter harness:project-install [--harness <name>] [--workspace <dir>] [--model <model>] [--runs-dir <dir>] [--json] [--verbose]
   babysitter harness:discover [--json]
   babysitter harness:list [--json]
   babysitter harness:install <name> [--workspace <dir>] [--json] [--dry-run] [--verbose]
@@ -243,6 +252,8 @@ interface ParsedArgs {
   workspace?: string;
   model?: string;
   interactive?: boolean;
+  // harness:cleanup flags
+  keepDays?: number;
 }
 
 interface ActionSummary {
@@ -603,6 +614,12 @@ function parseArgs(argv: string[]): ParsedArgs {
       parsed.pluginScope = "global";
       continue;
     }
+    // harness:cleanup flags
+    if (arg === "--keep-days") {
+      const raw = expectFlagValue(rest, ++i, "--keep-days");
+      parsed.keepDays = parsePositiveInteger(raw, "--keep-days");
+      continue;
+    }
     // tokens:stats flags
     if (arg === "--all") {
       parsed.tokensAll = true;
@@ -656,9 +673,29 @@ function parseArgs(argv: string[]): ParsedArgs {
   } else if (
     parsed.command === "harness:invoke" ||
     parsed.command === "harness:install" ||
-    parsed.command === "harness:install-plugin"
+    parsed.command === "harness:install-plugin" ||
+    parsed.command === "harness:help"
   ) {
     parsed.positional = positionals;
+  } else if (
+    parsed.command === "harness:retrospect" ||
+    parsed.command === "harness:doctor"
+  ) {
+    // First positional is optional run-id override
+    if (positionals.length > 0 && !parsed.runIdOverride) {
+      parsed.runIdOverride = positionals[0];
+    }
+  } else if (
+    parsed.command === "harness:cleanup" ||
+    parsed.command === "harness:assimilate" ||
+    parsed.command === "harness:contrib" ||
+    parsed.command === "harness:user-install" ||
+    parsed.command === "harness:project-install"
+  ) {
+    // Positionals join as prompt text if no --prompt given
+    if (positionals.length > 0 && !parsed.prompt) {
+      parsed.prompt = positionals.join(" ");
+    }
   }
   return parsed;
 }
@@ -2158,6 +2195,15 @@ const VALID_COMMANDS = [
   "harness:forever",
   "harness:resume-run",
   "harness:resume",
+  "harness:retrospect",
+  "harness:cleanup",
+  "harness:assimilate",
+  "harness:doctor",
+  "harness:contrib",
+  "harness:help",
+  "harness:observe",
+  "harness:user-install",
+  "harness:project-install",
   "hook:log",
   "hook:run",
   "skill:discover",
@@ -2203,6 +2249,86 @@ const VALID_COMMANDS = [
 // ---------------------------------------------------------------------------
 // Harness commands
 // ---------------------------------------------------------------------------
+
+function handleHarnessHelp(parsed: ParsedArgs): number {
+  const topic = parsed.positional?.join(" ")?.trim();
+  const colors = supportsColors();
+  const bold = colors ? "\x1b[1m" : "";
+  const dim = colors ? "\x1b[2m" : "";
+  const reset = colors ? "\x1b[0m" : "";
+  const cyan = colors ? "\x1b[36m" : "";
+
+  if (topic) {
+    // Topic-specific help would require reading files — for now, direct to docs
+    console.log(`\n${bold}Babysitter Help: ${topic}${reset}\n`);
+    console.log(`For detailed documentation on "${topic}", see:`);
+    console.log(`  https://github.com/a5c-ai/babysitter\n`);
+    console.log(`Or run: ${cyan}babysitter skill:discover --plugin-root <plugin-root> --json${reset}`);
+    console.log(`to find available skills, agents, and processes.\n`);
+    return 0;
+  }
+
+  console.log(`
+${bold}Welcome to the Babysitter Help Center!${reset}
+
+${bold}PRIMARY COMMANDS${reset}
+
+  ${cyan}harness:call${reset} [--prompt <text>]         Start a babysitter-orchestrated run
+  ${cyan}harness:resume${reset} [--run-id <id>]         Resume a paused/interrupted run
+  ${cyan}harness:yolo${reset} [--prompt <text>]          Autonomous mode (all breakpoints auto-approved)
+  ${cyan}harness:plan${reset} [--prompt <text>]          Generate plan without executing
+  ${cyan}harness:forever${reset} [--prompt <text>]       Infinite loop process with sleep intervals
+
+${bold}SECONDARY COMMANDS${reset}
+
+  ${cyan}harness:doctor${reset} [--run-id <id>]          10-point health check on a run
+  ${cyan}harness:retrospect${reset} [--run-id <id>]      Analyze completed run, suggest improvements
+  ${cyan}harness:cleanup${reset} [--keep-days <n>]       Clean up old runs and orphaned processes
+  ${cyan}harness:assimilate${reset} [--prompt <text>]     Convert external methodology to babysitter processes
+  ${cyan}harness:contrib${reset} [--prompt <text>]        Submit feedback or contribute to babysitter
+  ${cyan}harness:user-install${reset}                     First-time user onboarding
+  ${cyan}harness:project-install${reset}                  Onboard a project for babysitter
+  ${cyan}harness:observe${reset}                          Launch real-time observer dashboard
+  ${cyan}harness:help${reset} [<topic>]                   Show this help text
+
+${bold}LOW-LEVEL COMMANDS${reset}
+
+  ${cyan}harness:discover${reset}                         Detect installed harness CLIs
+  ${cyan}harness:invoke${reset} <name> --prompt <text>    Invoke a harness CLI directly
+  ${cyan}harness:install${reset} <name>                   Install a harness
+  ${cyan}harness:install-plugin${reset} <name>            Install harness plugin
+
+${dim}Documentation: https://github.com/a5c-ai/babysitter${reset}
+`);
+  return 0;
+}
+
+async function handleHarnessObserve(parsed: ParsedArgs): Promise<number> {
+  const { spawn } = await import("node:child_process");
+  const watchDir = parsed.workspace ?? path.resolve(process.cwd(), "..");
+
+  const colors = supportsColors();
+  const bold = colors ? "\x1b[1m" : "";
+  const dim = colors ? "\x1b[2m" : "";
+  const reset = colors ? "\x1b[0m" : "";
+
+  process.stderr.write(`${bold}Launching babysitter observer dashboard...${reset}\n`);
+  process.stderr.write(`${dim}Watching: ${watchDir}${reset}\n\n`);
+
+  const child = spawn(
+    "npx",
+    ["-y", "@a5c-ai/babysitter-observer-dashboard@latest", "--watch-dir", watchDir],
+    { stdio: "inherit", shell: true },
+  );
+
+  return new Promise<number>((resolve) => {
+    child.on("close", (code) => resolve(code ?? 0));
+    child.on("error", (err) => {
+      process.stderr.write(`Failed to launch observer: ${err.message}\n`);
+      resolve(1);
+    });
+  });
+}
 
 async function handleHarnessDiscover(parsed: ParsedArgs): Promise<number> {
   const { discoverHarnesses, detectCallerHarness } = await import("../harness/discovery");
@@ -2692,8 +2818,8 @@ export function createBabysitterCli() {
           return await handleHarnessInvoke(parsed);
         }
         if (parsed.command === "harness:create-run" || parsed.command === "harness:call") {
-          const { handleSessionCreate } = await import("./commands/sessionCreate");
-          return await handleSessionCreate({
+          const { handleHarnessCreateRun } = await import("./commands/harnessCreateRun");
+          return await handleHarnessCreateRun({
             prompt: parsed.prompt,
             harness: parsed.harness,
             processPath: parsed.processPath,
@@ -2707,8 +2833,8 @@ export function createBabysitterCli() {
           });
         }
         if (parsed.command === "harness:yolo") {
-          const { handleSessionCreate } = await import("./commands/sessionCreate");
-          return await handleSessionCreate({
+          const { handleHarnessCreateRun } = await import("./commands/harnessCreateRun");
+          return await handleHarnessCreateRun({
             prompt: parsed.prompt,
             harness: parsed.harness,
             processPath: parsed.processPath,
@@ -2722,8 +2848,8 @@ export function createBabysitterCli() {
           });
         }
         if (parsed.command === "harness:plan") {
-          const { handleSessionCreate } = await import("./commands/sessionCreate");
-          return await handleSessionCreate({
+          const { handleHarnessCreateRun } = await import("./commands/harnessCreateRun");
+          return await handleHarnessCreateRun({
             prompt: parsed.prompt,
             harness: parsed.harness,
             processPath: parsed.processPath,
@@ -2738,10 +2864,10 @@ export function createBabysitterCli() {
           });
         }
         if (parsed.command === "harness:forever") {
-          const { handleSessionCreate } = await import("./commands/sessionCreate");
+          const { handleHarnessCreateRun } = await import("./commands/harnessCreateRun");
           const foreverSuffix = "\n\n[IMPORTANT: Design this process as an infinite loop. The process should never complete — use ctx.sleepUntil() to pause between iterations and loop forever.]";
           const foreverPrompt = parsed.prompt ? parsed.prompt + foreverSuffix : foreverSuffix.trim();
-          return await handleSessionCreate({
+          return await handleHarnessCreateRun({
             prompt: foreverPrompt,
             harness: parsed.harness,
             processPath: parsed.processPath,
@@ -2755,10 +2881,188 @@ export function createBabysitterCli() {
           });
         }
         if (parsed.command === "harness:resume-run" || parsed.command === "harness:resume") {
-          const { handleSessionResume: handleHarnessResumeRun } = await import("./commands/sessionResume");
+          const { handleHarnessResumeRun } = await import("./commands/harnessResumeRun");
           return await handleHarnessResumeRun({
             runId: parsed.runIdOverride,
             harness: parsed.harness,
+            workspace: parsed.workspace,
+            model: parsed.model,
+            maxIterations: parsed.maxIterations,
+            runsDir: parsed.runsDir,
+            json: parsed.json,
+            verbose: parsed.verbose,
+            interactive: parsed.interactive,
+          });
+        }
+        if (parsed.command === "harness:retrospect") {
+          const { handleHarnessCreateRun } = await import("./commands/harnessCreateRun");
+          const retrospectPrefix = "[RETROSPECT MODE] Analyze a completed babysitter run. Create and run a retrospect process that:\n" +
+            "- Analyzes the run and its results (what went well, what didn't, what could be improved)\n" +
+            "- Analyzes the process that was followed (steps, tools, effectiveness)\n" +
+            "- Suggests improvements, optimizations, and fixes for both run and process\n" +
+            "- Implements approved improvements iteratively\n" +
+            "- Includes breakpoints for user steering at each analysis phase\n" +
+            "- Ends by prompting the user to contribute back via /babysitter:contrib\n" +
+            (parsed.runIdOverride ? `\nTarget run ID: ${parsed.runIdOverride}` : "\nTarget: most recent run");
+          const retrospectPrompt = parsed.prompt
+            ? retrospectPrefix + "\n\nAdditional instructions: " + parsed.prompt
+            : retrospectPrefix;
+          return await handleHarnessCreateRun({
+            prompt: retrospectPrompt,
+            harness: parsed.harness,
+            processPath: parsed.processPath,
+            workspace: parsed.workspace,
+            model: parsed.model,
+            maxIterations: parsed.maxIterations,
+            runsDir: parsed.runsDir,
+            json: parsed.json,
+            verbose: parsed.verbose,
+            interactive: parsed.interactive,
+          });
+        }
+        if (parsed.command === "harness:cleanup") {
+          const { handleHarnessCreateRun } = await import("./commands/harnessCreateRun");
+          const keepDays = parsed.keepDays ?? 7;
+          const cleanupPrefix = "[CLEANUP MODE] Clean up .a5c/runs and .a5c/processes directories. Create and run a cleanup process that:\n" +
+            "- Scans .a5c/runs/ for completed/failed runs\n" +
+            "- Aggregates insights from completed runs into docs/run-history-insights.md\n" +
+            "- Removes terminal runs (completed/failed) older than " + keepDays + " days\n" +
+            "- Never removes active/in-progress runs\n" +
+            "- Removes orphaned process files not referenced by remaining runs\n" +
+            "- Shows remaining run count and disk usage after cleanup\n" +
+            (parsed.dryRun ? "- DRY RUN: show what would be removed without deleting anything\n" : "") +
+            "- Always show the user a preview before removing (via breakpoints in interactive mode)";
+          const cleanupPrompt = parsed.prompt
+            ? cleanupPrefix + "\n\nAdditional instructions: " + parsed.prompt
+            : cleanupPrefix;
+          return await handleHarnessCreateRun({
+            prompt: cleanupPrompt,
+            harness: parsed.harness,
+            processPath: parsed.processPath,
+            workspace: parsed.workspace,
+            model: parsed.model,
+            maxIterations: parsed.maxIterations,
+            runsDir: parsed.runsDir,
+            json: parsed.json,
+            verbose: parsed.verbose,
+            interactive: parsed.interactive,
+          });
+        }
+        if (parsed.command === "harness:assimilate") {
+          const { handleHarnessCreateRun } = await import("./commands/harnessCreateRun");
+          const assimilatePrefix = "[ASSIMILATE MODE] Convert an external methodology, harness, or specification into babysitter process definitions.\n" +
+            "Use the assimilation domain processes from the active process library. Available workflows:\n" +
+            "- methodology-assimilation: Learn an external methodology from its repo and convert to babysitter processes\n" +
+            "- harness integration: Wire babysitter SDK into a specific AI coding harness (codex, opencode, gemini-cli, etc.)\n" +
+            "Resolve the active process library with `babysitter process-library:active --json` before selecting the workflow.";
+          const assimilatePrompt = parsed.prompt
+            ? assimilatePrefix + "\n\nTarget to assimilate: " + parsed.prompt
+            : assimilatePrefix;
+          return await handleHarnessCreateRun({
+            prompt: assimilatePrompt,
+            harness: parsed.harness,
+            processPath: parsed.processPath,
+            workspace: parsed.workspace,
+            model: parsed.model,
+            maxIterations: parsed.maxIterations,
+            runsDir: parsed.runsDir,
+            json: parsed.json,
+            verbose: parsed.verbose,
+            interactive: parsed.interactive,
+          });
+        }
+        if (parsed.command === "harness:doctor") {
+          const { handleHarnessCreateRun } = await import("./commands/harnessCreateRun");
+          const doctorPrefix = "[DOCTOR MODE] Comprehensive 10-point health check on a babysitter run. Diagnose:\n" +
+            "1. Run Discovery\n2. Journal Integrity (checksums, sequence, timestamps)\n" +
+            "3. State Cache Consistency\n4. Effect Status (stuck/errored/pending)\n" +
+            "5. Lock Status (stale locks)\n6. Session State (runaway loops)\n" +
+            "7. Log Analysis\n8. Disk Usage\n9. Process Validation\n10. Hook Execution Health\n" +
+            "Produce a structured diagnostic report with PASS/WARN/FAIL per check and specific fix commands.\n" +
+            (parsed.runIdOverride ? `Target run ID: ${parsed.runIdOverride}` : "Target: most recent run");
+          return await handleHarnessCreateRun({
+            prompt: doctorPrefix,
+            harness: parsed.harness,
+            processPath: parsed.processPath,
+            workspace: parsed.workspace,
+            model: parsed.model,
+            maxIterations: parsed.maxIterations,
+            runsDir: parsed.runsDir,
+            json: parsed.json,
+            verbose: parsed.verbose,
+            interactive: parsed.interactive,
+          });
+        }
+        if (parsed.command === "harness:contrib") {
+          const { handleHarnessCreateRun } = await import("./commands/harnessCreateRun");
+          const contribPrefix = "[CONTRIB MODE] Submit feedback or contribute to the babysitter project.\n" +
+            "Route to the appropriate workflow based on arguments:\n" +
+            "Issue-based (opens GitHub issue): bug report, feature request, documentation question\n" +
+            "PR-based (forks repo, creates branch, submits PR): bugfix, feature implementation, library contribution, harness integration\n" +
+            "Use contribution processes from the active process library (cradle/ directory).\n" +
+            "Add breakpoints before ALL GitHub actions (fork, star, submit PR/issue).";
+          const contribPrompt = parsed.prompt
+            ? contribPrefix + "\n\nContribution details: " + parsed.prompt
+            : contribPrefix;
+          return await handleHarnessCreateRun({
+            prompt: contribPrompt,
+            harness: parsed.harness,
+            processPath: parsed.processPath,
+            workspace: parsed.workspace,
+            model: parsed.model,
+            maxIterations: parsed.maxIterations,
+            runsDir: parsed.runsDir,
+            json: parsed.json,
+            verbose: parsed.verbose,
+            interactive: parsed.interactive,
+          });
+        }
+        if (parsed.command === "harness:help") {
+          return handleHarnessHelp(parsed);
+        }
+        if (parsed.command === "harness:observe") {
+          return await handleHarnessObserve(parsed);
+        }
+        if (parsed.command === "harness:user-install") {
+          const { handleHarnessCreateRun } = await import("./commands/harnessCreateRun");
+          const userInstallPrefix = "[USER-INSTALL MODE] First-time onboarding for new babysitter users.\n" +
+            "Resolve the active process library with `babysitter process-library:active --json`,\n" +
+            "then use the `cradle/user-install` process from the active library.\n" +
+            "This process: installs dependencies, interviews about specialties/preferences,\n" +
+            "builds user profile at ~/.a5c/user-profile.json, and configures tools.\n" +
+            "End with a friendly message including a polite ask to star https://github.com/a5c-ai/babysitter";
+          const userInstallPrompt = parsed.prompt
+            ? userInstallPrefix + "\n\nAdditional instructions: " + parsed.prompt
+            : userInstallPrefix;
+          return await handleHarnessCreateRun({
+            prompt: userInstallPrompt,
+            harness: parsed.harness,
+            processPath: parsed.processPath,
+            workspace: parsed.workspace,
+            model: parsed.model,
+            maxIterations: parsed.maxIterations,
+            runsDir: parsed.runsDir,
+            json: parsed.json,
+            verbose: parsed.verbose,
+            interactive: parsed.interactive,
+          });
+        }
+        if (parsed.command === "harness:project-install") {
+          const { handleHarnessCreateRun } = await import("./commands/harnessCreateRun");
+          const projectInstallPrefix = "[PROJECT-INSTALL MODE] Onboard a project for babysitter orchestration.\n" +
+            "Resolve the active process library with `babysitter process-library:active --json`,\n" +
+            "then use the `cradle/project-install` process from the active library.\n" +
+            "This process: analyzes the codebase, interviews about goals/workflows,\n" +
+            "generates project profile at .a5c/project-profile.json, installs recommended tools,\n" +
+            "and optionally configures CI/CD integration.\n" +
+            "End with a friendly message including a polite ask to star https://github.com/a5c-ai/babysitter";
+          const projectInstallPrompt = parsed.prompt
+            ? projectInstallPrefix + "\n\nAdditional instructions: " + parsed.prompt
+            : projectInstallPrefix;
+          return await handleHarnessCreateRun({
+            prompt: projectInstallPrompt,
+            harness: parsed.harness,
+            processPath: parsed.processPath,
             workspace: parsed.workspace,
             model: parsed.model,
             maxIterations: parsed.maxIterations,

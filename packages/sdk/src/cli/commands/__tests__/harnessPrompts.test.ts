@@ -4,10 +4,10 @@ import {
   buildOrchestrationSystemPrompt,
   buildProcessDefinitionSystemPrompt,
   buildProcessDefinitionUserPrompt,
-  type SessionCreatePromptContext,
-} from "../sessionCreatePrompts";
+  type HarnessPromptContext,
+} from "../harnessPrompts";
 
-const context: SessionCreatePromptContext = {
+const context: HarnessPromptContext = {
   platform: "linux",
   arch: "x64",
   nodeVersion: "v22.0.0",
@@ -43,7 +43,7 @@ const context: SessionCreatePromptContext = {
   ],
 };
 
-describe("sessionCreatePrompts", () => {
+describe("harnessPrompts", () => {
   test("phase 1 prompt includes runtime and harness guidance", () => {
     const prompt = buildProcessDefinitionSystemPrompt("/tmp/out.js", context);
     expect(prompt).toContain("Runtime environment:");

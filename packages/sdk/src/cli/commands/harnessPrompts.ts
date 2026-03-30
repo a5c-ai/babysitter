@@ -1,6 +1,6 @@
 import type { HarnessDiscoveryResult } from "../../harness/types";
 
-export interface SessionCreatePromptContext {
+export interface HarnessPromptContext {
   platform: string;
   arch: string;
   nodeVersion: string;
@@ -15,13 +15,16 @@ export interface SessionCreatePromptContext {
   envFlags: Array<{ name: string; value: string }>;
 }
 
+/** @deprecated Use HarnessPromptContext instead */
+export type SessionCreatePromptContext = HarnessPromptContext;
+
 export interface ProcessDefinitionUserPromptOptions {
   interactive: boolean;
   workspaceAssessment?: "empty" | "non-empty";
   workspaceEntries?: string[];
 }
 
-function formatHarnessCatalog(context: SessionCreatePromptContext): string[] {
+function formatHarnessCatalog(context: HarnessPromptContext): string[] {
   const lines = ["Discovered harnesses:"];
   for (const harness of context.discoveredHarnesses) {
     const parts = [
@@ -48,7 +51,7 @@ function formatHarnessCatalog(context: SessionCreatePromptContext): string[] {
   return lines;
 }
 
-function formatRuntimeContext(context: SessionCreatePromptContext): string[] {
+function formatRuntimeContext(context: HarnessPromptContext): string[] {
   return [
     "Runtime environment:",
     `- platform=${context.platform}`,
@@ -64,7 +67,7 @@ function formatRuntimeContext(context: SessionCreatePromptContext): string[] {
   ];
 }
 
-function formatHarnessAssignmentGuidance(context: SessionCreatePromptContext): string[] {
+function formatHarnessAssignmentGuidance(context: HarnessPromptContext): string[] {
   const installedHarnesses = context.discoveredHarnesses
     .filter((h) => h.installed)
     .map((h) => h.name);
@@ -88,7 +91,7 @@ function formatHarnessAssignmentGuidance(context: SessionCreatePromptContext): s
   ];
 }
 
-function formatSharedContext(context: SessionCreatePromptContext): string[] {
+function formatSharedContext(context: HarnessPromptContext): string[] {
   return [
     "",
     ...formatRuntimeContext(context),
@@ -101,7 +104,7 @@ function formatSharedContext(context: SessionCreatePromptContext): string[] {
 
 export function buildProcessDefinitionSystemPrompt(
   outputPath: string,
-  context: SessionCreatePromptContext,
+  context: HarnessPromptContext,
 ): string {
   return [
     "You are the babysitter harness:create-run phase 1 agent.",
@@ -234,7 +237,7 @@ export function buildProcessDefinitionUserPrompt(
 
 export function buildOrchestrationSystemPrompt(
   selectedHarnessName: string,
-  context: SessionCreatePromptContext,
+  context: HarnessPromptContext,
 ): string {
   return [
     "You are the babysitter harness:create-run phase 2 orchestration agent.",

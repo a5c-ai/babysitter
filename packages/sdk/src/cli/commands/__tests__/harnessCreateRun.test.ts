@@ -144,7 +144,7 @@ vi.mock("node:fs", async () => {
   };
 });
 
-import { handleSessionCreate, selectHarness } from "../sessionCreate";
+import { handleHarnessCreateRun, selectHarness } from "../harnessCreateRun";
 import { discoverHarnesses, detectCallerHarness } from "../../../harness/discovery";
 import { invokeHarness } from "../../../harness/invoker";
 import { createPiSession } from "../../../harness/piWrapper";
@@ -314,7 +314,7 @@ describe("selectHarness", () => {
   });
 });
 
-describe("handleSessionCreate", () => {
+describe("handleHarnessCreateRun", () => {
   let tempDirs: string[] = [];
 
   beforeEach(() => {
@@ -349,7 +349,7 @@ describe("handleSessionCreate", () => {
       };
       (orchestrateIteration as Mock).mockResolvedValue(completedResult);
 
-      const code = await handleSessionCreate({
+      const code = await handleHarnessCreateRun({
         processPath: "/tmp/my-process.js",
         runsDir: "/tmp/runs",
         json: false,
@@ -426,7 +426,7 @@ describe("handleSessionCreate", () => {
         output: "done",
       });
 
-      const code = await handleSessionCreate({
+      const code = await handleHarnessCreateRun({
         prompt: "create a game",
         workspace,
         runsDir: "/tmp/runs",
@@ -564,7 +564,7 @@ describe("handleSessionCreate", () => {
           };
         });
 
-      const code = await handleSessionCreate({
+      const code = await handleHarnessCreateRun({
         prompt: "create a game",
         workspace,
         runsDir: "/tmp/runs",
@@ -654,7 +654,7 @@ describe("handleSessionCreate", () => {
         };
       });
 
-      const code = await handleSessionCreate({
+      const code = await handleHarnessCreateRun({
         processPath: "/tmp/p.js",
         runsDir: "/tmp/runs",
         json: false,
@@ -751,7 +751,7 @@ describe("handleSessionCreate", () => {
         };
       });
 
-      const code = await handleSessionCreate({
+      const code = await handleHarnessCreateRun({
         processPath: "/tmp/p.js",
         prompt: "create a game",
         runsDir: "/tmp/runs",
@@ -889,7 +889,7 @@ describe("handleSessionCreate", () => {
         output: "done",
       });
 
-      const code = await handleSessionCreate({
+      const code = await handleHarnessCreateRun({
         prompt: "create a game",
         workspace,
         runsDir: "/tmp/runs",
@@ -986,7 +986,7 @@ describe("handleSessionCreate", () => {
         output: "done",
       });
 
-      const code = await handleSessionCreate({
+      const code = await handleHarnessCreateRun({
         prompt: "create a game",
         workspace,
         runsDir: "/tmp/runs",
@@ -1060,7 +1060,7 @@ describe("handleSessionCreate", () => {
         output: "done",
       });
 
-      const code = await handleSessionCreate({
+      const code = await handleHarnessCreateRun({
         prompt: "create a game",
         workspace,
         runsDir: "/tmp/runs",
@@ -1135,7 +1135,7 @@ describe("handleSessionCreate", () => {
         };
       });
 
-      const code = await handleSessionCreate({
+      const code = await handleHarnessCreateRun({
         prompt: "create a game",
         workspace,
         runsDir: "/tmp/runs",
@@ -1235,7 +1235,7 @@ describe("handleSessionCreate", () => {
           }),
       }));
 
-      const code = await handleSessionCreate({
+      const code = await handleHarnessCreateRun({
         prompt: "create a game",
         workspace,
         runsDir: path.join(workspace, ".a5c", "runs"),
@@ -1329,7 +1329,7 @@ describe("handleSessionCreate", () => {
         };
       });
 
-      const code = await handleSessionCreate({
+      const code = await handleHarnessCreateRun({
         prompt: "create a game",
         workspace,
         runsDir: "/tmp/runs",
@@ -1420,7 +1420,7 @@ describe("handleSessionCreate", () => {
         };
       });
 
-      const code = await handleSessionCreate({
+      const code = await handleHarnessCreateRun({
         prompt: "create a game",
         workspace,
         runsDir: "/tmp/runs",
@@ -1524,7 +1524,7 @@ describe("handleSessionCreate", () => {
         };
       });
 
-      const code = await handleSessionCreate({
+      const code = await handleHarnessCreateRun({
         prompt: "create a game",
         workspace,
         runsDir: "/tmp/runs",
@@ -1636,7 +1636,7 @@ describe("handleSessionCreate", () => {
         };
       });
 
-      const code = await handleSessionCreate({
+      const code = await handleHarnessCreateRun({
         prompt: "create a game",
         workspace,
         runsDir: "/tmp/runs",
@@ -1748,7 +1748,7 @@ describe("handleSessionCreate", () => {
         };
       });
 
-      const code = await handleSessionCreate({
+      const code = await handleHarnessCreateRun({
         prompt: "create a game",
         workspace,
         runsDir: "/tmp/runs",
@@ -1846,7 +1846,7 @@ describe("handleSessionCreate", () => {
         };
       });
 
-      const code = await handleSessionCreate({
+      const code = await handleHarnessCreateRun({
         prompt: "create a game",
         workspace,
         runsDir: "/tmp/runs",
@@ -1950,7 +1950,7 @@ describe("handleSessionCreate", () => {
         };
       });
 
-      const code = await handleSessionCreate({
+      const code = await handleHarnessCreateRun({
         prompt: "create a game",
         workspace,
         runsDir: "/tmp/runs",
@@ -2060,7 +2060,7 @@ describe("handleSessionCreate", () => {
         };
       });
 
-      const code = await handleSessionCreate({
+      const code = await handleHarnessCreateRun({
         prompt: "create a game",
         workspace,
         runsDir: "/tmp/runs",
@@ -2185,7 +2185,7 @@ describe("handleSessionCreate", () => {
         };
       });
 
-      const code = await handleSessionCreate({
+      const code = await handleHarnessCreateRun({
         prompt: "create a game",
         workspace,
         runsDir: "/tmp/runs",
@@ -2293,7 +2293,7 @@ describe("handleSessionCreate", () => {
         };
       });
 
-      const code = await handleSessionCreate({
+      const code = await handleHarnessCreateRun({
         prompt: "create a game",
         workspace,
         runsDir: "/tmp/runs",
@@ -2327,7 +2327,7 @@ describe("handleSessionCreate", () => {
       };
       (orchestrateIteration as Mock).mockResolvedValue(completedResult);
 
-      await handleSessionCreate({
+      await handleHarnessCreateRun({
         processPath: "/tmp/process.js",
         prompt: "build a thing",
         runsDir: "/tmp/runs",
@@ -2353,7 +2353,7 @@ describe("handleSessionCreate", () => {
       ]);
       (createRun as Mock).mockRejectedValue(new Error("disk full"));
 
-      const code = await handleSessionCreate({
+      const code = await handleHarnessCreateRun({
         processPath: "/tmp/process.js",
         runsDir: "/tmp/runs",
         json: false,
@@ -2380,7 +2380,7 @@ describe("handleSessionCreate", () => {
         output: "done",
       });
 
-      const code = await handleSessionCreate({
+      const code = await handleHarnessCreateRun({
         processPath: "/tmp/p.js",
         runsDir: "/tmp/runs",
         json: false,
@@ -2454,7 +2454,7 @@ describe("handleSessionCreate", () => {
         });
       (commitEffectResult as Mock).mockResolvedValue({});
 
-      const code = await handleSessionCreate({
+      const code = await handleHarnessCreateRun({
         processPath: "/tmp/p.js",
         runsDir: "/tmp/runs",
         json: false,
@@ -2510,7 +2510,7 @@ describe("handleSessionCreate", () => {
         });
       (commitEffectResult as Mock).mockResolvedValue({});
 
-      const code = await handleSessionCreate({
+      const code = await handleHarnessCreateRun({
         processPath: "/tmp/p.js",
         runsDir: "/tmp/runs",
         json: false,
@@ -2545,7 +2545,7 @@ describe("handleSessionCreate", () => {
       };
       (orchestrateIteration as Mock).mockResolvedValue(completedResult);
 
-      const code = await handleSessionCreate({
+      const code = await handleHarnessCreateRun({
         processPath: "/tmp/p.js",
         runsDir: "/tmp/runs",
         json: false,
@@ -2573,7 +2573,7 @@ describe("handleSessionCreate", () => {
           output: "done",
         });
 
-      const code = await handleSessionCreate({
+      const code = await handleHarnessCreateRun({
         processPath: "/tmp/p.js",
         runsDir: "/tmp/runs",
         json: false,
@@ -2615,7 +2615,7 @@ describe("handleSessionCreate", () => {
         .mockResolvedValueOnce(completedResult);
       (commitEffectResult as Mock).mockResolvedValue({});
 
-      const code = await handleSessionCreate({
+      const code = await handleHarnessCreateRun({
         processPath: "/tmp/p.js",
         runsDir: "/tmp/runs",
         json: false,
@@ -2685,7 +2685,7 @@ describe("handleSessionCreate", () => {
       );
       (commitEffectResult as Mock).mockResolvedValue({});
 
-      const code = await handleSessionCreate({
+      const code = await handleHarnessCreateRun({
         processPath: "/tmp/p.js",
         runsDir: "/tmp/runs",
         json: false,
@@ -2715,7 +2715,7 @@ describe("handleSessionCreate", () => {
       };
       (orchestrateIteration as Mock).mockResolvedValue(failedResult);
 
-      const code = await handleSessionCreate({
+      const code = await handleHarnessCreateRun({
         processPath: "/tmp/p.js",
         runsDir: "/tmp/runs",
         json: false,
@@ -2750,7 +2750,7 @@ describe("handleSessionCreate", () => {
       (orchestrateIteration as Mock).mockResolvedValue(waitingResult);
       (commitEffectResult as Mock).mockResolvedValue({});
 
-      const code = await handleSessionCreate({
+      const code = await handleHarnessCreateRun({
         processPath: "/tmp/p.js",
         runsDir: "/tmp/runs",
         maxIterations: 3,
@@ -2782,7 +2782,7 @@ describe("handleSessionCreate", () => {
 
       const logSpy = console.log as Mock;
 
-      await handleSessionCreate({
+      await handleHarnessCreateRun({
         processPath: "/tmp/p.js",
         runsDir: "/tmp/runs",
         json: true,
@@ -2822,7 +2822,7 @@ describe("handleSessionCreate", () => {
         output: "done",
       });
 
-      const code = await handleSessionCreate({
+      const code = await handleHarnessCreateRun({
         processPath: "/tmp/p.js",
         runsDir: "/tmp/runs",
         json: false,
@@ -2865,7 +2865,7 @@ describe("handleSessionCreate", () => {
         });
       (commitEffectResult as Mock).mockResolvedValue({});
 
-      const code = await handleSessionCreate({
+      const code = await handleHarnessCreateRun({
         processPath: "/tmp/p.js",
         runsDir: "/tmp/runs",
         harness: "pi",
@@ -2890,7 +2890,7 @@ describe("handleSessionCreate", () => {
     });
 
     it("returns 1 when neither --prompt nor --process is provided", async () => {
-      const code = await handleSessionCreate({
+      const code = await handleHarnessCreateRun({
         runsDir: "/tmp/runs",
         json: false,
         verbose: false,

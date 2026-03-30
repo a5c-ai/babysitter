@@ -3,7 +3,7 @@
  *
  * Uses an agentic Pi session to discover existing runs, present them to the
  * user, assess state, and resume orchestration by delegating to
- * handleSessionCreate.
+ * handleHarnessCreateRun.
  *
  * The Pi agent has access to three domain-specific tools
  * (babysitter_list_runs, babysitter_assess_run, babysitter_resume_run) plus
@@ -20,7 +20,7 @@ import { readStateCache } from "../../runtime/replay/stateCache";
 import { createPiSession, PiSessionHandle } from "../../harness/piWrapper";
 import { createAgenticToolDefinitions } from "../../harness/agenticTools";
 import type { PiSessionEvent } from "../../harness/types";
-import { handleSessionCreate } from "./sessionCreate";
+import { handleHarnessCreateRun } from "./harnessCreateRun";
 
 const DIM = "\x1b[2m";
 const RESET = "\x1b[0m";
@@ -286,7 +286,7 @@ function buildResumeUserPrompt(runIdHint?: string): string {
 // Main handler
 // ---------------------------------------------------------------------------
 
-export async function handleSessionResume(args: SessionResumeArgs): Promise<number> {
+export async function handleHarnessResumeRun(args: SessionResumeArgs): Promise<number> {
   const {
     runsDir,
     json,
@@ -443,7 +443,7 @@ export async function handleSessionResume(args: SessionResumeArgs): Promise<numb
             ? entryImportPath
             : path.resolve(entryImportPath);
 
-          resumeExitCode = await handleSessionCreate({
+          resumeExitCode = await handleHarnessCreateRun({
             processPath,
             prompt: selectedRun.prompt,
             harness: args.harness,
