@@ -295,6 +295,47 @@ function createReadlineInterface(): readline.Interface {
   });
 }
 
+function askLine(
+  rl: readline.Interface,
+  promptText: string,
+): Promise<string | null> {
+  return new Promise((resolve) => {
+    rl.question(`${promptText} `, (answer) => {
+      resolve(answer);
+    });
+    rl.once("close", () => resolve(null));
+  });
+}
+
+async function readInteractivePrompt(
+  rl: readline.Interface,
+): Promise<string | null> {
+  process.stderr.write("\n");
+  process.stderr.write(
+    `${BOLD}${CYAN}babysitter harness:create-run${RESET}\n`,
+  );
+  process.stderr.write(
+    `${DIM}Enter your request below. Press Enter to submit.${RESET}\n`,
+  );
+  process.stderr.write(
+    `${DIM}(Use \\ at end of line for multi-line input, Ctrl+C to cancel)${RESET}\n\n`,
+  );
+
+  const lines: string[] = [];
+  for (;;) {
+    const line = await askLine(rl, lines.length === 0 ? ">" : "...");
+    if (line === null) return null; // EOF / Ctrl+C / Ctrl+D
+    if (line.endsWith("\\")) {
+      lines.push(line.slice(0, -1));
+      continue;
+    }
+    lines.push(line);
+    const combined = lines.join("\n").trim();
+    if (combined) return combined;
+    lines.length = 0; // Reset if empty, re-prompt
+  }
+}
+
 function getGeneratedProcessPath(workDir: string): string {
   return path.join(workDir, "generated-process.mjs");
 }
@@ -4199,18 +4240,40 @@ async function runOrchestrationPhase(args: {
         let effectResult = state.pendingEffectResults.get(params.effectId);
 
         if (params.status) {
-          effectResult = {
-            status: params.status,
-            value: parseExplicitToolResultValue({
-              valueJson: params.valueJson,
-              valueText: params.valueText,
-            }),
-            error: params.status === "error"
-              ? new Error(params.error ?? "Effect failed")
-              : undefined,
-            stdout: params.stdout,
-            stderr: params.stderr,
-          };
+          const hasExplicitPayload =
+            params.valueJson !== undefined ||
+            params.valueText !== undefined ||
+            params.error !== undefined ||
+            params.stdout !== undefined ||
+            params.stderr !== undefined;
+
+          if (!effectResult || hasExplicitPayload) {
+            effectResult = {
+              status: params.status,
+              value: parseExplicitToolResultValue({
+                valueJson: params.valueJson,
+                valueText: params.valueText,
+              }),
+              error: params.status === "error"
+                ? new Error(params.error ?? "Effect failed")
+                : undefined,
+              stdout: params.stdout,
+              stderr: params.stderr,
+            };
+          } else if (params.status !== effectResult.status) {
+            effectResult = {
+              ...effectResult,
+              status: params.status,
+              error: params.status === "error"
+                ? new Error(
+                    params.error ??
+                    (effectResult.error instanceof Error
+                      ? effectResult.error.message
+                      : "Effect failed"),
+                  )
+                : undefined,
+            };
+          }
         }
 
         if (!effectResult && action.kind === "breakpoint") {
@@ -4652,7 +4715,7 @@ export async function handleSessionCreate(
   parsed: SessionCreateArgs,
 ): Promise<number> {
   const {
-    prompt,
+    prompt: initialPrompt,
     harness: preferredHarness,
     processPath: providedProcessPath,
     workspace,
@@ -4667,16 +4730,25 @@ export async function handleSessionCreate(
   const rl = interactive ? createReadlineInterface() : null;
 
   try {
+    let prompt = initialPrompt;
     if (!prompt && !providedProcessPath) {
-      const error = "Either --prompt or --process must be provided";
-      if (json) {
-        console.error(
-          JSON.stringify({ error: "MISSING_PROMPT", message: error }, null, 2),
-        );
+      if (interactive && rl) {
+        const userPrompt = await readInteractivePrompt(rl);
+        if (!userPrompt) {
+          return 0; // User cancelled
+        }
+        prompt = userPrompt;
       } else {
-        process.stderr.write(`${RED}Error:${RESET} ${error}\n`);
+        const error = "Either --prompt or --process must be provided";
+        if (json) {
+          console.error(
+            JSON.stringify({ error: "MISSING_PROMPT", message: error }, null, 2),
+          );
+        } else {
+          process.stderr.write(`${RED}Error:${RESET} ${error}\n`);
+        }
+        return 1;
       }
-      return 1;
     }
 
     const discovered = await discoverHarnesses();

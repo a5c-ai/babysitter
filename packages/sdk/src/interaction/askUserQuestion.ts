@@ -1,10 +1,182 @@
 import * as readline from "node:readline";
+import type { Readable, Writable } from "node:stream";
 
 const RESET = "\x1b[0m";
 const BOLD = "\x1b[1m";
 const CYAN = "\x1b[36m";
 const DIM = "\x1b[2m";
 const YELLOW = "\x1b[33m";
+const HIDE_CURSOR = "\x1b[?25l";
+const SHOW_CURSOR = "\x1b[?25h";
+const CLEAR_LINE = "\x1b[2K";
+const CURSOR_COL1 = "\x1b[G";
+const CURSOR_UP = "\x1b[A";
+
+// ---------------------------------------------------------------------------
+// Arrow-key interactive selector (single & multi-select)
+// ---------------------------------------------------------------------------
+
+interface ArrowSelectOptions {
+  multiSelect?: boolean;
+}
+
+function isTTYInput(stream: Readable): stream is NodeJS.ReadStream & { setRawMode: (mode: boolean) => void } {
+  return "isTTY" in stream && (stream as NodeJS.ReadStream).isTTY === true && typeof (stream as NodeJS.ReadStream).setRawMode === "function";
+}
+
+/**
+ * Render the option list to `output`. Returns the number of lines written.
+ */
+function renderOptions(
+  output: Writable,
+  options: string[],
+  cursor: number,
+  selected: Set<number>,
+  multiSelect: boolean,
+): number {
+  let lines = 0;
+  for (const [i, label] of options.entries()) {
+    const isCurrent = i === cursor;
+    const prefix = multiSelect
+      ? selected.has(i)
+        ? isCurrent
+          ? `${CYAN}${BOLD}> [x]${RESET} `
+          : `  [x] `
+        : isCurrent
+          ? `${CYAN}${BOLD}> [ ]${RESET} `
+          : `  [ ] `
+      : isCurrent
+        ? `${CYAN}${BOLD}> ${RESET}`
+        : `  `;
+    const text = isCurrent ? `${CYAN}${BOLD}${label}${RESET}` : label;
+    output.write(`${CLEAR_LINE}${CURSOR_COL1}${prefix}${text}\n`);
+    lines++;
+  }
+  if (multiSelect) {
+    output.write(`${CLEAR_LINE}${CURSOR_COL1}${DIM}(Space to toggle, Enter to confirm, Esc to cancel)${RESET}\n`);
+    lines++;
+  } else {
+    output.write(`${CLEAR_LINE}${CURSOR_COL1}${DIM}(Up/Down to move, Enter to select, 1-9 shortcut, Esc to cancel)${RESET}\n`);
+    lines++;
+  }
+  return lines;
+}
+
+/**
+ * Move the terminal cursor up `n` lines so we can re-render in place.
+ */
+function moveUp(output: Writable, n: number): void {
+  if (n > 0) {
+    output.write(`${CURSOR_UP}`.repeat(n));
+  }
+}
+
+/**
+ * Arrow-key interactive selector.
+ *
+ * Returns the selected index (single) or array of indices (multi).
+ * Returns `undefined` if cancelled (Escape / Ctrl-C).
+ */
+function promptArrowKeySelect(
+  input: NodeJS.ReadStream,
+  output: Writable,
+  options: string[],
+  opts?: ArrowSelectOptions,
+): Promise<number | number[] | undefined> {
+  const multiSelect = opts?.multiSelect ?? false;
+
+  return new Promise((resolve) => {
+    let cursor = 0;
+    const selected = new Set<number>();
+    let renderedLines = 0;
+    let resolved = false;
+
+    const cleanup = (): void => {
+      if (resolved) return;
+      resolved = true;
+      input.removeListener("data", onData);
+      try { input.setRawMode(false); } catch { /* ignore */ }
+      output.write(SHOW_CURSOR);
+    };
+
+    const finish = (value: number | number[] | undefined): void => {
+      cleanup();
+      resolve(value);
+    };
+
+    const redraw = (): void => {
+      moveUp(output, renderedLines);
+      renderedLines = renderOptions(output, options, cursor, selected, multiSelect);
+    };
+
+    const onData = (data: Buffer): void => {
+      if (resolved) return;
+      const key = data.toString("utf8");
+
+      // Ctrl-C
+      if (key === "\x03") {
+        finish(undefined);
+        return;
+      }
+
+      // Escape
+      if (key === "\x1b" || key === "\x1b\x1b") {
+        finish(undefined);
+        return;
+      }
+
+      // Enter
+      if (key === "\r" || key === "\n") {
+        if (multiSelect) {
+          finish([...selected].sort((a, b) => a - b));
+        } else {
+          finish(cursor);
+        }
+        return;
+      }
+
+      // Space (multi-select toggle)
+      if (key === " " && multiSelect) {
+        if (selected.has(cursor)) {
+          selected.delete(cursor);
+        } else {
+          selected.add(cursor);
+        }
+        redraw();
+        return;
+      }
+
+      // Arrow up
+      if (key === "\x1b[A") {
+        cursor = cursor > 0 ? cursor - 1 : options.length - 1;
+        redraw();
+        return;
+      }
+
+      // Arrow down
+      if (key === "\x1b[B") {
+        cursor = cursor < options.length - 1 ? cursor + 1 : 0;
+        redraw();
+        return;
+      }
+
+      // Number shortcuts 1-9 (single select only)
+      if (!multiSelect && /^[1-9]$/.test(key)) {
+        const idx = Number(key) - 1;
+        if (idx < options.length) {
+          finish(idx);
+        }
+        return;
+      }
+    };
+
+    output.write(HIDE_CURSOR);
+    input.setRawMode(true);
+    input.resume();
+    input.on("data", onData);
+    renderedLines = renderOptions(output, options, cursor, selected, multiSelect);
+  });
+}
 
 const MIN_QUESTION_COUNT = 1;
 const MAX_QUESTION_COUNT = 4;
@@ -208,6 +380,19 @@ export function createReadlineAskUserQuestionUiContext(
   return {
     async select(title: string, options: string[]): Promise<string | undefined> {
       process.stderr.write(`${title}\n`);
+
+      // Use arrow-key selector when stdin is a TTY
+      if (isTTYInput(process.stdin)) {
+        const idx = await promptArrowKeySelect(
+          process.stdin,
+          process.stderr,
+          options,
+        );
+        if (idx == null || typeof idx !== "number") return undefined;
+        return options[idx];
+      }
+
+      // Fallback: line-based prompt
       for (const [index, option] of options.entries()) {
         process.stderr.write(`  ${index + 1}. ${option}\n`);
       }
@@ -420,42 +605,78 @@ async function promptAskUserQuestionInteractive(
     }
     process.stderr.write(`${question.question}\n`);
 
-    if (options.length > 0) {
+    if (options.length > 0 && isTTYInput(process.stdin)) {
+      // Arrow-key interactive selection
+      const optionLabels = options.map((o) => {
+        const desc = o.description ? ` ${DIM}${o.description}${RESET}` : "";
+        return `${o.label}${desc}`;
+      });
+
+      if (question.multiSelect) {
+        const result = await promptArrowKeySelect(
+          process.stdin,
+          process.stderr,
+          optionLabels,
+          { multiSelect: true },
+        );
+        if (Array.isArray(result) && result.length > 0) {
+          answers[key] = result.map((i) => options[i].label).join(", ");
+        } else if (!question.required) {
+          answers[key] = "";
+        } else {
+          // Required but cancelled — use first option as fallback
+          answers[key] = options[0].label;
+        }
+      } else {
+        const result = await promptArrowKeySelect(
+          process.stdin,
+          process.stderr,
+          optionLabels,
+        );
+        if (typeof result === "number") {
+          answers[key] = options[result].label;
+        } else if (!question.required) {
+          answers[key] = "";
+        } else {
+          answers[key] = options[0].label;
+        }
+      }
+    } else if (options.length > 0) {
+      // Fallback: line-based prompt for non-TTY
       for (const [optionIndex, option] of options.entries()) {
         const description = option.description ? ` ${DIM}${option.description}${RESET}` : "";
         const preview = option.preview ? ` ${YELLOW}[preview]${RESET}` : "";
         process.stderr.write(`  ${optionIndex + 1}. ${option.label}${description}${preview}\n`);
       }
-    }
 
-    let answered = false;
-    while (!answered) {
-      const prompt =
-        options.length > 0
-          ? question.multiSelect
-            ? "Choose one or more options (numbers or labels, comma-separated)"
-            : "Choose an option (number or label)"
-          : "Answer";
-      const answer = await askLine(rl, prompt);
+      let answered = false;
+      while (!answered) {
+        const prompt = question.multiSelect
+          ? "Choose one or more options (numbers or labels, comma-separated)"
+          : "Choose an option (number or label)";
+        const answer = await askLine(rl, prompt);
 
-      if (!options.length) {
+        const parsed = parseOptionAnswer(answer, question);
+        if (parsed !== undefined) {
+          answers[key] = parsed;
+          answered = true;
+          continue;
+        }
+
+        process.stderr.write(`${YELLOW}Please choose a valid option.${RESET}\n`);
+      }
+    } else {
+      let answered = false;
+      while (!answered) {
+        const answer = await askLine(rl, "Answer");
+
         if (!answer && question.required) {
           process.stderr.write(`${YELLOW}An answer is required.${RESET}\n`);
           continue;
         }
         answers[key] = answer;
         answered = true;
-        continue;
       }
-
-      const parsed = parseOptionAnswer(answer, question);
-      if (parsed !== undefined) {
-        answers[key] = parsed;
-        answered = true;
-        continue;
-      }
-
-      process.stderr.write(`${YELLOW}Please choose a valid option.${RESET}\n`);
     }
   }
 

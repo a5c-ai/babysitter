@@ -609,7 +609,8 @@ describe("handleSessionCreate", () => {
           },
         ],
       });
-      vi.mocked(createPiSession).mockImplementationOnce((options?: { customTools?: Array<Record<string, unknown>> }) => {
+      const baseCreatePiSessionImpl = vi.mocked(createPiSession).getMockImplementation();
+      vi.mocked(createPiSession).mockImplementation((options?: { customTools?: Array<Record<string, unknown>> }) => {
         const tools = options?.customTools ?? [];
         const runCreate = tools.find((tool) => tool.name === "babysitter_run_create") as {
           execute?: (toolCallId: string, params: Record<string, unknown>) => Promise<{ details?: unknown }>;
@@ -663,6 +664,112 @@ describe("handleSessionCreate", () => {
 
       expect(code).toBe(1);
       expect(commitEffectResult).not.toHaveBeenCalled();
+    });
+
+    it("preserves staged dispatch result when posting with status only", async () => {
+      (discoverHarnesses as Mock).mockResolvedValue([
+        makeDiscoveryResult({ name: "pi" }),
+      ]);
+      (createRun as Mock).mockResolvedValue({
+        runId: "run-preserve-staged",
+        runDir: "/tmp/runs/run-preserve-staged",
+        metadata: {},
+      });
+      (orchestrateIteration as Mock)
+        .mockResolvedValueOnce({
+          status: "waiting",
+          nextActions: [
+            {
+              effectId: "eff-agent",
+              invocationKey: "key-agent",
+              kind: "agent",
+              taskDef: { kind: "agent", title: "Do work" },
+            },
+          ],
+        })
+        .mockResolvedValueOnce({
+          status: "completed",
+          output: { ok: true },
+        });
+      (invokeHarness as Mock).mockResolvedValue(
+        makeInvokeResult({
+          output: JSON.stringify({ answer: 42 }),
+        }),
+      );
+
+      const baseCreatePiSessionImpl = vi.mocked(createPiSession).getMockImplementation();
+      vi.mocked(createPiSession).mockImplementation((options?: { customTools?: Array<Record<string, unknown>> }) => {
+        const tools = options?.customTools ?? [];
+        const runCreate = tools.find((tool) => tool.name === "babysitter_run_create") as {
+          execute?: (toolCallId: string, params: Record<string, unknown>) => Promise<{ details?: unknown }>;
+        } | undefined;
+        const bindSession = tools.find((tool) => tool.name === "babysitter_bind_session") as {
+          execute?: (toolCallId: string, params: Record<string, unknown>) => Promise<{ details?: unknown }>;
+        } | undefined;
+        const runIterate = tools.find((tool) => tool.name === "babysitter_run_iterate") as {
+          execute?: (toolCallId: string, params: Record<string, unknown>) => Promise<{ details?: unknown }>;
+        } | undefined;
+        const dispatchEffectHarness = tools.find((tool) => tool.name === "babysitter_dispatch_effect_harness") as {
+          execute?: (toolCallId: string, params: Record<string, unknown>) => Promise<{ details?: unknown }>;
+        } | undefined;
+        const taskPost = tools.find((tool) => tool.name === "babysitter_task_post_result") as {
+          execute?: (toolCallId: string, params: Record<string, unknown>) => Promise<{ details?: unknown }>;
+        } | undefined;
+        const finish = tools.find((tool) => tool.name === "babysitter_finish_orchestration") as {
+          execute?: (toolCallId: string, params: Record<string, unknown>) => Promise<{ details?: unknown }>;
+        } | undefined;
+
+        return {
+          initialize: vi.fn().mockResolvedValue(undefined),
+          subscribe: vi.fn(() => () => {}),
+          dispose: vi.fn(),
+          executeBash: vi.fn(async () => ({
+            output: "ok",
+            exitCode: 0,
+            cancelled: false,
+          })),
+          get sessionId() {
+            return "mock-session-id-preserve-staged";
+          },
+          get isInitialized() {
+            return true;
+          },
+          prompt: vi.fn(async () => {
+            await runCreate?.execute?.("tool-run-create", {});
+            await bindSession?.execute?.("tool-bind", {});
+            const iter1 = await runIterate?.execute?.("tool-iterate-1", {});
+            const details = iter1?.details as { nextActions?: Array<{ effectId?: string }> } | undefined;
+            const effectId = details?.nextActions?.[0]?.effectId;
+            if (effectId) {
+              await dispatchEffectHarness?.execute?.("tool-dispatch", { effectId });
+              await taskPost?.execute?.("tool-post", { effectId, status: "ok" });
+            }
+            await runIterate?.execute?.("tool-iterate-2", {});
+            await finish?.execute?.("tool-finish", { summary: "done" });
+            return { success: true, output: "phase2", exitCode: 0, duration: 1 };
+          }),
+        };
+      });
+
+      const code = await handleSessionCreate({
+        processPath: "/tmp/p.js",
+        prompt: "create a game",
+        runsDir: "/tmp/runs",
+        json: false,
+        verbose: false,
+        interactive: false,
+      });
+
+      expect(code).toBe(0);
+      expect(commitEffectResult).toHaveBeenCalledWith(
+        expect.objectContaining({
+          effectId: "eff-agent",
+          result: expect.objectContaining({
+            status: "ok",
+            value: expect.anything(),
+          }),
+        }),
+      );
     });
 
     it("continues phase 2 after a late bootstrap prompt failure and preserves the original user prompt", async () => {

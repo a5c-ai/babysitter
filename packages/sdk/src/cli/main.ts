@@ -124,7 +124,8 @@ const USAGE = `Usage:
   babysitter compression:toggle <layer> <on|off> [--json]
   babysitter compression:set <layer.key> <value> [--json]
   babysitter compression:reset [--json]
-  babysitter harness:create-run --prompt <text> [--harness <name>] [--process <path>] [--workspace <dir>] [--model <model>] [--max-iterations <n>] [--runs-dir <dir>] [--interactive|--no-interactive|--non-interactive] [--json] [--verbose]
+  babysitter harness:create-run [--prompt <text>] [--harness <name>] [--process <path>] [--workspace <dir>] [--model <model>] [--max-iterations <n>] [--runs-dir <dir>] [--interactive|--no-interactive|--non-interactive] [--json] [--verbose]
+  babysitter harness:resume-run [--run-id <id>] [--runs-dir <dir>] [--harness <name>] [--workspace <dir>] [--model <model>] [--max-iterations <n>] [--interactive|--no-interactive] [--json] [--verbose]
   babysitter harness:discover [--json]
   babysitter harness:list [--json]
   babysitter harness:install <name> [--workspace <dir>] [--json] [--dry-run] [--verbose]
@@ -2146,6 +2147,7 @@ const VALID_COMMANDS = [
   "session:last-message",
   "session:iteration-message",
   "harness:create-run",
+  "harness:resume-run",
   "hook:log",
   "hook:run",
   "skill:discover",
@@ -2685,6 +2687,20 @@ export function createBabysitterCli() {
             prompt: parsed.prompt,
             harness: parsed.harness,
             processPath: parsed.processPath,
+            workspace: parsed.workspace,
+            model: parsed.model,
+            maxIterations: parsed.maxIterations,
+            runsDir: parsed.runsDir,
+            json: parsed.json,
+            verbose: parsed.verbose,
+            interactive: parsed.interactive,
+          });
+        }
+        if (parsed.command === "harness:resume-run") {
+          const { handleSessionResume: handleHarnessResumeRun } = await import("./commands/sessionResume");
+          return await handleHarnessResumeRun({
+            runId: parsed.runIdOverride,
+            harness: parsed.harness,
             workspace: parsed.workspace,
             model: parsed.model,
             maxIterations: parsed.maxIterations,

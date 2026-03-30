@@ -141,6 +141,29 @@ export function buildProcessDefinitionSystemPrompt(
     "- Do not set `task.metadata.bashSandbox`, `task.metadata.isolated`, or `task.metadata.enableCompaction` for ordinary internal PI tasks. Leave them unset unless the task truly requires stronger guardrails or long-running compaction.",
     "- If a task truly needs stronger internal guardrails, encode them explicitly in task metadata instead of assuming every internal task is secure or isolated by default.",
     "",
+    "Process Library Activation:",
+    "- You MUST call `babysitter_resolve_process_library` to bootstrap and resolve the active process-library root before authoring the process. This is non-optional.",
+    "- After resolving, read `binding.dir` as the active process-library root to search. Treat `specializations/**/**/**`, `methodologies/`, `contrib/`, and `reference/` as paths relative to `binding.dir`.",
+    "- If the cloned repo root is needed for adjacent reference material, use `defaultSpec.cloneDir`.",
+    "- Use `babysitter_search_process_library` and `babysitter_read_process_library_file` to search the library. Do not skip the search step.",
+    "",
+    "Interview Phase Enhancement (interactive mode):",
+    "- In interactive mode, follow a structured multi-step interview: first inspect the repo/workspace state, then search the process library for relevant specializations, methodologies, skills, and agents. Use babysitter discover commands at various stages.",
+    "- After each interview step, decide what the next highest-signal step is. Do not plan more than one step ahead. The same step type can repeat.",
+    "- Interview steps can include: research the repo, search the process library, ask the user a question via AskUserQuestion, research online, inspect local processes.",
+    "",
+    "Process Creation Guidelines:",
+    "- Before writing the process, scan methodologies and processes in the active process library to find relevant patterns to use as reference. Also scan `.a5c/processes/` for project-level reusable processes.",
+    "- Search for process files (.js), skills (SKILL.md), and agents (AGENT.md) during the process building phase. Search paths: `.a5c/processes/` (project level), `specializations/` under active root, `methodologies/` under active root.",
+    "- When creating the process file, include `@skill` and `@agent` JSDoc markers in the file header listing skills and agents relevant to this process. The SDK reads these markers to provide targeted discovery results instead of scanning all available skills.",
+    "- JSDoc marker format: `@skill <name> <path-relative-to-binding.dir>`, `@agent <name> <path-relative-to-binding.dir>`.",
+    "- Prefer modular, reusable process composition. If a generic reusable part is identified, build it modularly in `.a5c/processes/` for future composition.",
+    "- Processes should include: explicit milestones, quality gates with executable verification, iterative convergence loops, integration phases with integration tests.",
+    "- Test-driven approach where quality gate agents can use executable tools, scripts, and tests to verify accuracy and completeness.",
+    "",
+    "Non-interactive Mode Enhancement:",
+    "- In non-interactive mode, still parse the request, inspect the workspace, resolve the active process-library root, and search for the most relevant specialization or methodology before authoring. Do not skip the search step just because it is non-interactive.",
+    "",
     `Required output path: ${outputPath}`,
     ...formatSharedContext(context),
   ].join("\n");
@@ -201,6 +224,7 @@ export function buildProcessDefinitionUserPrompt(
   }
 
   lines.push(
+    "Before writing the process, you MUST resolve and search the active process-library. Use babysitter_resolve_process_library, then babysitter_search_process_library to find relevant patterns.",
     "The generated process must directly execute the user's requested work rather than write another babysitter process.",
     "Use babysitter_write_process_definition to write the file now, then call babysitter_report_process_definition exactly once.",
   );
