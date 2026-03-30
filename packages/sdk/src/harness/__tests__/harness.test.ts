@@ -12,7 +12,9 @@
 import * as path from "node:path";
 import { promises as fs } from "node:fs";
 import * as os from "node:os";
-import { describe, it, expect, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+import { writeFileSync } from "node:fs";
+import { Readable } from "node:stream";
 import { createClaudeCodeAdapter } from "../claudeCode";
 import { writeSessionFile } from "../../session/write";
 import { getSessionFilePath, readSessionFile, sessionFileExists } from "../../session/parse";
@@ -218,17 +220,34 @@ describe("CodexAdapter", () => {
       const adapter = createCodexAdapter();
       expect(adapter.resolveStateDir({})).toBe(path.resolve(".a5c"));
     });
+
+    it("keeps session state in the active workspace when pluginRoot is global CODEX_HOME", async () => {
+      const adapter = createCodexAdapter();
+      const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "codex-state-dir-test-"));
+      const originalCwd = process.cwd();
+      try {
+        process.chdir(tmpDir);
+        expect(
+          adapter.resolveStateDir({
+            pluginRoot: path.join(os.homedir(), ".codex"),
+          }),
+        ).toBe(path.join(tmpDir, ".a5c"));
+      } finally {
+        process.chdir(originalCwd);
+        await fs.rm(tmpDir, { recursive: true, force: true });
+      }
+    });
   });
 
   it("reports codex-specific missing session ID guidance", () => {
     const adapter = createCodexAdapter();
-    expect(adapter.getMissingSessionIdHint?.()).toContain("Codex babysitter supervisor");
+    expect(adapter.getMissingSessionIdHint?.()).toContain("Codex hook callback");
   });
 
-  it("does not advertise stop-hook support", () => {
+  it("advertises hook support for codex lifecycle hooks", () => {
     const adapter = createCodexAdapter();
-    expect(adapter.supportsHookType?.("stop")).toBe(false);
-    expect(adapter.supportsHookType?.("session-start")).toBe(false);
+    expect(adapter.supportsHookType?.("stop")).toBe(true);
+    expect(adapter.supportsHookType?.("session-start")).toBe(true);
     expect(adapter.findHookDispatcherPath("/tmp")).toBeNull();
   });
 
@@ -336,9 +355,9 @@ describe("Registry", () => {
       expect(adapter.name).toBe("claude-code");
     });
 
-    it("returns null adapter when no harness is active", () => {
+    it("returns custom adapter when no harness is active", () => {
       const adapter = detectAdapter();
-      expect(adapter.name).toBe("none");
+      expect(adapter.name).toBe("custom");
     });
   });
 
@@ -362,9 +381,9 @@ describe("Registry", () => {
     });
 
     it("resetAdapter clears the singleton for re-detection", () => {
-      // First: no env → null adapter
+      // First: no env → custom adapter
       const a1 = getAdapter();
-      expect(a1.name).toBe("none");
+      expect(a1.name).toBe("custom");
 
       // Set env and reset → should re-detect
       process.env.CLAUDE_SESSION_ID = "session-123";
@@ -581,5 +600,366 @@ describe("bindSession stale session handling", () => {
 
     // Without runsDir, can't check terminal state, so should return error
     expect(result.error).toContain("Session bound to active run: old-run");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Stop hook stale session fallback after /clear (Issue #69)
+// ---------------------------------------------------------------------------
+
+/**
+ * Temporarily replaces process.stdin with a Readable that emits `payload`,
+ * and captures process.stdout.write calls. Restores originals after `fn`.
+ */
+async function withSyntheticStdinAndCapturedStdout(
+  payload: string,
+  fn: () => Promise<number>,
+): Promise<{ exitCode: number; stdout: string }> {
+  const originalStdin = process.stdin;
+  const fakeStdin = Readable.from([payload], { encoding: "utf8" });
+  (fakeStdin as Readable & { unref?: () => void }).unref = () => {};
+
+  Object.defineProperty(process, "stdin", {
+    value: fakeStdin,
+    writable: true,
+    configurable: true,
+  });
+
+  let captured = "";
+  const originalWrite = process.stdout.write.bind(process.stdout);
+  const writeSpy = vi.spyOn(process.stdout, "write").mockImplementation(
+    (chunk: string | Uint8Array, ...rest: unknown[]) => {
+      if (typeof chunk === "string") captured += chunk;
+      return true;
+    },
+  );
+
+  try {
+    const exitCode = await fn();
+    return { exitCode, stdout: captured };
+  } finally {
+    writeSpy.mockRestore();
+    Object.defineProperty(process, "stdin", {
+      value: originalStdin,
+      writable: true,
+      configurable: true,
+    });
+  }
+}
+
+describe("stop hook stale session fallback (Issue #69)", () => {
+  let tmpDir: string;
+  let stateDir: string;
+  let runsDir: string;
+  let envFilePath: string;
+
+  beforeEach(async () => {
+    tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "harness-stop-hook-test-"));
+    stateDir = path.join(tmpDir, "state");
+    runsDir = path.join(tmpDir, "runs");
+    envFilePath = path.join(tmpDir, "claude.env.sh");
+    await fs.mkdir(stateDir, { recursive: true });
+    await fs.mkdir(runsDir, { recursive: true });
+  });
+
+  afterEach(async () => {
+    await fs.rm(tmpDir, { recursive: true, force: true });
+  });
+
+  function makeSessionState(runId: string) {
+    return {
+      active: true,
+      iteration: 1,
+      maxIterations: 256,
+      runId,
+      startedAt: "2026-01-01T00:00:00Z",
+      lastIterationAt: "2026-01-01T00:00:00Z",
+      iterationTimes: [],
+    };
+  }
+
+  /** Create a minimal run directory with run.json and a RUN_CREATED journal event. */
+  async function createMinimalRun(runId: string) {
+    const runDir = path.join(runsDir, runId);
+    await fs.mkdir(runDir, { recursive: true });
+    await fs.writeFile(
+      path.join(runDir, "run.json"),
+      JSON.stringify({
+        runId,
+        processId: "test-process",
+        layoutVersion: "2026.01",
+        createdAt: "2026-01-01T00:00:00Z",
+        prompt: "test",
+      }),
+    );
+    await appendEvent({
+      runDir,
+      event: { runId },
+      eventType: "RUN_CREATED",
+    });
+  }
+
+  it("falls back to env session ID when hook payload carries stale session", async () => {
+    const staleSessionId = "stale-session-from-clear";
+    const currentSessionId = "current-active-session";
+    const runId = "test-run-001";
+
+    // Write session file for the CURRENT session (not the stale one)
+    const filePath = getSessionFilePath(stateDir, currentSessionId);
+    await writeSessionFile(filePath, makeSessionState(runId), "test prompt");
+
+    // Verify the stale session has no file
+    expect(await sessionFileExists(getSessionFilePath(stateDir, staleSessionId))).toBe(false);
+    // Verify the current session file exists
+    expect(await sessionFileExists(filePath)).toBe(true);
+
+    // Set CLAUDE_SESSION_ID to the current session (simulating env after /clear)
+    process.env.CLAUDE_SESSION_ID = currentSessionId;
+
+    // Create a proper run so the hook can determine run state
+    await createMinimalRun(runId);
+
+    const adapter = createClaudeCodeAdapter();
+
+    // Send hook input with the STALE session ID (this is what happens after /clear)
+    const hookPayload = JSON.stringify({ session_id: staleSessionId });
+
+    const { exitCode, stdout } = await withSyntheticStdinAndCapturedStdout(
+      hookPayload,
+      () => adapter.handleStopHook({
+        stateDir,
+        runsDir,
+        json: true,
+        verbose: false,
+      }),
+    );
+
+    // The hook should NOT have returned with empty output (which would mean
+    // "no active loop found"). Instead it should have found the session via the
+    // env fallback and returned a block decision with iteration context.
+    const parsed = stdout.trim() ? JSON.parse(stdout.trim()) : {};
+    expect(parsed).not.toEqual({});
+    // The decision should block exit to continue the orchestration loop
+    expect(parsed.decision).toBe("block");
+  });
+
+  it("allows exit when neither payload nor env session has a state file", async () => {
+    const staleSessionId = "stale-session";
+    const envSessionId = "env-session-also-unknown";
+
+    // No session files exist for either ID
+    process.env.CLAUDE_SESSION_ID = envSessionId;
+
+    const adapter = createClaudeCodeAdapter();
+    const hookPayload = JSON.stringify({ session_id: staleSessionId });
+
+    const { exitCode, stdout } = await withSyntheticStdinAndCapturedStdout(
+      hookPayload,
+      () => adapter.handleStopHook({
+        stateDir,
+        runsDir,
+        json: true,
+        verbose: false,
+      }),
+    );
+
+    // Should allow exit — no session file for either ID
+    expect(exitCode).toBe(0);
+    expect(stdout.trim()).toBe("{}");
+  });
+
+  it("uses CLAUDE_ENV_FILE fallback when CLAUDE_SESSION_ID is not set", async () => {
+    const staleSessionId = "stale-from-payload";
+    const currentSessionId = "session-from-env-file";
+    const runId = "test-run-002";
+
+    // Write session file for the current session
+    const filePath = getSessionFilePath(stateDir, currentSessionId);
+    await writeSessionFile(filePath, makeSessionState(runId), "test prompt");
+
+    // Create a proper run
+    await createMinimalRun(runId);
+
+    // Set CLAUDE_ENV_FILE instead of CLAUDE_SESSION_ID
+    delete process.env.CLAUDE_SESSION_ID;
+    writeFileSync(envFilePath, `export CLAUDE_SESSION_ID="${currentSessionId}"\n`, "utf-8");
+    process.env.CLAUDE_ENV_FILE = envFilePath;
+
+    const adapter = createClaudeCodeAdapter();
+    const hookPayload = JSON.stringify({ session_id: staleSessionId });
+
+    const { exitCode, stdout } = await withSyntheticStdinAndCapturedStdout(
+      hookPayload,
+      () => adapter.handleStopHook({
+        stateDir,
+        runsDir,
+        json: true,
+        verbose: false,
+      }),
+    );
+
+    // Should find the session via env file fallback and block exit
+    const parsed = stdout.trim() ? JSON.parse(stdout.trim()) : {};
+    expect(parsed).not.toEqual({});
+    expect(parsed.decision).toBe("block");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Stop hook: breakpoint-only waiting allows exit
+// ---------------------------------------------------------------------------
+
+describe("stop hook allows exit when only breakpoints are pending", () => {
+  let tmpDir: string;
+  let stateDir: string;
+  let runsDir: string;
+
+  beforeEach(async () => {
+    tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "harness-breakpoint-test-"));
+    stateDir = path.join(tmpDir, "state");
+    runsDir = path.join(tmpDir, "runs");
+    await fs.mkdir(stateDir, { recursive: true });
+    await fs.mkdir(runsDir, { recursive: true });
+  });
+
+  afterEach(async () => {
+    await fs.rm(tmpDir, { recursive: true, force: true });
+  });
+
+  function makeSessionState(runId: string) {
+    return {
+      active: true,
+      iteration: 1,
+      maxIterations: 256,
+      runId,
+      startedAt: "2026-01-01T00:00:00Z",
+      lastIterationAt: "2026-01-01T00:00:00Z",
+      iterationTimes: [],
+    };
+  }
+
+  async function createRunWithBreakpoint(runId: string) {
+    const runDir = path.join(runsDir, runId);
+    await fs.mkdir(runDir, { recursive: true });
+    await fs.writeFile(
+      path.join(runDir, "run.json"),
+      JSON.stringify({
+        runId,
+        processId: "test-process",
+        layoutVersion: "2026.01",
+        createdAt: "2026-01-01T00:00:00Z",
+        prompt: "test",
+      }),
+    );
+    await appendEvent({
+      runDir,
+      event: { runId },
+      eventType: "RUN_CREATED",
+    });
+    await appendEvent({
+      runDir,
+      event: {
+        effectId: "bp-001",
+        invocationKey: "test:S000001:bp-task",
+        stepId: "S000001",
+        taskId: "bp-task",
+        taskDefRef: "tasks/bp-001/task.json",
+        kind: "breakpoint",
+        label: "manual",
+      },
+      eventType: "EFFECT_REQUESTED",
+    });
+  }
+
+  async function createRunWithBreakpointAndAgent(runId: string) {
+    const runDir = path.join(runsDir, runId);
+    await fs.mkdir(runDir, { recursive: true });
+    await fs.writeFile(
+      path.join(runDir, "run.json"),
+      JSON.stringify({
+        runId,
+        processId: "test-process",
+        layoutVersion: "2026.01",
+        createdAt: "2026-01-01T00:00:00Z",
+        prompt: "test",
+      }),
+    );
+    await appendEvent({
+      runDir,
+      event: { runId },
+      eventType: "RUN_CREATED",
+    });
+    await appendEvent({
+      runDir,
+      event: {
+        effectId: "bp-001",
+        invocationKey: "test:S000001:bp-task",
+        stepId: "S000001",
+        taskId: "bp-task",
+        taskDefRef: "tasks/bp-001/task.json",
+        kind: "breakpoint",
+        label: "manual",
+      },
+      eventType: "EFFECT_REQUESTED",
+    });
+    await appendEvent({
+      runDir,
+      event: {
+        effectId: "agent-001",
+        invocationKey: "test:S000002:agent-task",
+        stepId: "S000002",
+        taskId: "agent-task",
+        taskDefRef: "tasks/agent-001/task.json",
+        kind: "agent",
+        label: "auto",
+      },
+      eventType: "EFFECT_REQUESTED",
+    });
+  }
+
+  it("allows exit when only breakpoints are pending", async () => {
+    const sessionId = "bp-session-001";
+    const runId = "bp-run-001";
+
+    const filePath = getSessionFilePath(stateDir, sessionId);
+    await writeSessionFile(filePath, makeSessionState(runId), "test prompt");
+    await createRunWithBreakpoint(runId);
+
+    const adapter = createClaudeCodeAdapter();
+    const { stdout } = await withSyntheticStdinAndCapturedStdout(
+      JSON.stringify({ session_id: sessionId }),
+      () => adapter.handleStopHook({
+        stateDir,
+        runsDir,
+        pluginRoot: "",
+        verbose: false,
+      }),
+    );
+
+    const parsed = stdout.trim() ? JSON.parse(stdout.trim()) : {};
+    expect(parsed).toEqual({});
+  });
+
+  it("blocks exit when breakpoints AND other effects are pending", async () => {
+    const sessionId = "bp-session-002";
+    const runId = "bp-run-002";
+
+    const filePath = getSessionFilePath(stateDir, sessionId);
+    await writeSessionFile(filePath, makeSessionState(runId), "test prompt");
+    await createRunWithBreakpointAndAgent(runId);
+
+    const adapter = createClaudeCodeAdapter();
+    const { stdout } = await withSyntheticStdinAndCapturedStdout(
+      JSON.stringify({ session_id: sessionId }),
+      () => adapter.handleStopHook({
+        stateDir,
+        runsDir,
+        pluginRoot: "",
+        verbose: false,
+      }),
+    );
+
+    const parsed = stdout.trim() ? JSON.parse(stdout.trim()) : {};
+    expect(parsed.decision).toBe("block");
   });
 });

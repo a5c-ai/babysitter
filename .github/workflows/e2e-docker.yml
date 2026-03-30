@@ -8,6 +8,7 @@ on:
       - 'docker-compose.yml'
       - 'packages/sdk/**'
       - 'plugins/babysitter/**'
+      - 'plugins/babysitter-codex/**'
       - 'plugins/pi/**'
       - 'e2e-tests/**'
       - '.github/workflows/e2e-docker.yml'
@@ -21,6 +22,7 @@ on:
       - 'docker-compose.yml'
       - 'packages/sdk/**'
       - 'plugins/babysitter/**'
+      - 'plugins/babysitter-codex/**'
       - 'plugins/pi/**'
       - 'e2e-tests/**'
       - '.github/workflows/e2e-docker.yml'
@@ -35,6 +37,10 @@ jobs:
     name: Docker E2E Tests
     runs-on: ubuntu-latest
     timeout-minutes: 45
+    env:
+      AZURE_OPENAI_API_KEY: ${{ secrets.AZURE_OPENAI_API_KEY }}
+      AZURE_OPENAI_PROJECT_NAME: ${{ vars.AZURE_OPENAI_PROJECT_NAME }}
+      AZURE_OPENAI_DEPLOYMENT: ${{ vars.A5C_SELECTED_MODEL }}
 
     steps:
       - name: Checkout repository
@@ -67,27 +73,24 @@ jobs:
             --reporter=default --reporter=json \
             --outputFile.json=e2e-artifacts/test-results-structural.json \
             e2e-tests/docker/structural.test.ts \
-            e2e-tests/docker/sdk-cli.test.ts \
             e2e-tests/docker/stop-hook.test.ts \
             e2e-tests/docker/pi-harness.test.ts \
+            e2e-tests/docker/pi-secure-sandbox.test.ts \
             e2e-tests/docker/pi-workflow.test.ts \
             2>&1 | tee e2e-artifacts/structural-tests.log
 
       # NOTE: orchestration.test.ts (Anthropic Foundry) is disabled —
       # Foundry model is no longer provisioned.  Re-enable when restored.
 
-      - name: Run Pi workflow tests with Azure OpenAI (gated on secret)
-        if: env.AZURE_OPENAI_API_KEY != ''
-        env:
-          AZURE_OPENAI_API_KEY: ${{ secrets.AZURE_OPENAI_API_KEY }}
-          AZURE_OPENAI_PROJECT_NAME: ${{ secrets.AZURE_OPENAI_PROJECT_NAME }}
-          AZURE_OPENAI_DEPLOYMENT: ${{ secrets.AZURE_OPENAI_DEPLOYMENT }}
+      - name: Run Pi workflow tests with Azure OpenAI (gated on configured provider)
+        if: ${{ env.AZURE_OPENAI_API_KEY != '' && env.AZURE_OPENAI_PROJECT_NAME != '' }}
         run: |
           set -euo pipefail
           npx vitest run --config e2e-tests/docker/vitest.config.ts \
             --reporter=default --reporter=json \
             --outputFile.json=e2e-artifacts/test-results-pi-azure.json \
             e2e-tests/docker/pi-workflow.test.ts \
+            e2e-tests/docker/session-create-full-run.test.ts \
             2>&1 | tee e2e-artifacts/pi-azure-tests.log
 
       - name: Upload test artifacts
@@ -95,6 +98,80 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: e2e-test-artifacts
+          path: e2e-artifacts/
+          include-hidden-files: true
+          if-no-files-found: warn
+          retention-days: 14
+
+  codex-docker-e2e:
+    name: Codex Docker E2E
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      A5C_PROVIDER_NAME: ${{ vars.A5C_PROVIDER_NAME }}
+      A5C_SELECTED_CLI_COMMAND: ${{ vars.A5C_SELECTED_CLI_COMMAND }}
+      A5C_CLI_TOOL: ${{ vars.A5C_CLI_TOOL }}
+      A5C_SELECTED_MODEL: ${{ vars.A5C_SELECTED_MODEL }}
+      AZURE_OPENAI_API_KEY: ${{ secrets.AZURE_OPENAI_API_KEY }}
+      AZURE_OPENAI_PROJECT_NAME: ${{ vars.AZURE_OPENAI_PROJECT_NAME }}
+      AZURE_OPENAI_DEPLOYMENT: ${{ vars.A5C_SELECTED_MODEL }}
+
+    steps:
+      - name: Resolve Codex provider availability
+        id: codex_provider
+        run: |
+          set -euo pipefail
+          if [ -n "${AZURE_OPENAI_API_KEY:-}" ] && [ -n "${AZURE_OPENAI_PROJECT_NAME:-}" ]; then
+            echo "run_codex=true" >> "$GITHUB_OUTPUT"
+            echo "provider=azure" >> "$GITHUB_OUTPUT"
+          else
+            echo "run_codex=false" >> "$GITHUB_OUTPUT"
+            echo "provider=none" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Checkout repository
+        if: ${{ steps.codex_provider.outputs.run_codex == 'true' }}
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        if: ${{ steps.codex_provider.outputs.run_codex == 'true' }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        if: ${{ steps.codex_provider.outputs.run_codex == 'true' }}
+        run: |
+          set -euo pipefail
+          npm ci
+          npm install --no-save @rollup/rollup-linux-x64-gnu 2>/dev/null || true
+
+      - name: Set up Docker Buildx
+        if: ${{ steps.codex_provider.outputs.run_codex == 'true' }}
+        uses: docker/setup-buildx-action@v3
+
+      - name: Prepare artifact directories
+        if: ${{ steps.codex_provider.outputs.run_codex == 'true' }}
+        run: |
+          set -euo pipefail
+          mkdir -p e2e-artifacts
+
+      - name: Run Codex Docker full-run E2E
+        if: ${{ steps.codex_provider.outputs.run_codex == 'true' }}
+        run: |
+          set -euo pipefail
+          npx vitest run --config e2e-tests/docker/vitest.config.ts \
+            --reporter=default --reporter=json \
+            --outputFile.json=e2e-artifacts/test-results-codex.json \
+            e2e-tests/docker/codex-full-run.test.ts \
+            2>&1 | tee e2e-artifacts/codex-docker-e2e.log
+
+      - name: Upload Codex test artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: codex-e2e-artifacts
           path: e2e-artifacts/
           include-hidden-files: true
           if-no-files-found: warn

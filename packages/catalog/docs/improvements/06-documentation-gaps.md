@@ -93,7 +93,7 @@ The `.env.example` file exists but lacks detailed documentation:
 NEXT_PUBLIC_APP_NAME="Process Library Catalog"
 NEXT_PUBLIC_APP_URL="http://localhost:3000"
 DATABASE_PATH="./data/catalog.db"
-PROCESS_LIBRARY_PATH="../babysitter/skills/babysit/process"
+PROCESS_LIBRARY_PATH="../library"
 NEXT_PUBLIC_ENABLE_SEARCH=true
 NEXT_PUBLIC_ENABLE_ANALYTICS=false
 # GITHUB_TOKEN=

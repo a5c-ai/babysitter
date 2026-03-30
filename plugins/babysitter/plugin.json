@@ -13,16 +13,6 @@
     {
       "name": "babysitter",
       "file": "skills/babysit/SKILL.md"
-    },
-    {
-      "name": "babysitter-breakpoint",
-      "file": "skills/babysitter-breakpoint/SKILL.md",
-      "deprecated": true,
-      "replacedBy": "babysitter"
-    },
-    {
-      "name": "babysitter-score",
-      "file": "skills/babysitter-score/SKILL.md"
     }
   ],
   "repository": {

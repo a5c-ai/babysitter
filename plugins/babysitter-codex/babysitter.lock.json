@@ -8,14 +8,11 @@
   "content": {
     "name": "@a5c/babysitter-codex-content",
     "version": "0.1.4",
-    "upstream": {
-      "repo": "https://github.com/a5c-ai/babysitter",
-      "path": "plugins/babysitter",
+    "processLibrary": {
+      "repo": "https://github.com/a5c-ai/babysitter.git",
+      "processSubpath": "library",
+      "referenceSubpath": "library/reference",
       "snapshotCommit": "unknown"
     }
-  },
-  "integrity": {
-    "manifestPath": "config/content-manifest.json",
-    "algorithm": "sha256"
   }
 }

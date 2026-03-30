@@ -1,0 +1,42 @@
+{
+  "name": "@a5c-ai/babysitter-gemini",
+  "version": "0.1.0",
+  "description": "Babysitter Gemini CLI extension bundle with explicit installer commands for global and workspace extension roots",
+  "scripts": {
+    "test": "bash test/e2e-smoke.sh",
+    "deploy": "npm publish --access public",
+    "deploy:staging": "npm publish --access public --tag staging"
+  },
+  "bin": {
+    "babysitter-gemini": "bin/cli.js"
+  },
+  "files": [
+    "GEMINI.md",
+    "commands/",
+    "hooks/",
+    "scripts/",
+    "gemini-extension.json",
+    "versions.json",
+    "bin/"
+  ],
+  "keywords": [
+    "babysitter",
+    "gemini",
+    "gemini-cli",
+    "orchestration",
+    "extension"
+  ],
+  "author": "a5c.ai",
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/a5c-ai/babysitter"
+  },
+  "homepage": "https://github.com/a5c-ai/babysitter/tree/main/plugins/babysitter-gemini#readme",
+  "dependencies": {
+    "@a5c-ai/babysitter-sdk": "^0.0.173"
+  }
+}

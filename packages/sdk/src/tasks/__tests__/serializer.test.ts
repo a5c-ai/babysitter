@@ -67,6 +67,43 @@ describe("task serializer", () => {
     expect(blob).toEqual(bigPayload);
   });
 
+  it("preserves agent task payloads needed by external harness mappers", async () => {
+    const { serialized } = await serializeAndWriteTaskDefinition({
+      runDir,
+      effectId: EFFECT_ID,
+      taskId: "agent-task",
+      invocationKey: "proc:step-002b",
+      stepId: "step-002b",
+      task: {
+        kind: "agent",
+        title: "Create alpha artifact",
+        agent: {
+          role: "CI filesystem validation agent",
+          task: "Create codex-artifacts/alpha.txt in the current workspace.",
+          context: {
+            requiredContents: "alpha-run-ok",
+            requiredPath: "codex-artifacts/alpha.txt",
+          },
+          instructions: [
+            "Create the file if it does not exist.",
+            "Write exactly the required contents followed by a trailing newline.",
+          ],
+          outputFormat: "plain text",
+        },
+      },
+      inputs: { contents: "alpha-run-ok" },
+    });
+
+    expect(serialized.kind).toBe("agent");
+    expect(serialized.title).toBe("Create alpha artifact");
+    expect(serialized.agent).toMatchObject({
+      role: "CI filesystem validation agent",
+      task: "Create codex-artifacts/alpha.txt in the current workspace.",
+      outputFormat: "plain text",
+    });
+    expect(serialized.agent).toHaveProperty("context.requiredPath", "codex-artifacts/alpha.txt");
+  });
+
   it("serializes task results, spilling large payloads and emitting stdout/stderr refs", async () => {
     const hugeResult = { payload: "z".repeat(1024 * 1024 + 256) };
     const { resultRef, stdoutRef, stderrRef, serialized } = await serializeAndWriteTaskResult({

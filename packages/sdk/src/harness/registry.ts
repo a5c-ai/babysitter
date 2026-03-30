@@ -11,7 +11,8 @@ import { createClaudeCodeAdapter } from "./claudeCode";
 import { createCodexAdapter } from "./codex";
 import { createGeminiCliAdapter } from "./geminiCli";
 import { createPiAdapter } from "./pi";
-import { createNullAdapter } from "./nullAdapter";
+import { createOhMyPiAdapter } from "./ohMyPi";
+import { createCustomAdapter } from "./customAdapter";
 
 // ---------------------------------------------------------------------------
 // Registry of known adapters (ordered by priority)
@@ -19,9 +20,11 @@ import { createNullAdapter } from "./nullAdapter";
 
 const knownAdapters: HarnessAdapter[] = [
   createCodexAdapter(),
+  createOhMyPiAdapter(),
   createPiAdapter(),
   createClaudeCodeAdapter(),
   createGeminiCliAdapter(),
+  createCustomAdapter(),
 ];
 
 // ---------------------------------------------------------------------------
@@ -30,13 +33,13 @@ const knownAdapters: HarnessAdapter[] = [
 
 /**
  * Probe each registered adapter and return the first that reports active.
- * Falls back to the null adapter.
+ * Falls back to the custom adapter (which requires explicit args).
  */
 export function detectAdapter(): HarnessAdapter {
   for (const adapter of knownAdapters) {
     if (adapter.isActive()) return adapter;
   }
-  return createNullAdapter();
+  return createCustomAdapter();
 }
 
 /**

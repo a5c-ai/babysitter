@@ -1226,14 +1226,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - No unreleased changes.
 
 
-## Deprecation Notice
-
-**The VS Code extension (babysitter-vscode) has been deprecated and is no longer maintained.**
-
-Historical release entries below are preserved for reference but the extension will not receive further updates.
-
----
-
 ## [Unreleased]
 
 - No unreleased changes.
@@ -1288,7 +1280,7 @@ Thank you for the active contributions and support: @YoavMayer , @MaTriXy , @guy
 #### Infrastructure
 - **Docker support** as primary deployment method with comprehensive E2E testing
 - **Staging publish workflow** for better release management
-- **Breakpoints service and VS Code extension completely removed** from the system
+- **Breakpoints service and legacy editor extension surfaces completely removed** from the system
 - **Completion secret renamed to completion proof** throughout the API for clearer semantics
 
 ### Fixed
@@ -1361,4 +1353,4 @@ Thank you for the active contributions and support: @YoavMayer , @MaTriXy , @guy
 
 ### Added
 
-- Initial packaged VS Code extension with run discovery, monitoring, UI views, and `o` integration scaffolding.
+- Initial packaged editor observer surface with run discovery, monitoring, UI views, and `o` integration scaffolding.

@@ -52,7 +52,15 @@ import type {
   SessionBindOptions,
   SessionBindResult,
   HookHandlerArgs,
+  HarnessInstallOptions,
+  HarnessInstallResult,
 } from "./types";
+import {
+  getGeminiExtensionDir,
+  installCliViaNpm,
+  isGeminiPluginInstalled,
+  runPackageBinaryViaNpx,
+} from "./installSupport";
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -226,6 +234,16 @@ function countPendingByKind(records: EffectRecord[]): Record<string, number> {
   return Object.fromEntries(
     Array.from(counts.entries()).sort(([a], [b]) => a.localeCompare(b)),
   );
+}
+
+/**
+ * Returns true when every pending effect is a breakpoint (human-approval gate).
+ * Breakpoints require external human action, so the stop hook should allow exit
+ * rather than spinning the orchestration loop uselessly.
+ */
+function isOnlyBreakpoints(pendingByKind: Record<string, number>): boolean {
+  const keys = Object.keys(pendingByKind);
+  return keys.length === 1 && keys[0] === "breakpoint";
 }
 
 // ---------------------------------------------------------------------------
@@ -455,6 +473,7 @@ async function handleAfterAgentHookImpl(
   let runState = "";
   let completionProof = "";
   let pendingKinds = "";
+  let onlyBreakpointsPending = false;
 
   try {
     let runDir = path.isAbsolute(runId)
@@ -495,6 +514,7 @@ async function handleAfterAgentHookImpl(
     if (kindKeys.length > 0) {
       pendingKinds = kindKeys.join(", ");
     }
+    onlyBreakpointsPending = pendingRecords.length > 0 && isOnlyBreakpoints(pendingByKind);
 
     if (hasCompleted) {
       runState = "completed";
@@ -521,6 +541,31 @@ async function handleAfterAgentHookImpl(
         iteration: state.iteration,
         decision: "approve",
         reason: "run_state_unknown",
+        runState,
+        pendingKinds,
+        hasPromise,
+      });
+    }
+    process.stdout.write("{}\n");
+    return 0;
+  }
+
+  // 9b. If the run is waiting but ONLY on breakpoints, allow exit.
+  // Breakpoints require human interaction — spinning the orchestration loop
+  // accomplishes nothing and wastes iterations.
+  if (runState === "waiting" && onlyBreakpointsPending) {
+    log.info(`Run waiting on breakpoints only (${pendingKinds}) — allowing exit`);
+    if (verbose) {
+      process.stderr.write(
+        `[hook:run after-agent] Run waiting on breakpoint(s) — allowing exit for human resolution\n`,
+      );
+    }
+    if (runId) {
+      await appendStopHookEvent(path.join(runsDir, runId), {
+        sessionId,
+        iteration: state.iteration,
+        decision: "approve",
+        reason: "breakpoint_waiting",
         runState,
         pendingKinds,
         hasPromise,
@@ -791,6 +836,47 @@ async function bindSessionImpl(
   return { harness: HARNESS_NAME, sessionId, stateFile: filePath };
 }
 
+async function installGeminiHarness(
+  options: HarnessInstallOptions,
+): Promise<HarnessInstallResult> {
+  return installCliViaNpm({
+    harness: HARNESS_NAME,
+    cliCommand: "gemini",
+    packageName: "@google/gemini-cli",
+    summary: "Install the Gemini CLI globally via npm.",
+    options,
+  });
+}
+
+async function installGeminiPlugin(
+  options: HarnessInstallOptions,
+): Promise<HarnessInstallResult> {
+  const targetDir = getGeminiExtensionDir(options.workspace);
+  if (isGeminiPluginInstalled(options.workspace)) {
+    return {
+      harness: HARNESS_NAME,
+      warning: "The Babysitter Gemini extension is already installed at the target location; skipping reinstall.",
+      location: targetDir,
+    };
+  }
+
+  const packageArgs = options.workspace
+    ? ["install", "--workspace", path.resolve(options.workspace)]
+    : ["install", "--global"];
+
+  return runPackageBinaryViaNpx({
+    harness: HARNESS_NAME,
+    packageName: "@a5c-ai/babysitter-gemini",
+    packageArgs,
+    summary: options.workspace
+      ? "Install the published Babysitter Gemini extension into the target workspace."
+      : "Install the published Babysitter Gemini extension into the user-level Gemini extension directory.",
+    options,
+    env: process.env,
+    location: targetDir,
+  });
+}
+
 // ---------------------------------------------------------------------------
 // Adapter factory
 // ---------------------------------------------------------------------------
@@ -805,6 +891,10 @@ export function createGeminiCliAdapter(): HarnessAdapter {
         process.env.GEMINI_PROJECT_DIR ||
         process.env.GEMINI_CWD
       );
+    },
+
+    autoResolvesSessionId(): boolean {
+      return true;
     },
 
     resolveSessionId(parsed: { sessionId?: string }): string | undefined {
@@ -859,6 +949,14 @@ export function createGeminiCliAdapter(): HarnessAdapter {
         if (existsSync(candidate)) return candidate;
       }
       return null;
+    },
+
+    installHarness(options: HarnessInstallOptions): Promise<HarnessInstallResult> {
+      return installGeminiHarness(options);
+    },
+
+    installPlugin(options: HarnessInstallOptions): Promise<HarnessInstallResult> {
+      return installGeminiPlugin(options);
     },
   };
 }

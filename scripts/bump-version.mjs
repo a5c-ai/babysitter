@@ -30,6 +30,8 @@ const pluginManifests = [
   { path: "plugins/babysitter/.claude-plugin/plugin.json" },
   { path: "plugins/babysitter/plugin.json" },
 ];
+const codexPackageManifestPath = "plugins/babysitter-codex/package.json";
+const codexPackageLockPath = "plugins/babysitter-codex/package-lock.json";
 
 const manifests = packageManifests.map(({ path }) => ({
   path,
@@ -40,6 +42,12 @@ const pluginManifestData = pluginManifests.map(({ path }) => ({
   path,
   data: JSON.parse(readFileSync(path, "utf8")),
 }));
+const codexPackageManifest = existsSync(codexPackageManifestPath)
+  ? {
+      path: codexPackageManifestPath,
+      data: JSON.parse(readFileSync(codexPackageManifestPath, "utf8")),
+    }
+  : null;
 
 const rootManifest = manifests[0].data;
 const currentVersion = rootManifest.version;
@@ -71,6 +79,26 @@ for (const pluginManifest of pluginManifestData) {
   const newPluginVersion = bumpVersion(currentPluginVersion, bumpTarget);
   pluginManifest.data.version = newPluginVersion;
   writeFileSync(pluginManifest.path, `${JSON.stringify(pluginManifest.data, null, 2)}\n`);
+}
+
+// Update Codex package manifest - keep its own version stream, bumped by policy.
+if (codexPackageManifest) {
+  const currentCodexVersion = codexPackageManifest.data.version;
+  const newCodexVersion = bumpVersion(currentCodexVersion, bumpTarget);
+  codexPackageManifest.data.version = newCodexVersion;
+  writeFileSync(
+    codexPackageManifest.path,
+    `${JSON.stringify(codexPackageManifest.data, null, 2)}\n`,
+  );
+
+  if (existsSync(codexPackageLockPath)) {
+    const codexLock = JSON.parse(readFileSync(codexPackageLockPath, "utf8"));
+    codexLock.version = newCodexVersion;
+    if (codexLock.packages && codexLock.packages[""]) {
+      codexLock.packages[""].version = newCodexVersion;
+    }
+    writeFileSync(codexPackageLockPath, `${JSON.stringify(codexLock, null, 2)}\n`);
+  }
 }
 
 // Write sdkVersion to versions.json (separate from plugin.json to avoid

@@ -1,4 +1,0 @@
-interface:
-  display_name: "Babysitter"
-  short_description: "Orchestrate multi-step AI workflows with quality convergence"
-  default_prompt: "Use $babysitter-codex to orchestrate this task"

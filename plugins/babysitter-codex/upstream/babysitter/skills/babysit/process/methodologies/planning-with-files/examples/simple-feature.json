@@ -1,5 +1,0 @@
-{
-  "taskDescription": "Add user authentication with email/password login to the Express.js API",
-  "projectPath": "./planning",
-  "qualityThreshold": 80
-}

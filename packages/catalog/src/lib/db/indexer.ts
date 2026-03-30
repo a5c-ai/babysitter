@@ -31,8 +31,8 @@ import {
 // =============================================================================
 
 const DEFAULT_LIBRARY_PATHS = [
-  'plugins/babysitter/skills/babysit/process/specializations',
-  'plugins/babysitter/skills/babysit/process/methodologies',
+  'library/specializations',
+  'library/methodologies',
 ];
 
 const DEFAULT_BATCH_SIZE = 100;
@@ -253,9 +253,14 @@ export class CatalogIndexer {
     const agentFiles: string[] = [];
     const skillFiles: string[] = [];
     const processFiles: string[] = [];
+    const libraryRoots = [...new Set(
+      this.options.libraryPaths.map((libraryPath) =>
+        path.dirname(path.resolve(this.baseDir, libraryPath))
+      )
+    )];
 
-    for (const libraryPath of this.options.libraryPaths) {
-      const fullPath = path.resolve(this.baseDir, libraryPath);
+    for (const basePath of libraryRoots) {
+      const fullPath = basePath;
 
       try {
         await fs.access(fullPath);
@@ -263,9 +268,6 @@ export class CatalogIndexer {
         // Path doesn't exist, skip
         continue;
       }
-
-      // Use the directory parser to scan structure
-      const basePath = path.resolve(this.baseDir, 'plugins/babysitter/skills/babysit/process');
       const result = await parseDirectoryStructure(basePath, this.fsAdapter);
 
       if (result.success && result.data) {

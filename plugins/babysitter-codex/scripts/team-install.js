@@ -3,41 +3,83 @@
 
 const fs = require('fs');
 const path = require('path');
-const { spawnSync } = require('child_process');
+const {
+  copyPluginBundle,
+  ensureGlobalProcessLibrary,
+  ensureMarketplaceEntry,
+  installCodexSurface,
+  mergeCodexConfigFile,
+  warnWindowsHooks,
+  writeJson,
+} = require('../bin/install-shared');
 
-function readJson(filePath) {
-  return JSON.parse(fs.readFileSync(filePath, 'utf8'));
+function parseArgs(argv) {
+  const args = {
+    workspace: process.cwd(),
+    dryRun: false,
+  };
+  for (let i = 2; i < argv.length; i += 1) {
+    if (argv[i] === '--workspace' && argv[i + 1]) {
+      args.workspace = path.resolve(argv[++i]);
+    } else if (argv[i] === '--dry-run') {
+      args.dryRun = true;
+    }
+  }
+  return args;
 }
 
 function main() {
-  const root = process.cwd();
-  const lockPath = path.join(root, 'babysitter.lock.json');
-  if (!fs.existsSync(lockPath)) {
-    throw new Error(`missing lock file: ${lockPath}`);
-  }
-  const lock = readJson(lockPath);
-  const verify = spawnSync(process.execPath, ['scripts/verify-content-manifest.js'], { stdio: 'inherit' });
-  if (verify.status !== 0) process.exit(verify.status || 1);
+  const args = parseArgs(process.argv);
+  const packageRoot = path.resolve(process.env.BABYSITTER_PACKAGE_ROOT || path.join(__dirname, '..'));
+  const workspaceRoot = args.workspace;
+  const workspacePluginRoot = path.join(workspaceRoot, 'plugins', 'babysitter-codex');
+  const workspaceMarketplacePath = path.join(workspaceRoot, '.agents', 'plugins', 'marketplace.json');
+  const workspaceConfigPath = path.join(workspaceRoot, '.codex', 'config.toml');
 
-  const outDir = path.join(root, '.a5c', 'team');
-  fs.mkdirSync(outDir, { recursive: true });
   const installInfo = {
     installedAt: new Date().toISOString(),
-    runtime: lock.runtime,
-    content: lock.content,
-    lockVersion: lock.version,
+    packageRoot,
+    workspaceRoot,
+    pluginRoot: workspacePluginRoot,
+    marketplacePath: workspaceMarketplacePath,
+    codexConfigPath: workspaceConfigPath,
   };
-  fs.writeFileSync(path.join(outDir, 'install.json'), JSON.stringify(installInfo, null, 2), 'utf8');
+
+  if (args.dryRun) {
+    console.log(JSON.stringify({
+      ok: true,
+      dryRun: true,
+      installInfo,
+    }, null, 2));
+    return;
+  }
+
+  copyPluginBundle(packageRoot, workspacePluginRoot);
+  ensureMarketplaceEntry(workspaceMarketplacePath, workspacePluginRoot);
+  mergeCodexConfigFile(workspaceConfigPath);
+  installCodexSurface(packageRoot, path.join(workspaceRoot, '.codex'));
+
+  const active = ensureGlobalProcessLibrary(packageRoot);
+  installInfo.processLibraryStateFile = active.stateFile;
+  installInfo.processLibraryRoot = active.binding?.dir || '';
+  installInfo.processLibraryCloneDir = active.defaultSpec?.cloneDir || '';
+
+  const outDir = path.join(workspaceRoot, '.a5c', 'team');
+  fs.mkdirSync(outDir, { recursive: true });
+  writeJson(path.join(outDir, 'install.json'), installInfo);
 
   const profilePath = path.join(outDir, 'profile.json');
   if (!fs.existsSync(profilePath)) {
-    fs.writeFileSync(profilePath, JSON.stringify({
+    writeJson(profilePath, {
       teamName: 'default',
-      rulesLayer: 'config/rules/team/default.json',
-      processLibraryRoot: 'upstream/babysitter/skills/babysit/process',
-    }, null, 2), 'utf8');
+      pluginRoot: workspacePluginRoot,
+      marketplacePath: workspaceMarketplacePath,
+      codexConfigPath: workspaceConfigPath,
+      processLibraryLookupCommand: 'babysitter process-library:active --json',
+    });
   }
 
+  warnWindowsHooks();
   console.log('[team-install] complete');
 }
 

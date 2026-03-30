@@ -19,6 +19,10 @@ import { buildEffectIndex } from "../runtime/replay/effectIndex";
 import { resolveCompletionProof } from "../cli/completionProof";
 import { collapseDoubledA5cRuns } from "../cli/resolveInputPath";
 import type { EffectRecord } from "../runtime/types";
+import {
+  BabysitterRuntimeError,
+  ErrorCategory,
+} from "../runtime/exceptions";
 import { discoverSkillsInternal } from "../cli/commands/skill";
 import {
   readSessionFile,
@@ -41,10 +45,19 @@ import type {
   SessionBindOptions,
   SessionBindResult,
   HookHandlerArgs,
+  HarnessInstallOptions,
+  HarnessInstallResult,
 } from "./types";
 import { loadCompressionConfig } from "../compression/config-loader";
 import { densityFilterText, estimateTokens } from "../compression/density-filter";
 import { getOrCompressFile, findLibraryFiles } from "../compression/library-cache";
+import {
+  execFilePromise,
+  getClaudeInstalledPluginsPath,
+  installCliViaNpm,
+  isClaudePluginInstalled,
+  renderCommand,
+} from "./installSupport";
 
 // ---------------------------------------------------------------------------
 // Structured file logger (moved from hookRun.ts)
@@ -185,6 +198,16 @@ function countPendingByKind(records: EffectRecord[]): Record<string, number> {
   );
 }
 
+/**
+ * Returns true when every pending effect is a breakpoint (human-approval gate).
+ * Breakpoints require external human action, so the stop hook should allow exit
+ * rather than spinning the orchestration loop uselessly.
+ */
+function isOnlyBreakpoints(pendingByKind: Record<string, number>): boolean {
+  const keys = Object.keys(pendingByKind);
+  return keys.length === 1 && keys[0] === "breakpoint";
+}
+
 // ---------------------------------------------------------------------------
 // Cleanup helper
 // ---------------------------------------------------------------------------
@@ -195,6 +218,26 @@ async function cleanupSession(filePath: string): Promise<void> {
   } catch {
     // Best-effort cleanup
   }
+}
+
+/**
+ * Resolve the current session ID from environment, independent of the hook
+ * payload. After `/clear`, the hook payload may carry a stale session ID while
+ * CLAUDE_SESSION_ID or CLAUDE_ENV_FILE reflects the actual active session.
+ */
+function resolveCurrentSessionIdFromEnv(): string | undefined {
+  if (process.env.CLAUDE_SESSION_ID) return process.env.CLAUDE_SESSION_ID;
+  const envFile = process.env.CLAUDE_ENV_FILE;
+  if (envFile) {
+    try {
+      const content = readFileSync(envFile, "utf-8");
+      const match = content.match(/export CLAUDE_SESSION_ID="([^"]+)"/);
+      if (match?.[1]) return match[1];
+    } catch {
+      // Non-fatal
+    }
+  }
+  return undefined;
 }
 
 // ---------------------------------------------------------------------------
@@ -223,7 +266,7 @@ async function handleStopHookImpl(args: HookHandlerArgs): Promise<number> {
   const hookInput = parseHookInput(rawInput) as ClaudeCodeStopHookInput;
   log.info("Hook input received");
 
-  const sessionId = safeStr(hookInput as Record<string, unknown>, "session_id");
+  let sessionId = safeStr(hookInput as Record<string, unknown>, "session_id");
   if (!sessionId) {
     log.info("No session ID in hook input — allowing exit");
     if (verbose) {
@@ -276,14 +319,44 @@ async function handleStopHookImpl(args: HookHandlerArgs): Promise<number> {
         filePath = fallbackPath;
         log.info(`Found session file at fallback path: ${filePath}`);
       } else {
-        log.info(`No active loop found at primary (${filePath}) or fallback (${fallbackPath}) — allowing exit`);
-        if (verbose) {
-          process.stderr.write(
-            `[hook:run stop] No active loop found for session ${sessionId}\n`,
-          );
+        // Fallback: the hook payload may carry a stale session ID (e.g. after
+        // /clear). Try resolving the *current* session ID from CLAUDE_SESSION_ID
+        // or CLAUDE_ENV_FILE and retry the lookup if it differs.
+        const envSessionId = resolveCurrentSessionIdFromEnv();
+        if (envSessionId && envSessionId !== sessionId) {
+          log.info(`Payload session ${sessionId} is stale; current env session is ${envSessionId} — retrying lookup`);
+          const primaryRetry = getSessionFilePath(stateDir, envSessionId);
+          const fallbackRetry = getSessionFilePath(fallbackStateDir, envSessionId);
+          if (await sessionFileExists(primaryRetry)) {
+            filePath = primaryRetry;
+            sessionId = envSessionId;
+            log.setContext("session", sessionId);
+            log.info(`Found session file for env session at primary: ${filePath}`);
+          } else if (await sessionFileExists(fallbackRetry)) {
+            filePath = fallbackRetry;
+            sessionId = envSessionId;
+            log.setContext("session", sessionId);
+            log.info(`Found session file for env session at fallback: ${filePath}`);
+          } else {
+            log.info(`No active loop found for payload session ${sessionId} or env session ${envSessionId} — allowing exit`);
+            if (verbose) {
+              process.stderr.write(
+                `[hook:run stop] No active loop found for session ${sessionId} or ${envSessionId}\n`,
+              );
+            }
+            process.stdout.write("{}\n");
+            return 0;
+          }
+        } else {
+          log.info(`No active loop found at primary (${filePath}) or fallback (${fallbackPath}) — allowing exit`);
+          if (verbose) {
+            process.stderr.write(
+              `[hook:run stop] No active loop found for session ${sessionId}\n`,
+            );
+          }
+          process.stdout.write("{}\n");
+          return 0;
         }
-        process.stdout.write("{}\n");
-        return 0;
       }
     }
     sessionFile = await readSessionFile(filePath);
@@ -420,6 +493,7 @@ async function handleStopHookImpl(args: HookHandlerArgs): Promise<number> {
   let runState = "";
   let completionProof = "";
   let pendingKinds = "";
+  let onlyBreakpointsPending = false;
   let entrypointImportPath: string | undefined;
 
   if (runId) {
@@ -458,6 +532,7 @@ async function handleStopHookImpl(args: HookHandlerArgs): Promise<number> {
       if (kindKeys.length > 0) {
         pendingKinds = kindKeys.join(", ");
       }
+      onlyBreakpointsPending = pendingRecords.length > 0 && isOnlyBreakpoints(pendingByKind);
 
       if (hasCompleted) {
         runState = "completed";
@@ -502,6 +577,32 @@ async function handleStopHookImpl(args: HookHandlerArgs): Promise<number> {
       process.stdout.write("{}\n");
       return 0;
     }
+  }
+
+  // 5b. If the run is waiting but ONLY on breakpoints, allow exit.
+  // Breakpoints require human interaction — spinning the orchestration loop
+  // accomplishes nothing and wastes iterations. The user (or an external
+  // system) must resolve breakpoints before the run can proceed.
+  if (runState === "waiting" && onlyBreakpointsPending) {
+    log.info(`Run waiting on breakpoints only (${pendingKinds}) — allowing exit`);
+    if (verbose) {
+      process.stderr.write(
+        `[hook:run stop] Run waiting on breakpoint(s) — allowing exit for human resolution\n`,
+      );
+    }
+    if (runId) {
+      await appendStopHookEvent(path.join(runsDir, runId), {
+        sessionId,
+        iteration: state.iteration,
+        decision: "approve",
+        reason: "breakpoint_waiting",
+        runState,
+        pendingKinds,
+        hasPromise,
+      });
+    }
+    process.stdout.write("{}\n");
+    return 0;
   }
 
   // 6. If completionProof matches promiseValue → complete
@@ -931,6 +1032,95 @@ async function bindSessionImpl(
   return { harness: "claude-code", sessionId, stateFile: filePath };
 }
 
+async function installClaudeCodeHarness(
+  options: HarnessInstallOptions,
+): Promise<HarnessInstallResult> {
+  return installCliViaNpm({
+    harness: "claude-code",
+    cliCommand: "claude",
+    packageName: "@anthropic-ai/claude-code",
+    summary: "Install the Claude Code CLI globally via npm.",
+    options,
+  });
+}
+
+async function installClaudeCodePlugin(
+  options: HarnessInstallOptions,
+): Promise<HarnessInstallResult> {
+  if (isClaudePluginInstalled()) {
+    return {
+      harness: "claude-code",
+      warning: "The Claude Code Babysitter plugin already appears in installed_plugins.json; skipping reinstall.",
+      location: getClaudeInstalledPluginsPath(),
+    };
+  }
+
+  if (options.dryRun) {
+    return {
+      harness: "claude-code",
+      dryRun: true,
+      summary: "Add the published Babysitter Claude Code plugin to the marketplace and install it at user scope.",
+      command: [
+        renderCommand("claude", ["plugin", "marketplace", "add", "a5c-ai/babysitter"]),
+        renderCommand("claude", ["plugin", "install", "--scope", "user", "babysitter@a5c.ai"]),
+      ].join(" && "),
+    };
+  }
+
+  const marketplaceResult = await execFilePromise("claude", [
+    "plugin",
+    "marketplace",
+    "add",
+    "a5c-ai/babysitter",
+  ]);
+  if (marketplaceResult.exitCode !== 0) {
+    throw new BabysitterRuntimeError(
+      "ClaudePluginMarketplaceAddFailed",
+      "claude plugin marketplace add a5c-ai/babysitter failed",
+      {
+        category: ErrorCategory.External,
+        details: {
+          stdout: marketplaceResult.stdout,
+          stderr: marketplaceResult.stderr,
+          exitCode: marketplaceResult.exitCode,
+        },
+      },
+    );
+  }
+
+  const installArgs = ["plugin", "install", "--scope", "user", "babysitter@a5c.ai"];
+  const installResult = await execFilePromise("claude", installArgs);
+  if (installResult.exitCode !== 0) {
+    throw new BabysitterRuntimeError(
+      "ClaudePluginInstallFailed",
+      `${renderCommand("claude", installArgs)} failed`,
+      {
+        category: ErrorCategory.External,
+        details: {
+          stdout: installResult.stdout,
+          stderr: installResult.stderr,
+          exitCode: installResult.exitCode,
+        },
+      },
+    );
+  }
+
+  return {
+    harness: "claude-code",
+    summary: "Added the published Babysitter Claude Code plugin to the marketplace and installed it at user scope.",
+    command: [
+      renderCommand("claude", ["plugin", "marketplace", "add", "a5c-ai/babysitter"]),
+      renderCommand("claude", installArgs),
+    ].join(" && "),
+    output: [
+      marketplaceResult.stdout.trim(),
+      marketplaceResult.stderr.trim(),
+      installResult.stdout.trim(),
+      installResult.stderr.trim(),
+    ].filter(Boolean).join("\n"),
+  };
+}
+
 // ---------------------------------------------------------------------------
 // Adapter factory
 // ---------------------------------------------------------------------------
@@ -941,6 +1131,10 @@ export function createClaudeCodeAdapter(): HarnessAdapter {
 
     isActive(): boolean {
       return !!(process.env.CLAUDE_SESSION_ID || process.env.CLAUDE_ENV_FILE);
+    },
+
+    autoResolvesSessionId(): boolean {
+      return true;
     },
 
     resolveSessionId(parsed: { sessionId?: string }): string | undefined {
@@ -993,6 +1187,14 @@ export function createClaudeCodeAdapter(): HarnessAdapter {
         if (existsSync(candidate)) return candidate;
       }
       return null;
+    },
+
+    installHarness(options: HarnessInstallOptions): Promise<HarnessInstallResult> {
+      return installClaudeCodeHarness(options);
+    },
+
+    installPlugin(options: HarnessInstallOptions): Promise<HarnessInstallResult> {
+      return installClaudeCodePlugin(options);
     },
   };
 }

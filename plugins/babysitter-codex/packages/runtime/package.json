@@ -1,7 +1,0 @@
-{
-  "name": "@a5c/babysitter-codex-runtime",
-  "version": "0.1.4",
-  "private": true,
-  "description": "Runtime adapter, hooks, and orchestration glue for babysitter-codex",
-  "main": "../../.codex/orchestrate.js"
-}

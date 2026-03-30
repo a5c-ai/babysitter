@@ -185,7 +185,7 @@ describe("Pi harness adapter behavior tests", () => {
         delete process.env.PI_PLUGIN_ROOT;
         const {createPiAdapter} = require('@a5c-ai/babysitter-sdk/dist/harness/pi');
         const a = createPiAdapter();
-        console.log(a.resolveStateDir({pluginRoot: '/home/claude/.omp/plugins/pi'}));
+        console.log(a.resolveStateDir({pluginRoot: '/home/claude/.omp/plugins/babysitter-pi'}));
       "`,
     ).trim();
     expect(out).toBe("/home/claude/.omp/plugins/.a5c");
@@ -211,7 +211,7 @@ describe("Pi harness session binding tests", () => {
     );
 
     const createOut = dockerExec(
-      `PI_SESSION_ID=${sid} PI_PLUGIN_ROOT=${PLUGIN_DIR} babysitter run:create --process-id pi-test --entry ${processDir}/proc.js#process --prompt "pi harness test" --harness pi --session-id ${sid} --plugin-root ${PLUGIN_DIR} --json`,
+      `PI_SESSION_ID=${sid} PI_PLUGIN_ROOT=${PLUGIN_DIR} babysitter run:create --process-id pi-test --entry ${processDir}/proc.js#process --prompt "pi harness test" --harness pi --plugin-root ${PLUGIN_DIR} --json`,
     ).trim();
 
     const createResult = JSON.parse(createOut);
@@ -235,7 +235,7 @@ describe("Pi harness session binding tests", () => {
     );
 
     dockerExec(
-      `PI_SESSION_ID=${sid} PI_PLUGIN_ROOT=${PLUGIN_DIR} babysitter run:create --process-id pi-state-test --entry ${processDir}/proc.js#process --prompt "state check" --harness pi --session-id ${sid} --plugin-root ${PLUGIN_DIR} --json`,
+      `PI_SESSION_ID=${sid} PI_PLUGIN_ROOT=${PLUGIN_DIR} babysitter run:create --process-id pi-state-test --entry ${processDir}/proc.js#process --prompt "state check" --harness pi --plugin-root ${PLUGIN_DIR} --json`,
     );
 
     const stateOut = dockerExec(
@@ -277,59 +277,59 @@ describe("Pi harness session binding tests", () => {
 // ============================================================================
 
 describe("Pi plugin package structural tests", () => {
-  test("plugins/pi/package.json exists and has name babysitter-pi", () => {
+  test("plugins/babysitter-pi/package.json exists and has scoped npm package name", () => {
     const name = dockerExec(
-      `node -e "console.log(JSON.parse(require('fs').readFileSync('/app/plugins/pi/package.json','utf8')).name)"`,
+      `node -e "console.log(JSON.parse(require('fs').readFileSync('/app/plugins/babysitter-pi/package.json','utf8')).name)"`,
     ).trim();
-    expect(name).toBe("babysitter-pi");
+    expect(name).toBe("@a5c-ai/babysitter-pi");
   });
 
-  test("plugins/pi/extensions/babysitter/index.ts exists", () => {
-    dockerExec("test -f /app/plugins/pi/extensions/babysitter/index.ts");
+  test("plugins/babysitter-pi/extensions/babysitter/index.ts exists", () => {
+    dockerExec("test -f /app/plugins/babysitter-pi/extensions/babysitter/index.ts");
   });
 
-  test("plugins/pi/extensions/babysitter/sdk-bridge.ts exists", () => {
-    dockerExec("test -f /app/plugins/pi/extensions/babysitter/sdk-bridge.ts");
+  test("plugins/babysitter-pi/extensions/babysitter/sdk-bridge.ts exists", () => {
+    dockerExec("test -f /app/plugins/babysitter-pi/extensions/babysitter/sdk-bridge.ts");
   });
 
-  test("plugins/pi/extensions/babysitter/session-binder.ts exists", () => {
-    dockerExec("test -f /app/plugins/pi/extensions/babysitter/session-binder.ts");
+  test("plugins/babysitter-pi/extensions/babysitter/session-binder.ts exists", () => {
+    dockerExec("test -f /app/plugins/babysitter-pi/extensions/babysitter/session-binder.ts");
   });
 
-  test("plugins/pi/extensions/babysitter/loop-driver.ts exists", () => {
-    dockerExec("test -f /app/plugins/pi/extensions/babysitter/loop-driver.ts");
+  test("plugins/babysitter-pi/extensions/babysitter/loop-driver.ts exists", () => {
+    dockerExec("test -f /app/plugins/babysitter-pi/extensions/babysitter/loop-driver.ts");
   });
 
-  test("plugins/pi/extensions/babysitter/effect-executor.ts exists", () => {
-    dockerExec("test -f /app/plugins/pi/extensions/babysitter/effect-executor.ts");
+  test("plugins/babysitter-pi/extensions/babysitter/effect-executor.ts exists", () => {
+    dockerExec("test -f /app/plugins/babysitter-pi/extensions/babysitter/effect-executor.ts");
   });
 
-  test("plugins/pi/extensions/babysitter/guards.ts exists", () => {
-    dockerExec("test -f /app/plugins/pi/extensions/babysitter/guards.ts");
+  test("plugins/babysitter-pi/extensions/babysitter/guards.ts exists", () => {
+    dockerExec("test -f /app/plugins/babysitter-pi/extensions/babysitter/guards.ts");
   });
 
-  test("plugins/pi/extensions/babysitter/types.ts exists", () => {
-    dockerExec("test -f /app/plugins/pi/extensions/babysitter/types.ts");
+  test("plugins/babysitter-pi/extensions/babysitter/types.ts exists", () => {
+    dockerExec("test -f /app/plugins/babysitter-pi/extensions/babysitter/types.ts");
   });
 
-  test("plugins/pi/extensions/babysitter/tui-widgets.ts exists", () => {
-    dockerExec("test -f /app/plugins/pi/extensions/babysitter/tui-widgets.ts");
+  test("plugins/babysitter-pi/extensions/babysitter/tui-widgets.ts exists", () => {
+    dockerExec("test -f /app/plugins/babysitter-pi/extensions/babysitter/tui-widgets.ts");
   });
 
-  test("plugins/pi/extensions/babysitter/custom-tools.ts exists", () => {
-    dockerExec("test -f /app/plugins/pi/extensions/babysitter/custom-tools.ts");
+  test("plugins/babysitter-pi/extensions/babysitter/custom-tools.ts exists", () => {
+    dockerExec("test -f /app/plugins/babysitter-pi/extensions/babysitter/custom-tools.ts");
   });
 
-  test("plugins/pi/extensions/babysitter/tool-renderer.ts exists", () => {
-    dockerExec("test -f /app/plugins/pi/extensions/babysitter/tool-renderer.ts");
+  test("plugins/babysitter-pi/extensions/babysitter/tool-renderer.ts exists", () => {
+    dockerExec("test -f /app/plugins/babysitter-pi/extensions/babysitter/tool-renderer.ts");
   });
 
-  test("plugins/pi/AGENTS.md exists", () => {
-    dockerExec("test -f /app/plugins/pi/AGENTS.md");
+  test("plugins/babysitter-pi/AGENTS.md exists", () => {
+    dockerExec("test -f /app/plugins/babysitter-pi/AGENTS.md");
   });
 
-  test("plugins/pi/test/ contains integration, harness, and tui test files", () => {
-    const ls = dockerExec("ls /app/plugins/pi/test/").trim();
+  test("plugins/babysitter-pi/test/ contains integration, harness, and tui test files", () => {
+    const ls = dockerExec("ls /app/plugins/babysitter-pi/test/").trim();
     expect(ls).toContain("integration.test.js");
     expect(ls).toContain("harness.test.js");
     expect(ls).toContain("tui.test.js");
@@ -341,7 +341,7 @@ describe("Pi plugin package structural tests", () => {
 // ============================================================================
 
 describe("Pi harness auto-detection", () => {
-  test("detectAdapter returns pi when OMP_SESSION_ID is set", () => {
+  test("detectAdapter returns oh-my-pi when OMP_SESSION_ID is set", () => {
     const out = dockerExec(
       `${NP} OMP_SESSION_ID=detect-test node -e "
         const {detectAdapter} = require('@a5c-ai/babysitter-sdk/dist/harness/registry');
@@ -349,7 +349,7 @@ describe("Pi harness auto-detection", () => {
         console.log(a.name);
       "`,
     ).trim();
-    expect(out).toBe("pi");
+    expect(out).toBe("oh-my-pi");
   });
 
   test("getAdapterByName('pi') returns the pi adapter", () => {

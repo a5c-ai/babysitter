@@ -145,4 +145,28 @@ describe("createRun", () => {
     expect(journal[0].data.prompt).toBeUndefined();
     expect("prompt" in journal[0].data).toBe(false);
   });
+
+  test("returns an absolute runDir even when runsDir is relative", async () => {
+    const workspace = await fs.mkdtemp(path.join(tmpRoot, "relative-runsdir-"));
+    const originalCwd = process.cwd();
+    process.chdir(workspace);
+
+    try {
+      const entryFile = path.join(workspace, "process.mjs");
+      await fs.writeFile(entryFile, "export async function process() {}");
+
+      const result = await createRun({
+        runsDir: path.join(".a5c", "runs"),
+        process: {
+          processId: "relative/run-dir",
+          importPath: entryFile,
+        },
+      });
+
+      expect(path.isAbsolute(result.runDir)).toBe(true);
+      expect(result.runDir).toBe(path.join(workspace, ".a5c", "runs", result.runId));
+    } finally {
+      process.chdir(originalCwd);
+    }
+  });
 });

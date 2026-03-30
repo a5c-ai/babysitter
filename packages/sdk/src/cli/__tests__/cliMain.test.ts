@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { MockInstance } from "vitest";
 import path from "path";
 import { createBabysitterCli } from "../main";
+import { handleHarnessCreateRun } from "../commands/harnessCreateRun";
 import { buildEffectIndex } from "../../runtime/replay/effectIndex";
 import { readRunMetadata } from "../../storage/runFiles";
 import { commitEffectResult } from "../../runtime/commitEffectResult";
@@ -19,9 +20,14 @@ vi.mock("../../runtime/commitEffectResult", () => ({
   commitEffectResult: vi.fn(),
 }));
 
+vi.mock("../commands/harnessCreateRun", () => ({
+  handleHarnessCreateRun: vi.fn().mockResolvedValue(0),
+}));
+
 const buildEffectIndexMock = buildEffectIndex as unknown as ReturnType<typeof vi.fn>;
 const readRunMetadataMock = readRunMetadata as unknown as ReturnType<typeof vi.fn>;
 const commitEffectResultMock = commitEffectResult as unknown as ReturnType<typeof vi.fn>;
+const handleSessionCreateMock = handleHarnessCreateRun as unknown as ReturnType<typeof vi.fn>;
 
 describe("CLI main entry", () => {
   let logSpy: MockInstance<[message?: any, ...optionalParams: any[]], void>;
@@ -42,6 +48,8 @@ describe("CLI main entry", () => {
       startedAt: "2026-01-20T00:00:00.000Z",
       finishedAt: "2026-01-20T00:00:01.000Z",
     });
+    handleSessionCreateMock.mockReset();
+    handleSessionCreateMock.mockResolvedValue(0);
   });
 
   afterEach(() => {
@@ -149,6 +157,24 @@ describe("CLI main entry", () => {
     expect(exitCode).toBe(1);
     expect(logSpy).toHaveBeenCalledWith(
       "[task:post] status=error stdoutRef=tasks/mock/stdout.log stderrRef=tasks/mock/stderr.log resultRef=tasks/ef-err/result.json"
+    );
+  });
+
+  it("accepts harness:create-run --non-interactive as an alias for --no-interactive", async () => {
+    const cli = createBabysitterCli();
+    const exitCode = await cli.run([
+      "harness:create-run",
+      "--process",
+      "/tmp/generated-process.mjs",
+      "--non-interactive",
+    ]);
+
+    expect(exitCode).toBe(0);
+    expect(handleSessionCreateMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        processPath: "/tmp/generated-process.mjs",
+        interactive: false,
+      }),
     );
   });
 

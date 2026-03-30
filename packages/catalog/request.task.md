@@ -1,8 +1,8 @@
 build an amazing catalog for the process library at:
 
-plugins/babysitter/skills/babysit/process/specializations
-plugins/babysitter/skills/babysit/process/specializations/domains
-plugins/babysitter/skills/babysit/process/methodologies
+library/specializations
+library/specializations/domains
+library/methodologies
 
 research the structure of the process library and the fields in the process, specialization, domain, skill, agent files.
 

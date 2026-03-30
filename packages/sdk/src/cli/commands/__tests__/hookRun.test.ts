@@ -242,16 +242,15 @@ describe("handleHookRun dispatcher", () => {
     expect(stderr).toContain("UNSUPPORTED_HARNESS");
   });
 
-  it("rejects unsupported codex stop hooks", async () => {
+  it("handles codex stop hooks on every platform", async () => {
     const code = await callWithStdin("{}", {
       hookType: "stop",
       harness: "codex",
       json: true,
     });
-    expect(code).toBe(1);
-    const stderr = stderrChunks.join("");
-    expect(stderr).toContain("UNSUPPORTED_HOOK_TYPE");
-    expect(stderr).toContain("external Codex supervisor");
+    expect(code).toBe(0);
+    const output = JSON.parse(getStdout().trim());
+    expect(output.decision).toBeUndefined();
   });
 });
 

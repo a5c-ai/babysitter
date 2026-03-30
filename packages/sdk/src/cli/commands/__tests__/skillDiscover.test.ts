@@ -28,14 +28,18 @@ import {
 describe('discoverSkillsInternal', () => {
   let testDir: string;
   let pluginRoot: string;
+  let originalCwd: string;
 
   beforeEach(async () => {
+    originalCwd = process.cwd();
     testDir = path.join(os.tmpdir(), `skill-discover-test-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`);
     pluginRoot = path.join(testDir, 'plugin');
     await fs.mkdir(pluginRoot, { recursive: true });
+    process.chdir(testDir);
   });
 
   afterEach(async () => {
+    process.chdir(originalCwd);
     try {
       await fs.rm(testDir, { recursive: true, force: true });
     } catch {
@@ -90,6 +94,38 @@ category: testing
     expect(skill!.description).toContain('discovered skill');
     expect(skill!.category).toBe('testing');
     expect(skill!.source).toBe('local-plugin');
+  });
+
+  it('discovers skills from repo library root when present', async () => {
+    const skillDir = path.join(
+      testDir,
+      'library',
+      'specializations',
+      'repo-spec',
+      'skills',
+      'repo-skill'
+    );
+    await fs.mkdir(skillDir, { recursive: true });
+    await fs.writeFile(
+      path.join(skillDir, 'SKILL.md'),
+      `---
+name: repo-skill
+description: A repo library skill
+category: testing
+---
+`,
+      'utf8'
+    );
+
+    const result = await discoverSkillsInternal({
+      pluginRoot,
+      cacheTtl: 0,
+    });
+
+    const skill = result.skills.find((s) => s.name === 'repo-skill');
+    expect(skill).toBeDefined();
+    expect(skill!.source).toBe('local');
+    expect(skill!.file).toContain(path.join('library', 'specializations', 'repo-spec'));
   });
 
   it('discovers skills from specializations directory', async () => {
@@ -383,16 +419,20 @@ category: test
 describe('handleSkillDiscover --summary-only flag', () => {
   let testDir: string;
   let pluginRoot: string;
+  let originalCwd: string;
 
   beforeEach(async () => {
+    originalCwd = process.cwd();
     testDir = path.join(os.tmpdir(), `skill-discover-cli-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`);
     pluginRoot = path.join(testDir, 'plugin');
     await fs.mkdir(pluginRoot, { recursive: true });
+    process.chdir(testDir);
     vi.spyOn(console, 'log').mockImplementation(() => {});
     vi.spyOn(console, 'error').mockImplementation(() => {});
   });
 
   afterEach(async () => {
+    process.chdir(originalCwd);
     vi.restoreAllMocks();
     try {
       await fs.rm(testDir, { recursive: true, force: true });
@@ -483,16 +523,20 @@ category: test
 describe('handleSkillDiscover --include-remote flag', () => {
   let testDir: string;
   let pluginRoot: string;
+  let originalCwd: string;
 
   beforeEach(async () => {
+    originalCwd = process.cwd();
     testDir = path.join(os.tmpdir(), `skill-discover-remote-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`);
     pluginRoot = path.join(testDir, 'plugin');
     await fs.mkdir(pluginRoot, { recursive: true });
+    process.chdir(testDir);
     vi.spyOn(console, 'log').mockImplementation(() => {});
     vi.spyOn(console, 'error').mockImplementation(() => {});
   });
 
   afterEach(async () => {
+    process.chdir(originalCwd);
     vi.restoreAllMocks();
     try {
       await fs.rm(testDir, { recursive: true, force: true });
@@ -542,16 +586,20 @@ describe('handleSkillDiscover --include-remote flag', () => {
 describe('handleSkillDiscover JSON output', () => {
   let testDir: string;
   let pluginRoot: string;
+  let originalCwd: string;
 
   beforeEach(async () => {
+    originalCwd = process.cwd();
     testDir = path.join(os.tmpdir(), `skill-discover-json-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`);
     pluginRoot = path.join(testDir, 'plugin');
     await fs.mkdir(pluginRoot, { recursive: true });
+    process.chdir(testDir);
     vi.spyOn(console, 'log').mockImplementation(() => {});
     vi.spyOn(console, 'error').mockImplementation(() => {});
   });
 
   afterEach(async () => {
+    process.chdir(originalCwd);
     vi.restoreAllMocks();
     try {
       await fs.rm(testDir, { recursive: true, force: true });
@@ -611,11 +659,14 @@ describe('session:iteration-message skill context integration', () => {
   let testDir: string;
   let pluginRoot: string;
   const CACHE_DIR = path.join(os.tmpdir(), 'babysitter-skill-cache');
+  let originalCwd: string;
 
   beforeEach(async () => {
+    originalCwd = process.cwd();
     testDir = path.join(os.tmpdir(), `skill-session-int-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`);
     pluginRoot = path.join(testDir, 'plugin');
     await fs.mkdir(pluginRoot, { recursive: true });
+    process.chdir(testDir);
     // Clear the global skill cache to avoid cross-test contamination
     try {
       await fs.rm(CACHE_DIR, { recursive: true, force: true });
@@ -627,6 +678,7 @@ describe('session:iteration-message skill context integration', () => {
   });
 
   afterEach(async () => {
+    process.chdir(originalCwd);
     vi.restoreAllMocks();
     try {
       await fs.rm(testDir, { recursive: true, force: true });
@@ -836,14 +888,18 @@ export async function process(inputs, ctx) {}
 describe('discoverFromProcessFile', () => {
   let testDir: string;
   let pluginRoot: string;
+  let originalCwd: string;
 
   beforeEach(async () => {
+    originalCwd = process.cwd();
     testDir = path.join(os.tmpdir(), `process-discover-test-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`);
     pluginRoot = path.join(testDir, 'plugin');
     await fs.mkdir(path.join(pluginRoot, 'skills', 'babysit', 'process'), { recursive: true });
+    process.chdir(testDir);
   });
 
   afterEach(async () => {
+    process.chdir(originalCwd);
     try {
       await fs.rm(testDir, { recursive: true, force: true });
     } catch {
@@ -923,5 +979,26 @@ export async function process(inputs, ctx) {}
     expect(result).not.toBeNull();
     expect(result!.skills).toHaveLength(1);
     expect(result!.skills[0]).toEqual({ name: 'standalone-skill' });
+  });
+
+  it('resolves marker paths against repo library root when present', async () => {
+    const processFile = path.join(testDir, 'repo-process.js');
+    await fs.mkdir(path.join(testDir, 'library'), { recursive: true });
+    await fs.writeFile(processFile, `/**
+ * @skill repo-skill specializations/web-dev/skills/repo-skill/SKILL.md
+ */
+export async function process(inputs, ctx) {}
+`, 'utf8');
+
+    const result = discoverFromProcessFile({
+      processFilePath: processFile,
+      pluginRoot,
+    });
+
+    expect(result).not.toBeNull();
+    expect(result!.skills[0]).toEqual({
+      name: 'repo-skill',
+      file: path.resolve(testDir, 'library', 'specializations/web-dev/skills/repo-skill/SKILL.md'),
+    });
   });
 });

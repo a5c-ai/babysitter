@@ -551,7 +551,7 @@ describe("run:create --harness session binding triggers stop hook", () => {
 
     // Run run:create with --harness --session-id --plugin-root
     const createOut = dockerExec(
-      `babysitter run:create --process-id test-harness --entry ${processDir}/proc.js#process --prompt "harness test" --harness claude-code --session-id ${sid} --plugin-root ${PLUGIN_DIR} --json`,
+      `CLAUDE_SESSION_ID=${sid} babysitter run:create --process-id test-harness --entry ${processDir}/proc.js#process --prompt "harness test" --harness claude-code --plugin-root ${PLUGIN_DIR} --json`,
     ).trim();
 
     const createResult = JSON.parse(createOut);
@@ -585,7 +585,7 @@ describe("run:create --harness session binding triggers stop hook", () => {
 
     // Create run with harness binding
     const createOut = dockerExec(
-      `babysitter run:create --process-id test-harness-block --entry ${processDir}/proc.js#process --prompt "block test" --harness claude-code --session-id ${sid} --plugin-root ${PLUGIN_DIR} --json`,
+      `CLAUDE_SESSION_ID=${sid} babysitter run:create --process-id test-harness-block --entry ${processDir}/proc.js#process --prompt "block test" --harness claude-code --plugin-root ${PLUGIN_DIR} --json`,
     ).trim();
     const createResult = JSON.parse(createOut);
     expect(createResult.session?.error).toBeUndefined();

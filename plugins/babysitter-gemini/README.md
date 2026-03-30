@@ -1,190 +1,117 @@
-# Babysitter — Gemini CLI Extension
+# @a5c-ai/babysitter-gemini
 
-Orchestrate complex, multi-step AI workflows directly inside Gemini CLI using the event-sourced [Babysitter SDK](https://github.com/a5c-ai/babysitter).
+Babysitter integrates with Gemini CLI to run SDK-backed orchestration through
+Gemini's lifecycle hooks and turn loop.
 
-## How It Works
+## Integration Model
 
-Babysitter drives an **in-session loop** via the Gemini CLI `AfterAgent` hook:
+Gemini uses hook-driven continuation:
 
-1. You start a run with `/babysitter:call <task>`
-2. Each turn, you perform one orchestration step (iterate, post a result, handle a breakpoint)
-3. The `AfterAgent` hook fires after your turn — if the run isn't done, it blocks exit and re-injects the prompt for the next iteration
-4. The loop ends when you output `<promise>COMPLETION_PROOF</promise>`
+1. A session-start hook prepares session state for the active Gemini session
+2. The `/babysitter:*` command surface starts or resumes the active run
+3. After each turn, the harness decides whether to allow exit or re-inject the
+   next orchestration step
+4. The loop ends only when the run emits `completionProof` and the assistant
+   returns `<promise>...</promise>`
 
----
+## Active Process-Library Model
 
-## Installation
+Process discovery should prefer active roots:
 
-### Option 1 — From GitHub (recommended)
+1. `.a5c/processes` in the current workspace
+2. The SDK-managed active process-library binding returned by `babysitter process-library:active --json`
+3. The cloned process-library repo root from `defaultSpec.cloneDir` when adjacent reference material is needed
+4. Installed extension content only as a compatibility fallback
 
-```bash
-gemini extensions install https://github.com/a5c-ai/babysitter --subdirectory plugins/babysitter-gemini --auto-update
-```
-
-### Option 2 — From a local clone
-
-```bash
-git clone https://github.com/a5c-ai/babysitter
-gemini extensions install ./babysitter/plugins/babysitter-gemini
-```
-
-### Option 3 — Direct path (development)
-
-```bash
-gemini extensions install /absolute/path/to/babysitter/plugins/babysitter-gemini
-```
-
-The `--auto-update` flag (Option 1) keeps the extension updated automatically as new versions are released.
-
----
-
-## Prerequisites
-
-- [Gemini CLI](https://github.com/google-gemini/gemini-cli) installed
-- [Node.js](https://nodejs.org/) 18+ (for the Babysitter SDK)
-- The extension will install the Babysitter SDK automatically on first use
-
----
+Do not document bundled snapshot content as the primary library root.
 
 ## Commands
 
-All commands are available as `/babysitter:<command>` inside Gemini CLI.
+Gemini exposes slash commands:
 
 | Command | Description |
 |---------|-------------|
 | `/babysitter:call [task]` | Start a new orchestration run |
 | `/babysitter:resume [run-id]` | Resume an incomplete run |
-| `/babysitter:yolo [task]` | Start a fully autonomous run (no breakpoints) |
-| `/babysitter:forever [task]` | Start a never-ending periodic run |
+| `/babysitter:yolo [task]` | Start a fully autonomous run |
 | `/babysitter:plan [task]` | Design a process without executing it |
 | `/babysitter:doctor [run-id]` | Diagnose run health |
-| `/babysitter:observe` | Launch the real-time observer dashboard |
+| `/babysitter:observe` | Launch the observer dashboard |
 | `/babysitter:assimilate [target]` | Assimilate an external methodology or harness |
-| `/babysitter:user-install` | Set up Babysitter for yourself |
-| `/babysitter:project-install` | Set up Babysitter for this project |
+| `/babysitter:user-install` | Set up user defaults |
+| `/babysitter:project-install` | Set up the current project |
 | `/babysitter:retrospect [run-id]` | Analyze a completed run |
 | `/babysitter:help [topic]` | Show help |
 
----
+## Installation
 
-## Quick Start
+Install the published Gemini extension into the user-level Gemini extension
+directory:
 
-```
-/babysitter:call Build a REST API with JWT authentication
-```
-
-Babysitter will:
-1. Interview you about the requirements
-2. Design a custom process
-3. Run it iteratively until complete
-
----
-
-## State & Runs
-
-Babysitter stores all state locally:
-
-```
-.a5c/
-├── runs/<runId>/          # Run journals, tasks, and artifacts
-│   ├── run.json
-│   ├── journal/
-│   ├── tasks/
-│   └── state/
-├── state/<sessionId>.md   # Active session state (hook tracking)
-├── logs/                  # Hook execution logs
-└── processes/             # Reusable process definitions
-```
-
----
-
-## How the Loop Works (Technical)
-
-### Session Start
-When Gemini CLI starts, the `SessionStart` hook creates a baseline session state file at `.a5c/state/<session_id>.md`.
-
-### After Each Turn
-The `AfterAgent` hook reads the session state file. If a babysitter run is active:
-- Checks for `<promise>PROOF</promise>` in the agent's response — if matched, allows exit ✅
-- Otherwise outputs `{"decision":"block","reason":"...","systemMessage":"..."}` to continue the loop
-
-### Starting a Run
 ```bash
-# 1. Initialize the session loop
-bash "${extensionPath}/scripts/setup-babysitter-run.sh" \
-  --gemini-session-id "${GEMINI_SESSION_ID}" \
-  "Build a todo list app"
-
-# 2. Create the run (binds session automatically)
-babysitter run:create \
-  --process-id my-process \
-  --entry .a5c/processes/my-process.js#process \
-  --inputs .a5c/processes/my-process.inputs.json \
-  --harness gemini-cli \
-  --session-id "${GEMINI_SESSION_ID}" \
-  --state-dir ".a5c/state" \
-  --json
-
-# 3. STOP — the hook drives the loop from here
+npx @a5c-ai/babysitter-gemini install
 ```
 
-### Orchestration Loop (each iteration)
+Install it into a specific workspace:
+
 ```bash
-babysitter run:iterate .a5c/runs/<runId> --json --iteration <n>
-babysitter task:list .a5c/runs/<runId> --pending --json
-# ... execute each pending task ...
-babysitter task:post .a5c/runs/<runId> <effectId> \
-  --status ok --value tasks/<effectId>/output.json --json
-# STOP — hook re-injects prompt for next turn
+npx @a5c-ai/babysitter-gemini install --workspace /path/to/repo
 ```
 
-### Completing a Run
+Or use the Babysitter SDK helper, which runs the same published package flow:
+
 ```bash
-babysitter run:status .a5c/runs/<runId> --json
-# Extract completionProof from output, then output:
-# <promise>THE_PROOF_VALUE</promise>
+babysitter harness:install-plugin gemini-cli
+babysitter harness:install-plugin gemini-cli --workspace /path/to/repo
 ```
 
----
+If the workspace does not already have an active process-library binding, the
+installer bootstraps the shared global SDK process library automatically:
 
-## Logs
+```bash
+babysitter process-library:active --json
+```
 
-Hook logs are written to `.a5c/logs/`:
+## Orchestration Contract
 
-| File | Contents |
-|------|----------|
-| `babysitter-after-agent-hook.log` | AfterAgent hook decisions (block/allow) |
-| `babysitter-after-agent-hook-stderr.log` | AfterAgent hook errors |
-| `babysitter-session-start-hook.log` | Session start events |
-| `babysitter-session-start-hook-stderr.log` | Session start errors |
+Gemini docs should follow the same active contract as Claude/Codex where
+applicable:
 
----
+- use the Gemini `/babysitter:*` command surface
+- perform one orchestration phase per turn
+- let the harness hooks and command implementation own the low-level Babysitter runtime mechanics
+- finish only with the emitted `completionProof`
+
+## Task Kinds
+
+Current generated-process docs should prefer:
+
+- `agent`
+- `skill`
+- `shell`
+- `breakpoint`
+- `sleep`
+
+Do not present `node` as an active generated effect kind for Gemini flows.
 
 ## Troubleshooting
 
-**Hook not firing?**
-```
+Hook not firing:
+
+```text
 /babysitter:doctor
 ```
 
-**SDK not found?**
-```bash
-npm i -g @a5c-ai/babysitter-sdk@latest
+Run stuck:
+
+```text
+/babysitter:status
+/babysitter:doctor
 ```
 
-**Stale session state?**
-```bash
-rm .a5c/state/<session_id>.md
-```
-
-**Run stuck?**
-```bash
-babysitter run:status .a5c/runs/<runId> --json
-babysitter run:events .a5c/runs/<runId> --limit 10 --reverse
-```
-
----
+Low-level hook and CLI orchestration details belong in [GEMINI.md](./GEMINI.md),
+not in this user-facing README.
 
 ## License
 
-MIT — see [LICENSE](../../LICENSE)
+MIT

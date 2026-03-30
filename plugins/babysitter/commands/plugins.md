@@ -174,7 +174,7 @@ EOF
 # Create and run
 babysitter run:create \
   --process-id meta/plugin-creation \
-  --entry plugins/babysitter/skills/babysit/process/specializations/meta/plugin-creation.js#process \
+  --entry library/specializations/meta/plugin-creation.js#process \
   --inputs /tmp/plugin-inputs.json \
   --prompt "Create a new babysitter plugin package" \
   --json

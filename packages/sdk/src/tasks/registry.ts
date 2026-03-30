@@ -161,7 +161,12 @@ export class TaskRegistry {
   }
 }
 
-export const globalTaskRegistry = new TaskRegistry();
+const GLOBAL_TASK_REGISTRY_KEY = Symbol.for("@a5c-ai/babysitter-sdk/taskRegistry");
+const registryHost = globalThis as typeof globalThis & { [GLOBAL_TASK_REGISTRY_KEY]?: TaskRegistry };
+
+export const globalTaskRegistry = registryHost[GLOBAL_TASK_REGISTRY_KEY] ?? (
+  registryHost[GLOBAL_TASK_REGISTRY_KEY] = new TaskRegistry()
+);
 
 export function resetGlobalTaskRegistry(): void {
   globalTaskRegistry.clear();

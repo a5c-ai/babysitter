@@ -1,37 +1,40 @@
 #!/usr/bin/env node
 'use strict';
 
-/**
- * uninstall.js — Removes babysitter-codex skill files from ~/.codex/skills/
- */
-
 const fs = require('fs');
-const path = require('path');
-const os = require('os');
-
-const SKILL_NAME = 'babysitter-codex';
-
-function getCodexHome() {
-  if (process.env.CODEX_HOME) return process.env.CODEX_HOME;
-  return path.join(os.homedir(), '.codex');
-}
+const {
+  getCodexHome,
+  getHomeMarketplacePath,
+  getHomePluginRoot,
+  removeLegacyCodexSurface,
+  removeMarketplaceEntry,
+} = require('./install-shared');
 
 function main() {
   const codexHome = getCodexHome();
-  const skillDir = path.join(codexHome, 'skills', SKILL_NAME);
+  const pluginRoot = getHomePluginRoot();
+  const marketplacePath = getHomeMarketplacePath();
+  let removedPlugin = false;
 
-  if (!fs.existsSync(skillDir)) {
-    console.log('[babysitter-codex] Skill directory not found, nothing to remove.');
+  if (fs.existsSync(pluginRoot)) {
+    try {
+      fs.rmSync(pluginRoot, { recursive: true, force: true });
+      console.log(`[babysitter-codex] Removed ${pluginRoot}`);
+      removedPlugin = true;
+    } catch (err) {
+      console.warn(`[babysitter-codex] Warning: Could not remove plugin directory ${pluginRoot}: ${err.message}`);
+    }
+  }
+
+  removeMarketplaceEntry(marketplacePath);
+  removeLegacyCodexSurface(codexHome);
+
+  if (!removedPlugin) {
+    console.log('[babysitter-codex] Plugin directory not found, legacy Codex surface cleaned if present.');
     return;
   }
 
-  try {
-    fs.rmSync(skillDir, { recursive: true, force: true });
-    console.log(`[babysitter-codex] Removed ${skillDir}`);
-    console.log('[babysitter-codex] Restart Codex to complete uninstallation.');
-  } catch (err) {
-    console.warn(`[babysitter-codex] Warning: Could not remove skill directory: ${err.message}`);
-  }
+  console.log('[babysitter-codex] Restart Codex to complete uninstallation.');
 }
 
 main();

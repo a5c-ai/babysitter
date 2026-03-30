@@ -758,7 +758,7 @@ Copy `.env.example` to `.env.local` and configure:
 | Variable | Description | Default |
 |----------|-------------|---------|
 | `DATABASE_PATH` | SQLite database location | `./data/catalog.db` |
-| `PROCESS_LIBRARY_PATH` | Path to process library | `../babysitter/skills/babysit/process` |
+| `PROCESS_LIBRARY_PATH` | Path to process library | `../library` |
 
 ## Architecture
 

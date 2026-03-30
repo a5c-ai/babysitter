@@ -1,0 +1,63 @@
+FROM node:20-bookworm
+
+LABEL maintainer="a5c.ai"
+LABEL description="Codex CLI with babysitter SDK and repo-installed babysitter-codex for E2E validation"
+
+RUN apt-get update && apt-get install -y \
+    bash \
+    git \
+    jq \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN groupadd -r codex && useradd -r -g codex -m -d /home/codex codex
+
+ENV HOME=/home/codex
+ENV CODEX_HOME=/home/codex/.codex
+ENV PATH=/home/codex/.local/bin:${PATH}
+
+RUN mkdir -p /home/codex/.local /home/codex/.codex && \
+    echo "prefix=/home/codex/.local" > /home/codex/.npmrc
+
+WORKDIR /app
+
+COPY package.json package-lock.json* ./
+COPY packages/sdk/package.json ./packages/sdk/
+COPY plugins/babysitter-codex/package.json ./plugins/babysitter-codex/
+
+RUN npm install --include=dev
+
+COPY . .
+
+RUN npm run build:sdk
+
+RUN mkdir -p /workspace && chown -R codex:codex /app /home/codex /workspace
+
+USER codex
+
+RUN npm install -g @openai/codex@latest
+RUN npm install -g /app/packages/sdk
+RUN mkdir -p /tmp/babysitter-process-library-source/library && \
+    cp -R /app/library/. /tmp/babysitter-process-library-source/library/ && \
+    cd /tmp/babysitter-process-library-source && \
+    git init -q && \
+    git config user.name "Babysitter E2E" && \
+    git config user.email "e2e@example.com" && \
+    git add . && \
+    git commit -qm "seed process library"
+RUN BABYSITTER_PROCESS_LIBRARY_REPO=/tmp/babysitter-process-library-source npm install -g /app/plugins/babysitter-codex && \
+    BABYSITTER_PROCESS_LIBRARY_REPO=/tmp/babysitter-process-library-source babysitter-codex install --global
+
+WORKDIR /workspace
+
+ENV A5C_PROVIDER_NAME=""
+ENV A5C_SELECTED_CLI_COMMAND=""
+ENV A5C_CLI_TOOL=""
+ENV A5C_SELECTED_MODEL=""
+ENV AZURE_OPENAI_API_KEY=""
+ENV AZURE_OPENAI_PROJECT_NAME=""
+ENV AZURE_OPENAI_DEPLOYMENT=""
+ENV OPENAI_API_KEY=""
+ENV OPENAI_BASE_URL=""
+
+CMD ["bash"]

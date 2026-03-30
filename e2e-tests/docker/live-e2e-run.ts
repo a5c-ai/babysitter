@@ -8,10 +8,10 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { execSync } from 'child_process';
-import activate from '/app/plugins/pi/extensions/babysitter/index.ts';
-import { bindRun } from '/app/plugins/pi/extensions/babysitter/session-binder.ts';
-import { iterate, getRunStatus, postResult } from '/app/plugins/pi/extensions/babysitter/sdk-bridge.ts';
-import { resetGuardState } from '/app/plugins/pi/extensions/babysitter/guards.ts';
+import activate from '/app/plugins/babysitter-pi/extensions/babysitter/index.ts';
+import { bindRun } from '/app/plugins/babysitter-pi/extensions/babysitter/session-binder.ts';
+import { iterate, getRunStatus, postResult } from '/app/plugins/babysitter-pi/extensions/babysitter/sdk-bridge.ts';
+import { resetGuardState } from '/app/plugins/babysitter-pi/extensions/babysitter/guards.ts';
 import { loadJournal } from '@a5c-ai/babysitter-sdk';
 
 const SID = 'live-e2e-real-work';

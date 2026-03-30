@@ -1,8 +1,0 @@
-{
-  "runId": "completed-run",
-  "processId": "completed-process",
-  "entrypoint": "process.js",
-  "layoutVersion": "2026.01.runs-v1",
-  "createdAt": "2026-03-10T10:00:00.000Z",
-  "prompt": "Completed test run"
-}

@@ -15,7 +15,7 @@
     "skills"
   ],
   "scripts": {
-    "build": "tsc -p tsconfig.json",
+    "build": "tsc -p tsconfig.json && node -e \"const fs=require('fs');const p=require('path');const s=p.join('src','cli','commands','templates');const d=p.join('dist','cli','commands','templates');fs.mkdirSync(d,{recursive:true});fs.readdirSync(s).forEach(f=>fs.copyFileSync(p.join(s,f),p.join(d,f)));\"",
     "clean": "rimraf dist",
     "lint": "eslint \"src/**/*.ts\" --max-warnings=0",
     "test": "vitest run",
@@ -23,9 +23,16 @@
     "smoke:cli": "node scripts/smoke-cli.js --runs-dir packages/sdk/test-fixtures/cli/runs/smoke"
   },
   "dependencies": {
+    "@agentsh/secure-sandbox": "^0.1.7",
+    "@mariozechner/pi-coding-agent": "*",
     "@modelcontextprotocol/sdk": "^1.12.1",
+    "@sinclair/typebox": "^0.34.48",
     "fs-extra": "^11.2.0",
     "ulid": "^2.3.0"
+  },
+  "optionalDependencies": {
+    "@vscode/ripgrep": "^1.15.9",
+    "puppeteer": "^24.0.0"
   },
   "devDependencies": {
     "@types/fs-extra": "^11.0.4",
