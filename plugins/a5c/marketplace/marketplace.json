@@ -111,6 +111,15 @@
       "packagePath": "plugins/status-line",
       "tags": ["status-line", "ux", "claude-code", "session", "run-indicator", "observability"],
       "author": "a5c-ai"
+    },
+    "prompt-master": {
+      "name": "prompt-master",
+      "description": "Install the prompt-master skill for generating optimized prompts across 30+ AI tools. Supports automatic tool detection, 12 prompt templates, 35 anti-pattern diagnostics, and prompt decompiler mode. Optional UserPromptSubmit hook auto-detects prompt-generation requests. Optional profile integration recommends prompt-master in new babysitter processes.",
+      "latestVersion": "1.0.0",
+      "versions": ["1.0.0"],
+      "packagePath": "plugins/prompt-master",
+      "tags": ["skill", "prompts", "prompt-engineering", "multi-tool", "hooks", "claude-code", "cursor", "midjourney", "chatgpt"],
+      "author": "a5c-ai"
     }
   }
 }
