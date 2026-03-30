@@ -36,3 +36,10 @@ export {
 export { discoverHarnesses, detectCallerHarness, checkCliAvailable, KNOWN_HARNESSES } from "./discovery";
 
 export { invokeHarness, buildHarnessArgs, HARNESS_CLI_MAP } from "./invoker";
+
+export {
+  createAgenticToolDefinitions,
+  type AgenticToolOptions,
+  type CustomToolDefinition,
+  AGENTIC_TOOL_NAMES,
+} from "./agenticTools";

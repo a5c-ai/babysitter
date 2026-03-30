@@ -24,10 +24,12 @@ export interface AskUserQuestionQuestion {
   multiSelect?: boolean;
   allowOther?: boolean;
   required?: boolean;
+  recommended?: number;
 }
 
 export interface AskUserQuestionRequest {
   questions: AskUserQuestionQuestion[];
+  timeout?: number;
 }
 
 export interface AskUserQuestionResponse {
@@ -337,12 +339,76 @@ export async function promptAskUserQuestionWithUiContext(
   return createAskUserQuestionResponse(request, answers);
 }
 
+function getDefaultAnswerForQuestion(question: AskUserQuestionQuestion): string {
+  const options = question.options ?? [];
+  if (
+    question.recommended != null &&
+    options.length > 0 &&
+    options[question.recommended]
+  ) {
+    return options[question.recommended].label;
+  }
+  if (options.length > 0) {
+    return options[0].label;
+  }
+  return "";
+}
+
+function buildDefaultAnswers(request: AskUserQuestionRequest): Record<string, string> {
+  const answers: Record<string, string> = {};
+  for (const [index, question] of request.questions.entries()) {
+    const key = getQuestionKey(question, index);
+    answers[key] = getDefaultAnswerForQuestion(question);
+  }
+  return answers;
+}
+
 export async function promptAskUserQuestionWithReadline(
   rl: readline.Interface,
   request: AskUserQuestionRequest,
 ): Promise<AskUserQuestionResponse> {
   validateAskUserQuestionRequest(request);
 
+  // If a timeout is specified, race the interactive prompt against a timer
+  if (request.timeout != null && request.timeout > 0) {
+    const defaultAnswers = buildDefaultAnswers(request);
+    return new Promise<AskUserQuestionResponse>((resolve) => {
+      let settled = false;
+      const timer = setTimeout(() => {
+        if (!settled) {
+          settled = true;
+          process.stderr.write(
+            `${YELLOW}Ask timeout reached (${request.timeout}ms). Auto-selecting defaults.${RESET}\n`,
+          );
+          resolve(createAskUserQuestionResponse(request, defaultAnswers));
+        }
+      }, request.timeout);
+
+      promptAskUserQuestionInteractive(rl, request)
+        .then((response) => {
+          if (!settled) {
+            settled = true;
+            clearTimeout(timer);
+            resolve(response);
+          }
+        })
+        .catch(() => {
+          if (!settled) {
+            settled = true;
+            clearTimeout(timer);
+            resolve(createAskUserQuestionResponse(request, defaultAnswers));
+          }
+        });
+    });
+  }
+
+  return promptAskUserQuestionInteractive(rl, request);
+}
+
+async function promptAskUserQuestionInteractive(
+  rl: readline.Interface,
+  request: AskUserQuestionRequest,
+): Promise<AskUserQuestionResponse> {
   const answers: Record<string, string> = {};
 
   for (const [index, question] of request.questions.entries()) {

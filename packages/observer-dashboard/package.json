@@ -79,6 +79,7 @@
     "ulid": "^3.0.2"
   },
   "devDependencies": {
+    "@adobe/css-tools": "^4.4.4",
     "@playwright/test": "^1.58.2",
     "@tailwindcss/postcss": "^4",
     "@testing-library/jest-dom": "^6.9.1",

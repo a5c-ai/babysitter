@@ -13,12 +13,13 @@
 import * as path from "node:path";
 import * as readline from "node:readline";
 import { execFile } from "node:child_process";
-import { promises as fs } from "node:fs";
+import { existsSync, promises as fs, readFileSync } from "node:fs";
 import { pathToFileURL } from "node:url";
 import { Type } from "@sinclair/typebox";
 import { detectCallerHarness, discoverHarnesses } from "../../harness/discovery";
 import { invokeHarness } from "../../harness/invoker";
 import { createPiSession, PiSessionHandle } from "../../harness/piWrapper";
+import { createAgenticToolDefinitions } from "../../harness/agenticTools";
 import type {
   HarnessDiscoveryResult,
   PiSessionEvent,
@@ -1579,25 +1580,102 @@ function readBashSandboxMetadata(
     : undefined;
 }
 
+function readStringMetadata(
+  metadata: Record<string, unknown> | undefined,
+  key: string,
+): string | undefined {
+  const value = metadata?.[key];
+  return typeof value === "string" ? value : undefined;
+}
+
+/** Delegation configuration that can be supplied per-effect via tool params or task metadata. */
+interface DelegationConfig {
+  model?: string;
+  timeout?: number;
+  toolsMode?: "default" | "coding" | "readonly";
+  thinkingLevel?: "none" | "low" | "medium" | "high";
+  bashSandbox?: "auto" | "secure" | "local";
+  skills?: string[];
+  subagentName?: string;
+}
+
 function buildPiWorkerSessionOptions(args: {
   action: EffectAction;
   workspace?: string;
   model?: string;
+  customTools?: unknown[];
+  delegationConfig?: DelegationConfig;
 }): PiSessionOptions {
   const metadata = args.action.taskDef?.metadata as Record<string, unknown> | undefined;
   const isolated = readBooleanMetadata(metadata, "isolated");
   const enableCompaction = readBooleanMetadata(metadata, "enableCompaction");
-  const bashSandbox = readBashSandboxMetadata(metadata);
+
+  // Priority: delegationConfig > task metadata > defaults
+  const effectiveModel = args.delegationConfig?.model ?? args.model;
+  const effectiveTimeout = args.delegationConfig?.timeout ?? 900_000;
+  const effectiveToolsMode = args.delegationConfig?.toolsMode
+    ?? readStringMetadata(metadata, "toolsMode") as "default" | "coding" | "readonly" | undefined
+    ?? "coding";
+  const rawThinkingLevel = args.delegationConfig?.thinkingLevel
+    ?? readStringMetadata(metadata, "thinkingLevel") as "none" | "low" | "medium" | "high" | undefined;
+  // Map delegation "none" to undefined (no thinking header sent to PI).
+  const effectiveThinkingLevel: PiSessionOptions["thinkingLevel"] | undefined =
+    rawThinkingLevel === "none" ? undefined : rawThinkingLevel;
+  const effectiveBashSandbox = args.delegationConfig?.bashSandbox
+    ?? readBashSandboxMetadata(metadata);
+
+  // Resolve skills to appendSystemPrompt content
+  let appendSystemPrompt: string[] | undefined;
+  const skillNames = args.delegationConfig?.skills ?? (metadata?.skills as string[] | undefined);
+  if (skillNames?.length) {
+    const skillContents: string[] = [];
+    for (const skillName of skillNames) {
+      try {
+        const candidates = [
+          path.join(args.workspace ?? process.cwd(), ".a5c", "skills", skillName, "SKILL.md"),
+          path.join(args.workspace ?? process.cwd(), ".claude", "plugins", skillName, "SKILL.md"),
+        ];
+        for (const candidate of candidates) {
+          if (existsSync(candidate)) {
+            skillContents.push(readFileSync(candidate, "utf8"));
+            break;
+          }
+        }
+      } catch { /* skip missing skills */ }
+    }
+    if (skillContents.length) {
+      appendSystemPrompt = [skillContents.join("\n\n---\n\n")];
+    }
+  }
+
+  // Resolve subagentName to agentDir
+  const subagentName = args.delegationConfig?.subagentName ?? readStringMetadata(metadata, "subagentName");
+  let agentDir: string | undefined;
+  if (subagentName) {
+    const candidates = [
+      path.join(args.workspace ?? process.cwd(), ".claude", "agents", subagentName),
+    ];
+    for (const candidate of candidates) {
+      if (existsSync(candidate)) {
+        agentDir = candidate;
+        break;
+      }
+    }
+  }
 
   return {
     workspace: args.workspace,
-    model: args.model,
-    timeout: 900_000,
-    toolsMode: "coding",
+    model: effectiveModel,
+    timeout: effectiveTimeout,
+    toolsMode: effectiveToolsMode,
     ephemeral: true,
+    ...(args.customTools?.length ? { customTools: args.customTools } : {}),
     ...(isolated !== undefined ? { isolated } : {}),
     ...(enableCompaction !== undefined ? { enableCompaction } : {}),
-    ...(bashSandbox ? { bashSandbox } : {}),
+    ...(effectiveBashSandbox ? { bashSandbox: effectiveBashSandbox } : {}),
+    ...(effectiveThinkingLevel ? { thinkingLevel: effectiveThinkingLevel } : {}),
+    ...(appendSystemPrompt ? { appendSystemPrompt } : {}),
+    ...(agentDir ? { agentDir } : {}),
   };
 }
 
@@ -1742,6 +1820,7 @@ async function resolveEffect(
   discovered?: HarnessDiscoveryResult[],
   rl?: readline.Interface | null,
   json?: boolean,
+  askUserQuestionHandler?: ((params: unknown) => Promise<unknown>) | null,
 ): Promise<{
   status: "ok" | "error";
   value?: unknown;
@@ -1863,6 +1942,19 @@ async function resolveEffect(
       };
     }
 
+    if (options.interactive && !rl && askUserQuestionHandler) {
+      const response = await askUserQuestionHandler(approvalPrompt) as AskUserQuestionResponse;
+      const option = response.answers[approvalKey] ?? "Reject";
+      return {
+        status: "ok",
+        value: {
+          approved: option === "Approve",
+          option,
+          askUserQuestion: response,
+        },
+      };
+    }
+
     const response = createAskUserQuestionResponse(approvalPrompt, {
       [approvalKey]: "Approve",
     });
@@ -1968,6 +2060,171 @@ async function resolveEffect(
   };
 }
 
+interface EffectRetryConfig {
+  maxRetries: number;
+  baseDelayMs: number;
+  backoffMultiplier: number;
+  maxDelayMs: number;
+  nonRetryableKinds: string[];
+}
+
+const DEFAULT_EFFECT_RETRY_CONFIG: EffectRetryConfig = {
+  maxRetries: 3,
+  baseDelayMs: 1_000,
+  backoffMultiplier: 4,
+  maxDelayMs: 60_000,
+  nonRetryableKinds: ["breakpoint", "sleep"],
+};
+
+// For tests
+const EFFECT_RETRY_DELAYS_OVERRIDE = process.env.VITEST ? [0, 0, 0] : undefined;
+
+function isRetryableEffectError(error: unknown): boolean {
+  const message =
+    typeof error === "string"
+      ? error
+      : error instanceof Error
+        ? error.message
+        : String(error);
+  const lower = message.toLowerCase();
+  return (
+    lower.includes("timeout") ||
+    lower.includes("timed out") ||
+    lower.includes("econnreset") ||
+    lower.includes("econnrefused") ||
+    lower.includes("epipe") ||
+    lower.includes("rate limit") ||
+    lower.includes("too many requests") ||
+    lower.includes("server had an error") ||
+    lower.includes("temporarily unavailable") ||
+    lower.includes("please retry") ||
+    lower.includes("killed") ||
+    lower.includes("signal")
+  );
+}
+
+type ResolveEffectResult = {
+  status: "ok" | "error";
+  value?: unknown;
+  error?: unknown;
+  stdout?: string;
+  stderr?: string;
+};
+
+async function resolveEffectWithRetry(
+  action: EffectAction,
+  harnessName: string,
+  options: {
+    workspace?: string;
+    model?: string;
+    interactive?: boolean;
+    compressionConfig?: CompressionConfig | null;
+    retryConfig?: Partial<EffectRetryConfig>;
+  },
+  piSession?: PiSessionHandle | null,
+  discovered?: HarnessDiscoveryResult[],
+  rl?: readline.Interface | null,
+  json?: boolean,
+  // For recreating Pi session on retry
+  piSessionFactory?: () => PiSessionHandle,
+  askUserQuestionHandler?: ((params: unknown) => Promise<unknown>) | null,
+): Promise<ResolveEffectResult> {
+  const config = { ...DEFAULT_EFFECT_RETRY_CONFIG, ...options.retryConfig };
+
+  // Read per-effect overrides from task metadata
+  const metadata = action.taskDef?.metadata as
+    | Record<string, unknown>
+    | undefined;
+  if (typeof metadata?.maxRetries === "number") {
+    config.maxRetries = metadata.maxRetries;
+  }
+  if (metadata?.noRetry === true) {
+    config.maxRetries = 0;
+  }
+
+  // Non-retryable kinds
+  if (config.nonRetryableKinds.includes(action.kind)) {
+    return resolveEffect(
+      action,
+      harnessName,
+      options,
+      piSession,
+      discovered,
+      rl,
+      json,
+      askUserQuestionHandler,
+    );
+  }
+
+  let lastResult: ResolveEffectResult | undefined;
+  let currentPiSession = piSession;
+
+  for (let attempt = 0; attempt <= config.maxRetries; attempt++) {
+    try {
+      lastResult = await resolveEffect(
+        action,
+        harnessName,
+        options,
+        currentPiSession,
+        discovered,
+        rl,
+        json,
+        askUserQuestionHandler,
+      );
+
+      // Success — return immediately
+      if (lastResult.status === "ok") {
+        return lastResult;
+      }
+
+      // Effect returned error status — check if retryable
+      const errorMsg =
+        lastResult.error instanceof Error
+          ? lastResult.error.message
+          : String(lastResult.error ?? "");
+
+      if (attempt >= config.maxRetries || !isRetryableEffectError(errorMsg)) {
+        return lastResult;
+      }
+    } catch (error: unknown) {
+      if (attempt >= config.maxRetries || !isRetryableEffectError(error)) {
+        return {
+          status: "error",
+          error: error instanceof Error ? error : new Error(String(error)),
+          stderr: error instanceof Error ? error.message : String(error),
+        };
+      }
+      lastResult = {
+        status: "error" as const,
+        error: error instanceof Error ? error : new Error(String(error)),
+      };
+    }
+
+    // Compute delay with jitter
+    const testDelays = EFFECT_RETRY_DELAYS_OVERRIDE;
+    const baseDelay = testDelays
+      ? (testDelays[attempt] ?? 0)
+      : Math.min(
+          config.baseDelayMs * Math.pow(config.backoffMultiplier, attempt),
+          config.maxDelayMs,
+        );
+    const jitter = testDelays ? 0 : baseDelay * 0.2 * (Math.random() * 2 - 1);
+    const delay = Math.max(0, Math.round(baseDelay + jitter));
+
+    // Dispose and recreate Pi session if applicable
+    if (currentPiSession && piSessionFactory) {
+      currentPiSession.dispose();
+      currentPiSession = piSessionFactory();
+    }
+
+    if (delay > 0) {
+      await new Promise<void>((resolve) => setTimeout(resolve, delay));
+    }
+  }
+
+  return lastResult!;
+}
+
 function parseExplicitToolResultValue(args: {
   valueJson?: string;
   valueText?: string;
@@ -2006,10 +2263,12 @@ const ASK_QUESTION_SCHEMA = Type.Object({
   multiSelect: Type.Optional(Type.Boolean()),
   allowOther: Type.Optional(Type.Boolean()),
   required: Type.Optional(Type.Boolean()),
+  recommended: Type.Optional(Type.Number({ description: "Index of the recommended option (0-based). Auto-selected in non-interactive mode or on timeout." })),
 });
 
 const ASK_USER_QUESTION_SCHEMA = Type.Object({
   questions: Type.Array(ASK_QUESTION_SCHEMA, { minItems: 1, maxItems: 4 }),
+  timeout: Type.Optional(Type.Number({ description: "Timeout in ms. On expiry, the recommended option (or first) is auto-selected." })),
 });
 
 function formatToolResult(data: unknown, message?: string): ToolResultShape {
@@ -2066,11 +2325,25 @@ async function askUserQuestionViaTool(
   const answers: Record<string, string> = {};
   for (const [index, question] of request.questions.entries()) {
     const key = question.header?.trim() || `Question ${index + 1}`;
-    answers[key] = "";
+    if (
+      question.recommended != null &&
+      question.options &&
+      question.options[question.recommended]
+    ) {
+      answers[key] = question.options[question.recommended].label;
+    } else {
+      answers[key] = "";
+    }
   }
   if (isApprovalAskRequest(request)) {
     const key = request.questions[0]?.header?.trim() || "Decision";
-    answers[key] = "Approve";
+    const rec = request.questions[0]?.recommended;
+    const opts = request.questions[0]?.options;
+    if (rec != null && opts && opts[rec]) {
+      answers[key] = opts[rec].label;
+    } else {
+      answers[key] = "Approve";
+    }
   }
   return createAskUserQuestionResponse(request, answers);
 }
@@ -2705,6 +2978,20 @@ async function runProcessDefinitionPhase(args: {
     },
   ];
 
+  const agenticTools = createAgenticToolDefinitions({
+    workspace: args.workspace ?? process.cwd(),
+    interactive: args.interactive ?? false,
+    askUserQuestionHandler: async (params: unknown) => {
+      return askUserQuestionViaTool(
+        params as AskUserQuestionRequest,
+        args.interactive,
+        args.rl,
+        undefined,
+      );
+    },
+  });
+  const mergedCustomTools: unknown[] = [...customTools, ...agenticTools];
+
   emitProgress(
     { phase: "1", status: "started", harness: "pi (agentic)" },
     args.json,
@@ -2716,7 +3003,7 @@ async function runProcessDefinitionPhase(args: {
   );
   writeVerboseData(
     "phase1 tools",
-    (customTools as Array<{ name?: string; label?: string }>).map((tool) => ({
+    (mergedCustomTools as Array<{ name?: string; label?: string }>).map((tool) => ({
       name: tool.name,
       label: tool.label,
     })),
@@ -2749,7 +3036,7 @@ async function runProcessDefinitionPhase(args: {
     model: args.model,
     thinkingLevel: "low",
     toolsMode: phase1ToolsMode,
-    customTools,
+    customTools: mergedCustomTools,
     uiContext: interactiveUiContext,
     systemPrompt: processDefinitionSystemPrompt,
     isolated: true,
@@ -3164,8 +3451,15 @@ async function runOrchestrationPhase(args: {
               model: args.model,
             }));
           }
+          const piSessionFactory = (action.kind === "shell" || isPiHarness(taskHarness))
+            ? () => createPiSession(buildPiWorkerSessionOptions({
+                action,
+                workspace: args.workspace,
+                model: args.model,
+              }))
+            : undefined;
           try {
-            const effectResult = await resolveEffect(
+            const effectResult = await resolveEffectWithRetry(
               action,
               args.selectedHarnessName,
               {
@@ -3178,6 +3472,7 @@ async function runOrchestrationPhase(args: {
               args.discovered,
               args.rl,
               args.json,
+              piSessionFactory,
             );
             await commitEffectResult({
               runDir: created.runDir,
@@ -3615,11 +3910,18 @@ async function runOrchestrationPhase(args: {
           action,
           workspace: args.workspace,
           model: args.model,
+          customTools: phase2AgenticTools,
         });
         writeVerboseData("phase2 worker session options", workerSessionOptions);
         const workerSession = createPiSession(workerSessionOptions);
+        const piSessionFactory = () => createPiSession(buildPiWorkerSessionOptions({
+          action,
+          workspace: args.workspace,
+          model: args.model,
+          customTools: phase2AgenticTools,
+        }));
         try {
-          const effectResult = await resolveEffect(
+          const effectResult = await resolveEffectWithRetry(
             action,
             "pi",
             {
@@ -3632,6 +3934,7 @@ async function runOrchestrationPhase(args: {
             args.discovered,
             null,
             args.json,
+            piSessionFactory,
           );
           state.pendingEffectResults.set(params.effectId, effectResult);
           writeVerboseData("phase2 tool babysitter_run_shell_effect result", {
@@ -3643,6 +3946,10 @@ async function runOrchestrationPhase(args: {
             "Shell effect executed on the internal PI worker and staged for task posting.",
           );
         } finally {
+          // Note: if piSessionFactory was used for retries, the last recreated
+          // session is disposed inside resolveEffectWithRetry on the next retry
+          // or returned as currentPiSession. The original workerSession may have
+          // been disposed during retry. This dispose is a safety net.
           workerSession.dispose();
         }
       },
@@ -3654,10 +3961,40 @@ async function runOrchestrationPhase(args: {
       parameters: Type.Object({
         effectId: Type.String(),
         harness: Type.Optional(Type.String()),
+        model: Type.Optional(Type.String()),
+        timeout: Type.Optional(Type.Number()),
+        skills: Type.Optional(Type.Array(Type.String())),
+        subagentName: Type.Optional(Type.String()),
+        toolsMode: Type.Optional(Type.Union([
+          Type.Literal("default"),
+          Type.Literal("coding"),
+          Type.Literal("readonly"),
+        ])),
+        thinkingLevel: Type.Optional(Type.Union([
+          Type.Literal("none"),
+          Type.Literal("low"),
+          Type.Literal("medium"),
+          Type.Literal("high"),
+        ])),
+        bashSandbox: Type.Optional(Type.Union([
+          Type.Literal("auto"),
+          Type.Literal("secure"),
+          Type.Literal("local"),
+        ])),
       }),
       execute: async (
         _toolCallId: string,
-        params: { effectId: string; harness?: string },
+        params: {
+          effectId: string;
+          harness?: string;
+          model?: string;
+          timeout?: number;
+          skills?: string[];
+          subagentName?: string;
+          toolsMode?: "default" | "coding" | "readonly";
+          thinkingLevel?: "none" | "low" | "medium" | "high";
+          bashSandbox?: "auto" | "secure" | "local";
+        },
       ): Promise<ToolResultShape> => {
         writeVerboseData("phase2 tool babysitter_dispatch_effect_harness request", params);
         const action = state.pendingActions.get(params.effectId);
@@ -3682,21 +4019,48 @@ async function runOrchestrationPhase(args: {
           ? params.harness.trim()
           : undefined;
 
+        // Build delegation config from tool params, falling back to task metadata
+        const taskMetadata = action.taskDef?.metadata as Record<string, unknown> | undefined;
+        const delegationConfig: DelegationConfig = {
+          model: params.model ?? readStringMetadata(taskMetadata, "model"),
+          timeout: params.timeout ?? (typeof taskMetadata?.timeout === "number" ? taskMetadata.timeout : undefined),
+          toolsMode: params.toolsMode
+            ?? readStringMetadata(taskMetadata, "toolsMode") as DelegationConfig["toolsMode"],
+          thinkingLevel: params.thinkingLevel
+            ?? readStringMetadata(taskMetadata, "thinkingLevel") as DelegationConfig["thinkingLevel"],
+          bashSandbox: params.bashSandbox
+            ?? readStringMetadata(taskMetadata, "bashSandbox") as DelegationConfig["bashSandbox"],
+          skills: params.skills ?? (Array.isArray(taskMetadata?.skills) ? taskMetadata.skills as string[] : undefined),
+          subagentName: params.subagentName ?? readStringMetadata(taskMetadata, "subagentName"),
+        };
+
+        // Effective model for invokeHarness calls (delegationConfig > args.model)
+        const effectiveModel = delegationConfig.model ?? args.model;
+
         if (action.kind === "shell") {
           const workerSessionOptions = buildPiWorkerSessionOptions({
             action,
             workspace: args.workspace,
             model: args.model,
+            customTools: phase2AgenticTools,
+            delegationConfig,
           });
           writeVerboseData("phase2 worker session options", workerSessionOptions);
           const workerSession = createPiSession(workerSessionOptions);
+          const shellPiSessionFactory = () => createPiSession(buildPiWorkerSessionOptions({
+            action,
+            workspace: args.workspace,
+            model: args.model,
+            customTools: phase2AgenticTools,
+            delegationConfig,
+          }));
           try {
-            const effectResult = await resolveEffect(
+            const effectResult = await resolveEffectWithRetry(
               action,
               requestedHarness ?? "pi",
               {
                 workspace: args.workspace,
-                model: args.model,
+                model: effectiveModel,
                 interactive: false,
                 compressionConfig: args.compressionConfig,
               },
@@ -3704,6 +4068,7 @@ async function runOrchestrationPhase(args: {
               args.discovered,
               null,
               args.json,
+              shellPiSessionFactory,
             );
             state.pendingEffectResults.set(params.effectId, effectResult);
             writeVerboseData("phase2 tool babysitter_dispatch_effect_harness result", {
@@ -3728,28 +4093,42 @@ async function runOrchestrationPhase(args: {
           resolvedHarness: taskHarness,
           selectedHarness: args.selectedHarnessName,
           metadata: (action.taskDef?.metadata as Record<string, unknown> | undefined) ?? undefined,
+          delegationConfig,
         });
         let workerSession: PiSessionHandle | null = null;
+        const dispatchPiSessionFactory = isPiHarness(taskHarness)
+          ? () => createPiSession(buildPiWorkerSessionOptions({
+              action,
+              workspace: args.workspace,
+              model: args.model,
+              customTools: phase2AgenticTools,
+              delegationConfig,
+            }))
+          : undefined;
         if (isPiHarness(taskHarness)) {
           workerSession = createPiSession(buildPiWorkerSessionOptions({
             action,
             workspace: args.workspace,
             model: args.model,
+            customTools: phase2AgenticTools,
+            delegationConfig,
           }));
           writeVerboseData("phase2 worker session options", buildPiWorkerSessionOptions({
             action,
             workspace: args.workspace,
             model: args.model,
+            customTools: phase2AgenticTools,
+            delegationConfig,
           }));
         }
 
         try {
-          const effectResult = await resolveEffect(
+          const effectResult = await resolveEffectWithRetry(
             action,
             taskHarness,
             {
               workspace: args.workspace,
-              model: args.model,
+              model: effectiveModel,
               interactive: false,
               compressionConfig: args.compressionConfig,
             },
@@ -3757,6 +4136,7 @@ async function runOrchestrationPhase(args: {
             args.discovered,
             null,
             args.json,
+            dispatchPiSessionFactory,
           );
           state.pendingEffectResults.set(params.effectId, effectResult);
           writeVerboseData("phase2 tool babysitter_dispatch_effect_harness result", {
@@ -3947,7 +4327,21 @@ async function runOrchestrationPhase(args: {
     },
   ];
 
-  const tools = customTools as Array<{
+  const phase2AgenticTools = createAgenticToolDefinitions({
+    workspace: args.workspace ?? process.cwd(),
+    interactive: args.interactive ?? false,
+    askUserQuestionHandler: async (params: unknown) => {
+      return askUserQuestionViaTool(
+        params as AskUserQuestionRequest,
+        args.interactive,
+        args.rl,
+        undefined,
+      );
+    },
+  });
+  const mergedPhase2Tools: unknown[] = [...customTools, ...phase2AgenticTools];
+
+  const tools = mergedPhase2Tools as Array<{
     name: string;
     execute?: (toolCallId: string, params: Record<string, unknown>) => Promise<ToolResultShape> | ToolResultShape;
   }>;
@@ -4088,7 +4482,7 @@ async function runOrchestrationPhase(args: {
     workspace: args.workspace,
     model: args.model,
     toolsMode: "coding",
-    customTools,
+    customTools: mergedPhase2Tools,
     uiContext: args.interactive && args.rl
       ? createReadlineAskUserQuestionUiContext(args.rl)
       : undefined,
@@ -4101,7 +4495,7 @@ async function runOrchestrationPhase(args: {
   );
   writeVerboseData(
     "phase2 tools",
-    (customTools as Array<{ name?: string; label?: string }>).map((tool) => ({
+    (mergedPhase2Tools as Array<{ name?: string; label?: string }>).map((tool) => ({
       name: tool.name,
       label: tool.label,
     })),

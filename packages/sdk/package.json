@@ -30,6 +30,10 @@
     "fs-extra": "^11.2.0",
     "ulid": "^2.3.0"
   },
+  "optionalDependencies": {
+    "@vscode/ripgrep": "^1.15.9",
+    "puppeteer": "^24.0.0"
+  },
   "devDependencies": {
     "@types/fs-extra": "^11.0.4",
     "@types/node": "^20.11.30",
