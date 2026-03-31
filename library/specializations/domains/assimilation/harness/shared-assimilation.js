@@ -140,7 +140,7 @@ export const researchHarnessTask = defineTask('research-harness', (args, taskCtx
         'BEFORE researching the target harness, study the existing Claude Code and Codex plugin implementations thoroughly:',
         '  - Read plugins/babysitter/ end-to-end: plugin.json (hooks, skills, commands), hooks/ directory (session-start, stop, pre-tool-use, user-prompt-submit shell scripts), hooks/hooks.json, skills/babysit/SKILL.md, versions.json.',
         '  - Read plugins/babysitter-codex/ end-to-end: .codex-plugin/plugin.json, hooks.json, .app.json, skills/ directory (all 16 skills), versions.json.',
-        '  - Read plugins/babysitter-pi/ end-to-end: package.json (omp field, bin scripts), extensions/, skills/babysitter/SKILL.md, bin/ (cli.cjs, install.cjs, uninstall.cjs), scripts/setup.sh.',
+        '  - Read plugins/babysitter-pi/ end-to-end: package.json (omp field, bin scripts), extensions/, skills/babysitter/SKILL.md, versions.json, bin/ (cli.cjs, install.cjs, uninstall.cjs), scripts/setup.sh.',
         'Understand how each reference plugin: registers hooks, defines skills, handles installation/uninstallation, manages versions, and delegates to the SDK CLI.',
 
         // ── Understand the full adapter interface ──
@@ -435,7 +435,7 @@ export const createPluginTask = defineTask('create-plugin', (args, taskCtx) => (
         'Create the plugin manifest (plugin.json, .codex-plugin/plugin.json, or package.json) with correct metadata, hooks, skills, and commands references.',
         'Create hook scripts following the standard pattern: resolve plugin root, ensure CLI available, capture stdin, invoke babysitter hook:run, output JSON.',
         'Hook scripts must follow the reference pattern in plugins/babysitter/hooks/ - they delegate to the SDK CLI, not implement logic directly.',
-        'Create a versions.json file with the SDK version for dependency management.',
+        'Create a versions.json file with {"sdkVersion": "<current-version>"} for dependency management. This file MUST be maintained by CI — add it to scripts/bump-version.mjs (the versionsPath loop), .github/workflows/staging-publish.yml (the versions.json writer AND the git add step), and .github/workflows/release.yml (the git add step). Without CI integration, the file goes stale and the plugin falls back to "latest".',
         'Create any harness-specific config files (hooks.json, .app.json, config.toml, etc.).',
         'Do NOT create orchestration scripts, loop drivers, effect adapters, or result adapters - the SDK handles all of that.',
         'Do NOT create custom tools for run:create, run:iterate, task:post - the babysitter CLI is the tool.',
@@ -486,7 +486,7 @@ export const portSkillsTask = defineTask('port-skills', (args, taskCtx) => ({
         'Read the skills from the reference plugins (babysitter/skills/, babysitter-codex/skills/).',
         `Determine the skill format for ${args.harnessName}: SKILL.md frontmatter, AGENTS.md, GEMINI.md, or other format.`,
         'At minimum, port the core babysit skill - this is the primary orchestration entry point.',
-        'The babysit SKILL.md should be thin: SDK/CLI dependency setup from versions.json, then a single CLI command: babysitter instructions:babysit-skill --harness <name> --json',
+        'The babysit SKILL.md should be thin: SDK/CLI dependency setup from versions.json (read ${PLUGIN_ROOT}/versions.json — NOT plugin.json or package.json), then a single CLI command: babysitter instructions:babysit-skill --harness <name> --json',
         'Port additional skills as appropriate for the harness (call, doctor, help, resume, observe, plan, etc.).',
         'Each skill should use the SDK CLI instructions command to generate its content dynamically, not embed static instructions.',
         'Ensure the skill frontmatter has correct allowed-tools for the target harness.',
@@ -1059,6 +1059,7 @@ export const setupCiCdTask = defineTask('setup-ci-cd', (args, taskCtx) => ({
 
         // ── Update staging workflow (staging-publish.yml) ──
         'If the plugin is npm-published, add staging publish step with --tag staging flag.',
+        `CRITICAL: Add the plugin's versions.json to the staging-publish.yml versions.json writer loop AND the git add step. Without this, versions.json goes stale after the first commit and the plugin falls back to installing "latest" SDK instead of the pinned version.`,
 
         // ── Update Docker build (docker-publish.yml) ──
         `Add '${args.pluginDir}/**' to the paths trigger list so Docker image rebuilds when the plugin changes.`,

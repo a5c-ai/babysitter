@@ -139,7 +139,7 @@ jobs:
           # Claude Code's plugin validator rejecting unrecognized keys)
           node -e "
             const fs = require('fs');
-            for (const path of ['plugins/babysitter/versions.json', 'plugins/babysitter-codex/versions.json']) {
+            for (const path of ['plugins/babysitter/versions.json', 'plugins/babysitter-codex/versions.json', 'plugins/babysitter-gemini/versions.json', 'plugins/babysitter-pi/versions.json']) {
               const data = fs.existsSync(path) ? JSON.parse(fs.readFileSync(path, 'utf8')) : {};
               data.sdkVersion = '${STAGING_VERSION_SDK}';
               fs.writeFileSync(path, JSON.stringify(data, null, 2) + '\n');
@@ -151,7 +151,7 @@ jobs:
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add plugins/babysitter/versions.json plugins/babysitter-codex/versions.json
+          git add plugins/babysitter/versions.json plugins/babysitter-codex/versions.json plugins/babysitter-gemini/versions.json plugins/babysitter-pi/versions.json
           if git diff --cached --quiet; then
             echo "No sdkVersion changes to commit."
           else

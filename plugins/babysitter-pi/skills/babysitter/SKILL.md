@@ -14,7 +14,7 @@ Orchestrate `.a5c/runs/<runId>/` through iterative execution.
 Read the SDK version from the plugin manifest to ensure version compatibility:
 
 ```bash
-SDK_VERSION=$(node -e "try{console.log(JSON.parse(require('fs').readFileSync('${PI_PLUGIN_ROOT}/plugin.json','utf8')).sdkVersion||'latest')}catch{console.log('latest')}")
+SDK_VERSION=$(node -e "try{console.log(JSON.parse(require('fs').readFileSync('${PI_PLUGIN_ROOT}/versions.json','utf8')).sdkVersion||'latest')}catch{console.log('latest')}")
 sudo npm i -g @a5c-ai/babysitter-sdk@$SDK_VERSION
 # sudo is depending on the env and system
 ```

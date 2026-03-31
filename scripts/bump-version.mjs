@@ -106,6 +106,8 @@ if (codexPackageManifest) {
 for (const versionsPath of [
   "plugins/babysitter/versions.json",
   "plugins/babysitter-codex/versions.json",
+  "plugins/babysitter-gemini/versions.json",
+  "plugins/babysitter-pi/versions.json",
 ]) {
   const versionsData = existsSync(versionsPath)
     ? JSON.parse(readFileSync(versionsPath, "utf8"))
