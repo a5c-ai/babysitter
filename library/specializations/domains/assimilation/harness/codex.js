@@ -40,8 +40,15 @@ export async function process(inputs, ctx) {
 
   // ==========================================================================
   // PHASE 0: RESEARCH
+  // The shared researchHarnessTask now covers comprehensive official docs
+  // verification including: exact hook type names, which hooks control flow,
+  // hooks config format, plugin manifest format/location, plugin install/
+  // distribution CLI commands, and stop-hook existence verification.
+  //
   // Codex-specific surfaces: .codex/hooks.json, AGENTS.md, .agents/skills/,
   // config.toml, CODEX_THREAD_ID/CODEX_SESSION_ID env vars, codex CLI flags.
+  // Research must verify exact hook type names (SessionStart, UserPromptSubmit,
+  // Stop) and which hooks support flow control from Codex official docs.
   // ==========================================================================
 
   ctx.log('phase:research', 'Researching Codex CLI hook model, skill format, and distribution');

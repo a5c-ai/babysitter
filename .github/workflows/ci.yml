@@ -55,6 +55,11 @@ jobs:
           set -euo pipefail
           npm run test:sdk 2>&1 | tee artifacts/test-logs/unit-tests.log
 
+      - name: babysitter-github plugin validation
+        run: |
+          set -euo pipefail
+          bash plugins/babysitter-github/test/plugin-validate.sh 2>&1 | tee artifacts/test-logs/babysitter-github-validate.log
+
       - name: Upload test logs
         if: always()
         uses: actions/upload-artifact@v4

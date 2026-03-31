@@ -32,6 +32,7 @@ const pluginManifests = [
 ];
 const codexPackageManifestPath = "plugins/babysitter-codex/package.json";
 const codexPackageLockPath = "plugins/babysitter-codex/package-lock.json";
+const githubPackageManifestPath = "plugins/babysitter-github/package.json";
 
 const manifests = packageManifests.map(({ path }) => ({
   path,
@@ -46,6 +47,12 @@ const codexPackageManifest = existsSync(codexPackageManifestPath)
   ? {
       path: codexPackageManifestPath,
       data: JSON.parse(readFileSync(codexPackageManifestPath, "utf8")),
+    }
+  : null;
+const githubPackageManifest = existsSync(githubPackageManifestPath)
+  ? {
+      path: githubPackageManifestPath,
+      data: JSON.parse(readFileSync(githubPackageManifestPath, "utf8")),
     }
   : null;
 
@@ -101,6 +108,17 @@ if (codexPackageManifest) {
   }
 }
 
+// Update GitHub package manifest - keep its own version stream, bumped by policy.
+if (githubPackageManifest) {
+  const currentGithubVersion = githubPackageManifest.data.version;
+  const newGithubVersion = bumpVersion(currentGithubVersion, bumpTarget);
+  githubPackageManifest.data.version = newGithubVersion;
+  writeFileSync(
+    githubPackageManifest.path,
+    `${JSON.stringify(githubPackageManifest.data, null, 2)}\n`,
+  );
+}
+
 // Write sdkVersion to versions.json (separate from plugin.json to avoid
 // Claude Code's plugin validator rejecting unrecognized keys)
 for (const versionsPath of [
@@ -108,6 +126,7 @@ for (const versionsPath of [
   "plugins/babysitter-codex/versions.json",
   "plugins/babysitter-gemini/versions.json",
   "plugins/babysitter-pi/versions.json",
+  "plugins/babysitter-github/versions.json",
 ]) {
   const versionsData = existsSync(versionsPath)
     ? JSON.parse(readFileSync(versionsPath, "utf8"))

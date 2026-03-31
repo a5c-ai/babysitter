@@ -41,9 +41,16 @@ export async function process(inputs, ctx) {
 
   // ==========================================================================
   // PHASE 0: RESEARCH
+  // The shared researchHarnessTask now covers comprehensive official docs
+  // verification including: exact hook/event type names, which hooks control
+  // flow, hooks config format, plugin manifest format/location, plugin
+  // install/distribution CLI commands, and stop-hook existence verification.
+  //
   // OpenClaw-specific: npm plugin with openclaw field in package.json,
   // multi-channel daemon model (WhatsApp, Telegram, Slack), SQLite-backed
-  // sessions, agent_end/resume callbacks, MCP tools.
+  // sessions, agent_end/resume callbacks, MCP tools. Research must verify
+  // from official OpenClaw docs whether agent_end/resume callbacks can
+  // block completion or only trigger fire-and-forget continuation.
   // ==========================================================================
 
   ctx.log('phase:research', 'Researching OpenClaw plugin model, daemon lifecycle, and distribution');

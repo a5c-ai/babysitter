@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "hooks": {
+    "sessionStart": [
+      {
+        "type": "command",
+        "bash": "./hooks/session-start.sh",
+        "powershell": "./hooks/session-start.ps1",
+        "timeoutSec": 30
+      }
+    ],
+    "sessionEnd": [
+      {
+        "type": "command",
+        "bash": "./hooks/session-end.sh",
+        "powershell": "./hooks/session-end.ps1",
+        "timeoutSec": 30
+      }
+    ],
+    "userPromptSubmitted": [
+      {
+        "type": "command",
+        "bash": "./hooks/user-prompt-submitted.sh",
+        "powershell": "./hooks/user-prompt-submitted.ps1",
+        "timeoutSec": 30
+      }
+    ]
+  }
+}

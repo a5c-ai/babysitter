@@ -41,11 +41,17 @@ export async function process(inputs, ctx) {
 
   // ==========================================================================
   // PHASE 0: RESEARCH
+  // The shared researchHarnessTask now covers comprehensive official docs
+  // verification including: exact hook/event type names, which hooks control
+  // flow, hooks config format, plugin manifest format/location, plugin
+  // install/distribution CLI commands, and stop-hook existence verification.
+  //
   // Pi-specific: CLI command `pi`, PI_SESSION_ID/PI_PLUGIN_ROOT env vars,
   // npm package with pi-specific fields in package.json, extensions/ directory,
   // skills/ for SKILL.md files, bin/ for CLI entry points, loop-driver via
   // agent_end event. Shares adapter code with oh-my-pi but distinct plugin,
-  // distribution, and CLI surface.
+  // distribution, and CLI surface. Research must verify the loop-driver
+  // mechanism and skill format (SKILL.md) from official Pi documentation.
   // ==========================================================================
 
   ctx.log('phase:research', 'Researching Pi Coding Agent extension model, loop-driver, and distribution');

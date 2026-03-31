@@ -45,11 +45,11 @@ beforeEach(() => {
 
 describe("HARNESS_CLI_MAP", () => {
   it("has entries for all 7 supported harnesses", () => {
-    const expectedNames = ["claude-code", "codex", "pi", "oh-my-pi", "gemini-cli", "cursor", "opencode"];
+    const expectedNames = ["claude-code", "codex", "pi", "oh-my-pi", "gemini-cli", "cursor", "opencode", "github-copilot"];
     for (const name of expectedNames) {
       expect(HARNESS_CLI_MAP[name]).toBeDefined();
     }
-    expect(Object.keys(HARNESS_CLI_MAP)).toHaveLength(7);
+    expect(Object.keys(HARNESS_CLI_MAP)).toHaveLength(8);
   });
 });
 

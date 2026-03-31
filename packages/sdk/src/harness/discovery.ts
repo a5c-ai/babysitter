@@ -73,6 +73,15 @@ export const KNOWN_HARNESSES: readonly HarnessSpec[] = [
     capabilities: [Cap.SessionBinding, Cap.HeadlessPrompt],
   },
   {
+    name: "github-copilot",
+    cli: "copilot",
+    // Note: official Copilot docs do not confirm these env vars are injected
+    // into hooks. They are used as best-effort discriminators for caller detection.
+    callerEnvVars: ["COPILOT_HOME", "COPILOT_GITHUB_TOKEN"],
+    // No StopHook — Copilot CLI uses in-turn orchestration model
+    capabilities: [Cap.HeadlessPrompt, Cap.SessionBinding, Cap.Mcp],
+  },
+  {
     name: "opencode",
     cli: "opencode",
     callerEnvVars: [],
@@ -103,6 +112,7 @@ const CONFIG_PATHS: Record<string, string[]> = {
   pi: [".pi"],
   "oh-my-pi": [".pi"],
   "gemini-cli": [".gemini"],
+  "github-copilot": [".copilot", ".github"],
   cursor: [".cursor", ".cursorrules"],
   opencode: [".opencode"],
 };

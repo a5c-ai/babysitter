@@ -40,9 +40,16 @@ export async function process(inputs, ctx) {
 
   // ==========================================================================
   // PHASE 0: RESEARCH
+  // The shared researchHarnessTask now covers comprehensive official docs
+  // verification including: exact hook/event type names, which hooks control
+  // flow, hooks config format, plugin manifest format/location, plugin
+  // install/distribution CLI commands, and stop-hook existence verification.
+  //
   // OpenCode-specific: opencode.json config, .opencode/ directory,
   // session.created/session.idle events, plugin directory, custom tools,
-  // MCP helpers. No shell hooks - uses event-based plugin model.
+  // MCP helpers. Claimed to have no shell hooks - uses event-based plugin
+  // model. Research MUST verify this from official OpenCode documentation
+  // and determine whether events can control flow or are fire-and-forget.
   // ==========================================================================
 
   ctx.log('phase:research', 'Researching OpenCode plugin model, event system, and distribution');

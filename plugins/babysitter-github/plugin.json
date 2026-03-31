@@ -1,0 +1,70 @@
+{
+  "name": "babysitter",
+  "version": "0.1.0",
+  "description": "Orchestrate complex, multi-step workflows with event-sourced state management, hook-based extensibility, and human-in-the-loop approval -- powered by the Babysitter SDK",
+  "author": "a5c.ai",
+  "license": "MIT",
+  "hooks": {
+    "sessionStart": "hooks/session-start.sh",
+    "sessionEnd": "hooks/session-end.sh",
+    "userPromptSubmitted": "hooks/user-prompt-submitted.sh"
+  },
+  "commands": [],
+  "skills": [
+    {
+      "name": "babysit",
+      "file": "skills/babysit/SKILL.md"
+    },
+    {
+      "name": "call",
+      "file": "skills/call/SKILL.md"
+    },
+    {
+      "name": "doctor",
+      "file": "skills/doctor/SKILL.md"
+    },
+    {
+      "name": "retrospect",
+      "file": "skills/retrospect/SKILL.md"
+    },
+    {
+      "name": "resume",
+      "file": "skills/resume/SKILL.md"
+    },
+    {
+      "name": "observe",
+      "file": "skills/observe/SKILL.md"
+    },
+    {
+      "name": "help",
+      "file": "skills/help/SKILL.md"
+    },
+    {
+      "name": "plan",
+      "file": "skills/plan/SKILL.md"
+    },
+    {
+      "name": "assimilate",
+      "file": "skills/assimilate/SKILL.md"
+    },
+    {
+      "name": "user-install",
+      "file": "skills/user-install/SKILL.md"
+    }
+  ],
+  "contextFileName": "AGENTS.md",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/a5c-ai/babysitter"
+  },
+  "keywords": [
+    "orchestration",
+    "workflow",
+    "automation",
+    "event-sourced",
+    "hooks",
+    "github-copilot",
+    "agent",
+    "LLM"
+  ]
+}

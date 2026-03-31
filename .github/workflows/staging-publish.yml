@@ -67,6 +67,11 @@ jobs:
           set -euo pipefail
           npm test --prefix plugins/babysitter-codex 2>&1 | tee artifacts/logs/babysitter-codex-tests.log
 
+      - name: babysitter-github plugin validation
+        run: |
+          set -euo pipefail
+          bash plugins/babysitter-github/test/plugin-validate.sh 2>&1 | tee artifacts/logs/babysitter-github-validate.log
+
       - name: Upload build logs
         uses: actions/upload-artifact@v4
         with:
@@ -110,13 +115,19 @@ jobs:
           BASE_CODEX=$(node -e "console.log(require('./plugins/babysitter-codex/package.json').version)")
           IFS='.' read -r CODEX_MAJOR CODEX_MINOR CODEX_PATCH <<< "$BASE_CODEX"
           CODEX_NEXT_PATCH=$((CODEX_PATCH + 1))
+          BASE_GITHUB=$(node -e "console.log(require('./plugins/babysitter-github/package.json').version)")
+          IFS='.' read -r GITHUB_MAJOR GITHUB_MINOR GITHUB_PATCH <<< "$BASE_GITHUB"
+          GITHUB_NEXT_PATCH=$((GITHUB_PATCH + 1))
           SHORT_SHA=$(git rev-parse --short HEAD)
           STAGING_VERSION_SDK="${SDK_MAJOR}.${SDK_MINOR}.${SDK_NEXT_PATCH}-staging.${SHORT_SHA}"
           STAGING_VERSION_CODEX="${CODEX_MAJOR}.${CODEX_MINOR}.${CODEX_NEXT_PATCH}-staging.${SHORT_SHA}"
+          STAGING_VERSION_GITHUB="${GITHUB_MAJOR}.${GITHUB_MINOR}.${GITHUB_NEXT_PATCH}-staging.${SHORT_SHA}"
           echo "staging_version_sdk=$STAGING_VERSION_SDK" >> "$GITHUB_OUTPUT"
           echo "staging_version_codex=$STAGING_VERSION_CODEX" >> "$GITHUB_OUTPUT"
+          echo "staging_version_github=$STAGING_VERSION_GITHUB" >> "$GITHUB_OUTPUT"
           echo "Setting SDK staging version: $STAGING_VERSION_SDK"
           echo "Setting Codex staging version: $STAGING_VERSION_CODEX"
+          echo "Setting GitHub staging version: $STAGING_VERSION_GITHUB"
           # Write prerelease version into package.json files (for npm publish)
           node -e "
             const fs = require('fs');
@@ -134,12 +145,16 @@ jobs:
             const codexPkg = JSON.parse(fs.readFileSync(codexPkgPath, 'utf8'));
             codexPkg.version = '${STAGING_VERSION_CODEX}';
             fs.writeFileSync(codexPkgPath, JSON.stringify(codexPkg, null, 2) + '\n');
+            const githubPkgPath = 'plugins/babysitter-github/package.json';
+            const githubPkg = JSON.parse(fs.readFileSync(githubPkgPath, 'utf8'));
+            githubPkg.version = '${STAGING_VERSION_GITHUB}';
+            fs.writeFileSync(githubPkgPath, JSON.stringify(githubPkg, null, 2) + '\n');
           "
           # Write sdkVersion into versions.json (separate from plugin.json to avoid
           # Claude Code's plugin validator rejecting unrecognized keys)
           node -e "
             const fs = require('fs');
-            for (const path of ['plugins/babysitter/versions.json', 'plugins/babysitter-codex/versions.json', 'plugins/babysitter-gemini/versions.json', 'plugins/babysitter-pi/versions.json']) {
+            for (const path of ['plugins/babysitter/versions.json', 'plugins/babysitter-codex/versions.json', 'plugins/babysitter-gemini/versions.json', 'plugins/babysitter-pi/versions.json', 'plugins/babysitter-github/versions.json']) {
               const data = fs.existsSync(path) ? JSON.parse(fs.readFileSync(path, 'utf8')) : {};
               data.sdkVersion = '${STAGING_VERSION_SDK}';
               fs.writeFileSync(path, JSON.stringify(data, null, 2) + '\n');
@@ -151,7 +166,7 @@ jobs:
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add plugins/babysitter/versions.json plugins/babysitter-codex/versions.json plugins/babysitter-gemini/versions.json plugins/babysitter-pi/versions.json
+          git add plugins/babysitter/versions.json plugins/babysitter-codex/versions.json plugins/babysitter-gemini/versions.json plugins/babysitter-pi/versions.json plugins/babysitter-github/versions.json
           if git diff --cached --quiet; then
             echo "No sdkVersion changes to commit."
           else
@@ -190,6 +205,26 @@ jobs:
           set -euo pipefail
           npm run deploy:staging
         working-directory: plugins/babysitter-codex
+
+      - name: Inject SDK dependency into github package for publish
+        run: |
+          set -euo pipefail
+          node -e "
+            const fs = require('fs');
+            const pkgPath = 'plugins/babysitter-github/package.json';
+            const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
+            pkg.dependencies = pkg.dependencies || {};
+            pkg.dependencies['@a5c-ai/babysitter-sdk'] = '${{ steps.version.outputs.staging_version_sdk }}';
+            fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2) + '\n');
+          "
+
+      - name: Publish babysitter-github package to npm (staging tag)
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          set -euo pipefail
+          npm run deploy:staging
+        working-directory: plugins/babysitter-github
 
       - name: Inject SDK dependency into metapackage for publish
         run: |

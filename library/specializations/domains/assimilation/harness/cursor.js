@@ -52,11 +52,18 @@ export async function process(inputs, ctx) {
 
   // ==========================================================================
   // PHASE 0: RESEARCH
+  // The shared researchHarnessTask now covers comprehensive official docs
+  // verification including: exact hook type names, which hooks control flow,
+  // hooks config format, plugin manifest format/location, plugin install/
+  // distribution CLI commands, and stop-hook existence verification.
+  //
   // Cursor-specific research priorities:
   //   1. Current state of hooks in CLI headless mode (cursor -p / --print).
   //      As of Cursor 1.7+, hooks (stop, afterAgentResponse, afterFileEdit)
   //      do NOT fire in headless CLI mode. Only sessionStart fires. This may
-  //      have changed — the feature is still in beta.
+  //      have changed — the feature is still in beta. Research MUST verify
+  //      from official Cursor docs which hooks fire in headless mode and
+  //      which hooks can control flow (block/approve).
   //   2. Environment variables Cursor sets (session ID, workspace, etc.)
   //      Currently KNOWN_HARNESSES has empty callerEnvVars — research if
   //      Cursor now sets any identifiable env vars. Known user-set vars:
@@ -64,8 +71,9 @@ export async function process(inputs, ctx) {
   //   3. MCP server support — Cursor has MCP, but headless mode requires
   //      --approve-mcps flag to auto-approve MCP connections. Research
   //      whether this is sufficient for babysitter MCP tool access.
-  //   4. Hook events: sessionStart, afterFileEdit, beforeShellExecution,
-  //      afterMCPExecution, preToolUse, postToolUse, postToolUseFailure.
+  //   4. Hook events — verify from official docs: sessionStart, afterFileEdit,
+  //      beforeShellExecution, afterMCPExecution, preToolUse, postToolUse,
+  //      postToolUseFailure. Verify which can return flow-control decisions.
   //      Configured in .cursor/hooks.json (project) or ~/.cursor/hooks.json.
   //   5. .cursorrules format for embedding orchestration rules, .cursor/rules/
   //      directory for project rules, .mdc format.
@@ -79,9 +87,10 @@ export async function process(inputs, ctx) {
   //   7. Session model: Cursor has UUID-based session IDs, session listing
   //      (agent ls), session resume (--resume/--continue). No auto-set env var
   //      for session ID detection — unlike CLAUDE_SESSION_ID.
-  //   8. Plugin marketplace: .cursor-plugin/plugin.json manifest, official
-  //      Cursor Marketplace (manually reviewed), ~/.cursor/plugins/local/ for
-  //      local testing, /add-plugin command. This is the distribution mechanism.
+  //   8. Plugin manifest and marketplace — verify from official docs:
+  //      .cursor-plugin/plugin.json manifest format, Cursor Marketplace
+  //      submission process, ~/.cursor/plugins/local/ for local testing,
+  //      /add-plugin command, and plugin install/uninstall CLI commands.
   //   9. Known headless bugs: terminal not fully released, agent hangs
   //      indefinitely without exiting in some versions. Must verify current state.
   //  10. Existing SDK support: cursor entry in KNOWN_HARNESSES (HeadlessPrompt

@@ -94,6 +94,46 @@ export function createCodexContext(
 }
 
 /**
+ * Create a PromptContext pre-configured for GitHub Copilot CLI.
+ */
+export function createGithubCopilotContext(
+  overrides?: Partial<PromptContext>,
+): PromptContext {
+  return {
+    ...COMMON_DEFAULTS,
+    harness: 'github-copilot',
+    harnessLabel: 'GitHub Copilot CLI',
+    capabilities: ['hooks', 'mcp', 'task-tool', 'breakpoint-routing'],
+    pluginRootVar: '${COPILOT_PLUGIN_ROOT}',
+    // In-turn model: agent drives orchestration loop within a single session.
+    // No stop-hook available — Copilot CLI sessionEnd output is ignored.
+    loopControlTerm: 'in-turn',
+    sessionBindingFlags: '--state-dir .a5c/state',
+    hookDriven: false,
+    interactiveToolName: 'AskUserQuestion tool',
+    sessionEnvVars: 'session_id (via hook stdin JSON, if configured)',
+    resumeFlags: '--state-dir .a5c/state',
+    cliSetupSnippet: [
+      'Use the installed CLI alias:',
+      '',
+      '```bash',
+      'CLI="babysitter"',
+      '```',
+      '',
+      'If it is not available on the path, use:',
+      '',
+      '```bash',
+      'CLI="npx -y @a5c-ai/babysitter-sdk"',
+      '```',
+    ].join('\n'),
+    iterateFlags: '',
+    hasIntentFidelityChecks: false,
+    hasNonNegotiables: false,
+    ...overrides,
+  } as PromptContext;
+}
+
+/**
  * Create a PromptContext pre-configured for PI.
  */
 export function createPiContext(

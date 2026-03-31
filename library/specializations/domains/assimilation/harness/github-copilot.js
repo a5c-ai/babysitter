@@ -10,8 +10,15 @@
  *   The GitHub CLI is NOT a traditional coding harness like Claude Code or Codex.
  *   It's a GitHub API client with Copilot features bolted on. The integration
  *   approach differs from other harnesses:
- *   - No hook/event system (no stop-hook, no lifecycle events)
- *   - No persistent session model
+ *   - Hook system exists but limited: hooks.json with camelCase types
+ *     (sessionStart, sessionEnd, userPromptSubmitted, preToolUse, postToolUse,
+ *     errorOccurred) — but ONLY preToolUse can return flow-control decisions.
+ *     All other hook outputs are IGNORED. No stop-hook equivalent exists.
+ *   - Plugin system: manifest in .plugin/, .github/plugin/, .claude-plugin/,
+ *     or repo root. Install via `copilot plugin install OWNER/REPO`.
+ *   - Marketplace: marketplace.json, `copilot plugin marketplace add/browse/list`
+ *   - Plugin storage: ~/.copilot/installed-plugins/
+ *   - Skills: skills/NAME/SKILL.md format with frontmatter
  *   - Extension model: `gh extension install owner/repo` (binary or script)
  *   - Config: ~/.config/gh/ (hosts.yml, config.yml)
  *   - Environment: GH_TOKEN, GITHUB_TOKEN, GH_HOST, GH_REPO, etc.
@@ -64,7 +71,12 @@ export async function process(inputs, ctx) {
 
   // ==========================================================================
   // PHASE 0: RESEARCH
-  // GitHub-specific research priorities:
+  // The shared researchHarnessTask now covers comprehensive official docs
+  // verification including: exact hook type names, which hooks control flow,
+  // hooks config format, plugin manifest format/location, plugin install/
+  // distribution CLI commands, and stop-hook existence verification.
+  //
+  // GitHub Copilot CLI-specific research priorities:
   //   1. Current state of `gh copilot` — is there an agent loop beyond
   //      suggest/explain? Does it support tool use, MCP, or multi-turn?
   //   2. GitHub Copilot Workspace — is there a CLI/API for agent-style coding?
@@ -81,6 +93,21 @@ export async function process(inputs, ctx) {
   //  10. Whether GitHub CLI has any concept of workspaces or project context.
   //  11. Existing SDK support: currently NONE — no KNOWN_HARNESSES entry,
   //      no HARNESS_CLI_MAP entry, no adapter file.
+  //  12. CRITICAL: Verify from official GitHub Copilot CLI docs the exact hook
+  //      type names (known to be camelCase: sessionStart, sessionEnd,
+  //      userPromptSubmitted, preToolUse, postToolUse, errorOccurred).
+  //  13. CRITICAL: Verify that ONLY preToolUse can return flow-control
+  //      decisions — all other hook outputs are IGNORED by GitHub Copilot.
+  //      This means NO stop-hook mechanism exists for loop driving.
+  //  14. Verify hooks.json format: "version": 1, entries with type, bash,
+  //      powershell, cwd, timeoutSec fields.
+  //  15. Verify plugin manifest locations (.plugin/, .github/plugin/,
+  //      .claude-plugin/, or repo root) and install via CLI commands
+  //      (copilot plugin install OWNER/REPO).
+  //  16. Verify marketplace system: marketplace.json, copilot plugin
+  //      marketplace add/browse/list commands, storage at
+  //      ~/.copilot/installed-plugins/.
+  //  17. Verify skill format: skills/NAME/SKILL.md with frontmatter.
   //
   //  The research MUST be honest about limitations. If gh copilot doesn't
   //  support agent loops, the process should document that and adjust scope

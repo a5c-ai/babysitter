@@ -193,10 +193,35 @@ export const researchHarnessTask = defineTask('research-harness', (args, taskCtx
         'Read harness/installSupport.ts — understand installCliViaNpm, execFilePromise, isClaudePluginInstalled, getClaudeInstalledPluginsPath, renderCommand.',
         'Read cli/commands/skill.ts — understand discoverSkillsInternal, used by session-start hooks to inject available skills into context.',
 
-        // ── NOW research the target harness ──
+        // ── CRITICAL PRINCIPLE: Official Documentation First ──
+        'IMPORTANT: Do NOT assume hook types, hook output behavior, plugin format, or distribution model from other harnesses. Each harness has its own official documentation that MUST be consulted. The research must verify from official sources whether a stop-hook or equivalent exists that can block agent completion — this determines the entire orchestration model.',
+
+        // ── NOW research the target harness from OFFICIAL DOCUMENTATION ──
+        `Find and read the official documentation for ${args.harnessName}. This includes: the harness GitHub repo README, any docs/ directory, official website documentation, plugin/extension developer guides, and hook/event reference pages. Do not infer the extension model from code patterns alone — find the authoritative documentation.`,
         `Research how ${args.harnessName} actually works: its CLI command, flags, plugin/extension model, hook/event system, configuration files, and environment variables.`,
+
+        // ── A. Verify EXACT hook event type names from official docs ──
+        `Verify the EXACT hook/event type names used by ${args.harnessName} from official documentation. Different harnesses use different naming conventions and casing (e.g. Claude Code uses "PreToolUse"/"PostToolUse"/"Stop", Codex uses "SessionStart"/"Stop"/"UserPromptSubmit", GitHub Copilot uses camelCase "sessionStart"/"preToolUse"/"postToolUse"/"errorOccurred"). Do NOT assume the naming convention from one harness applies to another.`,
+
+        // ── B. Verify which hooks can control flow ──
+        `Verify WHICH hooks can return flow-control decisions (block/approve/deny) vs which hooks' outputs are IGNORED by the harness. For example, in some harnesses only one hook type (e.g. preToolUse or Stop) can actually influence execution flow — all other hook types fire-and-forget with their output discarded. This is the CRITICAL determination: if no hook can block agent completion and trigger re-entry, the orchestration model MUST use in-turn loop driving instead of hook-driven orchestration.`,
+
+        // ── C. Verify hooks configuration format ──
+        `Verify the hooks configuration file format for ${args.harnessName}: file name (hooks.json, settings.json, config.toml, etc.), schema version field (e.g. "version": 1), entry schema (what fields each hook entry requires — type, command paths, platform-specific scripts for bash/powershell/cmd, cwd, timeoutSec, matchers, etc.), and how hooks are registered (config file editing, CLI commands, or programmatic registration).`,
+
+        // ── D. Verify plugin manifest format and location ──
+        `Verify the plugin/extension manifest format and allowed locations for ${args.harnessName}: where the manifest file goes (e.g. .plugin/, .github/plugin/, .claude-plugin/, repo root, .codex-plugin/, etc.), what the manifest file is named (plugin.json, package.json, manifest.json, etc.), what fields the manifest supports, and what validation rules exist. Different harnesses have very different plugin discovery mechanisms.`,
+
+        // ── E. Verify plugin installation/distribution model ──
+        `Verify the plugin installation and distribution model for ${args.harnessName}: CLI commands for install/uninstall/update (e.g. "copilot plugin install OWNER/REPO", "claude plugin install", "codex marketplace install"), marketplace system and commands (marketplace.json, browse/list commands), plugin storage paths (e.g. ~/.copilot/installed-plugins/, ~/.claude/plugins/, etc.), and whether plugins are distributed via npm, git repos, binary downloads, or a custom marketplace.`,
+
+        // ── F. Read official documentation URLs ──
+        `The research agent MUST find and read the harness's official plugin/extension/hook documentation URLs. Do not infer behavior from code patterns or from other harnesses. If official documentation is sparse or missing, document that as a risk — the integration may need to be based on reverse engineering, which carries higher risk of breaking on updates.`,
+
+        // ── G. Verify stop-hook or equivalent mechanism ──
+        `Verify whether ${args.harnessName} has a stop-hook-like mechanism that can BLOCK agent completion and trigger re-entry. This is the single most important determination for the orchestration model. Specifically determine: (1) Can any hook/event prevent the agent from completing its turn? (2) If a hook blocks, does the agent re-enter with the hook's output as context? (3) Or does the harness use a different continuation model (loop-driver events, programmatic session API, or none at all)? Document the EXACT mechanism with references to official docs.`,
+
         `Determine what environment variables ${args.harnessName} sets when running agents (session ID, thread ID, plugin/extension root, workspace, CWD, env file path, etc.). These become the callerEnvVars in KNOWN_HARNESSES and the isActive() checks in the adapter.`,
-        `Determine the hook/event model: does ${args.harnessName} support shell hooks (like Claude Code .claude/settings.json or Codex .codex/hooks.json), in-process lifecycle events (like PI agent_end), programmatic API sessions (like PiSessionHandle), or needs in-turn loop driving?`,
         `Determine the loop continuation mechanism: stop-hook (harness calls agent back after hook returns), loop-driver (harness event like agent_end triggers next iteration), or in-turn (agent drives the loop itself). This determines hookDriven and loopControlTerm in PromptContext.`,
         `Determine if ${args.harnessName} supports programmatic (non-interactive) invocation, and if so, what the API looks like (similar to PiSessionHandle?). This determines the Programmatic capability.`,
 
@@ -215,9 +240,9 @@ export const researchHarnessTask = defineTask('research-harness', (args, taskCtx
         '  - baseArgs: any required args for headless/non-interactive mode (e.g. codex uses ["exec", "--dangerously-bypass-approvals-and-sandbox", "--skip-git-repo-check"])',
         'These determine how buildHarnessArgs() constructs CLI arguments and how invokeHarness() spawns the process. Both are used by harness:invoke and harness:create-run.',
 
-        // ── Plugin structure ──
-        `Determine the plugin/extension directory layout expected by ${args.harnessName}: where manifests go, where hooks go, where skills/agents go, where config goes.`,
-        'Determine the distribution method: npm package, plugin marketplace, extension store, git clone, manual install, etc.',
+        // ── Plugin structure (verified from official docs per steps D and E above) ──
+        `Determine the plugin/extension directory layout expected by ${args.harnessName}: where manifests go, where hooks go, where skills/agents go, where config goes. This MUST be verified from official documentation (step D above), not assumed from other harnesses.`,
+        `Determine the distribution method: npm package, plugin marketplace, extension store, git clone, manual install, CLI-driven install commands, etc. This MUST be verified from official documentation (step E above).`,
 
         // ── Map findings to EVERY adapter interface method ──
         'For each HarnessAdapter method (both required and optional), document how it should be implemented for this harness:',
@@ -244,7 +269,7 @@ export const researchHarnessTask = defineTask('research-harness', (args, taskCtx
         'Document the priority order this adapter should have in registry.ts knownAdapters relative to existing adapters.',
         'Return structured findings that implementation tasks can act on without guessing.',
       ],
-      outputFormat: 'JSON with distribution, envVars, hookModel, loopMechanism, discoverySpec, invokerSpec, pluginLayout, adapterMethodMap, sessionManagement, compressionSupport, programmaticApi, capabilities, promptContextFactory, registryPriority, installMethod, risks',
+      outputFormat: 'JSON with distribution, envVars, hookModel (including exact hook type names, which hooks control flow, hooks config format with schema version and entry fields), loopMechanism, discoverySpec, invokerSpec, pluginLayout (including manifest location and format), adapterMethodMap, sessionManagement, compressionSupport, programmaticApi, capabilities, promptContextFactory, registryPriority, installMethod (including CLI commands and storage paths), officialDocsUrls, risks',
     },
     outputSchema: {
       type: 'object',
@@ -252,7 +277,7 @@ export const researchHarnessTask = defineTask('research-harness', (args, taskCtx
       properties: {
         distribution: { type: 'object', description: 'How the plugin is distributed and installed' },
         envVars: { type: 'array', items: { type: 'string' }, description: 'All environment variables the harness sets when running' },
-        hookModel: { type: 'object', description: 'Hook/event model: types, input/output format, registration method' },
+        hookModel: { type: 'object', description: 'Hook/event model: exact type names (verified from official docs), which hooks can control flow (block/approve/deny) vs fire-and-forget, hooks config file format (schema version, entry fields, platform-specific script paths), registration method' },
         loopMechanism: { type: 'string', description: 'stop-hook, loop-driver, or in-turn' },
         discoverySpec: {
           type: 'object',
@@ -276,7 +301,7 @@ export const researchHarnessTask = defineTask('research-harness', (args, taskCtx
             baseArgs: { type: 'array', items: { type: 'string' } },
           },
         },
-        pluginLayout: { type: 'object', description: 'Expected plugin directory structure' },
+        pluginLayout: { type: 'object', description: 'Expected plugin directory structure: manifest file location and format (verified from official docs), allowed manifest directories, manifest fields and validation rules' },
         adapterMethodMap: { type: 'object', description: 'How each HarnessAdapter method (required + optional) maps to this harness' },
         sessionManagement: { type: 'object', description: 'Session state lifecycle: creation, persistence, iteration timing, isIterationTooFast' },
         compressionSupport: { type: 'object', description: 'Whether/how to integrate compression for session-start context and process library caching' },
@@ -284,7 +309,8 @@ export const researchHarnessTask = defineTask('research-harness', (args, taskCtx
         capabilities: { type: 'array', items: { type: 'string' }, description: 'HarnessCapability values: Programmatic, SessionBinding, StopHook, Mcp, HeadlessPrompt' },
         promptContextFactory: { type: 'string', description: 'Which factory to use or create for getPromptContext()' },
         registryPriority: { type: 'string', description: 'Where this adapter goes in registry.ts knownAdapters priority order' },
-        installMethod: { type: 'object', description: 'How installHarness() and installPlugin() should work' },
+        installMethod: { type: 'object', description: 'How installHarness() and installPlugin() should work: CLI commands for install/uninstall/update, marketplace commands, plugin storage paths' },
+        officialDocsUrls: { type: 'array', items: { type: 'string' }, description: 'URLs of official documentation pages consulted during research (plugin dev guide, hook reference, CLI reference, etc.)' },
         risks: { type: 'array', items: { type: 'string' } },
       },
     },
@@ -432,9 +458,10 @@ export const createPluginTask = defineTask('create-plugin', (args, taskCtx) => (
       instructions: [
         'Read the reference plugins to understand the complete plugin structure.',
         `Create the plugin directory at ${args.pluginDir} with the correct manifest format for ${args.harnessName}.`,
-        'Create the plugin manifest (plugin.json, .codex-plugin/plugin.json, or package.json) with correct metadata, hooks, skills, and commands references.',
+        'Create the plugin manifest (plugin.json, .codex-plugin/plugin.json, or package.json) with correct metadata, hooks, skills, and commands references. The manifest format and location MUST match what the research phase verified from official documentation (manifest location, required fields, validation rules).',
         'Create hook scripts following the standard pattern: resolve plugin root, ensure CLI available, capture stdin, invoke babysitter hook:run, output JSON.',
         'Hook scripts must follow the reference pattern in plugins/babysitter/hooks/ - they delegate to the SDK CLI, not implement logic directly.',
+        'IMPORTANT: The hooks configuration file (hooks.json, settings.json, etc.) MUST use the exact format verified from research — including schema version field (e.g. "version": 1), correct hook type names (which may be camelCase, PascalCase, or kebab-case depending on harness), platform-specific script paths (bash, powershell, cmd), and any required fields (cwd, timeoutSec, matchers, etc.). Do NOT copy the hooks config format from another harness — use what the research phase discovered from official docs.',
         'Create a versions.json file with {"sdkVersion": "<current-version>"} for dependency management. This file MUST be maintained by CI — add it to scripts/bump-version.mjs (the versionsPath loop), .github/workflows/staging-publish.yml (the versions.json writer AND the git add step), and .github/workflows/release.yml (the git add step). Without CI integration, the file goes stale and the plugin falls back to "latest".',
         'Create any harness-specific config files (hooks.json, .app.json, config.toml, etc.).',
         'Do NOT create orchestration scripts, loop drivers, effect adapters, or result adapters - the SDK handles all of that.',
@@ -484,7 +511,7 @@ export const portSkillsTask = defineTask('port-skills', (args, taskCtx) => ({
       },
       instructions: [
         'Read the skills from the reference plugins (babysitter/skills/, babysitter-codex/skills/).',
-        `Determine the skill format for ${args.harnessName}: SKILL.md frontmatter, AGENTS.md, GEMINI.md, or other format.`,
+        `Determine the skill format for ${args.harnessName} from the research findings. Skill formats vary significantly across harnesses: SKILL.md with YAML frontmatter (Claude Code), AGENTS.md (Codex), GEMINI.md (Gemini CLI), .toml config files, or entirely different formats. The research phase should have verified the exact skill definition format from official docs — use that, not assumptions.`,
         'At minimum, port the core babysit skill - this is the primary orchestration entry point.',
         'The babysit SKILL.md should be thin: SDK/CLI dependency setup from versions.json (read ${PLUGIN_ROOT}/versions.json — NOT plugin.json or package.json), then a single CLI command: babysitter instructions:babysit-skill --harness <name> --json',
         'Port additional skills as appropriate for the harness (call, doctor, help, resume, observe, plan, etc.).',
@@ -1059,7 +1086,11 @@ export const setupCiCdTask = defineTask('setup-ci-cd', (args, taskCtx) => ({
 
         // ── Update staging workflow (staging-publish.yml) ──
         'If the plugin is npm-published, add staging publish step with --tag staging flag.',
-        `CRITICAL: Add the plugin's versions.json to the staging-publish.yml versions.json writer loop AND the git add step. Without this, versions.json goes stale after the first commit and the plugin falls back to installing "latest" SDK instead of the pinned version.`,
+        `CRITICAL: Wire the plugin's versions.json into CI. This requires updates to THREE files:`,
+        `  1. scripts/bump-version.mjs — add the plugin's versions.json path to the versionsPath loop so version bumps propagate`,
+        `  2. .github/workflows/staging-publish.yml — add versions.json to BOTH the writer step (that sets sdkVersion) AND the git add step (that commits it)`,
+        `  3. .github/workflows/release.yml — add versions.json to the git add step`,
+        `Without ALL THREE integrations, versions.json goes stale after the first commit and the plugin falls back to installing "latest" SDK instead of the pinned version.`,
 
         // ── Update Docker build (docker-publish.yml) ──
         `Add '${args.pluginDir}/**' to the paths trigger list so Docker image rebuilds when the plugin changes.`,

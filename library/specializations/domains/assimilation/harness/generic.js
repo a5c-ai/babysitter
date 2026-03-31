@@ -39,6 +39,15 @@ export async function process(inputs, ctx) {
 
   // ==========================================================================
   // PHASE 0: RESEARCH
+  // The shared researchHarnessTask covers comprehensive official docs
+  // verification including: exact hook type names (do NOT assume from other
+  // harnesses), which hooks can control flow vs fire-and-forget, hooks
+  // config format (version field, entry schema, platform-specific scripts),
+  // plugin manifest format and location, plugin install/distribution CLI
+  // commands and marketplace system, official documentation URL reading,
+  // and critically — whether a stop-hook or equivalent exists that can
+  // block agent completion and trigger re-entry (determines the entire
+  // orchestration model: hook-driven vs in-turn).
   // ==========================================================================
 
   ctx.log('phase:research', `Researching ${harnessName} integration surfaces and distribution model`);

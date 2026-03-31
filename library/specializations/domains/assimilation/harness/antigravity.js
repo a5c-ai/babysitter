@@ -41,10 +41,17 @@ export async function process(inputs, ctx) {
 
   // ==========================================================================
   // PHASE 0: RESEARCH
+  // The shared researchHarnessTask now covers comprehensive official docs
+  // verification including: exact hook/event type names, which hooks control
+  // flow, hooks config format, plugin manifest format/location, plugin
+  // install/distribution CLI commands, and stop-hook existence verification.
+  //
   // Antigravity-specific: SKILL.md with scripts/ and references/ directories,
   // workflow definitions for /babysit command, rules for orchestration discipline,
   // MCP server config, multi-agent dispatch, artifact-based breakpoint review,
-  // model-agnostic execution.
+  // model-agnostic execution. Research must verify the exact skill format
+  // (SKILL.md vs other), hook/event model, and plugin manifest format from
+  // official Antigravity documentation.
   // ==========================================================================
 
   ctx.log('phase:research', 'Researching Antigravity skill/workflow/rule model and distribution');

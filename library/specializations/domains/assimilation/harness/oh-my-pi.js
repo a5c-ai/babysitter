@@ -42,12 +42,19 @@ export async function process(inputs, ctx) {
 
   // ==========================================================================
   // PHASE 0: RESEARCH
+  // The shared researchHarnessTask now covers comprehensive official docs
+  // verification including: exact hook/event type names, which hooks control
+  // flow, hooks config format, plugin manifest format/location, plugin
+  // install/distribution CLI commands, and stop-hook existence verification.
+  //
   // Oh-my-pi-specific: CLI command `omp`, OMP_SESSION_ID/OMP_PLUGIN_ROOT env
   // vars, npm package with omp.extensions/omp.skills fields in package.json,
   // richer extension API (CustomToolAPI, TUI widgets, status line, overlays),
   // plugin manager (install/uninstall/link/enable/disable), sub-agent/task tool
   // with parallel execution, session JSONL with tree semantics, hash-anchored
-  // edits, LSP integration. Loop-driver via agent_end event.
+  // edits, LSP integration. Loop-driver via agent_end event — research must
+  // verify this mechanism from official docs and confirm whether agent_end
+  // can block completion (like a stop-hook) or only triggers continuation.
   // ==========================================================================
 
   ctx.log('phase:research', 'Researching oh-my-pi extension API, plugin manager, and distribution');

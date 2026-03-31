@@ -40,9 +40,16 @@ export async function process(inputs, ctx) {
 
   // ==========================================================================
   // PHASE 0: RESEARCH
+  // The shared researchHarnessTask now covers comprehensive official docs
+  // verification including: exact hook type names, which hooks control flow,
+  // hooks config format, plugin manifest format/location, plugin install/
+  // distribution CLI commands, and stop-hook existence verification.
+  //
   // Gemini-specific: extension manifest in ~/.gemini/extensions/, GEMINI.md,
   // SessionStart/AfterAgent/BeforeTool hooks, MCP server config,
   // GEMINI_SESSION_ID/GEMINI_PROJECT_DIR/GEMINI_CWD env vars.
+  // Research must verify exact hook type names and whether AfterAgent (not
+  // Stop) is the correct continuation hook from Gemini CLI official docs.
   // ==========================================================================
 
   ctx.log('phase:research', 'Researching Gemini CLI extension model, hook chain, and distribution');
