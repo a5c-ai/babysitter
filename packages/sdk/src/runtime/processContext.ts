@@ -9,7 +9,8 @@ import { runParallelAll, runParallelMap } from "./intrinsics/parallel";
 import { ProcessContext, ParallelHelpers } from "./types";
 import { MissingProcessContextError } from "./exceptions";
 import { appendRunLog } from "../logging/runLogger";
-import { appendEvent } from "../storage/journal";
+import { promises as fs } from "node:fs";
+import * as path from "node:path";
 
 export interface ProcessContextInit extends Omit<TaskIntrinsicContext, "now"> {
   processId: string;
@@ -20,6 +21,8 @@ export interface ProcessContextInit extends Omit<TaskIntrinsicContext, "now"> {
    * Used to deduplicate ctx.log across iterations.
    */
   recordedLogSeqs?: Set<number>;
+  /** When true, breakpoints are auto-approved without human interaction. */
+  nonInteractive?: boolean;
 }
 
 export interface InternalProcessContext extends TaskIntrinsicContext {
@@ -29,6 +32,8 @@ export interface InternalProcessContext extends TaskIntrinsicContext {
   logSeq: number;
   /** Log seqs already in journal — skipped during replay. */
   recordedLogSeqs: Set<number>;
+  /** When true, breakpoints are auto-approved without human interaction. */
+  nonInteractive: boolean;
 }
 
 const contextStorage = new AsyncLocalStorage<InternalProcessContext>();
@@ -46,6 +51,7 @@ export function createProcessContext(init: ProcessContextInit): CreateProcessCon
     now: init.now ?? (() => new Date()),
     logSeq: 0,
     recordedLogSeqs: init.recordedLogSeqs ?? new Set(),
+    nonInteractive: init.nonInteractive ?? false,
   };
 
   const parallelHelpers: ParallelHelpers = {
@@ -97,12 +103,13 @@ export function createProcessContext(init: ProcessContextInit): CreateProcessCon
       // Mark as recorded so same-iteration duplicates are also skipped
       internal.recordedLogSeqs.add(seq);
 
-      // 1. Append PROCESS_LOG event to the run journal (source of truth)
-      void appendEvent({
-        runDir: internal.runDir,
-        eventType: "PROCESS_LOG",
-        event: { logSeq: seq, label, message },
-      }).catch(() => {
+      // 1. Record log seq to state file for replay deduplication.
+      //    Written to a separate file (not journal) to avoid race conditions
+      //    with journal sequence numbering from fire-and-forget writes.
+      void fs.appendFile(
+        path.join(internal.runDir, "state", "logSeqs.txt"),
+        `${seq}\n`,
+      ).catch(() => {
         // Never let logging break orchestration.
       });
 

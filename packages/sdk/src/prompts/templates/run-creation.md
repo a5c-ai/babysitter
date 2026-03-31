@@ -18,6 +18,7 @@ $CLI run:create \
 - `--inputs <file>` -- path to a JSON file with process inputs
 - `--run-id <id>` -- override auto-generated run ID
 - `--runs-dir <dir>` -- override runs directory (default: `.a5c/runs`)
+- `--non-interactive` -- auto-approve breakpoints without human interaction (yolo mode)
 
 {{sessionIdNote}}
 

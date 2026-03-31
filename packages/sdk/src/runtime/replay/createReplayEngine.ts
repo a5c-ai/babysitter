@@ -1,6 +1,8 @@
 import { readRunMetadata, readRunInputs } from "../../storage/runFiles";
 import { RunMetadata, JournalEvent } from "../../storage/types";
 import { loadJournal } from "../../storage/journal";
+import { promises as fs } from "node:fs";
+import * as path from "node:path";
 import { buildEffectIndex, EffectIndex } from "./effectIndex";
 import { ReplayCursor } from "./replayCursor";
 import { ProcessContext } from "../types";
@@ -58,8 +60,9 @@ export async function createReplayEngine(options: CreateReplayEngineOptions): Pr
     effectIndex,
   });
 
-  // Build set of already-recorded PROCESS_LOG seqs for replay deduplication
-  const recordedLogSeqs = extractRecordedLogSeqs(journal);
+  // Build set of already-recorded log seqs for replay deduplication.
+  // Read from state/logSeqs.txt (not journal) to avoid race conditions.
+  const recordedLogSeqs = await readRecordedLogSeqs(options.runDir);
 
   const replayCursor = new ReplayCursor();
   const processId = metadata.processId ?? metadata.request ?? metadata.runId;
@@ -72,6 +75,7 @@ export async function createReplayEngine(options: CreateReplayEngineOptions): Pr
     now: options.now,
     logger: options.logger,
     recordedLogSeqs,
+    nonInteractive: Boolean(metadata.nonInteractive),
   });
 
   return {
@@ -125,19 +129,23 @@ async function resolveStateCacheSnapshot({
 }
 
 /**
- * Scan journal for PROCESS_LOG events and collect their logSeq values.
- * Used by ctx.log to skip already-recorded logs during replay.
+ * Read recorded log sequence numbers from the state/logSeqs.txt file.
+ * Each line contains one seq number. Written by ctx.log in processContext.
+ * Uses a separate file (not journal) to avoid race conditions between
+ * fire-and-forget log writes and awaited effect writes.
  */
-function extractRecordedLogSeqs(events: JournalEvent[]): Set<number> {
+async function readRecordedLogSeqs(runDir: string): Promise<Set<number>> {
   const seqs = new Set<number>();
-  for (const event of events) {
-    if (event.type === "PROCESS_LOG") {
-      const data = event.data as Record<string, unknown>;
-      const logSeq = data?.logSeq;
-      if (typeof logSeq === "number") {
-        seqs.add(logSeq);
+  try {
+    const content = await fs.readFile(path.join(runDir, "state", "logSeqs.txt"), "utf8");
+    for (const line of content.split("\n")) {
+      const n = Number(line.trim());
+      if (Number.isFinite(n) && n > 0) {
+        seqs.add(n);
       }
     }
+  } catch {
+    // File doesn't exist yet — no log seqs recorded.
   }
   return seqs;
 }

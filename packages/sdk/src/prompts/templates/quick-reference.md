@@ -3,7 +3,7 @@
 **Create run (with session binding):**
 ```bash
 $CLI run:create --process-id <id> --entry <path>#<export> --inputs <file> \
-  --prompt "$PROMPT" --harness {{harness}}{{bindingFlags}} --json
+  --prompt "$PROMPT" --harness {{harness}}{{bindingFlags}} [--non-interactive] --json
 ```
 
 **Check status:**

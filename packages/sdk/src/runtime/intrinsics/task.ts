@@ -163,7 +163,7 @@ async function requestNewEffect<TArgs, TResult>(
     checksum: appendResult.checksum,
   };
   try {
-    options.context.effectIndex.applyEvent(syntheticEvent);
+    options.context.effectIndex.applyEvent(syntheticEvent, undefined, { skipSequenceValidation: true });
   } catch (error) {
     emitRuntimeMetric(options.context.logger, "invocation.collision", {
       invocationKey,

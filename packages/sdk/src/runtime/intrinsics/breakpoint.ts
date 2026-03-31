@@ -1,5 +1,7 @@
 import { BreakpointResult, BreakpointRoutingOptions, BreakpointStrategy, DefinedTask, TaskInvokeOptions } from "../types";
 import { runTaskIntrinsic, TaskIntrinsicContext } from "./task";
+import { InternalProcessContext } from "../processContext";
+import { appendEvent } from "../../storage/journal";
 
 interface BreakpointArgs<T = unknown> {
   payload: T;
@@ -37,6 +39,21 @@ export function runBreakpointIntrinsic<T = unknown>(
   options?: TaskInvokeOptions & BreakpointRoutingOptions
 ): Promise<BreakpointResult> {
   const label = deriveBreakpointLabel(payload, options?.label);
+
+  // In non-interactive mode, auto-approve breakpoints without dispatching a task.
+  const ctx = context as Partial<InternalProcessContext>;
+  if (ctx.nonInteractive) {
+    const bpLabel = options?.label ?? "unnamed";
+    void appendEvent({
+      runDir: context.runDir,
+      eventType: "PROCESS_LOG",
+      event: { logSeq: -1, label: "breakpoint:skipped", message: `Breakpoint '${bpLabel}' auto-approved (non-interactive mode)` },
+    }).catch(() => {
+      // Never let logging break orchestration.
+    });
+    return Promise.resolve({ approved: true, response: "Auto-approved (non-interactive mode)" });
+  }
+
   const invokeOptions = { ...options, label };
   return runTaskIntrinsic({
     task: breakpointTask,

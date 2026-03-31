@@ -614,6 +614,7 @@ export async function runOrchestrationPhase(args: {
         },
         prompt: args.prompt,
         inputs: args.prompt ? { prompt: args.prompt } : undefined,
+        ...(args.interactive === false ? { metadata: { nonInteractive: true } } : {}),
       });
       state.runId = created.runId;
       state.runDir = created.runDir;
@@ -941,6 +942,7 @@ export async function runOrchestrationPhase(args: {
           inputs: effectivePrompt
             ? { prompt: effectivePrompt }
             : undefined,
+          ...(args.interactive === false ? { metadata: { nonInteractive: true } } : {}),
         });
         state.runId = result.runId;
         state.runDir = result.runDir;

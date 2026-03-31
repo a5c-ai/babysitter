@@ -16,10 +16,17 @@ import {
 import { EffectAction, TaskDef } from "../types";
 import { buildParallelBatch } from "../../tasks/batching";
 
-// Mock journal and log modules for ctx.log tests
-vi.mock("../../storage/journal", () => ({
-  appendEvent: vi.fn().mockResolvedValue(undefined),
-}));
+// Mock log modules and fs for ctx.log tests
+vi.mock("node:fs", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("node:fs")>();
+  return {
+    ...actual,
+    promises: {
+      ...actual.promises,
+      appendFile: vi.fn().mockResolvedValue(undefined),
+    },
+  };
+});
 vi.mock("../../logging/runLogger", () => ({
   appendRunLog: vi.fn().mockResolvedValue("/tmp/test.log"),
 }));
@@ -277,6 +284,29 @@ describe("ProcessContext parallel helpers", () => {
     });
   });
 
+  test("createProcessContext sets nonInteractive from init", () => {
+    const { internalContext } = createProcessContext({
+      runId: "run-ni-true",
+      runDir: "/tmp/run-ni-true",
+      processId: "proc-ni-true",
+      effectIndex: effectIndexStub(),
+      replayCursor: new ReplayCursor(),
+      nonInteractive: true,
+    });
+    expect(internalContext.nonInteractive).toBe(true);
+  });
+
+  test("createProcessContext defaults nonInteractive to false", () => {
+    const { internalContext } = createProcessContext({
+      runId: "run-ni-default",
+      runDir: "/tmp/run-ni-default",
+      processId: "proc-ni-default",
+      effectIndex: effectIndexStub(),
+      replayCursor: new ReplayCursor(),
+    });
+    expect(internalContext.nonInteractive).toBe(false);
+  });
+
   test("ctx.parallel.map resolves values when no pending actions remain", async () => {
     const { context } = createProcessContext({
       runId: "run-map",
@@ -304,8 +334,8 @@ describe("ctx.log replay-aware deduplication", () => {
     vi.clearAllMocks();
   });
 
-  test("ctx.log writes to journal and log file on first call", async () => {
-    const { appendEvent } = await import("../../storage/journal");
+  test("ctx.log writes to logSeqs file and log file on first call", async () => {
+    const { promises: mockFs } = await import("node:fs");
     const { appendRunLog } = await import("../../logging/runLogger");
 
     const { context } = createProcessContext({
@@ -319,13 +349,10 @@ describe("ctx.log replay-aware deduplication", () => {
     context.log?.("phase:test", "first log");
     await delay(10);
 
-    expect(appendEvent).toHaveBeenCalledTimes(1);
-    expect(appendEvent).toHaveBeenCalledWith(
-      expect.objectContaining({
-        runDir: "/tmp/run-log-new",
-        eventType: "PROCESS_LOG",
-        event: { logSeq: 1, label: "phase:test", message: "first log" },
-      }),
+    expect(mockFs.appendFile).toHaveBeenCalledTimes(1);
+    expect(mockFs.appendFile).toHaveBeenCalledWith(
+      expect.stringContaining("logSeqs.txt"),
+      "1\n",
     );
 
     expect(appendRunLog).toHaveBeenCalledTimes(1);
@@ -341,10 +368,10 @@ describe("ctx.log replay-aware deduplication", () => {
   });
 
   test("ctx.log skips already-recorded seqs from previous iterations", async () => {
-    const { appendEvent } = await import("../../storage/journal");
+    const { promises: mockFs } = await import("node:fs");
     const { appendRunLog } = await import("../../logging/runLogger");
 
-    // Simulate replay: seqs 1 and 2 already in journal
+    // Simulate replay: seqs 1 and 2 already recorded
     const { context } = createProcessContext({
       runId: "run-log-replay",
       runDir: "/tmp/run-log-replay",
@@ -362,11 +389,10 @@ describe("ctx.log replay-aware deduplication", () => {
     context.log?.("label3", "new log 3");
     await delay(10);
 
-    expect(appendEvent).toHaveBeenCalledTimes(1);
-    expect(appendEvent).toHaveBeenCalledWith(
-      expect.objectContaining({
-        event: { logSeq: 3, label: "label3", message: "new log 3" },
-      }),
+    expect(mockFs.appendFile).toHaveBeenCalledTimes(1);
+    expect(mockFs.appendFile).toHaveBeenCalledWith(
+      expect.stringContaining("logSeqs.txt"),
+      "3\n",
     );
 
     expect(appendRunLog).toHaveBeenCalledTimes(1);
@@ -378,7 +404,7 @@ describe("ctx.log replay-aware deduplication", () => {
   });
 
   test("ctx.log assigns sequential logSeq numbers", async () => {
-    const { appendEvent } = await import("../../storage/journal");
+    const { promises: mockFs } = await import("node:fs");
 
     const { context } = createProcessContext({
       runId: "run-log-seq",
@@ -393,15 +419,15 @@ describe("ctx.log replay-aware deduplication", () => {
     context.log?.("msg3");
     await delay(10);
 
-    expect(appendEvent).toHaveBeenCalledTimes(3);
-    const seqs = (appendEvent as ReturnType<typeof vi.fn>).mock.calls.map(
-      (call: unknown[]) => (call[0] as { event: { logSeq: number } }).event.logSeq,
+    expect(mockFs.appendFile).toHaveBeenCalledTimes(3);
+    const seqs = (mockFs.appendFile as ReturnType<typeof vi.fn>).mock.calls.map(
+      (call: unknown[]) => (call[1] as string).trim(),
     );
-    expect(seqs).toEqual([1, 2, 3]);
+    expect(seqs).toEqual(["1", "2", "3"]);
   });
 
   test("ctx.log prevents same-iteration duplicate via recordedLogSeqs set", async () => {
-    const { appendEvent } = await import("../../storage/journal");
+    const { promises: mockFs } = await import("node:fs");
 
     const { context, internalContext } = createProcessContext({
       runId: "run-log-dup",
@@ -416,11 +442,11 @@ describe("ctx.log replay-aware deduplication", () => {
 
     // Verify seq 1 was added to recordedLogSeqs
     expect(internalContext.recordedLogSeqs.has(1)).toBe(true);
-    expect(appendEvent).toHaveBeenCalledTimes(1);
+    expect(mockFs.appendFile).toHaveBeenCalledTimes(1);
   });
 
   test("ctx.log handles single-arg form (message only, no label)", async () => {
-    const { appendEvent } = await import("../../storage/journal");
+    const { promises: mockFs } = await import("node:fs");
 
     const { context } = createProcessContext({
       runId: "run-log-nolabel",
@@ -433,15 +459,14 @@ describe("ctx.log replay-aware deduplication", () => {
     context.log?.("just a message");
     await delay(10);
 
-    expect(appendEvent).toHaveBeenCalledWith(
-      expect.objectContaining({
-        event: { logSeq: 1, label: undefined, message: "just a message" },
-      }),
+    expect(mockFs.appendFile).toHaveBeenCalledWith(
+      expect.stringContaining("logSeqs.txt"),
+      "1\n",
     );
   });
 
   test("ctx.log ignores non-string arguments", async () => {
-    const { appendEvent } = await import("../../storage/journal");
+    const { promises: mockFs } = await import("node:fs");
 
     const { context } = createProcessContext({
       runId: "run-log-bad",
@@ -455,11 +480,11 @@ describe("ctx.log replay-aware deduplication", () => {
     context.log?.({} as unknown as string);
     await delay(10);
 
-    expect(appendEvent).not.toHaveBeenCalled();
+    expect(mockFs.appendFile).not.toHaveBeenCalled();
   });
 
   test("ctx.log ignores empty message", async () => {
-    const { appendEvent } = await import("../../storage/journal");
+    const { promises: mockFs } = await import("node:fs");
 
     const { context } = createProcessContext({
       runId: "run-log-empty",
@@ -472,12 +497,12 @@ describe("ctx.log replay-aware deduplication", () => {
     context.log?.("");
     await delay(10);
 
-    expect(appendEvent).not.toHaveBeenCalled();
+    expect(mockFs.appendFile).not.toHaveBeenCalled();
   });
 
-  test("ctx.log never throws even when appendEvent fails", async () => {
-    const { appendEvent } = await import("../../storage/journal");
-    (appendEvent as ReturnType<typeof vi.fn>).mockRejectedValueOnce(new Error("disk full"));
+  test("ctx.log never throws even when fs.appendFile fails", async () => {
+    const { promises: mockFs } = await import("node:fs");
+    (mockFs.appendFile as ReturnType<typeof vi.fn>).mockRejectedValueOnce(new Error("disk full"));
 
     const { context } = createProcessContext({
       runId: "run-log-fail",

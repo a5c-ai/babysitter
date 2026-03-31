@@ -92,5 +92,10 @@ for (let attempt = 0; attempt < 3; attempt++) {
 
 ##### 5.1.2 Non-interactive mode
 
-Choose the best option from context and post the result. Rejections still use
-`--status ok` with `{"approved": false}`.
+When the run was created with `--non-interactive`, breakpoints are auto-approved
+at the runtime level and never appear as pending effects. No orchestrator action
+is needed for breakpoints in this mode.
+
+If running non-interactively without the `--non-interactive` flag (e.g. no
+question tool available), choose the best option from context and post the
+result. Rejections still use `--status ok` with `{"approved": false}`.

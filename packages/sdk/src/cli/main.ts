@@ -81,7 +81,7 @@ import {
 import { CONFIG_ENV_VARS, DEFAULTS } from "../config/defaults";
 
 const USAGE = `Usage:
-  babysitter run:create --process-id <id> --entry <path#export> [--runs-dir <dir>] [--inputs <file>] [--run-id <id>] [--process-revision <rev>] [--request <id>] [--prompt <text>] [--harness <name>] [--session-id <id>] [--plugin-root <dir>] [--json] [--dry-run]
+  babysitter run:create --process-id <id> --entry <path#export> [--runs-dir <dir>] [--inputs <file>] [--run-id <id>] [--process-revision <rev>] [--request <id>] [--prompt <text>] [--harness <name>] [--session-id <id>] [--plugin-root <dir>] [--non-interactive] [--json] [--dry-run]
   babysitter run:status <runDir> [--runs-dir <dir>] [--json]
   babysitter run:events <runDir> [--runs-dir <dir>] [--json] [--limit <n>] [--reverse] [--filter-type <type>]
   babysitter run:rebuild-state <runDir> [--runs-dir <dir>] [--json] [--dry-run]
@@ -1153,6 +1153,7 @@ async function handleRunCreate(parsed: ParsedArgs): Promise<number> {
       exportName: entrypoint.exportName,
     },
     inputs,
+    ...(parsed.interactive === false ? { metadata: { nonInteractive: true } } : {}),
   });
   const entrySpec = formatEntrypointSpecifier(result.metadata.entrypoint);
 
