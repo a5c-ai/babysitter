@@ -1,265 +1,718 @@
+/**
+ * Shared task definitions for harness assimilation processes.
+ *
+ * These tasks represent what a real harness integration actually produces:
+ *   - SDK adapter implementation
+ *   - Discovery/invoker/registry entries
+ *   - Plugin structure (hooks, configs, manifest)
+ *   - Skill porting from reference plugins
+ *   - Installation and distribution method
+ *   - Harness wrapper for harness:create-run
+ *   - README and documentation
+ *   - Quality verification and refinement
+ */
+
 import { defineTask } from '@a5c-ai/babysitter-sdk';
 
-const canonicalReferences = [
-  'plugins/babysitter/skills/babysit/SKILL.md',
-  'docs/assimilation/harness/claude-code-integration.md',
-  'docs/assimilation/harness/generic-harness-guide.md'
+// ---------------------------------------------------------------------------
+// Reference paths the agent should consult
+// ---------------------------------------------------------------------------
+
+const referencePlugins = [
+  'plugins/babysitter/',            // Claude Code reference plugin (hooks, skills, commands)
+  'plugins/babysitter-codex/',      // Codex reference plugin (skills, hooks, .codex-plugin/)
+  'plugins/babysitter-pi/',         // PI reference plugin (npm package, extensions, bin/)
 ];
 
-const edgeCaseMatrix = [
-  're-entrant run binding and stale session state recovery',
-  'lock contention, missing run directory, and CLI restart recovery',
-  'completion proof mismatch and premature <promise> output rejection',
-  'ambiguous or dismissed breakpoint response handling',
-  'user rejection posted with --status ok and approved=false',
-  'direct result.json writes rejected in favor of output.json + task:post',
-  'no generated kind: "node" effects anywhere in the process or skill adaptation',
-  'hook race conditions, repeated user yields, and harness restart recovery',
-  'upgrade, reinstall, disable, rollback, and upstream sync behavior'
+/**
+ * The canonical babysitter repo must be cloned/available for research.
+ * The research task must study the existing plugin and adapter implementations
+ * before starting any assimilation work.
+ */
+const babysitterRepo = 'https://github.com/a5c-ai/babysitter';
+
+const sdkHarnessCore = [
+  // ── Adapter interface and types ──
+  'packages/sdk/src/harness/types.ts',         // HarnessAdapter interface, HarnessCapability enum, all binding/hook/install types, PiSessionOptions/PiPromptResult
+  'packages/sdk/src/harness/index.ts',         // Public exports: all adapters, discovery, invoker, registry, piWrapper
+
+  // ── Discovery subsystem (two mechanisms) ──
+  'packages/sdk/src/harness/discovery.ts',     // KNOWN_HARNESSES array, CONFIG_PATHS map, discoverHarnesses() (installed-discovery via parallel CLI probing), detectCallerHarness() (in-session detection via env vars), checkCliAvailable() (which/where + --version)
+
+  // ── Invocation/wrapping subsystem ──
+  'packages/sdk/src/harness/invoker.ts',       // HARNESS_CLI_MAP (per-harness flag mapping), buildHarnessArgs() (pure arg builder), invokeHarness() (spawn CLI as child process with timeout/model/workspace)
+
+  // ── Adapter registry (auto-detection + lookup) ──
+  'packages/sdk/src/harness/registry.ts',      // detectAdapter() (priority-ordered env check), getAdapterByName(), listSupportedHarnesses(), get/set/resetAdapter()
+
+  // ── Reference adapter implementations (MUST READ before assimilation) ──
+  'packages/sdk/src/harness/claudeCode.ts',    // Claude Code adapter (1200+ lines): session-start with compression + skill discovery, stop hook with journal replay + completion proof, installPlugin, getPromptContext
+  'packages/sdk/src/harness/codex.ts',         // Codex adapter: multi-format hooks.json, Windows hookDriven auto-detection, supportsHookType whitelist, CODEX_* env chain
+  'packages/sdk/src/harness/pi.ts',            // PI adapter: in-process model, loop-driver, PI_*/OMP_* dual env, piWrapper delegation
+  'packages/sdk/src/harness/ohMyPi.ts',        // Oh-my-pi adapter: separate from pi.ts, OMP_* env vars, omp CLI
+  'packages/sdk/src/harness/geminiCli.ts',     // Gemini CLI adapter (960+ lines): AfterAgent continuation, GEMINI_* env chain, session-start context
+
+  // ── Programmatic session API ──
+  'packages/sdk/src/harness/piWrapper.ts',     // createPiSession → PiSessionHandle (.prompt(), .steer(), .followUp(), .subscribe(), .executeBash(), .abort(), .dispose()), PiEventListener, lazy init, compression integration
+
+  // ── Fallback/null adapters ──
+  'packages/sdk/src/harness/customAdapter.ts', // Custom/fallback adapter for unknown harnesses (autoResolvesSessionId=false, supportsHookType=false)
+  'packages/sdk/src/harness/nullAdapter.ts',   // Null adapter (no-op, used when no harness detected)
+
+  // ── Install support ──
+  'packages/sdk/src/harness/installSupport.ts', // installCliViaNpm, execFilePromise, isClaudePluginInstalled, getClaudeInstalledPluginsPath, renderCommand
+
+  // ── Cross-cutting SDK systems adapters integrate with ──
+  'packages/sdk/src/session.ts',               // Session state: readSessionFile, writeSessionFile, updateSessionState, deleteSessionFile, sessionFileExists, getSessionFilePath, getCurrentTimestamp, updateIterationTimes, isIterationTooFast
+  'packages/sdk/src/cli/completionProof.ts',   // resolveCompletionProof (SHA256 of runId + salt) — stop hook must validate
+  'packages/sdk/src/prompts/context.ts',       // PromptContext factories: createClaudeCodeContext, createCodexContext, createPiContext
+  'packages/sdk/src/prompts/types.ts',         // PromptContext interface: hookDriven, interactive tri-state, capabilities, loopControlTerm, etc.
+  'packages/sdk/src/compression/',             // loadCompressionConfig, densityFilterText, estimateTokens, getOrCompressFile, findLibraryFiles
+  'packages/sdk/src/cli/commands/skill.ts',    // discoverSkillsInternal — used by session-start hooks for context injection
 ];
 
-export const runHarnessResearchTask = defineTask('harness-runtime-research', (args, taskCtx) => ({
+/**
+ * Complete HarnessAdapter interface methods (from types.ts) that the research
+ * and adapter implementation tasks must be aware of:
+ *
+ * REQUIRED:
+ *   name: string (readonly)
+ *   isActive(): boolean                    — env var detection
+ *   resolveSessionId(parsed): string|undefined  — explicit arg → env vars → env file → undefined
+ *   resolveStateDir(args): string|undefined     — explicit arg → BABYSITTER_STATE_DIR → plugin root → .a5c
+ *   resolvePluginRoot(args): string|undefined   — args or harness-specific env vars
+ *   bindSession(opts: SessionBindOptions): Promise<SessionBindResult>  — run:create → state file
+ *   handleStopHook(args: HookHandlerArgs): Promise<number>            — approve/block decision
+ *   handleSessionStartHook(args: HookHandlerArgs): Promise<number>    — env file + state setup
+ *   findHookDispatcherPath(startCwd: string): string|null             — locate hook dispatcher
+ *
+ * OPTIONAL:
+ *   autoResolvesSessionId?(): boolean          — true = reject explicit --session-id
+ *   getMissingSessionIdHint?(): string         — guidance when session ID missing
+ *   supportsHookType?(hookType: string): boolean  — whitelist supported hook types
+ *   getUnsupportedHookMessage?(hookType: string): string
+ *   isCliInstalled?(): Promise<boolean>        — check if harness CLI binary exists
+ *   getCliInfo?(): Promise<{command, version?, path?}>
+ *   getCapabilities?(): HarnessCapability[]    — Programmatic, SessionBinding, StopHook, Mcp, HeadlessPrompt
+ *   installHarness?(options): Promise<HarnessInstallResult>   — install the CLI itself
+ *   installPlugin?(options): Promise<HarnessInstallResult>    — install the babysitter plugin
+ *   getPromptContext?(opts?: {interactive?}): PromptContext   — harness-specific prompt config
+ *
+ * CROSS-CUTTING CONCERNS the adapter may integrate with:
+ *   - Session state (session.ts): readSessionFile, writeSessionFile, updateSessionState,
+ *     deleteSessionFile, getCurrentTimestamp, updateIterationTimes, isIterationTooFast
+ *   - Completion proof (completionProof.ts): resolveCompletionProof (SHA256 of runId + salt)
+ *   - Compression (compression/): loadCompressionConfig, densityFilterText, estimateTokens,
+ *     getOrCompressFile, findLibraryFiles — for compressing session-start hook output
+ *   - Skill discovery (cli/commands/skill.ts): discoverSkillsInternal — for session-start context
+ *   - Prompt context (prompts/context.ts): factory functions for harness-specific PromptContext
+ *   - PiWrapper (piWrapper.ts): createPiSession for programmatic harnesses (PiSessionHandle
+ *     with .prompt(), .steer(), .followUp(), .subscribe(), .executeBash(), .abort(), .dispose())
+ *   - Install support (installSupport.ts): installCliViaNpm, execFilePromise, isClaudePluginInstalled
+ */
+
+// ---------------------------------------------------------------------------
+// PHASE 0: Research
+// ---------------------------------------------------------------------------
+
+export const researchHarnessTask = defineTask('research-harness', (args, taskCtx) => ({
   kind: 'agent',
-  title: `Research ${args.harnessName} distribution and hook model`,
-  description: 'Research upstream distribution, runtime install path, hook points, and orchestration loop behavior before implementation',
+  title: `Research ${args.harnessName} integration surfaces and distribution`,
+  description: 'Deep research into the harness extension model, hook lifecycle, session management, CLI invocation, environment variables, programmatic API, compression support, and distribution method',
 
   agent: {
     name: 'general-purpose',
     prompt: {
       role: 'senior integration researcher and harness architect',
-      task: `Research the real distribution and integration model for ${args.harnessName} before making any implementation decisions`,
+      task: `Conduct thorough research on ${args.harnessName} to produce actionable findings for every HarnessAdapter interface method, plugin structure, and SDK integration point`,
       context: {
         projectDir: args.projectDir,
         harnessName: args.harnessName,
-        upstreamSource: args.upstreamSource,
-        distributionTarget: args.distributionTarget,
-        loopModel: args.loopModel,
-        canonicalReferences
+        sdkHarnessCore,
+        referencePlugins,
       },
       instructions: [
-        `Start with repository research in ${args.projectDir}, then research the upstream distribution model for ${args.harnessName}.`,
-        `Determine how ${args.harnessName} plugins, extensions, packages, commands, or runtime libraries are actually distributed, installed, upgraded, enabled, disabled, and removed.`,
-        `Identify the real hook points, lifecycle callbacks, wrapper entry points, or continuation APIs used to keep the orchestration loop alive under the loop model "${args.loopModel}".`,
-        'Treat the current babysit skill and Claude Code harness integration as the canonical orchestration contract.',
-        'Treat the canonical babysit process library in the original upstream repo as the source of truth. Do not assume a harness-specific bundled copy should be the long-term distribution model.',
-        'Extract the concrete rules that must be preserved: run:create --harness first when native binding exists, stop-or-yield after task:post, exact completion proof handling, output.json posting protocol, breakpoint approval semantics, no node effects, and state file expectations.',
-        'Document whether the harness supports first-class binding, fallback external binding, or a non-stop-hook continuation pattern such as followUp or after-agent reentry.',
-        'Document the clean-room runtime install story from GitHub or the official upstream source, including any packaging manifests, registry format, signed artifact expectations, or plugin manager commands.',
-        'Document the actual process-library runtime capabilities the integration can rely on today: clone or sync workflow, active binding behavior, active-root inspection, path discovery, revision pinning, and any harness-specific fallback order.',
-        `Name the docs that must be updated for ${args.harnessName}, including install, upgrade, troubleshooting, and operator verification guidance.`,
-        'Return a migration brief that implementation tasks can follow without guessing.'
+        // ── PREREQUISITE: Clone babysitter repo and study existing implementations ──
+        `Clone the babysitter repo (${babysitterRepo}) if not already available locally. The repo contains the complete SDK, all existing adapter implementations, and all reference plugins. This is the source of truth.`,
+        'BEFORE researching the target harness, study the existing Claude Code and Codex plugin implementations thoroughly:',
+        '  - Read plugins/babysitter/ end-to-end: plugin.json (hooks, skills, commands), hooks/ directory (session-start, stop, pre-tool-use, user-prompt-submit shell scripts), hooks/hooks.json, skills/babysit/SKILL.md, versions.json.',
+        '  - Read plugins/babysitter-codex/ end-to-end: .codex-plugin/plugin.json, hooks.json, .app.json, skills/ directory (all 16 skills), versions.json.',
+        '  - Read plugins/babysitter-pi/ end-to-end: package.json (omp field, bin scripts), extensions/, skills/babysitter/SKILL.md, bin/ (cli.cjs, install.cjs, uninstall.cjs), scripts/setup.sh.',
+        'Understand how each reference plugin: registers hooks, defines skills, handles installation/uninstallation, manages versions, and delegates to the SDK CLI.',
+
+        // ── Understand the full adapter interface ──
+        'Read packages/sdk/src/harness/types.ts thoroughly. Understand every method on HarnessAdapter (required and optional) and every type: HarnessCapability enum (Programmatic, SessionBinding, StopHook, Mcp, HeadlessPrompt), HarnessDiscoveryResult, CallerHarnessResult, HarnessInvokeOptions/Result, SessionBindOptions/Result, HookHandlerArgs, HarnessInstallOptions/Result, PiSessionOptions, PiPromptResult.',
+
+        // ── Study ALL reference adapter implementations ──
+        'Read claudeCode.ts (1200+ lines) as the canonical reference — understand how it implements: session-start hook (env file creation, state file baseline, skill discovery context injection, compression of session-start output via density filter), stop hook (journal replay, completion proof validation, pending effect inspection, approve/block decision), bindSession (state file creation with run association), installPlugin (filesystem operations to register with Claude), getPromptContext (createClaudeCodeContext factory).',
+        'Read codex.ts — understand multi-format hooks.json support, Windows auto-detection for hookDriven flag, CODEX_THREAD_ID/CODEX_SESSION_ID/CODEX_ENV_FILE resolution chain, supportsHookType whitelist, getMissingSessionIdHint.',
+        'Read pi.ts — understand the PI-specific adapter: PI_SESSION_ID/PI_PLUGIN_ROOT env vars, in-process model, loop-driver, programmatic delegation to piWrapper.ts.',
+        'Read ohMyPi.ts — understand how it differs from pi.ts: OMP_SESSION_ID/OMP_PLUGIN_ROOT env vars, omp CLI, its own discovery entry.',
+        'Read geminiCli.ts (960+ lines) — understand AfterAgent as primary continuation hook (not Stop), GEMINI_SESSION_ID/GEMINI_PROJECT_DIR/GEMINI_CWD env vars, session-start context generation with compression.',
+        'Read nullAdapter.ts and customAdapter.ts — understand the fallback patterns, how customAdapter returns autoResolvesSessionId=false and supportsHookType=false.',
+
+        // ── Study the discovery subsystem (two mechanisms) ──
+        'Read discovery.ts thoroughly — understand BOTH discovery mechanisms:',
+        '  1. INSTALLED DISCOVERY (discoverHarnesses): probes each KNOWN_HARNESSES entry via Promise.allSettled + checkCliAvailable (which/where + --version). Returns HarnessDiscoveryResult[] with: name, installed, version, cliPath, cliCommand, configFound, capabilities, platform.',
+        '  2. IN-SESSION DETECTION (detectCallerHarness): checks callerEnvVars from KNOWN_HARNESSES against process.env. Returns CallerHarnessResult with: name, matchedEnvVars, capabilities. First match in KNOWN_HARNESSES order wins (important for priority).',
+        'Understand KNOWN_HARNESSES array: each entry has { name, cli, callerEnvVars, capabilities }. The callerEnvVars list determines in-session detection.',
+        'Understand CONFIG_PATHS map: maps harness names to config directory names checked for configFound in discovery results.',
+        'Understand checkCliAvailable: runs which/where to find binary, then <command> --version to extract version string.',
+
+        // ── Study the invocation/wrapping subsystem ──
+        'Read invoker.ts thoroughly — understand harness wrapping for use as an orchestration tool:',
+        '  - HARNESS_CLI_MAP: per-harness { cli, workspaceFlag?, supportsModel, promptStyle ("flag"|"positional"), baseArgs? }. This determines how buildHarnessArgs() constructs CLI arguments.',
+        '  - buildHarnessArgs(name, options): pure function that maps HarnessInvokeOptions to CLI argument array using HARNESS_CLI_MAP. Must produce valid CLI invocations for each harness.',
+        '  - invokeHarness(name, options): spawns the CLI as a child process with timeout, workspace, model, env override. Returns HarnessInvokeResult with success, output, exitCode, duration.',
+        'This wrapping is what enables harness:invoke and harness:create-run to use any harness as a tool for delegating work.',
+
+        // ── Study the adapter registry ──
+        'Read registry.ts — understand the auto-detection and lookup system:',
+        '  - detectAdapter(): iterates knownAdapters in priority order, calls isActive() on each. First active adapter wins. Falls back to customAdapter.',
+        '  - getAdapterByName(name): explicit lookup by harness name string.',
+        '  - listSupportedHarnesses(): returns names of all registered adapters.',
+        '  - get/set/resetAdapter(): singleton pattern for current active adapter.',
+        'The priority order in knownAdapters matters — more specific harnesses (Codex, oh-my-pi, pi) before generic ones (Claude Code, Gemini CLI).',
+
+        // ── Study programmatic session API ──
+        'Read piWrapper.ts — understand createPiSession and PiSessionHandle for programmatic harnesses:',
+        '  - createPiSession(options: PiSessionOptions) → PiSessionHandle with lazy initialization.',
+        '  - PiSessionHandle methods: .prompt(text), .steer(text), .followUp(text), .subscribe(listener), .executeBash(command), .abort(), .dispose().',
+        '  - PiEventListener type for subscribing to session events.',
+        '  - Compression integration in session context generation.',
+        'If the target harness has a programmatic API (not just CLI), a similar wrapper pattern should be created.',
+
+        // ── Study cross-cutting SDK systems the adapter touches ──
+        'Read session.ts — understand session state management: readSessionFile, writeSessionFile, updateSessionState, deleteSessionFile, sessionFileExists, getSessionFilePath, getCurrentTimestamp, updateIterationTimes, isIterationTooFast. These are used in both session-start and stop hooks.',
+        'Read cli/completionProof.ts — understand resolveCompletionProof (SHA256 of runId + salt). Stop hooks must validate this before approving completion.',
+        'Read compression/ — understand loadCompressionConfig, densityFilterText, estimateTokens, getOrCompressFile, findLibraryFiles. Claude Code and Gemini CLI adapters compress session-start output and cache process library files.',
+        'Read prompts/context.ts — understand the PromptContext factory functions (createClaudeCodeContext, createCodexContext, createPiContext) and how getPromptContext() uses them. Note the hookDriven, interactive tri-state, capabilities, loopControlTerm fields.',
+        'Read harness/installSupport.ts — understand installCliViaNpm, execFilePromise, isClaudePluginInstalled, getClaudeInstalledPluginsPath, renderCommand.',
+        'Read cli/commands/skill.ts — understand discoverSkillsInternal, used by session-start hooks to inject available skills into context.',
+
+        // ── NOW research the target harness ──
+        `Research how ${args.harnessName} actually works: its CLI command, flags, plugin/extension model, hook/event system, configuration files, and environment variables.`,
+        `Determine what environment variables ${args.harnessName} sets when running agents (session ID, thread ID, plugin/extension root, workspace, CWD, env file path, etc.). These become the callerEnvVars in KNOWN_HARNESSES and the isActive() checks in the adapter.`,
+        `Determine the hook/event model: does ${args.harnessName} support shell hooks (like Claude Code .claude/settings.json or Codex .codex/hooks.json), in-process lifecycle events (like PI agent_end), programmatic API sessions (like PiSessionHandle), or needs in-turn loop driving?`,
+        `Determine the loop continuation mechanism: stop-hook (harness calls agent back after hook returns), loop-driver (harness event like agent_end triggers next iteration), or in-turn (agent drives the loop itself). This determines hookDriven and loopControlTerm in PromptContext.`,
+        `Determine if ${args.harnessName} supports programmatic (non-interactive) invocation, and if so, what the API looks like (similar to PiSessionHandle?). This determines the Programmatic capability.`,
+
+        // ── Discovery requirements (both mechanisms) ──
+        `Determine the CLI command name for ${args.harnessName} (e.g. "claude", "codex", "pi", "omp", "gemini"). This becomes the cli field in KNOWN_HARNESSES and HARNESS_CLI_MAP.`,
+        `Determine how to probe whether ${args.harnessName} CLI is installed: does it support --version? What does its version output look like? This determines how checkCliAvailable() will detect it during discoverHarnesses() (installed-discovery).`,
+        `Determine which environment variables uniquely identify that we are running INSIDE ${args.harnessName}. This determines callerEnvVars for detectCallerHarness() (in-session detection). The env vars must be specific enough to avoid false positives with other harnesses.`,
+        `Determine if ${args.harnessName} has a config directory (e.g. .claude/, .codex/, .pi/, .gemini/). This becomes the CONFIG_PATHS entry for configFound in discovery results.`,
+
+        // ── Wrapping/invocation requirements ──
+        'Determine CLI invocation flags for the HARNESS_CLI_MAP entry. This is how the babysitter SDK wraps and invokes this harness as a tool for delegating work:',
+        '  - cli: shell command name (must match KNOWN_HARNESSES cli)',
+        '  - workspaceFlag: how to pass workspace directory (e.g. "--workspace", "-C", or undefined if not supported)',
+        '  - supportsModel: does it accept a --model flag?',
+        '  - promptStyle: "flag" (--prompt "text") or "positional" ("text" as last arg)',
+        '  - baseArgs: any required args for headless/non-interactive mode (e.g. codex uses ["exec", "--dangerously-bypass-approvals-and-sandbox", "--skip-git-repo-check"])',
+        'These determine how buildHarnessArgs() constructs CLI arguments and how invokeHarness() spawns the process. Both are used by harness:invoke and harness:create-run.',
+
+        // ── Plugin structure ──
+        `Determine the plugin/extension directory layout expected by ${args.harnessName}: where manifests go, where hooks go, where skills/agents go, where config goes.`,
+        'Determine the distribution method: npm package, plugin marketplace, extension store, git clone, manual install, etc.',
+
+        // ── Map findings to EVERY adapter interface method ──
+        'For each HarnessAdapter method (both required and optional), document how it should be implemented for this harness:',
+        '  - isActive(): which env vars to check (these are also the callerEnvVars for detectCallerHarness)',
+        '  - resolveSessionId(): full resolution chain specific to this harness (explicit arg → env vars → env file → undefined)',
+        '  - resolveStateDir(): where state files should live (plugin root + "/skills/babysit/state" or equivalent)',
+        '  - resolvePluginRoot(): how the plugin root is determined (env var name, or arg)',
+        '  - bindSession(): how to create state file and associate run with session',
+        '  - handleStopHook(): what the stop hook receives/returns, how it validates completion proof via resolveCompletionProof, or equivalent mechanism if no stop-hook exists',
+        '  - handleSessionStartHook(): what context to inject at session start (env file, state file, skill discovery, process library info), whether to use compression (densityFilterText, getOrCompressFile)',
+        '  - findHookDispatcherPath(): where the hook dispatcher lives in the plugin directory tree',
+        '  - autoResolvesSessionId(): whether explicit --session-id should be rejected (true for most harnesses that set env vars)',
+        '  - getMissingSessionIdHint(): what guidance to show when session ID is missing (e.g. "should be available from the Harness hook callback")',
+        '  - supportsHookType(): which hook types are supported by this harness (e.g. stop, session-start)',
+        '  - getUnsupportedHookMessage(): error message for unsupported hook types',
+        '  - isCliInstalled(): how to detect the CLI binary (uses checkCliAvailable pattern)',
+        '  - getCliInfo(): command name, version parsing, path resolution',
+        '  - getCapabilities(): which HarnessCapability values to declare (Programmatic, SessionBinding, StopHook, Mcp, HeadlessPrompt)',
+        '  - installHarness(): how to install the CLI itself (npm, brew, binary download, etc.)',
+        '  - installPlugin(): how to install/register the babysitter plugin into the harness (copy files, register hooks, npm link, etc.)',
+        '  - getPromptContext(): which PromptContext factory to use or create, with correct hookDriven, loopControlTerm, interactive, capabilities, sessionBindingFlags, sessionEnvVars',
+        'Document whether compression integration is appropriate for this harness (session-start output size, process library caching).',
+        'Document whether a PiWrapper-style programmatic session wrapper should be created (createHarnessSession → SessionHandle with .prompt(), .followUp(), .dispose()).',
+        'Document the priority order this adapter should have in registry.ts knownAdapters relative to existing adapters.',
+        'Return structured findings that implementation tasks can act on without guessing.',
       ],
-      outputFormat: 'JSON with findings, hookPoints, installStrategy, upstreamSyncStrategy, processLibraryCapabilities, docsTargets, loopContract, risks, artifactsCreated'
+      outputFormat: 'JSON with distribution, envVars, hookModel, loopMechanism, discoverySpec, invokerSpec, pluginLayout, adapterMethodMap, sessionManagement, compressionSupport, programmaticApi, capabilities, promptContextFactory, registryPriority, installMethod, risks',
     },
     outputSchema: {
       type: 'object',
-      required: ['findings', 'hookPoints', 'installStrategy', 'upstreamSyncStrategy', 'processLibraryCapabilities', 'docsTargets', 'loopContract', 'risks', 'artifactsCreated'],
+      required: ['distribution', 'envVars', 'hookModel', 'loopMechanism', 'discoverySpec', 'invokerSpec', 'pluginLayout', 'adapterMethodMap', 'capabilities', 'risks'],
       properties: {
-        findings: { type: 'array', items: { type: 'string' } },
-        hookPoints: { type: 'array', items: { type: 'string' } },
-        installStrategy: { type: 'array', items: { type: 'string' } },
-        upstreamSyncStrategy: { type: 'array', items: { type: 'string' } },
-        processLibraryCapabilities: { type: 'array', items: { type: 'string' } },
-        docsTargets: { type: 'array', items: { type: 'string' } },
-        loopContract: { type: 'array', items: { type: 'string' } },
-        risks: { type: 'array', items: { type: 'string' } },
-        artifactsCreated: { type: 'array', items: { type: 'string' } }
-      }
-    }
-  },
-
-  io: {
-    inputJsonPath: `tasks/${taskCtx.effectId}/input.json`,
-    outputJsonPath: `tasks/${taskCtx.effectId}/result.json`
-  },
-
-  labels: ['agent', 'assimilation', 'harness', 'research', 'runtime']
-}));
-
-export const adaptOriginalBabysitTask = defineTask('adapt-original-babysit', (args, taskCtx) => ({
-  kind: 'agent',
-  title: `Adapt canonical babysit assets into ${args.harnessName}`,
-  description: 'Install or sync the original babysit process library at runtime and adapt the important Claude Code skill semantics into the target harness',
-
-  agent: {
-    name: 'general-purpose',
-    prompt: {
-      role: 'senior orchestration engineer specializing in skill migration and plugin packaging',
-      task: `Adapt the canonical babysit skill, process library, and harness contract into ${args.harnessName} without drifting from the source of truth`,
-      context: {
-        projectDir: args.projectDir,
-        harnessName: args.harnessName,
-        upstreamSource: args.upstreamSource,
-        research: args.research,
-        canonicalReferences
-      },
-      instructions: [
-        'Read the current babysit skill and the Claude Code harness documentation as the source of truth.',
-        'Copy and adapt the important operational parts of the original babysit Claude Code skill instead of rewriting a weaker local version from scratch.',
-        'Preserve the orchestration contract: stop or yield after task:post, hook-owned continuation, exact completion proof semantics, output.json posting, breakpoint approval rules, and no node effects.',
-        'Keep user-facing README and install docs focused on harness installation, activation, commands, and troubleshooting. Put raw Babysitter CLI or SDK orchestration mechanics into harness-internal command docs, skill docs, agent context docs, or maintainer docs instead.',
-        'When the harness has a command surface, keep literal primitives such as run:create, run:iterate, task:list, task:post, session:init, and session:associate out of user-facing README and install docs entirely.',
-        'Design the runtime install or sync path for the original process library from the upstream GitHub repo or official source into the target plugin or extension layout.',
-        'Prefer clone-and-sync of the canonical process library over bundling a frozen copy into the harness package. If the harness still needs a fallback snapshot, describe it as temporary compatibility, not the primary source of truth.',
-        'If the harness cannot install directly from GitHub at runtime, define the supported fallback order, revision pinning strategy, update workflow, and stale-copy detection markers.',
-        'Update the target harness skill, command entry points, references, process-library resolution logic, and setup scripts so they point back to the canonical babysit contract.',
-        'Make explicit what was copied, what was adapted, what stayed harness-specific, what remains upstream-owned, and how updates from upstream will be merged later.',
-        'Reject stale patterns from older process files, especially session:associate-first designs, direct result.json writes, implicit breakpoint approval, and kind: node effects.'
-      ],
-      outputFormat: 'JSON with filesCreated, filesModified, copiedAssets, adaptedAssets, syncPlan, runtimeInstallPlan, processLibraryCapabilities, summary'
-    },
-    outputSchema: {
-      type: 'object',
-      required: ['filesCreated', 'filesModified', 'copiedAssets', 'adaptedAssets', 'syncPlan', 'runtimeInstallPlan', 'processLibraryCapabilities', 'summary'],
-      properties: {
-        filesCreated: { type: 'array', items: { type: 'string' } },
-        filesModified: { type: 'array', items: { type: 'string' } },
-        copiedAssets: { type: 'array', items: { type: 'string' } },
-        adaptedAssets: { type: 'array', items: { type: 'string' } },
-        syncPlan: { type: 'array', items: { type: 'string' } },
-        runtimeInstallPlan: { type: 'array', items: { type: 'string' } },
-        processLibraryCapabilities: { type: 'array', items: { type: 'string' } },
-        summary: { type: 'string' }
-      }
-    }
-  },
-
-  io: {
-    inputJsonPath: `tasks/${taskCtx.effectId}/input.json`,
-    outputJsonPath: `tasks/${taskCtx.effectId}/result.json`
-  },
-
-  labels: ['agent', 'assimilation', 'harness', 'migration', 'skill']
-}));
-
-export const writeHarnessInstallDocsTask = defineTask('write-harness-install-docs', (args, taskCtx) => ({
-  kind: 'agent',
-  title: `Write ${args.harnessName} install and operator docs`,
-  description: 'Author install, upgrade, sync, troubleshooting, and runtime verification documentation for the harness integration',
-
-  agent: {
-    name: 'general-purpose',
-    prompt: {
-      role: 'senior technical writer and release engineer',
-      task: `Write the missing installation and lifecycle documentation for the ${args.harnessName} babysitter integration`,
-      context: {
-        projectDir: args.projectDir,
-        harnessName: args.harnessName,
-        research: args.research,
-        assimilation: args.assimilation
-      },
-      instructions: [
-        'Create or update documentation for initial installation, runtime installation from GitHub or upstream source, local development linking, upgrade, reinstall, disable, uninstall, and rollback.',
-        'Keep the top-level README and user-facing install docs at the harness command level: how the user installs the harness, activates it, starts or resumes runs through harness commands, and where to look when it gets stuck.',
-        'Do not tell end users to manually drive raw Babysitter SDK or CLI primitives such as run:create, run:iterate, task:list, task:post, session:init, or session:associate from the README unless the harness truly exposes no higher-level command surface.',
-        'If the harness does expose a higher-level command surface, treat any literal mention of those primitives in README or install docs as a documentation bug and move that detail into internal command, skill, hook, or maintainer docs.',
-        'Move low-level Babysitter CLI or SDK mechanics into harness-internal command docs, skill docs, agent context files, hook docs, or maintainer/operator docs for that harness.',
-        'Document the canonical process-library source repo, the exact clone or sync command path, revision pinning, update checks, and what temporary fallback exists if upstream sync is unavailable.',
-        'Document the actual process-library lifecycle the harness uses in practice: clone or sync path, active binding behavior, active-root inspection, and fallback behavior when the preferred path is unavailable.',
-        'Document the exact verification steps that prove the plugin or extension is active, the babysitter CLI is reachable, and the orchestration loop is bound to the harness.',
-        'Document where session state lives, how the harness resumes after yielding to the user, and how operators diagnose stuck loops or broken hook registration.',
-        'Include troubleshooting for permission issues, missing binaries, hook registration failures, stale session files, lock conflicts, and completion proof mismatches.',
-        'Reference the canonical babysit skill semantics and explain any harness-specific differences without weakening the contract.',
-        'Return the list of docs created or updated.'
-      ],
-      outputFormat: 'JSON with filesCreated, filesModified, docsCovered, summary'
-    },
-    outputSchema: {
-      type: 'object',
-      required: ['filesCreated', 'filesModified', 'docsCovered', 'summary'],
-      properties: {
-        filesCreated: { type: 'array', items: { type: 'string' } },
-        filesModified: { type: 'array', items: { type: 'string' } },
-        docsCovered: { type: 'array', items: { type: 'string' } },
-        summary: { type: 'string' }
-      }
-    }
-  },
-
-  io: {
-    inputJsonPath: `tasks/${taskCtx.effectId}/input.json`,
-    outputJsonPath: `tasks/${taskCtx.effectId}/result.json`
-  },
-
-  labels: ['agent', 'assimilation', 'harness', 'docs', 'install']
-}));
-
-export const runHarnessRuntimeValidationTask = defineTask('run-harness-runtime-validation', (args, taskCtx) => ({
-  kind: 'agent',
-  title: `Validate full ${args.harnessName} orchestration runtime`,
-  description: 'Run the actual harness integration, validate user-yield continuation, and exercise the edge-case matrix',
-
-  agent: {
-    name: 'general-purpose',
-    prompt: {
-      role: 'staff QA engineer specializing in plugin and harness integration testing',
-      task: `Execute a real validation plan for the ${args.harnessName} babysitter integration instead of a structural smoke test`,
-      context: {
-        projectDir: args.projectDir,
-        harnessName: args.harnessName,
-        loopModel: args.loopModel,
-        research: args.research,
-        docs: args.docs,
-        integrationFiles: args.integrationFiles,
-        localTestResult: args.localTestResult,
-        edgeCaseMatrix
-      },
-      instructions: [
-        'Install or activate the harness integration exactly as an operator would, using the documented runtime install path from GitHub or the upstream source when possible.',
-        'Validate the canonical process-library integration path itself: clone or sync the upstream library, record the resolved root path, and verify the harness uses that root instead of silently preferring a bundled copy.',
-        `Run a real babysitter process through ${args.harnessName} and validate the full loop model "${args.loopModel}".`,
-        'Exercise run:create through the harness-native path first. Only use explicit session association as a documented fallback when the harness truly lacks first-class binding.',
-        'Verify that after an effect is posted the harness yields control and the hook, after-agent callback, idle callback, or followUp mechanism resumes the orchestration loop instead of inline multi-iteration spinning.',
-        'Verify that the original babysit skill adaptation is actually loaded by the target harness and that important canonical instructions survived the migration.',
-        'Verify that the integration exposes or documents a concrete active process-library root for the current run or session and that the documented install or sync path matches what the runtime actually uses.',
-        'Verify that user-facing README and install docs rely on harness commands and activation flow rather than instructing the end user to manually operate raw Babysitter CLI or SDK primitives, unless that is truly the only supported harness UX.',
-        'Fail the validation when user-facing README or install docs still name run:create, run:iterate, task:list, task:post, session:init, or session:associate even though the harness already exposes higher-level commands.',
-        'Run the edge-case matrix and record pass or fail for each scenario.',
-        'Confirm that result posting uses output.json plus task:post, and explicitly fail the validation if any generated path still instructs direct result.json writes.',
-        'Confirm that no process or generated skill emits kind: node.',
-        'Return a runtime report with blocking issues, test evidence, and the final verdict.'
-      ],
-      outputFormat: 'JSON with passed, failed, total, allPassed, tests, blockers, evidence, summary'
-    },
-    outputSchema: {
-      type: 'object',
-      required: ['passed', 'failed', 'total', 'allPassed', 'tests', 'blockers', 'evidence', 'summary'],
-      properties: {
-        passed: { type: 'number' },
-        failed: { type: 'number' },
-        total: { type: 'number' },
-        allPassed: { type: 'boolean' },
-        tests: {
-          type: 'array',
-          items: {
-            type: 'object',
-            required: ['name', 'passed', 'details'],
-            properties: {
-              name: { type: 'string' },
-              passed: { type: 'boolean' },
-              details: { type: 'string' }
-            }
-          }
+        distribution: { type: 'object', description: 'How the plugin is distributed and installed' },
+        envVars: { type: 'array', items: { type: 'string' }, description: 'All environment variables the harness sets when running' },
+        hookModel: { type: 'object', description: 'Hook/event model: types, input/output format, registration method' },
+        loopMechanism: { type: 'string', description: 'stop-hook, loop-driver, or in-turn' },
+        discoverySpec: {
+          type: 'object',
+          description: 'KNOWN_HARNESSES entry spec',
+          properties: {
+            name: { type: 'string' },
+            cli: { type: 'string' },
+            callerEnvVars: { type: 'array', items: { type: 'string' } },
+            capabilities: { type: 'array', items: { type: 'string' } },
+            configPaths: { type: 'array', items: { type: 'string' } },
+          },
         },
-        blockers: { type: 'array', items: { type: 'string' } },
-        evidence: { type: 'array', items: { type: 'string' } },
-        summary: { type: 'string' }
-      }
-    }
+        invokerSpec: {
+          type: 'object',
+          description: 'HARNESS_CLI_MAP entry spec for wrapping/invocation',
+          properties: {
+            cli: { type: 'string' },
+            workspaceFlag: { type: 'string' },
+            supportsModel: { type: 'boolean' },
+            promptStyle: { type: 'string' },
+            baseArgs: { type: 'array', items: { type: 'string' } },
+          },
+        },
+        pluginLayout: { type: 'object', description: 'Expected plugin directory structure' },
+        adapterMethodMap: { type: 'object', description: 'How each HarnessAdapter method (required + optional) maps to this harness' },
+        sessionManagement: { type: 'object', description: 'Session state lifecycle: creation, persistence, iteration timing, isIterationTooFast' },
+        compressionSupport: { type: 'object', description: 'Whether/how to integrate compression for session-start context and process library caching' },
+        programmaticApi: { type: 'object', description: 'PiWrapper-style programmatic session API: whether it exists, API shape, or null' },
+        capabilities: { type: 'array', items: { type: 'string' }, description: 'HarnessCapability values: Programmatic, SessionBinding, StopHook, Mcp, HeadlessPrompt' },
+        promptContextFactory: { type: 'string', description: 'Which factory to use or create for getPromptContext()' },
+        registryPriority: { type: 'string', description: 'Where this adapter goes in registry.ts knownAdapters priority order' },
+        installMethod: { type: 'object', description: 'How installHarness() and installPlugin() should work' },
+        risks: { type: 'array', items: { type: 'string' } },
+      },
+    },
   },
 
   io: {
     inputJsonPath: `tasks/${taskCtx.effectId}/input.json`,
-    outputJsonPath: `tasks/${taskCtx.effectId}/result.json`
+    outputJsonPath: `tasks/${taskCtx.effectId}/result.json`,
   },
 
-  labels: ['agent', 'assimilation', 'harness', 'test', 'e2e']
+  labels: ['agent', 'assimilation', 'research'],
 }));
 
-export const verifyHarnessAssimilationTask = defineTask('verify-harness-assimilation', (args, taskCtx) => ({
+// ---------------------------------------------------------------------------
+// PHASE 1: SDK Adapter
+// ---------------------------------------------------------------------------
+
+export const implementAdapterTask = defineTask('implement-adapter', (args, taskCtx) => ({
+  kind: 'agent',
+  title: `Implement ${args.harnessName} SDK harness adapter`,
+  description: 'Create the full HarnessAdapter implementation (all required + applicable optional methods), register in discovery/invoker/registry, and integrate with session state, compression, and prompt context',
+
+  agent: {
+    name: 'general-purpose',
+    prompt: {
+      role: 'senior SDK engineer',
+      task: `Implement the complete ${args.harnessName} harness adapter in the SDK and register it across all harness subsystems`,
+      context: {
+        projectDir: args.projectDir,
+        harnessName: args.harnessName,
+        adapterName: args.adapterName,
+        adapterFile: args.adapterFile,
+        research: args.research,
+        sdkHarnessCore,
+      },
+      instructions: [
+        // ── Study the reference implementations thoroughly ──
+        'Read claudeCode.ts end-to-end as the canonical reference. Pay special attention to:',
+        '  - How handleSessionStartHook builds context: env file parsing, skill discovery injection, process library resolution, compression via densityFilterText and getOrCompressFile/findLibraryFiles.',
+        '  - How handleStopHook replays the journal, validates completion proof, inspects pending effects, and returns approve/block JSON.',
+        '  - How bindSession creates the state file with run association metadata.',
+        '  - How installPlugin registers the plugin with the harness filesystem.',
+        '  - How getPromptContext() uses createClaudeCodeContext from prompts/context.ts.',
+        'Read codex.ts — note multi-format hooks.json, Windows hookDriven detection, supportsHookType whitelist, CODEX_* env chain.',
+        'Read pi.ts — note in-process model, loop-driver, dual env vars, delegation to piWrapper.ts.',
+        'Read geminiCli.ts — note AfterAgent continuation, GEMINI_* env chain, session-start context generation.',
+
+        // ── Create the adapter file ──
+        `Create packages/sdk/src/harness/${args.adapterFile || args.adapterName + '.ts'} implementing the HarnessAdapter interface.`,
+
+        // ── Required methods ──
+        'Implement isActive(): check the harness-specific environment variables identified in research.',
+        'Implement resolveSessionId(parsed): follow the standard chain: explicit arg → harness-specific env vars (e.g. HARNESS_SESSION_ID) → env file parsing → undefined. Use the pattern from claudeCode.ts (CLAUDE_SESSION_ID → CLAUDE_ENV_FILE parsing).',
+        'Implement resolveStateDir(args): explicit arg → BABYSITTER_STATE_DIR env → plugin root + "/skills/babysit/state" (or equivalent) → default ".a5c".',
+        'Implement resolvePluginRoot(args): explicit arg → harness-specific env var (e.g. HARNESS_PLUGIN_ROOT) → undefined.',
+        'Implement bindSession(opts: SessionBindOptions): create or update the session state file with run association. Use writeSessionFile from session.ts. Return SessionBindResult with harness name, sessionId, stateFile path.',
+        'Implement handleStopHook(args: HookHandlerArgs): read JSON from stdin, load session state, replay journal to check for completion proof and pending effects, return approve/block JSON to stdout. Integrate with resolveCompletionProof from cli/completionProof.ts.',
+        'Implement handleSessionStartHook(args: HookHandlerArgs): read JSON from stdin (if applicable), create env file (if harness uses env files for session ID), write baseline state file, inject context (skill discovery, process library info). Consider compression integration: use loadCompressionConfig, densityFilterText for large context, getOrCompressFile/findLibraryFiles for process library caching.',
+        'Implement findHookDispatcherPath(startCwd): locate the hook dispatcher script/binary in the plugin directory tree. Walk up from startCwd looking for the plugin structure.',
+
+        // ── Optional methods (implement all that apply) ──
+        'Implement autoResolvesSessionId(): return true if the adapter auto-resolves session IDs from env vars (most adapters do). When true, explicitly passing --session-id is rejected as a conflict.',
+        'Implement getMissingSessionIdHint(): return a guidance string explaining how the session ID should be available (e.g. "Session ID should be available from the Harness hook callback").',
+        'Implement supportsHookType(hookType): whitelist the hook types this harness supports (e.g. "stop", "session-start"). Return false for unsupported types.',
+        'Implement getUnsupportedHookMessage(hookType): return an error message for unsupported hook types.',
+        'Implement isCliInstalled(): use checkCliAvailable pattern — spawn "which"/"where" + the CLI command, then try "--version".',
+        'Implement getCliInfo(): return { command, version, path } by probing the CLI.',
+        'Implement getCapabilities(): return the HarnessCapability array from the research findings.',
+        'Implement installHarness(options): install the CLI itself (npm install -g, brew, etc.).',
+        'Implement installPlugin(options): install/register the babysitter plugin into the harness (copy files, register hooks, update config).',
+        'Implement getPromptContext(opts?): create or use the appropriate PromptContext factory from prompts/context.ts. If a new factory is needed, create it in context.ts following the pattern of createClaudeCodeContext/createCodexContext/createPiContext. Respect the interactive tri-state (true/false/undefined).',
+
+        // ── If programmatic API exists ──
+        'If the harness supports programmatic (non-CLI) sessions, create a wrapper similar to piWrapper.ts (createPiSession → SessionHandle with .prompt(), .followUp(), .dispose()). This enables harness:create-run to use the harness programmatically.',
+
+        // ── Register in discovery subsystem (BOTH mechanisms) ──
+        `Add a KNOWN_HARNESSES entry in discovery.ts: { name: "${args.adapterName}", cli: "<command>", callerEnvVars: [...env vars that uniquely identify running inside this harness...], capabilities: [...HarnessCapability values...] }.`,
+        'The callerEnvVars determine in-session detection via detectCallerHarness(). They must be specific enough to avoid false positives.',
+        'The cli field determines installed-discovery via discoverHarnesses() — checkCliAvailable() will probe this command with which/where + --version.',
+        'Add CONFIG_PATHS entry in discovery.ts if the harness has a config directory (e.g. ".harness") — used for configFound in discovery results.',
+
+        // ── Register in invocation/wrapping subsystem ──
+        `Add a HARNESS_CLI_MAP entry in invoker.ts: { cli: "<command>", workspaceFlag: "<flag>"|undefined, supportsModel: <bool>, promptStyle: "flag"|"positional", baseArgs: [...] }.`,
+        'This entry enables buildHarnessArgs() to construct valid CLI invocations for this harness.',
+        'This enables invokeHarness() to spawn the harness as a child process — used by harness:invoke and harness:create-run.',
+        'Verify buildHarnessArgs produces correct arguments for common invocation patterns (with/without workspace, model, prompt).',
+
+        // ── Register in adapter registry ──
+        'Add the adapter factory to registry.ts knownAdapters array in the correct priority order. More specific harnesses (e.g. oh-my-pi) before generic ones (e.g. pi). The order determines which adapter wins when multiple isActive() checks match.',
+        'Export the factory function from harness/index.ts following the existing export pattern.',
+
+        // ── Validation ──
+        'Create a factory function create<Name>Adapter() exported from the adapter file.',
+        'Run lint to verify no type errors: npm run lint --workspace=@a5c-ai/babysitter-sdk',
+        'Verify the adapter compiles and all interface methods are implemented.',
+      ],
+      outputFormat: 'JSON with adapterFile, discoveryEntry, invokerEntry, registryPosition, promptContextFactory, programmaticWrapper, filesCreated, filesModified, summary',
+    },
+    outputSchema: {
+      type: 'object',
+      required: ['filesCreated', 'filesModified', 'summary'],
+      properties: {
+        adapterFile: { type: 'string' },
+        discoveryEntry: { type: 'object' },
+        invokerEntry: { type: 'object' },
+        registryPosition: { type: 'string' },
+        promptContextFactory: { type: 'string' },
+        programmaticWrapper: { type: 'string' },
+        filesCreated: { type: 'array', items: { type: 'string' } },
+        filesModified: { type: 'array', items: { type: 'string' } },
+        summary: { type: 'string' },
+      },
+    },
+  },
+
+  io: {
+    inputJsonPath: `tasks/${taskCtx.effectId}/input.json`,
+    outputJsonPath: `tasks/${taskCtx.effectId}/result.json`,
+  },
+
+  labels: ['agent', 'assimilation', 'adapter', 'sdk'],
+}));
+
+// ---------------------------------------------------------------------------
+// PHASE 2: Plugin structure
+// ---------------------------------------------------------------------------
+
+export const createPluginTask = defineTask('create-plugin', (args, taskCtx) => ({
+  kind: 'agent',
+  title: `Create ${args.harnessName} plugin structure`,
+  description: 'Create the plugin manifest, hook scripts, and configuration files following the reference plugin patterns',
+
+  agent: {
+    name: 'general-purpose',
+    prompt: {
+      role: 'senior plugin engineer',
+      task: `Create the babysitter plugin for ${args.harnessName} following the reference plugin patterns`,
+      context: {
+        projectDir: args.projectDir,
+        harnessName: args.harnessName,
+        pluginDir: args.pluginDir,
+        research: args.research,
+        referencePlugins,
+      },
+      instructions: [
+        'Read the reference plugins to understand the complete plugin structure.',
+        `Create the plugin directory at ${args.pluginDir} with the correct manifest format for ${args.harnessName}.`,
+        'Create the plugin manifest (plugin.json, .codex-plugin/plugin.json, or package.json) with correct metadata, hooks, skills, and commands references.',
+        'Create hook scripts following the standard pattern: resolve plugin root, ensure CLI available, capture stdin, invoke babysitter hook:run, output JSON.',
+        'Hook scripts must follow the reference pattern in plugins/babysitter/hooks/ - they delegate to the SDK CLI, not implement logic directly.',
+        'Create a versions.json file with the SDK version for dependency management.',
+        'Create any harness-specific config files (hooks.json, .app.json, config.toml, etc.).',
+        'Do NOT create orchestration scripts, loop drivers, effect adapters, or result adapters - the SDK handles all of that.',
+        'Do NOT create custom tools for run:create, run:iterate, task:post - the babysitter CLI is the tool.',
+      ],
+      outputFormat: 'JSON with pluginDir, filesCreated, manifest, hookScripts, summary',
+    },
+    outputSchema: {
+      type: 'object',
+      required: ['pluginDir', 'filesCreated', 'summary'],
+      properties: {
+        pluginDir: { type: 'string' },
+        filesCreated: { type: 'array', items: { type: 'string' } },
+        summary: { type: 'string' },
+      },
+    },
+  },
+
+  io: {
+    inputJsonPath: `tasks/${taskCtx.effectId}/input.json`,
+    outputJsonPath: `tasks/${taskCtx.effectId}/result.json`,
+  },
+
+  labels: ['agent', 'assimilation', 'plugin'],
+}));
+
+// ---------------------------------------------------------------------------
+// PHASE 3: Skill porting
+// ---------------------------------------------------------------------------
+
+export const portSkillsTask = defineTask('port-skills', (args, taskCtx) => ({
+  kind: 'agent',
+  title: `Port skills to ${args.harnessName} format`,
+  description: 'Adapt skills from the reference plugins into the target harness skill format',
+
+  agent: {
+    name: 'general-purpose',
+    prompt: {
+      role: 'senior skill migration engineer',
+      task: `Port the babysitter skills into ${args.harnessName} plugin format`,
+      context: {
+        projectDir: args.projectDir,
+        harnessName: args.harnessName,
+        pluginDir: args.pluginDir,
+        research: args.research,
+        referencePlugins,
+      },
+      instructions: [
+        'Read the skills from the reference plugins (babysitter/skills/, babysitter-codex/skills/).',
+        `Determine the skill format for ${args.harnessName}: SKILL.md frontmatter, AGENTS.md, GEMINI.md, or other format.`,
+        'At minimum, port the core babysit skill - this is the primary orchestration entry point.',
+        'The babysit SKILL.md should be thin: SDK/CLI dependency setup from versions.json, then a single CLI command: babysitter instructions:babysit-skill --harness <name> --json',
+        'Port additional skills as appropriate for the harness (call, doctor, help, resume, observe, plan, etc.).',
+        'Each skill should use the SDK CLI instructions command to generate its content dynamically, not embed static instructions.',
+        'Ensure the skill frontmatter has correct allowed-tools for the target harness.',
+        'If the harness uses AGENTS.md or GEMINI.md instead of individual SKILL.md files, create the appropriate format.',
+      ],
+      outputFormat: 'JSON with skillsPorted, filesCreated, format, summary',
+    },
+    outputSchema: {
+      type: 'object',
+      required: ['skillsPorted', 'filesCreated', 'summary'],
+      properties: {
+        skillsPorted: { type: 'array', items: { type: 'string' } },
+        filesCreated: { type: 'array', items: { type: 'string' } },
+        format: { type: 'string' },
+        summary: { type: 'string' },
+      },
+    },
+  },
+
+  io: {
+    inputJsonPath: `tasks/${taskCtx.effectId}/input.json`,
+    outputJsonPath: `tasks/${taskCtx.effectId}/result.json`,
+  },
+
+  labels: ['agent', 'assimilation', 'skills'],
+}));
+
+// ---------------------------------------------------------------------------
+// PHASE 4: Install / distribution
+// ---------------------------------------------------------------------------
+
+export const createInstallDistTask = defineTask('create-install-dist', (args, taskCtx) => ({
+  kind: 'agent',
+  title: `Create ${args.harnessName} installation and distribution method`,
+  description: 'Create install/uninstall scripts, distribution packaging, and the babysitter plugin:install integration',
+
+  agent: {
+    name: 'general-purpose',
+    prompt: {
+      role: 'senior distribution engineer',
+      task: `Create the installation and distribution method for the ${args.harnessName} babysitter plugin`,
+      context: {
+        projectDir: args.projectDir,
+        harnessName: args.harnessName,
+        pluginDir: args.pluginDir,
+        research: args.research,
+        referencePlugins,
+      },
+      instructions: [
+        'Read the reference plugin installation methods: babysitter uses plugin marketplace, babysitter-codex uses npm + marketplace, babysitter-pi uses npm package with bin scripts.',
+        `Determine the right distribution method for ${args.harnessName} based on research findings.`,
+        'Create install scripts (bin/install.cjs, scripts/setup.sh, or equivalent) that handle: SDK dependency installation, hook registration, config file placement.',
+        'Create uninstall scripts that cleanly remove hooks, configs, and state files.',
+        'If the harness has a plugin marketplace, create the marketplace manifest entry.',
+        'If the harness uses npm distribution, set up package.json with correct bin, files, and omp/pi fields.',
+        'Ensure the install flow uses babysitter plugin:install or equivalent for registration.',
+        'The install script should be idempotent - safe to run multiple times.',
+      ],
+      outputFormat: 'JSON with method, filesCreated, installCommand, uninstallCommand, summary',
+    },
+    outputSchema: {
+      type: 'object',
+      required: ['method', 'filesCreated', 'summary'],
+      properties: {
+        method: { type: 'string' },
+        filesCreated: { type: 'array', items: { type: 'string' } },
+        installCommand: { type: 'string' },
+        uninstallCommand: { type: 'string' },
+        summary: { type: 'string' },
+      },
+    },
+  },
+
+  io: {
+    inputJsonPath: `tasks/${taskCtx.effectId}/input.json`,
+    outputJsonPath: `tasks/${taskCtx.effectId}/result.json`,
+  },
+
+  labels: ['agent', 'assimilation', 'install', 'distribution'],
+}));
+
+// ---------------------------------------------------------------------------
+// PHASE 5: Harness wrapper (for harness:create-run)
+// ---------------------------------------------------------------------------
+
+export const implementHarnessWrapperTask = defineTask('implement-harness-wrapper', (args, taskCtx) => ({
+  kind: 'agent',
+  title: `Verify ${args.harnessName} discovery, wrapping, and harness:create-run integration`,
+  description: 'Verify both discovery mechanisms (installed + in-session), CLI wrapping via invoker, programmatic session API, and prompt context for harness:create-run',
+
+  agent: {
+    name: 'general-purpose',
+    prompt: {
+      role: 'senior SDK engineer',
+      task: `Ensure ${args.harnessName} works correctly with harness:discover, harness:invoke, and harness:create-run`,
+      context: {
+        projectDir: args.projectDir,
+        harnessName: args.harnessName,
+        adapterName: args.adapterName,
+        research: args.research,
+        sdkHarnessCore,
+      },
+      instructions: [
+        // ── Understand the harness subsystems ──
+        'Read the harness:discover command (cli/commands/harness.ts) — understand how it calls discoverHarnesses() for installed-discovery and detectCallerHarness() for in-session detection.',
+        'Read discovery.ts — understand both discovery mechanisms:',
+        '  1. discoverHarnesses(): probes each KNOWN_HARNESSES entry via checkCliAvailable (which/where + --version). Returns HarnessDiscoveryResult[] with installed, version, cliPath, configFound.',
+        '  2. detectCallerHarness(): checks callerEnvVars against process.env. Returns CallerHarnessResult with name, matchedEnvVars, capabilities. First match wins.',
+        'Read invoker.ts — understand how invokeHarness() spawns the CLI using buildHarnessArgs() with HARNESS_CLI_MAP flag mapping. This is the wrapping layer.',
+        'Read harness:create-run (harnessPrompts.ts) — understand how buildProcessDefinitionSystemPrompt and buildOrchestrationSystemPrompt use the adapter getPromptContext() to build prompts for invoking harnesses as orchestration tools.',
+        'Read piWrapper.ts — understand createPiSession and PiSessionHandle for programmatic harness invocation (used when the harness has Programmatic capability).',
+        'Read registry.ts — understand detectAdapter() priority order and getAdapterByName() lookup.',
+
+        // ── Verify INSTALLED DISCOVERY ──
+        `Verify the KNOWN_HARNESSES entry for ${args.harnessName} has correct cli command so checkCliAvailable() can probe it.`,
+        `Verify the KNOWN_HARNESSES entry has correct capabilities array matching what the harness actually supports.`,
+        'Verify CONFIG_PATHS maps this harness to its config directory if applicable (for configFound in discovery results).',
+        `Test: run babysitter harness:discover --json and verify ${args.harnessName} appears with correct installed/version/configFound status.`,
+
+        // ── Verify IN-SESSION DETECTION ──
+        `Verify the KNOWN_HARNESSES entry for ${args.harnessName} has correct callerEnvVars — these must uniquely identify running inside this harness.`,
+        `Verify callerEnvVars don't overlap with other harnesses in a way that causes false positives (check KNOWN_HARNESSES order — first match wins).`,
+        `Verify the adapter isActive() method checks the same env vars as callerEnvVars.`,
+        'Verify the adapter priority in registry.ts knownAdapters is correct relative to other adapters.',
+
+        // ── Verify CLI WRAPPING (invoker) ──
+        `Verify the HARNESS_CLI_MAP entry for ${args.harnessName} has correct: cli, workspaceFlag, supportsModel, promptStyle, baseArgs.`,
+        'Verify buildHarnessArgs() produces valid CLI arguments for this harness with various option combinations (workspace, model, prompt).',
+        `Test: run babysitter harness:invoke ${args.adapterName} --prompt "test" --json and verify it produces a valid CLI invocation.`,
+
+        // ── Verify PROMPT CONTEXT ──
+        `If the adapter implements getPromptContext(), verify it returns a PromptContext with correct: harness, harnessLabel, platform, hookDriven, loopControlTerm, interactive tri-state, capabilities array, sessionBindingFlags, sessionEnvVars, pluginRootVar, and all required template variables.`,
+        'Verify the prompt context produces correct output when passed through the compose pipeline (compose.ts → parts → templates).',
+        `Test: run babysitter instructions:babysit-skill --harness ${args.adapterName} --json and verify it produces valid instructions.`,
+
+        // ── Verify PROGRAMMATIC API (if applicable) ──
+        'If the harness has Programmatic capability, verify a PiWrapper-style session wrapper exists or is created:',
+        '  - createHarnessSession(options) → SessionHandle with .prompt(), .followUp(), .dispose()',
+        '  - The wrapper must be importable from harness/index.ts and usable by harness:create-run.',
+        'If the harness does NOT have Programmatic capability, verify invokeHarness() is the correct invocation path.',
+
+        // ── Fix issues ──
+        'Fix any issues found during verification. Return detailed results for each check.',
+      ],
+      outputFormat: 'JSON with discoveryWorks, invokerWorks, promptContextWorks, filesModified, issues, summary',
+    },
+    outputSchema: {
+      type: 'object',
+      required: ['filesModified', 'summary'],
+      properties: {
+        discoveryWorks: { type: 'boolean' },
+        invokerWorks: { type: 'boolean' },
+        promptContextWorks: { type: 'boolean' },
+        filesModified: { type: 'array', items: { type: 'string' } },
+        issues: { type: 'array', items: { type: 'string' } },
+        summary: { type: 'string' },
+      },
+    },
+  },
+
+  io: {
+    inputJsonPath: `tasks/${taskCtx.effectId}/input.json`,
+    outputJsonPath: `tasks/${taskCtx.effectId}/result.json`,
+  },
+
+  labels: ['agent', 'assimilation', 'harness-wrapper'],
+}));
+
+// ---------------------------------------------------------------------------
+// PHASE 6: README
+// ---------------------------------------------------------------------------
+
+export const writeReadmeTask = defineTask('write-readme', (args, taskCtx) => ({
+  kind: 'agent',
+  title: `Write ${args.harnessName} plugin README`,
+  description: 'Write user-facing README with installation, activation, usage, and troubleshooting',
+
+  agent: {
+    name: 'general-purpose',
+    prompt: {
+      role: 'senior technical writer',
+      task: `Write the README for the ${args.harnessName} babysitter plugin`,
+      context: {
+        projectDir: args.projectDir,
+        harnessName: args.harnessName,
+        pluginDir: args.pluginDir,
+        research: args.research,
+        pluginFiles: args.pluginFiles,
+      },
+      instructions: [
+        'Write a README focused on the user experience: install, activate, use harness commands, troubleshoot.',
+        'Do NOT expose raw babysitter CLI primitives (run:create, run:iterate, task:post) in the README.',
+        'Keep SDK/CLI internals in skill docs, hook docs, or maintainer docs - not the user-facing README.',
+        'Document installation prerequisites, the install command, and verification steps.',
+        'Document how to start a new run, resume an existing run, and check run status using harness-native commands or skills.',
+        'Document common issues: missing CLI, hook registration failures, stale state, permission errors.',
+        'Include a section on upgrading and uninstalling.',
+        'Reference the canonical babysit contract without weakening it.',
+      ],
+      outputFormat: 'JSON with readmePath, filesCreated, sections, summary',
+    },
+    outputSchema: {
+      type: 'object',
+      required: ['readmePath', 'filesCreated', 'summary'],
+      properties: {
+        readmePath: { type: 'string' },
+        filesCreated: { type: 'array', items: { type: 'string' } },
+        sections: { type: 'array', items: { type: 'string' } },
+        summary: { type: 'string' },
+      },
+    },
+  },
+
+  io: {
+    inputJsonPath: `tasks/${taskCtx.effectId}/input.json`,
+    outputJsonPath: `tasks/${taskCtx.effectId}/result.json`,
+  },
+
+  labels: ['agent', 'assimilation', 'docs'],
+}));
+
+// ---------------------------------------------------------------------------
+// PHASE 7: Verification
+// ---------------------------------------------------------------------------
+
+export const verifyAssimilationTask = defineTask('verify-assimilation', (args, taskCtx) => ({
   kind: 'agent',
   title: `Verify ${args.harnessName} assimilation quality`,
-  description: 'Score the harness integration against research, runtime validation, installability, and canonical babysit fidelity',
+  description: 'Score the integration against adapter correctness, plugin completeness, skill fidelity, and install reliability',
 
   agent: {
     name: 'general-purpose',
@@ -270,59 +723,71 @@ export const verifyHarnessAssimilationTask = defineTask('verify-harness-assimila
         projectDir: args.projectDir,
         harnessName: args.harnessName,
         targetQuality: args.targetQuality,
+        integrationFiles: args.integrationFiles,
         research: args.research,
-        assimilation: args.assimilation,
-        docs: args.docs,
-        localTestResult: args.localTestResult,
-        runtimeValidation: args.runtimeValidation,
-        integrationFiles: args.integrationFiles
       },
       instructions: [
-        'Score research quality, implementation fidelity, runtime proof, installability, and operator readiness on a 0-100 scale.',
-        'Deduct heavily for any of the following: no upstream research, no runtime install story, no canonical babysit skill adaptation, no full harness run, no user-yield continuation test, missing install docs, user-facing README or install docs that tell end users to drive raw Babysitter CLI or SDK primitives instead of harness commands, direct result.json write guidance, implicit breakpoint approval, node effects, or bundled-library-first distribution.',
-        'Deduct heavily if user-facing docs mention literal runtime primitives by name when the harness has a higher-level command surface and that detail could live in internal command or skill docs instead.',
-        'Verify that the runtime validation actually exercises the real harness loop instead of a dry-run surrogate.',
-        'Verify that the install docs and sync plan are sufficient for a new operator to reproduce the integration from the upstream repo.',
-        'Verify that the process-library install, sync, and active-root behavior is documented accurately for the harness and matches the runtime validation evidence.',
-        'Return both score and qualityScore so existing processes can consume the result without local translation.'
+        'Score each dimension 0-100: adapter completeness, plugin structure, skill fidelity, hook correctness, install/dist method, harness wrapper, README quality.',
+
+        // ── Adapter interface completeness ──
+        'Verify the adapter implements ALL required HarnessAdapter methods: isActive, resolveSessionId, resolveStateDir, resolvePluginRoot, bindSession, handleStopHook, handleSessionStartHook, findHookDispatcherPath.',
+        'Verify the adapter implements applicable optional methods: autoResolvesSessionId, getMissingSessionIdHint, supportsHookType, getUnsupportedHookMessage, isCliInstalled, getCliInfo, getCapabilities, installHarness, installPlugin, getPromptContext.',
+        'Verify handleStopHook integrates with completionProof.ts and journal replay — not just a stub.',
+        'Verify handleSessionStartHook creates proper env files and/or state files, injects context (skills, process library info), and considers compression integration.',
+        'Verify bindSession creates a proper SessionState file via session.ts helpers.',
+        'Verify getPromptContext uses or creates the correct PromptContext factory with proper hookDriven, interactive, and capabilities values.',
+
+        // ── Registry entries ──
+        'Verify KNOWN_HARNESSES entry in discovery.ts has correct name, cli command, callerEnvVars, and capabilities.',
+        'Verify CONFIG_PATHS entry exists if the harness has a config directory.',
+        'Verify HARNESS_CLI_MAP entry in invoker.ts has correct cli, workspaceFlag, supportsModel, promptStyle, and baseArgs.',
+        'Verify the adapter factory is registered in registry.ts in the correct priority order.',
+        'Verify the adapter is exported from harness/index.ts.',
+
+        // ── Plugin and hooks ──
+        'Verify the plugin has correct manifest, hooks, and config files.',
+        'Verify hooks follow the standard delegate-to-CLI pattern (invoke babysitter hook:run, not inline logic).',
+        'Verify skills use the SDK CLI instructions command, not embedded static content.',
+        'Verify install/uninstall scripts are idempotent and complete.',
+
+        // ── Anti-patterns ──
+        'Verify README does not expose raw CLI primitives to end users.',
+        'Verify no generated code uses kind: "node" effects, direct result.json writes, or implicit breakpoint approval.',
+        'Deduct heavily for: missing adapter methods (especially stop/session-start hooks), broken discovery/invoker entries, stub implementations that skip journal replay or completion proof, redundant orchestration scripts or custom tools, missing getPromptContext or incorrect PromptContext values.',
+        'Return both score and qualityScore for backwards compatibility.',
       ],
-      outputFormat: 'JSON with score, qualityScore, issues, recommendations, dimensions, summary'
+      outputFormat: 'JSON with score, qualityScore, dimensions, issues, recommendations, summary',
     },
     outputSchema: {
       type: 'object',
-      required: ['score', 'qualityScore', 'issues', 'recommendations', 'dimensions', 'summary'],
+      required: ['score', 'qualityScore', 'dimensions', 'issues', 'summary'],
       properties: {
         score: { type: 'number', minimum: 0, maximum: 100 },
         qualityScore: { type: 'number', minimum: 0, maximum: 100 },
+        dimensions: { type: 'object' },
         issues: { type: 'array', items: { type: 'string' } },
         recommendations: { type: 'array', items: { type: 'string' } },
-        dimensions: {
-          type: 'object',
-          properties: {
-            research: { type: 'number' },
-            fidelity: { type: 'number' },
-            runtime: { type: 'number' },
-            docs: { type: 'number' },
-            edgeCases: { type: 'number' }
-          }
-        },
-        summary: { type: 'string' }
-      }
-    }
+        summary: { type: 'string' },
+      },
+    },
   },
 
   io: {
     inputJsonPath: `tasks/${taskCtx.effectId}/input.json`,
-    outputJsonPath: `tasks/${taskCtx.effectId}/result.json`
+    outputJsonPath: `tasks/${taskCtx.effectId}/result.json`,
   },
 
-  labels: ['agent', 'assimilation', 'harness', 'verify', 'quality']
+  labels: ['agent', 'assimilation', 'verify'],
 }));
 
-export const refineHarnessAssimilationTask = defineTask('refine-harness-assimilation', (args, taskCtx) => ({
+// ---------------------------------------------------------------------------
+// Convergence refinement
+// ---------------------------------------------------------------------------
+
+export const refineAssimilationTask = defineTask('refine-assimilation', (args, taskCtx) => ({
   kind: 'agent',
   title: `Refine ${args.harnessName} assimilation (iteration ${args.iteration})`,
-  description: 'Apply targeted fixes to close research, install, loop-validation, and docs gaps',
+  description: 'Apply targeted fixes to close the highest-impact quality gaps',
 
   agent: {
     name: 'general-purpose',
@@ -335,17 +800,18 @@ export const refineHarnessAssimilationTask = defineTask('refine-harness-assimila
         iteration: args.iteration,
         issues: args.issues,
         recommendations: args.recommendations,
-        integrationFiles: args.integrationFiles
+        integrationFiles: args.integrationFiles,
       },
       instructions: [
-        'Prioritize fixes that restore the canonical babysit contract before aesthetic cleanup.',
-        'Close research gaps, upstream install gaps, missing skill migration details, loop validation gaps, docs omissions, and edge-case blind spots before lower-priority cleanup.',
-        'If an old prompt or artifact still tells end users to use raw Babysitter CLI or SDK primitives from user-facing README or install docs, move that guidance into harness-internal command docs, skill docs, hook docs, or maintainer docs and replace the user-facing copy with the actual harness command flow.',
-        'If a user-facing README or install doc still mentions literal primitives like run:create, run:iterate, task:list, task:post, session:init, or session:associate even though the harness has a command surface, remove those names from the user-facing doc and relocate the details.',
-        'If an old prompt or artifact still mentions session:associate-first, direct result.json writes, implicit breakpoint approval, or node effects, replace it with the current contract.',
-        'Return the files created or modified and summarize the fixes applied.'
+        'Prioritize fixes that restore missing adapter methods, broken registry entries, or incorrect hook delegation.',
+        'Fix missing or incorrect KNOWN_HARNESSES or HARNESS_CLI_MAP entries.',
+        'Fix skills that embed static content instead of using the SDK CLI instructions command.',
+        'Fix hooks that implement logic directly instead of delegating to babysitter hook:run.',
+        'Remove any redundant orchestration scripts, loop drivers, effect adapters, or custom tools.',
+        'Fix README content that exposes raw CLI primitives to end users.',
+        'Return the files created or modified and summarize the fixes applied.',
       ],
-      outputFormat: 'JSON with filesCreated, filesModified, fixesApplied, summary'
+      outputFormat: 'JSON with filesCreated, filesModified, fixesApplied, summary',
     },
     outputSchema: {
       type: 'object',
@@ -354,15 +820,15 @@ export const refineHarnessAssimilationTask = defineTask('refine-harness-assimila
         filesCreated: { type: 'array', items: { type: 'string' } },
         filesModified: { type: 'array', items: { type: 'string' } },
         fixesApplied: { type: 'array', items: { type: 'string' } },
-        summary: { type: 'string' }
-      }
-    }
+        summary: { type: 'string' },
+      },
+    },
   },
 
   io: {
     inputJsonPath: `tasks/${taskCtx.effectId}/input.json`,
-    outputJsonPath: `tasks/${taskCtx.effectId}/result.json`
+    outputJsonPath: `tasks/${taskCtx.effectId}/result.json`,
   },
 
-  labels: ['agent', 'assimilation', 'harness', 'converge']
+  labels: ['agent', 'assimilation', 'converge'],
 }));
