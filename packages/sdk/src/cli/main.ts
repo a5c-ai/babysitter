@@ -91,7 +91,7 @@ const USAGE = `Usage:
   babysitter task:list <runDir> [--runs-dir <dir>] [--pending] [--kind <kind>] [--json]
   babysitter task:show <runDir> <effectId> [--runs-dir <dir>] [--json]
   babysitter session:init --session-id <id> --state-dir <dir> [--max-iterations <n>] [--run-id <id>] [--prompt <text>] [--json]
-  babysitter session:associate --session-id <id> --state-dir <dir> --run-id <id> [--json]
+  babysitter session:associate --session-id <id> --state-dir <dir> --run-id <id> [--force] [--runs-dir <dir>] [--json]
   babysitter session:resume --session-id <id> --state-dir <dir> --run-id <id> [--max-iterations <n>] [--runs-dir <dir>] [--json]
   babysitter session:state --session-id <id> --state-dir <dir> [--json]
   babysitter session:update --session-id <id> --state-dir <dir> [--iteration <n>] [--last-iteration-at <iso8601>] [--iteration-times <csv>] [--delete] [--json]
@@ -250,6 +250,7 @@ interface ParsedArgs {
   marketplaceBranch?: string;
   pluginScope?: "global" | "project";
   pluginForce?: boolean;
+  sessionForce?: boolean;
   // tokens:stats flags
   tokensAll?: boolean;
   tokensRunId?: string;
@@ -614,6 +615,7 @@ function parseArgs(argv: string[]): ParsedArgs {
     }
     if (arg === "--force") {
       parsed.pluginForce = true;
+      parsed.sessionForce = true;
       continue;
     }
     if (arg === "--global") {
@@ -2622,6 +2624,8 @@ export function createBabysitterCli() {
             sessionId: parsed.sessionId,
             stateDir: parsed.stateDir,
             runId: parsed.runIdOverride,
+            force: parsed.sessionForce,
+            runsDir: parsed.runsDir,
             json: parsed.json,
           });
         }
