@@ -135,7 +135,7 @@ const USAGE = `Usage:
   babysitter harness:forever [...]               (alias for harness:create-run, infinite loop process)
   babysitter harness:resume-run [--run-id <id>] [--runs-dir <dir>] [--harness <name>] [--workspace <dir>] [--model <model>] [--max-iterations <n>] [--interactive|--no-interactive] [--json] [--verbose]
   babysitter harness:resume [...]                (alias for harness:resume-run)
-  babysitter harness:retrospect [--run-id <id>] [--prompt <text>] [--harness <name>] [--workspace <dir>] [--model <model>] [--max-iterations <n>] [--runs-dir <dir>] [--json] [--verbose]
+  babysitter harness:retrospect [--run-id <id>...] [--all] [--prompt <text>] [--harness <name>] [--workspace <dir>] [--model <model>] [--max-iterations <n>] [--runs-dir <dir>] [--json] [--verbose]
   babysitter harness:cleanup [--dry-run] [--keep-days <n>] [--prompt <text>] [--harness <name>] [--workspace <dir>] [--model <model>] [--runs-dir <dir>] [--json] [--verbose]
   babysitter harness:assimilate [--prompt <text>] [--harness <name>] [--workspace <dir>] [--model <model>] [--max-iterations <n>] [--runs-dir <dir>] [--json] [--verbose]
   babysitter harness:doctor [--run-id <id>] [--runs-dir <dir>] [--json] [--verbose]
@@ -267,6 +267,9 @@ interface ParsedArgs {
   workspace?: string;
   model?: string;
   interactive?: boolean;
+  // harness:retrospect flags
+  retrospectAll?: boolean;
+  runIds?: string[];
   // harness:cleanup flags
   keepDays?: number;
 }
@@ -436,7 +439,10 @@ function parseArgs(argv: string[]): ParsedArgs {
       continue;
     }
     if (arg === "--run-id") {
-      parsed.runIdOverride = expectFlagValue(rest, ++i, "--run-id");
+      const rid = expectFlagValue(rest, ++i, "--run-id");
+      parsed.runIdOverride = rid;
+      if (!parsed.runIds) parsed.runIds = [];
+      parsed.runIds.push(rid);
       continue;
     }
     if (arg === "--process-revision") {
@@ -660,6 +666,7 @@ function parseArgs(argv: string[]): ParsedArgs {
     // tokens:stats flags
     if (arg === "--all") {
       parsed.tokensAll = true;
+      parsed.retrospectAll = true;
       continue;
     }
     positionals.push(arg);
@@ -2325,7 +2332,7 @@ ${bold}PRIMARY COMMANDS${reset}
 ${bold}SECONDARY COMMANDS${reset}
 
   ${cyan}harness:doctor${reset} [--run-id <id>]          10-point health check on a run
-  ${cyan}harness:retrospect${reset} [--run-id <id>]      Analyze completed run, suggest improvements
+  ${cyan}harness:retrospect${reset} [--run-id <id>...] [--all]  Analyze runs, suggest improvements
   ${cyan}harness:cleanup${reset} [--keep-days <n>]       Clean up old runs and orphaned processes
   ${cyan}harness:assimilate${reset} [--prompt <text>]     Convert external methodology to babysitter processes
   ${cyan}harness:contrib${reset} [--prompt <text>]        Submit feedback or contribute to babysitter
@@ -2981,7 +2988,15 @@ export function createBabysitterCli() {
             "- Implements approved improvements iteratively\n" +
             "- Includes breakpoints for user steering at each analysis phase\n" +
             "- Ends by prompting the user to contribute back via /babysitter:contrib\n" +
-            (parsed.runIdOverride ? `\nTarget run ID: ${parsed.runIdOverride}` : "\nTarget: most recent run");
+            (() => {
+              const targetText = parsed.retrospectAll
+                ? "\nTarget: ALL completed/failed runs in .a5c/runs/"
+                : (parsed.runIds && parsed.runIds.length > 1)
+                  ? `\nTarget run IDs: ${parsed.runIds.join(", ")}`
+                  : (parsed.runIdOverride ? `\nTarget run ID: ${parsed.runIdOverride}` : "\nTarget: most recent run");
+              return targetText;
+            })() +
+            "\nAfter completing the retrospect analysis, suggest running /babysitter:cleanup to clean up old runs.";
           const retrospectPrompt = parsed.prompt
             ? retrospectPrefix + "\n\nAdditional instructions: " + parsed.prompt
             : retrospectPrefix;
