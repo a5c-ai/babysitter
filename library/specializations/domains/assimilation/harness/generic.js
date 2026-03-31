@@ -15,6 +15,9 @@ import {
   createInstallDistTask,
   implementHarnessWrapperTask,
   writeReadmeTask,
+  writeAdapterTestsTask,
+  writePluginTestsTask,
+  setupCiCdTask,
   verifyAssimilationTask,
   refineAssimilationTask,
 } from './shared-assimilation.js';
@@ -125,7 +128,51 @@ export async function process(inputs, ctx) {
   integrationFiles.push(...readme.filesCreated);
 
   // ==========================================================================
-  // PHASE 5: VERIFY
+  // PHASE 5: TESTING
+  // Adapter unit tests + plugin integration tests run in parallel
+  // ==========================================================================
+
+  ctx.log('phase:testing', `Writing tests for ${harnessName} adapter and plugin`);
+
+  const [adapterTests, pluginTests] = await ctx.parallel.all([
+    async () => ctx.task(writeAdapterTestsTask, {
+      projectDir,
+      harnessName,
+      adapterName,
+      adapterFile: adapter.adapterFile,
+      research,
+      integrationFiles,
+    }),
+    async () => ctx.task(writePluginTestsTask, {
+      projectDir,
+      harnessName,
+      pluginDir,
+      research,
+      integrationFiles,
+    }),
+  ]);
+
+  integrationFiles.push(...adapterTests.filesCreated, ...pluginTests.filesCreated);
+
+  // ==========================================================================
+  // PHASE 6: CI/CD INTEGRATION
+  // ==========================================================================
+
+  ctx.log('phase:ci-cd', `Configuring CI/CD pipelines for ${harnessName} plugin`);
+
+  const ciCd = await ctx.task(setupCiCdTask, {
+    projectDir,
+    harnessName,
+    pluginDir,
+    adapterName,
+    research,
+    integrationFiles,
+  });
+
+  integrationFiles.push(...ciCd.filesModified);
+
+  // ==========================================================================
+  // PHASE 7: VERIFY
   // ==========================================================================
 
   ctx.log('phase:verify', 'Scoring assimilation quality');
@@ -144,7 +191,7 @@ export async function process(inputs, ctx) {
   ctx.log('phase:verify:complete', `Quality: ${finalQuality}/${targetQuality}`);
 
   // ==========================================================================
-  // PHASE 6: CONVERGE
+  // PHASE 8: CONVERGE
   // ==========================================================================
 
   while (finalQuality < targetQuality && iterations < maxIterations) {

@@ -41,6 +41,9 @@ import {
   createInstallDistTask,
   implementHarnessWrapperTask,
   writeReadmeTask,
+  writeAdapterTestsTask,
+  writePluginTestsTask,
+  setupCiCdTask,
   verifyAssimilationTask,
   refineAssimilationTask,
 } from './shared-assimilation.js';
@@ -185,7 +188,55 @@ export async function process(inputs, ctx) {
   integrationFiles.push(...readme.filesCreated);
 
   // ==========================================================================
-  // PHASE 5: VERIFY + CONVERGE
+  // PHASE 5: TESTING
+  // Adapter unit tests and plugin integration tests run in parallel.
+  // Adapter tests: Vitest in packages/sdk/src/harness/__tests__/
+  // Plugin tests: syntax validation + packaged-install in <pluginDir>/test/
+  // ==========================================================================
+
+  ctx.log('phase:testing', 'Writing adapter unit tests and plugin integration tests');
+
+  const [adapterTests, pluginTests] = await ctx.parallel.all([
+    async () => ctx.task(writeAdapterTestsTask, {
+      projectDir,
+      harnessName,
+      adapterName,
+      adapterFile: adapter.adapterFile,
+      research,
+      integrationFiles,
+    }),
+    async () => ctx.task(writePluginTestsTask, {
+      projectDir,
+      harnessName,
+      pluginDir,
+      research,
+      integrationFiles,
+    }),
+  ]);
+
+  integrationFiles.push(...adapterTests.filesCreated, ...pluginTests.filesCreated);
+
+  // ==========================================================================
+  // PHASE 6: CI/CD INTEGRATION
+  // Update CI workflows: PR validation, E2E Docker tests, release pipeline,
+  // staging publish, Docker image build triggers.
+  // ==========================================================================
+
+  ctx.log('phase:ci-cd', 'Configuring CI/CD pipelines for new plugin');
+
+  const ciCd = await ctx.task(setupCiCdTask, {
+    projectDir,
+    harnessName,
+    pluginDir,
+    adapterName,
+    research,
+    integrationFiles,
+  });
+
+  integrationFiles.push(...ciCd.filesModified);
+
+  // ==========================================================================
+  // PHASE 7: VERIFY + CONVERGE
   // ==========================================================================
 
   ctx.log('phase:verify', 'Scoring assimilation quality');

@@ -9,6 +9,9 @@
  *   - Installation and distribution method
  *   - Harness wrapper for harness:create-run
  *   - README and documentation
+ *   - Adapter unit tests (Vitest, following SDK harness test patterns)
+ *   - Plugin integration tests (syntax, packaged install, hooks, skills, config)
+ *   - CI/CD workflow integration (PR validation, E2E Docker, release pipeline)
  *   - Quality verification and refinement
  */
 
@@ -706,7 +709,399 @@ export const writeReadmeTask = defineTask('write-readme', (args, taskCtx) => ({
 }));
 
 // ---------------------------------------------------------------------------
-// PHASE 7: Verification
+// PHASE 7: Adapter Tests
+// ---------------------------------------------------------------------------
+
+/**
+ * Reference test files the agent should study:
+ *   packages/sdk/src/harness/__tests__/harness.test.ts     — adapter method tests, session binding, stop hook, registry
+ *   packages/sdk/src/harness/__tests__/discovery.test.ts   — KNOWN_HARNESSES, checkCliAvailable, discoverHarnesses, detectCallerHarness
+ *   packages/sdk/src/harness/__tests__/invoker.test.ts     — HARNESS_CLI_MAP, buildHarnessArgs, invokeHarness
+ *   packages/sdk/src/harness/__tests__/types.test.ts       — HarnessCapability enum, type compilation
+ *   packages/sdk/src/harness/__tests__/customAdapter.test.ts — fallback adapter
+ *   packages/sdk/src/harness/__tests__/piWrapper.test.ts   — programmatic session wrapper
+ *   packages/sdk/src/harness/__tests__/geminiCli.test.ts   — adapter + hook tests with stdin injection
+ */
+
+export const writeAdapterTestsTask = defineTask('write-adapter-tests', (args, taskCtx) => ({
+  kind: 'agent',
+  title: `Write ${args.harnessName} SDK adapter unit tests`,
+  description: 'Create comprehensive Vitest unit tests for the adapter, discovery entries, invoker entries, and registry integration following the existing test patterns',
+
+  agent: {
+    name: 'general-purpose',
+    prompt: {
+      role: 'senior test engineer',
+      task: `Write comprehensive unit tests for the ${args.harnessName} harness adapter in the SDK`,
+      context: {
+        projectDir: args.projectDir,
+        harnessName: args.harnessName,
+        adapterName: args.adapterName,
+        adapterFile: args.adapterFile,
+        research: args.research,
+        integrationFiles: args.integrationFiles,
+      },
+      instructions: [
+        // ── Study reference test patterns ──
+        'Read packages/sdk/src/harness/__tests__/harness.test.ts thoroughly — this is the canonical reference for adapter tests. Understand:',
+        '  - How each adapter suite is structured (ClaudeCodeAdapter, CodexAdapter, NullAdapter sections)',
+        '  - How environment variables are saved/restored in beforeEach/afterEach with comprehensive env key lists',
+        '  - How isActive(), resolveSessionId(), resolveStateDir(), resolvePluginRoot(), findHookDispatcherPath() are tested',
+        '  - How bindSession is tested with stale session handling (RUN_COMPLETED, RUN_FAILED detection)',
+        '  - How stop hook stale session fallback is tested (env fallback chain)',
+        '  - How registry singleton pattern is tested (detectAdapter, getAdapterByName, setAdapter, resetAdapter)',
+        'Read discovery.test.ts — understand how tests verify:',
+        '  - KNOWN_HARNESSES has the expected count and entries',
+        '  - checkCliAvailable() handles found/not-found/version-failure/timeout cases',
+        '  - discoverHarnesses() returns all harnesses with correct installed/version/capabilities',
+        '  - detectCallerHarness() detects each harness via env vars with first-match-wins behavior',
+        'Read invoker.test.ts — understand how tests verify:',
+        '  - HARNESS_CLI_MAP has entries for all supported harnesses',
+        '  - buildHarnessArgs() produces correct flags per-harness (workspace, model, prompt, baseArgs)',
+        '  - invokeHarness() handles success/failure/timeout/unknown-harness/env-passing',
+        'Read geminiCli.test.ts — understand hook testing patterns:',
+        '  - callWithStdin helper for simulating hook JSON input',
+        '  - Synthetic stdin with Readable streams and proper unref()',
+        '  - stdout/stderr interception with spies',
+        '  - AfterAgent hook with session file, journal replay, iteration tracking',
+        '  - SessionStart hook with state file creation and idempotency',
+        '  - bindSession conflict detection',
+
+        // ── Create the test file ──
+        `Create packages/sdk/src/harness/__tests__/${args.adapterName}.test.ts using Vitest (import { describe, it, expect, vi, beforeEach, afterEach } from "vitest").`,
+
+        // ── Adapter method tests ──
+        `Test suite: "${args.harnessName} Adapter"`,
+        '  - Test name property returns correct adapter name',
+        '  - Test isActive() returns true when harness-specific env vars are set, false otherwise',
+        '  - Test resolveSessionId() with: explicit arg (highest priority), harness-specific env vars, env file fallback, undefined when nothing set',
+        '  - Test resolveStateDir() with: explicit arg, BABYSITTER_STATE_DIR env, plugin root fallback, default .a5c',
+        '  - Test resolvePluginRoot() with: explicit arg, harness-specific plugin root env var',
+        '  - Test findHookDispatcherPath() locates the hook dispatcher from startCwd',
+        '  - Test autoResolvesSessionId() returns expected value',
+        '  - Test getMissingSessionIdHint() returns helpful message',
+        '  - Test supportsHookType() returns correct whitelist for supported/unsupported hook types',
+        '  - Test getCapabilities() returns correct HarnessCapability array',
+
+        // ── Hook tests (if applicable) ──
+        'If the adapter has handleStopHook:',
+        '  - Test with completion proof validation (resolveCompletionProof integration)',
+        '  - Test with pending effects → should block exit',
+        '  - Test with RUN_COMPLETED → should approve exit',
+        '  - Test with max iterations reached → should allow exit',
+        '  - Test with no active run → should allow exit',
+        '  - Test stale session fallback (env var chain)',
+        'If the adapter has handleSessionStartHook:',
+        '  - Test baseline state file creation',
+        '  - Test idempotency (no overwrite of existing state)',
+        '  - Test context injection (skills, process library)',
+        '  - Test env file creation if applicable',
+
+        // ── Session binding tests ──
+        '  - Test bindSession creates state file with run association',
+        '  - Test bindSession updates existing session with new run ID',
+        '  - Test bindSession detects conflict (already bound to different run)',
+        '  - Test stale session release (RUN_COMPLETED/RUN_FAILED)',
+        '  - Test idempotent re-binding to same runId',
+
+        // ── Discovery entry tests ──
+        `Test suite: "Discovery - ${args.harnessName}"`,
+        `  - Test KNOWN_HARNESSES includes an entry with name "${args.adapterName}"`,
+        '  - Test the entry has correct cli, callerEnvVars, and capabilities',
+        `  - Test detectCallerHarness() detects ${args.harnessName} when its env vars are set`,
+        `  - Test detectCallerHarness() does NOT detect ${args.harnessName} when env vars are absent`,
+
+        // ── Invoker entry tests ──
+        `Test suite: "Invoker - ${args.harnessName}"`,
+        `  - Test HARNESS_CLI_MAP includes an entry for "${args.adapterName}"`,
+        `  - Test buildHarnessArgs("${args.adapterName}", { prompt: "test" }) produces valid CLI args`,
+        '  - Test with workspace option (if workspaceFlag is defined)',
+        '  - Test with model option (if supportsModel is true)',
+
+        // ── Registry integration tests ──
+        `Test suite: "Registry - ${args.harnessName}"`,
+        `  - Test getAdapterByName("${args.adapterName}") returns the correct adapter`,
+        `  - Test detectAdapter() returns this adapter when its env vars are set`,
+        '  - Test priority order — verify this adapter wins/loses correctly against other adapters',
+
+        // ── Test infrastructure ──
+        'Use beforeEach/afterEach for comprehensive env var cleanup (save and restore all harness-related env vars)',
+        'Use vi.mock for child_process execFile where needed',
+        'Use mkdtemp for any file system operations, cleanup in afterEach',
+        'Use synthetic Readable streams for stdin simulation in hook tests',
+        'Use vi.spyOn(process.stdout, "write") for capturing hook output',
+        'Verify the test file passes: cd packages/sdk && npx vitest run src/harness/__tests__/' + args.adapterName + '.test.ts',
+      ],
+      outputFormat: 'JSON with testFile, testSuites, testCount, filesCreated, summary',
+    },
+    outputSchema: {
+      type: 'object',
+      required: ['testFile', 'filesCreated', 'summary'],
+      properties: {
+        testFile: { type: 'string' },
+        testSuites: { type: 'array', items: { type: 'string' } },
+        testCount: { type: 'number' },
+        filesCreated: { type: 'array', items: { type: 'string' } },
+        summary: { type: 'string' },
+      },
+    },
+  },
+
+  io: {
+    inputJsonPath: `tasks/${taskCtx.effectId}/input.json`,
+    outputJsonPath: `tasks/${taskCtx.effectId}/result.json`,
+  },
+
+  labels: ['agent', 'assimilation', 'testing', 'adapter'],
+}));
+
+// ---------------------------------------------------------------------------
+// PHASE 8: Plugin Tests
+// ---------------------------------------------------------------------------
+
+/**
+ * Reference plugin test files the agent should study:
+ *   plugins/babysitter-codex/test/integration.test.js  — syntax validation (node --check, sh -n)
+ *   plugins/babysitter-codex/test/packaged-install.test.js — npm pack, install, verify files/hooks/skills/config/marketplace
+ *   e2e-tests/docker/structural.test.ts — Docker image validation (CLI, plugins, hooks, settings)
+ *   e2e-tests/docker/stop-hook.test.ts — stop hook behavior tests
+ *   e2e-tests/docker/codex-full-run.test.ts — full Codex E2E with real LLM
+ */
+
+export const writePluginTestsTask = defineTask('write-plugin-tests', (args, taskCtx) => ({
+  kind: 'agent',
+  title: `Write ${args.harnessName} plugin integration and installation tests`,
+  description: 'Create integration tests for syntax validation, packaged installation, hook registration, skill distribution, and configuration verification following the babysitter-codex test patterns',
+
+  agent: {
+    name: 'general-purpose',
+    prompt: {
+      role: 'senior test engineer',
+      task: `Write comprehensive integration tests for the ${args.harnessName} babysitter plugin`,
+      context: {
+        projectDir: args.projectDir,
+        harnessName: args.harnessName,
+        pluginDir: args.pluginDir,
+        research: args.research,
+        integrationFiles: args.integrationFiles,
+      },
+      instructions: [
+        // ── Study reference plugin test patterns ──
+        'Read plugins/babysitter-codex/test/integration.test.js thoroughly — understand:',
+        '  - How it collects all JS files recursively and validates via node --check',
+        '  - How it validates shell hook scripts via sh -n',
+        '  - The test function pattern (testSyntax, testShellSyntax) with assertion counting',
+        'Read plugins/babysitter-codex/test/packaged-install.test.js thoroughly — understand:',
+        '  - How it uses npm pack --json to create a tarball, then extracts to a temp directory',
+        '  - How it runs the install command (babysitter-codex install --global) against the extracted package',
+        '  - How it verifies all installed files exist: plugin manifest, assets, hooks, skills, config files',
+        '  - How it validates hooks.json structure: SessionStart, UserPromptSubmit, Stop hook entries',
+        '  - How it validates configuration values (config.toml entries, profile.json settings)',
+        '  - How it verifies marketplace registration (marketplace.json entry)',
+        '  - How it tests workspace/team installation separately from global installation',
+        '  - How it checks for exclusions (no installer binaries, no UTF-8 BOM, no deprecated files)',
+        '  - Helper patterns: run(), readJson(), listModeSkillNames(), assertExists()',
+        'Read e2e-tests/docker/structural.test.ts — understand how Docker E2E tests verify:',
+        '  - CLI availability (babysitter command exists and returns version)',
+        '  - Plugin installation (plugin files present in expected paths)',
+        '  - Hook registration and executability (scripts have +x, hooks.json is valid)',
+        '  - Settings configuration (settings.json references correct hooks)',
+
+        // ── Create the test directory and files ──
+        `Create ${args.pluginDir}/test/ directory with the following test files:`,
+
+        // ── integration.test.js (syntax validation) ──
+        'Create integration.test.js following the babysitter-codex pattern:',
+        '  - testSyntax(): collect all JS files from skills/, bin/, scripts/ and run node --check on each',
+        '  - testShellSyntax(): validate all shell scripts in hooks/ via sh -n',
+        '  - Clear pass/fail output with file paths on error',
+        '  - Exit with code 1 on any failure',
+
+        // ── packaged-install.test.js (installation verification) ──
+        'Create packaged-install.test.js following the babysitter-codex pattern:',
+        '  1. Setup: npm pack --json, extract tarball to temp dir',
+        '  2. Test global installation:',
+        `     - Run the plugin install command appropriate for ${args.harnessName}`,
+        '     - Verify all expected files are installed:',
+        '       - Plugin manifest (plugin.json, .codex-plugin/plugin.json, package.json, or harness equivalent)',
+        '       - Hook scripts (all hooks referenced in hooks.json exist and are valid)',
+        '       - Skills directory (all skill definitions present with SKILL.md or equivalent)',
+        '       - Configuration files (hooks.json, config files for the harness)',
+        '       - Version/lock files (versions.json, babysitter.lock.json)',
+        '  3. Verify hooks.json structure:',
+        '     - Each hook type (SessionStart, Stop, UserPromptSubmit, etc.) has correct command paths',
+        '     - Hook commands reference valid script files',
+        '     - Matchers are correctly configured',
+        '  4. Verify skill distribution:',
+        '     - All skill names from source appear in installed location',
+        '     - Each skill has required definition file (SKILL.md, AGENTS.md, etc.)',
+        '     - No UTF-8 BOM in skill files',
+        '  5. Verify configuration:',
+        '     - Harness-specific config values are correct',
+        '     - Marketplace registration entry exists if applicable',
+        '  6. Test workspace/team installation (if the harness supports it):',
+        '     - Separate workspace-level installation',
+        '     - Workspace config files created correctly',
+        '  7. Verify exclusions:',
+        '     - No installer binaries in final install (bin/ excluded)',
+        '     - No test files in final install',
+        '     - No deprecated or unnecessary files',
+
+        // ── E2E test file (for Docker tests) ──
+        `Create e2e-tests/docker/${args.adapterName}.test.ts following the structural.test.ts pattern:`,
+        '  - Test babysitter CLI detects the harness (harness:discover shows it)',
+        `  - Test plugin files are correctly installed in Docker image`,
+        '  - Test hook scripts are executable and have valid syntax',
+        '  - Test hook invocation produces expected JSON output (stdin → hook → stdout)',
+        '  - Test session creation flow if applicable',
+        'Import helpers from e2e-tests/docker/helpers.ts for Docker exec and image management.',
+
+        // ── Package.json test script ──
+        `Add or update ${args.pluginDir}/package.json with test scripts:`,
+        '  "test": "node test/integration.test.js && node test/packaged-install.test.js"',
+        '  "test:integration": "node test/integration.test.js"',
+
+        // ── Run tests ──
+        'Run the integration test to verify it passes: node test/integration.test.js',
+        'If the packaged-install test requires npm pack, verify the package.json has correct files/bin fields.',
+      ],
+      outputFormat: 'JSON with testFiles, testCategories, filesCreated, summary',
+    },
+    outputSchema: {
+      type: 'object',
+      required: ['testFiles', 'filesCreated', 'summary'],
+      properties: {
+        testFiles: { type: 'array', items: { type: 'string' } },
+        testCategories: { type: 'array', items: { type: 'string' } },
+        filesCreated: { type: 'array', items: { type: 'string' } },
+        summary: { type: 'string' },
+      },
+    },
+  },
+
+  io: {
+    inputJsonPath: `tasks/${taskCtx.effectId}/input.json`,
+    outputJsonPath: `tasks/${taskCtx.effectId}/result.json`,
+  },
+
+  labels: ['agent', 'assimilation', 'testing', 'plugin'],
+}));
+
+// ---------------------------------------------------------------------------
+// PHASE 9: CI/CD Integration
+// ---------------------------------------------------------------------------
+
+/**
+ * Reference CI/CD files the agent should study:
+ *   .github/workflows/ci.yml              — PR validation: lint, build, test matrix (3 OS × 2 Node)
+ *   .github/workflows/e2e-docker.yml      — Docker E2E: structural, hook, workflow, full-run tests
+ *   .github/workflows/release.yml         — Release: validate → version bump → npm publish
+ *   .github/workflows/staging-publish.yml — Staging: prerelease versions, --tag staging
+ *   .github/workflows/docker-publish.yml  — Docker image: multi-platform build, ghcr.io publish
+ */
+
+export const setupCiCdTask = defineTask('setup-ci-cd', (args, taskCtx) => ({
+  kind: 'agent',
+  title: `Configure CI/CD for ${args.harnessName} plugin`,
+  description: 'Update CI/CD workflows to include the new plugin in PR validation, E2E Docker tests, release pipeline, and staging publish',
+
+  agent: {
+    name: 'general-purpose',
+    prompt: {
+      role: 'senior DevOps engineer',
+      task: `Integrate the ${args.harnessName} babysitter plugin into the existing CI/CD pipelines`,
+      context: {
+        projectDir: args.projectDir,
+        harnessName: args.harnessName,
+        pluginDir: args.pluginDir,
+        adapterName: args.adapterName,
+        research: args.research,
+        integrationFiles: args.integrationFiles,
+      },
+      instructions: [
+        // ── Study existing CI/CD patterns ──
+        'Read .github/workflows/ci.yml thoroughly — understand:',
+        '  - The test job: lint → verify:metadata → build:sdk → test:sdk with artifact upload',
+        '  - The packages-sdk matrix job: 3 OS (ubuntu, macos, windows) × 2 Node (20, 22) with lint, build, test, smoke per combination',
+        '  - How artifacts are structured: artifacts/test-logs/, _ci_artifacts/logs/{OS}/node{version}/',
+        'Read .github/workflows/e2e-docker.yml thoroughly — understand:',
+        '  - Path triggers: which plugin directories trigger the workflow (plugins/babysitter/**, plugins/babysitter-codex/**)',
+        '  - The docker-e2e-tests job: structural tests (no API key), Azure OpenAI tests (gated on secrets)',
+        '  - The codex-docker-e2e job: separate job for full Codex E2E with 90min timeout',
+        '  - How test files are selected: vitest run with specific test file paths',
+        '  - Artifact upload: e2e-artifacts/ with 14-day retention',
+        'Read .github/workflows/release.yml thoroughly — understand:',
+        '  - The validate job: lint, build, test, then babysitter-codex package tests (npm test --prefix plugins/babysitter-codex)',
+        '  - The version_and_release job: version bump, changelog, npm publish for SDK + codex + metapackage',
+        '  - How new plugins get added to the publish step',
+        'Read .github/workflows/staging-publish.yml — understand staging prerelease flow',
+        'Read .github/workflows/docker-publish.yml — understand multi-platform Docker build triggers',
+
+        // ── Update CI workflow (ci.yml) ──
+        'If the plugin has its own test suite (package.json with test script):',
+        `  - Add a "${args.harnessName} plugin tests" step to the test job: npm test --prefix ${args.pluginDir}`,
+        '  - Add artifact capture for the test logs',
+
+        // ── Update E2E Docker workflow (e2e-docker.yml) ──
+        `Add '${args.pluginDir}/**' to the paths trigger list in e2e-docker.yml (both pull_request and push sections).`,
+        `If an E2E test file was created (e2e-tests/docker/${args.adapterName}.test.ts):`,
+        '  - Add it to the structural test run command (no API key required tests)',
+        '  - If the harness supports full orchestration E2E, consider a separate gated job similar to codex-docker-e2e',
+
+        // ── Update release workflow (release.yml) ──
+        'If the plugin is published to npm:',
+        `  - Add "${args.harnessName} plugin tests" step to the validate job: npm test --prefix ${args.pluginDir}`,
+        '  - Add npm publish step to version_and_release job with correct package name and access level',
+        '  - Follow the existing pattern: npm publish --access public (or --tag staging for staging-publish.yml)',
+        'If the plugin is NOT published to npm (e.g., marketplace-only distribution):',
+        '  - Still add the test step to validate job',
+        '  - Skip the npm publish step',
+
+        // ── Update staging workflow (staging-publish.yml) ──
+        'If the plugin is npm-published, add staging publish step with --tag staging flag.',
+
+        // ── Update Docker build (docker-publish.yml) ──
+        `Add '${args.pluginDir}/**' to the paths trigger list so Docker image rebuilds when the plugin changes.`,
+        'If the plugin should be included in the Docker image, update Dockerfile to COPY the plugin.',
+
+        // ── Dockerfile updates (if applicable) ──
+        'Read the existing Dockerfile to understand how plugins are installed in the Docker image.',
+        'If the new plugin should be included:',
+        '  - Add COPY instruction for the plugin directory',
+        '  - Add install step if the plugin has a setup script',
+        '  - Verify the plugin is available in the Docker image by updating structural.test.ts expectations',
+
+        // ── Verify CI/CD changes ──
+        'Verify all workflow YAML files are valid (correct indentation, valid syntax).',
+        'Verify path triggers are comprehensive (include plugin dir, adapter file, test files).',
+        'Verify test steps use the correct working directory and commands.',
+        'Do NOT break existing workflows — only add new steps/paths.',
+      ],
+      outputFormat: 'JSON with workflowsModified, stepsAdded, dockerUpdated, filesModified, summary',
+    },
+    outputSchema: {
+      type: 'object',
+      required: ['workflowsModified', 'filesModified', 'summary'],
+      properties: {
+        workflowsModified: { type: 'array', items: { type: 'string' } },
+        stepsAdded: { type: 'array', items: { type: 'string' } },
+        dockerUpdated: { type: 'boolean' },
+        filesModified: { type: 'array', items: { type: 'string' } },
+        summary: { type: 'string' },
+      },
+    },
+  },
+
+  io: {
+    inputJsonPath: `tasks/${taskCtx.effectId}/input.json`,
+    outputJsonPath: `tasks/${taskCtx.effectId}/result.json`,
+  },
+
+  labels: ['agent', 'assimilation', 'ci-cd', 'devops'],
+}));
+
+// ---------------------------------------------------------------------------
+// PHASE 10: Verification
 // ---------------------------------------------------------------------------
 
 export const verifyAssimilationTask = defineTask('verify-assimilation', (args, taskCtx) => ({
@@ -727,7 +1122,7 @@ export const verifyAssimilationTask = defineTask('verify-assimilation', (args, t
         research: args.research,
       },
       instructions: [
-        'Score each dimension 0-100: adapter completeness, plugin structure, skill fidelity, hook correctness, install/dist method, harness wrapper, README quality.',
+        'Score each dimension 0-100: adapter completeness, plugin structure, skill fidelity, hook correctness, install/dist method, harness wrapper, README quality, adapter test coverage, plugin test coverage, CI/CD integration.',
 
         // ── Adapter interface completeness ──
         'Verify the adapter implements ALL required HarnessAdapter methods: isActive, resolveSessionId, resolveStateDir, resolvePluginRoot, bindSession, handleStopHook, handleSessionStartHook, findHookDispatcherPath.',
@@ -750,10 +1145,29 @@ export const verifyAssimilationTask = defineTask('verify-assimilation', (args, t
         'Verify skills use the SDK CLI instructions command, not embedded static content.',
         'Verify install/uninstall scripts are idempotent and complete.',
 
+        // ── Testing coverage ──
+        'Verify adapter unit tests exist at packages/sdk/src/harness/__tests__/<adapterName>.test.ts.',
+        'Verify adapter tests cover: isActive, resolveSessionId, resolveStateDir, resolvePluginRoot, bindSession, handleStopHook (with completion proof and journal replay), handleSessionStartHook (with state file and context injection), findHookDispatcherPath.',
+        'Verify adapter tests cover discovery entries (KNOWN_HARNESSES), invoker entries (HARNESS_CLI_MAP, buildHarnessArgs), and registry integration (detectAdapter, getAdapterByName).',
+        'Verify adapter tests use proper patterns: env var save/restore, vi.mock for execFile, mkdtemp for file ops, synthetic stdin for hooks.',
+        'Verify plugin integration tests exist at <pluginDir>/test/integration.test.js with: JS syntax validation (node --check), shell script validation (sh -n).',
+        'Verify plugin packaged-install tests exist at <pluginDir>/test/packaged-install.test.js with: npm pack, install verification, file manifest check, hooks.json validation, skill distribution, config validation, marketplace registration.',
+        'Verify E2E Docker test file exists at e2e-tests/docker/<adapterName>.test.ts with: harness discovery, plugin installation, hook executability, session flow.',
+        'Verify package.json has test script that runs both integration and packaged-install tests.',
+        'Verify all tests pass: adapter tests via vitest, plugin tests via node.',
+
+        // ── CI/CD integration ──
+        'Verify .github/workflows/e2e-docker.yml paths triggers include the plugin directory.',
+        'Verify .github/workflows/release.yml validate job includes plugin test step.',
+        'Verify .github/workflows/ci.yml includes plugin test step if the plugin has tests.',
+        'If npm-published: verify release.yml has npm publish step, staging-publish.yml has staging publish step.',
+        'Verify .github/workflows/docker-publish.yml paths include the plugin directory if Docker-relevant.',
+        'Verify E2E test is included in the Docker E2E test run commands.',
+
         // ── Anti-patterns ──
         'Verify README does not expose raw CLI primitives to end users.',
         'Verify no generated code uses kind: "node" effects, direct result.json writes, or implicit breakpoint approval.',
-        'Deduct heavily for: missing adapter methods (especially stop/session-start hooks), broken discovery/invoker entries, stub implementations that skip journal replay or completion proof, redundant orchestration scripts or custom tools, missing getPromptContext or incorrect PromptContext values.',
+        'Deduct heavily for: missing adapter methods (especially stop/session-start hooks), broken discovery/invoker entries, stub implementations that skip journal replay or completion proof, redundant orchestration scripts or custom tools, missing getPromptContext or incorrect PromptContext values, missing or inadequate tests, missing CI/CD integration.',
         'Return both score and qualityScore for backwards compatibility.',
       ],
       outputFormat: 'JSON with score, qualityScore, dimensions, issues, recommendations, summary',
