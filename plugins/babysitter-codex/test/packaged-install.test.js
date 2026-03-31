@@ -143,8 +143,7 @@ try {
   assert.strictEqual(hasBom, false, 'Installed babysit skill should not contain a UTF-8 BOM');
   const installedSkill = fs.readFileSync(path.join(installedPluginRoot, 'skills', 'babysit', 'SKILL.md'), 'utf8');
   assert.ok(installedSkill.includes('name: babysit'));
-  assert.ok(installedSkill.includes('run:create'), 'babysit skill should reference run:create');
-  assert.ok(installedSkill.includes('run:iterate'), 'babysit skill should reference run:iterate');
+  assert.ok(installedSkill.includes('instructions:babysit-skill'), 'babysit skill should reference instructions:babysit-skill command');
   const installedCallSkill = fs.readFileSync(path.join(installedPluginRoot, 'skills', 'call', 'SKILL.md'), 'utf8');
   assert.ok(installedCallSkill.includes('Load and use the installed `babysit` skill.'));
 
