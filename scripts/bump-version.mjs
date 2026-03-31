@@ -103,12 +103,16 @@ if (codexPackageManifest) {
 
 // Write sdkVersion to versions.json (separate from plugin.json to avoid
 // Claude Code's plugin validator rejecting unrecognized keys)
-const versionsPath = "plugins/babysitter/versions.json";
-const versionsData = existsSync(versionsPath)
-  ? JSON.parse(readFileSync(versionsPath, "utf8"))
-  : {};
-versionsData.sdkVersion = newVersion;
-writeFileSync(versionsPath, `${JSON.stringify(versionsData, null, 2)}\n`);
+for (const versionsPath of [
+  "plugins/babysitter/versions.json",
+  "plugins/babysitter-codex/versions.json",
+]) {
+  const versionsData = existsSync(versionsPath)
+    ? JSON.parse(readFileSync(versionsPath, "utf8"))
+    : {};
+  versionsData.sdkVersion = newVersion;
+  writeFileSync(versionsPath, `${JSON.stringify(versionsData, null, 2)}\n`);
+}
 
 // Update marketplace.json plugin entry - bump from its current version
 const marketplacePath = ".claude-plugin/marketplace.json";
