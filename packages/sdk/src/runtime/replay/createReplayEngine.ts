@@ -1,5 +1,6 @@
 import { readRunMetadata, readRunInputs } from "../../storage/runFiles";
-import { RunMetadata } from "../../storage/types";
+import { RunMetadata, JournalEvent } from "../../storage/types";
+import { loadJournal } from "../../storage/journal";
 import { buildEffectIndex, EffectIndex } from "./effectIndex";
 import { ReplayCursor } from "./replayCursor";
 import { ProcessContext } from "../types";
@@ -32,11 +33,34 @@ export async function createReplayEngine(options: CreateReplayEngineOptions): Pr
   const metadata = await readRunMetadata(options.runDir);
   ensureCompatibleLayout(metadata.layoutVersion, options.runDir);
   const inputs = await readRunInputs(options.runDir);
-  const effectIndex = await buildEffectIndex({ runDir: options.runDir });
+
+  // Load journal once — shared by effect index builder and log seq scanner.
+  // Wraps parse errors into RunFailedError for consistency with the old
+  // code-path where buildEffectIndex loaded the journal internally.
+  let journal: JournalEvent[];
+  try {
+    journal = await loadJournal(options.runDir);
+  } catch (error) {
+    const err = error as NodeJS.ErrnoException;
+    if (err?.code === "JOURNAL_PARSE_FAILED") {
+      throw new RunFailedError("Failed to parse journal event", {
+        path: err.path,
+        runDir: options.runDir,
+        error: err.message,
+      });
+    }
+    throw error;
+  }
+
+  const effectIndex = await buildEffectIndex({ runDir: options.runDir, events: journal });
   const { snapshot: stateCacheSnapshot, rebuildMeta: stateRebuild } = await resolveStateCacheSnapshot({
     runDir: options.runDir,
     effectIndex,
   });
+
+  // Build set of already-recorded PROCESS_LOG seqs for replay deduplication
+  const recordedLogSeqs = extractRecordedLogSeqs(journal);
+
   const replayCursor = new ReplayCursor();
   const processId = metadata.processId ?? metadata.request ?? metadata.runId;
   const { context, internalContext } = createProcessContext({
@@ -47,6 +71,7 @@ export async function createReplayEngine(options: CreateReplayEngineOptions): Pr
     replayCursor,
     now: options.now,
     logger: options.logger,
+    recordedLogSeqs,
   });
 
   return {
@@ -97,6 +122,24 @@ async function resolveStateCacheSnapshot({
   }
 
   return { snapshot: existingSnapshot, rebuildMeta: null };
+}
+
+/**
+ * Scan journal for PROCESS_LOG events and collect their logSeq values.
+ * Used by ctx.log to skip already-recorded logs during replay.
+ */
+function extractRecordedLogSeqs(events: JournalEvent[]): Set<number> {
+  const seqs = new Set<number>();
+  for (const event of events) {
+    if (event.type === "PROCESS_LOG") {
+      const data = event.data as Record<string, unknown>;
+      const logSeq = data?.logSeq;
+      if (typeof logSeq === "number") {
+        seqs.add(logSeq);
+      }
+    }
+  }
+  return seqs;
 }
 
 function ensureCompatibleLayout(layoutVersion: string | undefined, runDir: string) {

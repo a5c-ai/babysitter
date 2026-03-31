@@ -26,7 +26,17 @@ LOG_DIR="${BABYSITTER_LOG_DIR:-.a5c/logs}"
 LOG_FILE="$LOG_DIR/babysitter-after-agent-hook.log"
 mkdir -p "$LOG_DIR" 2>/dev/null
 
-echo "[INFO] $(date -u +%Y-%m-%dT%H:%M:%SZ) AfterAgent hook invoked" >> "$LOG_FILE" 2>/dev/null
+blog() {
+  local msg="$1"
+  local ts
+  ts="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+  echo "[INFO] $ts $msg" >> "$LOG_FILE" 2>/dev/null
+  if command -v babysitter &>/dev/null; then
+    babysitter log --type hook --label "hook:after-agent" --message "$msg" --source shell-hook 2>/dev/null || true
+  fi
+}
+
+blog "AfterAgent hook invoked"
 
 # ---------------------------------------------------------------------------
 # Resolve babysitter CLI
@@ -42,7 +52,7 @@ if ! command -v babysitter &>/dev/null; then
   fi
 fi
 
-echo "[INFO] $(date -u +%Y-%m-%dT%H:%M:%SZ) babysitter CLI resolved" >> "$LOG_FILE" 2>/dev/null
+blog "babysitter CLI resolved"
 
 # ---------------------------------------------------------------------------
 # Capture stdin (prevents keeping event loop alive)
@@ -52,7 +62,7 @@ INPUT_FILE=$(mktemp 2>/dev/null || echo "/tmp/bsitter-after-agent-$$.json")
 cat > "$INPUT_FILE"
 
 INPUT_SIZE=$(wc -c < "$INPUT_FILE" 2>/dev/null || echo "?")
-echo "[INFO] $(date -u +%Y-%m-%dT%H:%M:%SZ) Hook input received ($INPUT_SIZE bytes)" >> "$LOG_FILE" 2>/dev/null
+blog "Hook input received ($INPUT_SIZE bytes)"
 
 # ---------------------------------------------------------------------------
 # Delegate to SDK CLI (hook:run --hook-type stop --harness gemini-cli)
@@ -67,7 +77,7 @@ RESULT=$(babysitter hook:run \
   --json < "$INPUT_FILE" 2>>"$LOG_DIR/babysitter-after-agent-hook-stderr.log")
 EXIT_CODE=$?
 
-echo "[INFO] $(date -u +%Y-%m-%dT%H:%M:%SZ) CLI exit code=$EXIT_CODE result_len=$(echo -n "$RESULT" | wc -c)" >> "$LOG_FILE" 2>/dev/null
+blog "CLI exit code=$EXIT_CODE result_len=$(echo -n "$RESULT" | wc -c)"
 
 rm -f "$INPUT_FILE" 2>/dev/null
 

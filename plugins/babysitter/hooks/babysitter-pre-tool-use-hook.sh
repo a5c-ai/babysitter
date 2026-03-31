@@ -26,8 +26,12 @@ mkdir -p "$LOG_DIR" 2>/dev/null
 INPUT_FILE=$(mktemp 2>/dev/null || echo "/tmp/hook-pre-tool-use-$$.json")
 cat > "$INPUT_FILE"
 
+babysitter log --type hook --label "hook:pre-tool-use" --message "Hook invoked" --source shell-hook 2>/dev/null || true
+
 RESULT=$(babysitter hook:run --hook-type pre-tool-use --json < "$INPUT_FILE" 2>"$LOG_DIR/babysitter-pre-tool-use-hook-stderr.log")
 EXIT_CODE=$?
+
+babysitter log --type hook --label "hook:pre-tool-use" --message "CLI exit code=$EXIT_CODE" --source shell-hook 2>/dev/null || true
 
 rm -f "$INPUT_FILE" 2>/dev/null
 

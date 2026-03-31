@@ -34,6 +34,7 @@ import { handleSkillDiscover, handleSkillFetchRemote, discoverSkillsInternal, di
 import { handleMcpServe } from "./commands/mcpServe";
 import { handleHookLog } from "./commands/hookLog";
 import { handleHookRun } from "./commands/hookRun";
+import { handleLog } from "./commands/log";
 import { handleProfileCommand } from "./commands/profile";
 import type { ProfileCommandArgs } from "./commands/profile";
 import {
@@ -99,6 +100,7 @@ const USAGE = `Usage:
   babysitter session:last-message --transcript-path <file> [--json]
   babysitter session:iteration-message --iteration <n> [--run-id <id>] [--runs-dir <dir>] [--plugin-root <dir>] [--json]
   babysitter skill:discover --plugin-root <dir> [--run-id <id>] [--cache-ttl <seconds>] [--runs-dir <dir>] [--include-remote] [--summary-only] [--process-path <path>] [--json]
+  babysitter log --type <process|hook|cli> --message <msg> [--run-id <id>] [--label <label>] [--level <level>] [--source <src>] [--json]
   babysitter hook:log --hook-type <type> --log-file <path> [--json]
   babysitter hook:run --hook-type <stop|session-start|user-prompt-submit|pre-tool-use> [--harness <claude-code|gemini-cli>] [--plugin-root <dir>] [--state-dir <dir>] [--runs-dir <dir>] [--json] [--verbose]
   babysitter compress-output <command and args...>
@@ -251,6 +253,12 @@ interface ParsedArgs {
   pluginScope?: "global" | "project";
   pluginForce?: boolean;
   sessionForce?: boolean;
+  // log command flags
+  logType?: string;
+  logMessage?: string;
+  logLabel?: string;
+  logLevel?: string;
+  logSource?: string;
   // tokens:stats flags
   tokensAll?: boolean;
   tokensRunId?: string;
@@ -620,6 +628,27 @@ function parseArgs(argv: string[]): ParsedArgs {
     }
     if (arg === "--global") {
       parsed.pluginScope = "global";
+      continue;
+    }
+    // log command flags
+    if (arg === "--type") {
+      parsed.logType = expectFlagValue(rest, ++i, "--type");
+      continue;
+    }
+    if (arg === "--message") {
+      parsed.logMessage = expectFlagValue(rest, ++i, "--message");
+      continue;
+    }
+    if (arg === "--label") {
+      parsed.logLabel = expectFlagValue(rest, ++i, "--label");
+      continue;
+    }
+    if (arg === "--level") {
+      parsed.logLevel = expectFlagValue(rest, ++i, "--level");
+      continue;
+    }
+    if (arg === "--source") {
+      parsed.logSource = expectFlagValue(rest, ++i, "--source");
       continue;
     }
     // harness:cleanup flags
@@ -2212,6 +2241,7 @@ const VALID_COMMANDS = [
   "harness:observe",
   "harness:user-install",
   "harness:project-install",
+  "log",
   "hook:log",
   "hook:run",
   "skill:discover",
@@ -2681,6 +2711,19 @@ export function createBabysitterCli() {
             runId: parsed.runIdOverride,
             runsDir: parsed.runsDir,
             pluginRoot: parsed.pluginRoot,
+            json: parsed.json,
+          });
+        }
+        // Log command
+        if (parsed.command === "log") {
+          return await handleLog({
+            logType: parsed.logType ?? "",
+            message: parsed.logMessage ?? "",
+            runId: parsed.runIdOverride,
+            processId: parsed.processId,
+            label: parsed.logLabel,
+            level: parsed.logLevel,
+            source: parsed.logSource,
             json: parsed.json,
           });
         }

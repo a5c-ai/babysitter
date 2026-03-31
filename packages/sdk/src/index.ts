@@ -12,3 +12,4 @@ export * from "./profiles";
 export * from "./plugins";
 export * from "./interaction";
 export * from "./prompts";
+export * from "./logging";
