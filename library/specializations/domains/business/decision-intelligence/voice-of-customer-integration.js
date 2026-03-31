@@ -58,15 +58,24 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 5: Insights Synthesis
-  const insightsSynthesis = await ctx.task(insightsSynthesisTask, {
+  let insightsSynthesis = await ctx.task(insightsSynthesisTask, {
     projectName,
     textAnalytics,
     feedbackTaxonomy,
     analysisObjectives
   });
 
-  // Breakpoint: Review VoC insights
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      insightsSynthesis = await ctx.task(insightsSynthesisTask, { ...{
+    projectName,
+    textAnalytics,
+    feedbackTaxonomy,
+    analysisObjectives
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Review VoC insights for ${projectName}. Are the customer themes accurately captured?`,
     title: 'VoC Insights Review',
     context: {
@@ -74,9 +83,15 @@ export async function process(inputs, ctx) {
       projectName,
       sourceCount: feedbackSources.length,
       themeCount: insightsSynthesis.themes?.length || 0
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 6: Action Prioritization Framework
   const actionPrioritization = await ctx.task(actionPrioritizationTask, {
     projectName,
@@ -121,8 +136,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const sourceAssessmentTask = defineTask('source-assessment', (args, taskCtx) => ({
   kind: 'agent',

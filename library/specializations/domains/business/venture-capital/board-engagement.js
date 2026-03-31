@@ -78,7 +78,7 @@ export async function process(inputs, ctx) {
 
   // Task 5: Generate Pre-Meeting Package
   ctx.log('info', 'Generating pre-meeting package');
-  const preMeetingPackage = await ctx.task(preMeetingPackageTask, {
+  let preMeetingPackage = await ctx.task(preMeetingPackageTask, {
     companyName,
     boardMeeting,
     preMeetingAnalysis,
@@ -90,8 +90,20 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...preMeetingPackage.artifacts);
 
-  // Breakpoint: Review pre-meeting preparation
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      preMeetingPackage = await ctx.task(preMeetingPackageTask, { ...{
+    companyName,
+    boardMeeting,
+    preMeetingAnalysis,
+    strategicTopics,
+    questionsAndConcerns,
+    executiveSession,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Pre-meeting package complete for ${companyName} board meeting. ${strategicTopics.topics.length} strategic topics, ${questionsAndConcerns.questions.length} questions. Review materials?`,
     title: 'Board Meeting Preparation',
     context: {
@@ -104,9 +116,15 @@ export async function process(inputs, ctx) {
         concerns: questionsAndConcerns.concerns.length,
         priorActionItems: preMeetingAnalysis.openActionItems.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 6: Meeting Notes Template
   ctx.log('info', 'Preparing meeting notes template');
   const meetingNotesTemplate = await ctx.task(meetingNotesTask, {
@@ -174,8 +192,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Pre-Meeting Analysis
+  // Task 1: Pre-Meeting Analysis
 export const preMeetingAnalysisTask = defineTask('pre-meeting-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Conduct pre-meeting analysis',

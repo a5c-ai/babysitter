@@ -68,7 +68,7 @@ export async function process(inputs, ctx) {
 
   // Task 2: Validate Retraining Data
   ctx.log('info', 'Validating retraining data quality and availability');
-  const dataValidation = await ctx.task(validateRetrainingDataTask, {
+  let dataValidation = await ctx.task(validateRetrainingDataTask, {
     dataSource,
     validationDataSource,
     modelId,
@@ -86,8 +86,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...dataValidation.artifacts);
 
-  // Breakpoint: Review data validation and approve retraining
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      dataValidation = await ctx.task(validateRetrainingDataTask, { ...{
+    dataSource,
+    validationDataSource,
+    modelId,
+    currentModelSchema: modelStateValidation.modelSchema
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Data validation complete for model ${modelId}. Data quality score: ${dataValidation.dataQualityScore}/100. Dataset size: ${dataValidation.datasetSize} samples. Proceed with retraining?`,
     title: 'Retraining Data Validation Review',
     context: {
@@ -98,9 +107,15 @@ export async function process(inputs, ctx) {
       datasetSize: dataValidation.datasetSize,
       schemaMismatch: dataValidation.schemaMismatch,
       files: dataValidation.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 2: MODEL RETRAINING
   // ============================================================================
@@ -160,7 +175,6 @@ export async function process(inputs, ctx) {
       metadata: { processId: 'data-science-ml/model-retraining', timestamp: startTime }
     };
   }
-
   // ============================================================================
   // PHASE 3: MODEL VALIDATION AND COMPARISON
   // ============================================================================
@@ -180,7 +194,7 @@ export async function process(inputs, ctx) {
 
   // Task 7: Compare with Current Production Model
   ctx.log('info', 'Comparing retrained model with current production model');
-  const modelComparison = await ctx.task(compareModelsTask, {
+  let modelComparison = await ctx.task(compareModelsTask, {
     modelId,
     newModelVersion,
     newModelMetrics: modelEvaluation.metrics,
@@ -196,9 +210,19 @@ export async function process(inputs, ctx) {
 
   // Quality Gate: New model must meet performance threshold
   if (!modelEvaluation.meetsThreshold) {
-    ctx.log('warn', `Retrained model does not meet performance threshold: ${modelEvaluation.primaryMetricScore} < ${performanceThreshold}`);
-
-    await ctx.breakpoint({
+      let lastFeedback_qualityGateApproval = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_qualityGateApproval) {
+        modelComparison = await ctx.task(compareModelsTask, { ...{
+    modelId,
+    newModelVersion,
+    newModelMetrics: modelEvaluation.metrics,
+    currentModelVersion: modelStateValidation.currentVersion,
+    currentModelMetrics,
+    performanceThreshold
+  }, feedback: lastFeedback_qualityGateApproval, attempt: attempt + 1 });
+      }
+  const qualityGateApproval = await ctx.breakpoint({
       question: `Retrained model performance (${modelEvaluation.primaryMetricScore}) does not meet threshold (${performanceThreshold}). Review results and decide: proceed with deployment anyway, or abort?`,
       title: 'Model Performance Below Threshold',
       context: {
@@ -209,15 +233,31 @@ export async function process(inputs, ctx) {
         threshold: performanceThreshold,
         comparison: modelComparison,
         files: modelEvaluation.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_qualityGateApproval || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (qualityGateApproval.approved) break;
+      lastFeedback_qualityGateApproval = qualityGateApproval.response || qualityGateApproval.feedback || 'Changes requested';
+    } }
 
   // Quality Gate: New model should outperform current model
   if (!isImprovement) {
-    ctx.log('warn', `Retrained model does not outperform current model. Improvement: ${performanceImprovement}%`);
-
-    await ctx.breakpoint({
+      let lastFeedback_qualityGateApproval2 = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_qualityGateApproval2) {
+        modelComparison = await ctx.task(compareModelsTask, { ...{
+    modelId,
+    newModelVersion,
+    newModelMetrics: modelEvaluation.metrics,
+    currentModelVersion: modelStateValidation.currentVersion,
+    currentModelMetrics,
+    performanceThreshold
+  }, feedback: lastFeedback_qualityGateApproval2, attempt: attempt + 1 });
+      }
+  const qualityGateApproval2 = await ctx.breakpoint({
       question: `Retrained model shows ${performanceImprovement > 0 ? 'minimal' : 'negative'} improvement (${performanceImprovement}%). Deploy anyway, or abort?`,
       title: 'Model Performance Comparison Warning',
       context: {
@@ -228,13 +268,19 @@ export async function process(inputs, ctx) {
         improvement: performanceImprovement,
         comparison: modelComparison,
         files: modelComparison.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_qualityGateApproval2 || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (qualityGateApproval2.approved) break;
+      lastFeedback_qualityGateApproval2 = qualityGateApproval2.response || qualityGateApproval2.feedback || 'Changes requested';
+    } }
 
   // Task 8: Model Fairness and Bias Analysis
   ctx.log('info', 'Analyzing model fairness and bias');
-  const fairnessAnalysis = await ctx.task(analyzeFairnessTask, {
+  let fairnessAnalysis = await ctx.task(analyzeFairnessTask, {
     modelId,
     newModelVersion,
     validationDataSource: validationDataSource || dataSource,
@@ -245,9 +291,17 @@ export async function process(inputs, ctx) {
 
   // Quality Gate: Fairness checks must pass
   if (fairnessAnalysis.hasCriticalBias) {
-    ctx.log('error', 'Critical bias detected in retrained model');
-
-    await ctx.breakpoint({
+      let lastFeedback_qualityGateApproval3 = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_qualityGateApproval3) {
+        fairnessAnalysis = await ctx.task(analyzeFairnessTask, { ...{
+    modelId,
+    newModelVersion,
+    validationDataSource: validationDataSource || dataSource,
+    demographics: modelStateValidation.monitoredDemographics || []
+  }, feedback: lastFeedback_qualityGateApproval3, attempt: attempt + 1 });
+      }
+  const qualityGateApproval3 = await ctx.breakpoint({
       question: `Critical fairness issues detected in retrained model. ${fairnessAnalysis.criticalBiasCount} critical bias(es) found. Review and decide: abort deployment or accept risks?`,
       title: 'Model Fairness Critical Issues',
       context: {
@@ -257,9 +311,15 @@ export async function process(inputs, ctx) {
         criticalBiases: fairnessAnalysis.criticalBiases,
         fairnessMetrics: fairnessAnalysis.fairnessMetrics,
         files: fairnessAnalysis.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_qualityGateApproval3 || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (qualityGateApproval3.approved) break;
+      lastFeedback_qualityGateApproval3 = qualityGateApproval3.response || qualityGateApproval3.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 4: MODEL REGISTRATION AND VERSIONING
@@ -292,7 +352,7 @@ export async function process(inputs, ctx) {
 
   // Task 10: Generate Model Card
   ctx.log('info', 'Generating comprehensive model card');
-  const modelCard = await ctx.task(generateModelCardTask, {
+  let modelCard = await ctx.task(generateModelCardTask, {
     modelId,
     newModelVersion,
     modelRegistration,
@@ -315,8 +375,22 @@ export async function process(inputs, ctx) {
   let deploymentDecision = autoDeployEnabled && isImprovement && !fairnessAnalysis.hasCriticalBias;
 
   if (!autoDeployEnabled || !isImprovement || fairnessAnalysis.hasCriticalBias) {
-    // Manual approval required
-    await ctx.breakpoint({
+      let lastFeedback_phase5Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase5Review) {
+        modelCard = await ctx.task(generateModelCardTask, { ...{
+    modelId,
+    newModelVersion,
+    modelRegistration,
+    trainingMetadata: retrainingResult,
+    performanceMetrics: modelEvaluation.metrics,
+    fairnessAnalysis,
+    modelComparison,
+    intendedUse: modelStateValidation.intendedUse,
+    limitations: modelStateValidation.knownLimitations
+  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+      }
+  const phase5Review = await ctx.breakpoint({
       question: `Model ${newModelVersion} ready for deployment. Performance: ${modelEvaluation.primaryMetricScore}. Improvement: ${performanceImprovement}%. Deploy to production?`,
       title: 'Model Deployment Approval',
       context: {
@@ -333,10 +407,16 @@ export async function process(inputs, ctx) {
           ...modelCard.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })),
           { path: modelRegistration.registryUrl, format: 'link', label: 'Model Registry' }
         ]
-      }
-    });
-
-    // Assume approval was given if we continue past breakpoint
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase5Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase5Review.approved) break;
+      lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+    }
+  // Assume approval was given if we continue past breakpoint
     deploymentDecision = true;
   }
 
@@ -368,8 +448,7 @@ export async function process(inputs, ctx) {
         metadata: { processId: 'data-science-ml/model-retraining', timestamp: startTime }
       };
     }
-
-    // Task 12: Monitor Canary Deployment
+  // Task 12: Monitor Canary Deployment
     ctx.log('info', 'Monitoring canary deployment metrics');
     const canaryMonitoring = await ctx.task(monitorCanaryDeploymentTask, {
       modelId,
@@ -387,7 +466,7 @@ export async function process(inputs, ctx) {
 
       if (rollbackOnFailure) {
         ctx.log('warn', 'Initiating automatic rollback');
-        const rollback = await ctx.task(rollbackDeploymentTask, {
+        let rollback = await ctx.task(rollbackDeploymentTask, {
           modelId,
           newModelVersion,
           currentModelVersion: modelStateValidation.currentVersion,
@@ -408,8 +487,18 @@ export async function process(inputs, ctx) {
           artifacts,
           metadata: { processId: 'data-science-ml/model-retraining', timestamp: startTime }
         };
-      } else {
-        await ctx.breakpoint({
+          let lastFeedback_finalApproval2 = null;
+        for (let attempt = 0; attempt < 3; attempt++) {
+          if (lastFeedback_finalApproval2) {
+            rollback = await ctx.task(rollbackDeploymentTask, { ...{
+          modelId,
+          newModelVersion,
+          currentModelVersion: modelStateValidation.currentVersion,
+          deploymentId: canaryDeployment.deploymentId,
+          reason: 'Canary performance degradation'
+        }, feedback: lastFeedback_finalApproval2, attempt: attempt + 1 });
+          }
+  const finalApproval2 = await ctx.breakpoint({
           question: `Canary deployment showing performance issues. ${canaryMonitoring.issues.length} issue(s) detected. Rollback or continue full deployment?`,
           title: 'Canary Deployment Issues',
           context: {
@@ -419,12 +508,17 @@ export async function process(inputs, ctx) {
             issues: canaryMonitoring.issues,
             canaryMetrics: canaryMonitoring.metrics,
             files: canaryMonitoring.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-          }
-        });
-      }
+          },
+          expert: 'owner',
+          tags: ['approval-gate'],
+          previousFeedback: lastFeedback_finalApproval2 || undefined,
+          attempt: attempt > 0 ? attempt + 1 : undefined
+          });
+          if (finalApproval2.approved) break;
+          lastFeedback_finalApproval2 = finalApproval2.response || finalApproval2.feedback || 'Changes requested';
+        }     }
     }
-
-    // Task 13: Full Production Deployment
+  // Task 13: Full Production Deployment
     ctx.log('info', 'Proceeding with full production deployment');
     const fullDeployment = await ctx.task(fullDeployModelTask, {
       modelId,
@@ -452,8 +546,7 @@ export async function process(inputs, ctx) {
         metadata: { processId: 'data-science-ml/model-retraining', timestamp: startTime }
       };
     }
-
-    // Task 14: Update Model Serving Configuration
+  // Task 14: Update Model Serving Configuration
     const servingConfigUpdate = await ctx.task(updateServingConfigTask, {
       modelId,
       newModelVersion,
@@ -466,7 +559,6 @@ export async function process(inputs, ctx) {
   } else {
     ctx.log('info', 'Model deployment skipped - registered but not deployed');
   }
-
   // ============================================================================
   // PHASE 6: POST-DEPLOYMENT MONITORING
   // ============================================================================
@@ -490,14 +582,13 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...monitoringSetup.artifacts);
   }
-
   // ============================================================================
   // PHASE 7: FINALIZATION AND REPORTING
   // ============================================================================
 
   // Task 16: Generate Retraining Report
   ctx.log('info', 'Generating comprehensive retraining report');
-  const retrainingReport = await ctx.task(generateRetrainingReportTask, {
+  let retrainingReport = await ctx.task(generateRetrainingReportTask, {
     modelId,
     newModelVersion,
     currentModelVersion: modelStateValidation.currentVersion,
@@ -516,8 +607,27 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...retrainingReport.artifacts);
 
-  // Final Breakpoint: Review complete retraining pipeline results
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval3 = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval3) {
+      retrainingReport = await ctx.task(generateRetrainingReportTask, { ...{
+    modelId,
+    newModelVersion,
+    currentModelVersion: modelStateValidation.currentVersion,
+    retrainingTrigger,
+    dataValidation,
+    retrainingResult,
+    trainingMonitoring,
+    modelEvaluation,
+    modelComparison,
+    fairnessAnalysis,
+    modelRegistration,
+    deployed: deploymentSuccessful,
+    performanceImprovement,
+    artifacts
+  }, feedback: lastFeedback_finalApproval3, attempt: attempt + 1 });
+    }
+  const finalApproval3 = await ctx.breakpoint({
     question: `Model retraining pipeline complete for ${modelId}. New version: ${newModelVersion}. Performance improvement: ${performanceImprovement}%. Deployed: ${deploymentSuccessful}. Review final report?`,
     title: 'Retraining Pipeline Complete',
     context: {
@@ -532,9 +642,15 @@ export async function process(inputs, ctx) {
         { path: modelCard.modelCardPath, format: 'markdown', label: 'Model Card' },
         ...artifacts.filter(a => a.type === 'summary').map(a => ({ path: a.path, format: a.format || 'markdown' }))
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval3 || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval3.approved) break;
+    lastFeedback_finalApproval3 = finalApproval3.response || finalApproval3.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -573,8 +689,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

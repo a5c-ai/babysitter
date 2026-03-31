@@ -53,7 +53,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 6: Rule Application
-  const ruleApplication = await ctx.task(applyRulesToFactsTask, {
+  let ruleApplication = await ctx.task(applyRulesToFactsTask, {
     rules: ruleIdentification.consolidatedRules,
     facts: inputs.facts,
     statutoryInterpretation: statutoryAnalysis,
@@ -61,13 +61,28 @@ export async function process(inputs, ctx) {
   });
 
   // Quality Gate: Legal Soundness
-  if (ruleApplication.confidenceScore < 0.5) {
-    await ctx.breakpoint('legal-analysis-review', {
+      let lastFeedback = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback) {
+        ruleApplication = await ctx.task(applyRulesToFactsTask, { ...{
+    rules: ruleIdentification.consolidatedRules,
+    facts: inputs.facts,
+    statutoryInterpretation: statutoryAnalysis,
+    precedentGuidance: analogicalReasoning
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+      }
+  const phase6Review = await ctx.breakpoint('legal-analysis-review', {
       message: 'Legal analysis has significant uncertainty',
       uncertainAreas: ruleApplication.uncertainElements,
-      additionalResearchNeeded: ruleApplication.researchGaps
-    });
-  }
+      additionalResearchNeeded: ruleApplication.researchGaps,
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase6Review.approved) break;
+      lastFeedback = phase6Review.response || phase6Review.feedback || 'Changes requested';
+    } }
 
   // Phase 7: Argument Construction
   const argumentConstruction = await ctx.task(constructArgumentsTask, {

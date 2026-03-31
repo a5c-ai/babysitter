@@ -114,7 +114,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 7: Validating stories against INVEST criteria');
-  const investValidation = await ctx.task(investValidationTask, {
+  let investValidation = await ctx.task(investValidationTask, {
     projectName,
     userStories: storyCreation.userStories,
     acceptanceCriteria: acceptanceCriteria.criteria,
@@ -126,8 +126,18 @@ export async function process(inputs, ctx) {
 
   const qualityMet = investValidation.overallScore >= 80;
 
-  // Breakpoint: Review user stories
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      investValidation = await ctx.task(investValidationTask, { ...{
+    projectName,
+    userStories: storyCreation.userStories,
+    acceptanceCriteria: acceptanceCriteria.criteria,
+    storyEstimation,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `User story development complete for ${projectName}. INVEST score: ${investValidation.overallScore}/100. ${qualityMet ? 'Stories meet INVEST criteria!' : 'Some stories need refinement.'} Review and approve?`,
     title: 'User Story Review',
     context: {
@@ -146,9 +156,15 @@ export async function process(inputs, ctx) {
         totalStoryPoints: storyEstimation.totalPoints,
         storiesNeedingRefinement: investValidation.storiesNeedingRefinement?.length || 0
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 8: BACKLOG INTEGRATION
   // ============================================================================
@@ -208,8 +224,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

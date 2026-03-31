@@ -63,13 +63,11 @@ export async function process(inputs, ctx) {
     const twapOracle = await ctx.task(twapOracleTask, { projectName, outputDir });
     artifacts.push(...twapOracle.artifacts);
   }
-
   // Phase 7: Flash Swap (if enabled)
   if (features.includes('flash-swaps')) {
     const flashSwap = await ctx.task(flashSwapTask, { projectName, outputDir });
     artifacts.push(...flashSwap.artifacts);
   }
-
   // Phase 8: Router Implementation
   const routerImplementation = await ctx.task(routerImplementationTask, { projectName, outputDir });
   artifacts.push(...routerImplementation.artifacts);

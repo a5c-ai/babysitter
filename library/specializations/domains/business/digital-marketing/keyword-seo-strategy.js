@@ -82,7 +82,7 @@ export async function process(inputs, ctx) {
 
   // Task 8: Develop Topic Cluster Strategy
   ctx.log('info', 'Phase 8: Developing topic cluster strategy');
-  const topicClusters = await ctx.task(topicClusterStrategyTask, {
+  let topicClusters = await ctx.task(topicClusterStrategyTask, {
     keywordResearch,
     contentGaps,
     intentAnalysis,
@@ -90,8 +90,17 @@ export async function process(inputs, ctx) {
   });
   artifacts.push(...topicClusters.artifacts);
 
-  // Breakpoint: Review keyword strategy
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      topicClusters = await ctx.task(topicClusterStrategyTask, { ...{
+    keywordResearch,
+    contentGaps,
+    intentAnalysis,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Keyword research complete. ${keywordResearch.totalKeywords} keywords identified with ${topicClusters.clusterCount} topic clusters. Review strategy?`,
     title: 'Keyword Strategy Review',
     context: {
@@ -103,9 +112,15 @@ export async function process(inputs, ctx) {
         contentGaps: contentGaps.gapCount,
         highOpportunityKeywords: difficultyAssessment.highOpportunityCount
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 9: Prioritize Keywords by Business Value
   ctx.log('info', 'Phase 9: Prioritizing keywords by business value');
   const keywordPrioritization = await ctx.task(keywordPrioritizationTask, {
@@ -154,8 +169,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task definitions
+  // Task definitions
 export const seedKeywordsTask = defineTask('seed-keywords', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Define seed keywords and topics',

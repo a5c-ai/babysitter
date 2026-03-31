@@ -27,15 +27,24 @@ export async function process(inputs, ctx) {
 
   // Phase 1: Request Analysis
   ctx.log('info', 'Phase 1: Analyzing knowledge request');
-  const requestAnalysis = await ctx.task(requestAnalysisTask, { matchingRequest, outputDir });
-  artifacts.push(...requestAnalysis.artifacts);
-
-  await ctx.breakpoint({
+  let requestAnalysis = await ctx.task(requestAnalysisTask, { matchingRequest, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      requestAnalysis = await ctx.task(requestAnalysisTask, { ...{ matchingRequest, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Knowledge request analyzed: "${requestAnalysis.summary}". Expertise areas: ${requestAnalysis.expertiseNeeded.join(', ')}. Proceed?`,
     title: 'Request Analysis Review',
-    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })), summary: { expertiseNeeded: requestAnalysis.expertiseNeeded } }
-  });
-
+    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })), summary: { expertiseNeeded: requestAnalysis.expertiseNeeded } },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 2: Expert Pool Filtering
   ctx.log('info', 'Phase 2: Filtering expert pool');
   const expertFiltering = await ctx.task(expertFilteringTask, { requestAnalysis, expertPool, expertiseProfiles, matchingCriteria, outputDir });
@@ -83,7 +92,6 @@ export async function process(inputs, ctx) {
     reviewResult = await ctx.task(stakeholderReviewTask, { matchResults: matchRanking.rankings, connectionProtocol: connectionProtocol.protocol, qualityScore: qualityAssessment.overallScore, outputDir });
     artifacts.push(...reviewResult.artifacts);
   }
-
   const endTime = ctx.now();
   return {
     success: true,
@@ -103,8 +111,7 @@ export async function process(inputs, ctx) {
     metadata: { processId: 'domains/business/knowledge-management/expert-matching', timestamp: startTime, outputDir }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 export const requestAnalysisTask = defineTask('request-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Analyze knowledge request',

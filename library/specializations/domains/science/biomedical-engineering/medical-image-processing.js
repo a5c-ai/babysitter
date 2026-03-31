@@ -52,14 +52,22 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 4: Performance Metric Definition
-  const performanceMetrics = await ctx.task(performanceMetricTask, {
+  let performanceMetrics = await ctx.task(performanceMetricTask, {
     algorithmName,
     clinicalApplication,
     performanceRequirements
   });
 
-  // Breakpoint: Review algorithm implementation
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      performanceMetrics = await ctx.task(performanceMetricTask, { ...{
+    algorithmName,
+    clinicalApplication,
+    performanceRequirements
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: `Review algorithm implementation for ${algorithmName}. Is the approach clinically appropriate?`,
     title: 'Algorithm Implementation Review',
     context: {
@@ -71,9 +79,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: algorithmImplementation
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
   // Phase 5: Validation Dataset Curation
   const validationDataset = await ctx.task(validationDatasetTask, {
     algorithmName,
@@ -97,7 +111,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 8: Algorithm Documentation
-  const algorithmDocumentation = await ctx.task(algorithmDocumentationTask, {
+  let algorithmDocumentation = await ctx.task(algorithmDocumentationTask, {
     algorithmName,
     imageModality,
     clinicalApplication,
@@ -110,8 +124,23 @@ export async function process(inputs, ctx) {
     clinicalUtility
   });
 
-  // Final Breakpoint: Algorithm Approval
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      algorithmDocumentation = await ctx.task(algorithmDocumentationTask, { ...{
+    algorithmName,
+    imageModality,
+    clinicalApplication,
+    algorithmSpecification,
+    dataPreparation,
+    algorithmImplementation,
+    performanceMetrics,
+    validationDataset,
+    algorithmValidation,
+    clinicalUtility
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Image processing algorithm complete for ${algorithmName}. Performance: ${algorithmValidation.overallPerformance}. Approve for clinical integration?`,
     title: 'Algorithm Approval',
     context: {
@@ -121,9 +150,15 @@ export async function process(inputs, ctx) {
       files: [
         { path: `artifacts/algorithm-documentation.json`, format: 'json', content: algorithmDocumentation }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     algorithmName,
@@ -137,8 +172,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const algorithmSpecificationTask = defineTask('algorithm-specification', (args, taskCtx) => ({
   kind: 'agent',

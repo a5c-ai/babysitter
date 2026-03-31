@@ -59,7 +59,7 @@ export async function process(inputs, ctx) {
 
   // Task 3: Weight Elicitation
   ctx.log('info', 'Phase 3: Eliciting criteria weights');
-  const weightElicitation = await ctx.task(weightElicitationTask, {
+  let weightElicitation = await ctx.task(weightElicitationTask, {
     criteriaHierarchy,
     method,
     outputDir
@@ -67,8 +67,16 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...weightElicitation.artifacts);
 
-  // Breakpoint: Review weights
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      weightElicitation = await ctx.task(weightElicitationTask, { ...{
+    criteriaHierarchy,
+    method,
+    outputDir
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Criteria weights elicited. Consistency ratio: ${weightElicitation.consistencyRatio?.toFixed(3) || 'N/A'}. Top criterion: ${weightElicitation.topCriterion}. Review weights before scoring?`,
     title: 'Criteria Weights Review',
     context: {
@@ -76,9 +84,15 @@ export async function process(inputs, ctx) {
       weights: weightElicitation.weights,
       consistencyRatio: weightElicitation.consistencyRatio,
       files: weightElicitation.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // Task 4: Alternative Scoring
   ctx.log('info', 'Phase 4: Scoring alternatives against criteria');
   const alternativeScoring = await ctx.task(alternativeScoringTask, {
@@ -114,7 +128,7 @@ export async function process(inputs, ctx) {
 
   // Task 7: Recommendation Report
   ctx.log('info', 'Phase 7: Generating recommendation report');
-  const recommendationReport = await ctx.task(recommendationReportTask, {
+  let recommendationReport = await ctx.task(recommendationReportTask, {
     problemStructure,
     weightElicitation,
     aggregationRanking,
@@ -124,8 +138,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...recommendationReport.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      recommendationReport = await ctx.task(recommendationReportTask, { ...{
+    problemStructure,
+    weightElicitation,
+    aggregationRanking,
+    sensitivityAnalysis,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Decision analysis complete. Top alternative: ${aggregationRanking.topAlternative} (score: ${aggregationRanking.topScore.toFixed(3)}). Ranking stable: ${sensitivityAnalysis.rankingStable}. Review recommendation?`,
     title: 'MCDA Results Review',
     context: {
@@ -137,9 +161,15 @@ export async function process(inputs, ctx) {
         recommendation: recommendationReport.recommendation
       },
       files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -163,8 +193,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Problem Structuring
+  // Task 1: Problem Structuring
 export const problemStructuringTask = defineTask('problem-structuring', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Structure decision problem',

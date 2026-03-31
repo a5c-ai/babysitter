@@ -149,7 +149,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 8: Implementing safe area handling');
 
-  const safeAreaHandling = await ctx.task(safeAreaHandlingTask, {
+  let safeAreaHandling = await ctx.task(safeAreaHandlingTask, {
     appName,
     framework,
     outputDir
@@ -157,8 +157,16 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...safeAreaHandling.artifacts);
 
-  // Quality Gate: Layout Review
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      safeAreaHandling = await ctx.task(safeAreaHandlingTask, { ...{
+    appName,
+    framework,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Responsive layout system created for ${appName}. Devices: ${targetDevices.join(', ')}, Orientations: ${orientations.join(', ')}. Review implementation?`,
     title: 'Responsive Layout Review',
     context: {
@@ -169,9 +177,15 @@ export async function process(inputs, ctx) {
       breakpoints,
       utilities: responsiveHooks.hooks,
       files: artifacts.slice(-5).map(a => ({ path: a.path, format: 'javascript' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 9: RESPONSIVE TEXT
   // ============================================================================
@@ -258,8 +272,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

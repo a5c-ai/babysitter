@@ -53,7 +53,6 @@ export async function process(inputs, ctx) {
       deonticAnalysis: null
     };
   }
-
   // Phase 3: Obligation Analysis
   const obligationAnalysis = await ctx.task(obligationAnalysisTask, {
     situation: situationAnalysis,
@@ -62,15 +61,24 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 4: Permission Analysis
-  const permissionAnalysis = await ctx.task(permissionAnalysisTask, {
+  let permissionAnalysis = await ctx.task(permissionAnalysisTask, {
     situation: situationAnalysis,
     norms: normExtraction.applicableNorms,
     agents,
     obligations: obligationAnalysis.obligations
   });
 
-  // Breakpoint: Review deontic status
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      permissionAnalysis = await ctx.task(permissionAnalysisTask, { ...{
+    situation: situationAnalysis,
+    norms: normExtraction.applicableNorms,
+    agents,
+    obligations: obligationAnalysis.obligations
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: `Review deontic analysis for situation. ${obligationAnalysis.obligations?.length || 0} obligations, ${permissionAnalysis.permissions?.length || 0} permissions. Continue?`,
     title: 'Deontic Analysis Review',
     context: {
@@ -83,9 +91,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: { situationAnalysis, normExtraction, obligationAnalysis, permissionAnalysis }
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
   // Phase 5: Prohibition Analysis
   const prohibitionAnalysis = await ctx.task(prohibitionAnalysisTask, {
     situation: situationAnalysis,
@@ -129,7 +143,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 10: Deontic Synthesis and Recommendations
-  const deonticSynthesis = await ctx.task(deonticSynthesisTask, {
+  let deonticSynthesis = await ctx.task(deonticSynthesisTask, {
     situation: situationAnalysis,
     obligations: obligationAnalysis.obligations,
     permissions: permissionAnalysis.permissions,
@@ -141,8 +155,22 @@ export async function process(inputs, ctx) {
     context
   });
 
-  // Final Breakpoint: Deontic Analysis Approval
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      deonticSynthesis = await ctx.task(deonticSynthesisTask, { ...{
+    situation: situationAnalysis,
+    obligations: obligationAnalysis.obligations,
+    permissions: permissionAnalysis.permissions,
+    prohibitions: prohibitionAnalysis.prohibitions,
+    conflicts: conflictDetection.conflicts,
+    agentStatus: agentDeonticStatus,
+    compliance: complianceAssessment,
+    consequences: consequenceAnalysis,
+    context
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Deontic analysis complete. Overall compliance: ${complianceAssessment.overallStatus}. Approve analysis?`,
     title: 'Deontic Analysis Approval',
     context: {
@@ -154,9 +182,15 @@ export async function process(inputs, ctx) {
         { path: 'artifacts/deontic-report.json', format: 'json', content: deonticSynthesis },
         { path: 'artifacts/deontic-report.md', format: 'markdown', content: deonticSynthesis.markdown }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     situation: situationAnalysis,
@@ -178,8 +212,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const situationActionAnalysisTask = defineTask('situation-action-analysis', (args, taskCtx) => ({
   kind: 'agent',

@@ -39,7 +39,7 @@ export async function process(inputs, ctx) {
 
   // Phase 1: Process Observation
   ctx.log('info', 'Phase 1: Process Observation and Work Element Breakdown');
-  const observation = await ctx.task(processObservationTask, {
+  let observation = await ctx.task(processObservationTask, {
     processName,
     workStation,
     operators,
@@ -61,9 +61,17 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...timeStudy.artifacts);
   }
-
-  // Quality Gate: Time Study Review
-  await ctx.breakpoint({
+  let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      observation = await ctx.task(processObservationTask, { ...{
+    processName,
+    workStation,
+    operators,
+    outputDir
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Process observation complete. ${observation.workElements.length} work elements identified. ${timeStudy ? `Cycle time: ${timeStudy.observedCycleTime}s. Target: ${targetCycleTime || taktTime}s.` : ''} Proceed with standard work documentation?`,
     title: 'Time Study Review',
     context: {
@@ -72,9 +80,15 @@ export async function process(inputs, ctx) {
       workElements: observation.workElements,
       timeStudy: timeStudy?.summary,
       files: [...observation.artifacts, ...(timeStudy?.artifacts || [])].map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // Phase 3: Work Sequence Development
   ctx.log('info', 'Phase 3: Work Sequence Development');
   const workSequence = await ctx.task(workSequenceTask, {
@@ -116,7 +130,7 @@ export async function process(inputs, ctx) {
 
   // Phase 6: Work Instructions
   ctx.log('info', 'Phase 6: Detailed Work Instructions');
-  const workInstructions = await ctx.task(workInstructionsTask, {
+  let workInstructions = await ctx.task(workInstructionsTask, {
     processName,
     workSequence,
     standardWorkSheet,
@@ -125,8 +139,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...workInstructions.artifacts);
 
-  // Quality Gate: Standard Work Review
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      workInstructions = await ctx.task(workInstructionsTask, { ...{
+    processName,
+    workSequence,
+    standardWorkSheet,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Standard work documentation complete. Cycle time: ${standardWorkSheet.cycleTime}s. Standard WIP: ${standardWip.standardWipQuantity}. Work instructions: ${workInstructions.instructionCount}. Review and approve?`,
     title: 'Standard Work Document Review',
     context: {
@@ -136,9 +159,15 @@ export async function process(inputs, ctx) {
       workSequence: workSequence.sequence,
       standardWip: standardWip.standardWipQuantity,
       files: [...standardWorkSheet.artifacts, ...workInstructions.artifacts].map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 7: Training Materials
   ctx.log('info', 'Phase 7: Training Materials Development');
   const trainingMaterials = await ctx.task(trainingMaterialsTask, {
@@ -212,8 +241,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Process Observation
+  // Task 1: Process Observation
 export const processObservationTask = defineTask('standard-work-observation', (args, taskCtx) => ({
   kind: 'agent',
   title: `Process Observation - ${args.processName}`,

@@ -199,7 +199,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 11: Configuring code signing for iOS and Android');
 
-  const codeSigningSetup = await ctx.task(codeSigningTask, {
+  let codeSigningSetup = await ctx.task(codeSigningTask, {
     projectName,
     targetPlatforms,
     outputDir
@@ -207,8 +207,16 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...codeSigningSetup.artifacts);
 
-  // Quality Gate: Review setup configuration
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      codeSigningSetup = await ctx.task(codeSigningTask, { ...{
+    projectName,
+    targetPlatforms,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `React Native project setup complete for ${projectName}. Review configuration and approve?`,
     title: 'Project Setup Review',
     context: {
@@ -219,9 +227,15 @@ export async function process(inputs, ctx) {
       typescript,
       useExpo,
       files: artifacts.slice(-5).map(a => ({ path: a.path, format: a.format || 'javascript' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 12: DOCUMENTATION GENERATION
   // ============================================================================
@@ -279,8 +293,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

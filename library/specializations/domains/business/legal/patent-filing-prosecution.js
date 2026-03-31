@@ -47,14 +47,21 @@ export async function process(inputs, ctx) {
   artifacts.push(...disclosureReview.artifacts);
 
   // Phase 2: Patentability Assessment
-  const patentabilityAssessment = await ctx.task(patentabilityAssessmentTask, {
+  let patentabilityAssessment = await ctx.task(patentabilityAssessmentTask, {
     disclosure: disclosureReview.structuredDisclosure,
     outputDir
   });
   artifacts.push(...patentabilityAssessment.artifacts);
 
-  // Quality Gate: Patentability Decision
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      patentabilityAssessment = await ctx.task(patentabilityAssessmentTask, { ...{
+    disclosure: disclosureReview.structuredDisclosure,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Patentability assessment complete. Score: ${patentabilityAssessment.score}/100. Recommendation: ${patentabilityAssessment.recommendation}. Proceed with filing?`,
     title: 'Patentability Assessment Review',
     context: {
@@ -63,10 +70,15 @@ export async function process(inputs, ctx) {
       recommendation: patentabilityAssessment.recommendation,
       priorArt: patentabilityAssessment.priorArtFound,
       files: patentabilityAssessment.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
-  if (action === 'assess') {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }  if (action === 'assess') {
     return {
       success: true,
       action,
@@ -75,7 +87,6 @@ export async function process(inputs, ctx) {
       metadata: { processId: 'specializations/domains/business/legal/patent-filing-prosecution', timestamp: startTime }
     };
   }
-
   // Phase 3: Claims Drafting
   const claimsDrafting = await ctx.task(claimsDraftingTask, {
     disclosure: disclosureReview.structuredDisclosure,
@@ -93,16 +104,25 @@ export async function process(inputs, ctx) {
   artifacts.push(...specificationDrafting.artifacts);
 
   // Phase 5: Application Assembly
-  const applicationAssembly = await ctx.task(applicationAssemblyTask, {
+  let applicationAssembly = await ctx.task(applicationAssemblyTask, {
     disclosure: disclosureReview.structuredDisclosure,
     claims: claimsDrafting.claims,
     specification: specificationDrafting.specification,
     jurisdiction,
     outputDir
   });
-  artifacts.push(...applicationAssembly.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval2 = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval2) {
+      applicationAssembly = await ctx.task(applicationAssemblyTask, { ...{
+    disclosure: disclosureReview.structuredDisclosure,
+    claims: claimsDrafting.claims,
+    specification: specificationDrafting.specification,
+    jurisdiction,
+    outputDir
+  }, feedback: lastFeedback_finalApproval2, attempt: attempt + 1 });
+    }
+  const finalApproval2 = await ctx.breakpoint({
     question: `Patent application draft complete. ${claimsDrafting.claims.length} claims. Review and approve for filing?`,
     title: 'Patent Application Review',
     context: {
@@ -110,10 +130,15 @@ export async function process(inputs, ctx) {
       claimsCount: claimsDrafting.claims.length,
       applicationPath: applicationAssembly.applicationPath,
       files: [{ path: applicationAssembly.applicationPath, format: 'docx', label: 'Patent Application' }]
-    }
-  });
-
-  if (action === 'draft') {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval2 || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval2.approved) break;
+    lastFeedback_finalApproval2 = finalApproval2.response || finalApproval2.feedback || 'Changes requested';
+  }  if (action === 'draft') {
     return {
       success: true,
       action,
@@ -123,7 +148,6 @@ export async function process(inputs, ctx) {
       metadata: { processId: 'specializations/domains/business/legal/patent-filing-prosecution', timestamp: startTime }
     };
   }
-
   // Phase 6: Filing
   const filing = await ctx.task(patentFilingTask, {
     application: applicationAssembly,
@@ -141,7 +165,6 @@ export async function process(inputs, ctx) {
     });
     artifacts.push(...prosecutionStatus.artifacts);
   }
-
   return {
     success: true,
     action,

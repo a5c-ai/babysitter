@@ -38,17 +38,28 @@ export async function process(inputs, ctx) {
   artifacts.push(...complexityAnalysis.artifacts);
 
   // Phase 2: Identify Inefficient Data Structures
-  const dataStructureAnalysis = await ctx.task(identifyInefficientDataStructuresTask, {
+  let dataStructureAnalysis = await ctx.task(identifyInefficientDataStructuresTask, {
     projectName, targetFunctions, complexityAnalysis, outputDir
   });
-  artifacts.push(...dataStructureAnalysis.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      dataStructureAnalysis = await ctx.task(identifyInefficientDataStructuresTask, { ...{
+    projectName, targetFunctions, complexityAnalysis, outputDir
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Found ${dataStructureAnalysis.inefficiencies.length} inefficient data structures. Review alternatives?`,
     title: 'Data Structure Analysis',
-    context: { runId: ctx.runId, inefficiencies: dataStructureAnalysis.inefficiencies }
-  });
-
+    context: { runId: ctx.runId, inefficiencies: dataStructureAnalysis.inefficiencies },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // Phase 3: Research Alternative Algorithms
   const alternatives = await ctx.task(researchAlternativeAlgorithmsTask, {
     projectName, complexityAnalysis, dataStructureAnalysis, outputDir
@@ -80,17 +91,28 @@ export async function process(inputs, ctx) {
   artifacts.push(...benchmarks.artifacts);
 
   // Phase 8: Document Complexity Analysis
-  const documentation = await ctx.task(documentComplexityAnalysisTask, {
+  let documentation = await ctx.task(documentComplexityAnalysisTask, {
     projectName, complexityAnalysis, implementation, benchmarks, outputDir
   });
-  artifacts.push(...documentation.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      documentation = await ctx.task(documentComplexityAnalysisTask, { ...{
+    projectName, complexityAnalysis, implementation, benchmarks, outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Algorithm optimization complete. ${implementation.optimizedAlgorithms.length} algorithms improved. Accept changes?`,
     title: 'Algorithm Optimization Review',
-    context: { runId: ctx.runId, benchmarks: benchmarks.results }
-  });
-
+    context: { runId: ctx.runId, benchmarks: benchmarks.results },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     projectName,

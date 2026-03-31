@@ -121,7 +121,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 8: Assessing reasoning quality');
-  const qualityScore = await ctx.task(nonMonotonicQualityTask, {
+  let qualityScore = await ctx.task(nonMonotonicQualityTask, {
     kbAnalysis,
     defaultExtraction,
     beliefRevision,
@@ -134,8 +134,19 @@ export async function process(inputs, ctx) {
 
   const qualityMet = qualityScore.overallScore >= 75;
 
-  // Breakpoint: Review non-monotonic reasoning results
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      qualityScore = await ctx.task(nonMonotonicQualityTask, { ...{
+    kbAnalysis,
+    defaultExtraction,
+    beliefRevision,
+    retractionAnalysis,
+    finalInference,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Non-monotonic reasoning complete. Quality score: ${qualityScore.overallScore}/100. Retracted ${retractionAnalysis.retractedCount} conclusions. ${qualityMet ? 'Quality meets standards!' : 'Review defaults and priorities.'} Review results?`,
     title: 'Non-Monotonic Reasoning Results Review',
     context: {
@@ -154,9 +165,15 @@ export async function process(inputs, ctx) {
         retractedCount: retractionAnalysis.retractedCount,
         qualityScore: qualityScore.overallScore
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 9: REPORT GENERATION
   // ============================================================================
@@ -199,8 +216,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

@@ -141,7 +141,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Generating comprehensive review report');
-  const comprehensiveReport = await ctx.task(comprehensiveReportTask, {
+  let comprehensiveReport = await ctx.task(comprehensiveReportTask, {
     courseName,
     standardReviews: {
       standard1: standard1Review,
@@ -163,8 +163,26 @@ export async function process(inputs, ctx) {
   const qualityMet = overallScore >= qualityThreshold;
   const meetsCertification = comprehensiveReport.meetsCertification;
 
-  // Breakpoint: Review QM results
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      comprehensiveReport = await ctx.task(comprehensiveReportTask, { ...{
+    courseName,
+    standardReviews: {
+      standard1: standard1Review,
+      standard2: standard2Review,
+      standard3: standard3Review,
+      standard4: standard4Review,
+      standard5: standard5Review,
+      standard6: standard6Review,
+      standard7: standard7Review,
+      standard8: standard8Review
+    },
+    reviewType,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Quality Matters review complete. Score: ${overallScore}%. ${meetsCertification ? 'Meets QM certification standards!' : 'Does not meet certification - review recommendations.'} Review and approve?`,
     title: 'Quality Matters Review Results',
     context: {
@@ -178,9 +196,15 @@ export async function process(inputs, ctx) {
         essentialsMet: comprehensiveReport.essentialsMet,
         totalArtifacts: artifacts.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -213,8 +237,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Standard 1 Review - Course Overview and Introduction
+  // Task 1: Standard 1 Review - Course Overview and Introduction
 export const standard1ReviewTask = defineTask('standard1-review', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Review Standard 1: Course Overview and Introduction',

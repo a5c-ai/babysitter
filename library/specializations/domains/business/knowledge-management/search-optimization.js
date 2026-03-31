@@ -43,7 +43,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 1: Analyzing search analytics and user behavior');
-  const searchAnalysis = await ctx.task(searchAnalysisTask, {
+  let searchAnalysis = await ctx.task(searchAnalysisTask, {
     knowledgeBaseName,
     userSearchData,
     contentInventory,
@@ -53,8 +53,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...searchAnalysis.artifacts);
 
-  // Breakpoint: Review search analysis
-  await ctx.breakpoint({
+    let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      searchAnalysis = await ctx.task(searchAnalysisTask, { ...{
+    knowledgeBaseName,
+    userSearchData,
+    contentInventory,
+    currentSearchConfig,
+    outputDir
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Search analysis complete. Found ${searchAnalysis.searchPatterns.length} patterns and ${searchAnalysis.issues.length} issues. Review analysis?`,
     title: 'Search Analysis Review',
     context: {
@@ -71,9 +81,15 @@ export async function process(inputs, ctx) {
         zeroResultsRate: searchAnalysis.zeroResultsRate,
         topSearchTerms: searchAnalysis.topSearchTerms.slice(0, 5)
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 2: CONTENT INDEXING AUDIT
   // ============================================================================
@@ -109,7 +125,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 4: Building synonym dictionary and terminology mapping');
-  const synonymManagement = await ctx.task(synonymManagementTask, {
+  let synonymManagement = await ctx.task(synonymManagementTask, {
     knowledgeBaseName,
     searchAnalysis,
     taxonomyStructure,
@@ -119,8 +135,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...synonymManagement.artifacts);
 
-  // Breakpoint: Review synonym dictionary
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      synonymManagement = await ctx.task(synonymManagementTask, { ...{
+    knowledgeBaseName,
+    searchAnalysis,
+    taxonomyStructure,
+    contentInventory,
+    outputDir
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: `Synonym dictionary created with ${synonymManagement.synonymGroups.length} groups and ${synonymManagement.totalSynonyms} synonyms. Review dictionary?`,
     title: 'Synonym Dictionary Review',
     context: {
@@ -137,9 +163,15 @@ export async function process(inputs, ctx) {
         abbreviations: synonymManagement.abbreviations.length,
         misspellings: synonymManagement.commonMisspellings.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 5: SEARCH RANKING OPTIMIZATION
   // ============================================================================
@@ -173,7 +205,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...autocompleteConfig.artifacts);
   }
-
   // ============================================================================
   // PHASE 7: FACETED SEARCH DESIGN
   // ============================================================================
@@ -191,7 +222,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...facetedSearchConfig.artifacts);
   }
-
   // ============================================================================
   // PHASE 8: ZERO RESULTS HANDLING
   // ============================================================================
@@ -238,7 +268,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...relatedContentConfig.artifacts);
   }
-
   // ============================================================================
   // PHASE 11: SEARCH CONFIGURATION COMPILATION
   // ============================================================================
@@ -264,7 +293,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 12: Testing search quality and relevance');
-  const searchQualityTest = await ctx.task(searchQualityTestTask, {
+  let searchQualityTest = await ctx.task(searchQualityTestTask, {
     knowledgeBaseName,
     searchConfig: searchConfigCompilation.config,
     searchAnalysis,
@@ -276,8 +305,18 @@ export async function process(inputs, ctx) {
 
   const qualityMet = searchQualityTest.overallScore >= targetMetrics.relevanceScore;
 
-  // Breakpoint: Review search quality test
-  await ctx.breakpoint({
+    let lastFeedback_phase12Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase12Review) {
+      searchQualityTest = await ctx.task(searchQualityTestTask, { ...{
+    knowledgeBaseName,
+    searchConfig: searchConfigCompilation.config,
+    searchAnalysis,
+    targetMetrics,
+    outputDir
+  }, feedback: lastFeedback_phase12Review, attempt: attempt + 1 });
+    }
+  const phase12Review = await ctx.breakpoint({
     question: `Search quality score: ${searchQualityTest.overallScore}/100. ${qualityMet ? 'Quality targets met!' : 'May need improvements.'} Review results?`,
     title: 'Search Quality Test Review',
     context: {
@@ -295,9 +334,15 @@ export async function process(inputs, ctx) {
         findabilityRate: searchQualityTest.componentScores.findability,
         testCasesPassed: searchQualityTest.testCasesPassed
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase12Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase12Review.approved) break;
+    lastFeedback_phase12Review = phase12Review.response || phase12Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 13: SEARCH ANALYTICS SETUP
   // ============================================================================
@@ -317,7 +362,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 14: Creating search optimization implementation plan');
-  const implementationPlan = await ctx.task(implementationPlanTask, {
+  let implementationPlan = await ctx.task(implementationPlanTask, {
     knowledgeBaseName,
     searchPlatform,
     searchConfigCompilation,
@@ -344,8 +389,18 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...reviewResult.artifacts);
 
-    // Breakpoint: Final approval gate
-    await ctx.breakpoint({
+      let lastFeedback_finalApproval = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_finalApproval) {
+        implementationPlan = await ctx.task(implementationPlanTask, { ...{
+    knowledgeBaseName,
+    searchPlatform,
+    searchConfigCompilation,
+    currentSearchConfig,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+      }
+  const finalApproval = await ctx.breakpoint({
       question: `Stakeholder review complete. ${reviewResult.approved ? 'Approved!' : 'Requires revisions.'} Proceed with implementation?`,
       title: 'Final Approval Gate',
       context: {
@@ -362,9 +417,15 @@ export async function process(inputs, ctx) {
           stakeholdersReviewed: reviewResult.stakeholders.length,
           revisionsNeeded: reviewResult.revisionsNeeded
         }
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_finalApproval || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (finalApproval.approved) break;
+      lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+    } }
 
   const endTime = ctx.now();
   const duration = endTime - startTime;
@@ -410,8 +471,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

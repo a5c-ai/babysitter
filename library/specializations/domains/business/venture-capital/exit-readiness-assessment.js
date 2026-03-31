@@ -82,7 +82,7 @@ export async function process(inputs, ctx) {
 
   // Task 6: Exit Valuation Analysis
   ctx.log('info', 'Analyzing exit valuation');
-  const valuationAnalysis = await ctx.task(exitValuationTask, {
+  let valuationAnalysis = await ctx.task(exitValuationTask, {
     companyName,
     companyData,
     financialReadiness,
@@ -93,8 +93,19 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...valuationAnalysis.artifacts);
 
-  // Breakpoint: Review exit readiness
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      valuationAnalysis = await ctx.task(exitValuationTask, { ...{
+    companyName,
+    companyData,
+    financialReadiness,
+    marketPositioning,
+    buyerAnalysis,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Exit readiness assessment complete for ${companyName}. Overall readiness: ${financialReadiness.score}/100. ${buyerAnalysis.potentialBuyers.length} potential buyers identified. Review assessment?`,
     title: 'Exit Readiness Assessment Results',
     context: {
@@ -108,9 +119,15 @@ export async function process(inputs, ctx) {
         potentialBuyers: buyerAnalysis.potentialBuyers.length,
         valuationRange: valuationAnalysis.range
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 7: Gap Analysis and Recommendations
   ctx.log('info', 'Conducting gap analysis');
   const gapAnalysis = await ctx.task(gapAnalysisTask, {
@@ -177,8 +194,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Financial Readiness Assessment
+  // Task 1: Financial Readiness Assessment
 export const financialReadinessTask = defineTask('financial-readiness', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Assess financial readiness',

@@ -44,33 +44,39 @@ export async function process(inputs, ctx) {
   const viewModelBase = await ctx.task(createViewModelBaseTask, { projectName, framework, stateLibrary, outputDir });
   artifacts.push(...viewModelBase.artifacts);
 
-  const dataBinding = await ctx.task(implementDataBindingTask, { projectName, framework, stateLibrary, outputDir });
-  artifacts.push(...dataBinding.artifacts);
-
-  await ctx.breakpoint({
+  let dataBinding = await ctx.task(implementDataBindingTask, { projectName, framework, stateLibrary, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      dataBinding = await ctx.task(implementDataBindingTask, { ...{ projectName, framework, stateLibrary, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `MVVM base setup complete with ${stateLibrary}. Features: ${features.join(', ')}. Review?`,
     title: 'MVVM Setup Review',
-    context: { runId: ctx.runId, stateLibrary, features }
-  });
-
+    context: { runId: ctx.runId, stateLibrary, features },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   let commands = null;
   if (features.includes('commands')) {
     commands = await ctx.task(implementCommandPatternTask, { projectName, framework, stateLibrary, outputDir });
     artifacts.push(...commands.artifacts);
   }
-
   let validation = null;
   if (features.includes('validation')) {
     validation = await ctx.task(implementValidationTask, { projectName, framework, stateLibrary, outputDir });
     artifacts.push(...validation.artifacts);
   }
-
   let navigation = null;
   if (features.includes('navigation')) {
     navigation = await ctx.task(implementMvvmNavigationTask, { projectName, framework, stateLibrary, outputDir });
     artifacts.push(...navigation.artifacts);
   }
-
   const sampleViewModels = await ctx.task(createSampleViewModelsTask, { projectName, framework, stateLibrary, viewModelBase, outputDir });
   artifacts.push(...sampleViewModels.artifacts);
 

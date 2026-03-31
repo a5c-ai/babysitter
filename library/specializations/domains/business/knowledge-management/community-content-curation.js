@@ -25,15 +25,24 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Starting Community Content Curation and Management Process');
 
-  const contentInventory = await ctx.task(contentInventoryTask, { community, existingContent, contentScope, outputDir });
-  artifacts.push(...contentInventory.artifacts);
-
-  await ctx.breakpoint({
+  let contentInventory = await ctx.task(contentInventoryTask, { community, existingContent, contentScope, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      contentInventory = await ctx.task(contentInventoryTask, { ...{ community, existingContent, contentScope, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Inventoried ${contentInventory.totalAssets} content assets. Review?`,
     title: 'Content Inventory Review',
-    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })), summary: { totalAssets: contentInventory.totalAssets } }
-  });
-
+    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })), summary: { totalAssets: contentInventory.totalAssets } },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const contentAssessment = await ctx.task(contentAssessmentTask, { inventory: contentInventory.inventory, curationGoals, outputDir });
   artifacts.push(...contentAssessment.artifacts);
 
@@ -63,7 +72,6 @@ export async function process(inputs, ctx) {
     reviewResult = await ctx.task(stakeholderReviewTask, { curatedContent: contentOrganization.structure, curationGuidelines: curationGuidelines.guidelines, qualityScore: qualityAssessment.overallScore, outputDir });
     artifacts.push(...reviewResult.artifacts);
   }
-
   const endTime = ctx.now();
   return {
     success: true,

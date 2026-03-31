@@ -86,7 +86,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 4: Designing load testing scenarios');
 
-  const loadTesting = await ctx.task(loadTestingTask, {
+  let loadTesting = await ctx.task(loadTestingTask, {
     projectName,
     loadTestConfig,
     benchmarkStrategy,
@@ -95,8 +95,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...loadTesting.artifacts);
 
-  // Quality Gate: Benchmark Review
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      loadTesting = await ctx.task(loadTestingTask, { ...{
+    projectName,
+    loadTestConfig,
+    benchmarkStrategy,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Benchmark strategy defined for ${projectName}. Targets: ${benchmarkTargets.length}, KPIs defined. Approve benchmarking approach?`,
     title: 'Benchmark Strategy Review',
     context: {
@@ -105,9 +114,15 @@ export async function process(inputs, ctx) {
       benchmarkTargets,
       kpis,
       files: artifacts.slice(-3).map(a => ({ path: a.path, format: a.format || 'yaml' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 5: CONTINUOUS MONITORING
   // ============================================================================
@@ -192,8 +207,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

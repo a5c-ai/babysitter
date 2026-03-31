@@ -89,7 +89,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Conducting developer needs assessment and pain point discovery');
 
-  const discoveryResult = await ctx.task(developerNeedsAssessmentTask, {
+  let discoveryResult = await ctx.task(developerNeedsAssessmentTask, {
     projectName,
     organization,
     platformScope,
@@ -113,8 +113,18 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Discovery complete - Identified ${discoveryResult.painPoints.length} pain points, ${discoveryResult.requirements.length} requirements`);
 
-  // Quality Gate: Review discovery findings
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      discoveryResult = await ctx.task(developerNeedsAssessmentTask, { ...{
+    projectName,
+    organization,
+    platformScope,
+    requirements,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Phase 1 Review: Developer needs assessment complete. Identified ${discoveryResult.painPoints.length} pain points and ${discoveryResult.requirements.length} requirements. Top pain points: ${discoveryResult.topPainPoints.slice(0, 3).join(', ')}. Approve platform scope?`,
     title: 'Developer Needs Assessment Review',
     context: {
@@ -129,16 +139,22 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: JSON.stringify(discoveryResult, null, 2)
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 2: PLATFORM ARCHITECTURE DESIGN
   // ============================================================================
 
   ctx.log('info', 'Phase 2: Designing platform architecture and component selection');
 
-  const architectureResult = await ctx.task(platformArchitectureDesignTask, {
+  let architectureResult = await ctx.task(platformArchitectureDesignTask, {
     projectName,
     platformType,
     platformScope,
@@ -166,8 +182,21 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Architecture designed - Platform: ${architectureResult.platformTool}, Components: ${architectureResult.components.length}`);
 
-  // Quality Gate: Architecture review
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval2 = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval2) {
+      architectureResult = await ctx.task(platformArchitectureDesignTask, { ...{
+    projectName,
+    platformType,
+    platformScope,
+    discoveryResult,
+    infrastructure,
+    requirements,
+    organization,
+    outputDir
+  }, feedback: lastFeedback_finalApproval2, attempt: attempt + 1 });
+    }
+  const finalApproval2 = await ctx.breakpoint({
     question: `Phase 2 Review: Platform architecture designed using ${architectureResult.platformTool}. ${architectureResult.components.length} components selected. Estimated cost: $${architectureResult.estimatedMonthlyCost}/month. Approve architecture?`,
     title: 'Platform Architecture Review',
     context: {
@@ -183,9 +212,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: JSON.stringify(architectureResult, null, 2)
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval2 || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval2.approved) break;
+    lastFeedback_finalApproval2 = finalApproval2.response || finalApproval2.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 3: PLATFORM CORE DEPLOYMENT
   // ============================================================================
@@ -232,8 +267,21 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Platform core deployed - URL: ${coreDeployment.platformUrl}`);
 
-  // Quality Gate: Core deployment verification
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval3 = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval3) {
+      architectureResult = await ctx.task(platformArchitectureDesignTask, { ...{
+    projectName,
+    platformType,
+    platformScope,
+    discoveryResult,
+    infrastructure,
+    requirements,
+    organization,
+    outputDir
+  }, feedback: lastFeedback_finalApproval3, attempt: attempt + 1 });
+    }
+  const finalApproval3 = await ctx.breakpoint({
     question: `Phase 3 Review: Platform core deployed at ${coreDeployment.platformUrl}. Database: ${databaseSetup.databaseType}, Auth: ${authSetup.authProvider}. Verify platform is accessible?`,
     title: 'Core Deployment Verification',
     context: {
@@ -249,16 +297,22 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: JSON.stringify({ coreDeployment, databaseSetup, authSetup }, null, 2)
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval3 || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval3.approved) break;
+    lastFeedback_finalApproval3 = finalApproval3.response || finalApproval3.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 4: SERVICE CATALOG SETUP
   // ============================================================================
 
   ctx.log('info', 'Phase 4: Setting up service catalog and discovery');
 
-  const serviceCatalogResult = await ctx.task(serviceCatalogSetupTask, {
+  let serviceCatalogResult = await ctx.task(serviceCatalogSetupTask, {
     projectName,
     platformType,
     platformInfo: coreDeployment,
@@ -329,7 +383,6 @@ export async function process(inputs, ctx) {
   if (!backendTemplate.success || !frontendTemplate.success) {
     ctx.log('warn', 'Some template creation failed, but continuing with available templates');
   }
-
   const allTemplates = [backendTemplate, frontendTemplate, dataTemplate, workerTemplate].filter(t => t.success);
   allTemplates.forEach(t => {
     artifacts.push(...t.artifacts);
@@ -338,8 +391,19 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Golden paths created - ${allTemplates.length} service templates available`);
 
-  // Quality Gate: Template review
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval4 = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval4) {
+      serviceCatalogResult = await ctx.task(serviceCatalogSetupTask, { ...{
+    projectName,
+    platformType,
+    platformInfo: coreDeployment,
+    organization,
+    discoveryResult,
+    outputDir
+  }, feedback: lastFeedback_finalApproval4, attempt: attempt + 1 });
+    }
+  const finalApproval4 = await ctx.breakpoint({
     question: `Phase 5 Review: ${allTemplates.length} golden path templates created (${allTemplates.map(t => t.templateName).join(', ')}). Review templates?`,
     title: 'Golden Path Templates Review',
     context: {
@@ -356,9 +420,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         label: `${t.templateName} Template`
       }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval4 || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval4.approved) break;
+    lastFeedback_finalApproval4 = finalApproval4.response || finalApproval4.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 6: SELF-SERVICE WORKFLOWS
   // ============================================================================
@@ -480,7 +550,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 9: Creating developer onboarding program');
 
-  const onboardingResult = await ctx.task(developerOnboardingTask, {
+  let onboardingResult = await ctx.task(developerOnboardingTask, {
     projectName,
     platformInfo: coreDeployment,
     serviceCatalog: serviceCatalogResult,
@@ -508,8 +578,21 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Onboarding program created - ${onboardingResult.tutorials.length} tutorials, ${onboardingResult.videos.length} videos`);
 
-  // Quality Gate: Onboarding program review
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval5 = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval5) {
+      onboardingResult = await ctx.task(developerOnboardingTask, { ...{
+    projectName,
+    platformInfo: coreDeployment,
+    serviceCatalog: serviceCatalogResult,
+    templates: allTemplates,
+    workflows: platformInfo.workflows,
+    portal: developerPortalResult,
+    organization,
+    outputDir
+  }, feedback: lastFeedback_finalApproval5, attempt: attempt + 1 });
+    }
+  const finalApproval5 = await ctx.breakpoint({
     question: `Phase 9 Review: Developer onboarding program created with ${onboardingResult.tutorials.length} tutorials and ${onboardingResult.videos.length} video guides. Estimated time-to-first-deployment: ${onboardingResult.estimatedTimeToFirstDeployment} minutes. Review onboarding materials?`,
     title: 'Developer Onboarding Review',
     context: {
@@ -525,16 +608,22 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: JSON.stringify(onboardingResult, null, 2)
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval5 || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval5.approved) break;
+    lastFeedback_finalApproval5 = finalApproval5.response || finalApproval5.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 10: PILOT PROGRAM WITH INITIAL TEAMS
   // ============================================================================
 
   ctx.log('info', 'Phase 10: Running pilot program with initial teams');
 
-  const pilotResult = await ctx.task(platformPilotProgramTask, {
+  let pilotResult = await ctx.task(platformPilotProgramTask, {
     projectName,
     platformInfo: coreDeployment,
     serviceCatalog: serviceCatalogResult,
@@ -562,8 +651,21 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Pilot program complete - ${pilotResult.teamsOnboarded} teams, ${pilotResult.servicesCreated} services created`);
 
-  // Quality Gate: Pilot program review
-  await ctx.breakpoint({
+    let lastFeedback_qualityGateApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_qualityGateApproval) {
+      pilotResult = await ctx.task(platformPilotProgramTask, { ...{
+    projectName,
+    platformInfo: coreDeployment,
+    serviceCatalog: serviceCatalogResult,
+    templates: allTemplates,
+    onboarding: onboardingResult,
+    organization,
+    pilotTeamCount: Math.min(3, Math.ceil(organization.teams * 0.3)),
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval, attempt: attempt + 1 });
+    }
+  const qualityGateApproval = await ctx.breakpoint({
     question: `Phase 10 Review: Pilot program complete with ${pilotResult.teamsOnboarded} teams. Created ${pilotResult.servicesCreated} services. Satisfaction score: ${pilotResult.satisfactionScore}/10. Issues identified: ${pilotResult.issuesIdentified.length}. Proceed to full rollout?`,
     title: 'Pilot Program Review',
     context: {
@@ -580,16 +682,22 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: JSON.stringify(pilotResult, null, 2)
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_qualityGateApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (qualityGateApproval.approved) break;
+    lastFeedback_qualityGateApproval = qualityGateApproval.response || qualityGateApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 11: PLATFORM VALIDATION AND TESTING
   // ============================================================================
 
   ctx.log('info', 'Phase 11: Validating platform functionality and performance');
 
-  const validationResult = await ctx.task(platformValidationTask, {
+  let validationResult = await ctx.task(platformValidationTask, {
     projectName,
     platformInfo: coreDeployment,
     serviceCatalog: serviceCatalogResult,
@@ -601,9 +709,21 @@ export async function process(inputs, ctx) {
   });
 
   if (!validationResult.success) {
-    ctx.log('error', 'Platform validation failed');
-
-    await ctx.breakpoint({
+      let lastFeedback_phase11Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase11Review) {
+        validationResult = await ctx.task(platformValidationTask, { ...{
+    projectName,
+    platformInfo: coreDeployment,
+    serviceCatalog: serviceCatalogResult,
+    templates: allTemplates,
+    workflows: platformInfo.workflows,
+    pilot: pilotResult,
+    requirements,
+    outputDir
+  }, feedback: lastFeedback_phase11Review, attempt: attempt + 1 });
+      }
+  const phase11Review = await ctx.breakpoint({
       question: `Phase 11 Alert: Platform validation failed with ${validationResult.failedTests} failed tests. Issues: ${validationResult.criticalIssues.length} critical. Review issues before proceeding?`,
       title: 'Platform Validation Failed',
       context: {
@@ -614,9 +734,15 @@ export async function process(inputs, ctx) {
           format: 'json',
           content: JSON.stringify(validationResult, null, 2)
         }]
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase11Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase11Review.approved) break;
+      lastFeedback_phase11Review = phase11Review.response || phase11Review.feedback || 'Changes requested';
+    } }
 
   artifacts.push(...validationResult.artifacts);
 
@@ -681,7 +807,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 14: Creating rollout plan and communication strategy');
 
-  const rolloutPlanResult = await ctx.task(platformRolloutPlanTask, {
+  let rolloutPlanResult = await ctx.task(platformRolloutPlanTask, {
     projectName,
     platformInfo: coreDeployment,
     organization,
@@ -720,9 +846,19 @@ export async function process(inputs, ctx) {
 
   const readinessThreshold = 75;
 
-  ctx.log('info', `Overall platform readiness score: ${overallScore.toFixed(1)}/100`);
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval6 = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval6) {
+      rolloutPlanResult = await ctx.task(platformRolloutPlanTask, { ...{
+    projectName,
+    platformInfo: coreDeployment,
+    organization,
+    pilot: pilotResult,
+    targetAdoption,
+    outputDir
+  }, feedback: lastFeedback_finalApproval6, attempt: attempt + 1 });
+    }
+  const finalApproval6 = await ctx.breakpoint({
     question: `Final Review: Internal Developer Platform ${projectName} is ready for launch. Readiness score: ${overallScore.toFixed(1)}/100 (threshold: ${readinessThreshold}). ${rolloutPlanResult.phases.length}-phase rollout over ${rolloutPlanResult.estimatedDuration} weeks. Approve for launch?`,
     title: 'Final Platform Launch Review',
     context: {
@@ -766,9 +902,15 @@ export async function process(inputs, ctx) {
           content: rolloutPlanResult.executiveSummary || 'Executive summary pending'
         }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval6 || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval6.approved) break;
+    lastFeedback_finalApproval6 = finalApproval6.response || finalApproval6.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -817,8 +959,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

@@ -55,7 +55,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 3: Developing each hypothesis in detail');
-  const hypothesisDevelopment = await ctx.task(hypothesisDevelopmentTask, {
+  let hypothesisDevelopment = await ctx.task(hypothesisDevelopmentTask, {
     hypotheses: hypothesisGeneration.hypotheses,
     phenomenon,
     observations,
@@ -64,8 +64,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...hypothesisDevelopment.artifacts);
 
-  // Breakpoint: Review generated hypotheses
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      hypothesisDevelopment = await ctx.task(hypothesisDevelopmentTask, { ...{
+    hypotheses: hypothesisGeneration.hypotheses,
+    phenomenon,
+    observations,
+    outputDir
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Generated ${hypothesisDevelopment.developedHypotheses.length} working hypotheses for "${phenomenon}". Review before comparative analysis?`,
     title: 'Working Hypotheses Review',
     context: {
@@ -81,9 +90,15 @@ export async function process(inputs, ctx) {
         hypothesisCount: hypothesisDevelopment.developedHypotheses.length,
         observationCount: observations.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 4: COMPARATIVE EVALUATION
   // ============================================================================
@@ -131,7 +146,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 7: Formulating research strategy');
-  const strategyFormulation = await ctx.task(researchStrategyTask, {
+  let strategyFormulation = await ctx.task(researchStrategyTask, {
     activeHypotheses: hypothesisRefinement.activeHypotheses,
     crucialTests: crucialTestIdentification.crucialTests,
     comparativeAnalysis: comparativeEvaluation.analysis,
@@ -140,8 +155,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...strategyFormulation.artifacts);
 
-  // Final breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      strategyFormulation = await ctx.task(researchStrategyTask, { ...{
+    activeHypotheses: hypothesisRefinement.activeHypotheses,
+    crucialTests: crucialTestIdentification.crucialTests,
+    comparativeAnalysis: comparativeEvaluation.analysis,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Multiple hypotheses analysis complete. ${hypothesisRefinement.activeHypotheses.length} active hypotheses remain. ${crucialTestIdentification.crucialTests.length} crucial tests identified. Review research strategy?`,
     title: 'Multiple Hypotheses Analysis Complete',
     context: {
@@ -158,9 +182,15 @@ export async function process(inputs, ctx) {
         eliminatedHypotheses: hypothesisRefinement.eliminatedHypotheses.length,
         crucialTests: crucialTestIdentification.crucialTests.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -189,8 +219,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

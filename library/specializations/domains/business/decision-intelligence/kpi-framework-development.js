@@ -47,15 +47,24 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 3: Metric Hierarchy Design
-  const metricHierarchies = await ctx.task(metricHierarchyTask, {
+  let metricHierarchies = await ctx.task(metricHierarchyTask, {
     projectName,
     kpiDefinitions,
     businessUnits,
     strategicObjectives
   });
 
-  // Breakpoint: Review KPI definitions
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      metricHierarchies = await ctx.task(metricHierarchyTask, { ...{
+    projectName,
+    kpiDefinitions,
+    businessUnits,
+    strategicObjectives
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Review KPI definitions and hierarchies for ${projectName}. Are all strategic objectives covered?`,
     title: 'KPI Framework Review',
     context: {
@@ -63,9 +72,15 @@ export async function process(inputs, ctx) {
       projectName,
       kpiCount: kpiDefinitions.kpis?.length || 0,
       hierarchyLevels: metricHierarchies.levels?.length || 0
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 4: Target Setting Methodology
   const targetMethodology = await ctx.task(targetMethodologyTask, {
     projectName,
@@ -124,8 +139,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const strategicAlignmentTask = defineTask('strategic-alignment', (args, taskCtx) => ({
   kind: 'agent',

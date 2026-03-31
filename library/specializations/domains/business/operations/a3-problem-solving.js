@@ -58,20 +58,34 @@ export async function process(inputs, ctx) {
   artifacts.push({ phase: 'current-condition', output: currentCondition });
 
   // Phase 4: Goal Setting
-  const goalSetting = await ctx.task(setGoals, {
+  let goalSetting = await ctx.task(setGoals, {
     currentCondition,
     problemContext,
     constraints
   });
   artifacts.push({ phase: 'goal-setting', output: goalSetting });
 
-  // Quality Gate: Problem Definition Review
-  await ctx.breakpoint('problem-definition-review', {
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      goalSetting = await ctx.task(setGoals, { ...{
+    currentCondition,
+    problemContext,
+    constraints
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint('problem-definition-review', {
     title: 'A3 Problem Definition Review',
     description: 'Review background, current condition, and goals before root cause analysis',
-    artifacts: [background, currentCondition, goalSetting]
-  });
-
+    artifacts: [background, currentCondition, goalSetting],
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
   // Phase 5: Root Cause Analysis
   const rootCauseAnalysis = await ctx.task(analyzeRootCauses, {
     currentCondition,
@@ -89,20 +103,34 @@ export async function process(inputs, ctx) {
   artifacts.push({ phase: 'countermeasures', output: countermeasures });
 
   // Phase 7: Countermeasure Evaluation
-  const countermeasureEvaluation = await ctx.task(evaluateCountermeasures, {
+  let countermeasureEvaluation = await ctx.task(evaluateCountermeasures, {
     countermeasures,
     constraints,
     rootCauseAnalysis
   });
   artifacts.push({ phase: 'countermeasure-evaluation', output: countermeasureEvaluation });
 
-  // Quality Gate: Countermeasure Approval
-  await ctx.breakpoint('countermeasure-approval', {
+    let lastFeedback_phase7Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase7Review) {
+      countermeasureEvaluation = await ctx.task(evaluateCountermeasures, { ...{
+    countermeasures,
+    constraints,
+    rootCauseAnalysis
+  }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
+    }
+  const phase7Review = await ctx.breakpoint('countermeasure-approval', {
     title: 'A3 Countermeasure Approval',
     description: 'Review and approve proposed countermeasures before implementation',
-    artifacts: [rootCauseAnalysis, countermeasures, countermeasureEvaluation]
-  });
-
+    artifacts: [rootCauseAnalysis, countermeasures, countermeasureEvaluation],
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase7Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase7Review.approved) break;
+    lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
+  }
   // Phase 8: Implementation Planning
   const implementationPlan = await ctx.task(planImplementation, {
     countermeasureEvaluation,
@@ -149,20 +177,34 @@ export async function process(inputs, ctx) {
   artifacts.push({ phase: 'a3-document', output: a3Document });
 
   // Phase 13: Lessons Learned and Standardization
-  const standardization = await ctx.task(standardizeLearnings, {
+  let standardization = await ctx.task(standardizeLearnings, {
     a3Document,
     resultsVerification,
     rootCauseAnalysis
   });
   artifacts.push({ phase: 'standardization', output: standardization });
 
-  // Final Quality Gate: A3 Closeout
-  await ctx.breakpoint('a3-closeout', {
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      standardization = await ctx.task(standardizeLearnings, { ...{
+    a3Document,
+    resultsVerification,
+    rootCauseAnalysis
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint('a3-closeout', {
     title: 'A3 Problem Solving Closeout',
     description: 'Final review and approval of A3 document and standardization',
-    artifacts: [a3Document, resultsVerification, standardization]
-  });
-
+    artifacts: [a3Document, resultsVerification, standardization],
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     a3Document: {

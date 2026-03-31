@@ -39,23 +39,38 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 2: Launch Window Analysis
-  const launchWindowAnalysis = await ctx.task(launchWindowTask, {
+  let launchWindowAnalysis = await ctx.task(launchWindowTask, {
     projectName,
     targetBody,
     requirements: missionRequirements,
     constraints
   });
 
-  // Breakpoint: Launch window review
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      launchWindowAnalysis = await ctx.task(launchWindowTask, { ...{
+    projectName,
+    targetBody,
+    requirements: missionRequirements,
+    constraints
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Launch window analysis complete for ${projectName}. ${launchWindowAnalysis.windows.length} windows identified. Select primary window?`,
     title: 'Launch Window Review',
     context: {
       runId: ctx.runId,
       launchWindows: launchWindowAnalysis.windows
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // Phase 3: Trajectory Design
   const trajectoryDesign = await ctx.task(trajectoryDesignTask, {
     projectName,
@@ -65,23 +80,37 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 4: Delta-V Budget
-  const deltaVBudget = await ctx.task(deltaVBudgetTask, {
+  let deltaVBudget = await ctx.task(deltaVBudgetTask, {
     projectName,
     trajectory: trajectoryDesign,
     requirements: missionRequirements
   });
 
   // Quality Gate: Delta-V margin
-  if (deltaVBudget.margin < 0.1) {
-    await ctx.breakpoint({
+      let lastFeedback_phase4Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase4Review) {
+        deltaVBudget = await ctx.task(deltaVBudgetTask, { ...{
+    projectName,
+    trajectory: trajectoryDesign,
+    requirements: missionRequirements
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+      }
+  const phase4Review = await ctx.breakpoint({
       question: `Delta-V margin ${(deltaVBudget.margin * 100).toFixed(1)}% below 10% target. Review trajectory or accept?`,
       title: 'Delta-V Margin Warning',
       context: {
         runId: ctx.runId,
         deltaVBudget
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase4Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase4Review.approved) break;
+      lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+    } }
 
   // Phase 5: Orbit Design (if applicable)
   const orbitDesign = targetBody !== 'Earth-orbit' ? await ctx.task(orbitDesignTask, {
@@ -116,7 +145,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 9: Mission Documentation
-  const missionDocumentation = await ctx.task(missionDocumentationTask, {
+  let missionDocumentation = await ctx.task(missionDocumentationTask, {
     projectName,
     missionRequirements,
     launchWindowAnalysis,
@@ -128,8 +157,22 @@ export async function process(inputs, ctx) {
     monteCarloAnalysis
   });
 
-  // Final Breakpoint: Mission Design Approval
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      missionDocumentation = await ctx.task(missionDocumentationTask, { ...{
+    projectName,
+    missionRequirements,
+    launchWindowAnalysis,
+    trajectoryDesign,
+    deltaVBudget,
+    orbitDesign,
+    navigationDesign,
+    operationsTimeline,
+    monteCarloAnalysis
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Mission design complete for ${projectName}. Total delta-V: ${deltaVBudget.total} km/s. Approve baseline?`,
     title: 'Mission Design Approval',
     context: {
@@ -144,9 +187,15 @@ export async function process(inputs, ctx) {
         { path: 'artifacts/mission-design.json', format: 'json', content: missionDocumentation },
         { path: 'artifacts/mission-design.md', format: 'markdown', content: missionDocumentation.markdown }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     projectName,
@@ -163,8 +212,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const missionRequirementsTask = defineTask('mission-requirements', (args, taskCtx) => ({
   kind: 'agent',

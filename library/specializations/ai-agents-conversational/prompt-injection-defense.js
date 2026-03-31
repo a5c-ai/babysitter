@@ -94,7 +94,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...llmDetection.artifacts);
   }
-
   // ============================================================================
   // PHASE 5: CANARY TOKENS
   // ============================================================================
@@ -110,7 +109,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...canaryTokens.artifacts);
   }
-
   // ============================================================================
   // PHASE 6: OUTPUT VALIDATION
   // ============================================================================
@@ -132,7 +130,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 7: Creating security documentation');
 
-  const securityDocs = await ctx.task(securityDocumentationTask, {
+  let securityDocs = await ctx.task(securityDocumentationTask, {
     systemName,
     threatAnalysis: threatAnalysis.analysis,
     defenses: {
@@ -147,8 +145,23 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...securityDocs.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      securityDocs = await ctx.task(securityDocumentationTask, { ...{
+    systemName,
+    threatAnalysis: threatAnalysis.analysis,
+    defenses: {
+      sanitization: inputSanitization.sanitization,
+      hierarchy: instructionHierarchy.hierarchy,
+      llmDetection: llmDetection ? llmDetection.detection : null,
+      canaryTokens: canaryTokens ? canaryTokens.tokens : null,
+      outputValidation: outputValidation.validation
+    },
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Injection defense ${systemName} complete. Defense level: ${defenseLevel}. Review implementation?`,
     title: 'Injection Defense Review',
     context: {
@@ -161,9 +174,15 @@ export async function process(inputs, ctx) {
         enableCanaryTokens
       },
       files: artifacts.map(a => ({ path: a.path, format: a.format || 'python' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -186,8 +205,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

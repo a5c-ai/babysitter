@@ -76,7 +76,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 3: Designing code generation pipeline');
 
-  const codeGenPipeline = await ctx.task(codeGenPipelineTask, {
+  let codeGenPipeline = await ctx.task(codeGenPipelineTask, {
     projectName,
     targetLanguages,
     apiSpecPath,
@@ -104,8 +104,18 @@ export async function process(inputs, ctx) {
   const languageGuidelines = await ctx.parallel.all(languageGuidelinesTasks);
   artifacts.push(...languageGuidelines.flatMap(g => g.artifacts));
 
-  // Quality Gate: Strategy Review
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      codeGenPipeline = await ctx.task(codeGenPipelineTask, { ...{
+    projectName,
+    targetLanguages,
+    apiSpecPath,
+    strategyEvaluation,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Multi-language strategy defined for ${projectName}. Languages: ${targetLanguages.length}, Generation approach: ${strategyEvaluation.recommendedApproach}. Approve strategy?`,
     title: 'Multi-Language Strategy Review',
     context: {
@@ -114,9 +124,15 @@ export async function process(inputs, ctx) {
       targetLanguages,
       recommendedApproach: strategyEvaluation.recommendedApproach,
       files: artifacts.slice(-5).map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 5: FEATURE PARITY PLANNING
   // ============================================================================
@@ -221,8 +237,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

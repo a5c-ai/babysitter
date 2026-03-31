@@ -43,15 +43,24 @@ export async function process(inputs, ctx) {
   const stringExtraction = await ctx.task(extractStringsTask, { projectName, framework, outputDir });
   artifacts.push(...stringExtraction.artifacts);
 
-  const translationManagement = await ctx.task(setupTranslationManagementTask, { projectName, languages, defaultLanguage, outputDir });
-  artifacts.push(...translationManagement.artifacts);
-
-  await ctx.breakpoint({
+  let translationManagement = await ctx.task(setupTranslationManagementTask, { projectName, languages, defaultLanguage, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      translationManagement = await ctx.task(setupTranslationManagementTask, { ...{ projectName, languages, defaultLanguage, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `i18n setup complete. ${stringExtraction.stringCount} strings extracted. Languages: ${languages.join(', ')}. Review?`,
     title: 'i18n Setup Review',
-    context: { runId: ctx.runId, languages, stringCount: stringExtraction.stringCount }
-  });
-
+    context: { runId: ctx.runId, languages, stringCount: stringExtraction.stringCount },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const rtlSupport = await ctx.task(implementRtlSupportTask, { projectName, framework, languages, outputDir });
   artifacts.push(...rtlSupport.artifacts);
 

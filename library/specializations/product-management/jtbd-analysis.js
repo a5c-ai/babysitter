@@ -67,13 +67,12 @@ export async function process(inputs, ctx) {
       recommendation: 'Conduct additional customer research before proceeding'
     };
   }
-
   // ============================================================================
   // PHASE 2: JOB IDENTIFICATION
   // ============================================================================
 
   ctx.log('info', 'Phase 2: Identifying core jobs customers are trying to accomplish');
-  const jobIdentification = await ctx.task(jobIdentificationTask, {
+  let jobIdentification = await ctx.task(jobIdentificationTask, {
     productName,
     customerContext,
     targetCustomers,
@@ -92,9 +91,18 @@ export async function process(inputs, ctx) {
       recommendation: 'Broaden problem space or conduct additional customer discovery'
     };
   }
-
-  // Breakpoint: Review identified jobs
-  await ctx.breakpoint({
+  let lastFeedback_qualityGateApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_qualityGateApproval) {
+      jobIdentification = await ctx.task(jobIdentificationTask, { ...{
+    productName,
+    customerContext,
+    targetCustomers,
+    problemSpace,
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval, attempt: attempt + 1 });
+    }
+  const qualityGateApproval = await ctx.breakpoint({
     question: `Job identification complete for ${productName}. ${jobIdentification.coreJobs.length} core jobs identified across ${jobIdentification.customerSegments.length} segments. Review jobs before proceeding to job mapping?`,
     title: 'Job Identification Review',
     context: {
@@ -111,9 +119,15 @@ export async function process(inputs, ctx) {
         customerSegments: jobIdentification.customerSegments.length,
         problemSpace
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_qualityGateApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (qualityGateApproval.approved) break;
+    lastFeedback_qualityGateApproval = qualityGateApproval.response || qualityGateApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 3: FUNCTIONAL JOBS ANALYSIS
   // ============================================================================
@@ -164,7 +178,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 6: Creating detailed job stories with context and motivations');
-  const jobStoryCreation = await ctx.task(jobStoryCreationTask, {
+  let jobStoryCreation = await ctx.task(jobStoryCreationTask, {
     productName,
     coreJobs: jobIdentification.coreJobs,
     functionalJobs: functionalJobsAnalysis.functionalJobs,
@@ -176,8 +190,20 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...jobStoryCreation.artifacts);
 
-  // Breakpoint: Review job stories
-  await ctx.breakpoint({
+    let lastFeedback_phase6Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase6Review) {
+      jobStoryCreation = await ctx.task(jobStoryCreationTask, { ...{
+    productName,
+    coreJobs: jobIdentification.coreJobs,
+    functionalJobs: functionalJobsAnalysis.functionalJobs,
+    emotionalJobs: emotionalJobsAnalysis.emotionalJobs,
+    socialJobs: socialJobsAnalysis.socialJobs,
+    customerContext,
+    outputDir
+  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
+    }
+  const phase6Review = await ctx.breakpoint({
     question: `Job stories created: ${jobStoryCreation.jobStories.length} stories covering functional, emotional, and social dimensions. Review stories before progress mapping?`,
     title: 'Job Stories Review',
     context: {
@@ -195,9 +221,15 @@ export async function process(inputs, ctx) {
         emotionalStories: jobStoryCreation.emotionalStoriesCount,
         socialStories: jobStoryCreation.socialStoriesCount
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase6Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase6Review.approved) break;
+    lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 7: PROGRESS MAPPING
   // ============================================================================
@@ -215,7 +247,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...progressMapping.artifacts);
   }
-
   // ============================================================================
   // PHASE 8: DESIRED OUTCOMES IDENTIFICATION
   // ============================================================================
@@ -238,7 +269,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 9: Assessing importance and current satisfaction for outcomes');
-  const outcomesAssessment = await ctx.task(outcomesAssessmentTask, {
+  let outcomesAssessment = await ctx.task(outcomesAssessmentTask, {
     productName,
     desiredOutcomes: outcomesIdentification.desiredOutcomes,
     coreJobs: jobIdentification.coreJobs,
@@ -266,10 +297,19 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...competitiveAnalysis.artifacts);
   }
-
   // Breakpoint: Review competing solutions
-  if (competitiveAnalysis) {
-    await ctx.breakpoint({
+      let lastFeedback_phase10Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase10Review) {
+        outcomesAssessment = await ctx.task(outcomesAssessmentTask, { ...{
+    productName,
+    desiredOutcomes: outcomesIdentification.desiredOutcomes,
+    coreJobs: jobIdentification.coreJobs,
+    customerContext,
+    outputDir
+  }, feedback: lastFeedback_phase10Review, attempt: attempt + 1 });
+      }
+  const phase10Review = await ctx.breakpoint({
       question: `Competing solutions analyzed: ${competitiveAnalysis.competingSolutions.length} alternatives identified. ${competitiveAnalysis.underservedJobs.length} underserved jobs found. Review before innovation opportunities?`,
       title: 'Competitive Analysis Review',
       context: {
@@ -286,9 +326,15 @@ export async function process(inputs, ctx) {
           underservedJobs: competitiveAnalysis.underservedJobs.length,
           switchingBarriers: competitiveAnalysis.switchingBarriers.length
         }
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase10Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase10Review.approved) break;
+      lastFeedback_phase10Review = phase10Review.response || phase10Review.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 11: UNMET NEEDS IDENTIFICATION
@@ -328,7 +374,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 13: Scoring and prioritizing innovation opportunities');
-  const opportunityPrioritization = await ctx.task(opportunityPrioritizationTask, {
+  let opportunityPrioritization = await ctx.task(opportunityPrioritizationTask, {
     productName,
     innovationOpportunities: innovationOpportunities.opportunities,
     outcomesAssessment,
@@ -339,8 +385,19 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...opportunityPrioritization.artifacts);
 
-  // Breakpoint: Review innovation opportunities
-  await ctx.breakpoint({
+    let lastFeedback_phase13Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase13Review) {
+      opportunityPrioritization = await ctx.task(opportunityPrioritizationTask, { ...{
+    productName,
+    innovationOpportunities: innovationOpportunities.opportunities,
+    outcomesAssessment,
+    unmetNeedsAnalysis,
+    innovationGoals,
+    outputDir
+  }, feedback: lastFeedback_phase13Review, attempt: attempt + 1 });
+    }
+  const phase13Review = await ctx.breakpoint({
     question: `Innovation opportunities prioritized: ${opportunityPrioritization.highPriorityOpportunities.length} high-priority opportunities identified. Opportunity score: ${opportunityPrioritization.averageOpportunityScore.toFixed(1)}/100. Review opportunities?`,
     title: 'Innovation Opportunities Review',
     context: {
@@ -358,9 +415,15 @@ export async function process(inputs, ctx) {
         averageOpportunityScore: opportunityPrioritization.averageOpportunityScore,
         innovationCategories: opportunityPrioritization.opportunitiesByCategory
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase13Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase13Review.approved) break;
+    lastFeedback_phase13Review = phase13Review.response || phase13Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 14: STRATEGIC RECOMMENDATIONS
   // ============================================================================
@@ -404,7 +467,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 16: Validating JTBD analysis quality and completeness');
-  const qualityValidation = await ctx.task(qualityValidationTask, {
+  let qualityValidation = await ctx.task(qualityValidationTask, {
     productName,
     jobIdentification,
     functionalJobsAnalysis,
@@ -422,8 +485,23 @@ export async function process(inputs, ctx) {
   const analysisScore = qualityValidation.overallScore;
   const qualityMet = analysisScore >= 80;
 
-  // Final Breakpoint: Review complete JTBD analysis
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      qualityValidation = await ctx.task(qualityValidationTask, { ...{
+    productName,
+    jobIdentification,
+    functionalJobsAnalysis,
+    emotionalJobsAnalysis,
+    socialJobsAnalysis,
+    outcomesIdentification,
+    outcomesAssessment,
+    innovationOpportunities,
+    competitiveAnalysis,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `JTBD Analysis complete for ${productName}. Quality score: ${analysisScore}/100. ${qualityMet ? 'Analysis meets quality standards!' : 'Analysis may need refinement.'} ${opportunityPrioritization.highPriorityOpportunities.length} high-priority innovation opportunities identified. Approve and proceed?`,
     title: 'Final JTBD Analysis Review',
     context: {
@@ -445,9 +523,15 @@ export async function process(inputs, ctx) {
         strategicRecommendations: strategicRecommendations.recommendations.length,
         duration: ctx.now() - startTime
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -522,8 +606,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

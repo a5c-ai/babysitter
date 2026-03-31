@@ -149,7 +149,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 8: Validating quality gate implementation');
-  const validation = await ctx.task(validateImplementationTask, {
+  let validation = await ctx.task(validateImplementationTask, {
     projectPath,
     gates: gateDefinition.gates,
     automation: automationImplementation,
@@ -164,8 +164,20 @@ export async function process(inputs, ctx) {
   const implementationSuccess = validation.overallSuccess;
   const validationScore = validation.validationScore;
 
-  // Breakpoint: Review quality gate implementation
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      validation = await ctx.task(validateImplementationTask, { ...{
+    projectPath,
+    gates: gateDefinition.gates,
+    automation: automationImplementation,
+    cicdIntegration,
+    monitoringSetup,
+    enforcementLevel,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Quality gates implementation complete. Validation score: ${validationScore}/100. ${implementationSuccess ? 'All gates validated successfully!' : 'Some gates require attention.'} Review and approve?`,
     title: 'Quality Gates Implementation Review',
     context: {
@@ -186,9 +198,15 @@ export async function process(inputs, ctx) {
         criticalIssues: validation.criticalIssues?.length || 0,
         warnings: validation.warnings?.length || 0
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 9: ROLLOUT PLANNING (if successful)
   // ============================================================================
@@ -205,7 +223,6 @@ export async function process(inputs, ctx) {
     });
     artifacts.push(...rolloutPlan.artifacts);
   }
-
   // ============================================================================
   // PHASE 10: CONTINUOUS IMPROVEMENT SETUP
   // ============================================================================
@@ -299,8 +316,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

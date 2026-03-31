@@ -49,7 +49,7 @@ export async function process(inputs, ctx) {
   let currentQuality = 0;
   let iterations = 0;
 
-  const researchResult = await ctx.task(runHarnessResearchTask, {
+  let researchResult = await ctx.task(runHarnessResearchTask, {
     projectDir,
     harnessName: 'OpenClaw',
     upstreamSource: 'official OpenClaw package, plugin registry, and the canonical babysitter plugin repo',
@@ -67,9 +67,18 @@ export async function process(inputs, ctx) {
 
   const analysisResult = await ctx.task(analyzeOpenClawSetupTask, {
     projectDir
-  });
-
-  await ctx.breakpoint({
+    let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      researchResult = await ctx.task(runHarnessResearchTask, { ...{
+    projectDir,
+    harnessName: 'OpenClaw',
+    upstreamSource: 'official OpenClaw package, plugin registry, and the canonical babysitter plugin repo',
+    distributionTarget: 'OpenClaw plugin package, openclaw.json MCP tools, hooks, and runtime install path',
+    loopModel: 'session-serialized daemon continuation using authoritative session or capability context, with agent_end or documented wait or resume callbacks owning reentry after user yield'
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Review the OpenClaw integration analysis for "${projectDir}". Does the existing setup match expectations? Proceed with scaffolding?`,
     title: 'OpenClaw Analysis Review',
     context: {
@@ -77,9 +86,15 @@ export async function process(inputs, ctx) {
       files: [
         { path: 'artifacts/analysis/openclaw-audit.md', format: 'markdown', label: 'OpenClaw Audit' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 2: SCAFFOLD
   // ============================================================================
@@ -168,16 +183,24 @@ export async function process(inputs, ctx) {
 
   integrationFiles.push(...daemonAdapterResult.filesCreated);
 
-  const docsResult = await ctx.task(writeHarnessInstallDocsTask, {
+  let docsResult = await ctx.task(writeHarnessInstallDocsTask, {
     projectDir,
     harnessName: 'OpenClaw',
     research: researchResult,
     assimilation: assimilationResult
   });
 
-  integrationFiles.push(...(docsResult.filesCreated || []), ...(docsResult.filesModified || []));
-
-  await ctx.breakpoint({
+    let lastFeedback_analysisApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_analysisApproval) {
+      docsResult = await ctx.task(writeHarnessInstallDocsTask, { ...{
+    projectDir,
+    harnessName: 'OpenClaw',
+    research: researchResult,
+    assimilation: assimilationResult
+  }, feedback: lastFeedback_analysisApproval, attempt: attempt + 1 });
+    }
+  const analysisApproval = await ctx.breakpoint({
     question: `Implementation phase complete. Review the integration files before testing. All lifecycle hooks, MCP tools, agent routing, result posting, and daemon adapter are in place.`,
     title: 'Implementation Review',
     context: {
@@ -185,9 +208,15 @@ export async function process(inputs, ctx) {
       files: [
         { path: 'artifacts/implementation/summary.md', format: 'markdown', label: 'Implementation Summary' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_analysisApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (analysisApproval.approved) break;
+    lastFeedback_analysisApproval = analysisApproval.response || analysisApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 4: TEST
   // ============================================================================
@@ -267,7 +296,7 @@ export async function process(inputs, ctx) {
       localTestResult: reTestResult
     });
 
-    const reVerifyResult = await ctx.task(verifyHarnessAssimilationTask, {
+    let reVerifyResult = await ctx.task(verifyHarnessAssimilationTask, {
       projectDir,
       harnessName: 'OpenClaw',
       research: researchResult,
@@ -283,8 +312,22 @@ export async function process(inputs, ctx) {
     currentQuality = reVerifyResult.qualityScore;
     iterations++;
 
-    if (currentQuality < targetQuality && iterations >= maxIterations) {
-      await ctx.breakpoint({
+        let lastFeedback_iterationApproval = null;
+      for (let attempt = 0; attempt < 3; attempt++) {
+        if (lastFeedback_iterationApproval) {
+          reVerifyResult = await ctx.task(verifyHarnessAssimilationTask, { ...{
+      projectDir,
+      harnessName: 'OpenClaw',
+      research: researchResult,
+      assimilation: assimilationResult,
+      docs: docsResult,
+      targetQuality,
+      integrationFiles,
+      localTestResult: reTestResult,
+      runtimeValidation: runtimeValidationResult
+    }, feedback: lastFeedback_iterationApproval, attempt: attempt + 1 });
+        }
+  const iterationApproval = await ctx.breakpoint({
         question: `Convergence reached ${maxIterations} iterations but quality (${currentQuality}) is below target (${targetQuality}). Continue with additional iterations or accept current state?`,
         title: 'Convergence Limit Reached',
         context: {
@@ -292,9 +335,15 @@ export async function process(inputs, ctx) {
           files: [
             { path: 'artifacts/convergence/status.md', format: 'markdown', label: 'Convergence Status' }
           ]
-        }
-      });
-    }
+        },
+        expert: 'owner',
+        tags: ['approval-gate'],
+        previousFeedback: lastFeedback_iterationApproval || undefined,
+        attempt: attempt > 0 ? attempt + 1 : undefined
+        });
+        if (iterationApproval.approved) break;
+        lastFeedback_iterationApproval = iterationApproval.response || iterationApproval.feedback || 'Changes requested';
+      }   }
   }
 
   ctx.log('phase:complete', `Integration complete: quality=${currentQuality}, iterations=${iterations}`);
@@ -320,8 +369,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

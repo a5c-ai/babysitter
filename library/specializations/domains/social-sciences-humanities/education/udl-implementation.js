@@ -115,7 +115,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Scoring UDL implementation quality');
-  const qualityScore = await ctx.task(udlQualityScoringTask, {
+  let qualityScore = await ctx.task(udlQualityScoringTask, {
     courseName,
     engagementStrategies,
     representationStrategies,
@@ -131,8 +131,21 @@ export async function process(inputs, ctx) {
   const overallScore = qualityScore.overallScore;
   const qualityMet = overallScore >= qualityThreshold;
 
-  // Breakpoint: Review UDL implementation
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      qualityScore = await ctx.task(udlQualityScoringTask, { ...{
+    courseName,
+    engagementStrategies,
+    representationStrategies,
+    actionExpressionStrategies,
+    implementationPlan,
+    barrierAnalysis,
+    qualityThreshold,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `UDL implementation complete. Quality score: ${overallScore}/${qualityThreshold}. ${qualityMet ? 'Quality standards met!' : 'May need refinement.'} Review and approve?`,
     title: 'UDL Implementation Review',
     context: {
@@ -147,9 +160,15 @@ export async function process(inputs, ctx) {
         actionExpressionStrategiesCount: actionExpressionStrategies.strategies?.length || 0,
         totalArtifacts: artifacts.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -173,8 +192,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Learner Variability Analysis
+  // Task 1: Learner Variability Analysis
 export const learnerVariabilityAnalysisTask = defineTask('learner-variability-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Analyze learner variability',

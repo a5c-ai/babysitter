@@ -123,7 +123,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 8: Assessing reasoning quality');
-  const qualityScore = await ctx.task(maxentQualityTask, {
+  let qualityScore = await ctx.task(maxentQualityTask, {
     constraintFormalization,
     optimization,
     distribution: distribution.distribution,
@@ -135,8 +135,18 @@ export async function process(inputs, ctx) {
 
   const qualityMet = qualityScore.overallScore >= 75;
 
-  // Breakpoint: Review MaxEnt results
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      qualityScore = await ctx.task(maxentQualityTask, { ...{
+    constraintFormalization,
+    optimization,
+    distribution: distribution.distribution,
+    verification,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Maximum entropy analysis complete. Entropy: ${distribution.entropy.toFixed(4)}. Quality score: ${qualityScore.overallScore}/100. ${qualityMet ? 'Quality meets standards!' : 'Review constraint satisfaction.'} Review results?`,
     title: 'Maximum Entropy Results Review',
     context: {
@@ -154,9 +164,15 @@ export async function process(inputs, ctx) {
         constraintsSatisfied: verification.allSatisfied,
         qualityScore: qualityScore.overallScore
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 9: REPORT GENERATION
   // ============================================================================
@@ -195,8 +211,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

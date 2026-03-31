@@ -53,7 +53,7 @@ export async function process(inputs, ctx) {
   artifacts.push(...(solutionDevelopment.artifacts || []));
 
   // Phase 3: Prototype Strategy
-  const prototypeStrategy = await ctx.task(prototypeStrategyTask, {
+  let prototypeStrategy = await ctx.task(prototypeStrategyTask, {
     projectName,
     solutionDevelopment,
     problemAnalysis
@@ -61,8 +61,16 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...(prototypeStrategy.artifacts || []));
 
-  // Breakpoint: Review prototype strategy
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      prototypeStrategy = await ctx.task(prototypeStrategyTask, { ...{
+    projectName,
+    solutionDevelopment,
+    problemAnalysis
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Review prototype strategy for ${projectName}. Prototype type: ${prototypeStrategy.prototypeType}. Ready to build?`,
     title: 'Prototype Strategy Review',
     context: {
@@ -71,9 +79,15 @@ export async function process(inputs, ctx) {
       prototypeType: prototypeStrategy.prototypeType,
       estimatedEffort: prototypeStrategy.estimatedEffort,
       files: artifacts
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // Phase 4: Validation Experiment Design
   const experimentDesign = await ctx.task(experimentDesignTask, {
     projectName,
@@ -124,7 +138,7 @@ export async function process(inputs, ctx) {
   artifacts.push(...(validationScoring.artifacts || []));
 
   // Phase 9: Decision Framework
-  const decisionFramework = await ctx.task(decisionFrameworkTask, {
+  let decisionFramework = await ctx.task(decisionFrameworkTask, {
     projectName,
     validationScoring,
     problemStatement,
@@ -133,8 +147,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...(decisionFramework.artifacts || []));
 
-  // Final Breakpoint: Validation decision
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      decisionFramework = await ctx.task(decisionFrameworkTask, { ...{
+    projectName,
+    validationScoring,
+    problemStatement,
+    solutionHypothesis
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Problem-Solution Fit validation complete. Score: ${validationScoring.overallScore}/100. Recommendation: ${decisionFramework.recommendation}. Approve decision?`,
     title: 'Problem-Solution Fit Decision',
     context: {
@@ -146,9 +169,15 @@ export async function process(inputs, ctx) {
       viabilityScore: validationScoring.viabilityScore,
       recommendation: decisionFramework.recommendation,
       files: artifacts
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -180,8 +209,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const problemAnalysisTask = defineTask('problem-analysis', (args, taskCtx) => ({
   kind: 'agent',

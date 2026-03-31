@@ -50,20 +50,34 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 6: Timeline Reconstruction
-  const timeline = await ctx.task(reconstructTimelineTask, {
+  let timeline = await ctx.task(reconstructTimelineTask, {
     evidence: corroboration.corroboratedEvidence,
     hypotheses: hypotheses.generatedHypotheses,
     temporalConstraints: inputs.constraints?.temporal
   });
 
   // Quality Gate: Timeline Consistency
-  if (timeline.consistencyScore < 0.6) {
-    await ctx.breakpoint('timeline-inconsistency', {
+      let lastFeedback = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback) {
+        timeline = await ctx.task(reconstructTimelineTask, { ...{
+    evidence: corroboration.corroboratedEvidence,
+    hypotheses: hypotheses.generatedHypotheses,
+    temporalConstraints: inputs.constraints?.temporal
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+      }
+  const phase6Review = await ctx.breakpoint('timeline-inconsistency', {
       message: 'Timeline reconstruction has significant inconsistencies',
       inconsistencies: timeline.inconsistencies,
-      possibleResolutions: timeline.resolutionOptions
-    });
-  }
+      possibleResolutions: timeline.resolutionOptions,
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase6Review.approved) break;
+      lastFeedback = phase6Review.response || phase6Review.feedback || 'Changes requested';
+    } }
 
   // Phase 7: Causal Reconstruction
   const causalReconstruction = await ctx.task(reconstructCausalChainTask, {

@@ -99,7 +99,7 @@ export async function process(inputs, ctx) {
 
   // Phase 6: Multi-Criteria Analysis
   ctx.log('info', 'Phase 6: Performing multi-criteria decision analysis');
-  const multiCriteriaAnalysis = await ctx.task(performMultiCriteriaAnalysis, {
+  let multiCriteriaAnalysis = await ctx.task(performMultiCriteriaAnalysis, {
     rankedMaterials: performanceRanking.rankedList,
     selectionCriteria,
     objectives,
@@ -108,8 +108,18 @@ export async function process(inputs, ctx) {
   });
   artifacts.push(...(multiCriteriaAnalysis.artifacts || []));
 
-  // Quality Gate: Review candidate selection
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      multiCriteriaAnalysis = await ctx.task(performMultiCriteriaAnalysis, { ...{
+    rankedMaterials: performanceRanking.rankedList,
+    selectionCriteria,
+    objectives,
+    constraints,
+    methodologies: inputs.mcdmMethods || ['weighted-sum', 'TOPSIS']
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: 'Review the materials selection analysis. Are the performance indices appropriate and rankings reasonable?',
     title: 'Materials Selection Review',
     context: {
@@ -121,9 +131,15 @@ export async function process(inputs, ctx) {
         objectives
       },
       files: artifacts
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 7: Detailed Candidate Evaluation
   ctx.log('info', 'Phase 7: Evaluating top candidates in detail');
   const candidateEvaluation = await ctx.task(evaluateCandidates, {

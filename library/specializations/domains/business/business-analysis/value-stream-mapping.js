@@ -120,7 +120,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 7: Identifying kaizen improvement opportunities');
-  const kaizenIdentification = await ctx.task(kaizenIdentificationTask, {
+  let kaizenIdentification = await ctx.task(kaizenIdentificationTask, {
     projectName,
     valueStreamName,
     currentStateMap: currentStateMap.map,
@@ -131,8 +131,19 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...kaizenIdentification.artifacts);
 
-  // Breakpoint: Review value stream maps
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      kaizenIdentification = await ctx.task(kaizenIdentificationTask, { ...{
+    projectName,
+    valueStreamName,
+    currentStateMap: currentStateMap.map,
+    futureStateMap: futureStateDesign.map,
+    wasteIdentification,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Value stream mapping complete for ${valueStreamName}. Lead time reduction potential: ${futureStateDesign.metrics?.leadTimeReduction || 'TBD'}. Review and approve?`,
     title: 'Value Stream Map Review',
     context: {
@@ -150,9 +161,15 @@ export async function process(inputs, ctx) {
         wasteIdentified: wasteIdentification.totalWaste?.length || 0,
         kaizenOpportunities: kaizenIdentification.kaizenBursts?.length || 0
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 8: IMPROVEMENT ROADMAP
   // ============================================================================
@@ -211,8 +228,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

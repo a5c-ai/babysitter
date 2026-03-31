@@ -28,11 +28,16 @@ export async function process(inputs, ctx) {
   const clientSetup = await ctx.task(clientSetupTask, { projectName, outputDir });
   artifacts.push(...clientSetup.artifacts);
 
-  const extensionsSetup = await ctx.task(extensionsSetupTask, { projectName, features, outputDir });
-  artifacts.push(...extensionsSetup.artifacts);
-
-  await ctx.breakpoint({ question: `Prisma integration complete for ${projectName}. ${modelsSetup.models.length} models. Approve?`, title: 'Prisma Review', context: { runId: ctx.runId, models: modelsSetup.models } });
-
+  let extensionsSetup = await ctx.task(extensionsSetupTask, { projectName, features, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      extensionsSetup = await ctx.task(extensionsSetupTask, { ...{ projectName, features, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({ question: `Prisma integration complete for ${projectName}. ${modelsSetup.models.length} models. Approve?`, title: 'Prisma Review', context: { runId: ctx.runId, models: modelsSetup.models }, expert: 'owner', tags: ['approval-gate'], previousFeedback: lastFeedback || undefined, attempt: attempt > 0 ? attempt + 1 : undefined });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const documentation = await ctx.task(documentationTask, { projectName, schemaSetup, modelsSetup, outputDir });
   artifacts.push(...documentation.artifacts);
 

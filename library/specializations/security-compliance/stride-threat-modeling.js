@@ -62,7 +62,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Decomposing and analyzing system architecture');
 
-  const decompositionResult = await ctx.task(decomposeArchitectureTask, {
+  let decompositionResult = await ctx.task(decomposeArchitectureTask, {
     system,
     architecture,
     securityRequirements,
@@ -75,8 +75,18 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Architecture decomposed - ${decompositionResult.components.length} components, ${decompositionResult.dataFlows.length} data flows, ${decompositionResult.trustBoundaries.length} trust boundaries`);
 
-  // Quality Gate: Architecture review
-  await ctx.breakpoint({
+    let lastFeedback_qualityGateApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_qualityGateApproval) {
+      decompositionResult = await ctx.task(decomposeArchitectureTask, { ...{
+    system,
+    architecture,
+    securityRequirements,
+    threatModelingDepth,
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval, attempt: attempt + 1 });
+    }
+  const qualityGateApproval = await ctx.breakpoint({
     question: `Architecture decomposed for ${system}. Identified ${decompositionResult.components.length} components, ${decompositionResult.dataFlows.length} data flows, ${decompositionResult.trustBoundaries.length} trust boundaries. Review architecture decomposition?`,
     title: 'Architecture Decomposition Review',
     context: {
@@ -89,9 +99,15 @@ export async function process(inputs, ctx) {
         dataStores: decompositionResult.dataStores.length
       },
       files: decompositionResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_qualityGateApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (qualityGateApproval.approved) break;
+    lastFeedback_qualityGateApproval = qualityGateApproval.response || qualityGateApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 2: CREATE DATA FLOW DIAGRAMS (DFD)
   // ============================================================================
@@ -211,7 +227,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 8: Identifying Elevation of Privilege threats');
 
-  const elevationResult = await ctx.task(identifyElevationOfPrivilegeThreatsTask, {
+  let elevationResult = await ctx.task(identifyElevationOfPrivilegeThreatsTask, {
     system,
     decomposition: decompositionResult,
     dataFlows: dfdResult.dataFlows,
@@ -228,9 +244,19 @@ export async function process(inputs, ctx) {
   // Quality Gate: Review all identified threats
   const totalThreats = spoofingResult.threats.length + tamperingResult.threats.length +
                        repudiationResult.threats.length + infoDisclosureResult.threats.length +
-                       dosResult.threats.length + elevationResult.threats.length;
-
-  await ctx.breakpoint({
+    let lastFeedback_qualityGateApproval2 = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_qualityGateApproval2) {
+      elevationResult = await ctx.task(identifyElevationOfPrivilegeThreatsTask, { ...{
+    system,
+    decomposition: decompositionResult,
+    dataFlows: dfdResult.dataFlows,
+    trustBoundaries: decompositionResult.trustBoundaries,
+    threatModelingDepth,
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval2, attempt: attempt + 1 });
+    }
+  const qualityGateApproval2 = await ctx.breakpoint({
     question: `STRIDE threat identification complete. Total ${totalThreats} threats identified across all categories. Review threats before risk assessment?`,
     title: 'STRIDE Threats Review',
     context: {
@@ -249,9 +275,15 @@ export async function process(inputs, ctx) {
         format: a.format || 'json',
         label: a.label
       }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_qualityGateApproval2 || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (qualityGateApproval2.approved) break;
+    lastFeedback_qualityGateApproval2 = qualityGateApproval2.response || qualityGateApproval2.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 9: RISK ASSESSMENT AND SCORING
   // ============================================================================
@@ -286,7 +318,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 10: Developing mitigation strategies');
 
-  const mitigationResult = await ctx.task(developMitigationStrategiesTask, {
+  let mitigationResult = await ctx.task(developMitigationStrategiesTask, {
     system,
     threatsWithRisk: riskAssessmentResult.threatsWithRisk,
     securityRequirements,
@@ -300,8 +332,19 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Mitigation strategies developed - ${mitigationResult.mitigations.length} mitigation controls`);
 
-  // Quality Gate: Mitigation review
-  await ctx.breakpoint({
+    let lastFeedback_phase10Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase10Review) {
+      mitigationResult = await ctx.task(developMitigationStrategiesTask, { ...{
+    system,
+    threatsWithRisk: riskAssessmentResult.threatsWithRisk,
+    securityRequirements,
+    complianceNeeds,
+    includeMitigationPrioritization,
+    outputDir
+  }, feedback: lastFeedback_phase10Review, attempt: attempt + 1 });
+    }
+  const phase10Review = await ctx.breakpoint({
     question: `Mitigation strategies developed for ${mitigationResult.mitigations.length} controls. Priority 1: ${mitigationResult.priority1.length}, Priority 2: ${mitigationResult.priority2.length}. Review mitigations?`,
     title: 'Mitigation Strategies Review',
     context: {
@@ -314,9 +357,15 @@ export async function process(inputs, ctx) {
         estimatedEffort: mitigationResult.estimatedEffort
       },
       files: mitigationResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase10Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase10Review.approved) break;
+    lastFeedback_phase10Review = phase10Review.response || phase10Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 11: CREATE ATTACK TREES (OPTIONAL)
   // ============================================================================
@@ -338,7 +387,6 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Attack trees created - ${attackTreesResult.attackTrees.length} trees`);
   }
-
   // ============================================================================
   // PHASE 12: MAP TO COMPLIANCE REQUIREMENTS
   // ============================================================================
@@ -408,7 +456,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 15: Calculating security posture score and final assessment');
 
-  const postureResult = await ctx.task(calculateSecurityPostureTask, {
+  let postureResult = await ctx.task(calculateSecurityPostureTask, {
     system,
     riskScore,
     threatCount: totalThreats,
@@ -424,8 +472,21 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Security posture score: ${postureResult.postureScore}/100`);
 
-  // Final Breakpoint: Threat modeling complete
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      postureResult = await ctx.task(calculateSecurityPostureTask, { ...{
+    system,
+    riskScore,
+    threatCount: totalThreats,
+    criticalThreats: riskAssessmentResult.criticalThreats,
+    highThreats: riskAssessmentResult.highThreats,
+    mitigationCoverage: mitigationResult.mitigationCoverage,
+    complianceCoverage: complianceMappingResult.complianceCoverage,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `STRIDE Threat Modeling Complete for ${system}. Risk Score: ${riskScore}/100, Security Posture: ${postureResult.postureScore}/100. Total ${totalThreats} threats identified, ${mitigationResult.mitigations.length} mitigations proposed. Approve threat model?`,
     title: 'Final Threat Model Review',
     context: {
@@ -455,9 +516,15 @@ export async function process(inputs, ctx) {
         { path: remediationPlanResult.planPath, format: 'markdown', label: 'Remediation Plan' },
         { path: postureResult.summaryPath, format: 'json', label: 'Security Posture Summary' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -511,8 +578,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

@@ -67,7 +67,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 2: Designing Memory Layout');
 
-  const memoryLayout = await ctx.task(memoryLayoutDesignTask, {
+  let memoryLayout = await ctx.task(memoryLayoutDesignTask, {
     projectName,
     targetMcu,
     requirements,
@@ -75,18 +75,33 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...memoryLayout.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      memoryLayout = await ctx.task(memoryLayoutDesignTask, { ...{
+    projectName,
+    targetMcu,
+    requirements,
+    dualBank,
+    outputDir
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Memory layout designed for ${projectName}. Bootloader: ${memoryLayout.bootloaderSize}, App: ${memoryLayout.applicationSize}. Proceed?`,
     title: 'Memory Layout Review',
     context: {
       runId: ctx.runId,
       memoryLayout: memoryLayout.layout,
       files: memoryLayout.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 3: STARTUP AND INITIALIZATION
   // ============================================================================
@@ -170,7 +185,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...secureBootImpl.artifacts);
   }
-
   // ============================================================================
   // PHASE 8: APPLICATION LAUNCH
   // ============================================================================
@@ -204,7 +218,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...rollbackImpl.artifacts);
   }
-
   // ============================================================================
   // PHASE 10: ERROR HANDLING AND RECOVERY
   // ============================================================================
@@ -258,7 +271,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 13: Creating Documentation');
 
-  const documentation = await ctx.task(bootloaderDocumentationTask, {
+  let documentation = await ctx.task(bootloaderDocumentationTask, {
     projectName,
     targetMcu,
     memoryLayout,
@@ -270,8 +283,20 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...documentation.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      documentation = await ctx.task(bootloaderDocumentationTask, { ...{
+    projectName,
+    targetMcu,
+    memoryLayout,
+    updateProtocol,
+    secureBoot,
+    rollbackProtection,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Bootloader Implementation Complete for ${projectName}. Secure: ${secureBoot}, Update: ${updateMechanism}. Review package?`,
     title: 'Bootloader Implementation Complete',
     context: {
@@ -289,9 +314,15 @@ export async function process(inputs, ctx) {
         { path: documentation.readmePath, format: 'markdown', label: 'Documentation' },
         { path: memoryLayout.linkerScriptPath, format: 'ld', label: 'Linker Script' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -341,8 +372,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

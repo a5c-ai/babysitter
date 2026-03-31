@@ -109,7 +109,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 5: Adding capability declarations');
 
-  const capabilityDeclarations = await ctx.task(capabilityDeclarationsTask, {
+  let capabilityDeclarations = await ctx.task(capabilityDeclarationsTask, {
     projectName,
     language,
     capabilities,
@@ -118,8 +118,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...capabilityDeclarations.artifacts);
 
-  // Quality Gate: Server Structure Review
-  await ctx.breakpoint({
+    let lastFeedback_phase5Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase5Review) {
+      capabilityDeclarations = await ctx.task(capabilityDeclarationsTask, { ...{
+    projectName,
+    language,
+    capabilities,
+    outputDir
+  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+    }
+  const phase5Review = await ctx.breakpoint({
     question: `MCP Server structure created with ${capabilities.length} capabilities and ${transport} transport. Proceed with handler implementation?`,
     title: 'Server Structure Review',
     context: {
@@ -128,9 +137,15 @@ export async function process(inputs, ctx) {
       capabilities,
       transport,
       files: artifacts.slice(-4).map(a => ({ path: a.path, format: a.format || 'typescript' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase5Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase5Review.approved) break;
+    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 6: REQUEST HANDLER STRUCTURE
   // ============================================================================
@@ -210,7 +225,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 11: Documenting server setup');
 
-  const documentation = await ctx.task(documentationTask, {
+  let documentation = await ctx.task(documentationTask, {
     projectName,
     serverName,
     serverVersion,
@@ -225,8 +240,23 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...documentation.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      documentation = await ctx.task(documentationTask, { ...{
+    projectName,
+    serverName,
+    serverVersion,
+    transport,
+    capabilities,
+    projectInit,
+    serverMetadata,
+    transportSetup,
+    handlerStructure,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `MCP Server Bootstrap complete for ${projectName}. Server ready for tool and resource implementation. Review and approve?`,
     title: 'MCP Server Bootstrap Complete',
     context: {
@@ -245,9 +275,15 @@ export async function process(inputs, ctx) {
         { path: serverInit.entryPointPath, format: 'typescript', label: 'Server Entry Point' },
         { path: serverMetadata.configPath, format: 'json', label: 'Server Config' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -284,8 +320,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

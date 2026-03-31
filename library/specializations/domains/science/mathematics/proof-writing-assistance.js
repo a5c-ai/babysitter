@@ -32,7 +32,7 @@ export async function process(inputs, ctx) {
   } = inputs;
 
   // Phase 1: Review Proof Structure and Logic
-  const structureReview = await ctx.task(structureReviewTask, {
+  let structureReview = await ctx.task(structureReviewTask, {
     theoremStatement,
     proofDraft,
     mathDomain
@@ -47,9 +47,16 @@ export async function process(inputs, ctx) {
       refinedProof: null
     };
   }
-
-  // Breakpoint: Review proof structure analysis
-  await ctx.breakpoint({
+  let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      structureReview = await ctx.task(structureReviewTask, { ...{
+    theoremStatement,
+    proofDraft,
+    mathDomain
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Review proof structure analysis. Does this correctly identify the proof strategy and logical flow?`,
     title: 'Proof Structure Review',
     context: {
@@ -62,9 +69,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: structureReview
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // Phase 2: Identify Implicit Assumptions
   const assumptionAnalysis = await ctx.task(assumptionAnalysisTask, {
     theoremStatement,
@@ -93,7 +106,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 5: Generate Proof Outline and Templates
-  const proofTemplates = await ctx.task(proofTemplatesTask, {
+  let proofTemplates = await ctx.task(proofTemplatesTask, {
     theoremStatement,
     proofStrategy: structureReview.proofStrategy,
     mathDomain,
@@ -101,20 +114,35 @@ export async function process(inputs, ctx) {
   });
 
   // Quality Gate: Review suggestions before finalizing
-  if (assumptionAnalysis.implicitAssumptions.length > 0 || notationSuggestions.suggestions.length > 0) {
-    await ctx.breakpoint({
+      let lastFeedback_phase5Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase5Review) {
+        proofTemplates = await ctx.task(proofTemplatesTask, { ...{
+    theoremStatement,
+    proofStrategy: structureReview.proofStrategy,
+    mathDomain,
+    structureAnalysis: structureReview.structureAnalysis
+  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+      }
+  const phase5Review = await ctx.breakpoint({
       question: `Found ${assumptionAnalysis.implicitAssumptions.length} implicit assumptions and ${notationSuggestions.suggestions.length} notation suggestions. Review and incorporate?`,
       title: 'Suggestions Review',
       context: {
         runId: ctx.runId,
         implicitAssumptions: assumptionAnalysis.implicitAssumptions,
         notationSuggestions: notationSuggestions.suggestions
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase5Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase5Review.approved) break;
+      lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+    } }
 
   // Phase 6: Generate Refined Proof
-  const refinedProof = await ctx.task(refinedProofGenerationTask, {
+  let refinedProof = await ctx.task(refinedProofGenerationTask, {
     theoremStatement,
     proofDraft,
     structureReview,
@@ -125,8 +153,21 @@ export async function process(inputs, ctx) {
     targetAudience
   });
 
-  // Final Breakpoint: Proof Writing Complete
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      refinedProof = await ctx.task(refinedProofGenerationTask, { ...{
+    theoremStatement,
+    proofDraft,
+    structureReview,
+    assumptionAnalysis,
+    notationSuggestions,
+    latexFormatting,
+    proofTemplates,
+    targetAudience
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Proof writing assistance complete for "${theoremStatement}". Review refined proof and approve?`,
     title: 'Proof Writing Complete',
     context: {
@@ -137,9 +178,15 @@ export async function process(inputs, ctx) {
         { path: `artifacts/refined-proof.tex`, format: 'latex', content: refinedProof.latexFormatted },
         { path: `artifacts/proof-analysis.json`, format: 'json', content: { structureReview, assumptionAnalysis } }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     theoremStatement,
@@ -167,8 +214,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const structureReviewTask = defineTask('structure-review', (args, taskCtx) => ({
   kind: 'agent',

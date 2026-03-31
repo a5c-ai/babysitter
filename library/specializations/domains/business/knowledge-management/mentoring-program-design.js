@@ -32,7 +32,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 1: Assessing mentoring program needs');
-  const needsAssessment = await ctx.task(needsAssessmentTask, {
+  let needsAssessment = await ctx.task(needsAssessmentTask, {
     programScope,
     targetAudience,
     mentoringGoals,
@@ -43,8 +43,19 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...needsAssessment.artifacts);
 
-  // Breakpoint: Review needs assessment
-  await ctx.breakpoint({
+    let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      needsAssessment = await ctx.task(needsAssessmentTask, { ...{
+    programScope,
+    targetAudience,
+    mentoringGoals,
+    existingPrograms,
+    organizationalContext,
+    outputDir
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Identified ${needsAssessment.knowledgeGaps.length} knowledge gaps for mentoring. Review assessment?`,
     title: 'Needs Assessment Review',
     context: {
@@ -55,9 +66,15 @@ export async function process(inputs, ctx) {
         targetMentees: needsAssessment.targetMenteeCount,
         availableMentors: needsAssessment.potentialMentorCount
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 2: PROGRAM STRUCTURE DESIGN
   // ============================================================================
@@ -92,7 +109,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 4: Designing curriculum and activities');
-  const curriculumDesign = await ctx.task(curriculumDesignTask, {
+  let curriculumDesign = await ctx.task(curriculumDesignTask, {
     mentoringGoals,
     knowledgeGaps: needsAssessment.knowledgeGaps,
     programStructure: programStructure.structure,
@@ -101,8 +118,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...curriculumDesign.artifacts);
 
-  // Breakpoint: Review curriculum
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      curriculumDesign = await ctx.task(curriculumDesignTask, { ...{
+    mentoringGoals,
+    knowledgeGaps: needsAssessment.knowledgeGaps,
+    programStructure: programStructure.structure,
+    outputDir
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: `Curriculum designed with ${curriculumDesign.activities.length} activities. Review?`,
     title: 'Curriculum Design Review',
     context: {
@@ -112,9 +138,15 @@ export async function process(inputs, ctx) {
         totalActivities: curriculumDesign.activities.length,
         milestones: curriculumDesign.milestones.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 5: TRAINING MATERIALS DEVELOPMENT
   // ============================================================================
@@ -174,7 +206,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 9: Assessing program design quality');
-  const qualityAssessment = await ctx.task(qualityAssessmentTask, {
+  let qualityAssessment = await ctx.task(qualityAssessmentTask, {
     needsAssessment,
     programStructure,
     matchingCriteria,
@@ -201,18 +233,34 @@ export async function process(inputs, ctx) {
       outputDir
     });
 
-    artifacts.push(...reviewResult.artifacts);
-
-    await ctx.breakpoint({
+      let lastFeedback_finalApproval = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_finalApproval) {
+        qualityAssessment = await ctx.task(qualityAssessmentTask, { ...{
+    needsAssessment,
+    programStructure,
+    matchingCriteria,
+    curriculumDesign,
+    evaluationFramework,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+      }
+  const finalApproval = await ctx.breakpoint({
       question: `Stakeholder review complete. ${reviewResult.approved ? 'Approved!' : 'Requires revisions.'} Finalize program design?`,
       title: 'Final Approval Gate',
       context: {
         runId: ctx.runId,
         files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })),
         summary: { approved: reviewResult.approved, qualityScore: qualityAssessment.overallScore }
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_finalApproval || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (finalApproval.approved) break;
+      lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+    } }
 
   const endTime = ctx.now();
   const duration = endTime - startTime;
@@ -241,8 +289,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

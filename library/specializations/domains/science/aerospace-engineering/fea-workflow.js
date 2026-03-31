@@ -48,42 +48,71 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 3: Mesh Generation Strategy
-  const meshStrategy = await ctx.task(feaMeshStrategyTask, {
+  let meshStrategy = await ctx.task(feaMeshStrategyTask, {
     projectName,
     geometry: geometryPrep,
     analysisType,
     accuracyRequirements: inputs.accuracyRequirements
   });
 
-  // Breakpoint: Mesh strategy review
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      meshStrategy = await ctx.task(feaMeshStrategyTask, { ...{
+    projectName,
+    geometry: geometryPrep,
+    analysisType,
+    accuracyRequirements: inputs.accuracyRequirements
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Review mesh strategy for ${projectName}. Estimated elements: ${meshStrategy.estimatedElements}. Proceed with meshing?`,
     title: 'FEA Mesh Strategy Review',
     context: {
       runId: ctx.runId,
       meshStrategy,
       qualityTargets: meshStrategy.qualityTargets
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // Phase 4: Mesh Generation
-  const meshGeneration = await ctx.task(feaMeshGenerationTask, {
+  let meshGeneration = await ctx.task(feaMeshGenerationTask, {
     projectName,
     geometry: geometryPrep,
     meshStrategy
   });
 
   // Quality Gate: Mesh quality
-  if (meshGeneration.qualityMetrics.worstJacobian < 0.3) {
-    await ctx.breakpoint({
+      let lastFeedback_phase4Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase4Review) {
+        meshGeneration = await ctx.task(feaMeshGenerationTask, { ...{
+    projectName,
+    geometry: geometryPrep,
+    meshStrategy
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+      }
+  const phase4Review = await ctx.breakpoint({
       question: `Mesh quality issue: worst Jacobian ${meshGeneration.qualityMetrics.worstJacobian}. Remesh or accept?`,
       title: 'Mesh Quality Warning',
       context: {
         runId: ctx.runId,
         qualityMetrics: meshGeneration.qualityMetrics
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase4Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase4Review.approved) break;
+      lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+    } }
 
   // Phase 5: Boundary Conditions and Constraints
   const boundaryConditions = await ctx.task(boundaryConditionsTask, {
@@ -137,7 +166,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 11: Report Generation
-  const reportGeneration = await ctx.task(feaReportTask, {
+  let reportGeneration = await ctx.task(feaReportTask, {
     projectName,
     geometryPrep,
     meshGeneration,
@@ -148,8 +177,21 @@ export async function process(inputs, ctx) {
     validation
   });
 
-  // Final Breakpoint: Results Approval
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      reportGeneration = await ctx.task(feaReportTask, { ...{
+    projectName,
+    geometryPrep,
+    meshGeneration,
+    materialDefinition,
+    analysisExecution,
+    postProcessing,
+    marginCalculation,
+    validation
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `FEA analysis complete for ${projectName}. Minimum MS: ${marginCalculation.minimumMargin}. Approve results?`,
     title: 'FEA Results Approval',
     context: {
@@ -164,9 +206,15 @@ export async function process(inputs, ctx) {
         { path: 'artifacts/fea-report.json', format: 'json', content: reportGeneration },
         { path: 'artifacts/fea-report.md', format: 'markdown', content: reportGeneration.markdown }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     projectName,
@@ -186,8 +234,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions (abbreviated for space - following same pattern)
+  // Task Definitions (abbreviated for space - following same pattern)
 
 export const feaGeometryPrepTask = defineTask('fea-geometry-prep', (args, taskCtx) => ({
   kind: 'agent',

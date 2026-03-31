@@ -45,15 +45,24 @@ export async function process(inputs, ctx) {
   const controllerDesign = await ctx.task(controllerDesignTask, { designName, memoryType, memoryArchitecture, eccSupport, outputDir });
   artifacts.push(...controllerDesign.artifacts);
 
-  const phyDesign = await ctx.task(phyDesignTask, { designName, memoryType, clockFrequency, dataWidth, outputDir });
-  artifacts.push(...phyDesign.artifacts);
-
-  await ctx.breakpoint({
+  let phyDesign = await ctx.task(phyDesignTask, { designName, memoryType, clockFrequency, dataWidth, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      phyDesign = await ctx.task(phyDesignTask, { ...{ designName, memoryType, clockFrequency, dataWidth, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Memory controller designed for ${designName}. ${memoryType} at ${clockFrequency}MHz, ${dataWidth}-bit interface. Review memory design?`,
     title: 'Memory Interface Review',
-    context: { runId: ctx.runId, designName, memoryType, clockFrequency, dataWidth }
-  });
-
+    context: { runId: ctx.runId, designName, memoryType, clockFrequency, dataWidth },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const timingCalibration = await ctx.task(timingCalibrationTask, { designName, phyDesign, memoryType, clockFrequency, outputDir });
   artifacts.push(...timingCalibration.artifacts);
 

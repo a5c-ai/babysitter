@@ -194,8 +194,20 @@ export async function process(inputs, ctx) {
     localTestResult: testResult
   });
 
-  if (!testResult.allPassed) {
-    await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase4Review) {
+        runtimeValidationResult = await ctx.task(runHarnessRuntimeValidationTask, { ...{
+    projectDir,
+    harnessName: 'Google Antigravity',
+    loopModel: 'workflow-driven orchestration with explicit user-yield and resume discipline',
+    research: researchResult,
+    docs: docsResult,
+    integrationFiles,
+    localTestResult: testResult
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+      }
+  const phase4Review = await ctx.breakpoint({
       question: `Integration tests found ${testResult.failures.length} issue(s). Review failures and decide whether to fix and retry or accept current state.`,
       title: 'Integration Test Failures',
       context: {
@@ -203,10 +215,16 @@ export async function process(inputs, ctx) {
         files: [
           { path: `artifacts/antigravity-test-report.md`, format: 'markdown', label: 'Test Report' }
         ]
-      }
-    });
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase4Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase4Review.approved) break;
+      lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+    }
   }
-
   // ============================================================================
   // PHASE 5: VERIFY
   // End-to-end verification: start a babysitter run through Antigravity's
@@ -261,7 +279,7 @@ export async function process(inputs, ctx) {
     converged = quality >= targetQuality;
 
     if (!converged && iteration < maxIterations) {
-      const fixResult = await ctx.task(refineHarnessAssimilationTask, {
+      let fixResult = await ctx.task(refineHarnessAssimilationTask, {
         projectDir,
         harnessName: 'Google Antigravity',
         integrationFiles,
@@ -280,9 +298,19 @@ export async function process(inputs, ctx) {
         integrationFiles,
         localTestResult: testResult
       });
-      verifyResult = scoreResult;
-
-      await ctx.breakpoint({
+        let lastFeedback_iterationApproval = null;
+      for (let attempt = 0; attempt < 3; attempt++) {
+        if (lastFeedback_iterationApproval) {
+          fixResult = await ctx.task(refineHarnessAssimilationTask, { ...{
+        projectDir,
+        harnessName: 'Google Antigravity',
+        integrationFiles,
+        issues: scoreResult.issues,
+        recommendations: scoreResult.recommendations,
+        iteration
+      }, feedback: lastFeedback_iterationApproval, attempt: attempt + 1 });
+        }
+  const iterationApproval = await ctx.breakpoint({
         question: `Iteration ${iteration}/${maxIterations}: Quality ${quality}/${targetQuality}. Continue converging or accept current state?`,
         title: `Convergence Iteration ${iteration}`,
         context: {
@@ -290,11 +318,16 @@ export async function process(inputs, ctx) {
           files: [
             { path: `artifacts/convergence-iteration-${iteration}.md`, format: 'markdown', label: `Iteration ${iteration} Report` }
           ]
-        }
-      });
-    }
+        },
+        expert: 'owner',
+        tags: ['approval-gate'],
+        previousFeedback: lastFeedback_iterationApproval || undefined,
+        attempt: attempt > 0 ? attempt + 1 : undefined
+        });
+        if (iterationApproval.approved) break;
+        lastFeedback_iterationApproval = iterationApproval.response || iterationApproval.feedback || 'Changes requested';
+      }   }
   }
-
   // ============================================================================
   // RETURN RESULT
   // ============================================================================
@@ -323,8 +356,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

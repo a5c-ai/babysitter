@@ -38,23 +38,35 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Cryptographic Inventory');
 
-  const inventoryResult = await ctx.task(cryptographicInventoryTask, {
+  let inventoryResult = await ctx.task(cryptographicInventoryTask, {
     organization,
     systems
   });
 
-  artifacts.push(...(inventoryResult.artifacts || []));
-
-  await ctx.breakpoint({
+    let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      inventoryResult = await ctx.task(cryptographicInventoryTask, { ...{
+    organization,
+    systems
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Cryptographic inventory complete. Algorithms found: ${inventoryResult.algorithmCount}, Vulnerable: ${inventoryResult.vulnerableCount}. Proceed with vulnerability assessment?`,
     title: 'Cryptographic Inventory Review',
     context: {
       runId: ctx.runId,
       inventory: inventoryResult,
       files: (inventoryResult.artifacts || []).map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 2: QUANTUM VULNERABILITY ASSESSMENT
   // ============================================================================
@@ -76,24 +88,37 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 3: NIST PQC Candidate Evaluation');
 
-  const pqcEvaluationResult = await ctx.task(nistPqcCandidateEvaluationTask, {
+  let pqcEvaluationResult = await ctx.task(nistPqcCandidateEvaluationTask, {
     vulnerabilities: vulnerabilityResult,
     organization,
     useCases: inventoryResult.useCases
   });
 
-  artifacts.push(...(pqcEvaluationResult.artifacts || []));
-
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      pqcEvaluationResult = await ctx.task(nistPqcCandidateEvaluationTask, { ...{
+    vulnerabilities: vulnerabilityResult,
+    organization,
+    useCases: inventoryResult.useCases
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `PQC evaluation complete. Recommended algorithms: ${pqcEvaluationResult.recommendations.join(', ')}. Review recommendations?`,
     title: 'PQC Candidate Evaluation Review',
     context: {
       runId: ctx.runId,
       evaluation: pqcEvaluationResult,
       files: (pqcEvaluationResult.artifacts || []).map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 4: MIGRATION STRATEGY DESIGN
   // ============================================================================
@@ -138,37 +163,48 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...(implementationResult.artifacts || []));
   }
-
   // ============================================================================
   // PHASE 7: TESTING AND VALIDATION PLAN
   // ============================================================================
 
   ctx.log('info', 'Phase 7: Testing and Validation Plan');
 
-  const testingResult = await ctx.task(pqcTestingValidationPlanTask, {
+  let testingResult = await ctx.task(pqcTestingValidationPlanTask, {
     pqcRecommendations: pqcEvaluationResult,
     implementationGuidelines: implementationResult
   });
 
-  artifacts.push(...(testingResult.artifacts || []));
-
-  await ctx.breakpoint({
+    let lastFeedback_phase7Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase7Review) {
+      testingResult = await ctx.task(pqcTestingValidationPlanTask, { ...{
+    pqcRecommendations: pqcEvaluationResult,
+    implementationGuidelines: implementationResult
+  }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
+    }
+  const phase7Review = await ctx.breakpoint({
     question: `Testing plan created. Test categories: ${testingResult.testCategories.length}. Review testing approach?`,
     title: 'Testing Plan Review',
     context: {
       runId: ctx.runId,
       testing: testingResult,
       files: (testingResult.artifacts || []).map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase7Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase7Review.approved) break;
+    lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 8: SECURITY VALIDATION REPORT
   // ============================================================================
 
   ctx.log('info', 'Phase 8: Security Validation Report');
 
-  const securityReportResult = await ctx.task(securityValidationReportTask, {
+  let securityReportResult = await ctx.task(securityValidationReportTask, {
     organization,
     inventoryResult,
     vulnerabilityResult,
@@ -180,9 +216,22 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...(securityReportResult.artifacts || []));
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      securityReportResult = await ctx.task(securityValidationReportTask, { ...{
+    organization,
+    inventoryResult,
+    vulnerabilityResult,
+    pqcEvaluationResult,
+    migrationStrategyResult,
+    hybridCryptoResult,
+    implementationResult,
+    testingResult,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `PQC assessment complete for ${organization.name}. Vulnerable algorithms: ${vulnerabilityResult.vulnerableCount}, Migration timeline: ${timelineYears} years. Approve assessment?`,
     title: 'PQC Assessment Complete',
     context: {
@@ -194,9 +243,15 @@ export async function process(inputs, ctx) {
         recommendedPQC: pqcEvaluationResult.recommendations
       },
       files: artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
 
   return {
@@ -241,8 +296,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

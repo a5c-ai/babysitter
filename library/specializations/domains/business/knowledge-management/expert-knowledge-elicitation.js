@@ -42,7 +42,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 1: Planning and preparing knowledge elicitation');
-  const elicitationPlan = await ctx.task(elicitationPlanningTask, {
+  let elicitationPlan = await ctx.task(elicitationPlanningTask, {
     knowledgeDomain,
     experts,
     elicitationGoals,
@@ -66,9 +66,20 @@ export async function process(inputs, ctx) {
       }
     };
   }
-
-  // Breakpoint: Review elicitation plan
-  await ctx.breakpoint({
+  let lastFeedback_reviewApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_reviewApproval) {
+      elicitationPlan = await ctx.task(elicitationPlanningTask, { ...{
+    knowledgeDomain,
+    experts,
+    elicitationGoals,
+    existingKnowledge,
+    elicitationMethods,
+    sessionParameters,
+    outputDir
+  }, feedback: lastFeedback_reviewApproval, attempt: attempt + 1 });
+    }
+  const reviewApproval = await ctx.breakpoint({
     question: `Elicitation plan created for ${experts.length} experts covering ${elicitationPlan.knowledgeAreas.length} knowledge areas. Review plan?`,
     title: 'Elicitation Plan Review',
     context: {
@@ -85,9 +96,15 @@ export async function process(inputs, ctx) {
         knowledgeAreas: elicitationPlan.knowledgeAreas.length,
         sessionsPlanned: elicitationPlan.plannedSessions.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_reviewApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (reviewApproval.approved) break;
+    lastFeedback_reviewApproval = reviewApproval.response || reviewApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 2: INTERVIEW PROTOCOL DEVELOPMENT
   // ============================================================================
@@ -108,7 +125,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 3: Executing knowledge elicitation sessions');
-  const elicitationSessions = await ctx.task(elicitationExecutionTask, {
+  let elicitationSessions = await ctx.task(elicitationExecutionTask, {
     knowledgeDomain,
     experts,
     interviewProtocol,
@@ -119,8 +136,19 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...elicitationSessions.artifacts);
 
-  // Breakpoint: Review elicitation sessions
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      elicitationSessions = await ctx.task(elicitationExecutionTask, { ...{
+    knowledgeDomain,
+    experts,
+    interviewProtocol,
+    plannedSessions: elicitationPlan.plannedSessions,
+    elicitationMethods,
+    outputDir
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Completed ${elicitationSessions.completedSessions.length} elicitation sessions. Review session outcomes?`,
     title: 'Elicitation Sessions Review',
     context: {
@@ -136,9 +164,15 @@ export async function process(inputs, ctx) {
         knowledgeItemsCaptured: elicitationSessions.knowledgeItems.length,
         expertsInterviewed: elicitationSessions.expertsInterviewed
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 4: KNOWLEDGE EXTRACTION AND ANALYSIS
   // ============================================================================
@@ -173,7 +207,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 6: Developing knowledge documentation');
-  const documentation = await ctx.task(documentationDevelopmentTask, {
+  let documentation = await ctx.task(documentationDevelopmentTask, {
     knowledgeDomain,
     structuredKnowledge: knowledgeStructuring.structuredKnowledge,
     experts,
@@ -182,8 +216,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...documentation.artifacts);
 
-  // Breakpoint: Review documentation
-  await ctx.breakpoint({
+    let lastFeedback_phase6Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase6Review) {
+      documentation = await ctx.task(documentationDevelopmentTask, { ...{
+    knowledgeDomain,
+    structuredKnowledge: knowledgeStructuring.structuredKnowledge,
+    experts,
+    outputDir
+  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
+    }
+  const phase6Review = await ctx.breakpoint({
     question: `Created ${documentation.documents.length} knowledge documents. Review documentation?`,
     title: 'Documentation Review',
     context: {
@@ -199,9 +242,15 @@ export async function process(inputs, ctx) {
         documentTypes: documentation.documentTypes,
         totalKnowledgeItems: documentation.totalKnowledgeItems
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase6Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase6Review.approved) break;
+    lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 7: EXPERT VALIDATION
   // ============================================================================
@@ -240,7 +289,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 9: Analyzing knowledge gaps and follow-up needs');
-  const gapAnalysis = await ctx.task(gapAnalysisTask, {
+  let gapAnalysis = await ctx.task(gapAnalysisTask, {
     knowledgeDomain,
     elicitationGoals,
     capturedKnowledge: documentation.documents,
@@ -268,8 +317,18 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...reviewResult.artifacts);
 
-    // Breakpoint: Final approval gate
-    await ctx.breakpoint({
+      let lastFeedback_finalApproval = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_finalApproval) {
+        gapAnalysis = await ctx.task(gapAnalysisTask, { ...{
+    knowledgeDomain,
+    elicitationGoals,
+    capturedKnowledge: documentation.documents,
+    knowledgeAreas: elicitationPlan.knowledgeAreas,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+      }
+  const finalApproval = await ctx.breakpoint({
       question: `Stakeholder review complete. ${reviewResult.approved ? 'Approved!' : 'Requires revisions.'} Finalize elicitation?`,
       title: 'Final Approval Gate',
       context: {
@@ -286,9 +345,15 @@ export async function process(inputs, ctx) {
           stakeholdersReviewed: reviewResult.stakeholders.length,
           gapsIdentified: gapAnalysis.gaps.length
         }
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_finalApproval || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (finalApproval.approved) break;
+      lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+    } }
 
   const endTime = ctx.now();
   const duration = endTime - startTime;
@@ -326,8 +391,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

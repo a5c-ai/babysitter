@@ -126,7 +126,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 8: Defining success metrics');
-  const successMetrics = await ctx.task(successMetricsTask, {
+  let successMetrics = await ctx.task(successMetricsTask, {
     baselineAnalysis,
     solutionDesign,
     targetImprovement,
@@ -136,9 +136,17 @@ export async function process(inputs, ctx) {
   artifacts.push(...successMetrics.artifacts);
 
   const currentPerformance = baselineAnalysis.performanceScore;
-  const expectedImprovement = solutionDesign.expectedImprovement;
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      successMetrics = await ctx.task(successMetricsTask, { ...{
+    baselineAnalysis,
+    solutionDesign,
+    targetImprovement,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Touchpoint optimization complete for ${touchpoint.name || 'touchpoint'}. Current performance: ${currentPerformance}%. Expected improvement: ${expectedImprovement}%. Friction points: ${frictionAnalysis.frictionPoints?.length || 0}. Solutions designed: ${solutionDesign.solutions?.length || 0}. Review and implement?`,
     title: 'Touchpoint Optimization Review',
     context: {
@@ -158,9 +166,15 @@ export async function process(inputs, ctx) {
         solutionCount: solutionDesign.solutions?.length || 0,
         implementationPhases: implementationPlanning.phases?.length || 0
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -196,8 +210,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

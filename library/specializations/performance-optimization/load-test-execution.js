@@ -42,15 +42,24 @@ export async function process(inputs, ctx) {
   artifacts.push(...baseline.artifacts);
 
   // Phase 3: Execute Load Scenarios
-  const loadExecution = await ctx.task(executeLoadScenariosTask, { projectName, testScripts, loadProfile, duration, outputDir });
-  artifacts.push(...loadExecution.artifacts);
-
-  await ctx.breakpoint({
+  let loadExecution = await ctx.task(executeLoadScenariosTask, { projectName, testScripts, loadProfile, duration, outputDir });
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      loadExecution = await ctx.task(executeLoadScenariosTask, { ...{ projectName, testScripts, loadProfile, duration, outputDir }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Load test completed. Avg response: ${loadExecution.avgResponseTime}ms. Error rate: ${loadExecution.errorRate}%. Analyze results?`,
     title: 'Load Test Execution Complete',
-    context: { runId: ctx.runId, loadExecution }
-  });
-
+    context: { runId: ctx.runId, loadExecution },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // Phase 4: Collect Performance Metrics
   const metrics = await ctx.task(collectPerformanceMetricsTask, { projectName, loadExecution, outputDir });
   artifacts.push(...metrics.artifacts);
@@ -68,15 +77,24 @@ export async function process(inputs, ctx) {
   artifacts.push(...comparison.artifacts);
 
   // Phase 8: Generate Test Report
-  const report = await ctx.task(generateLoadTestReportTask, { projectName, baseline, loadExecution, metrics, bottlenecks, comparison, outputDir });
-  artifacts.push(...report.artifacts);
-
-  await ctx.breakpoint({
+  let report = await ctx.task(generateLoadTestReportTask, { projectName, baseline, loadExecution, metrics, bottlenecks, comparison, outputDir });
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      report = await ctx.task(generateLoadTestReportTask, { ...{ projectName, baseline, loadExecution, metrics, bottlenecks, comparison, outputDir }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Analysis complete. Found ${bottlenecks.bottlenecks.length} bottlenecks. Review report?`,
     title: 'Load Test Analysis',
-    context: { runId: ctx.runId, bottlenecks, report }
-  });
-
+    context: { runId: ctx.runId, bottlenecks, report },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     projectName,

@@ -114,7 +114,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 6: Configuring alerts');
 
-  const alertConfiguration = await ctx.task(alertConfigurationTask, {
+  let alertConfiguration = await ctx.task(alertConfigurationTask, {
     financialIndicators,
     operationalIndicators,
     complianceIndicators,
@@ -125,8 +125,19 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...alertConfiguration.artifacts);
 
-  // Breakpoint: Review monitoring setup
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      alertConfiguration = await ctx.task(alertConfigurationTask, { ...{
+    financialIndicators,
+    operationalIndicators,
+    complianceIndicators,
+    alertThresholds,
+    alertRecipients,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Risk monitoring configured for ${suppliers.length} suppliers. ${alertConfiguration.totalAlerts} alert rules created. Review monitoring setup?`,
     title: 'Risk Monitoring Setup Review',
     context: {
@@ -137,9 +148,15 @@ export async function process(inputs, ctx) {
         totalAlerts: alertConfiguration.totalAlerts,
         dataSources: dataIntegration.connectedSources
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 7: DASHBOARD SETUP
   // ============================================================================
@@ -197,8 +214,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

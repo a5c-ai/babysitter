@@ -116,7 +116,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Scoring LMS configuration quality');
-  const qualityScore = await ctx.task(lmsQualityScoringTask, {
+  let qualityScore = await ctx.task(lmsQualityScoringTask, {
     lmsPlatform,
     requirementsAnalysis,
     roleConfiguration,
@@ -132,8 +132,21 @@ export async function process(inputs, ctx) {
   const overallScore = qualityScore.overallScore;
   const qualityMet = overallScore >= qualityThreshold;
 
-  // Breakpoint: Review LMS configuration
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      qualityScore = await ctx.task(lmsQualityScoringTask, { ...{
+    lmsPlatform,
+    requirementsAnalysis,
+    roleConfiguration,
+    templateDesign,
+    integrationSetup,
+    documentation,
+    qualityThreshold,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `LMS configuration complete. Quality score: ${overallScore}/${qualityThreshold}. ${qualityMet ? 'Quality standards met!' : 'May need refinement.'} Review and approve?`,
     title: 'LMS Administration Review',
     context: {
@@ -148,9 +161,15 @@ export async function process(inputs, ctx) {
         totalIntegrations: integrationSetup.integrations?.length || 0,
         totalArtifacts: artifacts.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -177,8 +196,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: LMS Requirements Analysis
+  // Task 1: LMS Requirements Analysis
 export const lmsRequirementsAnalysisTask = defineTask('lms-requirements-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Analyze LMS requirements',

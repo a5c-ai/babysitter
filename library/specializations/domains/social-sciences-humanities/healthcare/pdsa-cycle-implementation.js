@@ -45,7 +45,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
   ctx.log('info', 'PLAN Phase: Planning the test of change');
 
-  const planPhase = await ctx.task(planPhaseTask, {
+  let planPhase = await ctx.task(planPhaseTask, {
     improvementAim,
     changeIdea,
     currentBaseline,
@@ -55,9 +55,20 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...planPhase.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_testApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_testApproval) {
+      planPhase = await ctx.task(planPhaseTask, { ...{
+    improvementAim,
+    changeIdea,
+    currentBaseline,
+    testScope,
+    cycleNumber,
+    previousLearnings,
+    outputDir
+  }, feedback: lastFeedback_testApproval, attempt: attempt + 1 });
+    }
+  const testApproval = await ctx.breakpoint({
     question: `PLAN complete. Testing: "${planPhase.testDescription}". Prediction: ${planPhase.prediction}. Test duration: ${planPhase.testDuration}. Sample size: ${planPhase.sampleSize}. Approve to proceed with DO phase?`,
     title: 'PDSA PLAN Phase Review',
     context: {
@@ -68,23 +79,36 @@ export async function process(inputs, ctx) {
       prediction: planPhase.prediction,
       dataCollectionPlan: planPhase.dataCollectionPlan,
       files: planPhase.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_testApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (testApproval.approved) break;
+    lastFeedback_testApproval = testApproval.response || testApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // DO PHASE
   // ============================================================================
   ctx.log('info', 'DO Phase: Carrying out the test');
 
-  const doPhase = await ctx.task(doPhaseTask, {
+  let doPhase = await ctx.task(doPhaseTask, {
     planPhase,
     testScope,
     outputDir
   });
 
-  artifacts.push(...doPhase.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_testApproval2 = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_testApproval2) {
+      doPhase = await ctx.task(doPhaseTask, { ...{
+    planPhase,
+    testScope,
+    outputDir
+  }, feedback: lastFeedback_testApproval2, attempt: attempt + 1 });
+    }
+  const testApproval2 = await ctx.breakpoint({
     question: `DO phase complete. Test executed: ${doPhase.testExecuted}. ${doPhase.observations.length} observations documented. ${doPhase.unexpectedEvents.length} unexpected events. Proceed with STUDY phase?`,
     title: 'PDSA DO Phase Review',
     context: {
@@ -94,24 +118,38 @@ export async function process(inputs, ctx) {
       dataCollected: doPhase.dataCollected,
       unexpectedEvents: doPhase.unexpectedEvents,
       files: doPhase.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_testApproval2 || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (testApproval2.approved) break;
+    lastFeedback_testApproval2 = testApproval2.response || testApproval2.feedback || 'Changes requested';
+  }
   // ============================================================================
   // STUDY PHASE
   // ============================================================================
   ctx.log('info', 'STUDY Phase: Analyzing results');
 
-  const studyPhase = await ctx.task(studyPhaseTask, {
+  let studyPhase = await ctx.task(studyPhaseTask, {
     planPhase,
     doPhase,
     currentBaseline,
     outputDir
   });
 
-  artifacts.push(...studyPhase.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      studyPhase = await ctx.task(studyPhaseTask, { ...{
+    planPhase,
+    doPhase,
+    currentBaseline,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `STUDY complete. Prediction confirmed: ${studyPhase.predictionConfirmed}. Result: ${studyPhase.resultSummary}. Key learning: ${studyPhase.keyLearning}. Proceed with ACT phase?`,
     title: 'PDSA STUDY Phase Review',
     context: {
@@ -121,9 +159,15 @@ export async function process(inputs, ctx) {
       comparison: studyPhase.comparisonToPrediction,
       learnings: studyPhase.learnings,
       files: studyPhase.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // ACT PHASE
   // ============================================================================
@@ -202,8 +246,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// PLAN Phase Task
+  // PLAN Phase Task
 export const planPhaseTask = defineTask('pdsa-plan', (args, taskCtx) => ({
   kind: 'agent',
   title: `PDSA PLAN - Cycle ${args.cycleNumber}`,

@@ -42,7 +42,7 @@ export async function process(inputs, ctx) {
 
   // Phase 1: Event Discovery and Initial Response
   ctx.log('info', 'Phase 1: Event Discovery and Initial Response');
-  const initialResponse = await ctx.task(initialResponseTask, {
+  let initialResponse = await ctx.task(initialResponseTask, {
     eventDescription,
     eventType,
     severity,
@@ -52,9 +52,20 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...initialResponse.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      initialResponse = await ctx.task(initialResponseTask, { ...{
+    eventDescription,
+    eventType,
+    severity,
+    patientHarm,
+    eventDate,
+    location,
+    outputDir
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Initial response complete. Event classified as: ${initialResponse.classification}. Immediate actions: ${initialResponse.immediateActions.length}. Team assembled: ${initialResponse.teamAssembled}. Proceed with investigation?`,
     title: 'Initial Response Review',
     context: {
@@ -63,9 +74,15 @@ export async function process(inputs, ctx) {
       classification: initialResponse.classification,
       immediateActions: initialResponse.immediateActions,
       files: initialResponse.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // Phase 2: Information Gathering
   ctx.log('info', 'Phase 2: Information Gathering');
   const informationGathering = await ctx.task(informationGatheringTask, {
@@ -78,15 +95,22 @@ export async function process(inputs, ctx) {
 
   // Phase 3: Timeline Reconstruction
   ctx.log('info', 'Phase 3: Timeline Reconstruction');
-  const timelineReconstruction = await ctx.task(timelineReconstructionTask, {
+  let timelineReconstruction = await ctx.task(timelineReconstructionTask, {
     informationGathering,
     eventDescription,
     outputDir
   });
 
-  artifacts.push(...timelineReconstruction.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      timelineReconstruction = await ctx.task(timelineReconstructionTask, { ...{
+    informationGathering,
+    eventDescription,
+    outputDir
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Timeline reconstructed with ${timelineReconstruction.events.length} events. ${timelineReconstruction.criticalPoints.length} critical points identified. Proceed with cause analysis?`,
     title: 'Timeline Review',
     context: {
@@ -94,9 +118,15 @@ export async function process(inputs, ctx) {
       timeline: timelineReconstruction.timeline,
       criticalPoints: timelineReconstruction.criticalPoints,
       files: timelineReconstruction.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // Phase 4: Cause and Effect Analysis
   ctx.log('info', 'Phase 4: Cause and Effect Analysis');
   const causeEffectAnalysis = await ctx.task(causeEffectAnalysisTask, {
@@ -109,15 +139,22 @@ export async function process(inputs, ctx) {
 
   // Phase 5: Contributing Factor Identification
   ctx.log('info', 'Phase 5: Contributing Factor Identification');
-  const contributingFactors = await ctx.task(contributingFactorsTask, {
+  let contributingFactors = await ctx.task(contributingFactorsTask, {
     causeEffectAnalysis,
     informationGathering,
     outputDir
   });
 
-  artifacts.push(...contributingFactors.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase5Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase5Review) {
+      contributingFactors = await ctx.task(contributingFactorsTask, { ...{
+    causeEffectAnalysis,
+    informationGathering,
+    outputDir
+  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+    }
+  const phase5Review = await ctx.breakpoint({
     question: `${contributingFactors.humanFactors.length} human factors, ${contributingFactors.systemFactors.length} system factors identified. Proceed with root cause determination?`,
     title: 'Contributing Factors Review',
     context: {
@@ -126,9 +163,15 @@ export async function process(inputs, ctx) {
       systemFactors: contributingFactors.systemFactors,
       environmentalFactors: contributingFactors.environmentalFactors,
       files: contributingFactors.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase5Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase5Review.approved) break;
+    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+  }
   // Phase 6: Root Cause Determination
   ctx.log('info', 'Phase 6: Root Cause Determination');
   const rootCauseDetermination = await ctx.task(rootCauseDeterminationTask, {
@@ -141,15 +184,22 @@ export async function process(inputs, ctx) {
 
   // Phase 7: Action Plan Development
   ctx.log('info', 'Phase 7: Action Plan Development');
-  const actionPlan = await ctx.task(actionPlanDevelopmentTask, {
+  let actionPlan = await ctx.task(actionPlanDevelopmentTask, {
     rootCauseDetermination,
     contributingFactors,
     outputDir
   });
 
-  artifacts.push(...actionPlan.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      actionPlan = await ctx.task(actionPlanDevelopmentTask, { ...{
+    rootCauseDetermination,
+    contributingFactors,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `${rootCauseDetermination.rootCauses.length} root causes identified. ${actionPlan.actions.length} corrective actions proposed. ${actionPlan.strongActions} strong actions. Approve action plan?`,
     title: 'Root Causes and Action Plan Review',
     context: {
@@ -157,9 +207,15 @@ export async function process(inputs, ctx) {
       rootCauses: rootCauseDetermination.rootCauses,
       actions: actionPlan.actions,
       files: [...rootCauseDetermination.artifacts, ...actionPlan.artifacts].map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 8: Measurement Plan
   ctx.log('info', 'Phase 8: Measurement Plan Development');
   const measurementPlan = await ctx.task(measurementPlanTask, {
@@ -232,8 +288,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Initial Response
+  // Task 1: Initial Response
 export const initialResponseTask = defineTask('rca-hc-initial', (args, taskCtx) => ({
   kind: 'agent',
   title: 'RCA Initial Response',

@@ -67,17 +67,28 @@ export async function process(inputs, ctx) {
   artifacts.push(...pipelineOptimization.artifacts);
 
   // Phase 6: Performance Benchmarking
-  const benchmarking = await ctx.task(imageVideoBenchmarkingTask, {
+  let benchmarking = await ctx.task(imageVideoBenchmarkingTask, {
     projectName, pipelineOptimization, realTime, outputDir
   });
-  artifacts.push(...benchmarking.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      benchmarking = await ctx.task(imageVideoBenchmarkingTask, { ...{
+    projectName, pipelineOptimization, realTime, outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Image/video processing complete for ${projectName}. Frame rate: ${benchmarking.fps} FPS. Latency: ${benchmarking.latency}ms. Review?`,
     title: 'Image/Video Processing Complete',
-    context: { runId: ctx.runId, benchmarking }
-  });
-
+    context: { runId: ctx.runId, benchmarking },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: !realTime || benchmarking.fps >= 30,
     projectName,

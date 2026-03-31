@@ -239,6 +239,45 @@ Analyze → Score: 68/85 (improvement only +6)
 Analyze → Score: 87/85 ✓ Converged!
 ```
 
+### Breakpoint Routing
+
+Breakpoints support routing fields to control who receives them and how responses are collected:
+
+```javascript
+const approval = await ctx.breakpoint({
+  question: "Review the security audit results?",
+  options: ["Approve", "Request changes"],
+  expert: "security-reviewer",       // route to a specific domain expert
+  tags: ["security", "audit"],       // categorization tags for filtering
+  strategy: "first-response-wins",   // collect strategy (single | first-response-wins | collect-all | quorum)
+});
+```
+
+Use `expert: 'owner'` to route back to the run requester. The `strategy` field is only meaningful when `expert !== 'owner'`.
+
+### Breakpoint Rejection Handling — Retry/Refine Pattern
+
+Processes must ALWAYS loop back on rejection, never fail. Use `previousFeedback` and `attempt` fields to track retry state:
+
+```javascript
+let lastFeedback = null;
+for (let attempt = 0; attempt < 3; attempt++) {
+  if (lastFeedback) {
+    currentResult = await ctx.task(refineTask, { ...args, feedback: lastFeedback, attempt: attempt + 1 });
+  }
+  const approval = await ctx.breakpoint({
+    question: 'Review and approve this step?',
+    options: ['Approve', 'Request changes'],
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined,
+  });
+  if (approval.approved) break;
+  lastFeedback = approval.response || approval.feedback || 'Changes requested';
+}
+```
+
 ### Breakpoint Strategy
 
 Smart breakpoints prevent wasted iterations:
@@ -396,11 +435,15 @@ export async function process(inputs, ctx) {
 
   // Phase 4: Iterative improvement if issues found
   if (securityCheck.criticalIssues.length > 0) {
-    await ctx.breakpoint({
+    const approval = await ctx.breakpoint({
       reason: "Critical security issues",
       issues: securityCheck.criticalIssues,
-      question: "Start iterative improvement?"
+      question: "Start iterative improvement?",
+      options: ["Approve", "Reject"]
     });
+    if (!approval.approved) {
+      return { ok: false, reason: "User rejected iterative improvement", feedback: approval.response || approval.feedback };
+    }
 
     // Run convergence loop (Pattern 7)
     const improvement = await ctx.task(iterativeImprovementTask, {
@@ -421,6 +464,49 @@ This combines:
 - Skill task (security check)
 - Iterative convergence (improvement loop)
 - Breakpoints (human approval)
+
+---
+
+## Effect Execution Hints
+
+Tasks can include an `execution` field to express preferences about how the effect should be dispatched:
+
+```javascript
+defineTask('security-scan', (args, taskCtx) => ({
+  kind: 'agent',
+  title: 'Security vulnerability scan',
+  execution: {
+    model: 'claude-opus-4-6',       // universal — used by plugins + internal harness
+    harness: 'pi',                  // internal harness only — ignored by plugins
+    permissions: ['file:read', 'net:fetch'],  // internal harness only
+  },
+  agent: {
+    name: 'security-scanner',
+    prompt: {
+      role: 'Security engineer',
+      task: 'Scan for vulnerabilities',
+      context: { ...args },
+      instructions: ['Scan dependencies', 'Check for known CVEs'],
+      outputFormat: 'JSON'
+    },
+    outputSchema: { type: 'object', required: ['findings'] }
+  },
+  io: {
+    inputJsonPath: `tasks/${taskCtx.effectId}/input.json`,
+    outputJsonPath: `tasks/${taskCtx.effectId}/result.json`
+  }
+}));
+```
+
+**Field scope:**
+
+| Field | Scope | Description |
+|-------|-------|-------------|
+| `execution.model` | Universal | Preferred model for the task. Used by both plugins and internal harness. |
+| `execution.harness` | Internal harness only | Preferred harness CLI. ONLY used by `harness:create-run`. Ignored by plugins. |
+| `execution.permissions` | Internal harness only | Free-form permission list. ONLY used by `harness:create-run`. |
+
+**Note:** In plugin SKILL.md files, the `harness` field is ignored. Only `model` is considered for subagent selection.
 
 ---
 

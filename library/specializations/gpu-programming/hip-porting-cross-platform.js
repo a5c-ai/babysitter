@@ -67,17 +67,28 @@ export async function process(inputs, ctx) {
   artifacts.push(...platformTesting.artifacts);
 
   // Phase 6: Performance Comparison
-  const performanceComparison = await ctx.task(crossPlatformPerformanceTask, {
+  let performanceComparison = await ctx.task(crossPlatformPerformanceTask, {
     projectName, targetPlatforms, platformTesting, outputDir
   });
-  artifacts.push(...performanceComparison.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      performanceComparison = await ctx.task(crossPlatformPerformanceTask, { ...{
+    projectName, targetPlatforms, platformTesting, outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `HIP porting complete for ${projectName}. Platforms passed: ${platformTesting.passedPlatforms.join(', ')}. Review?`,
     title: 'HIP Porting Complete',
-    context: { runId: ctx.runId, platformTesting, performanceComparison }
-  });
-
+    context: { runId: ctx.runId, platformTesting, performanceComparison },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: platformTesting.allPlatformsPassed,
     projectName,

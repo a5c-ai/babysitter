@@ -62,7 +62,7 @@ export async function process(inputs, ctx) {
   artifacts.push(...virtualHosting.artifacts);
 
   // Phase 9: Static File Serving
-  const staticFiles = await ctx.task(staticFilesTask, { projectName, language, outputDir });
+  let staticFiles = await ctx.task(staticFilesTask, { projectName, language, outputDir });
   artifacts.push(...staticFiles.artifacts);
 
   // Phase 10: Testing and Validation
@@ -70,14 +70,23 @@ export async function process(inputs, ctx) {
     () => ctx.task(testSuiteTask, { projectName, language, features, outputDir }),
     () => ctx.task(validationTask, { projectName, features, outputDir })
   ]);
-  artifacts.push(...testSuite.artifacts, ...validation.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      staticFiles = await ctx.task(staticFilesTask, { ...{ projectName, language, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `HTTP Server Complete for ${projectName}! Validation: ${validation.overallScore}/100. Review?`,
     title: 'HTTP Server Complete',
-    context: { runId: ctx.runId, validationScore: validation.overallScore }
-  });
-
+    context: { runId: ctx.runId, validationScore: validation.overallScore },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: validation.overallScore >= 80,
     projectName,

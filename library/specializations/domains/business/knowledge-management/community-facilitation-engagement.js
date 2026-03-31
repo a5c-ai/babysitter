@@ -27,15 +27,24 @@ export async function process(inputs, ctx) {
 
   // Phase 1: Community Assessment
   ctx.log('info', 'Phase 1: Assessing current community state');
-  const communityAssessment = await ctx.task(communityAssessmentTask, { community, currentState, memberProfiles, outputDir });
-  artifacts.push(...communityAssessment.artifacts);
-
-  await ctx.breakpoint({
+  let communityAssessment = await ctx.task(communityAssessmentTask, { community, currentState, memberProfiles, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      communityAssessment = await ctx.task(communityAssessmentTask, { ...{ community, currentState, memberProfiles, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Community assessment complete with ${communityAssessment.activeMembers} active members and ${communityAssessment.engagementLevel}% engagement. Review?`,
     title: 'Community Assessment Review',
-    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })), summary: { activeMembers: communityAssessment.activeMembers, engagementLevel: communityAssessment.engagementLevel } }
-  });
-
+    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })), summary: { activeMembers: communityAssessment.activeMembers, engagementLevel: communityAssessment.engagementLevel } },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 2: Engagement Strategy Development
   ctx.log('info', 'Phase 2: Developing engagement strategy');
   const engagementStrategy = await ctx.task(engagementStrategyTask, { communityAssessment, engagementGoals, outputDir });
@@ -83,7 +92,6 @@ export async function process(inputs, ctx) {
     reviewResult = await ctx.task(stakeholderReviewTask, { facilitationPlan: engagementStrategy.strategy, activities: activityCalendar.calendar, qualityScore: qualityAssessment.overallScore, outputDir });
     artifacts.push(...reviewResult.artifacts);
   }
-
   const endTime = ctx.now();
   return {
     success: true,
@@ -101,8 +109,7 @@ export async function process(inputs, ctx) {
     metadata: { processId: 'domains/business/knowledge-management/community-facilitation-engagement', timestamp: startTime, outputDir }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 export const communityAssessmentTask = defineTask('community-assessment', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Assess community state',

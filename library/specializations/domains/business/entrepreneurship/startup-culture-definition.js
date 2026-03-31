@@ -36,16 +36,26 @@ export async function process(inputs, ctx) {
   artifacts.push(...(cultureAssessment.artifacts || []));
 
   // Phase 3: Values Definition
-  const valuesDefinition = await ctx.task(valuesDefinitionTask, { companyName, founderValues, mission });
+  let valuesDefinition = await ctx.task(valuesDefinitionTask, { companyName, founderValues, mission });
   artifacts.push(...(valuesDefinition.artifacts || []));
 
-  // Breakpoint: Review values
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      valuesDefinition = await ctx.task(valuesDefinitionTask, { ...{ companyName, founderValues, mission }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Review values for ${companyName}: ${valuesDefinition.values?.join(', ')}. Proceed with behaviors definition?`,
     title: 'Values Review',
-    context: { runId: ctx.runId, companyName, values: valuesDefinition.values, files: artifacts }
-  });
-
+    context: { runId: ctx.runId, companyName, values: valuesDefinition.values, files: artifacts },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 4: Behaviors Definition
   const behaviorsDefinition = await ctx.task(behaviorsDefinitionTask, { companyName, valuesDefinition });
   artifacts.push(...(behaviorsDefinition.artifacts || []));

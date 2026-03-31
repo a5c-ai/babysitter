@@ -538,7 +538,7 @@ export async function process(inputs, ctx) {
 
   // Phase 6: Dashboard Creation
   ctx.log('Phase 6: Creating adoption dashboard');
-  const dashboardResult = await ctx.task(dashboardCreationTask, {
+  let dashboardResult = await ctx.task(dashboardCreationTask, {
     adoptionFramework: artifacts.adoptionFramework,
     adoptionMetrics: artifacts.adoptionMetrics,
     utilizationAnalysis: artifacts.utilizationAnalysis,
@@ -546,17 +546,32 @@ export async function process(inputs, ctx) {
   });
   artifacts.adoptionDashboard = dashboardResult;
 
-  // Breakpoint for metrics review
-  await ctx.breakpoint('adoption-metrics-review', {
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      dashboardResult = await ctx.task(dashboardCreationTask, { ...{
+    adoptionFramework: artifacts.adoptionFramework,
+    adoptionMetrics: artifacts.adoptionMetrics,
+    utilizationAnalysis: artifacts.utilizationAnalysis,
+    proficiencyAssessment: artifacts.proficiencyAssessment
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint('adoption-metrics-review', {
     question: 'Review the adoption tracking metrics and dashboard. Are the measurements accurate and useful?',
     artifacts: {
       adoptionMetrics: artifacts.adoptionMetrics,
       utilizationAnalysis: artifacts.utilizationAnalysis,
       proficiencyAssessment: artifacts.proficiencyAssessment,
       adoptionDashboard: artifacts.adoptionDashboard
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 7: Intervention Recommendations
   ctx.log('Phase 7: Developing intervention recommendations');
   const interventionResult = await ctx.task(interventionRecommendationsTask, {

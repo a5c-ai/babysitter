@@ -57,7 +57,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Initializing dbt project and folder structure');
 
-  const projectInit = await ctx.task(projectInitializationTask, {
+  let projectInit = await ctx.task(projectInitializationTask, {
     projectName,
     dataWarehouse,
     modelingApproach,
@@ -65,9 +65,18 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...projectInit.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      projectInit = await ctx.task(projectInitializationTask, { ...{
+    projectName,
+    dataWarehouse,
+    modelingApproach,
+    includePackages,
+    outputDir
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Phase 1 Complete: dbt project "${projectName}" initialized with ${projectInit.folderCount} folders and ${projectInit.configFiles.length} configuration files. Review project structure?`,
     title: 'Project Initialization Complete',
     context: {
@@ -77,16 +86,22 @@ export async function process(inputs, ctx) {
       folderStructure: projectInit.folderStructure,
       configFiles: projectInit.configFiles,
       files: projectInit.artifacts.map(a => ({ path: a.path, format: a.format || 'yaml' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 2: PROFILES AND CONNECTION CONFIGURATION
   // ============================================================================
 
   ctx.log('info', 'Phase 2: Configuring database connections and profiles');
 
-  const profilesConfig = await ctx.task(profilesConfigurationTask, {
+  let profilesConfig = await ctx.task(profilesConfigurationTask, {
     projectName,
     dataWarehouse,
     deploymentEnvironments,
@@ -111,9 +126,17 @@ export async function process(inputs, ctx) {
   );
 
   const sourceConfigs = await ctx.parallel.all(sourceTasks);
-  artifacts.push(...sourceConfigs.flatMap(s => s.artifacts));
-
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      profilesConfig = await ctx.task(profilesConfigurationTask, { ...{
+    projectName,
+    dataWarehouse,
+    deploymentEnvironments,
+    outputDir
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Phase 3 Complete: Configured ${sourceDatabases.length} source database(s) with ${sourceConfigs.reduce((sum, s) => sum + s.tableCount, 0)} total tables. Review source configurations?`,
     title: 'Source Configuration Review',
     context: {
@@ -125,9 +148,15 @@ export async function process(inputs, ctx) {
         testsConfigured: s.freshnessTests
       })),
       files: sourceConfigs.flatMap(s => s.artifacts).map(a => ({ path: a.path, format: a.format || 'yaml' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 4: STAGING LAYER SETUP
   // ============================================================================
@@ -164,7 +193,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 6: Creating marts layer (dimensional/denormalized models)');
 
-  const martsLayer = await ctx.task(martsLayerTask, {
+  let martsLayer = await ctx.task(martsLayerTask, {
     projectName,
     intermediateLayer,
     stagingLayer,
@@ -172,9 +201,18 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...martsLayer.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase6Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase6Review) {
+      martsLayer = await ctx.task(martsLayerTask, { ...{
+    projectName,
+    intermediateLayer,
+    stagingLayer,
+    modelingApproach,
+    outputDir
+  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
+    }
+  const phase6Review = await ctx.breakpoint({
     question: `Phase 6 Complete: Data models created across 3 layers - Staging (${stagingLayer.modelCount} models), Intermediate (${intermediateLayer.modelCount} models), Marts (${martsLayer.modelCount} models). Review model architecture?`,
     title: 'Data Model Architecture Review',
     context: {
@@ -199,9 +237,15 @@ export async function process(inputs, ctx) {
         ...intermediateLayer.artifacts.map(a => ({ path: a.path, format: 'sql', label: 'Intermediate Model' })),
         ...martsLayer.artifacts.map(a => ({ path: a.path, format: 'sql', label: 'Marts Model' }))
       ].slice(0, 20)
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase6Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase6Review.approved) break;
+    lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 7: MACROS AND UTILITY FUNCTIONS
   // ============================================================================
@@ -223,7 +267,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 8: Configuring comprehensive data testing strategy');
 
-  const testingConfig = await ctx.task(testingConfigurationTask, {
+  let testingConfig = await ctx.task(testingConfigurationTask, {
     projectName,
     stagingLayer,
     intermediateLayer,
@@ -233,9 +277,20 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...testingConfig.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase8Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase8Review) {
+      testingConfig = await ctx.task(testingConfigurationTask, { ...{
+    projectName,
+    stagingLayer,
+    intermediateLayer,
+    martsLayer,
+    sourceConfigs,
+    testingStrategy,
+    outputDir
+  }, feedback: lastFeedback_phase8Review, attempt: attempt + 1 });
+    }
+  const phase8Review = await ctx.breakpoint({
     question: `Phase 8 Complete: Testing configured with ${testingConfig.totalTests} tests across ${testingConfig.testCategories.length} categories (schema, data quality, relationships, custom). Proceed with documentation?`,
     title: 'Testing Configuration Review',
     context: {
@@ -250,9 +305,15 @@ export async function process(inputs, ctx) {
       },
       testCategories: testingConfig.testCategories,
       files: testingConfig.artifacts.map(a => ({ path: a.path, format: a.format || 'yaml' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase8Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase8Review.approved) break;
+    lastFeedback_phase8Review = phase8Review.response || phase8Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 9: DOCUMENTATION SETUP
   // ============================================================================
@@ -312,7 +373,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 12: Integrating dbt with CI/CD pipeline');
 
-  const cicdIntegration = await ctx.task(cicdIntegrationTask, {
+  let cicdIntegration = await ctx.task(cicdIntegrationTask, {
     projectName,
     cicdPlatform,
     deploymentEnvironments,
@@ -321,9 +382,19 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...cicdIntegration.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase12Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase12Review) {
+      cicdIntegration = await ctx.task(cicdIntegrationTask, { ...{
+    projectName,
+    cicdPlatform,
+    deploymentEnvironments,
+    dataWarehouse,
+    testingConfig,
+    outputDir
+  }, feedback: lastFeedback_phase12Review, attempt: attempt + 1 });
+    }
+  const phase12Review = await ctx.breakpoint({
     question: `Phase 12 Complete: CI/CD pipeline configured for ${cicdPlatform} with ${cicdIntegration.jobCount} jobs across ${deploymentEnvironments.length} environments. Includes: dbt run, test, docs, freshness checks. Review CI/CD configuration?`,
     title: 'CI/CD Integration Review',
     context: {
@@ -337,9 +408,15 @@ export async function process(inputs, ctx) {
         scheduledRuns: cicdIntegration.scheduledRuns
       },
       files: cicdIntegration.artifacts.map(a => ({ path: a.path, format: a.format || 'yaml' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase12Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase12Review.approved) break;
+    lastFeedback_phase12Review = phase12Review.response || phase12Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 13: DATA QUALITY FRAMEWORK
   // ============================================================================
@@ -380,7 +457,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 15: Validating dbt project configuration and best practices');
 
-  const validation = await ctx.task(projectValidationTask, {
+  let validation = await ctx.task(projectValidationTask, {
     projectName,
     projectInit,
     sourceConfigs,
@@ -398,8 +475,23 @@ export async function process(inputs, ctx) {
   const projectScore = validation.overallScore;
   const validationPassed = projectScore >= 80;
 
-  if (!validationPassed) {
-    await ctx.breakpoint({
+      let lastFeedback_phase15Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase15Review) {
+        validation = await ctx.task(projectValidationTask, { ...{
+    projectName,
+    projectInit,
+    sourceConfigs,
+    stagingLayer,
+    intermediateLayer,
+    martsLayer,
+    testingConfig,
+    documentation,
+    cicdIntegration,
+    outputDir
+  }, feedback: lastFeedback_phase15Review, attempt: attempt + 1 });
+      }
+  const phase15Review = await ctx.breakpoint({
       question: `Phase 15 Warning: Project validation score: ${projectScore}/100 (below threshold of 80). ${validation.issues.length} issue(s) found. Review and address issues?`,
       title: 'Project Validation Issues',
       context: {
@@ -409,9 +501,15 @@ export async function process(inputs, ctx) {
         issues: validation.issues,
         recommendations: validation.recommendations,
         files: validation.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase15Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase15Review.approved) break;
+      lastFeedback_phase15Review = phase15Review.response || phase15Review.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 16: SETUP GUIDE AND HANDOFF DOCUMENTATION
@@ -419,7 +517,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 16: Creating setup guide and handoff documentation');
 
-  const setupGuide = await ctx.task(setupGuideTask, {
+  let setupGuide = await ctx.task(setupGuideTask, {
     projectName,
     dataWarehouse,
     sourceDatabases,
@@ -436,9 +534,23 @@ export async function process(inputs, ctx) {
 
   // ============================================================================
   // FINAL BREAKPOINT: PROJECT COMPLETE
-  // ============================================================================
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      setupGuide = await ctx.task(setupGuideTask, { ...{
+    projectName,
+    dataWarehouse,
+    sourceDatabases,
+    projectInit,
+    profilesConfig,
+    environmentConfigs,
+    packageConfig,
+    cicdIntegration,
+    validation,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `dbt Project Setup Complete for "${projectName}"! Validation score: ${projectScore}/100. Project includes ${stagingLayer.modelCount + intermediateLayer.modelCount + martsLayer.modelCount} models, ${testingConfig.totalTests} tests, and complete CI/CD integration. Review deliverables and approve for deployment?`,
     title: 'dbt Project Setup Complete',
     context: {
@@ -469,9 +581,15 @@ export async function process(inputs, ctx) {
         { path: validation.reportPath, format: 'json', label: 'Validation Report' },
         { path: cicdIntegration.pipelineConfigPath, format: 'yaml', label: 'CI/CD Configuration' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -567,8 +685,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

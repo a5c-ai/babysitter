@@ -40,27 +40,34 @@ export async function process(inputs, ctx) {
     const ikSystems = await ctx.task(ikSystemsTask, { projectName, characterTypes, outputDir });
     artifacts.push(...ikSystems.artifacts);
   }
-
   // Phase 5: Procedural Animation
   if (proceduralAnimRequired) {
     const procedural = await ctx.task(proceduralAnimTask, { projectName, outputDir });
     artifacts.push(...procedural.artifacts);
   }
-
   // Phase 6: Animation Integration
   const integration = await ctx.task(animIntegrationTask, { projectName, stateMachines, blendTrees, outputDir });
   artifacts.push(...integration.artifacts);
 
   // Phase 7: Animation Optimization
-  const optimization = await ctx.task(animOptimizationTask, { projectName, integration, outputDir });
-  artifacts.push(...optimization.artifacts);
-
-  await ctx.breakpoint({
+  let optimization = await ctx.task(animOptimizationTask, { projectName, integration, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      optimization = await ctx.task(animOptimizationTask, { ...{ projectName, integration, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Animation implementation complete for ${projectName}. ${stateMachines.stateCount} animation states. ${blendTrees.treeCount} blend trees. Review?`,
     title: 'Animation Implementation Review',
-    context: { runId: ctx.runId, stateMachines, blendTrees, optimization }
-  });
-
+    context: { runId: ctx.runId, stateMachines, blendTrees, optimization },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     projectName,

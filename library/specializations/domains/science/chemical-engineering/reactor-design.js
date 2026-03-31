@@ -94,7 +94,7 @@ export async function process(inputs, ctx) {
 
   // Task 6: Assess Reactor Safety
   ctx.log('info', 'Assessing reactor safety');
-  const safetyAssessmentResult = await ctx.task(reactorSafetyTask, {
+  let safetyAssessmentResult = await ctx.task(reactorSafetyTask, {
     processName,
     reactorType: reactorSelectionResult.reactorType,
     reactorSizing: reactorSizingResult.sizing,
@@ -106,8 +106,20 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...safetyAssessmentResult.artifacts);
 
-  // Breakpoint: Review reactor design
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      safetyAssessmentResult = await ctx.task(reactorSafetyTask, { ...{
+    processName,
+    reactorType: reactorSelectionResult.reactorType,
+    reactorSizing: reactorSizingResult.sizing,
+    heatTransferDesign: heatTransferResult.design,
+    chemistryAnalysis: chemistryReviewResult.analysis,
+    safetyConstraints,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Reactor design complete for ${processName}. Type: ${reactorSelectionResult.reactorType}. Volume: ${reactorSizingResult.sizing.volume} m3. Conversion: ${reactorSizingResult.sizing.achievedConversion}%. Safety assessment: ${safetyAssessmentResult.overallRisk}. Review design?`,
     title: 'Reactor Design Review',
     context: {
@@ -120,9 +132,15 @@ export async function process(inputs, ctx) {
         heatDuty: heatTransferResult.design.totalHeatDuty,
         overallRisk: safetyAssessmentResult.overallRisk
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 7: Define Operating Envelope
   ctx.log('info', 'Defining operating envelope');
   const operatingEnvelopeResult = await ctx.task(operatingEnvelopeTask, {
@@ -175,8 +193,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Chemistry Review
+  // Task 1: Chemistry Review
 export const chemistryReviewTask = defineTask('chemistry-review', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Review reaction chemistry and thermodynamics',

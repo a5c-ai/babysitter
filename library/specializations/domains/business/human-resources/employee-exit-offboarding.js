@@ -75,8 +75,10 @@ export async function process(inputs, ctx) {
     ]
   });
 
-  // Phase 4: Manager Briefing and Approval
-  await ctx.breakpoint('separation-plan-approval', {
+  let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    // No preceding task identified for re-run with feedback
+    const finalApproval = await ctx.breakpoint('separation-plan-approval', {
     title: 'Separation Plan Approval',
     description: 'Review and approve employee separation plan',
     artifacts: {
@@ -88,9 +90,15 @@ export async function process(inputs, ctx) {
       'Is the separation timeline appropriate?',
       'Are all compliance requirements addressed?',
       'Is the knowledge transfer plan adequate?'
-    ]
-  });
-
+    ],
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 5: Knowledge Transfer Planning
   const knowledgeTransferPlan = await ctx.task('plan-knowledge-transfer', {
     separationPlan,

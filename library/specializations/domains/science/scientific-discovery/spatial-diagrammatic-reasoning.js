@@ -45,7 +45,6 @@ export async function process(inputs, ctx) {
       spatialAnalysis: null
     };
   }
-
   // Phase 2: Topological Relation Extraction
   const topologicalRelations = await ctx.task(topologicalRelationTask, {
     elements: elementCharacterization.elements
@@ -58,14 +57,22 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 4: Spatial Configuration Analysis
-  const configurationAnalysis = await ctx.task(configurationAnalysisTask, {
+  let configurationAnalysis = await ctx.task(configurationAnalysisTask, {
     elements: elementCharacterization.elements,
     topological: topologicalRelations.relations,
     geometric: geometricAnalysis.properties
   });
 
-  // Breakpoint: Review spatial structure
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      configurationAnalysis = await ctx.task(configurationAnalysisTask, { ...{
+    elements: elementCharacterization.elements,
+    topological: topologicalRelations.relations,
+    geometric: geometricAnalysis.properties
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: `Review spatial structure. ${elementCharacterization.elements.length} elements, ${topologicalRelations.relations?.length || 0} relations. Continue analysis?`,
     title: 'Spatial Structure Review',
     context: {
@@ -77,9 +84,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: { elementCharacterization, topologicalRelations, geometricAnalysis, configurationAnalysis }
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
   // Phase 5: Diagram Interpretation
   const diagramInterpretation = await ctx.task(diagramInterpretationTask, {
     diagrams,
@@ -124,7 +137,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 10: Spatial Synthesis
-  const spatialSynthesis = await ctx.task(spatialSynthesisTask, {
+  let spatialSynthesis = await ctx.task(spatialSynthesisTask, {
     elements: elementCharacterization.elements,
     topological: topologicalRelations,
     geometric: geometricAnalysis,
@@ -138,8 +151,24 @@ export async function process(inputs, ctx) {
     domain
   });
 
-  // Final Breakpoint: Spatial Analysis Approval
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      spatialSynthesis = await ctx.task(spatialSynthesisTask, { ...{
+    elements: elementCharacterization.elements,
+    topological: topologicalRelations,
+    geometric: geometricAnalysis,
+    configuration: configurationAnalysis,
+    diagrams: diagramInterpretation,
+    constraints: constraintAnalysis,
+    transformations: transformationAnalysis,
+    queryAnswers: queryResolution.answers,
+    inferences: spatialInferences.inferences,
+    spatialQueries,
+    domain
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Spatial analysis complete. ${queryResolution.answers?.length || 0} queries resolved. Approve analysis?`,
     title: 'Spatial Analysis Approval',
     context: {
@@ -151,9 +180,15 @@ export async function process(inputs, ctx) {
         { path: 'artifacts/spatial-report.json', format: 'json', content: spatialSynthesis },
         { path: 'artifacts/spatial-report.md', format: 'markdown', content: spatialSynthesis.markdown }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     spatialAnalysis: {
@@ -175,8 +210,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const elementCharacterizationTask = defineTask('element-characterization', (args, taskCtx) => ({
   kind: 'agent',

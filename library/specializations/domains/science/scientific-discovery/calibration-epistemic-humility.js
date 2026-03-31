@@ -65,19 +65,33 @@ export async function process(inputs, ctx) {
   });
 
   // Quality Gate: Calibration Reasonableness
-  const reasonablenessCheck = await ctx.task(checkReasonablenessTask, {
+  let reasonablenessCheck = await ctx.task(checkReasonablenessTask, {
     originalConfidences: claimInventory.inventoriedClaims,
     adjustedConfidences: calibrationAdjustment.adjustedAssessments,
     adjustmentMagnitudes: calibrationAdjustment.adjustmentMagnitudes
   });
 
-  if (reasonablenessCheck.hasUnreasonableAdjustments) {
-    await ctx.breakpoint('calibration-review', {
+      let lastFeedback = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback) {
+        reasonablenessCheck = await ctx.task(checkReasonablenessTask, { ...{
+    originalConfidences: claimInventory.inventoriedClaims,
+    adjustedConfidences: calibrationAdjustment.adjustedAssessments,
+    adjustmentMagnitudes: calibrationAdjustment.adjustmentMagnitudes
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+      }
+  const qualityGateApproval = await ctx.breakpoint('calibration-review', {
       message: 'Some calibration adjustments may be unreasonable',
       flaggedAdjustments: reasonablenessCheck.flaggedAdjustments,
-      reviewGuidance: reasonablenessCheck.reviewGuidance
-    });
-  }
+      reviewGuidance: reasonablenessCheck.reviewGuidance,
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (qualityGateApproval.approved) break;
+      lastFeedback = qualityGateApproval.response || qualityGateApproval.feedback || 'Changes requested';
+    }  }
 
   // Phase 8: Uncertainty Model Construction
   const uncertaintyModel = await ctx.task(constructUncertaintyModelTask, {

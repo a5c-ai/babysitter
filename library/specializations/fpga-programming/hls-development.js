@@ -45,15 +45,24 @@ export async function process(inputs, ctx) {
   const codeRefactoring = await ctx.task(codeRefactoringTask, { designName, algorithmAnalysis, optimizationLevel, outputDir });
   artifacts.push(...codeRefactoring.artifacts);
 
-  const directiveOptimization = await ctx.task(directiveOptimizationTask, { designName, codeRefactoring, targetLatency, targetThroughput, outputDir });
-  artifacts.push(...directiveOptimization.artifacts);
-
-  await ctx.breakpoint({
+  let directiveOptimization = await ctx.task(directiveOptimizationTask, { designName, codeRefactoring, targetLatency, targetThroughput, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      directiveOptimization = await ctx.task(directiveOptimizationTask, { ...{ designName, codeRefactoring, targetLatency, targetThroughput, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `HLS code optimized for ${designName}. ${directiveOptimization.directiveCount} directives applied, estimated II: ${directiveOptimization.estimatedII}. Review HLS design?`,
     title: 'HLS Design Review',
-    context: { runId: ctx.runId, designName, directives: directiveOptimization.directiveCount, estimatedII: directiveOptimization.estimatedII }
-  });
-
+    context: { runId: ctx.runId, designName, directives: directiveOptimization.directiveCount, estimatedII: directiveOptimization.estimatedII },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const interfaceSynthesis = await ctx.task(interfaceSynthesisTask, { designName, directiveOptimization, outputDir });
   artifacts.push(...interfaceSynthesis.artifacts);
 

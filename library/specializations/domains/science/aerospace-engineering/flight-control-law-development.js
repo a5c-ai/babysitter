@@ -45,23 +45,38 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 3: Control Architecture Design
-  const architectureDesign = await ctx.task(controlArchitectureTask, {
+  let architectureDesign = await ctx.task(controlArchitectureTask, {
     projectName,
     plantModel,
     requirements: requirementsAnalysis,
     architecture: controlArchitecture
   });
 
-  // Breakpoint: Architecture review
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      architectureDesign = await ctx.task(controlArchitectureTask, { ...{
+    projectName,
+    plantModel,
+    requirements: requirementsAnalysis,
+    architecture: controlArchitecture
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Review control architecture for ${projectName}. Architecture: ${architectureDesign.type}. Proceed with control law design?`,
     title: 'Control Architecture Review',
     context: {
       runId: ctx.runId,
       architecture: architectureDesign
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // Phase 4: Inner Loop Design (SAS)
   const innerLoopDesign = await ctx.task(innerLoopDesignTask, {
     projectName,
@@ -87,7 +102,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 7: Linear Stability Analysis
-  const stabilityAnalysis = await ctx.task(linearStabilityTask, {
+  let stabilityAnalysis = await ctx.task(linearStabilityTask, {
     projectName,
     controlLaws: { innerLoop: innerLoopDesign, outerLoop: outerLoopDesign },
     gainScheduling,
@@ -95,16 +110,31 @@ export async function process(inputs, ctx) {
   });
 
   // Quality Gate: Stability margins
-  if (stabilityAnalysis.worstGainMargin < 6 || stabilityAnalysis.worstPhaseMargin < 45) {
-    await ctx.breakpoint({
+      let lastFeedback_phase7Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase7Review) {
+        stabilityAnalysis = await ctx.task(linearStabilityTask, { ...{
+    projectName,
+    controlLaws: { innerLoop: innerLoopDesign, outerLoop: outerLoopDesign },
+    gainScheduling,
+    plantModel
+  }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
+      }
+  const phase7Review = await ctx.breakpoint({
       question: `Stability margins below target. GM: ${stabilityAnalysis.worstGainMargin}dB, PM: ${stabilityAnalysis.worstPhaseMargin}deg. Review design?`,
       title: 'Stability Margin Warning',
       context: {
         runId: ctx.runId,
         stabilityAnalysis
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase7Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase7Review.approved) break;
+      lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
+    } }
 
   // Phase 8: Nonlinear Simulation
   const nonlinearSim = await ctx.task(nonlinearSimTask, {
@@ -138,7 +168,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 12: Documentation
-  const documentation = await ctx.task(fcsDocumentationTask, {
+  let documentation = await ctx.task(fcsDocumentationTask, {
     projectName,
     requirementsAnalysis,
     architectureDesign,
@@ -151,8 +181,23 @@ export async function process(inputs, ctx) {
     pilotedSim
   });
 
-  // Final Breakpoint: FCS Approval
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      documentation = await ctx.task(fcsDocumentationTask, { ...{
+    projectName,
+    requirementsAnalysis,
+    architectureDesign,
+    innerLoopDesign,
+    outerLoopDesign,
+    gainScheduling,
+    stabilityAnalysis,
+    hqAssessment,
+    robustnessAnalysis,
+    pilotedSim
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `FCS development complete for ${projectName}. HQ Level: ${hqAssessment.overallLevel}. Approve for implementation?`,
     title: 'FCS Development Approval',
     context: {
@@ -166,9 +211,15 @@ export async function process(inputs, ctx) {
         { path: 'artifacts/fcs-design.json', format: 'json', content: documentation },
         { path: 'artifacts/fcs-design.md', format: 'markdown', content: documentation.markdown }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     projectName,
@@ -188,8 +239,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const fcsRequirementsTask = defineTask('fcs-requirements', (args, taskCtx) => ({
   kind: 'agent',

@@ -24,11 +24,16 @@ export async function process(inputs, ctx) {
   const conversionsSetup = await ctx.task(conversionsSetupTask, { projectName, outputDir });
   artifacts.push(...conversionsSetup.artifacts);
 
-  const privacySetup = await ctx.task(privacySetupTask, { projectName, outputDir });
-  artifacts.push(...privacySetup.artifacts);
-
-  await ctx.breakpoint({ question: `Google Analytics integration complete for ${projectName}. Approve?`, title: 'Analytics Review', context: { runId: ctx.runId, events: eventsSetup.events } });
-
+  let privacySetup = await ctx.task(privacySetupTask, { projectName, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      privacySetup = await ctx.task(privacySetupTask, { ...{ projectName, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({ question: `Google Analytics integration complete for ${projectName}. Approve?`, title: 'Analytics Review', context: { runId: ctx.runId, events: eventsSetup.events }, expert: 'owner', tags: ['approval-gate'], previousFeedback: lastFeedback || undefined, attempt: attempt > 0 ? attempt + 1 : undefined });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const documentation = await ctx.task(documentationTask, { projectName, outputDir });
   artifacts.push(...documentation.artifacts);
 

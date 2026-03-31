@@ -52,7 +52,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Geometry Import and Preparation');
 
-  const geometryResult = await ctx.task(geometryPreparationTask, {
+  let geometryResult = await ctx.task(geometryPreparationTask, {
     projectName,
     cadFile,
     analysisType,
@@ -64,8 +64,17 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Geometry prepared - ${geometryResult.bodyCount} bodies, ${geometryResult.surfaceCount} surfaces`);
 
   // Breakpoint: Review geometry cleanup
-  if (geometryResult.cleanupRequired) {
-    await ctx.breakpoint({
+      let lastFeedback_phase1Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase1Review) {
+        geometryResult = await ctx.task(geometryPreparationTask, { ...{
+    projectName,
+    cadFile,
+    analysisType,
+    outputDir
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+      }
+  const phase1Review = await ctx.breakpoint({
       question: `Geometry cleanup required. Issues found: ${geometryResult.geometryIssues.join(', ')}. Review and approve geometry preparation?`,
       title: 'Geometry Preparation Review',
       context: {
@@ -74,9 +83,15 @@ export async function process(inputs, ctx) {
         geometryIssues: geometryResult.geometryIssues,
         cleanupActions: geometryResult.cleanupActions,
         files: geometryResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase1Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase1Review.approved) break;
+      lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 2: MESH GENERATION
@@ -84,7 +99,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 2: Mesh Generation');
 
-  const meshResult = await ctx.task(meshGenerationTask, {
+  let meshResult = await ctx.task(meshGenerationTask, {
     projectName,
     geometryResult,
     analysisType,
@@ -97,8 +112,18 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Mesh generated - ${meshResult.nodeCount} nodes, ${meshResult.elementCount} elements`);
 
   // Quality Gate: Mesh quality check
-  if (meshResult.qualityScore < 0.8) {
-    await ctx.breakpoint({
+      let lastFeedback_phase2Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase2Review) {
+        meshResult = await ctx.task(meshGenerationTask, { ...{
+    projectName,
+    geometryResult,
+    analysisType,
+    meshSettings,
+    outputDir
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+      }
+  const phase2Review = await ctx.breakpoint({
       question: `Mesh quality score ${(meshResult.qualityScore * 100).toFixed(1)}% is below threshold. ${meshResult.poorElements} elements have poor quality. Refine mesh or proceed?`,
       title: 'Mesh Quality Warning',
       context: {
@@ -107,9 +132,15 @@ export async function process(inputs, ctx) {
         qualityMetrics: meshResult.qualityMetrics,
         poorElementLocations: meshResult.poorElementLocations,
         files: meshResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase2Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase2Review.approved) break;
+      lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 3: MATERIAL PROPERTY ASSIGNMENT
@@ -135,7 +166,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 4: Boundary Conditions and Loads Application');
 
-  const boundaryResult = await ctx.task(boundaryConditionsTask, {
+  let boundaryResult = await ctx.task(boundaryConditionsTask, {
     projectName,
     constraints,
     loads,
@@ -149,8 +180,20 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Boundary conditions applied - ${boundaryResult.constraintCount} constraints, ${boundaryResult.loadCount} loads`);
 
-  // Breakpoint: Review boundary conditions
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      boundaryResult = await ctx.task(boundaryConditionsTask, { ...{
+    projectName,
+    constraints,
+    loads,
+    geometryResult,
+    meshResult,
+    analysisType,
+    outputDir
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: `Boundary conditions applied. Constraints: ${boundaryResult.constraintCount}, Loads: ${boundaryResult.loadCount}. Total DOF constrained: ${boundaryResult.constrainedDOF}. Review setup?`,
     title: 'Boundary Conditions Review',
     context: {
@@ -159,9 +202,15 @@ export async function process(inputs, ctx) {
       loads: boundaryResult.loadSummary,
       reactionForceEstimate: boundaryResult.reactionEstimate,
       files: boundaryResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 5: SOLVER CONFIGURATION
   // ============================================================================
@@ -187,7 +236,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 6: Pre-Solve Validation');
 
-  const validationResult = await ctx.task(preSolveValidationTask, {
+  let validationResult = await ctx.task(preSolveValidationTask, {
     projectName,
     geometryResult,
     meshResult,
@@ -202,8 +251,20 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Pre-solve validation complete - Status: ${validationResult.validationStatus}`);
 
   // Quality Gate: Validation errors
-  if (validationResult.errors.length > 0) {
-    await ctx.breakpoint({
+      let lastFeedback_phase6Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase6Review) {
+        validationResult = await ctx.task(preSolveValidationTask, { ...{
+    projectName,
+    geometryResult,
+    meshResult,
+    materialResult,
+    boundaryResult,
+    solverConfigResult,
+    outputDir
+  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
+      }
+  const phase6Review = await ctx.breakpoint({
       question: `Pre-solve validation found ${validationResult.errors.length} errors: ${validationResult.errors.join('; ')}. Fix errors before solving?`,
       title: 'Pre-Solve Validation Errors',
       context: {
@@ -212,9 +273,15 @@ export async function process(inputs, ctx) {
         warnings: validationResult.warnings,
         recommendations: validationResult.recommendations,
         files: validationResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase6Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase6Review.approved) break;
+      lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 7: SOLVER EXECUTION
@@ -222,7 +289,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 7: Solver Execution');
 
-  const solveResult = await ctx.task(solverExecutionTask, {
+  let solveResult = await ctx.task(solverExecutionTask, {
     projectName,
     analysisType,
     solverConfigResult,
@@ -234,8 +301,17 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Solver complete - Status: ${solveResult.solverStatus}, Time: ${solveResult.solveTime}`);
 
   // Quality Gate: Solver convergence
-  if (solveResult.solverStatus !== 'converged') {
-    await ctx.breakpoint({
+      let lastFeedback_phase7Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase7Review) {
+        solveResult = await ctx.task(solverExecutionTask, { ...{
+    projectName,
+    analysisType,
+    solverConfigResult,
+    outputDir
+  }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
+      }
+  const phase7Review = await ctx.breakpoint({
       question: `Solver ${solveResult.solverStatus}. ${solveResult.convergenceMessage}. Review solver diagnostics?`,
       title: 'Solver Status Warning',
       context: {
@@ -244,9 +320,15 @@ export async function process(inputs, ctx) {
         convergenceHistory: solveResult.convergenceHistory,
         diagnostics: solveResult.diagnostics,
         files: solveResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase7Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase7Review.approved) break;
+      lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 8: RESULTS EXTRACTION
@@ -254,7 +336,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 8: Results Extraction');
 
-  const resultsResult = await ctx.task(resultsExtractionTask, {
+  let resultsResult = await ctx.task(resultsExtractionTask, {
     projectName,
     analysisType,
     solveResult,
@@ -265,8 +347,17 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Results extracted - Max stress: ${resultsResult.maxStress} MPa, Max displacement: ${resultsResult.maxDisplacement} mm`);
 
-  // Breakpoint: Review results
-  await ctx.breakpoint({
+    let lastFeedback_phase8Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase8Review) {
+      resultsResult = await ctx.task(resultsExtractionTask, { ...{
+    projectName,
+    analysisType,
+    solveResult,
+    outputDir
+  }, feedback: lastFeedback_phase8Review, attempt: attempt + 1 });
+    }
+  const phase8Review = await ctx.breakpoint({
     question: `Analysis complete. Max Von Mises Stress: ${resultsResult.maxStress} MPa, Max Displacement: ${resultsResult.maxDisplacement} mm. Review detailed results?`,
     title: 'FEA Results Review',
     context: {
@@ -274,16 +365,22 @@ export async function process(inputs, ctx) {
       resultsSummary: resultsResult.summary,
       criticalLocations: resultsResult.criticalLocations,
       files: resultsResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase8Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase8Review.approved) break;
+    lastFeedback_phase8Review = phase8Review.response || phase8Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 9: RESULTS VALIDATION AND REPORTING
   // ============================================================================
 
   ctx.log('info', 'Phase 9: Results Validation and Reporting');
 
-  const reportResult = await ctx.task(generateFEAReportTask, {
+  let reportResult = await ctx.task(generateFEAReportTask, {
     projectName,
     analysisType,
     geometryResult,
@@ -297,8 +394,22 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...reportResult.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      reportResult = await ctx.task(generateFEAReportTask, { ...{
+    projectName,
+    analysisType,
+    geometryResult,
+    meshResult,
+    materialResult,
+    boundaryResult,
+    solveResult,
+    resultsResult,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `FEA Analysis Complete for ${projectName}. Max stress: ${resultsResult.maxStress} MPa, Safety factor: ${resultsResult.safetyFactor}. Approve analysis results?`,
     title: 'FEA Analysis Complete',
     context: {
@@ -314,9 +425,15 @@ export async function process(inputs, ctx) {
       files: [
         { path: reportResult.reportPath, format: 'markdown', label: 'FEA Report' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -351,8 +468,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

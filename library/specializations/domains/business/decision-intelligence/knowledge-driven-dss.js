@@ -52,23 +52,37 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 4: Knowledge Base Design
-  const knowledgeBase = await ctx.task(knowledgeBaseDesignTask, {
+  let knowledgeBase = await ctx.task(knowledgeBaseDesignTask, {
     projectName,
     knowledgeRepresentation,
     decisionDomains
   });
 
-  // Breakpoint: Review knowledge model
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      knowledgeBase = await ctx.task(knowledgeBaseDesignTask, { ...{
+    projectName,
+    knowledgeRepresentation,
+    decisionDomains
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Review knowledge base design for ${projectName}. Does it capture domain expertise adequately?`,
     title: 'Knowledge Base Review',
     context: {
       runId: ctx.runId,
       projectName,
       knowledgeDomains: decisionDomains.length
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 5: Inference Engine Design
   const inferenceEngine = await ctx.task(inferenceEngineTask, {
     projectName,
@@ -116,8 +130,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const knowledgeRequirementsTask = defineTask('knowledge-requirements', (args, taskCtx) => ({
   kind: 'agent',

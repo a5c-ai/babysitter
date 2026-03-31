@@ -107,7 +107,7 @@ export async function process(inputs, ctx) {
   if (supportTemplates) {
     ctx.log('info', 'Phase 5: Implementing resource templates');
 
-    const resourceTemplates = await ctx.task(resourceTemplatesTask, {
+    let resourceTemplates = await ctx.task(resourceTemplatesTask, {
       projectName,
       uriScheme,
       language,
@@ -116,9 +116,17 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...resourceTemplates.artifacts);
   }
-
-  // Quality Gate: Resource Provider Review
-  await ctx.breakpoint({
+  let lastFeedback_phase5Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase5Review) {
+      resourceTemplates = await ctx.task(resourceTemplatesTask, { ...{
+      projectName,
+      uriScheme,
+      language,
+      outputDir
+    }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+    }
+  const phase5Review = await ctx.breakpoint({
     question: `Resource provider for ${resourceType} created with ${uriScheme} scheme. Proceed with caching and subscription implementation?`,
     title: 'Resource Provider Review',
     context: {
@@ -127,9 +135,15 @@ export async function process(inputs, ctx) {
       resourceType,
       uriScheme,
       files: artifacts.slice(-3).map(a => ({ path: a.path, format: a.format || 'typescript' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase5Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase5Review.approved) break;
+    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 6: CACHING STRATEGY
   // ============================================================================
@@ -176,7 +190,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...subscriptionSupport.artifacts);
   }
-
   // ============================================================================
   // PHASE 9: RESOURCE ACCESS TESTS
   // ============================================================================
@@ -201,7 +214,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 10: Documenting resource patterns');
 
-  const documentation = await ctx.task(documentationTask, {
+  let documentation = await ctx.task(documentationTask, {
     projectName,
     resourceType,
     uriScheme,
@@ -216,8 +229,23 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...documentation.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      documentation = await ctx.task(documentationTask, { ...{
+    projectName,
+    resourceType,
+    uriScheme,
+    contentType,
+    uriSchemeDesign,
+    listingHandler,
+    contentFetching,
+    supportTemplates,
+    supportSubscriptions,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `MCP Resource Provider complete for ${resourceType}. Review and approve?`,
     title: 'MCP Resource Provider Complete',
     context: {
@@ -235,9 +263,15 @@ export async function process(inputs, ctx) {
         { path: listingHandler.handlerPath, format: 'typescript', label: 'Listing Handler' },
         { path: contentFetching.handlerPath, format: 'typescript', label: 'Content Handler' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -270,8 +304,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

@@ -74,7 +74,7 @@ export async function process(inputs, ctx) {
 
   // Task 5: Design Relief Header and Collection System
   ctx.log('info', 'Designing relief header and collection system');
-  const headerResult = await ctx.task(reliefHeaderDesignTask, {
+  let headerResult = await ctx.task(reliefHeaderDesignTask, {
     processName,
     reliefDevices: sizingResult.devices,
     disposalMethod,
@@ -83,8 +83,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...headerResult.artifacts);
 
-  // Breakpoint: Review relief system design
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      headerResult = await ctx.task(reliefHeaderDesignTask, { ...{
+    processName,
+    reliefDevices: sizingResult.devices,
+    disposalMethod,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Relief system design in progress for ${processName}. Scenarios: ${scenarioResult.scenarios.length}. Relief devices: ${sizingResult.devices.length}. Header size: ${headerResult.headerSize}". Review design?`,
     title: 'Pressure Relief System Design Review',
     context: {
@@ -96,9 +105,15 @@ export async function process(inputs, ctx) {
         controllingScenario: reliefRateResult.controllingScenario,
         headerSize: headerResult.headerSize
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 6: Design Disposal System per API 521
   ctx.log('info', 'Designing disposal system per API 521');
   const disposalResult = await ctx.task(disposalSystemDesignTask, {
@@ -154,8 +169,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Relief Scenario Identification
+  // Task 1: Relief Scenario Identification
 export const reliefScenarioIdentificationTask = defineTask('relief-scenario-identification', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Identify relief scenarios',

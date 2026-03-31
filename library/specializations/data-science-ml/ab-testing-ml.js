@@ -134,7 +134,7 @@ export async function process(inputs, ctx) {
   artifacts.push(...statisticalDesign.artifacts);
 
   // Task 1.3: Sample Size Calculation
-  const sampleSizeCalc = await ctx.task(sampleSizeCalculationTask, {
+  let sampleSizeCalc = await ctx.task(sampleSizeCalculationTask, {
     projectName,
     targetMetric,
     confidenceLevel,
@@ -148,8 +148,21 @@ export async function process(inputs, ctx) {
   artifacts.push(...sampleSizeCalc.artifacts);
 
   // Quality Gate: Check if sample size is achievable
-  if (!sampleSizeCalc.feasible) {
-    await ctx.breakpoint({
+      let lastFeedback_qualityGateApproval = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_qualityGateApproval) {
+        sampleSizeCalc = await ctx.task(sampleSizeCalculationTask, { ...{
+    projectName,
+    targetMetric,
+    confidenceLevel,
+    statisticalPower: statisticalDesign.power,
+    minimumDetectableEffect,
+    expectedBaselineRate: statisticalDesign.expectedBaselineRate,
+    testDuration,
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval, attempt: attempt + 1 });
+      }
+  const qualityGateApproval = await ctx.breakpoint({
       question: `Sample size calculation shows the required sample size (${sampleSizeCalc.requiredSampleSize} per variant) may not be achievable within ${testDuration} days. Expected daily traffic: ${sampleSizeCalc.estimatedDailyTraffic}. Adjust parameters or proceed anyway?`,
       title: 'Sample Size Feasibility Warning',
       context: {
@@ -160,9 +173,15 @@ export async function process(inputs, ctx) {
         files: [
           { path: `${outputDir}/sample-size-analysis.json`, format: 'json' }
         ]
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_qualityGateApproval || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (qualityGateApproval.approved) break;
+      lastFeedback_qualityGateApproval = qualityGateApproval.response || qualityGateApproval.feedback || 'Changes requested';
+    } }
 
   // Task 1.4: Randomization Strategy Design
   const randomizationStrategy = await ctx.task(randomizationStrategyDesignTask, {
@@ -178,7 +197,7 @@ export async function process(inputs, ctx) {
   artifacts.push(...randomizationStrategy.artifacts);
 
   // Task 1.5: Metrics and Guardrails Definition
-  const metricsDefinition = await ctx.task(metricsDefinitionTask, {
+  let metricsDefinition = await ctx.task(metricsDefinitionTask, {
     projectName,
     targetMetric,
     secondaryMetrics,
@@ -189,8 +208,19 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...metricsDefinition.artifacts);
 
-  // Breakpoint: Review test design before execution
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      metricsDefinition = await ctx.task(metricsDefinitionTask, { ...{
+    projectName,
+    targetMetric,
+    secondaryMetrics,
+    guardrailMetrics,
+    statisticalDesign,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `A/B test design complete for ${projectName}. Target metric: ${targetMetric}. Required sample size: ${sampleSizeCalc.requiredSampleSize} per variant. Confidence level: ${confidenceLevel}. Approve test design and proceed with execution?`,
     title: 'A/B Test Design Approval',
     context: {
@@ -206,9 +236,15 @@ export async function process(inputs, ctx) {
         { path: `${outputDir}/statistical-design.json`, format: 'json' },
         { path: `${outputDir}/metrics-definition.json`, format: 'json' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 2: TEST INFRASTRUCTURE SETUP
   // ============================================================================
@@ -322,7 +358,7 @@ export async function process(inputs, ctx) {
     ctx.log('info', `Test progress: ${progress.toFixed(1)}% (${currentSampleSize}/${sampleSizeCalc.requiredSampleSize} samples)`);
 
     // Task 3.4: Check Guardrail Metrics
-    const guardrailCheck = await ctx.task(guardrailMetricsCheckTask, {
+    let guardrailCheck = await ctx.task(guardrailMetricsCheckTask, {
       projectName,
       monitoringResults,
       guardrailMetrics,
@@ -334,9 +370,18 @@ export async function process(inputs, ctx) {
 
     // Quality Gate: Guardrail violations
     if (guardrailCheck.violationsDetected) {
-      ctx.log('warn', `Guardrail violations detected: ${guardrailCheck.violations.length}`);
-
-      await ctx.breakpoint({
+        let lastFeedback_iterationApproval = null;
+      for (let attempt = 0; attempt < 3; attempt++) {
+        if (lastFeedback_iterationApproval) {
+          guardrailCheck = await ctx.task(guardrailMetricsCheckTask, { ...{
+      projectName,
+      monitoringResults,
+      guardrailMetrics,
+      metricsDefinition,
+      outputDir
+    }, feedback: lastFeedback_iterationApproval, attempt: attempt + 1 });
+        }
+  const iterationApproval = await ctx.breakpoint({
         question: `GUARDRAIL ALERT: ${guardrailCheck.violations.length} metric(s) violated thresholds. ${guardrailCheck.violations.map(v => `${v.metric}: ${v.description}`).join(', ')}. Should we stop the test early?`,
         title: 'Guardrail Violation Alert',
         context: {
@@ -347,10 +392,16 @@ export async function process(inputs, ctx) {
           files: [
             { path: `${outputDir}/guardrail-violations.json`, format: 'json' }
           ]
-        }
-      });
-
-      // If user wants to stop, break the loop
+        },
+        expert: 'owner',
+        tags: ['approval-gate'],
+        previousFeedback: lastFeedback_iterationApproval || undefined,
+        attempt: attempt > 0 ? attempt + 1 : undefined
+        });
+        if (iterationApproval.approved) break;
+        lastFeedback_iterationApproval = iterationApproval.response || iterationApproval.feedback || 'Changes requested';
+      }
+  // If user wants to stop, break the loop
       if (guardrailCheck.stopRecommended) {
         earlyStopTriggered = true;
         earlyStopReason = 'guardrail_violation';
@@ -358,10 +409,9 @@ export async function process(inputs, ctx) {
         continue;
       }
     }
-
-    // Task 3.5: Early Stopping Analysis (if enabled)
+  // Task 3.5: Early Stopping Analysis (if enabled)
     if (earlyStoppingEnabled && currentSampleSize >= minimumSampleSize) {
-      const earlyStoppingAnalysis = await ctx.task(earlyStoppingAnalysisTask, {
+      let earlyStoppingAnalysis = await ctx.task(earlyStoppingAnalysisTask, {
         projectName,
         monitoringResults,
         targetMetric,
@@ -374,9 +424,20 @@ export async function process(inputs, ctx) {
       artifacts.push(...earlyStoppingAnalysis.artifacts);
 
       if (earlyStoppingAnalysis.canStop) {
-        ctx.log('info', `Early stopping criteria met: ${earlyStoppingAnalysis.reason}`);
-
-        await ctx.breakpoint({
+          let lastFeedback_iterationApproval2 = null;
+        for (let attempt = 0; attempt < 3; attempt++) {
+          if (lastFeedback_iterationApproval2) {
+            earlyStoppingAnalysis = await ctx.task(earlyStoppingAnalysisTask, { ...{
+        projectName,
+        monitoringResults,
+        targetMetric,
+        confidenceLevel,
+        statisticalDesign,
+        sequentialTestingEnabled,
+        outputDir
+      }, feedback: lastFeedback_iterationApproval2, attempt: attempt + 1 });
+          }
+  const iterationApproval2 = await ctx.breakpoint({
           question: `Early stopping criteria met: ${earlyStoppingAnalysis.reason}. Current sample size: ${currentSampleSize}. Confidence: ${earlyStoppingAnalysis.confidence}. Stop test early?`,
           title: 'Early Stopping Opportunity',
           context: {
@@ -389,10 +450,15 @@ export async function process(inputs, ctx) {
             files: [
               { path: `${outputDir}/early-stopping-analysis.json`, format: 'json' }
             ]
-          }
-        });
-
-        if (earlyStoppingAnalysis.stopApproved) {
+          },
+          expert: 'owner',
+          tags: ['approval-gate'],
+          previousFeedback: lastFeedback_iterationApproval2 || undefined,
+          attempt: attempt > 0 ? attempt + 1 : undefined
+          });
+          if (iterationApproval2.approved) break;
+          lastFeedback_iterationApproval2 = iterationApproval2.response || iterationApproval2.feedback || 'Changes requested';
+        }        if (earlyStoppingAnalysis.stopApproved) {
           earlyStopTriggered = true;
           earlyStopReason = earlyStoppingAnalysis.reason;
           testComplete = true;
@@ -400,21 +466,18 @@ export async function process(inputs, ctx) {
         }
       }
     }
-
-    // Check if minimum sample size reached
+  // Check if minimum sample size reached
     if (currentSampleSize >= sampleSizeCalc.requiredSampleSize) {
       ctx.log('info', 'Minimum sample size reached');
       testComplete = true;
     }
-
-    // Check if test duration exceeded
+  // Check if test duration exceeded
     const daysElapsed = monitoringResults.daysElapsed;
     if (daysElapsed >= testDuration) {
       ctx.log('info', `Test duration limit reached (${testDuration} days)`);
       testComplete = true;
     }
-
-    // If not complete, wait before next check
+  // If not complete, wait before next check
     if (!testComplete) {
       ctx.log('info', 'Waiting for more data collection...');
       // In real implementation, this would be a sleep task
@@ -537,7 +600,7 @@ export async function process(inputs, ctx) {
   artifacts.push(...decisionRecommendation.artifacts);
 
   // Task 5.3: Risk Assessment
-  const riskAssessment = await ctx.task(riskAssessmentTask, {
+  let riskAssessment = await ctx.task(riskAssessmentTask, {
     projectName,
     winnerSelection,
     decisionRecommendation,
@@ -549,8 +612,20 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...riskAssessment.artifacts);
 
-  // Breakpoint: Review results before final decision
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval2 = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval2) {
+      riskAssessment = await ctx.task(riskAssessmentTask, { ...{
+    projectName,
+    winnerSelection,
+    decisionRecommendation,
+    effectSizeAnalysis,
+    segmentationAnalysis,
+    guardrailCheck,
+    outputDir
+  }, feedback: lastFeedback_finalApproval2, attempt: attempt + 1 });
+    }
+  const finalApproval2 = await ctx.breakpoint({
     question: `A/B test analysis complete for ${projectName}. Winner: ${winnerSelection.winner}. Statistical significance: ${significanceTest.significant ? 'YES' : 'NO'}. Effect size: ${effectSizeAnalysis.effectSize.toFixed(3)}. Recommendation: ${decisionRecommendation.recommendation}. Approve final decision?`,
     title: 'A/B Test Results Review',
     context: {
@@ -566,9 +641,15 @@ export async function process(inputs, ctx) {
         { path: `${outputDir}/statistical-analysis.json`, format: 'json' },
         { path: `${outputDir}/decision-recommendation.json`, format: 'json' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval2 || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval2.approved) break;
+    lastFeedback_finalApproval2 = finalApproval2.response || finalApproval2.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 6: REPORTING AND DOCUMENTATION
   // ============================================================================
@@ -631,7 +712,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...rolloutPlan.artifacts);
   }
-
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -688,8 +768,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

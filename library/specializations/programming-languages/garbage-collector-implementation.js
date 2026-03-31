@@ -41,16 +41,24 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Designing Object Model');
 
-  const objectModel = await ctx.task(objectModelTask, {
+  let objectModel = await ctx.task(objectModelTask, {
     languageName,
     gcAlgorithm,
     implementationLanguage,
     outputDir
   });
 
-  artifacts.push(...objectModel.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      objectModel = await ctx.task(objectModelTask, { ...{
+    languageName,
+    gcAlgorithm,
+    implementationLanguage,
+    outputDir
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Object model designed with ${objectModel.headerSize} byte header. Root set: ${objectModel.rootSetSources.join(', ')}. Proceed with allocator?`,
     title: 'Object Model Review',
     context: {
@@ -58,9 +66,15 @@ export async function process(inputs, ctx) {
       headerSize: objectModel.headerSize,
       rootSetSources: objectModel.rootSetSources,
       files: objectModel.artifacts.map(a => ({ path: a.path, format: a.format || 'c' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 2: MEMORY ALLOCATOR
   // ============================================================================
@@ -199,7 +213,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 10: Generating Documentation');
 
-  const documentation = await ctx.task(gcDocumentationTask, {
+  let documentation = await ctx.task(gcDocumentationTask, {
     languageName,
     gcAlgorithm,
     objectModel,
@@ -208,9 +222,19 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...documentation.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      documentation = await ctx.task(gcDocumentationTask, { ...{
+    languageName,
+    gcAlgorithm,
+    objectModel,
+    gcIntegration,
+    benchmarks,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `GC Implementation Complete for ${languageName}! Algorithm: ${gcAlgorithm}, Pause time: ${benchmarks.avgPauseTime}. Review deliverables?`,
     title: 'GC Complete',
     context: {
@@ -227,9 +251,15 @@ export async function process(inputs, ctx) {
         { path: gcIntegration.mainFilePath, format: implementationLanguage.toLowerCase(), label: 'GC Implementation' },
         { path: documentation.specPath, format: 'markdown', label: 'GC Specification' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -268,8 +298,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

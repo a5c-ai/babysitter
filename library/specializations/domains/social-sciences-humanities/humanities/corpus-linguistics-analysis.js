@@ -96,7 +96,7 @@ export async function process(inputs, ctx) {
 
   // Task 7: Generate Corpus Analysis Report
   ctx.log('info', 'Generating corpus analysis report');
-  const analysisReport = await ctx.task(corpusReportTask, {
+  let analysisReport = await ctx.task(corpusReportTask, {
     corpusDesign,
     corpusAnnotation,
     frequencyAnalysis,
@@ -108,8 +108,20 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...analysisReport.artifacts);
 
-  // Breakpoint: Review corpus analysis
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      analysisReport = await ctx.task(corpusReportTask, { ...{
+    corpusDesign,
+    corpusAnnotation,
+    frequencyAnalysis,
+    concordanceAnalysis,
+    patternAnalysis,
+    comparativeAnalysis,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Corpus analysis complete. Tokens: ${corpusDesign.statistics?.tokens || 0}. Patterns found: ${patternAnalysis.patterns?.length || 0}. Review analysis?`,
     title: 'Corpus Linguistics Analysis Results',
     context: {
@@ -121,9 +133,15 @@ export async function process(inputs, ctx) {
         types: corpusDesign.statistics?.types || 0,
         patternsFound: patternAnalysis.patterns?.length || 0
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -151,8 +169,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Corpus Design and Compilation
+  // Task 1: Corpus Design and Compilation
 export const corpusDesignTask = defineTask('corpus-design', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Design and compile corpus',

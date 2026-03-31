@@ -93,7 +93,7 @@ export async function process(inputs, ctx) {
 
   // Task 7: Integrated Interpretation
   ctx.log('info', 'Developing integrated contextual interpretation');
-  const integratedInterpretation = await ctx.task(integratedInterpretationTask, {
+  let integratedInterpretation = await ctx.task(integratedInterpretationTask, {
     textPassage,
     canonicalContext,
     historicalContext,
@@ -107,8 +107,22 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...integratedInterpretation.artifacts);
 
-  // Breakpoint: Review interpretation results
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      integratedInterpretation = await ctx.task(integratedInterpretationTask, { ...{
+    textPassage,
+    canonicalContext,
+    historicalContext,
+    culturalContext,
+    genreAnalysis,
+    authorIntentAnalysis,
+    receptionHistoryAnalysis,
+    interpretiveGoal,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Canonical contextual reading complete. Interpretation developed with ${interpretiveGoal} goal. Review the interpretation?`,
     title: 'Canonical Contextual Reading Results',
     context: {
@@ -120,9 +134,15 @@ export async function process(inputs, ctx) {
         genre: genreAnalysis.genre,
         receptionTraditions: receptionHistoryAnalysis.traditions?.length || 0
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 8: Generate Reading Report
   ctx.log('info', 'Generating canonical reading report');
   const readingReport = await ctx.task(readingReportTask, {
@@ -173,8 +193,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Canonical Context
+  // Task 1: Canonical Context
 export const canonicalContextTask = defineTask('canonical-context', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Identify canonical context',

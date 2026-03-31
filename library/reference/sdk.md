@@ -88,7 +88,16 @@ export async function process(inputs: any, ctx: ProcessContext): Promise<any> {
   ]);
 
   if (!lintResult.ok || !testsResult.ok) {
-    await ctx.breakpoint({ reason: "lint/tests failed", lintResult, testsResult });
+    const approval = await ctx.breakpoint({
+      question: "Lint/tests failed. Continue anyway?",
+      reason: "lint/tests failed",
+      options: ["Approve", "Reject"],
+      lintResult,
+      testsResult,
+    });
+    if (!approval.approved) {
+      return { ok: false, reason: "User rejected after lint/test failure", feedback: approval.response || approval.feedback };
+    }
   }
 
   const review = await ctx.task(codeReviewAgentTask, {
@@ -402,6 +411,12 @@ export interface TaskDef {
     timeoutMs?: number;
   };
 
+  execution?: {
+    model?: string;               // preferred model (universal — used by plugins + internal harness)
+    harness?: string;             // preferred harness CLI (internal harness only, ignored by plugins)
+    permissions?: string[];       // free-form permission list (internal harness only)
+  };
+
   io?: {
     inputJsonPath?: string;       // where inputs are written for the script
     outputJsonPath?: string;      // where script writes JSON output
@@ -550,7 +565,54 @@ export interface ProcessContext {
 
 #### `ctx.breakpoint(payload)`
 
-Implemented via a task, but with a dedicated `kind`:
+Implemented via a task, but with a dedicated `kind`. Returns a `BreakpointResult` with `{ approved, response, feedback, option }`:
+
+```ts
+const approval = await ctx.breakpoint({
+  question: "Approve this step?",
+  options: ["Approve", "Reject"],
+});
+if (!approval.approved) {
+  return { ok: false, reason: "User rejected", feedback: approval.response || approval.feedback };
+}
+```
+
+**Breakpoint routing fields:**
+
+The payload can include routing fields to control who receives the breakpoint and how responses are collected:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `expert` | `string \| string[]` | Domain expert identifier, or `'owner'` to route to the run requester |
+| `tags` | `string[]` | Categorization tags for filtering breakpoints |
+| `strategy` | `'single' \| 'first-response-wins' \| 'collect-all' \| 'quorum'` | Response collection strategy. Only meaningful when `expert !== 'owner'`. Default: `'single'` |
+| `previousFeedback` | `string` | Feedback from a previous rejection (used in retry loops) |
+| `attempt` | `number` | Current retry attempt number |
+
+**Rejection handling -- retry/refine pattern:**
+
+Processes should loop back on rejection rather than failing. Use `previousFeedback` and `attempt` to track retries:
+
+```ts
+let lastFeedback: string | null = null;
+for (let attempt = 0; attempt < 3; attempt++) {
+  if (lastFeedback) {
+    currentResult = await ctx.task(refineTask, { ...args, feedback: lastFeedback, attempt: attempt + 1 });
+  }
+  const approval = await ctx.breakpoint({
+    question: 'Review and approve this step?',
+    options: ['Approve', 'Request changes'],
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined,
+  });
+  if (approval.approved) break;
+  lastFeedback = approval.response || approval.feedback || 'Changes requested';
+}
+```
+
+Internally this is sugar for:
 
 ```ts
 await ctx.task(breakpointTask, { payload }, { label: "breakpoint" });
@@ -562,7 +624,7 @@ The runner for `kind="breakpoint"` is typically a CLI or UI that:
 
 * displays the payload
 * waits for human action
-* writes result (optional) and marks effect as resolved
+* writes result (approved/rejected + optional feedback) and marks effect as resolved
 
 #### `ctx.sleepUntil(isoOrEpochMs)`
 
@@ -853,11 +915,16 @@ export async function process(inputs: any, ctx: ProcessContext) {
   ]);
 
   if (!lintResult.ok || !testsResult.ok) {
-    await ctx.breakpoint({
+    const approval = await ctx.breakpoint({
+      question: "Lint/tests failed. Continue anyway?",
       reason: "lint/tests failed",
+      options: ["Approve", "Reject"],
       lintResult,
       testsResult,
     });
+    if (!approval.approved) {
+      return { ok: false, reason: "User rejected", feedback: approval.response || approval.feedback };
+    }
   }
 
   const review = await ctx.task(codeReviewAgentTask, {
@@ -1369,7 +1436,10 @@ import { sleepUntil, breakpoint } from "@a5c-ai/babysitter-sdk";
 export async function process(inputs: any) {
   await sleepUntil("2026-01-10T09:00:00.000Z");
 
-  await breakpoint({ message: "Inspect inputs and approve" });
+  const approval = await breakpoint({ question: "Inspect inputs and approve", options: ["Approve", "Reject"] });
+  if (!approval.approved) {
+    return { ok: false, reason: "User rejected", feedback: approval.response || approval.feedback };
+  }
 
   // ...
 }

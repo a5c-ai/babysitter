@@ -84,7 +84,7 @@ export async function process(inputs, ctx) {
 
   // Task 5: Compile Song Package
   ctx.log('info', 'Compiling complete song package');
-  const packageResult = await ctx.task(compileSongPackageTask, {
+  let packageResult = await ctx.task(compileSongPackageTask, {
     persona,
     albumConcept,
     songConcept: conceptResult.concept,
@@ -97,8 +97,21 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...(packageResult.artifacts || []));
 
-  // Breakpoint: Review song
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      packageResult = await ctx.task(compileSongPackageTask, { ...{
+    persona,
+    albumConcept,
+    songConcept: conceptResult.concept,
+    lyrics: lyricsResult.lyrics,
+    style: styleResult.style,
+    coverPrompt: coverResult.coverPrompt,
+    trackNumber,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Song "${conceptResult.concept.title}" complete. Lyrics, style spec, and cover art prompt generated. Review and approve?`,
     title: 'Song Composition Review',
     context: {
@@ -112,9 +125,15 @@ export async function process(inputs, ctx) {
         lyricWordCount: lyricsResult.lyrics?.wordCount,
         structureSections: lyricsResult.lyrics?.sections?.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -140,8 +159,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Song Concept
+  // Task 1: Song Concept
 export const songConceptTask = defineTask('song-concept', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Develop detailed song concept',

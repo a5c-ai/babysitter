@@ -82,7 +82,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 4: Creating segmentation matrix');
 
-  const segmentationMatrix = await ctx.task(segmentationMatrixTask, {
+  let segmentationMatrix = await ctx.task(segmentationMatrixTask, {
     abcClassification,
     xyzClassification,
     outputDir
@@ -90,8 +90,16 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...segmentationMatrix.artifacts);
 
-  // Breakpoint: Review segmentation
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      segmentationMatrix = await ctx.task(segmentationMatrixTask, { ...{
+    abcClassification,
+    xyzClassification,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Inventory segmentation complete. ${segmentationMatrix.segmentCount} segments identified. A items: ${segmentationMatrix.aItemCount}. Review segmentation before policy development?`,
     title: 'Inventory Segmentation Review',
     context: {
@@ -102,9 +110,15 @@ export async function process(inputs, ctx) {
         aItemCount: segmentationMatrix.aItemCount,
         distribution: segmentationMatrix.distribution
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 5: STOCKING POLICY DEVELOPMENT
   // ============================================================================
@@ -198,8 +212,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

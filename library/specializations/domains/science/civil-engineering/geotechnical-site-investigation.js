@@ -78,7 +78,7 @@ export async function process(inputs, ctx) {
 
   // Task 5: Subsurface Characterization
   ctx.log('info', 'Characterizing subsurface conditions');
-  const subsurfaceCharacterization = await ctx.task(subsurfaceCharacterizationTask, {
+  let subsurfaceCharacterization = await ctx.task(subsurfaceCharacterizationTask, {
     projectId,
     fieldInvestigation,
     labTesting,
@@ -87,8 +87,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...subsurfaceCharacterization.artifacts);
 
-  // Breakpoint: Review investigation results
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      subsurfaceCharacterization = await ctx.task(subsurfaceCharacterizationTask, { ...{
+    projectId,
+    fieldInvestigation,
+    labTesting,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Geotechnical investigation complete for ${projectId}. Review soil profile and lab results?`,
     title: 'Geotechnical Investigation Review',
     context: {
@@ -100,9 +109,15 @@ export async function process(inputs, ctx) {
         soilTypes: subsurfaceCharacterization.soilTypes,
         groundwaterDepth: fieldInvestigation.groundwaterDepth
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 6: Foundation Recommendations
   ctx.log('info', 'Developing foundation recommendations');
   const foundationRecommendations = await ctx.task(foundationRecommendationsTask, {
@@ -166,8 +181,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Preliminary Site Assessment
+  // Task 1: Preliminary Site Assessment
 export const siteAssessmentTask = defineTask('site-assessment', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Perform preliminary site assessment',

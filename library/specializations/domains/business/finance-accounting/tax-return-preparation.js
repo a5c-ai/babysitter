@@ -40,18 +40,31 @@ export async function process(inputs, ctx) {
   results.steps.push({ name: 'data-gathering', result: dataResult });
 
   // Step 3: Book-to-Tax Adjustments
-  const adjustmentsResult = await ctx.task(prepareBookTaxAdjustmentsTask, {
+  let adjustmentsResult = await ctx.task(prepareBookTaxAdjustmentsTask, {
     financialData: dataResult,
     priorYearReturn: inputs.priorYearReturn
   });
   results.steps.push({ name: 'book-tax-adjustments', result: adjustmentsResult });
 
-  // Breakpoint for adjustments review
-  await ctx.breakpoint('adjustments-review', {
+    let lastFeedback_reviewApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_reviewApproval) {
+      adjustmentsResult = await ctx.task(prepareBookTaxAdjustmentsTask, { ...{
+    financialData: dataResult,
+    priorYearReturn: inputs.priorYearReturn
+  }, feedback: lastFeedback_reviewApproval, attempt: attempt + 1 });
+    }
+  const reviewApproval = await ctx.breakpoint('adjustments-review', {
     message: 'Review book-to-tax adjustments before preparing returns',
-    data: adjustmentsResult
-  });
-
+    data: adjustmentsResult,
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_reviewApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (reviewApproval.approved) break;
+    lastFeedback_reviewApproval = reviewApproval.response || reviewApproval.feedback || 'Changes requested';
+  }
   // Step 4: Federal Return Preparation
   const federalResult = await ctx.task(prepareFederalReturnTask, {
     taxableIncome: adjustmentsResult,
@@ -69,23 +82,37 @@ export async function process(inputs, ctx) {
   results.steps.push({ name: 'state-returns', result: stateResult });
 
   // Step 6: Supporting Schedules
-  const schedulesResult = await ctx.task(prepareSupportingSchedulesTask, {
+  let schedulesResult = await ctx.task(prepareSupportingSchedulesTask, {
     federalReturn: federalResult,
     stateReturns: stateResult,
     financialData: dataResult
   });
   results.steps.push({ name: 'supporting-schedules', result: schedulesResult });
 
-  // Breakpoint for return review
-  await ctx.breakpoint('return-review', {
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      schedulesResult = await ctx.task(prepareSupportingSchedulesTask, { ...{
+    federalReturn: federalResult,
+    stateReturns: stateResult,
+    financialData: dataResult
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint('return-review', {
     message: 'Review all tax returns before final preparation',
     data: {
       federal: federalResult,
       state: stateResult,
       schedules: schedulesResult
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Step 7: Tax Payment Calculations
   const paymentResult = await ctx.task(calculateTaxPaymentsTask, {
     federalReturn: federalResult,
@@ -123,8 +150,7 @@ export async function process(inputs, ctx) {
 
   return results;
 }
-
-// Task definitions
+  // Task definitions
 export const planTaxReturnProcessTask = defineTask('plan-tax-return-process', (args, taskCtx) => ({
   kind: 'agent',
   skill: { name: 'tax-compliance' },

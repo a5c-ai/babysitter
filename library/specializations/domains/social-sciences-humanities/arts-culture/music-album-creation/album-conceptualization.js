@@ -101,7 +101,7 @@ export async function process(inputs, ctx) {
 
   // Task 7: Compile Album Concept Document
   ctx.log('info', 'Compiling comprehensive album concept document');
-  const compiledResult = await ctx.task(compileAlbumConceptTask, {
+  let compiledResult = await ctx.task(compileAlbumConceptTask, {
     persona,
     coreConcept: coreConceptResult.concept,
     motifs: motifsResult.motifs,
@@ -114,8 +114,21 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...(compiledResult.artifacts || []));
 
-  // Breakpoint: Review album concept
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      compiledResult = await ctx.task(compileAlbumConceptTask, { ...{
+    persona,
+    coreConcept: coreConceptResult.concept,
+    motifs: motifsResult.motifs,
+    sonicPalette: sonicPaletteResult.palette,
+    narrativeArc: narrativeArcResult.arc,
+    trackSequencing: sequencingResult.sequencing,
+    visualDirection: visualDirectionResult.visual,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Album concept "${coreConceptResult.concept.title}" for ${artistName} complete with ${trackCount} tracks planned. Review and approve?`,
     title: 'Album Concept Review',
     context: {
@@ -128,9 +141,15 @@ export async function process(inputs, ctx) {
         trackCount,
         motifsCount: motifsResult.motifs?.length || 0
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -155,8 +174,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Core Concept
+  // Task 1: Core Concept
 export const coreConceptTask = defineTask('core-concept', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Generate album core concept',

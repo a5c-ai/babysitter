@@ -95,7 +95,7 @@ export async function process(inputs, ctx) {
 
   // Task 7: Generate Archival Research Guide
   ctx.log('info', 'Generating archival research guide');
-  const researchGuide = await ctx.task(archivalGuideTask, {
+  let researchGuide = await ctx.task(archivalGuideTask, {
     archiveIdentification,
     findingAidAnalysis,
     sourceStrategy,
@@ -107,8 +107,20 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...researchGuide.artifacts);
 
-  // Breakpoint: Review archival methodology
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      researchGuide = await ctx.task(archivalGuideTask, { ...{
+    archiveIdentification,
+    findingAidAnalysis,
+    sourceStrategy,
+    transcriptionProtocols,
+    digitizationStandards,
+    scholarlyApparatus,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Archival research methodology complete for: ${researchQuestion}. Archives identified: ${archiveIdentification.archives?.length || 0}. Review methodology?`,
     title: 'Archival Research Methodology Results',
     context: {
@@ -120,9 +132,15 @@ export async function process(inputs, ctx) {
         archivesIdentified: archiveIdentification.archives?.length || 0,
         collectionsFound: findingAidAnalysis.collections?.length || 0
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -152,8 +170,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Archive Identification and Access Planning
+  // Task 1: Archive Identification and Access Planning
 export const archiveIdentificationTask = defineTask('archive-identification', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Identify archives and plan access',

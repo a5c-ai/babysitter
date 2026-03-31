@@ -57,7 +57,7 @@ export async function process(inputs, ctx) {
 
   // Task 3: Settlement Analysis
   ctx.log('info', 'Performing settlement analysis');
-  const settlementAnalysis = await ctx.task(settlementAnalysisTask, {
+  let settlementAnalysis = await ctx.task(settlementAnalysisTask, {
     projectId,
     geotechnicalReport,
     structuralLoads,
@@ -97,9 +97,18 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...deepFoundationDesign.artifacts);
   }
-
-  // Breakpoint: Review foundation design
-  await ctx.breakpoint({
+  let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      settlementAnalysis = await ctx.task(settlementAnalysisTask, { ...{
+    projectId,
+    geotechnicalReport,
+    structuralLoads,
+    foundationSelection,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Foundation design complete for ${projectId}. Type: ${foundationSelection.selectedType}. Review design calculations?`,
     title: 'Foundation Design Review',
     context: {
@@ -111,9 +120,15 @@ export async function process(inputs, ctx) {
         estimatedSettlement: settlementAnalysis.totalSettlement,
         foundationCount: shallowFoundationDesign?.footingCount || deepFoundationDesign?.pileCount
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 5: Pile Cap Design (if deep foundations)
   let pileCapDesign = null;
   if (deepFoundationDesign) {
@@ -128,7 +143,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...pileCapDesign.artifacts);
   }
-
   // Task 6: Grade Beam Design
   ctx.log('info', 'Designing grade beams');
   const gradeBeamDesign = await ctx.task(gradeBeamDesignTask, {
@@ -195,8 +209,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Foundation Type Selection
+  // Task 1: Foundation Type Selection
 export const foundationSelectionTask = defineTask('foundation-selection', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Select foundation type',

@@ -40,16 +40,24 @@ export async function process(inputs, ctx) {
 
   // Phase 1: Current State Assessment
   ctx.log('info', 'Phase 1: Current State Assessment');
-  const currentStateAssessment = await ctx.task(cdiCurrentStateTask, {
+  let currentStateAssessment = await ctx.task(cdiCurrentStateTask, {
     organizationName,
     scope,
     currentMetrics,
     outputDir
   });
 
-  artifacts.push(...currentStateAssessment.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      currentStateAssessment = await ctx.task(cdiCurrentStateTask, { ...{
+    organizationName,
+    scope,
+    currentMetrics,
+    outputDir
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Current state assessed. CMI: ${currentStateAssessment.currentCMI}. Query rate: ${currentStateAssessment.queryRate}%. ${currentStateAssessment.opportunities.length} improvement opportunities identified. Proceed?`,
     title: 'CDI Current State Review',
     context: {
@@ -57,9 +65,15 @@ export async function process(inputs, ctx) {
       metrics: currentStateAssessment.metrics,
       opportunities: currentStateAssessment.opportunities,
       files: currentStateAssessment.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // Phase 2: Focus Area Prioritization
   ctx.log('info', 'Phase 2: Focus Area Prioritization');
   const focusAreaPrioritization = await ctx.task(focusAreaPrioritizationTask, {
@@ -82,15 +96,22 @@ export async function process(inputs, ctx) {
 
   // Phase 4: CDI Workflow Design
   ctx.log('info', 'Phase 4: CDI Workflow Design');
-  const workflowDesign = await ctx.task(cdiWorkflowDesignTask, {
+  let workflowDesign = await ctx.task(cdiWorkflowDesignTask, {
     queryProcessDesign,
     staffing,
     outputDir
   });
 
-  artifacts.push(...workflowDesign.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      workflowDesign = await ctx.task(cdiWorkflowDesignTask, { ...{
+    queryProcessDesign,
+    staffing,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Query process designed with ${queryProcessDesign.queryTemplates.length} templates. Workflow covers ${workflowDesign.reviewSteps.length} review steps. Proceed with education planning?`,
     title: 'CDI Process Design Review',
     context: {
@@ -98,9 +119,15 @@ export async function process(inputs, ctx) {
       queryTemplates: queryProcessDesign.queryTemplates,
       workflow: workflowDesign.workflow,
       files: [...queryProcessDesign.artifacts, ...workflowDesign.artifacts].map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 5: Provider Education Program
   ctx.log('info', 'Phase 5: Provider Education Program');
   const providerEducation = await ctx.task(providerEducationTask, {
@@ -206,8 +233,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task definitions
+  // Task definitions
 export const cdiCurrentStateTask = defineTask('cdi-current-state', (args, taskCtx) => ({
   kind: 'agent',
   title: `CDI Current State - ${args.organizationName}`,

@@ -39,7 +39,7 @@ export async function process(inputs, ctx) {
 
   // Phase 1: Problem Definition
   ctx.log('info', 'Phase 1: Problem Definition');
-  const problemDefinition = await ctx.task(problemDefinitionTask, {
+  let problemDefinition = await ctx.task(problemDefinitionTask, {
     problemDescription,
     severity,
     impactArea,
@@ -49,8 +49,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...problemDefinition.artifacts);
 
-  // Quality Gate: Problem Statement Review
-  await ctx.breakpoint({
+    let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      problemDefinition = await ctx.task(problemDefinitionTask, { ...{
+    problemDescription,
+    severity,
+    impactArea,
+    teamMembers,
+    outputDir
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Problem defined: "${problemDefinition.problemStatement}". Impact: ${problemDefinition.impact}. Is problem statement clear and specific? Proceed with data collection?`,
     title: 'Problem Definition Review',
     context: {
@@ -59,9 +69,15 @@ export async function process(inputs, ctx) {
       impact: problemDefinition.impact,
       scope: problemDefinition.scope,
       files: problemDefinition.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // Phase 2: Data Collection
   ctx.log('info', 'Phase 2: Data Collection and Fact Gathering');
   const dataCollection = await ctx.task(dataCollectionTask, {
@@ -84,7 +100,7 @@ export async function process(inputs, ctx) {
 
   // Phase 4: 5 Whys Analysis
   ctx.log('info', 'Phase 4: 5 Whys Deep Dive Analysis');
-  const fiveWhysAnalysis = await ctx.task(fiveWhysAnalysisTask, {
+  let fiveWhysAnalysis = await ctx.task(fiveWhysAnalysisTask, {
     problemDefinition,
     fishboneAnalysis,
     outputDir
@@ -92,8 +108,16 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...fiveWhysAnalysis.artifacts);
 
-  // Quality Gate: Initial Causes Review
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      fiveWhysAnalysis = await ctx.task(fiveWhysAnalysisTask, { ...{
+    problemDefinition,
+    fishboneAnalysis,
+    outputDir
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: `Initial analysis complete. ${fishboneAnalysis.totalCauses} potential causes identified. ${fiveWhysAnalysis.rootCauses.length} root causes from 5 Whys. Proceed with verification?`,
     title: 'Initial Cause Analysis Review',
     context: {
@@ -101,9 +125,15 @@ export async function process(inputs, ctx) {
       fishboneCauses: fishboneAnalysis.causesByCategory,
       fiveWhysRootCauses: fiveWhysAnalysis.rootCauses,
       files: [...fishboneAnalysis.artifacts, ...fiveWhysAnalysis.artifacts].map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
   // Phase 5: Fault Tree Analysis (for complex problems)
   let faultTreeAnalysis = null;
   if (severity === 'high' || severity === 'critical') {
@@ -116,7 +146,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...faultTreeAnalysis.artifacts);
   }
-
   // Phase 6: Cause Prioritization
   ctx.log('info', 'Phase 6: Cause Prioritization');
   const causePrioritization = await ctx.task(causePrioritizationTask, {
@@ -131,7 +160,7 @@ export async function process(inputs, ctx) {
 
   // Phase 7: Root Cause Verification
   ctx.log('info', 'Phase 7: Root Cause Verification');
-  const causeVerification = await ctx.task(causeVerificationTask, {
+  let causeVerification = await ctx.task(causeVerificationTask, {
     causePrioritization,
     dataCollection,
     outputDir
@@ -139,8 +168,16 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...causeVerification.artifacts);
 
-  // Quality Gate: Verified Root Causes
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      causeVerification = await ctx.task(causeVerificationTask, { ...{
+    causePrioritization,
+    dataCollection,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Verification complete. ${causeVerification.verifiedCauses.length}/${causePrioritization.prioritizedCauses.length} causes verified. Primary root cause: "${causeVerification.primaryRootCause}". Confidence: ${causeVerification.confidence}%. Proceed with corrective actions?`,
     title: 'Root Cause Verification Review',
     context: {
@@ -149,9 +186,15 @@ export async function process(inputs, ctx) {
       primaryRootCause: causeVerification.primaryRootCause,
       confidence: causeVerification.confidence,
       files: causeVerification.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 8: Corrective Action Development
   ctx.log('info', 'Phase 8: Corrective Action Development');
   const correctiveActions = await ctx.task(correctiveActionsTask, {
@@ -213,8 +256,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Problem Definition
+  // Task 1: Problem Definition
 export const problemDefinitionTask = defineTask('rca-problem-definition', (args, taskCtx) => ({
   kind: 'agent',
   title: 'RCA Problem Definition',

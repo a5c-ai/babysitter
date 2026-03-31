@@ -42,7 +42,7 @@ export async function process(inputs, ctx) {
 
   // Phase 1: Specimen Preparation
   ctx.log('info', 'Phase 1: Preparing specimens');
-  const specimenPrep = await ctx.task(fatigueSpeicmenPrepTask, {
+  let specimenPrep = await ctx.task(fatigueSpeicmenPrepTask, {
     sampleId,
     analysisType,
     precrackRequired,
@@ -67,9 +67,17 @@ export async function process(inputs, ctx) {
       outputDir
     });
 
-    artifacts.push(...fatigueResults.artifacts);
-
-    await ctx.breakpoint({
+      let lastFeedback_phase2Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase2Review) {
+        specimenPrep = await ctx.task(fatigueSpeicmenPrepTask, { ...{
+    sampleId,
+    analysisType,
+    precrackRequired,
+    outputDir
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+      }
+  const phase2Review = await ctx.breakpoint({
       question: `Fatigue testing complete. ${fatigueResults.dataPoints} data points collected. Fatigue limit: ${fatigueResults.fatigueLimit} MPa. Review S-N curve?`,
       title: 'Fatigue Testing Review',
       context: {
@@ -81,9 +89,15 @@ export async function process(inputs, ctx) {
           basquinExponent: fatigueResults.basquinExponent
         },
         files: fatigueResults.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase2Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase2Review.approved) break;
+      lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+    } }
 
   // Phase 3: Fatigue Crack Growth Testing (da/dN)
   if (analysisType === 'crack-growth') {
@@ -98,7 +112,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...crackGrowthResults.artifacts);
   }
-
   // Phase 4: Fracture Toughness Testing
   if (analysisType === 'fracture-toughness' || analysisType === 'both') {
     ctx.log('info', 'Phase 4: Performing fracture toughness testing');
@@ -110,9 +123,17 @@ export async function process(inputs, ctx) {
       outputDir
     });
 
-    artifacts.push(...fractureResults.artifacts);
-
-    await ctx.breakpoint({
+      let lastFeedback_finalApproval = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_finalApproval) {
+        specimenPrep = await ctx.task(fatigueSpeicmenPrepTask, { ...{
+    sampleId,
+    analysisType,
+    precrackRequired,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+      }
+  const finalApproval = await ctx.breakpoint({
       question: `Fracture toughness testing complete. KIC: ${fractureResults.kic} MPa*sqrt(m). Valid test: ${fractureResults.validTest}. Review results?`,
       title: 'Fracture Toughness Review',
       context: {
@@ -123,9 +144,15 @@ export async function process(inputs, ctx) {
           validityChecks: fractureResults.validityChecks
         },
         files: fractureResults.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_finalApproval || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (finalApproval.approved) break;
+      lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+    } }
 
   // Phase 5: Fractographic Examination
   ctx.log('info', 'Phase 5: Performing fractographic examination');
@@ -214,8 +241,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Specimen Preparation
+  // Task 1: Specimen Preparation
 export const fatigueSpeicmenPrepTask = defineTask('fatigue-specimen-prep', (args, taskCtx) => ({
   kind: 'agent',
   title: `Fatigue Specimen Preparation - ${args.sampleId}`,

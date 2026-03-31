@@ -45,10 +45,13 @@ export async function process(inputs, ctx) {
   artifacts.push(...mastery.artifacts);
 
   // PHASE 4: Progress Update
-  const progress = await ctx.task(progressUpdateTask, { currentTopic, solving, mastery, outputDir });
-  artifacts.push(...progress.artifacts);
-
-  await ctx.breakpoint({
+  let progress = await ctx.task(progressUpdateTask, { currentTopic, solving, mastery, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      progress = await ctx.task(progressUpdateTask, { ...{ currentTopic, solving, mastery, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `CSES session complete. Topic: ${currentTopic}. Problems solved: ${solving.solvedCount}. Mastery: ${mastery.masteryLevel}%. Continue?`,
     title: 'CSES Learning Session Complete',
     context: {
@@ -57,9 +60,15 @@ export async function process(inputs, ctx) {
       solvedCount: solving.solvedCount,
       masteryLevel: mastery.masteryLevel,
       files: progress.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     currentTopic,

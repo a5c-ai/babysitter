@@ -110,7 +110,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Scoring Bloom\'s taxonomy application quality');
-  const qualityScore = await ctx.task(bloomsQualityScoringTask, {
+  let qualityScore = await ctx.task(bloomsQualityScoringTask, {
     courseName,
     objectiveWriting,
     verbAlignment,
@@ -126,8 +126,21 @@ export async function process(inputs, ctx) {
   const overallScore = qualityScore.overallScore;
   const qualityMet = overallScore >= qualityThreshold;
 
-  // Breakpoint: Review Bloom's taxonomy application
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      qualityScore = await ctx.task(bloomsQualityScoringTask, { ...{
+    courseName,
+    objectiveWriting,
+    verbAlignment,
+    assessmentAlignment,
+    activityAlignment,
+    levelDistribution,
+    qualityThreshold,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Bloom's taxonomy application complete. Quality score: ${overallScore}/${qualityThreshold}. ${qualityMet ? 'Quality standards met!' : 'May need refinement.'} Review and approve?`,
     title: 'Bloom\'s Taxonomy Application Review',
     context: {
@@ -142,9 +155,15 @@ export async function process(inputs, ctx) {
         levelDistribution: levelDistribution.distribution,
         totalArtifacts: artifacts.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -170,8 +189,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Content Cognitive Mapping
+  // Task 1: Content Cognitive Mapping
 export const contentCognitiveMappingTask = defineTask('content-cognitive-mapping', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Map content to cognitive levels',

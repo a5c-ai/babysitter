@@ -58,7 +58,6 @@ export async function process(inputs, ctx) {
     });
     artifacts.push(...gpuDirectSetup.artifacts);
   }
-
   // Phase 4: Distributed Workload Partitioning
   const workloadPartitioning = await ctx.task(distributedWorkloadTask, {
     projectName, numNodes, gpusPerNode, clusterDesign, outputDir
@@ -78,17 +77,28 @@ export async function process(inputs, ctx) {
   artifacts.push(...faultTolerance.artifacts);
 
   // Phase 7: Scaling Benchmark
-  const scalingBenchmark = await ctx.task(clusterScalingBenchmarkTask, {
+  let scalingBenchmark = await ctx.task(clusterScalingBenchmarkTask, {
     projectName, numNodes, gpusPerNode, outputDir
   });
-  artifacts.push(...scalingBenchmark.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      scalingBenchmark = await ctx.task(clusterScalingBenchmarkTask, { ...{
+    projectName, numNodes, gpusPerNode, outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `GPU cluster implementation complete for ${projectName}. Scaling efficiency: ${scalingBenchmark.scalingEfficiency}%. Review?`,
     title: 'Cluster Computing Complete',
-    context: { runId: ctx.runId, scalingBenchmark }
-  });
-
+    context: { runId: ctx.runId, scalingBenchmark },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: scalingBenchmark.scalingEfficiency >= 70,
     projectName,

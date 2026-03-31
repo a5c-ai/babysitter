@@ -130,7 +130,7 @@ export async function process(inputs, ctx) {
   artifacts.push(...statisticalDesign.artifacts);
 
   // Task 1.3: Traffic Allocation Strategy
-  const trafficAllocationPlan = await ctx.task(trafficAllocationTask, {
+  let trafficAllocationPlan = await ctx.task(trafficAllocationTask, {
     projectName,
     experimentName,
     variants,
@@ -142,8 +142,20 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...trafficAllocationPlan.artifacts);
 
-  // Breakpoint: Review experiment design
-  await ctx.breakpoint({
+    let lastFeedback_reviewApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_reviewApproval) {
+      trafficAllocationPlan = await ctx.task(trafficAllocationTask, { ...{
+    projectName,
+    experimentName,
+    variants,
+    trafficAllocation,
+    sampleSize,
+    duration,
+    outputDir
+  }, feedback: lastFeedback_reviewApproval, attempt: attempt + 1 });
+    }
+  const reviewApproval = await ctx.breakpoint({
     question: `Review A/B test design for ${experimentName}. Variants: ${variants.length}. Sample size: ${sampleSize} per variant. Duration: ${duration} days. Confidence: ${confidenceLevel}. Approve design?`,
     title: 'Experiment Design Approval',
     context: {
@@ -158,9 +170,15 @@ export async function process(inputs, ctx) {
         { path: `${outputDir}/experiment-config.json`, format: 'json' },
         { path: `${outputDir}/statistical-design.md`, format: 'markdown' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_reviewApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (reviewApproval.approved) break;
+    lastFeedback_reviewApproval = reviewApproval.response || reviewApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 2: EXPERIMENT TRACKING SYSTEM SETUP
   // ============================================================================
@@ -238,7 +256,7 @@ export async function process(inputs, ctx) {
   artifacts.push(...assignmentService.artifacts);
 
   // Task 3.3: Assignment Logging Pipeline
-  const assignmentLogging = await ctx.task(assignmentLoggingTask, {
+  let assignmentLogging = await ctx.task(assignmentLoggingTask, {
     projectName,
     experimentName,
     assignmentService,
@@ -248,8 +266,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...assignmentLogging.artifacts);
 
-  // Quality Gate: Validate randomization quality
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      assignmentLogging = await ctx.task(assignmentLoggingTask, { ...{
+    projectName,
+    experimentName,
+    assignmentService,
+    dataWarehouse,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Randomization infrastructure ready for ${experimentName}. Algorithm: ${randomizationAlgorithm.algorithm}. Assignment service: ${assignmentService.endpoint}. Validate randomization quality before proceeding?`,
     title: 'Randomization Validation',
     context: {
@@ -261,9 +289,15 @@ export async function process(inputs, ctx) {
         { path: `${outputDir}/randomization-spec.json`, format: 'json' },
         { path: `${outputDir}/assignment-service-api.yaml`, format: 'yaml' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 4: DATA COLLECTION PIPELINE
   // ============================================================================
@@ -576,7 +610,6 @@ export async function process(inputs, ctx) {
       }
     };
   }
-
   // Task 10.2: Deployment Plan
   const deploymentPlan = await ctx.task(deploymentPlanTask, {
     projectName,
@@ -597,7 +630,7 @@ export async function process(inputs, ctx) {
   artifacts.push(...deploymentPlan.artifacts);
 
   // Task 10.3: Runbook and Documentation
-  const runbook = await ctx.task(runbookGenerationTask, {
+  let runbook = await ctx.task(runbookGenerationTask, {
     projectName,
     experimentName,
     architecture: workflowOrchestration,
@@ -608,8 +641,19 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...runbook.artifacts);
 
-  // Final Breakpoint: Review complete pipeline
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval2 = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval2) {
+      runbook = await ctx.task(runbookGenerationTask, { ...{
+    projectName,
+    experimentName,
+    architecture: workflowOrchestration,
+    monitoring: pipelineObservability,
+    troubleshooting: integrationTesting,
+    outputDir
+  }, feedback: lastFeedback_finalApproval2, attempt: attempt + 1 });
+    }
+  const finalApproval2 = await ctx.breakpoint({
     question: `A/B Testing Pipeline complete for ${experimentName}. Components: assignment service, event collection, metrics computation, statistical analysis, guardrail monitoring, automated reporting. Review deployment plan and approve launch?`,
     title: 'Pipeline Deployment Approval',
     context: {
@@ -623,9 +667,15 @@ export async function process(inputs, ctx) {
         { path: `${outputDir}/deployment-plan.json`, format: 'json' },
         { path: `${outputDir}/runbook.md`, format: 'markdown' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval2 || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval2.approved) break;
+    lastFeedback_finalApproval2 = finalApproval2.response || finalApproval2.feedback || 'Changes requested';
+  }
   // ============================================================================
   // RETURN RESULTS
   // ============================================================================
@@ -704,8 +754,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

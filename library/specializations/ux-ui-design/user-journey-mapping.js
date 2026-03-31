@@ -70,7 +70,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Synthesizing research data and user insights');
 
-  const researchSynthesis = await ctx.task(researchSynthesisTask, {
+  let researchSynthesis = await ctx.task(researchSynthesisTask, {
     product,
     personas,
     researchData,
@@ -95,8 +95,19 @@ export async function process(inputs, ctx) {
 
   // Quality Gate: Research completeness
   const insightQuality = researchSynthesis.insightQualityScore || 0;
-  if (insightQuality < 70) {
-    await ctx.breakpoint({
+      let lastFeedback_qualityGateApproval = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_qualityGateApproval) {
+        researchSynthesis = await ctx.task(researchSynthesisTask, { ...{
+    product,
+    personas,
+    researchData,
+    journeyScope,
+    targetPersona,
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval, attempt: attempt + 1 });
+      }
+  const qualityGateApproval = await ctx.breakpoint({
       question: `Research synthesis quality: ${insightQuality}%. Low quality may result in incomplete journey maps. Review research data and approve to continue or provide additional research?`,
       title: 'Research Quality Review',
       context: {
@@ -107,9 +118,15 @@ export async function process(inputs, ctx) {
         missingData: researchSynthesis.missingData,
         recommendation: 'Consider conducting additional user interviews or analytics review',
         files: researchSynthesis.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown', label: a.label }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_qualityGateApproval || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (qualityGateApproval.approved) break;
+      lastFeedback_qualityGateApproval = qualityGateApproval.response || qualityGateApproval.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 2: JOURNEY STAGES DEFINITION
@@ -117,7 +134,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 2: Defining journey stages and structure');
 
-  const stagesDefinition = await ctx.task(stagesDefinitionTask, {
+  let stagesDefinition = await ctx.task(stagesDefinitionTask, {
     product,
     journeyScope,
     targetPersona: targetPersona || personas[0]?.name,
@@ -129,8 +146,19 @@ export async function process(inputs, ctx) {
   artifacts.push(...stagesDefinition.artifacts);
 
   // Quality Gate: Minimum stages coverage
-  if (stagesDefinition.stages.length < qualityTargets.minStages) {
-    await ctx.breakpoint({
+      let lastFeedback_phase2Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase2Review) {
+        stagesDefinition = await ctx.task(stagesDefinitionTask, { ...{
+    product,
+    journeyScope,
+    targetPersona: targetPersona || personas[0]?.name,
+    synthesizedInsights: researchSynthesis.synthesizedInsights,
+    qualityTargets,
+    outputDir
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+      }
+  const phase2Review = await ctx.breakpoint({
       question: `Only ${stagesDefinition.stages.length} stages defined. Minimum recommended: ${qualityTargets.minStages}. Journey may lack detail. Review and approve stages?`,
       title: 'Journey Stages Review',
       context: {
@@ -140,9 +168,15 @@ export async function process(inputs, ctx) {
         stages: stagesDefinition.stages.map(s => ({ name: s.name, description: s.description })),
         recommendation: 'Consider breaking down stages into more granular phases',
         files: stagesDefinition.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown', label: a.label }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase2Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase2Review.approved) break;
+      lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+    } }
 
   await ctx.checkpoint({
     title: 'Phase 2: Journey Stages Defined',
@@ -161,7 +195,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 3: Identifying touchpoints across all stages');
 
-  const touchpointMapping = await ctx.task(touchpointMappingTask, {
+  let touchpointMapping = await ctx.task(touchpointMappingTask, {
     product,
     stages: stagesDefinition.stages,
     synthesizedInsights: researchSynthesis.synthesizedInsights,
@@ -173,8 +207,18 @@ export async function process(inputs, ctx) {
 
   // Quality Gate: Minimum touchpoints
   const totalTouchpoints = touchpointMapping.touchpointsByStage.reduce((sum, stage) => sum + stage.touchpoints.length, 0);
-  if (totalTouchpoints < qualityTargets.minTouchpoints) {
-    await ctx.breakpoint({
+      let lastFeedback_phase3Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase3Review) {
+        touchpointMapping = await ctx.task(touchpointMappingTask, { ...{
+    product,
+    stages: stagesDefinition.stages,
+    synthesizedInsights: researchSynthesis.synthesizedInsights,
+    qualityTargets,
+    outputDir
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+      }
+  const phase3Review = await ctx.breakpoint({
       question: `Only ${totalTouchpoints} touchpoints identified. Minimum recommended: ${qualityTargets.minTouchpoints}. This may result in incomplete journey understanding. Continue or add more touchpoints?`,
       title: 'Touchpoint Coverage Review',
       context: {
@@ -184,9 +228,15 @@ export async function process(inputs, ctx) {
         touchpointsByStage: touchpointMapping.touchpointsByStage,
         recommendation: 'Consider all digital and physical touchpoints, support interactions, and third-party integrations',
         files: touchpointMapping.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown', label: a.label }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase3Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase3Review.approved) break;
+      lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 4: USER ACTIONS DOCUMENTATION
@@ -221,7 +271,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 5: Mapping user thoughts and emotions throughout journey');
 
-  const emotionalMapping = await ctx.task(emotionalMappingTask, {
+  let emotionalMapping = await ctx.task(emotionalMappingTask, {
     product,
     stages: stagesDefinition.stages,
     touchpoints: touchpointMapping.touchpointsByStage,
@@ -235,8 +285,20 @@ export async function process(inputs, ctx) {
 
   // Quality Gate: Emotional variance (indicates rich journey with highs and lows)
   const emotionalVariance = emotionalMapping.emotionalVariance || 0;
-  if (emotionalVariance < qualityTargets.emotionalVarianceThreshold) {
-    await ctx.breakpoint({
+      let lastFeedback_qualityGateApproval2 = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_qualityGateApproval2) {
+        emotionalMapping = await ctx.task(emotionalMappingTask, { ...{
+    product,
+    stages: stagesDefinition.stages,
+    touchpoints: touchpointMapping.touchpointsByStage,
+    actions: actionsDocumentation.actionsByStage,
+    synthesizedInsights: researchSynthesis.synthesizedInsights,
+    qualityTargets,
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval2, attempt: attempt + 1 });
+      }
+  const qualityGateApproval2 = await ctx.breakpoint({
       question: `Emotional variance is ${emotionalVariance} (scale 1-10). Low variance may indicate lack of emotional depth or missing critical pain/delight moments. Review emotional mapping?`,
       title: 'Emotional Journey Review',
       context: {
@@ -248,9 +310,15 @@ export async function process(inputs, ctx) {
         lowPoints: emotionalMapping.emotionalLowPoints,
         recommendation: 'Deep dive into user research for emotional reactions at each stage',
         files: emotionalMapping.artifacts.map(a => ({ path: a.path, format: a.format || 'html', label: a.label }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_qualityGateApproval2 || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (qualityGateApproval2.approved) break;
+      lastFeedback_qualityGateApproval2 = qualityGateApproval2.response || qualityGateApproval2.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 6: PAIN POINTS IDENTIFICATION
@@ -258,7 +326,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 6: Identifying and categorizing pain points');
 
-  const painPointsAnalysis = await ctx.task(painPointsAnalysisTask, {
+  let painPointsAnalysis = await ctx.task(painPointsAnalysisTask, {
     product,
     stages: stagesDefinition.stages,
     touchpoints: touchpointMapping.touchpointsByStage,
@@ -273,8 +341,21 @@ export async function process(inputs, ctx) {
   painPointsIdentified = painPointsAnalysis.totalPainPoints;
 
   // Quality Gate: Minimum pain points
-  if (painPointsIdentified < qualityTargets.minPainPoints) {
-    await ctx.breakpoint({
+      let lastFeedback_qualityGateApproval3 = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_qualityGateApproval3) {
+        painPointsAnalysis = await ctx.task(painPointsAnalysisTask, { ...{
+    product,
+    stages: stagesDefinition.stages,
+    touchpoints: touchpointMapping.touchpointsByStage,
+    actions: actionsDocumentation.actionsByStage,
+    emotions: emotionalMapping.emotionalCurve,
+    synthesizedInsights: researchSynthesis.synthesizedInsights,
+    qualityTargets,
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval3, attempt: attempt + 1 });
+      }
+  const qualityGateApproval3 = await ctx.breakpoint({
       question: `Only ${painPointsIdentified} pain points identified. Minimum recommended: ${qualityTargets.minPainPoints}. Additional research may be needed. Review pain points and approve?`,
       title: 'Pain Points Coverage Review',
       context: {
@@ -286,9 +367,15 @@ export async function process(inputs, ctx) {
         topPainPoints: painPointsAnalysis.topPainPoints,
         recommendation: 'Conduct additional user interviews focused on frustrations and obstacles',
         files: painPointsAnalysis.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_qualityGateApproval3 || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (qualityGateApproval3.approved) break;
+      lastFeedback_qualityGateApproval3 = qualityGateApproval3.response || qualityGateApproval3.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 7: OPPORTUNITIES IDENTIFICATION
@@ -296,7 +383,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 7: Identifying improvement opportunities');
 
-  const opportunitiesIdentification = await ctx.task(opportunitiesIdentificationTask, {
+  let opportunitiesIdentification = await ctx.task(opportunitiesIdentificationTask, {
     product,
     stages: stagesDefinition.stages,
     painPoints: painPointsAnalysis.allPainPoints,
@@ -311,8 +398,21 @@ export async function process(inputs, ctx) {
   opportunitiesCount = opportunitiesIdentification.totalOpportunities;
 
   // Quality Gate: Minimum opportunities
-  if (opportunitiesCount < qualityTargets.minOpportunities) {
-    await ctx.breakpoint({
+      let lastFeedback_qualityGateApproval4 = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_qualityGateApproval4) {
+        opportunitiesIdentification = await ctx.task(opportunitiesIdentificationTask, { ...{
+    product,
+    stages: stagesDefinition.stages,
+    painPoints: painPointsAnalysis.allPainPoints,
+    emotionalLowPoints: emotionalMapping.emotionalLowPoints,
+    touchpoints: touchpointMapping.touchpointsByStage,
+    synthesizedInsights: researchSynthesis.synthesizedInsights,
+    qualityTargets,
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval4, attempt: attempt + 1 });
+      }
+  const qualityGateApproval4 = await ctx.breakpoint({
       question: `Only ${opportunitiesCount} opportunities identified. Minimum recommended: ${qualityTargets.minOpportunities}. More opportunities may exist. Review and approve?`,
       title: 'Opportunities Coverage Review',
       context: {
@@ -324,9 +424,15 @@ export async function process(inputs, ctx) {
         topOpportunities: opportunitiesIdentification.topOpportunities,
         recommendation: 'Consider ideation workshop to generate more improvement opportunities',
         files: opportunitiesIdentification.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown', label: a.label }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_qualityGateApproval4 || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (qualityGateApproval4.approved) break;
+      lastFeedback_qualityGateApproval4 = qualityGateApproval4.response || qualityGateApproval4.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 8: CURRENT STATE JOURNEY MAP CREATION
@@ -399,7 +505,6 @@ export async function process(inputs, ctx) {
       }
     });
   }
-
   // ============================================================================
   // PHASE 10: SERVICE BLUEPRINT (OPTIONAL)
   // ============================================================================
@@ -429,7 +534,6 @@ export async function process(inputs, ctx) {
       }
     });
   }
-
   // ============================================================================
   // PHASE 11: PRIORITIZATION FRAMEWORK
   // ============================================================================
@@ -466,7 +570,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 12: Final assessment and deliverables package');
 
-  const finalAssessment = await ctx.task(finalAssessmentTask, {
+  let finalAssessment = await ctx.task(finalAssessmentTask, {
     product,
     researchSynthesis,
     stagesDefinition,
@@ -487,8 +591,27 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `User journey mapping complete: ${journeyMapsCreated} maps, ${painPointsIdentified} pain points, ${opportunitiesCount} opportunities`);
 
-  // Final Breakpoint: Journey Map Review
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      finalAssessment = await ctx.task(finalAssessmentTask, { ...{
+    product,
+    researchSynthesis,
+    stagesDefinition,
+    touchpointMapping,
+    actionsDocumentation,
+    emotionalMapping,
+    painPointsAnalysis,
+    opportunitiesIdentification,
+    currentStateMap,
+    futureStateMap,
+    serviceBlueprint,
+    prioritizationFramework,
+    qualityTargets,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `User Journey Mapping Complete. ${journeyMapsCreated} journey maps created with ${painPointsIdentified} pain points and ${opportunitiesCount} opportunities identified. Review deliverables and approve?`,
     title: 'Final User Journey Mapping Review',
     context: {
@@ -513,9 +636,15 @@ export async function process(inputs, ctx) {
         { path: prioritizationFramework.prioritizationMatrixPath, format: 'html', label: 'Prioritization Matrix' },
         { path: finalAssessment.executiveSummaryPath, format: 'markdown', label: 'Executive Summary' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -597,8 +726,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

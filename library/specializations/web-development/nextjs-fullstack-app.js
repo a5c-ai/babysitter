@@ -144,7 +144,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 8: Building Client Components');
 
-  const clientComponents = await ctx.task(clientComponentsTask, {
+  let clientComponents = await ctx.task(clientComponentsTask, {
     projectName,
     styling,
     outputDir
@@ -152,8 +152,16 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...clientComponents.artifacts);
 
-  // Quality Gate
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      clientComponents = await ctx.task(clientComponentsTask, { ...{
+    projectName,
+    styling,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Next.js full-stack setup complete for ${projectName}. ${appRouterSetup.routes.length} routes, ${serverComponents.components.length} server components. Approve configuration?`,
     title: 'Next.js Full-Stack Review',
     context: {
@@ -162,9 +170,15 @@ export async function process(inputs, ctx) {
       serverComponents: serverComponents.components,
       apiRoutes: apiRoutes.endpoints,
       files: artifacts.slice(-5).map(a => ({ path: a.path, format: a.format || 'typescript' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 9: DEPLOYMENT CONFIGURATION
   // ============================================================================
@@ -222,8 +236,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

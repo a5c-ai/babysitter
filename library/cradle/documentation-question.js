@@ -67,36 +67,63 @@ export async function process(inputs, ctx) {
       ? docSearchResult.answer
       : issueSearchResult.answer;
 
-    await ctx.breakpoint({
-      question: [
-        'We found an existing answer to your question:',
-        '',
-        `**Source:** ${docSearchResult.answerFound ? docSearchResult.source : issueSearchResult.source}`,
-        '',
-        `**Answer:** ${existingAnswer}`,
-        '',
-        'Would you like to:',
-        '1. Accept this answer (no issue needed)',
-        '2. This doesn\'t fully answer my question - create an issue anyway',
-        '3. Cancel'
-      ].join('\n'),
-      title: 'Existing Answer Found',
-      context: { runId: ctx.runId }
-    });
+    let answerCheckLastFeedback = null;
+    let answerCheckApproved = false;
+    for (let answerCheckAttempt = 0; answerCheckAttempt < 3; answerCheckAttempt++) {
+      const answerCheckResult = await ctx.breakpoint({
+        question: [
+            'We found an existing answer to your question:',
+            '',
+            `**Source:** ${docSearchResult.answerFound ? docSearchResult.source : issueSearchResult.source}`,
+            '',
+            `**Answer:** ${existingAnswer}`,
+            '',
+            'Would you like to:',
+            '1. Accept this answer (no issue needed)',
+            '2. This doesn\'t fully answer my question - create an issue anyway'
+          ].join('\n'),
+        previousFeedback: answerCheckLastFeedback || undefined,
+        attempt: answerCheckAttempt > 0 ? answerCheckAttempt + 1 : undefined,
+        title: 'Existing Answer Found',
+        options: ['Approve', 'Request changes'],
+        expert: 'owner',
+        tags: ['approval-gate', 'answer-check'],
+        context: { runId: ctx.runId }
+      });
+      if (answerCheckResult.approved) {
+        answerCheckApproved = true;
+        break;
+      }
+      answerCheckLastFeedback = answerCheckResult.response || answerCheckResult.feedback || 'Changes requested';
+    }
+    if (!answerCheckApproved) {
+      // After 3 attempts, accept the existing answer gracefully
+      return { success: true, existingAnswer, reason: 'Existing answer provided after review', feedback: answerCheckLastFeedback };
+    }
   }
 
   if (issueSearchResult.duplicateFound) {
-    await ctx.breakpoint({
-      question: [
-        'A similar documentation question may already be open:',
-        '',
-        ...issueSearchResult.matches.map(m => `- #${m.number}: ${m.title} (${m.state})`),
-        '',
-        'Would you like to continue creating a new issue, or cancel?'
-      ].join('\n'),
-      title: 'Potential Duplicate Question Found',
-      context: { runId: ctx.runId }
-    });
+    let dupLastFeedback = null;
+    for (let dupAttempt = 0; dupAttempt < 3; dupAttempt++) {
+      const duplicateApproval = await ctx.breakpoint({
+        question: [
+            'A similar documentation question may already be open:',
+            '',
+            ...issueSearchResult.matches.map(m => `- #${m.number}: ${m.title} (${m.state})`),
+            '',
+            'Would you like to continue creating a new issue, or provide feedback?'
+          ].join('\n'),
+        previousFeedback: dupLastFeedback || undefined,
+        attempt: dupAttempt > 0 ? dupAttempt + 1 : undefined,
+        title: 'Potential Duplicate Question Found',
+        options: ['Approve', 'Request changes'],
+        expert: 'owner',
+        tags: ['approval-gate', 'duplicate-check'],
+        context: { runId: ctx.runId }
+      });
+      if (duplicateApproval.approved) break;
+      dupLastFeedback = duplicateApproval.response || duplicateApproval.feedback || 'Changes requested';
+    }
   }
 
   // ============================================================================
@@ -115,22 +142,42 @@ export async function process(inputs, ctx) {
   // PHASE 6: REVIEW BREAKPOINT
   // ============================================================================
 
-  await ctx.breakpoint({
-    question: [
-      'Please review the documentation question before submission:',
-      '',
-      `**Title:** ${issueComposition.title}`,
-      '',
-      '**Labels:** ' + issueComposition.labels.join(', '),
-      '',
-      '**Body preview:**',
-      issueComposition.bodyPreview,
-      '',
-      'Approve to submit this question to a5c-ai/babysitter, or reject to cancel.'
-    ].join('\n'),
-    title: 'Review Documentation Question Before Submission',
-    context: { runId: ctx.runId }
-  });
+  let reviewLastFeedback = null;
+  let currentIssueComposition = issueComposition;
+  for (let reviewAttempt = 0; reviewAttempt < 3; reviewAttempt++) {
+    if (reviewLastFeedback) {
+      currentIssueComposition = await ctx.task(composeDocQuestionIssueTask, {
+        questionDetails,
+        docSearchResult,
+        issueSearchResult,
+        feedback: reviewLastFeedback,
+        attempt: reviewAttempt + 1
+      });
+    }
+    const reviewApproval = await ctx.breakpoint({
+      question: [
+          'Please review the documentation question before submission:',
+          '',
+          `**Title:** ${currentIssueComposition.title}`,
+          '',
+          '**Labels:** ' + currentIssueComposition.labels.join(', '),
+          '',
+          '**Body preview:**',
+          currentIssueComposition.bodyPreview,
+          '',
+          'Approve to submit this question to a5c-ai/babysitter, or request changes.'
+        ].join('\n'),
+      previousFeedback: reviewLastFeedback || undefined,
+      attempt: reviewAttempt > 0 ? reviewAttempt + 1 : undefined,
+      title: 'Review Documentation Question Before Submission',
+      options: ['Approve', 'Request changes'],
+      expert: 'owner',
+      tags: ['approval-gate', 'review'],
+      context: { runId: ctx.runId }
+    });
+    if (reviewApproval.approved) break;
+    reviewLastFeedback = reviewApproval.response || reviewApproval.feedback || 'Changes requested';
+  }
 
   // ============================================================================
   // PHASE 7: SUBMIT ISSUE
@@ -138,11 +185,21 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 7: Submitting documentation question to GitHub');
 
-  await ctx.breakpoint({
-    question: 'Confirm: Open this documentation question on a5c-ai/babysitter GitHub repository?',
-    title: 'Confirm GitHub Issue Submission',
-    context: { runId: ctx.runId }
-  });
+  let submitLastFeedback = null;
+  for (let submitAttempt = 0; submitAttempt < 3; submitAttempt++) {
+    const submitApproval = await ctx.breakpoint({
+      question: 'Confirm: Open this documentation question on a5c-ai/babysitter GitHub repository?',
+      previousFeedback: submitLastFeedback || undefined,
+      attempt: submitAttempt > 0 ? submitAttempt + 1 : undefined,
+      title: 'Confirm GitHub Issue Submission',
+      options: ['Approve', 'Request changes'],
+      expert: 'owner',
+      tags: ['approval-gate', 'submit'],
+      context: { runId: ctx.runId }
+    });
+    if (submitApproval.approved) break;
+    submitLastFeedback = submitApproval.response || submitApproval.feedback || 'Changes requested';
+  }
 
   const submitResult = await ctx.task(submitDocQuestionTask, {
     title: issueComposition.title,

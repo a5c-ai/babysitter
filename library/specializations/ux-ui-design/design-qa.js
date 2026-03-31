@@ -80,7 +80,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Planning design QA and visual regression strategy');
 
-  const qaStrategy = await ctx.task(designQaStrategyTask, {
+  let qaStrategy = await ctx.task(designQaStrategyTask, {
     projectName,
     designFiles,
     implementationUrl,
@@ -111,8 +111,27 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...qaStrategy.artifacts);
 
-  // Quality Gate: Strategy review
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      qaStrategy = await ctx.task(designQaStrategyTask, { ...{
+    projectName,
+    designFiles,
+    implementationUrl,
+    pages,
+    components,
+    tool,
+    designSystem,
+    viewports,
+    browsers,
+    toleranceLevel,
+    includeAccessibility,
+    includeDarkMode,
+    includeInteractiveStates,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Design QA strategy planned. ${qaStrategy.totalTestScenarios} test scenarios across ${pages.length} pages and ${components.length} components. Coverage: ${qaStrategy.coveragePercentage}%. Tolerance level: ${toleranceLevel}. Review and approve strategy?`,
     title: 'Design QA Strategy Review',
     context: {
@@ -130,9 +149,15 @@ export async function process(inputs, ctx) {
       },
       testScope: qaStrategy.testScope,
       files: qaStrategy.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 2: DESIGN SYSTEM COMPLIANCE VALIDATION
   // ============================================================================
@@ -242,7 +267,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 6: Capturing baseline screenshots from design files');
 
-  const baselineCapture = await ctx.task(baselineScreenshotCaptureTask, {
+  let baselineCapture = await ctx.task(baselineScreenshotCaptureTask, {
     projectName,
     designFiles,
     designAnalysis,
@@ -260,8 +285,22 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Baseline capture: ${baselinesCreated} baseline screenshots created`);
 
-  // Quality Gate: Baseline review
-  await ctx.breakpoint({
+    let lastFeedback_phase6Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase6Review) {
+      baselineCapture = await ctx.task(baselineScreenshotCaptureTask, { ...{
+    projectName,
+    designFiles,
+    designAnalysis,
+    pages,
+    components,
+    viewportConfig: viewportConfig.configurations,
+    includeInteractiveStates,
+    includeDarkMode,
+    outputDir
+  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
+    }
+  const phase6Review = await ctx.breakpoint({
     question: `Baseline capture complete. ${baselinesCreated} baseline screenshots captured from design files across ${viewportConfig.totalConfigurations} configurations. Review baselines and approve to proceed with comparison?`,
     title: 'Baseline Screenshot Review',
     context: {
@@ -278,9 +317,15 @@ export async function process(inputs, ctx) {
         format: 'image',
         label: `Baseline: ${b.name} @ ${b.viewport}`
       }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase6Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase6Review.approved) break;
+    lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 7: IMPLEMENTATION SCREENSHOT CAPTURE
   // ============================================================================
@@ -312,7 +357,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 8: Running pixel-perfect visual comparison');
 
-  const pixelComparison = await ctx.task(pixelPerfectComparisonTask, {
+  let pixelComparison = await ctx.task(pixelPerfectComparisonTask, {
     projectName,
     baselineCapture,
     implementationCapture,
@@ -330,8 +375,20 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Pixel-perfect comparison: Score ${pixelPerfectScore}/100, ${pixelComparison.differences.length} differences found`);
 
   // Quality Gate: Pixel-perfect review
-  if (pixelComparison.criticalDifferences.length > 0) {
-    await ctx.breakpoint({
+      let lastFeedback_qualityGateApproval = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_qualityGateApproval) {
+        pixelComparison = await ctx.task(pixelPerfectComparisonTask, { ...{
+    projectName,
+    baselineCapture,
+    implementationCapture,
+    pixelPerfectThreshold,
+    layoutShiftThreshold,
+    colorDifferenceThreshold,
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval, attempt: attempt + 1 });
+      }
+  const qualityGateApproval = await ctx.breakpoint({
       question: `Pixel-perfect comparison found ${pixelComparison.criticalDifferences.length} critical difference(s) and ${pixelComparison.differences.length} total differences. Pixel-perfect score: ${pixelPerfectScore}/100. Review differences and approve to continue?`,
       title: 'Pixel-Perfect Comparison Results',
       context: {
@@ -352,9 +409,15 @@ export async function process(inputs, ctx) {
             label: `Diff: ${img.name}`
           }))
         ]
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_qualityGateApproval || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (qualityGateApproval.approved) break;
+      lastFeedback_qualityGateApproval = qualityGateApproval.response || qualityGateApproval.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 9: TYPOGRAPHY VERIFICATION
@@ -448,7 +511,6 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Interactive states: ${interactiveStatesResults.testsPassed}/${interactiveStatesResults.totalTests} tests passed`);
   }
-
   // ============================================================================
   // PHASE 13: RESPONSIVE DESIGN VERIFICATION
   // ============================================================================
@@ -478,7 +540,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 14: Testing cross-browser visual consistency');
 
-  const crossBrowserTest = await ctx.task(crossBrowserConsistencyTask, {
+  let crossBrowserTest = await ctx.task(crossBrowserConsistencyTask, {
     projectName,
     implementationUrl,
     pages,
@@ -496,8 +558,21 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Cross-browser testing: ${crossBrowserScore}/100, ${crossBrowserTest.inconsistencies.length} inconsistencies found`);
 
   // Quality Gate: Cross-browser review
-  if (crossBrowserTest.criticalInconsistencies.length > 0) {
-    await ctx.breakpoint({
+      let lastFeedback_qualityGateApproval2 = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_qualityGateApproval2) {
+        crossBrowserTest = await ctx.task(crossBrowserConsistencyTask, { ...{
+    projectName,
+    implementationUrl,
+    pages,
+    components,
+    browsers,
+    viewportConfig: viewportConfig.configurations,
+    pixelPerfectThreshold,
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval2, attempt: attempt + 1 });
+      }
+  const qualityGateApproval2 = await ctx.breakpoint({
       question: `Cross-browser testing found ${crossBrowserTest.criticalInconsistencies.length} critical inconsistency/inconsistencies across browsers. Consistency score: ${crossBrowserScore}/100. Review browser-specific issues and approve to continue?`,
       title: 'Cross-Browser Consistency Review',
       context: {
@@ -517,9 +592,15 @@ export async function process(inputs, ctx) {
             label: `Browser: ${img.browser}`
           }))
         ]
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_qualityGateApproval2 || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (qualityGateApproval2.approved) break;
+      lastFeedback_qualityGateApproval2 = qualityGateApproval2.response || qualityGateApproval2.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 15: DARK MODE VERIFICATION (OPTIONAL)
@@ -544,7 +625,6 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Dark mode verification: ${darkModeResults.complianceScore}/100, ${darkModeResults.issues.length} issues found`);
   }
-
   // ============================================================================
   // PHASE 16: ACCESSIBILITY VISUAL VALIDATION (OPTIONAL)
   // ============================================================================
@@ -567,7 +647,6 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Accessibility validation: ${accessibilityResults.accessibilityScore}/100, ${accessibilityResults.violations.length} violations found`);
   }
-
   // ============================================================================
   // PHASE 17: VISUAL REGRESSION ANALYSIS
   // ============================================================================
@@ -625,7 +704,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 19: Creating design QA remediation plan');
 
-  const remediationPlan = await ctx.task(designQaRemediationPlanTask, {
+  let remediationPlan = await ctx.task(designQaRemediationPlanTask, {
     projectName,
     regressions,
     pixelComparison,
@@ -640,8 +719,23 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...remediationPlan.artifacts);
 
-  // Quality Gate: Remediation plan review
-  await ctx.breakpoint({
+    let lastFeedback_phase19Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase19Review) {
+      remediationPlan = await ctx.task(designQaRemediationPlanTask, { ...{
+    projectName,
+    regressions,
+    pixelComparison,
+    typographyVerification,
+    spacingVerification,
+    colorValidation,
+    responsiveVerification,
+    crossBrowserTest,
+    prioritizeByImpact: true,
+    outputDir
+  }, feedback: lastFeedback_phase19Review, attempt: attempt + 1 });
+    }
+  const phase19Review = await ctx.breakpoint({
     question: `Design QA remediation plan created with ${remediationPlan.totalTasks} tasks across ${remediationPlan.categories.length} categories. ${remediationPlan.criticalTasks} critical tasks identified. Estimated effort: ${remediationPlan.estimatedEffort}. Review and approve for implementation?`,
     title: 'Design QA Remediation Plan Review',
     context: {
@@ -659,9 +753,15 @@ export async function process(inputs, ctx) {
         { path: remediationPlan.planPath, format: 'markdown', label: 'Remediation Plan' },
         { path: remediationPlan.roadmapPath, format: 'markdown', label: 'Implementation Roadmap' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase19Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase19Review.approved) break;
+    lastFeedback_phase19Review = phase19Review.response || phase19Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 20: VISUAL REGRESSION TEST SUITE GENERATION
   // ============================================================================
@@ -713,7 +813,6 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `CI/CD integration configured: ${cicdSetup.pipelineStages.length} pipeline stages`);
   }
-
   // ============================================================================
   // PHASE 22: DESIGN HANDOFF VALIDATION CHECKLIST
   // ============================================================================
@@ -772,7 +871,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 24: Conducting final design QA assessment');
 
-  const finalAssessment = await ctx.task(finalDesignQaAssessmentTask, {
+  let finalAssessment = await ctx.task(finalDesignQaAssessmentTask, {
     projectName,
     pixelPerfectScore,
     designSystemCompliance: dsComplianceScore,
@@ -795,8 +894,28 @@ export async function process(inputs, ctx) {
   complianceScore = finalAssessment.overallComplianceScore;
   const productionReady = finalAssessment.productionReady;
 
-  // Final Breakpoint: Design QA approval
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval2 = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval2) {
+      finalAssessment = await ctx.task(finalDesignQaAssessmentTask, { ...{
+    projectName,
+    pixelPerfectScore,
+    designSystemCompliance: dsComplianceScore,
+    typographyScore,
+    spacingScore,
+    colorScore,
+    responsiveScore,
+    crossBrowserScore,
+    interactiveStatesResults,
+    darkModeResults,
+    accessibilityResults,
+    regressionAnalysis,
+    remediationPlan,
+    toleranceLevel,
+    outputDir
+  }, feedback: lastFeedback_finalApproval2, attempt: attempt + 1 });
+    }
+  const finalApproval2 = await ctx.breakpoint({
     question: `Design QA Complete! ${projectName}: Overall compliance score ${complianceScore}/100, Pixel-perfect score ${pixelPerfectScore}/100. ${regressions.length} regression(s) found, ${remediationPlan.totalTasks} remediation task(s) identified. Production ready: ${productionReady}. ${finalAssessment.verdict}. Approve final design QA deliverables?`,
     title: 'Design QA Complete',
     context: {
@@ -844,9 +963,15 @@ export async function process(inputs, ctx) {
         { path: testSuiteGeneration.testSuitePath, format: 'code', label: 'Visual Regression Test Suite' },
         { path: finalAssessment.reportPath, format: 'markdown', label: 'Final Assessment' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval2 || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval2.approved) break;
+    lastFeedback_finalApproval2 = finalApproval2.response || finalApproval2.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -931,8 +1056,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

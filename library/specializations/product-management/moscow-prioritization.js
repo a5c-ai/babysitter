@@ -51,13 +51,12 @@ export async function process(inputs, ctx) {
       }
     };
   }
-
   // ============================================================================
   // PHASE 2: INITIAL MOSCOW CATEGORIZATION
   // ============================================================================
 
   ctx.log('info', 'Phase 2: Performing initial MoSCoW categorization');
-  const initialCategorization = await ctx.task(moscowCategorizationTask, {
+  let initialCategorization = await ctx.task(moscowCategorizationTask, {
     requirements: requirementsPrep.requirements,
     businessGoals,
     timeframe,
@@ -67,8 +66,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...initialCategorization.artifacts);
 
-  // Breakpoint: Review initial categorization
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      initialCategorization = await ctx.task(moscowCategorizationTask, { ...{
+    requirements: requirementsPrep.requirements,
+    businessGoals,
+    timeframe,
+    constraints,
+    outputDir
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Initial MoSCoW categorization complete. Must-have: ${initialCategorization.categorization.must.length}, Should-have: ${initialCategorization.categorization.should.length}, Could-have: ${initialCategorization.categorization.could.length}, Won't-have: ${initialCategorization.categorization.wont.length}. Review categorization?`,
     title: 'Initial MoSCoW Categorization Review',
     context: {
@@ -87,9 +96,15 @@ export async function process(inputs, ctx) {
         wontHave: initialCategorization.categorization.wont.length,
         categorizedPercentage: initialCategorization.coveragePercentage
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 3: STAKEHOLDER ALIGNMENT AND VALIDATION
   // ============================================================================
@@ -110,8 +125,18 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...validationResult.artifacts);
 
-    // Breakpoint: Stakeholder feedback review
-    await ctx.breakpoint({
+      let lastFeedback_phase3Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase3Review) {
+        initialCategorization = await ctx.task(moscowCategorizationTask, { ...{
+    requirements: requirementsPrep.requirements,
+    businessGoals,
+    timeframe,
+    constraints,
+    outputDir
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+      }
+  const phase3Review = await ctx.breakpoint({
       question: `Stakeholder validation complete. Alignment score: ${validationResult.alignmentScore}/100. ${validationResult.changesRequested.length} change(s) requested. Review feedback and proceed with refinement?`,
       title: 'Stakeholder Validation Review',
       context: {
@@ -129,10 +154,16 @@ export async function process(inputs, ctx) {
           conflicts: validationResult.conflicts.length,
           consensus: validationResult.consensusAchieved
         }
-      }
-    });
-
-    // ============================================================================
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase3Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase3Review.approved) break;
+      lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+    }
+  // ============================================================================
     // PHASE 4: REFINEMENT BASED ON FEEDBACK
     // ============================================================================
 
@@ -150,7 +181,6 @@ export async function process(inputs, ctx) {
       artifacts.push(...refinement.artifacts);
     }
   }
-
   // ============================================================================
   // PHASE 5: DEPENDENCY ANALYSIS
   // ============================================================================
@@ -200,7 +230,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 8: Specifying Minimum Viable Product (MVP)');
-  const mvpSpecification = await ctx.task(mvpSpecificationTask, {
+  let mvpSpecification = await ctx.task(mvpSpecificationTask, {
     mustHaveRequirements: validatedCategorization.categorization?.must || validatedCategorization.must,
     dependencies: dependencyAnalysis.dependencies,
     estimates: estimationAnalysis.estimates,
@@ -211,8 +241,19 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...mvpSpecification.artifacts);
 
-  // Breakpoint: Final review of prioritization and MVP
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      mvpSpecification = await ctx.task(mvpSpecificationTask, { ...{
+    mustHaveRequirements: validatedCategorization.categorization?.must || validatedCategorization.must,
+    dependencies: dependencyAnalysis.dependencies,
+    estimates: estimationAnalysis.estimates,
+    businessGoals,
+    timeframe,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `MoSCoW prioritization complete. MVP contains ${mvpSpecification.mvpScope.features.length} features with estimated ${mvpSpecification.mvpScope.totalEffort}. Release scope defined for ${releaseScope.releases.length} release(s). Review final prioritization?`,
     title: 'Final Prioritization Review',
     context: {
@@ -231,9 +272,15 @@ export async function process(inputs, ctx) {
         totalMustHave: validatedCategorization.categorization?.must.length || validatedCategorization.must?.length || 0,
         totalShouldHave: validatedCategorization.categorization?.should.length || validatedCategorization.should?.length || 0
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 9: ROADMAP GENERATION (OPTIONAL)
   // ============================================================================
@@ -251,7 +298,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...roadmap.artifacts);
   }
-
   // ============================================================================
   // PHASE 10: DOCUMENTATION AND REPORTING
   // ============================================================================
@@ -305,8 +351,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

@@ -80,7 +80,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...sseEndpoint.artifacts);
   }
-
   // ============================================================================
   // PHASE 4: POST ENDPOINT FOR CLIENT-TO-SERVER
   // ============================================================================
@@ -102,7 +101,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 5: Implementing connection management');
 
-  const connectionManagement = await ctx.task(connectionManagementTask, {
+  let connectionManagement = await ctx.task(connectionManagementTask, {
     projectName,
     transportType,
     language,
@@ -111,8 +110,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...connectionManagement.artifacts);
 
-  // Quality Gate: Transport Layer Review
-  await ctx.breakpoint({
+    let lastFeedback_phase5Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase5Review) {
+      connectionManagement = await ctx.task(connectionManagementTask, { ...{
+    projectName,
+    transportType,
+    language,
+    outputDir
+  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+    }
+  const phase5Review = await ctx.breakpoint({
     question: `Transport layer ${transportType} implemented. Proceed with authentication and CORS configuration?`,
     title: 'Transport Layer Review',
     context: {
@@ -120,9 +128,15 @@ export async function process(inputs, ctx) {
       projectName,
       transportType,
       files: artifacts.slice(-3).map(a => ({ path: a.path, format: a.format || 'typescript' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase5Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase5Review.approved) break;
+    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 6: AUTHENTICATION AND AUTHORIZATION
   // ============================================================================
@@ -153,7 +167,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...corsConfig.artifacts);
   }
-
   // ============================================================================
   // PHASE 8: RECONNECTION HANDLING
   // ============================================================================
@@ -184,7 +197,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...healthCheck.artifacts);
   }
-
   // ============================================================================
   // PHASE 10: INTEGRATION TESTS
   // ============================================================================
@@ -207,7 +219,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 11: Documenting transport configuration');
 
-  const documentation = await ctx.task(documentationTask, {
+  let documentation = await ctx.task(documentationTask, {
     projectName,
     transportType,
     authMethod,
@@ -220,8 +232,21 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...documentation.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      documentation = await ctx.task(documentationTask, { ...{
+    projectName,
+    transportType,
+    authMethod,
+    corsEnabled,
+    healthCheckEnabled,
+    transportServer,
+    authConfig,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `MCP Transport Layer Implementation complete for ${transportType}. Review and approve?`,
     title: 'MCP Transport Layer Complete',
     context: {
@@ -237,9 +262,15 @@ export async function process(inputs, ctx) {
         { path: documentation.transportDocPath, format: 'markdown', label: 'Transport Documentation' },
         { path: transportServer.serverPath, format: 'typescript', label: 'Transport Server' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -274,8 +305,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

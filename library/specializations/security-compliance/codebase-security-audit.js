@@ -574,7 +574,6 @@ export async function process(inputs, ctx) {
   if (!projectRoot) {
     throw new Error('projectRoot is required — specify the absolute path to the project directory');
   }
-
   // These may be overridden by auto-detection
   let projectName = inputs.projectName || 'Application';
   let techStack = inputs.techStack || {};
@@ -588,7 +587,7 @@ export async function process(inputs, ctx) {
   if (!auditDomains || auditDomains.length === 0) {
     ctx.log?.('info', '=== PHASE 0: Auto-Detecting Project Profile ===');
 
-    const detection = await ctx.task(autoDetectTask, { projectRoot });
+    let detection = await ctx.task(autoDetectTask, { projectRoot });
 
     // Use detected project name and tech stack if not provided by user
     if (!inputs.projectName && detection.projectName) {
@@ -597,8 +596,7 @@ export async function process(inputs, ctx) {
     if (!inputs.techStack && detection.techStack) {
       techStack = detection.techStack;
     }
-
-    // Build domains list: always-on + detected optional domains
+  // Build domains list: always-on + detected optional domains
     auditDomains = [...ALWAYS_ON_DOMAINS];
     const detectedOptional = [];
 
@@ -608,16 +606,14 @@ export async function process(inputs, ctx) {
         detectedOptional.push({ domain, reason: info.reason });
       }
     }
-
-    // Merge module info from both alwaysOnModules and detectedDomains
+  // Merge module info from both alwaysOnModules and detectedDomains
     const allModules = { ...(detection.alwaysOnModules || {}) };
     for (const [domain, info] of Object.entries(detection.detectedDomains || {})) {
       if (info.detected && info.modules) {
         allModules[domain] = info.modules;
       }
     }
-
-    // Build a human-readable summary for the breakpoint — with modules per domain
+  // Build a human-readable summary for the breakpoint — with modules per domain
     const formatModules = (modules) => {
       if (!modules || modules.length === 0) return '';
       return modules.map(m => {
@@ -648,8 +644,12 @@ export async function process(inputs, ctx) {
 
     ctx.log?.('info', `Detected ${auditDomains.length} audit domains for "${projectName}"`);
 
-    // Ask user to confirm
-    await ctx.breakpoint({
+      let lastFeedback_stepApproval = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_stepApproval) {
+        detection = await ctx.task(autoDetectTask, { ...{ projectRoot }, feedback: lastFeedback_stepApproval, attempt: attempt + 1 });
+      }
+  const stepApproval = await ctx.breakpoint({
       question: [
         `Auto-detected project profile for "${projectName}":`,
         '',
@@ -670,9 +670,15 @@ export async function process(inputs, ctx) {
         techStack,
         projectName,
         modulesPerDomain: allModules
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_stepApproval || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (stepApproval.approved) break;
+      lastFeedback_stepApproval = stepApproval.response || stepApproval.feedback || 'Changes requested';
+    } }
 
   const finalReportPath = reportOutputPath || `${projectRoot}/reports/security-audit-report.html`;
 
@@ -719,7 +725,6 @@ export async function process(inputs, ctx) {
       allFindings.push(...domainFindings);
     }
   }
-
   const criticalCount = allFindings.filter(f => (f.severity || '').toUpperCase() === 'CRITICAL').length;
   const highCount = allFindings.filter(f => (f.severity || '').toUpperCase() === 'HIGH').length;
   const mediumCount = allFindings.filter(f => (f.severity || '').toUpperCase() === 'MEDIUM').length;
@@ -728,9 +733,12 @@ export async function process(inputs, ctx) {
 
   // ── PHASE 3: Human Review ────────────────────────────────────────
 
-  ctx.log?.('info', '=== PHASE 3: Findings Review ===');
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      detection = await ctx.task(autoDetectTask, { ...{ projectRoot }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Security scan complete. Found ${allFindings.length} total findings (${criticalCount} CRITICAL, ${highCount} HIGH, ${mediumCount} MEDIUM). Review and approve report generation?`,
     title: 'Security Scan Results Review',
     context: {
@@ -744,9 +752,15 @@ export async function process(inputs, ctx) {
           scanDomains.map(d => [d, DOMAIN_REGISTRY[d].extractFindings(scanResults[d] || {}).length])
         )
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ── PHASE 4: HTML Report Generation ──────────────────────────────
 
   ctx.log?.('info', '=== PHASE 4: HTML Report Generation ===');

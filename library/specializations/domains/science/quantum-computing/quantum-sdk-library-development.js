@@ -40,24 +40,37 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Library Architecture Design');
 
-  const architectureResult = await ctx.task(libraryArchitectureDesignTask, {
+  let architectureResult = await ctx.task(libraryArchitectureDesignTask, {
     libraryName,
     targetFeatures,
     platforms
   });
 
-  artifacts.push(...(architectureResult.artifacts || []));
-
-  await ctx.breakpoint({
+    let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      architectureResult = await ctx.task(libraryArchitectureDesignTask, { ...{
+    libraryName,
+    targetFeatures,
+    platforms
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Library architecture designed. Modules: ${architectureResult.moduleCount}, APIs: ${architectureResult.apiCount}. Proceed with circuit primitives implementation?`,
     title: 'Library Architecture Review',
     context: {
       runId: ctx.runId,
       architecture: architectureResult,
       files: (architectureResult.artifacts || []).map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 2: CIRCUIT PRIMITIVES IMPLEMENTATION
   // ============================================================================
@@ -80,24 +93,37 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 3: Algorithm Templates Implementation');
 
-  const templatesResult = await ctx.task(algorithmTemplatesImplementationTask, {
+  let templatesResult = await ctx.task(algorithmTemplatesImplementationTask, {
     architecture: architectureResult,
     targetFeatures,
     primitives: primitivesResult
   });
 
-  artifacts.push(...(templatesResult.artifacts || []));
-
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      templatesResult = await ctx.task(algorithmTemplatesImplementationTask, { ...{
+    architecture: architectureResult,
+    targetFeatures,
+    primitives: primitivesResult
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Algorithm templates implemented: ${templatesResult.templateCount}. Included: ${templatesResult.algorithms.join(', ')}. Review templates?`,
     title: 'Algorithm Templates Review',
     context: {
       runId: ctx.runId,
       templates: templatesResult,
       files: (templatesResult.artifacts || []).map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 4: HARDWARE ABSTRACTION LAYER
   // ============================================================================
@@ -115,7 +141,6 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `HAL implemented for ${halResult.supportedBackends.length} backends`);
   }
-
   // ============================================================================
   // PHASE 5: API DESIGN AND IMPLEMENTATION
   // ============================================================================
@@ -166,7 +191,6 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Example notebooks created: ${examplesResult.notebookCount}`);
   }
-
   // ============================================================================
   // PHASE 8: MULTI-PLATFORM SUPPORT
   // ============================================================================
@@ -188,7 +212,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 9: Testing and Validation');
 
-  const testingResult = await ctx.task(sdkTestingValidationTask, {
+  let testingResult = await ctx.task(sdkTestingValidationTask, {
     libraryName,
     architecture: architectureResult,
     primitives: primitivesResult,
@@ -196,34 +220,57 @@ export async function process(inputs, ctx) {
     platforms
   });
 
-  artifacts.push(...(testingResult.artifacts || []));
-
-  await ctx.breakpoint({
+    let lastFeedback_phase9Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase9Review) {
+      testingResult = await ctx.task(sdkTestingValidationTask, { ...{
+    libraryName,
+    architecture: architectureResult,
+    primitives: primitivesResult,
+    templates: templatesResult,
+    platforms
+  }, feedback: lastFeedback_phase9Review, attempt: attempt + 1 });
+    }
+  const phase9Review = await ctx.breakpoint({
     question: `SDK testing complete. Tests passed: ${testingResult.passedTests}/${testingResult.totalTests}. Coverage: ${testingResult.coverage}%. Review test results?`,
     title: 'SDK Testing Review',
     context: {
       runId: ctx.runId,
       testing: testingResult,
       files: (testingResult.artifacts || []).map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase9Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase9Review.approved) break;
+    lastFeedback_phase9Review = phase9Review.response || phase9Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 10: PACKAGING AND DISTRIBUTION
   // ============================================================================
 
   ctx.log('info', 'Phase 10: Packaging and Distribution');
 
-  const packagingResult = await ctx.task(packagingDistributionTask, {
+  let packagingResult = await ctx.task(packagingDistributionTask, {
     libraryName,
     architecture: architectureResult,
     platforms,
     outputDir
   });
 
-  artifacts.push(...(packagingResult.artifacts || []));
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      packagingResult = await ctx.task(packagingDistributionTask, { ...{
+    libraryName,
+    architecture: architectureResult,
+    platforms,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `SDK development complete. Library: ${libraryName}, Modules: ${architectureResult.moduleCount}, Platforms: ${multiPlatformResult.supportedPlatforms.length}. Approve release?`,
     title: 'SDK Development Complete',
     context: {
@@ -236,9 +283,15 @@ export async function process(inputs, ctx) {
         platforms: multiPlatformResult.supportedPlatforms.length
       },
       files: artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
 
   return {
@@ -279,8 +332,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

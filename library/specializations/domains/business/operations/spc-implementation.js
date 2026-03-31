@@ -51,7 +51,7 @@ export async function process(inputs, ctx) {
 
   // Phase 2: Measurement System Analysis
   ctx.log('info', 'Phase 2: Measurement System Analysis');
-  const msa = await ctx.task(msaTask, {
+  let msa = await ctx.task(msaTask, {
     processName,
     assessment,
     outputDir
@@ -59,8 +59,16 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...msa.artifacts);
 
-  // Quality Gate: MSA Results
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      msa = await ctx.task(msaTask, { ...{
+    processName,
+    assessment,
+    outputDir
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `MSA complete. Gage R&R: ${msa.gageRR}%. ${msa.acceptable ? 'ACCEPTABLE' : 'NOT ACCEPTABLE - measurement system needs improvement'}. Proceed with data collection?`,
     title: 'Measurement System Analysis Review',
     context: {
@@ -69,9 +77,15 @@ export async function process(inputs, ctx) {
       gageRR: msa.gageRR,
       acceptable: msa.acceptable,
       files: msa.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // Phase 3: Data Collection
   ctx.log('info', 'Phase 3: Data Collection for Control Chart');
   const dataCollection = await ctx.task(dataCollectionTask, {
@@ -110,7 +124,7 @@ export async function process(inputs, ctx) {
 
   // Phase 6: Initial Stability Analysis
   ctx.log('info', 'Phase 6: Initial Stability Analysis');
-  const stabilityAnalysis = await ctx.task(stabilityAnalysisTask, {
+  let stabilityAnalysis = await ctx.task(stabilityAnalysisTask, {
     processName,
     controlLimits,
     dataCollection,
@@ -119,8 +133,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...stabilityAnalysis.artifacts);
 
-  // Quality Gate: Stability Review
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      stabilityAnalysis = await ctx.task(stabilityAnalysisTask, { ...{
+    processName,
+    controlLimits,
+    dataCollection,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Initial stability analysis complete. Process ${stabilityAnalysis.isStable ? 'IS STABLE' : 'IS NOT STABLE'}. Out-of-control points: ${stabilityAnalysis.outOfControlPoints}. Special causes: ${stabilityAnalysis.specialCauses.length}. ${stabilityAnalysis.isStable ? 'Proceed with capability study?' : 'Address special causes before proceeding?'}`,
     title: 'Process Stability Review',
     context: {
@@ -131,9 +154,15 @@ export async function process(inputs, ctx) {
       specialCauses: stabilityAnalysis.specialCauses,
       westernElectricRules: stabilityAnalysis.rulesViolated,
       files: stabilityAnalysis.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 7: Process Capability Analysis (if stable)
   let capabilityAnalysis = null;
   if (specifications && stabilityAnalysis.isStable) {
@@ -148,7 +177,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...capabilityAnalysis.artifacts);
   }
-
   // Phase 8: Response Plan Development
   ctx.log('info', 'Phase 8: Response Plan Development');
   const responsePlan = await ctx.task(responsePlanTask, {
@@ -244,8 +272,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Process Assessment
+  // Task 1: Process Assessment
 export const processAssessmentTask = defineTask('spc-assessment', (args, taskCtx) => ({
   kind: 'agent',
   title: `SPC Process Assessment - ${args.processName}`,

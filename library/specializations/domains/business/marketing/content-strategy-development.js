@@ -157,7 +157,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 10: Assessing content strategy quality');
-  const qualityAssessment = await ctx.task(contentStrategyQualityTask, {
+  let qualityAssessment = await ctx.task(contentStrategyQualityTask, {
     brandName,
     contentAudit,
     audienceAnalysis,
@@ -175,8 +175,23 @@ export async function process(inputs, ctx) {
   const strategyScore = qualityAssessment.overallScore;
   const qualityMet = strategyScore >= 80;
 
-  // Breakpoint: Review content strategy
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      qualityAssessment = await ctx.task(contentStrategyQualityTask, { ...{
+    brandName,
+    contentAudit,
+    audienceAnalysis,
+    editorialMission,
+    contentPillars,
+    contentMatrix,
+    contentTypes,
+    distributionStrategy,
+    successMetrics,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Content strategy complete. Quality score: ${strategyScore}/100. ${qualityMet ? 'Strategy meets quality standards!' : 'Strategy may need refinement.'} Review and approve?`,
     title: 'Content Strategy Review & Approval',
     context: {
@@ -196,9 +211,15 @@ export async function process(inputs, ctx) {
         contentTypesCount: contentTypes.types?.length || 0,
         channelCount: distributionStrategy.channels?.length || 0
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -229,8 +250,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

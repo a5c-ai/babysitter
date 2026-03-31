@@ -137,7 +137,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 8: Assessing guidelines quality');
-  const qualityAssessment = await ctx.task(guidelinesQualityAssessmentTask, {
+  let qualityAssessment = await ctx.task(guidelinesQualityAssessmentTask, {
     brandName,
     brandFoundation,
     visualIdentity,
@@ -154,8 +154,22 @@ export async function process(inputs, ctx) {
   const guidelinesScore = qualityAssessment.overallScore;
   const qualityMet = guidelinesScore >= 80;
 
-  // Breakpoint: Review brand guidelines
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      qualityAssessment = await ctx.task(guidelinesQualityAssessmentTask, { ...{
+    brandName,
+    brandFoundation,
+    visualIdentity,
+    voiceAndTone,
+    messagingHierarchy,
+    touchpointApplications,
+    usageRules,
+    guidelinesDocument,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Brand guidelines complete. Quality score: ${guidelinesScore}/100. ${qualityMet ? 'Guidelines meet quality standards!' : 'Guidelines may need refinement.'} Review and approve?`,
     title: 'Brand Guidelines Review & Approval',
     context: {
@@ -175,9 +189,15 @@ export async function process(inputs, ctx) {
         colorPalette: visualIdentity.colorPalette?.primary || 'N/A',
         voiceAttributes: voiceAndTone.voiceAttributes?.length || 0
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -218,8 +238,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

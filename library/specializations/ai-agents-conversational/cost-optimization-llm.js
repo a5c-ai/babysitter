@@ -78,7 +78,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...cachingStrategy.artifacts);
   }
-
   // ============================================================================
   // PHASE 4: MODEL ROUTING
   // ============================================================================
@@ -95,7 +94,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...modelRouting.artifacts);
   }
-
   // ============================================================================
   // PHASE 5: USAGE OPTIMIZATION
   // ============================================================================
@@ -117,7 +115,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 6: Projecting savings');
 
-  const savingsProjection = await ctx.task(savingsProjectionTask, {
+  let savingsProjection = await ctx.task(savingsProjectionTask, {
     systemName,
     currentCosts,
     promptCompression: promptCompression.savings,
@@ -129,8 +127,20 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...savingsProjection.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      savingsProjection = await ctx.task(savingsProjectionTask, { ...{
+    systemName,
+    currentCosts,
+    promptCompression: promptCompression.savings,
+    caching: cachingStrategy ? cachingStrategy.savings : null,
+    modelRouting: modelRouting ? modelRouting.savings : null,
+    usageOptimization: usageOptimization.savings,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Cost optimization for ${systemName} complete. Projected savings: ${savingsProjection.totalSavingsPercent}%. Review optimization strategies?`,
     title: 'Cost Optimization Review',
     context: {
@@ -143,9 +153,15 @@ export async function process(inputs, ctx) {
         enableModelRouting
       },
       files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -175,8 +191,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

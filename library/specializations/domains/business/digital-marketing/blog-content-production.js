@@ -80,7 +80,7 @@ export async function process(inputs, ctx) {
 
   // Task 7: Internal Stakeholder Review
   ctx.log('info', 'Phase 7: Preparing for stakeholder review');
-  const reviewPrep = await ctx.task(stakeholderReviewTask, {
+  let reviewPrep = await ctx.task(stakeholderReviewTask, {
     content: editedContent,
     visuals: visualsResult,
     brief: briefResult,
@@ -88,8 +88,17 @@ export async function process(inputs, ctx) {
   });
   artifacts.push(...reviewPrep.artifacts);
 
-  // Breakpoint: Content review
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      reviewPrep = await ctx.task(stakeholderReviewTask, { ...{
+    content: editedContent,
+    visuals: visualsResult,
+    brief: briefResult,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Blog content ready for review. SEO score: ${seoOptimized.seoScore}/100. Word count: ${editedContent.wordCount}. Approve for publishing?`,
     title: 'Blog Content Review',
     context: {
@@ -102,9 +111,15 @@ export async function process(inputs, ctx) {
         readabilityScore: editedContent.readabilityScore,
         visualCount: visualsResult.visualCount
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 8: Final QA and Formatting
   ctx.log('info', 'Phase 8: Final QA and formatting');
   const finalQA = await ctx.task(finalQATask, {
@@ -156,8 +171,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task definitions
+  // Task definitions
 export const contentBriefTask = defineTask('content-brief', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Generate content brief from editorial calendar',

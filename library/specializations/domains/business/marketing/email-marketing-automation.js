@@ -43,17 +43,26 @@ export async function process(inputs, ctx) {
   const testingStrategy = await ctx.task(emailTestingStrategyTask, { nurtureSequences, lifecycleCampaigns, outputDir });
   artifacts.push(...testingStrategy.artifacts);
 
-  const qualityAssessment = await ctx.task(emailAutomationQualityTask, { journeyMapping, nurtureSequences, lifecycleCampaigns, automationRules, personalizationStrategy, outputDir });
+  let qualityAssessment = await ctx.task(emailAutomationQualityTask, { journeyMapping, nurtureSequences, lifecycleCampaigns, automationRules, personalizationStrategy, outputDir });
   artifacts.push(...qualityAssessment.artifacts);
 
-  const automationScore = qualityAssessment.overallScore;
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      qualityAssessment = await ctx.task(emailAutomationQualityTask, { ...{ journeyMapping, nurtureSequences, lifecycleCampaigns, automationRules, personalizationStrategy, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Email automation complete. Quality score: ${automationScore}/100. Review and approve?`,
     title: 'Email Automation Review',
-    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })) }
-  });
-
+    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })) },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     automationScore,

@@ -109,7 +109,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 7: Scoring review quality');
-  const qualityScore = await ctx.task(reviewQualityScoringTask, {
+  let qualityScore = await ctx.task(reviewQualityScoringTask, {
     protocolDevelopment,
     searchStrategy,
     studySelection,
@@ -124,8 +124,20 @@ export async function process(inputs, ctx) {
   const reviewScore = qualityScore.overallScore;
   const qualityMet = reviewScore >= 80;
 
-  // Breakpoint: Review literature review
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      qualityScore = await ctx.task(reviewQualityScoringTask, { ...{
+    protocolDevelopment,
+    searchStrategy,
+    studySelection,
+    qualityAssessment,
+    dataExtraction,
+    evidenceSynthesis,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Literature review complete. Quality score: ${reviewScore}/100. ${qualityMet ? 'Review meets quality standards!' : 'Review may need refinement.'} Review and approve?`,
     title: 'Literature Review Assessment',
     context: {
@@ -141,9 +153,15 @@ export async function process(inputs, ctx) {
         synthesisApproach: evidenceSynthesis.approach,
         researchGaps: evidenceSynthesis.researchGaps
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -172,8 +190,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Review Protocol
+  // Task 1: Review Protocol
 export const reviewProtocolTask = defineTask('review-protocol', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Develop review protocol',

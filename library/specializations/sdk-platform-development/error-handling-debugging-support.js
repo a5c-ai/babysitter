@@ -74,24 +74,38 @@ export async function process(inputs, ctx) {
 
   // Phase 5: Developer Tools Integration
   ctx.log.info('Phase 5: Creating developer debugging tools');
-  const developerTools = await ctx.task(developerToolsIntegrationTask, {
+  let developerTools = await ctx.task(developerToolsIntegrationTask, {
     sdkName,
     languages,
     debugModes: debugModes.result,
     stackTraceHandling: stackTraceHandling.result
   });
 
-  // Quality Gate
-  await ctx.breakpoint('error-handling-review', {
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      developerTools = await ctx.task(developerToolsIntegrationTask, { ...{
+    sdkName,
+    languages,
+    debugModes: debugModes.result,
+    stackTraceHandling: stackTraceHandling.result
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint('error-handling-review', {
     question: 'Review the error handling and debugging implementation. Are error messages clear and actionable?',
     context: {
       errorArchitecture: errorArchitecture.result,
       errorCatalog: errorCatalog.result,
       debugModes: debugModes.result
-    }
-  });
-
-  ctx.log.info('Error handling and debugging support implementation completed');
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }  ctx.log.info('Error handling and debugging support implementation completed');
 
   return {
     errorHandlingDesign: errorArchitecture.result,

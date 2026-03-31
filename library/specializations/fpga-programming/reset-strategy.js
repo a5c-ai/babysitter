@@ -39,18 +39,27 @@ export async function process(inputs, ctx) {
   const resetArchitecture = await ctx.task(resetArchitectureTask, { designName, clockDomains, resetType, resetPolarity, outputDir });
   artifacts.push(...resetArchitecture.artifacts);
 
-  const resetSynchronizers = await ctx.task(resetSynchronizersTask, { designName, clockDomains, resetType, resetPolarity, outputDir });
+  let resetSynchronizers = await ctx.task(resetSynchronizersTask, { designName, clockDomains, resetType, resetPolarity, outputDir });
   artifacts.push(...resetSynchronizers.artifacts);
 
   const resetSequencingLogic = resetSequencing ? await ctx.task(resetSequencingTask, { designName, clockDomains, resetArchitecture, outputDir }) : null;
-  if (resetSequencingLogic) artifacts.push(...resetSequencingLogic.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      resetSynchronizers = await ctx.task(resetSynchronizersTask, { ...{ designName, clockDomains, resetType, resetPolarity, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Reset strategy defined for ${designName}. ${clockDomains.length} domains, ${resetSynchronizers.synchronizerCount} synchronizers. Review reset design?`,
     title: 'Reset Strategy Review',
-    context: { runId: ctx.runId, designName, domains: clockDomains.length, synchronizers: resetSynchronizers.synchronizerCount }
-  });
-
+    context: { runId: ctx.runId, designName, domains: clockDomains.length, synchronizers: resetSynchronizers.synchronizerCount },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const resetConstraints = await ctx.task(resetConstraintsTask, { designName, resetArchitecture, resetSynchronizers, outputDir });
   artifacts.push(...resetConstraints.artifacts);
 

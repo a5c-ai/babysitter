@@ -37,15 +37,24 @@ export async function process(inputs, ctx) {
   const backupCodesSetup = await ctx.task(backupCodesSetupTask, { projectName, features, outputDir });
   artifacts.push(...backupCodesSetup.artifacts);
 
-  const recoverySetup = await ctx.task(recoverySetupTask, { projectName, outputDir });
-  artifacts.push(...recoverySetup.artifacts);
-
-  await ctx.breakpoint({
+  let recoverySetup = await ctx.task(recoverySetupTask, { projectName, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      recoverySetup = await ctx.task(recoverySetupTask, { ...{ projectName, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `MFA implementation complete for ${projectName}. ${methods.length} methods configured. Approve?`,
     title: 'MFA Review',
-    context: { runId: ctx.runId, methods: mfaSetup.configuredMethods }
-  });
-
+    context: { runId: ctx.runId, methods: mfaSetup.configuredMethods },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const documentation = await ctx.task(documentationTask, { projectName, mfaSetup, outputDir });
   artifacts.push(...documentation.artifacts);
 

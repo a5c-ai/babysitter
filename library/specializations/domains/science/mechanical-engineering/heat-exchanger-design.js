@@ -86,7 +86,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 3: Preliminary Sizing');
 
-  const prelimSizingResult = await ctx.task(preliminarySizingTask, {
+  let prelimSizingResult = await ctx.task(preliminarySizingTask, {
     projectName,
     exchangerType,
     requirementsResult,
@@ -98,8 +98,18 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Preliminary sizing - Area: ${prelimSizingResult.estimatedArea} m^2`);
 
-  // Breakpoint: Review preliminary sizing
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      prelimSizingResult = await ctx.task(preliminarySizingTask, { ...{
+    projectName,
+    exchangerType,
+    requirementsResult,
+    fluidPropsResult,
+    outputDir
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Preliminary sizing complete. Estimated area: ${prelimSizingResult.estimatedArea} m^2, U: ${prelimSizingResult.overallU} W/m^2K. Proceed with detailed design?`,
     title: 'Preliminary Sizing Review',
     context: {
@@ -107,9 +117,15 @@ export async function process(inputs, ctx) {
       preliminarySizing: prelimSizingResult.summary,
       assumptions: prelimSizingResult.assumptions,
       files: prelimSizingResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 4: DETAILED THERMAL DESIGN
   // ============================================================================
@@ -136,7 +152,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 5: Hydraulic Design');
 
-  const hydraulicResult = await ctx.task(hydraulicDesignTask, {
+  let hydraulicResult = await ctx.task(hydraulicDesignTask, {
     projectName,
     exchangerType,
     thermalDesignResult,
@@ -151,8 +167,19 @@ export async function process(inputs, ctx) {
 
   // Quality Gate: Pressure drop limits
   if (hydraulicResult.shellPressureDrop > pressureDropLimits.shell ||
-      hydraulicResult.tubePressureDrop > pressureDropLimits.tube) {
-    await ctx.breakpoint({
+      let lastFeedback_qualityGateApproval = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_qualityGateApproval) {
+        hydraulicResult = await ctx.task(hydraulicDesignTask, { ...{
+    projectName,
+    exchangerType,
+    thermalDesignResult,
+    fluidPropsResult,
+    pressureDropLimits,
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval, attempt: attempt + 1 });
+      }
+  const qualityGateApproval = await ctx.breakpoint({
       question: `Pressure drop exceeds limits. Shell: ${hydraulicResult.shellPressureDrop}/${pressureDropLimits.shell} kPa, Tube: ${hydraulicResult.tubePressureDrop}/${pressureDropLimits.tube} kPa. Modify design?`,
       title: 'Pressure Drop Warning',
       context: {
@@ -164,9 +191,15 @@ export async function process(inputs, ctx) {
         limits: pressureDropLimits,
         suggestions: hydraulicResult.suggestions,
         files: hydraulicResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_qualityGateApproval || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (qualityGateApproval.approved) break;
+      lastFeedback_qualityGateApproval = qualityGateApproval.response || qualityGateApproval.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 6: MECHANICAL DESIGN
@@ -211,7 +244,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 8: Generating Heat Exchanger Report');
 
-  const reportResult = await ctx.task(generateHXReportTask, {
+  let reportResult = await ctx.task(generateHXReportTask, {
     projectName,
     exchangerType,
     requirementsResult,
@@ -226,8 +259,23 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...reportResult.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      reportResult = await ctx.task(generateHXReportTask, { ...{
+    projectName,
+    exchangerType,
+    requirementsResult,
+    fluidPropsResult,
+    prelimSizingResult,
+    thermalDesignResult,
+    hydraulicResult,
+    mechanicalResult,
+    ratingResult,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Heat Exchanger Design Complete for ${projectName}. Type: ${mechanicalResult.temaType}, Area: ${thermalDesignResult.actualArea} m^2, Excess: ${ratingResult.excessArea}%. Approve design?`,
     title: 'Heat Exchanger Design Complete',
     context: {
@@ -243,9 +291,15 @@ export async function process(inputs, ctx) {
       files: [
         { path: reportResult.reportPath, format: 'markdown', label: 'HX Design Report' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -286,8 +340,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

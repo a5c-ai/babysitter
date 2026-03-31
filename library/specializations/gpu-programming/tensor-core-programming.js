@@ -51,7 +51,6 @@ export async function process(inputs, ctx) {
     });
     artifacts.push(...wmmaImpl.artifacts);
   }
-
   // Phase 3: cuBLAS Tensor Core Integration
   const cublasIntegration = await ctx.task(cublasTensorCoreTask, {
     projectName, matrixOperation, precision, outputDir
@@ -71,17 +70,28 @@ export async function process(inputs, ctx) {
   artifacts.push(...performanceProfiling.artifacts);
 
   // Phase 6: Precision Analysis
-  const precisionAnalysis = await ctx.task(precisionAnalysisTask, {
+  let precisionAnalysis = await ctx.task(precisionAnalysisTask, {
     projectName, precision, mixedPrecision, outputDir
   });
-  artifacts.push(...precisionAnalysis.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      precisionAnalysis = await ctx.task(precisionAnalysisTask, { ...{
+    projectName, precision, mixedPrecision, outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Tensor Core implementation complete for ${projectName}. Speedup vs CUDA cores: ${performanceProfiling.speedup}x. Review?`,
     title: 'Tensor Core Programming Complete',
-    context: { runId: ctx.runId, performanceProfiling, precisionAnalysis }
-  });
-
+    context: { runId: ctx.runId, performanceProfiling, precisionAnalysis },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: performanceProfiling.speedup >= 2.0,
     projectName,

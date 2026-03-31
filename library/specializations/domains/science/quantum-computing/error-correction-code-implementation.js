@@ -42,24 +42,37 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Code Selection and Analysis');
 
-  const codeAnalysisResult = await ctx.task(qecCodeAnalysisTask, {
+  let codeAnalysisResult = await ctx.task(qecCodeAnalysisTask, {
     codeType,
     distance,
     physicalErrorRate
   });
 
-  artifacts.push(...(codeAnalysisResult.artifacts || []));
-
-  await ctx.breakpoint({
+    let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      codeAnalysisResult = await ctx.task(qecCodeAnalysisTask, { ...{
+    codeType,
+    distance,
+    physicalErrorRate
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Code analysis complete. Physical qubits: ${codeAnalysisResult.physicalQubits}, Logical qubits: ${codeAnalysisResult.logicalQubits}, Threshold: ${codeAnalysisResult.codeThreshold}. Proceed with encoding implementation?`,
     title: 'QEC Code Analysis Review',
     context: {
       runId: ctx.runId,
       codeAnalysis: codeAnalysisResult,
       files: (codeAnalysisResult.artifacts || []).map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 2: LOGICAL QUBIT ENCODING
   // ============================================================================
@@ -83,7 +96,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 3: Syndrome Extraction Circuit Design');
 
-  const syndromeResult = await ctx.task(syndromeExtractionTask, {
+  let syndromeResult = await ctx.task(syndromeExtractionTask, {
     codeType,
     distance,
     encodingCircuit: encodingResult.encodingCircuit,
@@ -91,18 +104,33 @@ export async function process(inputs, ctx) {
     framework
   });
 
-  artifacts.push(...(syndromeResult.artifacts || []));
-
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      syndromeResult = await ctx.task(syndromeExtractionTask, { ...{
+    codeType,
+    distance,
+    encodingCircuit: encodingResult.encodingCircuit,
+    codeParameters: codeAnalysisResult.codeParameters,
+    framework
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Syndrome extraction designed. Ancilla qubits: ${syndromeResult.ancillaCount}, Measurement rounds: ${syndromeResult.measurementRounds}. Review syndrome circuit?`,
     title: 'Syndrome Extraction Review',
     context: {
       runId: ctx.runId,
       syndromeCircuit: syndromeResult,
       files: (syndromeResult.artifacts || []).map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 4: DECODER IMPLEMENTATION
   // ============================================================================
@@ -127,7 +155,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 5: Error Correction Simulation');
 
-  const simulationResult = await ctx.task(qecSimulationTask, {
+  let simulationResult = await ctx.task(qecSimulationTask, {
     codeType,
     distance,
     encodingCircuit: encodingResult.encodingCircuit,
@@ -138,18 +166,36 @@ export async function process(inputs, ctx) {
     framework
   });
 
-  artifacts.push(...(simulationResult.artifacts || []));
-
-  await ctx.breakpoint({
+    let lastFeedback_phase5Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase5Review) {
+      simulationResult = await ctx.task(qecSimulationTask, { ...{
+    codeType,
+    distance,
+    encodingCircuit: encodingResult.encodingCircuit,
+    syndromeCircuit: syndromeResult.syndromeCircuit,
+    decoder: decoderResult.decoder,
+    physicalErrorRate,
+    numRounds,
+    framework
+  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+    }
+  const phase5Review = await ctx.breakpoint({
     question: `QEC simulation complete. Logical error rate: ${simulationResult.logicalErrorRate}, Error suppression: ${simulationResult.errorSuppression}x. Review simulation results?`,
     title: 'QEC Simulation Review',
     context: {
       runId: ctx.runId,
       simulation: simulationResult,
       files: (simulationResult.artifacts || []).map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase5Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase5Review.approved) break;
+    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 6: THRESHOLD ANALYSIS
   // ============================================================================
@@ -172,7 +218,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 7: Resource Overhead Analysis');
 
-  const overheadResult = await ctx.task(resourceOverheadAnalysisTask, {
+  let overheadResult = await ctx.task(resourceOverheadAnalysisTask, {
     codeType,
     distance,
     codeAnalysis: codeAnalysisResult,
@@ -181,25 +227,41 @@ export async function process(inputs, ctx) {
     thresholdResult
   });
 
-  artifacts.push(...(overheadResult.artifacts || []));
-
-  await ctx.breakpoint({
+    let lastFeedback_phase7Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase7Review) {
+      overheadResult = await ctx.task(resourceOverheadAnalysisTask, { ...{
+    codeType,
+    distance,
+    codeAnalysis: codeAnalysisResult,
+    encodingResult,
+    syndromeResult,
+    thresholdResult
+  }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
+    }
+  const phase7Review = await ctx.breakpoint({
     question: `Resource analysis complete. Qubit overhead: ${overheadResult.qubitOverhead}x, Gate overhead: ${overheadResult.gateOverhead}x, Time overhead: ${overheadResult.timeOverhead}x. Review overhead analysis?`,
     title: 'Resource Overhead Review',
     context: {
       runId: ctx.runId,
       overhead: overheadResult,
       files: (overheadResult.artifacts || []).map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase7Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase7Review.approved) break;
+    lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 8: DOCUMENTATION
   // ============================================================================
 
   ctx.log('info', 'Phase 8: Documentation');
 
-  const docResult = await ctx.task(qecDocumentationTask, {
+  let docResult = await ctx.task(qecDocumentationTask, {
     codeType,
     distance,
     codeAnalysisResult,
@@ -212,9 +274,23 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...(docResult.artifacts || []));
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      docResult = await ctx.task(qecDocumentationTask, { ...{
+    codeType,
+    distance,
+    codeAnalysisResult,
+    encodingResult,
+    syndromeResult,
+    decoderResult,
+    simulationResult,
+    thresholdResult,
+    overheadResult,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `QEC implementation complete. Code: ${codeType}, Distance: ${distance}, Threshold: ${thresholdResult.estimatedThreshold}. Approve implementation?`,
     title: 'QEC Implementation Complete',
     context: {
@@ -227,9 +303,15 @@ export async function process(inputs, ctx) {
         threshold: thresholdResult.estimatedThreshold
       },
       files: artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
 
   return {
@@ -273,8 +355,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

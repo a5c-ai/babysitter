@@ -19,33 +19,55 @@ export async function process(inputs, ctx) {
     targetQuality = 85
   } = inputs;
 
-  // Phase 1: Event Strategy and Objectives
-  await ctx.breakpoint({
+  let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    // No preceding task identified for re-run with feedback
+    const phase1Review = await ctx.breakpoint({
     question: 'Starting town hall planning. Define event strategy and objectives?',
     title: 'Phase 1: Event Strategy',
     context: {
       runId: ctx.runId,
       phase: 'event-strategy',
       eventPurpose: eventPurpose.name
-    }
-  });
-
-  const eventStrategy = await ctx.task(defineEventStrategyTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
+  let eventStrategy = await ctx.task(defineEventStrategyTask, {
     eventPurpose,
     audience,
     contentTopics
   });
 
-  // Phase 2: Content Development
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      eventStrategy = await ctx.task(defineEventStrategyTask, { ...{
+    eventPurpose,
+    audience,
+    contentTopics
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: 'Strategy defined. Develop event content?',
     title: 'Phase 2: Content Development',
     context: {
       runId: ctx.runId,
       phase: 'content-development'
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   const [contentPlan, executivePreperation] = await Promise.all([
     ctx.task(developEventContentTask, {
       eventStrategy,
@@ -59,66 +81,122 @@ export async function process(inputs, ctx) {
     })
   ]);
 
-  // Phase 3: Engagement Design
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      eventStrategy = await ctx.task(defineEventStrategyTask, { ...{
+    eventPurpose,
+    audience,
+    contentTopics
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: 'Content developed. Design engagement elements?',
     title: 'Phase 3: Engagement Design',
     context: {
       runId: ctx.runId,
       phase: 'engagement-design'
-    }
-  });
-
-  const engagementDesign = await ctx.task(designEngagementElementsTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
+  let engagementDesign = await ctx.task(designEngagementElementsTask, {
     eventStrategy,
     audience,
     eventFormat
   });
 
-  // Phase 4: Q&A Preparation
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      engagementDesign = await ctx.task(designEngagementElementsTask, { ...{
+    eventStrategy,
+    audience,
+    eventFormat
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: 'Engagement designed. Prepare Q&A session?',
     title: 'Phase 4: Q&A Preparation',
     context: {
       runId: ctx.runId,
       phase: 'qa-preparation'
-    }
-  });
-
-  const qaPreparation = await ctx.task(prepareQaSessionTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
+  let qaPreparation = await ctx.task(prepareQaSessionTask, {
     contentTopics,
     executives,
     eventPurpose
   });
 
-  // Phase 5: Production Planning
-  await ctx.breakpoint({
+    let lastFeedback_phase5Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase5Review) {
+      qaPreparation = await ctx.task(prepareQaSessionTask, { ...{
+    contentTopics,
+    executives,
+    eventPurpose
+  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+    }
+  const phase5Review = await ctx.breakpoint({
     question: 'Q&A prepared. Plan production and logistics?',
     title: 'Phase 5: Production Planning',
     context: {
       runId: ctx.runId,
       phase: 'production-planning',
       eventFormat
-    }
-  });
-
-  const productionPlan = await ctx.task(planProductionTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase5Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase5Review.approved) break;
+    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+  }
+  let productionPlan = await ctx.task(planProductionTask, {
     eventFormat,
     audience,
     engagementDesign
   });
 
-  // Phase 6: Facilitation Guide
-  await ctx.breakpoint({
+    let lastFeedback_phase6Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase6Review) {
+      productionPlan = await ctx.task(planProductionTask, { ...{
+    eventFormat,
+    audience,
+    engagementDesign
+  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
+    }
+  const phase6Review = await ctx.breakpoint({
     question: 'Production planned. Create facilitation guide?',
     title: 'Phase 6: Facilitation Guide',
     context: {
       runId: ctx.runId,
       phase: 'facilitation-guide'
-    }
-  });
-
-  const facilitationGuide = await ctx.task(createFacilitationGuideTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase6Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase6Review.approved) break;
+    lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
+  }
+  let facilitationGuide = await ctx.task(createFacilitationGuideTask, {
     eventStrategy,
     contentPlan,
     engagementDesign,
@@ -126,33 +204,63 @@ export async function process(inputs, ctx) {
     productionPlan
   });
 
-  // Phase 7: Follow-up Planning
-  await ctx.breakpoint({
+    let lastFeedback_phase7Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase7Review) {
+      facilitationGuide = await ctx.task(createFacilitationGuideTask, { ...{
+    eventStrategy,
+    contentPlan,
+    engagementDesign,
+    qaPreparation,
+    productionPlan
+  }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
+    }
+  const phase7Review = await ctx.breakpoint({
     question: 'Guide created. Plan follow-up activities?',
     title: 'Phase 7: Follow-up Planning',
     context: {
       runId: ctx.runId,
       phase: 'follow-up-planning'
-    }
-  });
-
-  const followUpPlan = await ctx.task(planFollowUpTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase7Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase7Review.approved) break;
+    lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
+  }
+  let followUpPlan = await ctx.task(planFollowUpTask, {
     eventStrategy,
     contentPlan,
     engagementDesign
   });
 
-  // Phase 8: Quality Validation
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      followUpPlan = await ctx.task(planFollowUpTask, { ...{
+    eventStrategy,
+    contentPlan,
+    engagementDesign
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: 'Validate town hall planning quality?',
     title: 'Phase 8: Quality Validation',
     context: {
       runId: ctx.runId,
       phase: 'quality-validation',
       targetQuality
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const qualityResult = await ctx.task(validateTownHallPlanTask, {
     eventStrategy,
     contentPlan,
@@ -206,8 +314,7 @@ export async function process(inputs, ctx) {
     };
   }
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const defineEventStrategyTask = defineTask('define-event-strategy', (args, taskCtx) => ({
   kind: 'agent',

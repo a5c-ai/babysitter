@@ -98,7 +98,7 @@ export async function process(inputs, ctx) {
 
   // Task 7: Generate IRB Application Package
   ctx.log('info', 'Generating IRB application package');
-  const irbApplication = await ctx.task(irbApplicationTask, {
+  let irbApplication = await ctx.task(irbApplicationTask, {
     researchProject,
     riskAssessment,
     categoryDetermination,
@@ -112,8 +112,22 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...irbApplication.artifacts);
 
-  // Breakpoint: Review ethics application
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      irbApplication = await ctx.task(irbApplicationTask, { ...{
+    researchProject,
+    riskAssessment,
+    categoryDetermination,
+    consentDevelopment,
+    dataProtection,
+    vulnerableProtocols,
+    communityProtocols,
+    institutionalRequirements,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Ethics review preparation complete for "${researchProject.title || 'project'}". Review category: ${categoryDetermination.category}. Review application?`,
     title: 'Research Ethics Review Results',
     context: {
@@ -125,9 +139,15 @@ export async function process(inputs, ctx) {
         riskLevel: riskAssessment.riskLevel,
         consentTypes: consentDevelopment.types
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -158,8 +178,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Risk Assessment
+  // Task 1: Risk Assessment
 export const riskAssessmentTask = defineTask('risk-assessment', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Conduct research risk assessment',

@@ -270,6 +270,41 @@ $CLI task:post <runId> <effectId> --status error
 | `response` | `string` | No | The user's response text or selected option |
 | `feedback` | `string` | No | Additional feedback from the user |
 
+**Breakpoint routing fields:**
+
+When calling `ctx.breakpoint()`, you can include routing fields to control who receives the breakpoint and how responses are collected:
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `expert` | `string \| string[]` | No | Domain expert identifier, or `'owner'` to route back to the run requester |
+| `tags` | `string[]` | No | Categorization tags for filtering breakpoints |
+| `strategy` | `'single' \| 'first-response-wins' \| 'collect-all' \| 'quorum'` | No | Response collection strategy. Only meaningful when `expert !== 'owner'`. Default: `'single'` |
+| `previousFeedback` | `string` | No | Feedback from a previous rejection (used in retry loops) |
+| `attempt` | `number` | No | Current retry attempt number |
+
+**Breakpoint rejection handling — retry/refine pattern:**
+
+Processes must ALWAYS loop back on rejection, never fail. Use the following clean retry/refine pattern:
+
+```javascript
+let lastFeedback = null;
+for (let attempt = 0; attempt < 3; attempt++) {
+  if (lastFeedback) {
+    currentResult = await ctx.task(refineTask, { ...args, feedback: lastFeedback, attempt: attempt + 1 });
+  }
+  const approval = await ctx.breakpoint({
+    question: 'Review and approve this step?',
+    options: ['Approve', 'Request changes'],
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined,
+  });
+  if (approval.approved) break;
+  lastFeedback = approval.response || approval.feedback || 'Changes requested';
+}
+```
+
 After receiving an explicit approval or rejection from the user, post the result of the breakpoint to the run by calling `task:post`.
 
 Breakpoints are meant for human approval. NEVER prompt directly and never release or approve breakpoints yourself. Once the user responds via the AskUserQuestion tool, post the result of the breakpoint to the run by calling `task:post` when the breakpoint is resolved.
@@ -390,6 +425,41 @@ After you ran run:create, progress through the phases above by Stopping the sess
 | `skill` | Claude Code skill | Skill system | When a matching installed skill exists (preferred over agent when available) |
 | `breakpoint` | Human approval | UI/CLI | Decision gates requiring user input |
 | `sleep` | Time gate | Scheduler | Time-based pauses |
+
+### Effect Execution Hints
+
+Tasks can include an `execution` field to express preferences about how the effect should be executed:
+
+| Field | Description |
+|-------|-------------|
+| `execution.model` | Preferred model for the task (e.g., `'claude-opus-4-6'`). Used for subagent selection. |
+
+Example:
+
+```javascript
+defineTask('my-task', (args, taskCtx) => ({
+  kind: 'agent',
+  title: 'My task',
+  execution: {
+    model: 'claude-opus-4-6',
+  },
+  agent: {
+    name: 'general-purpose',
+    prompt: {
+      role: 'Task executor',
+      task: 'Perform the requested work',
+      context: { ...args },
+      instructions: ['Execute the task'],
+      outputFormat: 'JSON'
+    },
+    outputSchema: { type: 'object', required: ['result'] }
+  },
+  io: {
+    inputJsonPath: `tasks/${taskCtx.effectId}/input.json`,
+    outputJsonPath: `tasks/${taskCtx.effectId}/result.json`
+  }
+}));
+```
 
 ### Agent Task Example
 

@@ -98,7 +98,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 6: Generating TOWS strategic options');
-  const towsStrategies = await ctx.task(towsStrategiesTask, {
+  let towsStrategies = await ctx.task(towsStrategiesTask, {
     swotMatrix: swotMatrix.matrix,
     organizationContext,
     outputDir
@@ -106,8 +106,16 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...towsStrategies.artifacts);
 
-  // Breakpoint: Review SWOT analysis
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      towsStrategies = await ctx.task(towsStrategiesTask, { ...{
+    swotMatrix: swotMatrix.matrix,
+    organizationContext,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `SWOT analysis complete. Identified ${strengthsAnalysis.strengths.length} strengths, ${weaknessesAnalysis.weaknesses.length} weaknesses, ${opportunitiesAnalysis.opportunities.length} opportunities, ${threatsAnalysis.threats.length} threats. Review findings?`,
     title: 'SWOT Analysis Review',
     context: {
@@ -123,9 +131,15 @@ export async function process(inputs, ctx) {
         threats: threatsAnalysis.threats.length,
         strategicOptions: towsStrategies.strategies.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 7: STRATEGIC IMPLICATIONS AND RECOMMENDATIONS
   // ============================================================================
@@ -183,8 +197,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

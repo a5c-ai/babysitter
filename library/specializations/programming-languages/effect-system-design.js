@@ -55,25 +55,39 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 2: Implementing Effect Declaration');
 
-  const effectDeclaration = await ctx.task(effectDeclarationTask, {
+  let effectDeclaration = await ctx.task(effectDeclarationTask, {
     languageName,
     effectStyle,
     implementationLanguage,
     outputDir
   });
 
-  artifacts.push(...effectDeclaration.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      effectDeclaration = await ctx.task(effectDeclarationTask, { ...{
+    languageName,
+    effectStyle,
+    implementationLanguage,
+    outputDir
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Effect declaration implemented. Features: ${effectDeclaration.features.join(', ')}. Proceed with handlers?`,
     title: 'Effect Declaration Review',
     context: {
       runId: ctx.runId,
       features: effectDeclaration.features,
       files: effectDeclaration.artifacts.map(a => ({ path: a.path, format: a.format || 'ocaml' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 3: EFFECT HANDLERS
   // ============================================================================
@@ -191,7 +205,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 10: Generating Documentation');
 
-  const documentation = await ctx.task(effectSystemDocumentationTask, {
+  let documentation = await ctx.task(effectSystemDocumentationTask, {
     languageName,
     effectStyle,
     integration,
@@ -199,9 +213,18 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...documentation.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      documentation = await ctx.task(effectSystemDocumentationTask, { ...{
+    languageName,
+    effectStyle,
+    integration,
+    testSuite,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Effect System Complete for ${languageName}! Style: ${effectStyle}, Effect inference: ${effectInference.enabled}. Review deliverables?`,
     title: 'Effect System Complete',
     context: {
@@ -217,9 +240,15 @@ export async function process(inputs, ctx) {
         { path: integration.mainFilePath, format: implementationLanguage.toLowerCase(), label: 'Effect System' },
         { path: documentation.guidePath, format: 'markdown', label: 'Effects Guide' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -251,8 +280,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

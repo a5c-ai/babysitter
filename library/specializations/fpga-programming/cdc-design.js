@@ -42,15 +42,24 @@ export async function process(inputs, ctx) {
   const synchronizerDesign = await ctx.task(synchronizerDesignTask, { designName, cdcAnalysis, clockDomains, outputDir });
   artifacts.push(...synchronizerDesign.artifacts);
 
-  const handshakeProtocol = await ctx.task(handshakeProtocolTask, { designName, clockDomains, cdcAnalysis, outputDir });
-  artifacts.push(...handshakeProtocol.artifacts);
-
-  await ctx.breakpoint({
+  let handshakeProtocol = await ctx.task(handshakeProtocolTask, { designName, clockDomains, cdcAnalysis, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      handshakeProtocol = await ctx.task(handshakeProtocolTask, { ...{ designName, clockDomains, cdcAnalysis, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `CDC design complete for ${designName}. ${cdcAnalysis.crossingCount} crossings identified, ${synchronizerDesign.synchronizerCount} synchronizers designed. Review CDC design?`,
     title: 'CDC Design Review',
-    context: { runId: ctx.runId, designName, crossingCount: cdcAnalysis.crossingCount, synchronizerCount: synchronizerDesign.synchronizerCount }
-  });
-
+    context: { runId: ctx.runId, designName, crossingCount: cdcAnalysis.crossingCount, synchronizerCount: synchronizerDesign.synchronizerCount },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const asyncFifoDesign = crossingTypes.includes('async_fifo') ? await ctx.task(asyncFifoDesignTask, { designName, clockDomains, outputDir }) : null;
   if (asyncFifoDesign) artifacts.push(...asyncFifoDesign.artifacts);
 

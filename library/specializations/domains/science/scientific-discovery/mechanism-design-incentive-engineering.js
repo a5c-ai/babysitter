@@ -48,7 +48,6 @@ export async function process(inputs, ctx) {
       mechanisms: null
     };
   }
-
   // Phase 2: Agent Type Analysis
   const agentAnalysis = await ctx.task(agentTypeAnalysisTask, {
     agents,
@@ -65,15 +64,24 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 4: Social Choice Function Design
-  const socialChoiceFunction = await ctx.task(socialChoiceFunctionTask, {
+  let socialChoiceFunction = await ctx.task(socialChoiceFunctionTask, {
     objectives: objectiveFormalization.formalizedObjectives,
     agentTypes: agentAnalysis.agentTypes,
     informationStructure,
     constraints
   });
 
-  // Breakpoint: Review mechanism design parameters
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      socialChoiceFunction = await ctx.task(socialChoiceFunctionTask, { ...{
+    objectives: objectiveFormalization.formalizedObjectives,
+    agentTypes: agentAnalysis.agentTypes,
+    informationStructure,
+    constraints
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: `Review mechanism design for "${context}". Social choice function defined for ${agentAnalysis.agentTypes.length} agent types. Proceed?`,
     title: 'Mechanism Design Parameters Review',
     context: {
@@ -86,9 +94,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: { objectiveFormalization, agentAnalysis, informationStructure, socialChoiceFunction }
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
   // Phase 5: Incentive Compatibility Analysis
   const incentiveCompatibility = await ctx.task(incentiveCompatibilityTask, {
     socialChoiceFunction,
@@ -131,7 +145,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 10: Final Mechanism Recommendation
-  const finalRecommendation = await ctx.task(mechanismRecommendationTask, {
+  let finalRecommendation = await ctx.task(mechanismRecommendationTask, {
     objectives: objectiveFormalization.formalizedObjectives,
     mechanisms: mechanismSynthesis.mechanisms,
     transferDesign,
@@ -141,8 +155,20 @@ export async function process(inputs, ctx) {
     context
   });
 
-  // Final Breakpoint: Mechanism Design Approval
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      finalRecommendation = await ctx.task(mechanismRecommendationTask, { ...{
+    objectives: objectiveFormalization.formalizedObjectives,
+    mechanisms: mechanismSynthesis.mechanisms,
+    transferDesign,
+    implementationAnalysis,
+    robustnessAnalysis,
+    constraints,
+    context
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Mechanism design complete for "${context}". ${mechanismSynthesis.mechanisms.length} mechanisms designed. Review and approve?`,
     title: 'Mechanism Design Approval',
     context: {
@@ -154,9 +180,15 @@ export async function process(inputs, ctx) {
         { path: 'artifacts/mechanism-design-report.json', format: 'json', content: finalRecommendation },
         { path: 'artifacts/mechanism-design-report.md', format: 'markdown', content: finalRecommendation.markdown }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     context,
@@ -179,8 +211,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const objectiveFormalizationTask = defineTask('objective-formalization', (args, taskCtx) => ({
   kind: 'agent',

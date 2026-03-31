@@ -36,7 +36,7 @@ export async function process(inputs, ctx) {
   if (!skipPhases.includes(1)) {
     ctx.log('info', 'Phase 1: Research, README, and References');
 
-    const phase1 = await ctx.task(phase1ResearchTask, {
+    let phase1 = await ctx.task(phase1ResearchTask, {
       name,
       domain,
       description,
@@ -46,9 +46,19 @@ export async function process(inputs, ctx) {
     });
 
     phaseResults.phase1 = phase1;
-    artifacts.push(...phase1.artifacts);
-
-    await ctx.breakpoint({
+      let lastFeedback_phase1Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase1Review) {
+        phase1 = await ctx.task(phase1ResearchTask, { ...{
+      name,
+      domain,
+      description,
+      scope,
+      basePath,
+      existingReferences
+    }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+      }
+  const phase1Review = await ctx.breakpoint({
       question: `Phase 1 complete. README.md and references.md created. Review before proceeding to Phase 2?`,
       title: 'Phase 1 Review - Research & README',
       context: {
@@ -63,9 +73,15 @@ export async function process(inputs, ctx) {
           domain: domain || 'R&D',
           filesCreated: phase1.artifacts.length
         }
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase1Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase1Review.approved) break;
+      lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 2: IDENTIFYING PROCESSES
@@ -74,7 +90,7 @@ export async function process(inputs, ctx) {
   if (!skipPhases.includes(2)) {
     ctx.log('info', 'Phase 2: Identifying Processes');
 
-    const phase2 = await ctx.task(phase2IdentifyProcessesTask, {
+    let phase2 = await ctx.task(phase2IdentifyProcessesTask, {
       name,
       domain,
       description,
@@ -85,9 +101,20 @@ export async function process(inputs, ctx) {
     });
 
     phaseResults.phase2 = phase2;
-    artifacts.push(...phase2.artifacts);
-
-    await ctx.breakpoint({
+      let lastFeedback_phase2Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase2Review) {
+        phase2 = await ctx.task(phase2IdentifyProcessesTask, { ...{
+      name,
+      domain,
+      description,
+      scope,
+      basePath,
+      readmePath: `${basePath}/README.md`,
+      referencesPath: `${basePath}/references.md`
+    }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+      }
+  const phase2Review = await ctx.breakpoint({
       question: `Phase 2 complete. ${phase2.processCount} processes identified. Review processes-backlog.md before proceeding?`,
       title: 'Phase 2 Review - Process Identification',
       context: {
@@ -101,9 +128,15 @@ export async function process(inputs, ctx) {
           processCount: phase2.processCount,
           categories: phase2.categories
         }
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase2Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase2Review.approved) break;
+      lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 3: CREATE PROCESS JS FILES
@@ -112,7 +145,7 @@ export async function process(inputs, ctx) {
   if (!skipPhases.includes(3)) {
     ctx.log('info', 'Phase 3: Creating Process JS Files');
 
-    const phase3 = await ctx.task(phase3CreateProcessesTask, {
+    let phase3 = await ctx.task(phase3CreateProcessesTask, {
       name,
       domain,
       basePath,
@@ -120,9 +153,17 @@ export async function process(inputs, ctx) {
     });
 
     phaseResults.phase3 = phase3;
-    artifacts.push(...phase3.artifacts);
-
-    await ctx.breakpoint({
+      let lastFeedback_phase3Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase3Review) {
+        phase3 = await ctx.task(phase3CreateProcessesTask, { ...{
+      name,
+      domain,
+      basePath,
+      processesBacklogPath: `${basePath}/processes-backlog.md`
+    }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+      }
+  const phase3Review = await ctx.breakpoint({
       question: `Phase 3 complete. ${phase3.filesCreated} process files created. Review before proceeding to Phase 4?`,
       title: 'Phase 3 Review - Process Implementation',
       context: {
@@ -136,9 +177,15 @@ export async function process(inputs, ctx) {
           filesCreated: phase3.filesCreated,
           processNames: phase3.processNames
         }
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase3Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase3Review.approved) break;
+      lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 4: IDENTIFY SKILLS AND AGENTS
@@ -147,7 +194,7 @@ export async function process(inputs, ctx) {
   if (!skipPhases.includes(4)) {
     ctx.log('info', 'Phase 4: Identifying Skills and Agents');
 
-    const phase4 = await ctx.task(phase4IdentifySkillsAgentsTask, {
+    let phase4 = await ctx.task(phase4IdentifySkillsAgentsTask, {
       name,
       domain,
       basePath,
@@ -155,9 +202,17 @@ export async function process(inputs, ctx) {
     });
 
     phaseResults.phase4 = phase4;
-    artifacts.push(...phase4.artifacts);
-
-    await ctx.breakpoint({
+      let lastFeedback_phase4Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase4Review) {
+        phase4 = await ctx.task(phase4IdentifySkillsAgentsTask, { ...{
+      name,
+      domain,
+      basePath,
+      processFiles: phaseResults.phase3?.processFiles || []
+    }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+      }
+  const phase4Review = await ctx.breakpoint({
       question: `Phase 4 complete. ${phase4.skillCount} skills and ${phase4.agentCount} agents identified. Review skills-agents-backlog.md?`,
       title: 'Phase 4 Review - Skills & Agents Identification',
       context: {
@@ -172,9 +227,15 @@ export async function process(inputs, ctx) {
           agentCount: phase4.agentCount,
           mappingEntries: phase4.mappingEntries
         }
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase4Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase4Review.approved) break;
+      lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 5: RESEARCH REFERENCES FOR SKILLS/AGENTS
@@ -183,7 +244,7 @@ export async function process(inputs, ctx) {
   if (!skipPhases.includes(5)) {
     ctx.log('info', 'Phase 5: Researching References');
 
-    const phase5 = await ctx.task(phase5ResearchReferencesTask, {
+    let phase5 = await ctx.task(phase5ResearchReferencesTask, {
       name,
       domain,
       basePath,
@@ -191,9 +252,17 @@ export async function process(inputs, ctx) {
     });
 
     phaseResults.phase5 = phase5;
-    artifacts.push(...phase5.artifacts);
-
-    await ctx.breakpoint({
+      let lastFeedback_phase5Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase5Review) {
+        phase5 = await ctx.task(phase5ResearchReferencesTask, { ...{
+      name,
+      domain,
+      basePath,
+      skillsAgentsBacklogPath: `${basePath}/skills-agents-backlog.md`
+    }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+      }
+  const phase5Review = await ctx.breakpoint({
       question: `Phase 5 complete. ${phase5.referencesFound} external references found. Review skills-agents-references.md?`,
       title: 'Phase 5 Review - External References',
       context: {
@@ -207,9 +276,15 @@ export async function process(inputs, ctx) {
           referencesFound: phase5.referencesFound,
           reusableCandidates: phase5.reusableCandidates
         }
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase5Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase5Review.approved) break;
+      lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 6: CREATE SKILLS AND AGENTS
@@ -218,7 +293,7 @@ export async function process(inputs, ctx) {
   if (!skipPhases.includes(6)) {
     ctx.log('info', 'Phase 6: Creating Skills and Agents');
 
-    const phase6 = await ctx.task(phase6CreateSkillsAgentsTask, {
+    let phase6 = await ctx.task(phase6CreateSkillsAgentsTask, {
       name,
       domain,
       basePath,
@@ -227,9 +302,18 @@ export async function process(inputs, ctx) {
     });
 
     phaseResults.phase6 = phase6;
-    artifacts.push(...phase6.artifacts);
-
-    await ctx.breakpoint({
+      let lastFeedback_finalApproval = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_finalApproval) {
+        phase6 = await ctx.task(phase6CreateSkillsAgentsTask, { ...{
+      name,
+      domain,
+      basePath,
+      skillsAgentsBacklogPath: `${basePath}/skills-agents-backlog.md`,
+      referencesPath: `${basePath}/skills-agents-references.md`
+    }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+      }
+  const finalApproval = await ctx.breakpoint({
       question: `Phase 6 complete. ${phase6.skillsCreated} skills and ${phase6.agentsCreated} agents created. Review before final integration?`,
       title: 'Phase 6 Review - Skills & Agents Creation',
       context: {
@@ -244,9 +328,15 @@ export async function process(inputs, ctx) {
           agentsCreated: phase6.agentsCreated,
           totalFiles: phase6.artifacts.length
         }
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_finalApproval || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (finalApproval.approved) break;
+      lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 7: INTEGRATE SKILLS AND AGENTS
@@ -265,7 +355,6 @@ export async function process(inputs, ctx) {
     phaseResults.phase7 = phase7;
     artifacts.push(...phase7.artifacts);
   }
-
   // ============================================================================
   // FINAL VALIDATION
   // ============================================================================
@@ -313,8 +402,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

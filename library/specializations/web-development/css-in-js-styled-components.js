@@ -24,11 +24,16 @@ export async function process(inputs, ctx) {
   const componentPatterns = await ctx.task(componentPatternsTask, { projectName, outputDir });
   artifacts.push(...componentPatterns.artifacts);
 
-  const globalStyles = await ctx.task(globalStylesTask, { projectName, outputDir });
-  artifacts.push(...globalStyles.artifacts);
-
-  await ctx.breakpoint({ question: `CSS-in-JS setup complete for ${projectName}. Approve?`, title: 'CSS-in-JS Review', context: { runId: ctx.runId, components: componentPatterns.components } });
-
+  let globalStyles = await ctx.task(globalStylesTask, { projectName, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      globalStyles = await ctx.task(globalStylesTask, { ...{ projectName, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({ question: `CSS-in-JS setup complete for ${projectName}. Approve?`, title: 'CSS-in-JS Review', context: { runId: ctx.runId, components: componentPatterns.components }, expert: 'owner', tags: ['approval-gate'], previousFeedback: lastFeedback || undefined, attempt: attempt > 0 ? attempt + 1 : undefined });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const documentation = await ctx.task(documentationTask, { projectName, outputDir });
   artifacts.push(...documentation.artifacts);
 

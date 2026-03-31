@@ -49,7 +49,7 @@ export async function process(inputs, ctx) {
 
   // Phase 2: Gap Analysis
   ctx.log('info', 'Phase 2: Gap Analysis against ISO 9001:2015');
-  const gapAnalysis = await ctx.task(gapAnalysisTask, {
+  let gapAnalysis = await ctx.task(gapAnalysisTask, {
     organizationName,
     scope,
     currentMaturity,
@@ -58,8 +58,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...gapAnalysis.artifacts);
 
-  // Quality Gate: Gap Analysis Review
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      gapAnalysis = await ctx.task(gapAnalysisTask, { ...{
+    organizationName,
+    scope,
+    currentMaturity,
+    outputDir
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Gap analysis complete. Overall conformity: ${gapAnalysis.overallConformity}%. ${gapAnalysis.majorGaps} major gaps, ${gapAnalysis.minorGaps} minor gaps identified. Review gaps before planning?`,
     title: 'ISO 9001 Gap Analysis Review',
     context: {
@@ -68,9 +77,15 @@ export async function process(inputs, ctx) {
       conformityByClause: gapAnalysis.conformityByClause,
       priorityGaps: gapAnalysis.priorityGaps,
       files: gapAnalysis.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // Phase 3: Context and Scope Definition
   ctx.log('info', 'Phase 3: Context of the Organization');
   const contextDefinition = await ctx.task(contextDefinitionTask, {
@@ -104,7 +119,7 @@ export async function process(inputs, ctx) {
 
   // Phase 6: Documentation Development
   ctx.log('info', 'Phase 6: QMS Documentation Development');
-  const documentation = await ctx.task(documentationTask, {
+  let documentation = await ctx.task(documentationTask, {
     organizationName,
     scope,
     contextDefinition,
@@ -115,8 +130,19 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...documentation.artifacts);
 
-  // Quality Gate: Documentation Review
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      documentation = await ctx.task(documentationTask, { ...{
+    organizationName,
+    scope,
+    contextDefinition,
+    processMapping,
+    riskAssessment,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `QMS documentation developed. Quality Manual: ${documentation.qualityManual ? 'Complete' : 'Pending'}. Procedures: ${documentation.procedureCount}. Work Instructions: ${documentation.workInstructionCount}. Review documentation structure?`,
     title: 'QMS Documentation Review',
     context: {
@@ -125,9 +151,15 @@ export async function process(inputs, ctx) {
       documentHierarchy: documentation.documentHierarchy,
       mandatoryDocuments: documentation.mandatoryDocuments,
       files: documentation.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 7: Implementation Planning
   ctx.log('info', 'Phase 7: Implementation Planning');
   const implementationPlan = await ctx.task(implementationPlanTask, {
@@ -183,7 +215,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...certificationReadiness.artifacts);
   }
-
   // Phase 12: Report Generation
   ctx.log('info', 'Phase 12: Implementation Report Generation');
   const report = await ctx.task(reportTask, {
@@ -249,8 +280,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Management Commitment
+  // Task 1: Management Commitment
 export const managementCommitmentTask = defineTask('iso9001-commitment', (args, taskCtx) => ({
   kind: 'agent',
   title: `ISO 9001 Management Commitment - ${args.organizationName}`,

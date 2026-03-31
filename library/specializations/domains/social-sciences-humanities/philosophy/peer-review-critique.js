@@ -81,7 +81,7 @@ export async function process(inputs, ctx) {
 
   // Task 6: Overall Evaluation and Recommendations
   ctx.log('info', 'Developing overall evaluation');
-  const overallEvaluation = await ctx.task(overallEvaluationTask, {
+  let overallEvaluation = await ctx.task(overallEvaluationTask, {
     manuscriptOverview,
     argumentAssessment,
     clarityAssessment,
@@ -92,8 +92,19 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...overallEvaluation.artifacts);
 
-  // Breakpoint: Review peer review
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      overallEvaluation = await ctx.task(overallEvaluationTask, { ...{
+    manuscriptOverview,
+    argumentAssessment,
+    clarityAssessment,
+    originalityAssessment,
+    scholarlyAssessment,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Peer review complete. Recommendation: ${overallEvaluation.recommendation}. Review the assessment?`,
     title: 'Peer Review Results',
     context: {
@@ -105,9 +116,15 @@ export async function process(inputs, ctx) {
         majorConcerns: overallEvaluation.majorConcerns.length,
         minorConcerns: overallEvaluation.minorConcerns.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 7: Generate Peer Review Report
   ctx.log('info', 'Generating peer review report');
   const reviewReport = await ctx.task(reviewReportTask, {
@@ -153,8 +170,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task definitions
+  // Task definitions
 export const manuscriptOverviewTask = defineTask('manuscript-overview', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Develop manuscript overview',

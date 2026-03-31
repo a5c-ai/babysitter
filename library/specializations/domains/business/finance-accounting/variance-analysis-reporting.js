@@ -48,18 +48,31 @@ export async function process(inputs, ctx) {
   results.steps.push({ name: 'material-variance-identification', result: materialResult });
 
   // Step 4: Root Cause Analysis
-  const rootCauseResult = await ctx.task(performRootCauseAnalysisTask, {
+  let rootCauseResult = await ctx.task(performRootCauseAnalysisTask, {
     materialVariances: materialResult,
     reportingPeriod: inputs.reportingPeriod
   });
   results.steps.push({ name: 'root-cause-analysis', result: rootCauseResult });
 
-  // Breakpoint for analyst review of root causes
-  await ctx.breakpoint('root-cause-review', {
+    let lastFeedback_reviewApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_reviewApproval) {
+      rootCauseResult = await ctx.task(performRootCauseAnalysisTask, { ...{
+    materialVariances: materialResult,
+    reportingPeriod: inputs.reportingPeriod
+  }, feedback: lastFeedback_reviewApproval, attempt: attempt + 1 });
+    }
+  const reviewApproval = await ctx.breakpoint('root-cause-review', {
     message: 'Review root cause analysis before gathering management input',
-    data: rootCauseResult
-  });
-
+    data: rootCauseResult,
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_reviewApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (reviewApproval.approved) break;
+    lastFeedback_reviewApproval = reviewApproval.response || reviewApproval.feedback || 'Changes requested';
+  }
   // Step 5: Trend Analysis
   const trendResult = await ctx.task(performTrendAnalysisTask, {
     currentVariances: calculationResult,
@@ -71,19 +84,33 @@ export async function process(inputs, ctx) {
   results.steps.push({ name: 'trend-analysis', result: trendResult });
 
   // Step 6: Develop Actionable Recommendations
-  const recommendationsResult = await ctx.task(developRecommendationsTask, {
+  let recommendationsResult = await ctx.task(developRecommendationsTask, {
     rootCauses: rootCauseResult,
     trends: trendResult,
     materialVariances: materialResult
   });
   results.steps.push({ name: 'recommendations', result: recommendationsResult });
 
-  // Breakpoint for management review
-  await ctx.breakpoint('management-review', {
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      recommendationsResult = await ctx.task(developRecommendationsTask, { ...{
+    rootCauses: rootCauseResult,
+    trends: trendResult,
+    materialVariances: materialResult
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint('management-review', {
     message: 'Review variance analysis and recommendations with management',
-    data: { rootCauses: rootCauseResult, recommendations: recommendationsResult }
-  });
-
+    data: { rootCauses: rootCauseResult, recommendations: recommendationsResult },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Step 7: Prepare Final Report
   const reportResult = await ctx.task(prepareFinalReportTask, {
     reportingPeriod: inputs.reportingPeriod,
@@ -104,8 +131,7 @@ export async function process(inputs, ctx) {
 
   return results;
 }
-
-// Task definitions
+  // Task definitions
 export const validateAndPrepareDataTask = defineTask('validate-prepare-data', (args, taskCtx) => ({
   kind: 'agent',
   skill: { name: 'financial-reporting' },

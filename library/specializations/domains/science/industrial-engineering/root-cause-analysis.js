@@ -55,15 +55,22 @@ export async function process(inputs, ctx) {
 
   // Task 3: Data Collection
   ctx.log('info', 'Phase 3: Collecting and verifying data');
-  const dataCollection = await ctx.task(dataCollectionTask, {
+  let dataCollection = await ctx.task(dataCollectionTask, {
     problemDefinition,
     outputDir
   });
 
   artifacts.push(...dataCollection.artifacts);
 
-  // Breakpoint: Review data
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      dataCollection = await ctx.task(dataCollectionTask, { ...{
+    problemDefinition,
+    outputDir
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Data collection complete. ${dataCollection.dataPoints} data points collected. Is/Is Not analysis complete. Ready to develop cause theories?`,
     title: 'RCA Data Review',
     context: {
@@ -71,9 +78,15 @@ export async function process(inputs, ctx) {
       isIsNot: problemDefinition.isIsNot,
       dataPoints: dataCollection.dataPoints,
       files: dataCollection.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // Task 4: Cause Theory Development
   ctx.log('info', 'Phase 4: Developing possible cause theories');
   const causeTheories = await ctx.task(causeTheoriesTask, {
@@ -133,7 +146,7 @@ export async function process(inputs, ctx) {
 
   // Task 10: Documentation
   ctx.log('info', 'Phase 10: Creating RCA report');
-  const rcaReport = await ctx.task(rcaReportTask, {
+  let rcaReport = await ctx.task(rcaReportTask, {
     problemDefinition,
     containmentActions,
     dataCollection,
@@ -146,8 +159,21 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...rcaReport.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      rcaReport = await ctx.task(rcaReportTask, { ...{
+    problemDefinition,
+    containmentActions,
+    dataCollection,
+    causeTheories,
+    rootCauseId,
+    correctiveActions,
+    verificationPlan,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `RCA complete. ${rootCauseId.rootCauses.length} root causes identified. ${correctiveActions.actions.length} corrective actions recommended. Review report?`,
     title: 'RCA Results Review',
     context: {
@@ -159,9 +185,15 @@ export async function process(inputs, ctx) {
         verificationMetrics: verificationPlan.metrics
       },
       files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -184,8 +216,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Problem Definition
+  // Task 1: Problem Definition
 export const problemDefinitionTask = defineTask('problem-definition', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Define problem with is/is not analysis',

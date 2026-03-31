@@ -39,7 +39,7 @@ export async function process(inputs, ctx) {
   // ========================================================================
   ctx.log('info', 'Starting Phase 1: Story Development');
 
-  const storyResult = await ctx.task(storyDevelopmentPhase, {
+  let storyResult = await ctx.task(storyDevelopmentPhase, {
     concept,
     format,
     genre,
@@ -61,8 +61,20 @@ export async function process(inputs, ctx) {
   phaseResults.story = storyResult;
   artifacts.push(...(storyResult.artifacts || []));
 
-  // Phase 1 Quality Gate
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      storyResult = await ctx.task(storyDevelopmentPhase, { ...{
+    concept,
+    format,
+    genre,
+    targetDuration,
+    tone,
+    themes,
+    outputDir: `${outputDir}/story`
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Phase 1 Complete: Story development finished. Logline, treatment, beat sheet, and ${storyResult.story?.outline?.sceneCount || 0} scenes outlined. Ready to proceed to character creation?`,
     title: 'Phase 1: Story Development Complete',
     context: {
@@ -74,15 +86,21 @@ export async function process(inputs, ctx) {
         format,
         genre
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ========================================================================
   // PHASE 2: CHARACTER CREATION
   // ========================================================================
   ctx.log('info', 'Starting Phase 2: Character Creation');
 
-  const characterResult = await ctx.task(characterCreationPhase, {
+  let characterResult = await ctx.task(characterCreationPhase, {
     storyContext: storyResult.story,
     format,
     genre,
@@ -102,8 +120,17 @@ export async function process(inputs, ctx) {
   phaseResults.characters = characterResult;
   artifacts.push(...(characterResult.artifacts || []));
 
-  // Phase 2 Quality Gate
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval2 = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval2) {
+      characterResult = await ctx.task(characterCreationPhase, { ...{
+    storyContext: storyResult.story,
+    format,
+    genre,
+    outputDir: `${outputDir}/characters`
+  }, feedback: lastFeedback_finalApproval2, attempt: attempt + 1 });
+    }
+  const finalApproval2 = await ctx.breakpoint({
     question: `Phase 2 Complete: ${characterResult.characters?.supporting?.length + 2 || 0} characters profiled with relationships and visual designs. Ready to proceed to world building?`,
     title: 'Phase 2: Character Creation Complete',
     context: {
@@ -114,15 +141,21 @@ export async function process(inputs, ctx) {
         antagonist: characterResult.characters?.antagonist?.name,
         supportingCount: characterResult.characters?.supporting?.length || 0
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval2 || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval2.approved) break;
+    lastFeedback_finalApproval2 = finalApproval2.response || finalApproval2.feedback || 'Changes requested';
+  }
   // ========================================================================
   // PHASE 3: WORLD BUILDING
   // ========================================================================
   ctx.log('info', 'Starting Phase 3: World Building');
 
-  const worldResult = await ctx.task(worldBuildingPhase, {
+  let worldResult = await ctx.task(worldBuildingPhase, {
     storyContext: storyResult.story,
     characters: characterResult.characters,
     format,
@@ -143,8 +176,18 @@ export async function process(inputs, ctx) {
   phaseResults.world = worldResult;
   artifacts.push(...(worldResult.artifacts || []));
 
-  // Phase 3 Quality Gate
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval3 = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval3) {
+      worldResult = await ctx.task(worldBuildingPhase, { ...{
+    storyContext: storyResult.story,
+    characters: characterResult.characters,
+    format,
+    genre,
+    outputDir: `${outputDir}/world`
+  }, feedback: lastFeedback_finalApproval3, attempt: attempt + 1 });
+    }
+  const finalApproval3 = await ctx.breakpoint({
     question: `Phase 3 Complete: ${worldResult.world?.locations?.length || 0} locations designed, props and costumes specified, ${worldResult.world?.vfx?.summary?.totalShots || 0} VFX shots planned. Ready to proceed to screenplay?`,
     title: 'Phase 3: World Building Complete',
     context: {
@@ -154,15 +197,21 @@ export async function process(inputs, ctx) {
         locations: worldResult.world?.locations?.length,
         vfxShots: worldResult.world?.vfx?.summary?.totalShots
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval3 || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval3.approved) break;
+    lastFeedback_finalApproval3 = finalApproval3.response || finalApproval3.feedback || 'Changes requested';
+  }
   // ========================================================================
   // PHASE 4: SCREENPLAY WRITING
   // ========================================================================
   ctx.log('info', 'Starting Phase 4: Screenplay Writing');
 
-  const screenplayResult = await ctx.task(screenplayWritingPhase, {
+  let screenplayResult = await ctx.task(screenplayWritingPhase, {
     storyContext: storyResult.story,
     characters: characterResult.characters,
     sceneOutline: storyResult.story?.outline?.scenes,
@@ -184,8 +233,19 @@ export async function process(inputs, ctx) {
   phaseResults.screenplay = screenplayResult;
   artifacts.push(...(screenplayResult.artifacts || []));
 
-  // Phase 4 Quality Gate
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval4 = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval4) {
+      screenplayResult = await ctx.task(screenplayWritingPhase, { ...{
+    storyContext: storyResult.story,
+    characters: characterResult.characters,
+    sceneOutline: storyResult.story?.outline?.scenes,
+    format,
+    genre,
+    outputDir: `${outputDir}/screenplay`
+  }, feedback: lastFeedback_finalApproval4, attempt: attempt + 1 });
+    }
+  const finalApproval4 = await ctx.breakpoint({
     question: `Phase 4 Complete: Screenplay "${screenplayResult.screenplay?.titlePage?.title || 'Untitled'}" at ${screenplayResult.screenplay?.statistics?.totalPages || 0} pages. Ready to proceed to visual production?`,
     title: 'Phase 4: Screenplay Complete',
     context: {
@@ -196,15 +256,21 @@ export async function process(inputs, ctx) {
         pageCount: screenplayResult.screenplay?.statistics?.totalPages,
         sceneCount: screenplayResult.screenplay?.statistics?.sceneCount
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval4 || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval4.approved) break;
+    lastFeedback_finalApproval4 = finalApproval4.response || finalApproval4.feedback || 'Changes requested';
+  }
   // ========================================================================
   // PHASE 5: VISUAL PRODUCTION
   // ========================================================================
   ctx.log('info', 'Starting Phase 5: Visual Production');
 
-  const visualResult = await ctx.task(visualProductionPhase, {
+  let visualResult = await ctx.task(visualProductionPhase, {
     screenplay: screenplayResult.screenplay,
     scenes: storyResult.story?.outline?.scenes,
     worldBible: worldResult.world,
@@ -225,8 +291,18 @@ export async function process(inputs, ctx) {
   phaseResults.visual = visualResult;
   artifacts.push(...(visualResult.artifacts || []));
 
-  // Phase 5 Quality Gate
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval5 = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval5) {
+      visualResult = await ctx.task(visualProductionPhase, { ...{
+    screenplay: screenplayResult.screenplay,
+    scenes: storyResult.story?.outline?.scenes,
+    worldBible: worldResult.world,
+    genre,
+    outputDir: `${outputDir}/visual`
+  }, feedback: lastFeedback_finalApproval5, attempt: attempt + 1 });
+    }
+  const finalApproval5 = await ctx.breakpoint({
     question: `Phase 5 Complete: ${visualResult.visualPackage?.statistics?.totalShots || 0} shots designed, ${visualResult.visualPackage?.storyboards?.length || 0} storyboard frames, video prompts for all scenes. Ready to proceed to audio design?`,
     title: 'Phase 5: Visual Production Complete',
     context: {
@@ -237,9 +313,15 @@ export async function process(inputs, ctx) {
         storyboardFrames: visualResult.visualPackage?.storyboards?.length,
         videoPrompts: visualResult.visualPackage?.videoPrompts?.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval5 || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval5.approved) break;
+    lastFeedback_finalApproval5 = finalApproval5.response || finalApproval5.feedback || 'Changes requested';
+  }
   // ========================================================================
   // PHASE 6: AUDIO DESIGN
   // ========================================================================
@@ -272,7 +354,7 @@ export async function process(inputs, ctx) {
   // ========================================================================
   ctx.log('info', 'Starting Phase 7: Final Production Bible Compilation');
 
-  const finalResult = await ctx.task(compileProductionBible, {
+  let finalResult = await ctx.task(compileProductionBible, {
     story: phaseResults.story,
     characters: phaseResults.characters,
     world: phaseResults.world,
@@ -286,8 +368,22 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...(finalResult.artifacts || []));
 
-  // Final Quality Gate
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval6 = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval6) {
+      finalResult = await ctx.task(compileProductionBible, { ...{
+    story: phaseResults.story,
+    characters: phaseResults.characters,
+    world: phaseResults.world,
+    screenplay: phaseResults.screenplay,
+    visual: phaseResults.visual,
+    audio: phaseResults.audio,
+    format,
+    genre,
+    outputDir
+  }, feedback: lastFeedback_finalApproval6, attempt: attempt + 1 });
+    }
+  const finalApproval6 = await ctx.breakpoint({
     question: `PRODUCTION COMPLETE! Full production package ready with screenplay, visual package, audio design, and production bible. Review final deliverables?`,
     title: 'Full Production Complete',
     context: {
@@ -303,9 +399,15 @@ export async function process(inputs, ctx) {
         musicCues: audioResult.audioDesign?.musicCues?.length,
         originalScore: createOriginalScore
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval6 || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval6.approved) break;
+    lastFeedback_finalApproval6 = finalApproval6.response || finalApproval6.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
 
   return {
@@ -340,8 +442,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // PHASE TASK DEFINITIONS
 // ============================================================================
 

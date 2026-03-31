@@ -77,7 +77,7 @@ export async function process(inputs, ctx) {
 
   // Phase 3: Phase Identification
   ctx.log('info', 'Phase 3: Identifying crystalline phases');
-  const phaseIdentification = await ctx.task(phaseIdentificationTask, {
+  let phaseIdentification = await ctx.task(phaseIdentificationTask, {
     sampleId,
     peakList: peakDetection.peaks,
     targetPhases,
@@ -87,8 +87,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...phaseIdentification.artifacts);
 
-  // Breakpoint: Review phase identification results
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      phaseIdentification = await ctx.task(phaseIdentificationTask, { ...{
+    sampleId,
+    peakList: peakDetection.peaks,
+    targetPhases,
+    wavelength,
+    outputDir
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Phase identification complete for ${sampleId}. Found ${phaseIdentification.identifiedPhases.length} phases: ${phaseIdentification.identifiedPhases.map(p => p.name).join(', ')}. Proceed with refinement?`,
     title: 'Phase Identification Review',
     context: {
@@ -101,9 +111,15 @@ export async function process(inputs, ctx) {
         unindexedPeaks: peakDetection.peaks.length - phaseIdentification.indexedPeakCount
       },
       files: phaseIdentification.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // Phase 4: Crystallographic Refinement
   ctx.log('info', 'Phase 4: Performing crystallographic refinement');
   const refinement = await ctx.task(refinementTask, {
@@ -142,7 +158,7 @@ export async function process(inputs, ctx) {
 
   // Phase 7: Report Generation
   ctx.log('info', 'Phase 7: Generating XRD analysis report');
-  const report = await ctx.task(xrdReportTask, {
+  let report = await ctx.task(xrdReportTask, {
     sampleId,
     dataPreprocessing,
     peakDetection,
@@ -155,8 +171,21 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...report.artifacts);
 
-  // Final breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      report = await ctx.task(xrdReportTask, { ...{
+    sampleId,
+    dataPreprocessing,
+    peakDetection,
+    phaseIdentification,
+    refinement,
+    quantitativeAnalysis,
+    microstructuralAnalysis,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `XRD analysis complete for ${sampleId}. Refinement Rwp: ${refinement.rwp.toFixed(2)}%, GoF: ${refinement.gof.toFixed(2)}. Review final results?`,
     title: 'XRD Analysis Complete',
     context: {
@@ -176,9 +205,15 @@ export async function process(inputs, ctx) {
         microstrain: microstructuralAnalysis.averageMicrostrain
       },
       files: artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -217,8 +252,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Data Preprocessing
+  // Task 1: Data Preprocessing
 export const dataPreprocessingTask = defineTask('xrd-data-preprocessing', (args, taskCtx) => ({
   kind: 'agent',
   title: `XRD Data Preprocessing - ${args.sampleId}`,

@@ -122,7 +122,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...mpuConfig.artifacts);
   }
-
   // ============================================================================
   // PHASE 6: OPTIMIZATION ANALYSIS
   // ============================================================================
@@ -144,7 +143,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 7: Generating Documentation');
 
-  const documentation = await ctx.task(memoryDocumentationTask, {
+  let documentation = await ctx.task(memoryDocumentationTask, {
     projectName,
     memoryMapDesign,
     sectionAllocation,
@@ -156,8 +155,20 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...documentation.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      documentation = await ctx.task(memoryDocumentationTask, { ...{
+    projectName,
+    memoryMapDesign,
+    sectionAllocation,
+    linkerScript,
+    mpuConfig,
+    optimizationAnalysis,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Memory Architecture Planning Complete for ${projectName}. Flash: ${memoryMapDesign.flashUsed}, RAM: ${memoryMapDesign.ramUsed}. Review?`,
     title: 'Memory Planning Complete',
     context: {
@@ -172,9 +183,15 @@ export async function process(inputs, ctx) {
         { path: linkerScript.scriptPath, format: 'ld', label: 'Linker Script' },
         { path: documentation.docPath, format: 'markdown', label: 'Memory Doc' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -197,8 +214,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

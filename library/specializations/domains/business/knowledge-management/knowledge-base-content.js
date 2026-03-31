@@ -36,7 +36,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 1: Auditing existing content and identifying gaps');
-  const contentAudit = await ctx.task(contentAuditTask, {
+  let contentAudit = await ctx.task(contentAuditTask, {
     knowledgeBaseName,
     contentScope,
     existingContent,
@@ -47,8 +47,19 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...contentAudit.artifacts);
 
-  // Breakpoint: Review content audit
-  await ctx.breakpoint({
+    let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      contentAudit = await ctx.task(contentAuditTask, { ...{
+    knowledgeBaseName,
+    contentScope,
+    existingContent,
+    targetAudience,
+    contentTypes,
+    outputDir
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Content audit complete. Found ${contentAudit.existingContentCount} existing items and ${contentAudit.gapsIdentified.length} content gaps. Review audit?`,
     title: 'Content Audit Review',
     context: {
@@ -65,9 +76,15 @@ export async function process(inputs, ctx) {
         outdatedContent: contentAudit.outdatedContent.length,
         duplicateContent: contentAudit.duplicateContent.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 2: CONTENT STRATEGY AND PLANNING
   // ============================================================================
@@ -121,7 +138,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 5: Creating content development roadmap');
-  const contentRoadmap = await ctx.task(contentRoadmapTask, {
+  let contentRoadmap = await ctx.task(contentRoadmapTask, {
     knowledgeBaseName,
     contentStrategy,
     contentArchitecture,
@@ -133,8 +150,20 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...contentRoadmap.artifacts);
 
-  // Breakpoint: Review content roadmap
-  await ctx.breakpoint({
+    let lastFeedback_phase5Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase5Review) {
+      contentRoadmap = await ctx.task(contentRoadmapTask, { ...{
+    knowledgeBaseName,
+    contentStrategy,
+    contentArchitecture,
+    gapsIdentified: contentAudit.gapsIdentified,
+    subjectMatterExperts,
+    contentOwnership,
+    outputDir
+  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+    }
+  const phase5Review = await ctx.breakpoint({
     question: `Content roadmap created with ${contentRoadmap.contentItems.length} items planned across ${contentRoadmap.phases.length} phases. Review roadmap?`,
     title: 'Content Roadmap Review',
     context: {
@@ -151,9 +180,15 @@ export async function process(inputs, ctx) {
         priorityItems: contentRoadmap.priorityItems.length,
         estimatedEffort: contentRoadmap.estimatedEffort
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase5Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase5Review.approved) break;
+    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 6: CONTENT CREATION GUIDELINES
   // ============================================================================
@@ -249,13 +284,12 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...localizationPlan.artifacts);
   }
-
   // ============================================================================
   // PHASE 12: QUALITY ASSESSMENT
   // ============================================================================
 
   ctx.log('info', 'Phase 12: Assessing overall content plan quality');
-  const qualityAssessment = await ctx.task(qualityAssessmentTask, {
+  let qualityAssessment = await ctx.task(qualityAssessmentTask, {
     knowledgeBaseName,
     contentStrategy,
     contentArchitecture,
@@ -270,8 +304,21 @@ export async function process(inputs, ctx) {
 
   const qualityMet = qualityAssessment.overallScore >= 80;
 
-  // Breakpoint: Review quality assessment
-  await ctx.breakpoint({
+    let lastFeedback_phase12Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase12Review) {
+      qualityAssessment = await ctx.task(qualityAssessmentTask, { ...{
+    knowledgeBaseName,
+    contentStrategy,
+    contentArchitecture,
+    templatesAndStandards,
+    contentRoadmap,
+    reviewWorkflowDesign,
+    maintenancePlan,
+    outputDir
+  }, feedback: lastFeedback_phase12Review, attempt: attempt + 1 });
+    }
+  const phase12Review = await ctx.breakpoint({
     question: `Content plan quality score: ${qualityAssessment.overallScore}/100. ${qualityMet ? 'Quality standards met!' : 'May need improvements.'} Review results?`,
     title: 'Quality Assessment Review',
     context: {
@@ -289,15 +336,21 @@ export async function process(inputs, ctx) {
         architectureScore: qualityAssessment.componentScores.architecture,
         issues: qualityAssessment.issues.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase12Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase12Review.approved) break;
+    lastFeedback_phase12Review = phase12Review.response || phase12Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 13: IMPLEMENTATION PREPARATION
   // ============================================================================
 
   ctx.log('info', 'Phase 13: Preparing for content implementation');
-  const implementationPrep = await ctx.task(implementationPrepTask, {
+  let implementationPrep = await ctx.task(implementationPrepTask, {
     knowledgeBaseName,
     contentRoadmap,
     templatesAndStandards,
@@ -327,8 +380,20 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...reviewResult.artifacts);
 
-    // Breakpoint: Final approval gate
-    await ctx.breakpoint({
+      let lastFeedback_finalApproval = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_finalApproval) {
+        implementationPrep = await ctx.task(implementationPrepTask, { ...{
+    knowledgeBaseName,
+    contentRoadmap,
+    templatesAndStandards,
+    reviewWorkflowDesign,
+    subjectMatterExperts,
+    contentOwnership,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+      }
+  const finalApproval = await ctx.breakpoint({
       question: `Stakeholder review complete. ${reviewResult.approved ? 'Approved!' : 'Requires revisions.'} Proceed with content development?`,
       title: 'Final Approval Gate',
       context: {
@@ -345,9 +410,15 @@ export async function process(inputs, ctx) {
           stakeholdersReviewed: reviewResult.stakeholders.length,
           revisionsNeeded: reviewResult.revisionsNeeded
         }
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_finalApproval || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (finalApproval.approved) break;
+      lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+    } }
 
   const endTime = ctx.now();
   const duration = endTime - startTime;
@@ -398,8 +469,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

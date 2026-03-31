@@ -19,144 +19,261 @@ export async function process(inputs, ctx) {
     targetQuality = 85
   } = inputs;
 
-  // Phase 1: Program Strategy
-  await ctx.breakpoint({
+  let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    // No preceding task identified for re-run with feedback
+    const phase1Review = await ctx.breakpoint({
     question: 'Starting employee advocacy program development. Define program strategy?',
     title: 'Phase 1: Program Strategy',
     context: {
       runId: ctx.runId,
       phase: 'program-strategy',
       organization: organization.name
-    }
-  });
-
-  const programStrategy = await ctx.task(defineProgramStrategyTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
+  let programStrategy = await ctx.task(defineProgramStrategyTask, {
     organization,
     employeeBase,
     contentStrategy
   });
 
-  // Phase 2: Participant Identification
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      programStrategy = await ctx.task(defineProgramStrategyTask, { ...{
+    organization,
+    employeeBase,
+    contentStrategy
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: 'Strategy defined. Identify and segment participants?',
     title: 'Phase 2: Participant Identification',
     context: {
       runId: ctx.runId,
       phase: 'participant-identification'
-    }
-  });
-
-  const participantSegmentation = await ctx.task(identifyParticipantsTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
+  let participantSegmentation = await ctx.task(identifyParticipantsTask, {
     employeeBase,
     programStrategy
   });
 
-  // Phase 3: Platform and Tools Selection
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      participantSegmentation = await ctx.task(identifyParticipantsTask, { ...{
+    employeeBase,
+    programStrategy
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: 'Participants identified. Select platforms and tools?',
     title: 'Phase 3: Platform Selection',
     context: {
       runId: ctx.runId,
       phase: 'platform-selection',
       optionCount: platformOptions.length
-    }
-  });
-
-  const platformSelection = await ctx.task(selectPlatformsTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
+  let platformSelection = await ctx.task(selectPlatformsTask, {
     platformOptions,
     programStrategy,
     employeeBase
   });
 
-  // Phase 4: Content Library Development
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      platformSelection = await ctx.task(selectPlatformsTask, { ...{
+    platformOptions,
+    programStrategy,
+    employeeBase
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: 'Platforms selected. Develop content library?',
     title: 'Phase 4: Content Library',
     context: {
       runId: ctx.runId,
       phase: 'content-library'
-    }
-  });
-
-  const contentLibrary = await ctx.task(developContentLibraryTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
+  let contentLibrary = await ctx.task(developContentLibraryTask, {
     contentStrategy,
     programStrategy,
     organization
   });
 
-  // Phase 5: Guidelines and Governance
-  await ctx.breakpoint({
+    let lastFeedback_phase5Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase5Review) {
+      contentLibrary = await ctx.task(developContentLibraryTask, { ...{
+    contentStrategy,
+    programStrategy,
+    organization
+  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+    }
+  const phase5Review = await ctx.breakpoint({
     question: 'Content developed. Create guidelines and governance?',
     title: 'Phase 5: Guidelines and Governance',
     context: {
       runId: ctx.runId,
       phase: 'guidelines-governance'
-    }
-  });
-
-  const guidelines = await ctx.task(createGuidelinesTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase5Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase5Review.approved) break;
+    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+  }
+  let guidelines = await ctx.task(createGuidelinesTask, {
     socialMediaPolicy,
     programStrategy,
     organization
   });
 
-  // Phase 6: Training and Enablement
-  await ctx.breakpoint({
+    let lastFeedback_phase6Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase6Review) {
+      guidelines = await ctx.task(createGuidelinesTask, { ...{
+    socialMediaPolicy,
+    programStrategy,
+    organization
+  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
+    }
+  const phase6Review = await ctx.breakpoint({
     question: 'Guidelines created. Develop training program?',
     title: 'Phase 6: Training Program',
     context: {
       runId: ctx.runId,
       phase: 'training-program'
-    }
-  });
-
-  const trainingPlan = await ctx.task(developTrainingPlanTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase6Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase6Review.approved) break;
+    lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
+  }
+  let trainingPlan = await ctx.task(developTrainingPlanTask, {
     guidelines,
     platformSelection,
     participantSegmentation
   });
 
-  // Phase 7: Recognition and Incentives
-  await ctx.breakpoint({
+    let lastFeedback_phase7Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase7Review) {
+      trainingPlan = await ctx.task(developTrainingPlanTask, { ...{
+    guidelines,
+    platformSelection,
+    participantSegmentation
+  }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
+    }
+  const phase7Review = await ctx.breakpoint({
     question: 'Training planned. Design recognition and incentives?',
     title: 'Phase 7: Recognition and Incentives',
     context: {
       runId: ctx.runId,
       phase: 'recognition-incentives'
-    }
-  });
-
-  const recognitionProgram = await ctx.task(designRecognitionProgramTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase7Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase7Review.approved) break;
+    lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
+  }
+  let recognitionProgram = await ctx.task(designRecognitionProgramTask, {
     programStrategy,
     participantSegmentation
   });
 
-  // Phase 8: Measurement Framework
-  await ctx.breakpoint({
+    let lastFeedback_phase8Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase8Review) {
+      recognitionProgram = await ctx.task(designRecognitionProgramTask, { ...{
+    programStrategy,
+    participantSegmentation
+  }, feedback: lastFeedback_phase8Review, attempt: attempt + 1 });
+    }
+  const phase8Review = await ctx.breakpoint({
     question: 'Recognition designed. Define measurement framework?',
     title: 'Phase 8: Measurement Framework',
     context: {
       runId: ctx.runId,
       phase: 'measurement-framework'
-    }
-  });
-
-  const measurementFramework = await ctx.task(defineMeasurementTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase8Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase8Review.approved) break;
+    lastFeedback_phase8Review = phase8Review.response || phase8Review.feedback || 'Changes requested';
+  }
+  let measurementFramework = await ctx.task(defineMeasurementTask, {
     programStrategy,
     platformSelection
   });
 
-  // Phase 9: Quality Validation
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      measurementFramework = await ctx.task(defineMeasurementTask, { ...{
+    programStrategy,
+    platformSelection
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: 'Validate employee advocacy program quality?',
     title: 'Phase 9: Quality Validation',
     context: {
       runId: ctx.runId,
       phase: 'quality-validation',
       targetQuality
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const qualityResult = await ctx.task(validateAdvocacyProgramTask, {
     programStrategy,
     participantSegmentation,
@@ -207,8 +324,7 @@ export async function process(inputs, ctx) {
     };
   }
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const defineProgramStrategyTask = defineTask('define-program-strategy', (args, taskCtx) => ({
   kind: 'agent',

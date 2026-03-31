@@ -33,19 +33,33 @@ export async function process(inputs, ctx) {
   results.steps.push({ name: 'audit-planning', result: planningResult });
 
   // Step 2: Preliminary Survey and Process Understanding
-  const surveyResult = await ctx.task(conductPreliminarySurveyTask, {
+  let surveyResult = await ctx.task(conductPreliminarySurveyTask, {
     auditArea: inputs.auditArea,
     processDocumentation: inputs.processDocumentation,
     auditPlan: planningResult
   });
   results.steps.push({ name: 'preliminary-survey', result: surveyResult });
 
-  // Breakpoint for audit scope approval
-  await ctx.breakpoint('scope-approval', {
+    let lastFeedback_assessmentApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_assessmentApproval) {
+      surveyResult = await ctx.task(conductPreliminarySurveyTask, { ...{
+    auditArea: inputs.auditArea,
+    processDocumentation: inputs.processDocumentation,
+    auditPlan: planningResult
+  }, feedback: lastFeedback_assessmentApproval, attempt: attempt + 1 });
+    }
+  const assessmentApproval = await ctx.breakpoint('scope-approval', {
     message: 'Review audit scope and approach before beginning fieldwork',
-    data: { plan: planningResult, survey: surveyResult }
-  });
-
+    data: { plan: planningResult, survey: surveyResult },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_assessmentApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (assessmentApproval.approved) break;
+    lastFeedback_assessmentApproval = assessmentApproval.response || assessmentApproval.feedback || 'Changes requested';
+  }
   // Step 3: Control Identification and Evaluation
   const controlsResult = await ctx.task(evaluateControlsTask, {
     processUnderstanding: surveyResult,
@@ -54,19 +68,33 @@ export async function process(inputs, ctx) {
   results.steps.push({ name: 'control-evaluation', result: controlsResult });
 
   // Step 4: Test Design and Execution
-  const testingResult = await ctx.task(executeAuditTestsTask, {
+  let testingResult = await ctx.task(executeAuditTestsTask, {
     controls: controlsResult,
     auditPlan: planningResult,
     auditPeriod: inputs.auditPeriod
   });
   results.steps.push({ name: 'audit-testing', result: testingResult });
 
-  // Breakpoint for testing review
-  await ctx.breakpoint('testing-review', {
+    let lastFeedback_reviewApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_reviewApproval) {
+      testingResult = await ctx.task(executeAuditTestsTask, { ...{
+    controls: controlsResult,
+    auditPlan: planningResult,
+    auditPeriod: inputs.auditPeriod
+  }, feedback: lastFeedback_reviewApproval, attempt: attempt + 1 });
+    }
+  const reviewApproval = await ctx.breakpoint('testing-review', {
     message: 'Review testing results and preliminary findings',
-    data: testingResult
-  });
-
+    data: testingResult,
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_reviewApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (reviewApproval.approved) break;
+    lastFeedback_reviewApproval = reviewApproval.response || reviewApproval.feedback || 'Changes requested';
+  }
   // Step 5: Findings Development
   const findingsResult = await ctx.task(developFindingsTask, {
     testingResults: testingResult,
@@ -82,7 +110,7 @@ export async function process(inputs, ctx) {
   results.steps.push({ name: 'management-response', result: responseResult });
 
   // Step 7: Audit Report Preparation
-  const reportResult = await ctx.task(prepareAuditReportTask, {
+  let reportResult = await ctx.task(prepareAuditReportTask, {
     auditArea: inputs.auditArea,
     auditPeriod: inputs.auditPeriod,
     findings: findingsResult,
@@ -91,12 +119,28 @@ export async function process(inputs, ctx) {
   });
   results.steps.push({ name: 'audit-report', result: reportResult });
 
-  // Breakpoint for report approval
-  await ctx.breakpoint('report-approval', {
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      reportResult = await ctx.task(prepareAuditReportTask, { ...{
+    auditArea: inputs.auditArea,
+    auditPeriod: inputs.auditPeriod,
+    findings: findingsResult,
+    managementResponse: responseResult,
+    auditPlan: planningResult
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint('report-approval', {
     message: 'Final review of audit report before issuance',
-    data: reportResult
-  });
-
+    data: reportResult,
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Step 8: Follow-up Tracking Setup
   const followUpResult = await ctx.task(setupFollowUpTrackingTask, {
     findings: findingsResult,
@@ -113,8 +157,7 @@ export async function process(inputs, ctx) {
 
   return results;
 }
-
-// Task definitions
+  // Task definitions
 export const developAuditPlanTask = defineTask('develop-audit-plan', (args, taskCtx) => ({
   kind: 'agent',
   skill: { name: 'internal-audit' },

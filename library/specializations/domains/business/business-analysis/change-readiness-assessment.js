@@ -574,7 +574,7 @@ export async function process(inputs, ctx) {
 
   // Phase 7: Readiness Scorecard
   ctx.log('Phase 7: Creating readiness scorecard');
-  const scorecardResult = await ctx.task(readinessScorecardTask, {
+  let scorecardResult = await ctx.task(readinessScorecardTask, {
     organizationalContext: artifacts.organizationalContext,
     adkarAssessment: artifacts.adkarAssessment,
     capabilityAssessment: artifacts.capabilityAssessment,
@@ -584,12 +584,29 @@ export async function process(inputs, ctx) {
   });
   artifacts.readinessScorecard = scorecardResult;
 
-  // Breakpoint for assessment review
-  await ctx.breakpoint('readiness-assessment-review', {
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      scorecardResult = await ctx.task(readinessScorecardTask, { ...{
+    organizationalContext: artifacts.organizationalContext,
+    adkarAssessment: artifacts.adkarAssessment,
+    capabilityAssessment: artifacts.capabilityAssessment,
+    stakeholderReadiness: artifacts.stakeholderReadiness,
+    infrastructureReadiness: artifacts.infrastructureReadiness,
+    riskAssessment: artifacts.riskAssessment
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint('readiness-assessment-review', {
     question: 'Review the change readiness assessment results. Are the findings accurate and complete?',
-    artifacts: artifacts
-  });
-
+    artifacts: artifacts,
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 8: Recommendations
   ctx.log('Phase 8: Developing readiness recommendations');
   const recommendationsResult = await ctx.task(recommendationsTask, {

@@ -60,7 +60,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Detecting and analyzing flaky tests');
 
-  const flakinessDetection = await ctx.task(flakinessDetectionTask, {
+  let flakinessDetection = await ctx.task(flakinessDetectionTask, {
     testSuite,
     executionHistory,
     runCount,
@@ -88,9 +88,20 @@ export async function process(inputs, ctx) {
 
   // Quality Gate: Check if flakiness rate is within acceptable threshold
   if (currentFlakinessRate <= targetFlakiness) {
-    ctx.log('info', `Flakiness rate ${currentFlakinessRate.toFixed(2)}% is within target ${targetFlakiness}%`);
-
-    await ctx.breakpoint({
+      let lastFeedback_qualityGateApproval = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_qualityGateApproval) {
+        flakinessDetection = await ctx.task(flakinessDetectionTask, { ...{
+    testSuite,
+    executionHistory,
+    runCount,
+    parallelRuns,
+    testFramework,
+    cicdPlatform,
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval, attempt: attempt + 1 });
+      }
+  const qualityGateApproval = await ctx.breakpoint({
       question: `Flakiness rate ${currentFlakinessRate.toFixed(2)}% is within target. Continue with preventive analysis or complete process?`,
       title: 'Flakiness Target Already Met',
       context: {
@@ -99,9 +110,15 @@ export async function process(inputs, ctx) {
         targetFlakiness,
         flakyTests: flakyTests.map(t => ({ test: t.testName, failureRate: t.failureRate })),
         files: flakinessDetection.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_qualityGateApproval || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (qualityGateApproval.approved) break;
+      lastFeedback_qualityGateApproval = qualityGateApproval.response || qualityGateApproval.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 2: ROOT CAUSE CATEGORIZATION
@@ -109,7 +126,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 2: Analyzing root causes of flaky tests');
 
-  const rootCauseAnalysis = await ctx.task(rootCauseAnalysisTask, {
+  let rootCauseAnalysis = await ctx.task(rootCauseAnalysisTask, {
     flakyTests,
     testSuite,
     testFramework,
@@ -127,8 +144,18 @@ export async function process(inputs, ctx) {
     ctx.log('info', `  - ${cause}: ${count} tests`);
   });
 
-  // Breakpoint: Review root cause analysis
-  await ctx.breakpoint({
+    let lastFeedback_reviewApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_reviewApproval) {
+      rootCauseAnalysis = await ctx.task(rootCauseAnalysisTask, { ...{
+    flakyTests,
+    testSuite,
+    testFramework,
+    environmentDetails,
+    outputDir
+  }, feedback: lastFeedback_reviewApproval, attempt: attempt + 1 });
+    }
+  const reviewApproval = await ctx.breakpoint({
     question: `Root cause analysis complete. ${categorizedTests.length} tests categorized. Review findings and approve stabilization plan?`,
     title: 'Root Cause Analysis Review',
     context: {
@@ -142,16 +169,22 @@ export async function process(inputs, ctx) {
         recommendation: t.recommendation
       })),
       files: rootCauseAnalysis.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_reviewApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (reviewApproval.approved) break;
+    lastFeedback_reviewApproval = reviewApproval.response || reviewApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 3: STABILIZATION STRATEGY PLANNING
   // ============================================================================
 
   ctx.log('info', 'Phase 3: Planning stabilization strategies');
 
-  const stabilizationPlan = await ctx.task(stabilizationPlanningTask, {
+  let stabilizationPlan = await ctx.task(stabilizationPlanningTask, {
     categorizedTests,
     rootCauseDistribution,
     testFramework,
@@ -167,8 +200,19 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Stabilization plan created with ${stabilizationStrategies.length} strategies`);
 
-  // Breakpoint: Review and approve stabilization plan
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      stabilizationPlan = await ctx.task(stabilizationPlanningTask, { ...{
+    categorizedTests,
+    rootCauseDistribution,
+    testFramework,
+    targetFlakiness,
+    quarantineEnabled,
+    outputDir
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Stabilization plan created for ${prioritizedTests.length} tests. Review plan and approve execution?`,
     title: 'Stabilization Plan Approval',
     context: {
@@ -181,9 +225,15 @@ export async function process(inputs, ctx) {
         techniques: s.techniques
       })),
       files: stabilizationPlan.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 4: TIMING ISSUES STABILIZATION (PARALLEL)
   // ============================================================================
@@ -214,7 +264,6 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Stabilized ${stabilizedTests.length}/${timingTests.length} timing-related tests`);
   }
-
   // ============================================================================
   // PHASE 5: TEST ISOLATION STABILIZATION (PARALLEL)
   // ============================================================================
@@ -246,7 +295,6 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Stabilized ${isolationStabilized.length}/${isolationTests.length} isolation-related tests`);
   }
-
   // ============================================================================
   // PHASE 6: ENVIRONMENT ISSUES STABILIZATION
   // ============================================================================
@@ -276,7 +324,6 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Stabilized ${environmentStabilization.stabilized}/${environmentTests.length} environment-related tests`);
   }
-
   // ============================================================================
   // PHASE 7: NETWORK/API ISSUES STABILIZATION (PARALLEL)
   // ============================================================================
@@ -308,7 +355,6 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Stabilized ${networkStabilized.length}/${networkTests.length} network-related tests`);
   }
-
   // ============================================================================
   // PHASE 8: TEST DESIGN ISSUES STABILIZATION
   // ============================================================================
@@ -337,7 +383,6 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Stabilized ${designStabilization.stabilized}/${designTests.length} design-related tests`);
   }
-
   // ============================================================================
   // PHASE 9: QUARANTINE REMAINING FLAKY TESTS
   // ============================================================================
@@ -367,14 +412,13 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Quarantined ${quarantinedTests.length} remaining flaky tests`);
   }
-
   // ============================================================================
   // PHASE 10: VALIDATION - RE-RUN TESTS
   // ============================================================================
 
   ctx.log('info', 'Phase 10: Validating stabilization by re-running tests');
 
-  const validationResult = await ctx.task(stabilizationValidationTask, {
+  let validationResult = await ctx.task(stabilizationValidationTask, {
     stabilizedTests,
     testSuite,
     runCount: runCount * 2, // More runs for validation
@@ -393,8 +437,18 @@ export async function process(inputs, ctx) {
   // Quality Gate: Check if target flakiness rate achieved
   const targetMet = newFlakinessRate <= targetFlakiness;
 
-  if (!targetMet) {
-    await ctx.breakpoint({
+      let lastFeedback_qualityGateApproval2 = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_qualityGateApproval2) {
+        validationResult = await ctx.task(stabilizationValidationTask, { ...{
+    stabilizedTests,
+    testSuite,
+    runCount: runCount * 2, // More runs for validation
+    testFramework,
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval2, attempt: attempt + 1 });
+      }
+  const qualityGateApproval2 = await ctx.breakpoint({
       question: `Target flakiness rate not met: ${newFlakinessRate.toFixed(2)}% > ${targetFlakiness}%. Continue with additional iterations or complete process?`,
       title: 'Target Flakiness Not Met',
       context: {
@@ -405,9 +459,15 @@ export async function process(inputs, ctx) {
         quarantined: quarantinedTests.length,
         remaining: unstabilizedTests.length - quarantinedTests.length,
         files: validationResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_qualityGateApproval2 || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (qualityGateApproval2.approved) break;
+      lastFeedback_qualityGateApproval2 = qualityGateApproval2.response || qualityGateApproval2.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 11: MONITORING SETUP
@@ -451,7 +511,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 13: Generating comprehensive flakiness elimination report');
 
-  const finalReport = await ctx.task(flakinessEliminationReportTask, {
+  let finalReport = await ctx.task(flakinessEliminationReportTask, {
     originalFlakinessRate: currentFlakinessRate,
     newFlakinessRate,
     targetFlakiness,
@@ -472,9 +532,22 @@ export async function process(inputs, ctx) {
   ctx.log('info', 'Phase 14: Final review and approval');
 
   const improvement = currentFlakinessRate - newFlakinessRate;
-  const improvementPercent = (improvement / currentFlakinessRate) * 100;
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      finalReport = await ctx.task(flakinessEliminationReportTask, { ...{
+    originalFlakinessRate: currentFlakinessRate,
+    newFlakinessRate,
+    targetFlakiness,
+    flakyTests: flakyTests.length,
+    stabilizedTests: validatedStabilizations.length,
+    quarantinedTests: quarantinedTests.length,
+    rootCauseDistribution,
+    testSuite,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Flakiness elimination complete. Reduced flakiness from ${currentFlakinessRate.toFixed(2)}% to ${newFlakinessRate.toFixed(2)}% (${improvementPercent.toFixed(1)}% improvement). Target ${targetMet ? 'MET' : 'NOT MET'}. Approve and merge changes?`,
     title: 'Final Flakiness Elimination Approval',
     context: {
@@ -503,9 +576,15 @@ export async function process(inputs, ctx) {
         { path: monitoringSetup.dashboardConfigPath, format: 'json', label: 'Monitoring Config' },
         { path: validationResult.reportPath, format: 'json', label: 'Validation Results' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -548,8 +627,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

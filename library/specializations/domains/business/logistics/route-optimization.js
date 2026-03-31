@@ -65,7 +65,6 @@ export async function process(inputs, ctx) {
       metadata: { processId: 'specializations/domains/business/logistics/route-optimization', timestamp: startTime }
     };
   }
-
   // ============================================================================
   // PHASE 2: GEOCODING AND DISTANCE MATRIX
   // ============================================================================
@@ -105,7 +104,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 4: Running route optimization algorithm');
 
-  const routeOptimization = await ctx.task(routeOptimizationTask, {
+  let routeOptimization = await ctx.task(routeOptimizationTask, {
     deliveryPoints: dataValidation.processedDeliveryPoints,
     vehicleFleet,
     distanceMatrix: distanceMatrix.matrix,
@@ -117,8 +116,20 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...routeOptimization.artifacts);
 
-  // Quality Gate: Review optimization results
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      routeOptimization = await ctx.task(routeOptimizationTask, { ...{
+    deliveryPoints: dataValidation.processedDeliveryPoints,
+    vehicleFleet,
+    distanceMatrix: distanceMatrix.matrix,
+    timeMatrix: distanceMatrix.timeMatrix,
+    constraintModel: constraintModel.model,
+    optimizationObjective,
+    outputDir
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: `Route optimization complete. Total routes: ${routeOptimization.routes.length}. Total distance: ${routeOptimization.totalDistance} km. Estimated savings: ${routeOptimization.estimatedSavings}%. Review routes?`,
     title: 'Route Optimization Results',
     context: {
@@ -131,9 +142,15 @@ export async function process(inputs, ctx) {
         unassignedDeliveries: routeOptimization.unassignedDeliveries.length
       },
       files: routeOptimization.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 5: ROUTE VALIDATION AND FEASIBILITY CHECK
   // ============================================================================
@@ -153,7 +170,6 @@ export async function process(inputs, ctx) {
   if (!routeValidation.allRoutesFeasible) {
     ctx.log('warn', `Some routes have feasibility issues: ${routeValidation.issues.length}`);
   }
-
   // ============================================================================
   // PHASE 6: VEHICLE UTILIZATION ANALYSIS
   // ============================================================================
@@ -190,7 +206,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 8: Generating route instructions and manifests');
 
-  const routeInstructions = await ctx.task(routeInstructionsTask, {
+  let routeInstructions = await ctx.task(routeInstructionsTask, {
     optimizedRoutes: routeOptimization.routes,
     deliveryPoints: dataValidation.processedDeliveryPoints,
     vehicleFleet,
@@ -199,8 +215,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...routeInstructions.artifacts);
 
-  // Final Breakpoint: Review complete optimization
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      routeInstructions = await ctx.task(routeInstructionsTask, { ...{
+    optimizedRoutes: routeOptimization.routes,
+    deliveryPoints: dataValidation.processedDeliveryPoints,
+    vehicleFleet,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Route optimization complete. ${routeOptimization.routes.length} routes generated for ${deliveryPoints.length} deliveries. Cost savings: $${costAnalysis.totalSavings}. Approve routes for dispatch?`,
     title: 'Final Route Review',
     context: {
@@ -217,9 +242,15 @@ export async function process(inputs, ctx) {
         { path: routeInstructions.manifestPath, format: 'json', label: 'Route Manifests' },
         { path: costAnalysis.reportPath, format: 'markdown', label: 'Cost Analysis Report' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -252,8 +283,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

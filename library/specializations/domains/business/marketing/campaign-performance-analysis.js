@@ -171,7 +171,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 10: Generating executive summary report');
-  const executiveSummary = await ctx.task(executiveSummaryReportTask, {
+  let executiveSummary = await ctx.task(executiveSummaryReportTask, {
     campaignName,
     kpiTracking,
     channelAnalysis,
@@ -187,8 +187,21 @@ export async function process(inputs, ctx) {
   const campaignScore = kpiTracking.overallScore;
   const goalsAchieved = campaignScore >= 80;
 
-  // Breakpoint: Review campaign analysis
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      executiveSummary = await ctx.task(executiveSummaryReportTask, { ...{
+    campaignName,
+    kpiTracking,
+    channelAnalysis,
+    segmentAnalysis,
+    roiAnalysis,
+    learningsDocumentation,
+    optimizationRecommendations,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Campaign analysis complete. Performance score: ${campaignScore}/100. ${goalsAchieved ? 'Campaign met goals!' : 'Campaign underperformed against goals.'} Review and approve?`,
     title: 'Campaign Performance Review & Approval',
     context: {
@@ -208,9 +221,15 @@ export async function process(inputs, ctx) {
         channelsAnalyzed: channelAnalysis.channels?.length || 0,
         recommendationCount: optimizationRecommendations.recommendations?.length || 0
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -259,8 +278,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

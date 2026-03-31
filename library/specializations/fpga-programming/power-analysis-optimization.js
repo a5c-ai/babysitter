@@ -43,15 +43,24 @@ export async function process(inputs, ctx) {
   const powerBreakdown = await ctx.task(powerBreakdownTask, { designName, powerEstimation, outputDir });
   artifacts.push(...powerBreakdown.artifacts);
 
-  const optimizationPlanning = await ctx.task(optimizationPlanningTask, { designName, powerBreakdown, powerBudget, outputDir });
-  artifacts.push(...optimizationPlanning.artifacts);
-
-  await ctx.breakpoint({
+  let optimizationPlanning = await ctx.task(optimizationPlanningTask, { designName, powerBreakdown, powerBudget, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      optimizationPlanning = await ctx.task(optimizationPlanningTask, { ...{ designName, powerBreakdown, powerBudget, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Power analysis complete for ${designName}. Total: ${powerEstimation.totalPower}W, Budget: ${powerBudget || 'N/A'}W. Review optimizations?`,
     title: 'Power Analysis Review',
-    context: { runId: ctx.runId, designName, totalPower: powerEstimation.totalPower, budget: powerBudget }
-  });
-
+    context: { runId: ctx.runId, designName, totalPower: powerEstimation.totalPower, budget: powerBudget },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const clockGatingOptimization = await ctx.task(clockGatingOptimizationTask, { designName, optimizationPlanning, outputDir });
   artifacts.push(...clockGatingOptimization.artifacts);
 

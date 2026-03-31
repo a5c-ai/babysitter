@@ -83,7 +83,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 3: Configuring Memory Management');
 
-  const memoryConfig = await ctx.task(rtosMemoryConfigTask, {
+  let memoryConfig = await ctx.task(rtosMemoryConfigTask, {
     projectName,
     rtosName,
     heapScheme,
@@ -92,9 +92,19 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...memoryConfig.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      memoryConfig = await ctx.task(rtosMemoryConfigTask, { ...{
+    projectName,
+    rtosName,
+    heapScheme,
+    staticAllocation,
+    requirements,
+    outputDir
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `RTOS configuration ready for ${projectName}. Heap: ${memoryConfig.heapSize}, Static: ${staticAllocation}. Proceed with task design?`,
     title: 'RTOS Configuration Review',
     context: {
@@ -102,9 +112,15 @@ export async function process(inputs, ctx) {
       rtosName,
       heapSize: memoryConfig.heapSize,
       files: memoryConfig.artifacts.map(a => ({ path: a.path, format: a.format || 'c' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 4: TASK ARCHITECTURE DESIGN
   // ============================================================================
@@ -186,7 +202,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...timerSetup.artifacts);
   }
-
   // ============================================================================
   // PHASE 9: LOW-POWER TICKLESS MODE (if enabled)
   // ============================================================================
@@ -205,7 +220,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...ticklessSetup.artifacts);
   }
-
   // ============================================================================
   // PHASE 10: INTERRUPT INTEGRATION
   // ============================================================================
@@ -265,7 +279,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 13: Creating Documentation');
 
-  const documentation = await ctx.task(rtosDocumentationTask, {
+  let documentation = await ctx.task(rtosDocumentationTask, {
     projectName,
     rtosName,
     taskArchitecture,
@@ -277,8 +291,20 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...documentation.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      documentation = await ctx.task(rtosDocumentationTask, { ...{
+    projectName,
+    rtosName,
+    taskArchitecture,
+    ipcSetup,
+    syncPrimitives,
+    configHeader,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `RTOS Integration Complete for ${projectName}. ${taskImplementation.taskCount} tasks, ${ipcSetup.queueCount} queues. Review integration?`,
     title: 'RTOS Integration Complete',
     context: {
@@ -295,9 +321,15 @@ export async function process(inputs, ctx) {
         { path: documentation.readmePath, format: 'markdown', label: 'Documentation' },
         { path: configHeader.configPath, format: 'c', label: 'RTOS Config' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -341,8 +373,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

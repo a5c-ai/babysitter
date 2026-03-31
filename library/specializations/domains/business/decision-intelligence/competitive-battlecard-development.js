@@ -62,7 +62,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 5: Battlecard Content Creation
-  const battlecardContent = await ctx.task(battlecardContentTask, {
+  let battlecardContent = await ctx.task(battlecardContentTask, {
     projectName,
     competitors,
     competitiveResearch,
@@ -71,8 +71,19 @@ export async function process(inputs, ctx) {
     winLossIntelligence
   });
 
-  // Breakpoint: Review battlecard content
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      battlecardContent = await ctx.task(battlecardContentTask, { ...{
+    projectName,
+    competitors,
+    competitiveResearch,
+    differentiationAnalysis,
+    objectionLibrary,
+    winLossIntelligence
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Review battlecard content for ${projectName}. Is the positioning accurate and compelling?`,
     title: 'Battlecard Content Review',
     context: {
@@ -80,9 +91,15 @@ export async function process(inputs, ctx) {
       projectName,
       battlecardCount: battlecardContent.battlecards?.length || 0,
       objectionCount: objectionLibrary.objections?.length || 0
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 6: Win Strategy Development
   const winStrategies = await ctx.task(winStrategyTask, {
     projectName,
@@ -124,8 +141,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const competitiveResearchTask = defineTask('competitive-research', (args, taskCtx) => ({
   kind: 'agent',

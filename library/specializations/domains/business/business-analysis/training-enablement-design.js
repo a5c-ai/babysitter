@@ -485,7 +485,7 @@ export async function process(inputs, ctx) {
 
   // Phase 3: Curriculum Design
   ctx.log('Phase 3: Designing training curriculum');
-  const curriculumResult = await ctx.task(curriculumDesignTask, {
+  let curriculumResult = await ctx.task(curriculumDesignTask, {
     learningObjectives: artifacts.learningObjectives,
     needsAnalysis: artifacts.needsAnalysis,
     deliveryPreferences: inputs.deliveryPreferences,
@@ -493,16 +493,31 @@ export async function process(inputs, ctx) {
   });
   artifacts.curriculum = curriculumResult;
 
-  // Breakpoint for curriculum review
-  await ctx.breakpoint('curriculum-review', {
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      curriculumResult = await ctx.task(curriculumDesignTask, { ...{
+    learningObjectives: artifacts.learningObjectives,
+    needsAnalysis: artifacts.needsAnalysis,
+    deliveryPreferences: inputs.deliveryPreferences,
+    constraints: inputs.constraints
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint('curriculum-review', {
     question: 'Review the training curriculum design. Is the structure and content appropriate?',
     artifacts: {
       needsAnalysis: artifacts.needsAnalysis,
       learningObjectives: artifacts.learningObjectives,
       curriculum: artifacts.curriculum
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 4: Learning Materials Development
   ctx.log('Phase 4: Developing learning materials');
   const materialsResult = await ctx.task(materialDevelopmentTask, {

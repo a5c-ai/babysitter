@@ -24,15 +24,24 @@ export async function process(inputs, ctx) {
   const gapAnalysis = await ctx.task(gapAnalysisTask, { assessment, targetLevel, outputDir });
   artifacts.push(...gapAnalysis.artifacts);
 
-  const learningPlan = await ctx.task(learningPlanCreationTask, { gapAnalysis, targetLevel, outputDir });
-  artifacts.push(...learningPlan.artifacts);
-
-  await ctx.breakpoint({
+  let learningPlan = await ctx.task(learningPlanCreationTask, { gapAnalysis, targetLevel, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      learningPlan = await ctx.task(learningPlanCreationTask, { ...{ gapAnalysis, targetLevel, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Skill gap analysis complete. ${gapAnalysis.gaps.length} gaps identified. Learning plan created. Review?`,
     title: 'Skill Gap Analysis Complete',
-    context: { runId: ctx.runId, gaps: gapAnalysis.gaps, planDuration: learningPlan.estimatedDuration }
-  });
-
+    context: { runId: ctx.runId, gaps: gapAnalysis.gaps, planDuration: learningPlan.estimatedDuration },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     currentLevel,

@@ -61,7 +61,6 @@ export async function process(inputs, ctx) {
       }
     };
   }
-
   // ============================================================================
   // PHASE 2: CARD PREPARATION AND CONTENT CURATION
   // ============================================================================
@@ -84,7 +83,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 3: Setting up card sorting tool and configuring study');
-  const toolSetup = await ctx.task(toolSetupTask, {
+  let toolSetup = await ctx.task(toolSetupTask, {
     projectName,
     sortingType,
     toolPreference,
@@ -98,8 +97,22 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...toolSetup.artifacts);
 
-  // Breakpoint: Review study setup before recruitment
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      toolSetup = await ctx.task(toolSetupTask, { ...{
+    projectName,
+    sortingType,
+    toolPreference,
+    cards: cardPreparation.finalCards,
+    predefinedCategories: cardPreparation.categories,
+    studyPlanning,
+    remoteSession,
+    includeFollowUpQuestions,
+    outputDir
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Card sorting study configured with ${cardPreparation.finalCards.length} cards${sortingType === 'closed' ? ` and ${cardPreparation.categories.length} predefined categories` : ''}. Review setup and approve for participant recruitment?`,
     title: 'Card Sorting Study Setup Review',
     context: {
@@ -122,9 +135,15 @@ export async function process(inputs, ctx) {
         toolConfigured: toolSetup.toolName,
         studyUrl: toolSetup.studyUrl
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 4: PARTICIPANT RECRUITMENT AND SCREENING
   // ============================================================================
@@ -183,7 +202,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 7: Performing dendrogram analysis and identifying clusters');
-  const dendrogramAnalysis = await ctx.task(dendrogramAnalysisTask, {
+  let dendrogramAnalysis = await ctx.task(dendrogramAnalysisTask, {
     projectName,
     sortingType,
     similarityMatrix: similarityAnalysis.similarityMatrix,
@@ -194,8 +213,19 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...dendrogramAnalysis.artifacts);
 
-  // Breakpoint: Review analysis results
-  await ctx.breakpoint({
+    let lastFeedback_phase7Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase7Review) {
+      dendrogramAnalysis = await ctx.task(dendrogramAnalysisTask, { ...{
+    projectName,
+    sortingType,
+    similarityMatrix: similarityAnalysis.similarityMatrix,
+    cards: cardPreparation.finalCards,
+    sortingData: sessionFacilitation.sortingData,
+    outputDir
+  }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
+    }
+  const phase7Review = await ctx.breakpoint({
     question: `Card sorting analysis complete. ${sessionFacilitation.completedSessions} sessions analyzed. Agreement score: ${similarityAnalysis.overallAgreementScore}/100. ${dendrogramAnalysis.clusters.length} clusters identified. Review analysis?`,
     title: 'Card Sorting Analysis Review',
     context: {
@@ -218,9 +248,15 @@ export async function process(inputs, ctx) {
         strongPairings: similarityAnalysis.strongPairings.length,
         uncertainGroupings: dendrogramAnalysis.uncertainGroupings.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase7Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase7Review.approved) break;
+    lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 8: CATEGORY NAMING AND LABELING (for open/hybrid sorts)
   // ============================================================================
@@ -239,7 +275,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...categoryLabeling.artifacts);
   }
-
   // ============================================================================
   // PHASE 9: CATEGORY VALIDATION AND AGREEMENT SCORING
   // ============================================================================
@@ -279,7 +314,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...navigationRecommendations.artifacts);
   }
-
   // ============================================================================
   // PHASE 11: INSIGHT GENERATION AND FINDINGS SYNTHESIS
   // ============================================================================
@@ -329,7 +363,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 13: Scoring card sorting study quality and reliability');
-  const qualityScoring = await ctx.task(qualityScoringTask, {
+  let qualityScoring = await ctx.task(qualityScoringTask, {
     projectName,
     sortingType,
     participantCount: sessionFacilitation.completedSessions,
@@ -347,8 +381,23 @@ export async function process(inputs, ctx) {
   const qualityScore = qualityScoring.overallScore;
   const qualityMet = qualityScore >= 75;
 
-  // Final Breakpoint: Review complete card sorting deliverables
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      qualityScoring = await ctx.task(qualityScoringTask, { ...{
+    projectName,
+    sortingType,
+    participantCount: sessionFacilitation.completedSessions,
+    targetParticipantCount: participantCount,
+    cardCount: cardPreparation.finalCards.length,
+    agreementScore: similarityAnalysis.overallAgreementScore,
+    categoryValidation,
+    sessionFacilitation,
+    minAgreementScore,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Card sorting study complete! Quality score: ${qualityScore}/100. Agreement score: ${similarityAnalysis.overallAgreementScore}/100. ${qualityMet ? 'Study meets quality standards!' : 'Study may benefit from additional sessions or refinement.'} Review findings and approve?`,
     title: 'Card Sorting Final Review',
     context: {
@@ -380,9 +429,15 @@ export async function process(inputs, ctx) {
           navigationStructureReady: !!navigationRecommendations
         }
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -455,8 +510,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

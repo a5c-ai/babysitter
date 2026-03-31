@@ -97,7 +97,7 @@ export async function process(inputs, ctx) {
 
   // Task 7: Generate Close Reading Report
   ctx.log('info', 'Generating close reading report');
-  const closeReadingReport = await ctx.task(closeReadingReportTask, {
+  let closeReadingReport = await ctx.task(closeReadingReportTask, {
     text,
     initialReading,
     languageAnalysis,
@@ -111,8 +111,22 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...closeReadingReport.artifacts);
 
-  // Breakpoint: Review close reading analysis
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      closeReadingReport = await ctx.task(closeReadingReportTask, { ...{
+    text,
+    initialReading,
+    languageAnalysis,
+    imageryAnalysis,
+    structureAnalysis,
+    intertextualAnalysis,
+    patternSynthesis,
+    theoreticalLens,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Close reading complete for ${text.title || 'text'}. Patterns identified: ${patternSynthesis.patterns?.length || 0}. Review analysis?`,
     title: 'Close Reading Analysis Results',
     context: {
@@ -124,9 +138,15 @@ export async function process(inputs, ctx) {
         patternsIdentified: patternSynthesis.patterns?.length || 0,
         annotationCount: initialReading.annotations?.length || 0
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -156,8 +176,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Initial Reading and Annotation
+  // Task 1: Initial Reading and Annotation
 export const initialReadingTask = defineTask('initial-reading', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Perform initial reading and annotation',

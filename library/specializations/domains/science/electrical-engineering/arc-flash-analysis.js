@@ -31,7 +31,7 @@ export async function process(inputs, ctx) {
   } = inputs;
 
   // Phase 1: Collect System Data and Protective Device Information
-  const dataCollection = await ctx.task(dataCollectionTask, {
+  let dataCollection = await ctx.task(dataCollectionTask, {
     facilityName,
     systemData,
     equipmentList,
@@ -47,9 +47,17 @@ export async function process(inputs, ctx) {
       missingData: dataCollection.missingData
     };
   }
-
-  // Breakpoint: Review collected data
-  await ctx.breakpoint({
+  let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      dataCollection = await ctx.task(dataCollectionTask, { ...{
+    facilityName,
+    systemData,
+    equipmentList,
+    protectionDevices
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Review system data for ${facilityName} arc flash study. ${dataCollection.equipmentCount} equipment items identified. Proceed with modeling?`,
     title: 'Data Collection Review',
     context: {
@@ -61,9 +69,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: dataCollection
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // Phase 2: Build Power System Model with Device Characteristics
   const systemModeling = await ctx.task(systemModelingTask, {
     facilityName,
@@ -72,14 +86,22 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 3: Calculate Bolted Fault Currents at Equipment
-  const faultCurrentCalculation = await ctx.task(faultCurrentCalculationTask, {
+  let faultCurrentCalculation = await ctx.task(faultCurrentCalculationTask, {
     facilityName,
     systemModel: systemModeling.model,
     equipmentLocations: systemModeling.equipmentLocations
   });
 
-  // Breakpoint: Review fault currents
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      faultCurrentCalculation = await ctx.task(faultCurrentCalculationTask, { ...{
+    facilityName,
+    systemModel: systemModeling.model,
+    equipmentLocations: systemModeling.equipmentLocations
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Fault current calculations complete. Max bolted fault: ${faultCurrentCalculation.maxFault}. Review before clearing time analysis?`,
     title: 'Fault Current Review',
     context: {
@@ -90,9 +112,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: faultCurrentCalculation
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // Phase 4: Determine Protective Device Clearing Times
   const clearingTimeAnalysis = await ctx.task(clearingTimeAnalysisTask, {
     facilityName,
@@ -109,14 +137,22 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 6: Determine Arc Flash Boundaries
-  const arcFlashBoundaries = await ctx.task(arcFlashBoundaryTask, {
+  let arcFlashBoundaries = await ctx.task(arcFlashBoundaryTask, {
     facilityName,
     incidentEnergies: incidentEnergyCalculation.results,
     equipmentLocations: systemModeling.equipmentLocations
   });
 
-  // Breakpoint: Review incident energy results
-  await ctx.breakpoint({
+    let lastFeedback_phase6Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase6Review) {
+      arcFlashBoundaries = await ctx.task(arcFlashBoundaryTask, { ...{
+    facilityName,
+    incidentEnergies: incidentEnergyCalculation.results,
+    equipmentLocations: systemModeling.equipmentLocations
+  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
+    }
+  const phase6Review = await ctx.breakpoint({
     question: `Incident energy calculations complete for ${facilityName}. ${incidentEnergyCalculation.hazardousLocations} hazardous locations identified. Review results?`,
     title: 'Incident Energy Review',
     context: {
@@ -128,9 +164,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: incidentEnergyCalculation
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase6Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase6Review.approved) break;
+    lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
+  }
   // Phase 7: Specify PPE Requirements and Labeling
   const ppeAndLabeling = await ctx.task(ppeAndLabelingTask, {
     facilityName,
@@ -140,7 +182,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 8: Document Hazard Analysis and Safety Recommendations
-  const documentationAndRecommendations = await ctx.task(documentationTask, {
+  let documentationAndRecommendations = await ctx.task(documentationTask, {
     facilityName,
     dataCollection,
     systemModeling,
@@ -151,8 +193,21 @@ export async function process(inputs, ctx) {
     ppeAndLabeling
   });
 
-  // Final Breakpoint: Study Approval
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      documentationAndRecommendations = await ctx.task(documentationTask, { ...{
+    facilityName,
+    dataCollection,
+    systemModeling,
+    faultCurrentCalculation,
+    clearingTimeAnalysis,
+    incidentEnergyCalculation,
+    arcFlashBoundaries,
+    ppeAndLabeling
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Arc flash hazard analysis complete for ${facilityName}. ${ppeAndLabeling.totalLabels} labels generated. Approve study?`,
     title: 'Study Approval',
     context: {
@@ -163,9 +218,15 @@ export async function process(inputs, ctx) {
         { path: `artifacts/arc-flash-results.json`, format: 'json', content: incidentEnergyCalculation.results },
         { path: `artifacts/arc-flash-report.md`, format: 'markdown', content: documentationAndRecommendations.markdown }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     facilityName,
@@ -184,8 +245,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const dataCollectionTask = defineTask('data-collection', (args, taskCtx) => ({
   kind: 'agent',

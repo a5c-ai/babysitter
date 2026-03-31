@@ -604,7 +604,6 @@ export async function process(inputs, ctx) {
   if (!projectRoot) {
     throw new Error('projectRoot is required — specify the absolute path to the project directory');
   }
-
   const projectName = inputs.projectName || projectRoot.split('/').filter(Boolean).pop();
   const startTime = ctx.now();
   const artifacts = [];
@@ -686,7 +685,7 @@ export async function process(inputs, ctx) {
 
   ctx.log?.('info', '=== PHASE 3: Cross-File Compound Analysis ===');
 
-  const compound = await ctx.task(compoundAnalysisTask, {
+  let compound = await ctx.task(compoundAnalysisTask, {
     projectRoot,
     projectName,
     perFileResults,
@@ -700,9 +699,17 @@ export async function process(inputs, ctx) {
   ctx.log?.('info', '=== PHASE 4: Findings Review ===');
 
   const allFindings = perFileResults.flatMap(r => r.findings || []);
-  const totalFindings = allFindings.length + (homoglyphResults.homoglyphsFound?.length || 0);
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      compound = await ctx.task(compoundAnalysisTask, { ...{
+    projectRoot,
+    projectName,
+    perFileResults,
+    homoglyphResults
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: [
       `Trojan detection scan complete for "${projectName}".`,
       '',
@@ -723,9 +730,15 @@ export async function process(inputs, ctx) {
       verdict: compound.overallVerdict,
       layerCount: compound.layerCount,
       findings: totalFindings
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ── PHASE 5: Report Generation ────────────────────────────────────
 
   ctx.log?.('info', '=== PHASE 5: HTML Report Generation ===');
@@ -768,7 +781,6 @@ export async function process(inputs, ctx) {
       artifacts.push({ type: 'revert', files: revert.revertedFiles });
     }
   }
-
   // ── Return ────────────────────────────────────────────────────────
 
   const endTime = ctx.now();

@@ -104,7 +104,7 @@ export async function process(inputs, ctx) {
 
   // Phase 6: Data Validation
   ctx.log('info', 'Phase 6: Validating extracted data');
-  const dataValidation = await ctx.task(validateData, {
+  let dataValidation = await ctx.task(validateData, {
     extractedData: dataExtraction.data,
     schema: schemaDesign.schema,
     validationRules: inputs.validationRules,
@@ -113,8 +113,18 @@ export async function process(inputs, ctx) {
   });
   artifacts.push(...(dataValidation.artifacts || []));
 
-  // Quality Gate: Review data quality
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      dataValidation = await ctx.task(validateData, { ...{
+    extractedData: dataExtraction.data,
+    schema: schemaDesign.schema,
+    validationRules: inputs.validationRules,
+    physicalConstraints: inputs.physicalConstraints,
+    standardsCompliance
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: 'Review data quality report. Are validation results acceptable for database inclusion?',
     title: 'Data Quality Review',
     context: {
@@ -126,9 +136,15 @@ export async function process(inputs, ctx) {
         qualityScore: dataValidation.qualityScore
       },
       files: artifacts
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 7: Data Standardization
   ctx.log('info', 'Phase 7: Standardizing data formats and units');
   const dataStandardization = await ctx.task(standardizeData, {

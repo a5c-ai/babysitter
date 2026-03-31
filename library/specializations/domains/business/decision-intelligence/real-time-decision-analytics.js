@@ -53,23 +53,37 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 4: Analytics Engine Design
-  const analyticsEngine = await ctx.task(realtimeAnalyticsEngineTask, {
+  let analyticsEngine = await ctx.task(realtimeAnalyticsEngineTask, {
     projectName,
     useCaseAnalysis,
     streamingArchitecture
   });
 
-  // Breakpoint: Review real-time architecture
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      analyticsEngine = await ctx.task(realtimeAnalyticsEngineTask, { ...{
+    projectName,
+    useCaseAnalysis,
+    streamingArchitecture
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Review real-time analytics architecture for ${projectName}. Does it meet latency requirements?`,
     title: 'Real-Time Architecture Review',
     context: {
       runId: ctx.runId,
       projectName,
       latencyTarget: latencyRequirements.detection || 'N/A'
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 5: Decision Engine Implementation
   const decisionEngine = await ctx.task(realtimeDecisionEngineTask, {
     projectName,
@@ -117,8 +131,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const realtimeUseCaseTask = defineTask('realtime-use-case', (args, taskCtx) => ({
   kind: 'agent',

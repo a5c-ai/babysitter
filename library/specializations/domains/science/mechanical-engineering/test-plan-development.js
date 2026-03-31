@@ -33,23 +33,37 @@ export async function process(inputs, ctx) {
   artifacts.push({ phase: 'requirements-analysis', data: requirementsAnalysis });
 
   // Phase 2: Test Strategy Development
-  const testStrategy = await ctx.task(testStrategyTask, {
+  let testStrategy = await ctx.task(testStrategyTask, {
     testMatrix: requirementsAnalysis.testMatrix,
     constraints: inputs.constraints,
     testType: inputs.testType
   });
   artifacts.push({ phase: 'test-strategy', data: testStrategy });
 
-  // Breakpoint: Test Strategy Review
-  await ctx.breakpoint('strategy-review', {
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      testStrategy = await ctx.task(testStrategyTask, { ...{
+    testMatrix: requirementsAnalysis.testMatrix,
+    constraints: inputs.constraints,
+    testType: inputs.testType
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint('strategy-review', {
     question: 'Review test strategy and approach. Approve test methodology?',
     context: {
       testCount: testStrategy.testCount,
       estimatedCost: testStrategy.costEstimate,
       estimatedDuration: testStrategy.durationEstimate
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // Phase 3: Test Procedure Development
   const testProcedures = await ctx.task(testProceduresTask, {
     testMatrix: requirementsAnalysis.testMatrix,
@@ -99,7 +113,7 @@ export async function process(inputs, ctx) {
   artifacts.push({ phase: 'resource-plan', data: resourcePlan });
 
   // Phase 9: Test Plan Documentation
-  const testPlanDocument = await ctx.task(testPlanDocumentTask, {
+  let testPlanDocument = await ctx.task(testPlanDocumentTask, {
     projectId: inputs.projectId,
     requirementsAnalysis: requirementsAnalysis,
     testStrategy: testStrategy,
@@ -109,17 +123,34 @@ export async function process(inputs, ctx) {
   });
   artifacts.push({ phase: 'test-plan-document', data: testPlanDocument });
 
-  // Final Breakpoint: Test Plan Approval
-  await ctx.breakpoint('test-plan-approval', {
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      testPlanDocument = await ctx.task(testPlanDocumentTask, { ...{
+    projectId: inputs.projectId,
+    requirementsAnalysis: requirementsAnalysis,
+    testStrategy: testStrategy,
+    testProcedures: testProcedures,
+    instrumentationPlan: instrumentationPlan,
+    resourcePlan: resourcePlan
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint('test-plan-approval', {
     question: 'Approve test plan for execution?',
     context: {
       projectId: inputs.projectId,
       totalTests: testStrategy.testCount,
       totalCost: resourcePlan.totalCost,
       totalDuration: resourcePlan.totalDuration
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     results: {
@@ -140,8 +171,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-const requirementsAnalysisTask = defineTask('requirements-analysis', (args) => ({
+  const requirementsAnalysisTask = defineTask('requirements-analysis', (args) => ({
   kind: 'agent',
   title: 'Requirements Analysis and Test Matrix Development',
   agent: {

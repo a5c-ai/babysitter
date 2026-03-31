@@ -56,7 +56,7 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Identified ${custodianIdentification.custodians.length} custodians`);
 
   // Phase 3: Hold Notice Drafting
-  const holdNotice = await ctx.task(holdNoticeDraftingTask, {
+  let holdNotice = await ctx.task(holdNoticeDraftingTask, {
     matterId,
     matterType,
     scope: scopeDefinition.scope,
@@ -65,8 +65,18 @@ export async function process(inputs, ctx) {
   });
   artifacts.push(...holdNotice.artifacts);
 
-  // Quality Gate: Review hold notice
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      holdNotice = await ctx.task(holdNoticeDraftingTask, { ...{
+    matterId,
+    matterType,
+    scope: scopeDefinition.scope,
+    custodians: custodianIdentification.custodians,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Legal hold notice drafted for ${matterId}. ${custodianIdentification.custodians.length} custodians identified. Review and approve hold issuance?`,
     title: 'Legal Hold Notice Review',
     context: {
@@ -75,9 +85,15 @@ export async function process(inputs, ctx) {
       custodianCount: custodianIdentification.custodians.length,
       scope: scopeDefinition.scope.summary,
       files: [{ path: holdNotice.noticePath, format: 'docx', label: 'Hold Notice' }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 4: Hold Issuance
   const holdIssuance = await ctx.task(holdIssuanceTask, {
     matterId,

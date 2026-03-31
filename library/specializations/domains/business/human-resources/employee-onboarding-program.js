@@ -45,7 +45,7 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Starting Employee Onboarding Program for ${employeeName} (${employeeId})`);
 
   // Phase 1: Pre-boarding Setup (Before Day 1)
-  const preboardingSetup = await ctx.task(preboardingSetupTask, {
+  let preboardingSetup = await ctx.task(preboardingSetupTask, {
     employeeId,
     employeeName,
     department,
@@ -56,9 +56,21 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...preboardingSetup.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      preboardingSetup = await ctx.task(preboardingSetupTask, { ...{
+    employeeId,
+    employeeName,
+    department,
+    role,
+    startDate,
+    manager,
+    location,
+    outputDir
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Pre-boarding setup completed for ${employeeName}. IT equipment ordered, accounts created. Review pre-boarding checklist?`,
     title: 'Pre-boarding Review',
     context: {
@@ -69,9 +81,15 @@ export async function process(inputs, ctx) {
       accountsCreated: preboardingSetup.accountsCreated,
       equipmentOrdered: preboardingSetup.equipmentOrdered,
       files: preboardingSetup.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // Phase 2: Buddy Assignment
   const buddyAssignment = await ctx.task(buddyAssignmentTask, {
     employeeId,
@@ -101,7 +119,7 @@ export async function process(inputs, ctx) {
   artifacts.push(...day1Orientation.artifacts);
 
   // Phase 4: 30-60-90 Day Plan Development
-  const developmentPlan = await ctx.task(developmentPlanTask, {
+  let developmentPlan = await ctx.task(developmentPlanTask, {
     employeeId,
     employeeName,
     department,
@@ -112,9 +130,21 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...developmentPlan.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      developmentPlan = await ctx.task(developmentPlanTask, { ...{
+    employeeId,
+    employeeName,
+    department,
+    role,
+    manager,
+    seniorityLevel,
+    customOnboardingPath,
+    outputDir
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: `30-60-90 day plan created for ${employeeName}. Review milestones and success criteria before sharing with new hire?`,
     title: '30-60-90 Day Plan Review',
     context: {
@@ -125,9 +155,15 @@ export async function process(inputs, ctx) {
       day90Goals: developmentPlan.day90Goals,
       successCriteria: developmentPlan.successCriteria,
       files: developmentPlan.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
   // Phase 5: Training Schedule Creation
   const trainingSchedule = await ctx.task(trainingScheduleTask, {
     employeeId,
@@ -166,7 +202,7 @@ export async function process(inputs, ctx) {
   artifacts.push(...week1Tracking.artifacts);
 
   // Phase 8: 30-Day Checkpoint
-  const day30Checkpoint = await ctx.task(checkpointTask, {
+  let day30Checkpoint = await ctx.task(checkpointTask, {
     employeeId,
     employeeName,
     checkpointDay: 30,
@@ -175,9 +211,19 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...day30Checkpoint.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase8Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase8Review) {
+      day30Checkpoint = await ctx.task(checkpointTask, { ...{
+    employeeId,
+    employeeName,
+    checkpointDay: 30,
+    milestones: developmentPlan.day30Goals,
+    manager,
+    outputDir
+  }, feedback: lastFeedback_phase8Review, attempt: attempt + 1 });
+    }
+  const phase8Review = await ctx.breakpoint({
     question: `30-day checkpoint for ${employeeName}. Milestone completion: ${day30Checkpoint.completionRate}%. Review progress and provide feedback?`,
     title: '30-Day Checkpoint Review',
     context: {
@@ -188,9 +234,15 @@ export async function process(inputs, ctx) {
       pendingMilestones: day30Checkpoint.pendingMilestones,
       feedback: day30Checkpoint.feedback,
       files: day30Checkpoint.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase8Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase8Review.approved) break;
+    lastFeedback_phase8Review = phase8Review.response || phase8Review.feedback || 'Changes requested';
+  }
   // Phase 9: 60-Day Checkpoint
   const day60Checkpoint = await ctx.task(checkpointTask, {
     employeeId,
@@ -205,7 +257,7 @@ export async function process(inputs, ctx) {
   artifacts.push(...day60Checkpoint.artifacts);
 
   // Phase 10: 90-Day Checkpoint and Completion
-  const day90Checkpoint = await ctx.task(checkpointTask, {
+  let day90Checkpoint = await ctx.task(checkpointTask, {
     employeeId,
     employeeName,
     checkpointDay: 90,
@@ -215,9 +267,20 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...day90Checkpoint.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      day90Checkpoint = await ctx.task(checkpointTask, { ...{
+    employeeId,
+    employeeName,
+    checkpointDay: 90,
+    milestones: developmentPlan.day90Goals,
+    manager,
+    previousCheckpoint: day60Checkpoint,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `90-day onboarding checkpoint for ${employeeName}. Overall completion: ${day90Checkpoint.completionRate}%. Confirm onboarding completion and transition to regular performance management?`,
     title: '90-Day Onboarding Completion',
     context: {
@@ -227,9 +290,15 @@ export async function process(inputs, ctx) {
       onboardingSuccess: day90Checkpoint.onboardingSuccess,
       recommendations: day90Checkpoint.recommendations,
       files: day90Checkpoint.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 11: Onboarding Feedback Collection
   const feedbackCollection = await ctx.task(feedbackCollectionTask, {
     employeeId,
@@ -288,8 +357,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const preboardingSetupTask = defineTask('preboarding-setup', (args, taskCtx) => ({
   kind: 'agent',

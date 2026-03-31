@@ -40,15 +40,24 @@ export async function process(inputs, ctx) {
   artifacts.push(...comparison.artifacts);
 
   // Phase 3: Configure Statistical Analysis
-  const statisticalConfig = await ctx.task(configureStatisticalAnalysisTask, { projectName, outputDir });
-  artifacts.push(...statisticalConfig.artifacts);
-
-  await ctx.breakpoint({
+  let statisticalConfig = await ctx.task(configureStatisticalAnalysisTask, { projectName, outputDir });
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      statisticalConfig = await ctx.task(configureStatisticalAnalysisTask, { ...{ projectName, outputDir }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Regression detection configured. Threshold: ${regressionThreshold}%. Implement monitoring?`,
     title: 'Regression Detection Configuration',
-    context: { runId: ctx.runId, criteria, comparison }
-  });
-
+    context: { runId: ctx.runId, criteria, comparison },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // Phase 4: Set Up Automated Monitoring
   const monitoring = await ctx.task(setupAutomatedMonitoringTask, { projectName, comparison, outputDir });
   artifacts.push(...monitoring.artifacts);
@@ -66,15 +75,24 @@ export async function process(inputs, ctx) {
   artifacts.push(...ciIntegration.artifacts);
 
   // Phase 8: Document Detection Strategy
-  const documentation = await ctx.task(documentRegressionDetectionTask, { projectName, criteria, comparison, alerting, outputDir });
-  artifacts.push(...documentation.artifacts);
-
-  await ctx.breakpoint({
+  let documentation = await ctx.task(documentRegressionDetectionTask, { projectName, criteria, comparison, alerting, outputDir });
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      documentation = await ctx.task(documentRegressionDetectionTask, { ...{ projectName, criteria, comparison, alerting, outputDir }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Regression detection setup complete. ${alerting.alertRules.length} alert rules configured. CI integrated: ${ciIntegration.integrated}. Accept?`,
     title: 'Regression Detection Review',
-    context: { runId: ctx.runId, alerting, ciIntegration }
-  });
-
+    context: { runId: ctx.runId, alerting, ciIntegration },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     projectName,

@@ -31,7 +31,7 @@ export async function process(inputs, ctx) {
 
   // Phase 1: Design Independent Methods
   ctx.log('info', 'Designing independent research methods for triangulation');
-  const methodDesigns = await ctx.task(designMethodsTask, {
+  let methodDesigns = await ctx.task(designMethodsTask, {
     researchQuestion,
     phenomenon,
     requestedMethods: methods,
@@ -60,9 +60,17 @@ export async function process(inputs, ctx) {
     methodDesigns: methodDesigns.methods,
     methodResults,
     domain
-  });
-
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      methodDesigns = await ctx.task(designMethodsTask, { ...{
+    researchQuestion,
+    phenomenon,
+    requestedMethods: methods,
+    domain
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Methods executed. Independence score: ${independenceAssessment.independenceScore}%. Review method results?`,
     title: 'Triangulation - Method Execution Complete',
     context: {
@@ -72,9 +80,15 @@ export async function process(inputs, ctx) {
         { path: 'artifacts/method-results.json', format: 'json' },
         { path: 'artifacts/independence-assessment.json', format: 'json' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // Phase 4: Identify Convergent Findings
   ctx.log('info', 'Identifying convergent findings across methods');
   const convergenceAnalysis = await ctx.task(analyzeConvergenceTask, {
@@ -95,7 +109,7 @@ export async function process(inputs, ctx) {
 
   // Phase 6: Resolve Discrepancies
   ctx.log('info', 'Attempting to resolve discrepancies');
-  const discrepancyResolution = await ctx.task(resolveDiscrepanciesTask, {
+  let discrepancyResolution = await ctx.task(resolveDiscrepanciesTask, {
     researchQuestion,
     divergentFindings: divergenceAnalysis.divergentFindings,
     methodResults,
@@ -113,9 +127,17 @@ export async function process(inputs, ctx) {
     discrepancyResolution,
     independenceAssessment,
     domain
-  });
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      discrepancyResolution = await ctx.task(resolveDiscrepanciesTask, { ...{
+    researchQuestion,
+    divergentFindings: divergenceAnalysis.divergentFindings,
+    methodResults,
+    domain
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Triangulation complete. Convergence: ${convergenceAnalysis.overallConvergence}%. Review triangulated conclusion?`,
     title: 'Triangulation - Final Results',
     context: {
@@ -124,9 +146,15 @@ export async function process(inputs, ctx) {
         { path: 'artifacts/convergence-analysis.json', format: 'json' },
         { path: 'artifacts/triangulated-conclusion.md', format: 'markdown' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: convergenceAnalysis.overallConvergence >= convergenceThreshold,
     processId: 'domains/science/scientific-discovery/triangulation',

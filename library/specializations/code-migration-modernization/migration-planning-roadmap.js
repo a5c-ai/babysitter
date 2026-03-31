@@ -44,7 +44,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 1: Defining migration goals');
-  const migrationGoals = await ctx.task(defineMigrationGoalsTask, {
+  let migrationGoals = await ctx.task(defineMigrationGoalsTask, {
     projectName,
     assessmentReport,
     businessRequirements,
@@ -55,8 +55,19 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...migrationGoals.artifacts);
 
-  // Breakpoint: Goal alignment review
-  await ctx.breakpoint({
+    let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      migrationGoals = await ctx.task(defineMigrationGoalsTask, { ...{
+    projectName,
+    assessmentReport,
+    businessRequirements,
+    budgetConstraints,
+    timelineConstraints,
+    outputDir
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Migration goals defined for ${projectName}. Primary goal: ${migrationGoals.primaryGoal}. Business alignment score: ${migrationGoals.alignmentScore}%. Approve goals before strategy selection?`,
     title: 'Migration Goals Review',
     context: {
@@ -64,9 +75,15 @@ export async function process(inputs, ctx) {
       projectName,
       goals: migrationGoals,
       recommendation: 'Ensure all stakeholders agree on goals before proceeding'
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 2: SELECT MIGRATION STRATEGY
   // ============================================================================
@@ -89,7 +106,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 3: Defining target architecture');
-  const targetArchitecture = await ctx.task(defineTargetArchitectureTask, {
+  let targetArchitecture = await ctx.task(defineTargetArchitectureTask, {
     projectName,
     migrationGoals,
     migrationStrategy,
@@ -99,8 +116,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...targetArchitecture.artifacts);
 
-  // Breakpoint: Target architecture approval
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      targetArchitecture = await ctx.task(defineTargetArchitectureTask, { ...{
+    projectName,
+    migrationGoals,
+    migrationStrategy,
+    assessmentReport,
+    outputDir
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Target architecture designed for ${projectName}. Pattern: ${targetArchitecture.architecturePattern}. Approve architecture before detailed planning?`,
     title: 'Target Architecture Review',
     context: {
@@ -108,9 +135,15 @@ export async function process(inputs, ctx) {
       projectName,
       architecture: targetArchitecture,
       files: targetArchitecture.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 4: IDENTIFY MIGRATION PHASES
   // ============================================================================
@@ -210,7 +243,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 10: Finalizing migration plan');
-  const finalPlan = await ctx.task(finalizeMigrationPlanTask, {
+  let finalPlan = await ctx.task(finalizeMigrationPlanTask, {
     projectName,
     migrationGoals,
     migrationStrategy,
@@ -225,8 +258,23 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...finalPlan.artifacts);
 
-  // Final Breakpoint: Migration Plan Approval
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      finalPlan = await ctx.task(finalizeMigrationPlanTask, { ...{
+    projectName,
+    migrationGoals,
+    migrationStrategy,
+    targetArchitecture,
+    detailedRoadmap,
+    dataMigrationPlan,
+    testingStrategy,
+    communicationPlan,
+    riskMitigationPlan,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Migration plan complete for ${projectName}. Total phases: ${detailedRoadmap.phases.length}. Estimated duration: ${detailedRoadmap.totalDuration}. Estimated cost: ${detailedRoadmap.estimatedCost}. Approve migration plan?`,
     title: 'Migration Plan Final Approval',
     context: {
@@ -240,9 +288,15 @@ export async function process(inputs, ctx) {
         riskLevel: riskMitigationPlan.overallRiskLevel
       },
       files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -267,8 +321,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

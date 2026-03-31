@@ -35,7 +35,7 @@ export async function process(inputs, ctx) {
 
   // Task 1: Baseline Assessment
   ctx.log('info', 'Phase 1: Assessing current workplace organization maturity');
-  const baselineAssessment = await ctx.task(baselineAssessmentTask, {
+  let baselineAssessment = await ctx.task(baselineAssessmentTask, {
     targetArea,
     currentMaturity,
     outputDir
@@ -43,8 +43,16 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...baselineAssessment.artifacts);
 
-  // Breakpoint: Review baseline
-  await ctx.breakpoint({
+    let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      baselineAssessment = await ctx.task(baselineAssessmentTask, { ...{
+    targetArea,
+    currentMaturity,
+    outputDir
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `5S baseline assessment complete. Current score: ${baselineAssessment.totalScore}/50. Ready to begin Sort phase?`,
     title: '5S Baseline Assessment',
     context: {
@@ -52,9 +60,15 @@ export async function process(inputs, ctx) {
       scores: baselineAssessment.categoryScores,
       totalScore: baselineAssessment.totalScore,
       files: baselineAssessment.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // Task 2: Sort (Seiri)
   ctx.log('info', 'Phase 2: Implementing Sort - Red Tag process');
   const sortPhase = await ctx.task(sortPhaseTask, {
@@ -119,7 +133,7 @@ export async function process(inputs, ctx) {
 
   // Task 8: Final Assessment and Report
   ctx.log('info', 'Phase 8: Conducting final assessment');
-  const finalAssessment = await ctx.task(finalAssessmentTask, {
+  let finalAssessment = await ctx.task(finalAssessmentTask, {
     baselineAssessment,
     sortPhase,
     setInOrderPhase,
@@ -131,8 +145,20 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...finalAssessment.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      finalAssessment = await ctx.task(finalAssessmentTask, { ...{
+    baselineAssessment,
+    sortPhase,
+    setInOrderPhase,
+    shinePhase,
+    standardizePhase,
+    sustainPhase,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `5S implementation complete. New score: ${finalAssessment.newScore}/50 (was ${baselineAssessment.totalScore}/50). Improvement: ${finalAssessment.improvementPercentage}%. Review results?`,
     title: '5S Implementation Results',
     context: {
@@ -145,9 +171,15 @@ export async function process(inputs, ctx) {
         visualControlsCreated: visualManagement.controlsCreated
       },
       files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -177,8 +209,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Baseline Assessment
+  // Task 1: Baseline Assessment
 export const baselineAssessmentTask = defineTask('baseline-assessment', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Assess current 5S maturity',

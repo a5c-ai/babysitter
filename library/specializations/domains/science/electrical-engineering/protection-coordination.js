@@ -31,7 +31,7 @@ export async function process(inputs, ctx) {
   } = inputs;
 
   // Phase 1: Collect System Data and Single-Line Diagrams
-  const systemDataCollection = await ctx.task(systemDataCollectionTask, {
+  let systemDataCollection = await ctx.task(systemDataCollectionTask, {
     systemName,
     singleLineDiagram,
     protectionZones
@@ -46,9 +46,16 @@ export async function process(inputs, ctx) {
       missingData: systemDataCollection.missingData
     };
   }
-
-  // Breakpoint: Review system data
-  await ctx.breakpoint({
+  let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      systemDataCollection = await ctx.task(systemDataCollectionTask, { ...{
+    systemName,
+    singleLineDiagram,
+    protectionZones
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Review system data for ${systemName} protection study. Proceed with fault calculations?`,
     title: 'System Data Review',
     context: {
@@ -60,19 +67,34 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: systemDataCollection
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // Phase 2: Calculate Short-Circuit Currents at Key Locations
-  const shortCircuitAnalysis = await ctx.task(shortCircuitAnalysisTask, {
+  let shortCircuitAnalysis = await ctx.task(shortCircuitAnalysisTask, {
     systemName,
     systemData: systemDataCollection.systemData,
     faultStudyData,
     protectionZones
   });
 
-  // Breakpoint: Review fault currents
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      shortCircuitAnalysis = await ctx.task(shortCircuitAnalysisTask, { ...{
+    systemName,
+    systemData: systemDataCollection.systemData,
+    faultStudyData,
+    protectionZones
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Short-circuit analysis complete. Max fault: ${shortCircuitAnalysis.maxFault}, Min fault: ${shortCircuitAnalysis.minFault}. Review before relay selection?`,
     title: 'Fault Analysis Review',
     context: {
@@ -84,9 +106,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: shortCircuitAnalysis
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // Phase 3: Select Protective Device Types and Ratings
   const deviceSelection = await ctx.task(deviceSelectionTask, {
     systemName,
@@ -96,15 +124,24 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 4: Determine Relay Settings and Pickup Values
-  const relaySettingsCalculation = await ctx.task(relaySettingsCalculationTask, {
+  let relaySettingsCalculation = await ctx.task(relaySettingsCalculationTask, {
     systemName,
     deviceSelection: deviceSelection.devices,
     shortCircuitResults: shortCircuitAnalysis.results,
     systemData: systemDataCollection.systemData
   });
 
-  // Breakpoint: Review relay settings
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      relaySettingsCalculation = await ctx.task(relaySettingsCalculationTask, { ...{
+    systemName,
+    deviceSelection: deviceSelection.devices,
+    shortCircuitResults: shortCircuitAnalysis.results,
+    systemData: systemDataCollection.systemData
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: `Review calculated relay settings for ${systemName}. ${relaySettingsCalculation.totalSettings} settings defined. Proceed with coordination?`,
     title: 'Relay Settings Review',
     context: {
@@ -115,9 +152,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: relaySettingsCalculation
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
   // Phase 5: Plot Time-Current Coordination Curves
   const coordinationCurves = await ctx.task(coordinationCurvesTask, {
     systemName,
@@ -127,7 +170,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 6: Verify Coordination Between Devices
-  const coordinationVerification = await ctx.task(coordinationVerificationTask, {
+  let coordinationVerification = await ctx.task(coordinationVerificationTask, {
     systemName,
     coordinationCurves: coordinationCurves.curves,
     relaySettings: relaySettingsCalculation.settings,
@@ -135,17 +178,32 @@ export async function process(inputs, ctx) {
   });
 
   // Quality Gate: Coordination must be achieved
-  if (!coordinationVerification.fullyCoordinated) {
-    await ctx.breakpoint({
+      let lastFeedback_phase6Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase6Review) {
+        coordinationVerification = await ctx.task(coordinationVerificationTask, { ...{
+    systemName,
+    coordinationCurves: coordinationCurves.curves,
+    relaySettings: relaySettingsCalculation.settings,
+    protectionZones
+  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
+      }
+  const phase6Review = await ctx.breakpoint({
       question: `Coordination verification found ${coordinationVerification.coordinationIssues.length} coordination issues. Review and adjust settings?`,
       title: 'Coordination Issues',
       context: {
         runId: ctx.runId,
         issues: coordinationVerification.coordinationIssues,
         recommendations: coordinationVerification.recommendations
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase6Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase6Review.approved) break;
+      lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
+    }  }
 
   // Phase 7: Analyze Protection for Various Fault Scenarios
   const faultScenarioAnalysis = await ctx.task(faultScenarioAnalysisTask, {
@@ -156,7 +214,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 8: Document Settings and Coordination Study Results
-  const studyDocumentation = await ctx.task(studyDocumentationTask, {
+  let studyDocumentation = await ctx.task(studyDocumentationTask, {
     systemName,
     systemDataCollection,
     shortCircuitAnalysis,
@@ -167,8 +225,21 @@ export async function process(inputs, ctx) {
     faultScenarioAnalysis
   });
 
-  // Final Breakpoint: Study Approval
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      studyDocumentation = await ctx.task(studyDocumentationTask, { ...{
+    systemName,
+    systemDataCollection,
+    shortCircuitAnalysis,
+    deviceSelection,
+    relaySettingsCalculation,
+    coordinationCurves,
+    coordinationVerification,
+    faultScenarioAnalysis
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Protection coordination study complete for ${systemName}. Coordination ${coordinationVerification.fullyCoordinated ? 'ACHIEVED' : 'PARTIAL'}. Approve study?`,
     title: 'Study Approval',
     context: {
@@ -179,9 +250,15 @@ export async function process(inputs, ctx) {
         { path: `artifacts/relay-settings.json`, format: 'json', content: relaySettingsCalculation.settings },
         { path: `artifacts/coordination-study.md`, format: 'markdown', content: studyDocumentation.markdown }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     systemName,
@@ -205,8 +282,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const systemDataCollectionTask = defineTask('system-data-collection', (args, taskCtx) => ({
   kind: 'agent',

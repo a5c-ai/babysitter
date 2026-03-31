@@ -85,7 +85,7 @@ export async function process(inputs, ctx) {
 
   // Task 6: Execute VQE/QAOA
   ctx.log('info', 'Executing variational algorithm');
-  const executionResult = await ctx.task(variationalExecutionTask, {
+  let executionResult = await ctx.task(variationalExecutionTask, {
     hybridLoop: hybridLoop.implementation,
     tunedParameters: hyperparameterTuning.bestParameters,
     outputDir
@@ -93,8 +93,16 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...executionResult.artifacts);
 
-  // Breakpoint: Review optimization results
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      executionResult = await ctx.task(variationalExecutionTask, { ...{
+    hybridLoop: hybridLoop.implementation,
+    tunedParameters: hyperparameterTuning.bestParameters,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Variational algorithm completed. Final energy: ${executionResult.finalEnergy}. Iterations: ${executionResult.iterations}. Converged: ${executionResult.converged}. Review results?`,
     title: 'Variational Algorithm Results',
     context: {
@@ -107,9 +115,15 @@ export async function process(inputs, ctx) {
         converged: executionResult.converged,
         ansatzType
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 7: Benchmark Against Classical
   ctx.log('info', 'Benchmarking against classical solutions');
   const classicalBenchmark = await ctx.task(classicalBenchmarkTask, {
@@ -163,8 +177,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Hamiltonian Definition
+  // Task 1: Hamiltonian Definition
 export const hamiltonianDefinitionTask = defineTask('hamiltonian-definition', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Define problem Hamiltonian and cost function',

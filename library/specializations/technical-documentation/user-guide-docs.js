@@ -108,7 +108,6 @@ export async function process(inputs, ctx) {
       }
     };
   }
-
   // ============================================================================
   // PHASE 2: AUDIENCE ANALYSIS AND PERSONAS
   // ============================================================================
@@ -129,7 +128,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 3: Designing information architecture');
-  const iaDesign = await ctx.task(informationArchitectureTask, {
+  let iaDesign = await ctx.task(informationArchitectureTask, {
     product,
     features: discovery.refinedFeatures,
     sections,
@@ -141,8 +140,20 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...iaDesign.artifacts);
 
-  // Breakpoint: Review information architecture
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      iaDesign = await ctx.task(informationArchitectureTask, { ...{
+    product,
+    features: discovery.refinedFeatures,
+    sections,
+    framework,
+    personas: audienceAnalysis.personas,
+    userJourneys: audienceAnalysis.userJourneys,
+    outputDir
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Information architecture designed with ${iaDesign.sections.length} sections and ${iaDesign.topics.length} topics. Review structure?`,
     title: 'IA Design Review',
     context: {
@@ -160,9 +171,15 @@ export async function process(inputs, ctx) {
         framework,
         navigationDepth: iaDesign.navigationDepth
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 4: GETTING STARTED GUIDE CREATION
   // ============================================================================
@@ -248,7 +265,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 9: Validating documentation quality');
-  const qualityValidation = await ctx.task(qualityValidationTask, {
+  let qualityValidation = await ctx.task(qualityValidationTask, {
     product,
     sections: iaDesign.sections,
     artifacts,
@@ -262,8 +279,20 @@ export async function process(inputs, ctx) {
 
   const qualityMet = qualityValidation.overallScore >= 80;
 
-  // Breakpoint: Review quality validation
-  await ctx.breakpoint({
+    let lastFeedback_phase9Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase9Review) {
+      qualityValidation = await ctx.task(qualityValidationTask, { ...{
+    product,
+    sections: iaDesign.sections,
+    artifacts,
+    styleGuide,
+    framework,
+    targetAudience,
+    outputDir
+  }, feedback: lastFeedback_phase9Review, attempt: attempt + 1 });
+    }
+  const phase9Review = await ctx.breakpoint({
     question: `Documentation quality score: ${qualityValidation.overallScore}/100. ${qualityMet ? 'Quality meets standards!' : 'Quality may need improvement.'} Review documentation?`,
     title: 'Quality Validation Review',
     context: {
@@ -282,9 +311,15 @@ export async function process(inputs, ctx) {
         faqCount: faqTroubleshooting.faqCount,
         glossaryTerms: glossaryReference.termCount
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase9Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase9Review.approved) break;
+    lastFeedback_phase9Review = phase9Review.response || phase9Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 10: PEER REVIEW AND TECHNICAL ACCURACY
   // ============================================================================
@@ -305,8 +340,20 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...reviewResult.artifacts);
 
-    // Breakpoint: Review approval gate
-    await ctx.breakpoint({
+      let lastFeedback_finalApproval = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_finalApproval) {
+        qualityValidation = await ctx.task(qualityValidationTask, { ...{
+    product,
+    sections: iaDesign.sections,
+    artifacts,
+    styleGuide,
+    framework,
+    targetAudience,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+      }
+  const finalApproval = await ctx.breakpoint({
       question: `Documentation review complete. ${reviewResult.approved ? 'Approved by reviewers!' : 'Requires revisions.'} Proceed with refinement and publication?`,
       title: 'Documentation Approval Gate',
       context: {
@@ -324,10 +371,16 @@ export async function process(inputs, ctx) {
           revisionsNeeded: reviewResult.revisionsNeeded,
           criticalIssues: reviewResult.criticalIssues || 0
         }
-      }
-    });
-
-    // If revisions needed, incorporate feedback
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_finalApproval || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (finalApproval.approved) break;
+      lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+    }
+  // If revisions needed, incorporate feedback
     if (reviewResult.revisionsNeeded && reviewResult.approved) {
       ctx.log('info', 'Incorporating review feedback');
       const revision = await ctx.task(revisionTask, {
@@ -341,7 +394,6 @@ export async function process(inputs, ctx) {
       artifacts.push(...revision.artifacts);
     }
   }
-
   // ============================================================================
   // PHASE 11: NAVIGATION AND SEARCH SETUP
   // ============================================================================
@@ -406,8 +458,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

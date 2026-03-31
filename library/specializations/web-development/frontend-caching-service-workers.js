@@ -24,11 +24,16 @@ export async function process(inputs, ctx) {
   const offlineSetup = await ctx.task(offlineSupportTask, { projectName, outputDir });
   artifacts.push(...offlineSetup.artifacts);
 
-  const updateSetup = await ctx.task(updateHandlingTask, { projectName, outputDir });
-  artifacts.push(...updateSetup.artifacts);
-
-  await ctx.breakpoint({ question: `Frontend caching setup complete for ${projectName}. Approve?`, title: 'Caching Review', context: { runId: ctx.runId, strategies: cachingStrategies.strategies } });
-
+  let updateSetup = await ctx.task(updateHandlingTask, { projectName, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      updateSetup = await ctx.task(updateHandlingTask, { ...{ projectName, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({ question: `Frontend caching setup complete for ${projectName}. Approve?`, title: 'Caching Review', context: { runId: ctx.runId, strategies: cachingStrategies.strategies }, expert: 'owner', tags: ['approval-gate'], previousFeedback: lastFeedback || undefined, attempt: attempt > 0 ? attempt + 1 : undefined });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const documentation = await ctx.task(documentationTask, { projectName, outputDir });
   artifacts.push(...documentation.artifacts);
 

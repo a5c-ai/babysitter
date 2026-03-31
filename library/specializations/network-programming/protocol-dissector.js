@@ -42,7 +42,6 @@ export async function process(inputs, ctx) {
     results[phase.name] = result;
     artifacts.push(...result.artifacts);
   }
-
   const validation = await ctx.task(validationFinalTask, { projectName, protocol, results, outputDir });
   artifacts.push(...validation.artifacts);
 

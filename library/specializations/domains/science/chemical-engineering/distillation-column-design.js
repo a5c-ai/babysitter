@@ -92,7 +92,7 @@ export async function process(inputs, ctx) {
 
   // Task 6: Optimize for Energy Efficiency
   ctx.log('info', 'Optimizing for energy efficiency');
-  const energyOptimizationResult = await ctx.task(energyOptimizationTask, {
+  let energyOptimizationResult = await ctx.task(energyOptimizationTask, {
     processName,
     columnDesign: {
       sizing: columnSizingResult.sizing,
@@ -106,8 +106,22 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...energyOptimizationResult.artifacts);
 
-  // Breakpoint: Review distillation design
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      energyOptimizationResult = await ctx.task(energyOptimizationTask, { ...{
+    processName,
+    columnDesign: {
+      sizing: columnSizingResult.sizing,
+      internals: internalsResult.internals,
+      minimumDesign: minimumDesignResult
+    },
+    feedSpecification,
+    economicData,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Distillation design complete for ${processName}. Stages: ${columnSizingResult.sizing.actualStages}. Diameter: ${columnSizingResult.sizing.diameter} m. Reflux ratio: ${energyOptimizationResult.optimizedReflux}. Reboiler duty: ${energyOptimizationResult.reboilerDuty} kW. Review design?`,
     title: 'Distillation Column Design Review',
     context: {
@@ -121,9 +135,15 @@ export async function process(inputs, ctx) {
         refluxRatio: energyOptimizationResult.optimizedReflux,
         reboilerDuty: energyOptimizationResult.reboilerDuty
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 7: Develop Operating Procedures
   ctx.log('info', 'Developing operating procedures for startup');
   const operatingProceduresResult = await ctx.task(operatingProceduresTask, {
@@ -176,8 +196,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Product Requirements Specification
+  // Task 1: Product Requirements Specification
 export const productRequirementsTask = defineTask('product-requirements', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Specify product purity and recovery requirements',

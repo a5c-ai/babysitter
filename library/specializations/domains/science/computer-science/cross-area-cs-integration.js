@@ -69,21 +69,35 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 7: Cross-validation
-  const crossValidation = await ctx.task(crossValidator, {
+  let crossValidation = await ctx.task(crossValidator, {
     theoreticalContributions,
     practicalContributions,
     framework: frameworkSynthesis
   });
 
-  // Phase 8: Review breakpoint
-  await ctx.breakpoint('integration-review', {
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      crossValidation = await ctx.task(crossValidator, { ...{
+    theoreticalContributions,
+    practicalContributions,
+    framework: frameworkSynthesis
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint('integration-review', {
     message: 'Review cross-area CS integration results',
     frameworkSynthesis,
     theoreticalContributions,
     practicalContributions,
-    crossValidation
-  });
-
+    crossValidation,
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 9: Research roadmap development
   const researchRoadmap = await ctx.task(roadmapDeveloper, {
     framework: frameworkSynthesis,

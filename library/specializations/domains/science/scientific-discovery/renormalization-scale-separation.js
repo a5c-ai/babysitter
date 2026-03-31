@@ -65,7 +65,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 4: Renormalizing parameters');
-  const renormalization = await ctx.task(renormalizationTask, {
+  let renormalization = await ctx.task(renormalizationTask, {
     regularizedQuantities: regularization.regularizedQuantities,
     couplings,
     physicalSystem,
@@ -74,8 +74,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...renormalization.artifacts);
 
-  // Breakpoint: Review renormalization
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      renormalization = await ctx.task(renormalizationTask, { ...{
+    regularizedQuantities: regularization.regularizedQuantities,
+    couplings,
+    physicalSystem,
+    outputDir
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: `Renormalization complete. ${renormalization.renormalizedParameters.length} parameters renormalized. Proceed with RG flow analysis?`,
     title: 'Renormalization Review',
     context: {
@@ -91,9 +100,15 @@ export async function process(inputs, ctx) {
         divergencesFound: divergenceAnalysis.divergences.length,
         parametersRenormalized: renormalization.renormalizedParameters.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 5: RENORMALIZATION GROUP FLOW
   // ============================================================================
@@ -140,7 +155,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 8: Analyzing universality and critical behavior');
-  const universalityAnalysis = await ctx.task(universalityTask, {
+  let universalityAnalysis = await ctx.task(universalityTask, {
     fixedPoints: fixedPointAnalysis.fixedPoints,
     criticalExponents: fixedPointAnalysis.criticalExponents,
     physicalSystem,
@@ -149,8 +164,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...universalityAnalysis.artifacts);
 
-  // Final breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      universalityAnalysis = await ctx.task(universalityTask, { ...{
+    fixedPoints: fixedPointAnalysis.fixedPoints,
+    criticalExponents: fixedPointAnalysis.criticalExponents,
+    physicalSystem,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Scale separation analysis complete. ${fixedPointAnalysis.fixedPoints.length} fixed points found. Universality class: ${universalityAnalysis.universalityClass}. Review findings?`,
     title: 'Renormalization Analysis Complete',
     context: {
@@ -166,9 +190,15 @@ export async function process(inputs, ctx) {
         fixedPointCount: fixedPointAnalysis.fixedPoints.length,
         universalityClass: universalityAnalysis.universalityClass
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -202,8 +232,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

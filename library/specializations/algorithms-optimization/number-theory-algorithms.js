@@ -24,16 +24,24 @@ export async function process(inputs, ctx) {
     artifacts.push(...impl.artifacts);
     implementations[algo] = impl;
   }
-
-  const library = await ctx.task(numberTheoryLibraryTask, { implementations, language, outputDir });
-  artifacts.push(...library.artifacts);
-
-  await ctx.breakpoint({
+  let library = await ctx.task(numberTheoryLibraryTask, { implementations, language, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      library = await ctx.task(numberTheoryLibraryTask, { ...{ implementations, language, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Number theory library complete. ${algorithms.length} algorithms implemented. Review?`,
     title: 'Number Theory Complete',
-    context: { runId: ctx.runId, algorithms, libraryPath: library.libraryPath }
-  });
-
+    context: { runId: ctx.runId, algorithms, libraryPath: library.libraryPath },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     algorithms,

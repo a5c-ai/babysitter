@@ -111,7 +111,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 7: Scoring interview protocol quality');
-  const qualityScore = await ctx.task(interviewProtocolQualityScoringTask, {
+  let qualityScore = await ctx.task(interviewProtocolQualityScoringTask, {
     designPlanning,
     guideevelopment,
     probingStrategy,
@@ -126,8 +126,20 @@ export async function process(inputs, ctx) {
   const protocolScore = qualityScore.overallScore;
   const qualityMet = protocolScore >= 80;
 
-  // Breakpoint: Review interview protocol
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      qualityScore = await ctx.task(interviewProtocolQualityScoringTask, { ...{
+    designPlanning,
+    guideevelopment,
+    probingStrategy,
+    rapportProtocol,
+    ethicsProtocol,
+    documentationPlan,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Interview protocol complete. Quality score: ${protocolScore}/100. ${qualityMet ? 'Protocol meets quality standards!' : 'Protocol may need refinement.'} Review and approve?`,
     title: 'Interview Protocol Review',
     context: {
@@ -143,9 +155,15 @@ export async function process(inputs, ctx) {
         totalQuestions: guideevelopment.totalQuestions,
         estimatedDuration: guideevelopment.estimatedDuration
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -177,8 +195,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Interview Design Planning
+  // Task 1: Interview Design Planning
 export const interviewDesignPlanningTask = defineTask('interview-design-planning', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Plan interview design',

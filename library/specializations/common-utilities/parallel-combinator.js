@@ -67,6 +67,5 @@ export async function pipeline(ctx, initialInput, phases) {
       }
     }
   }
-  
   return accumulated;
 }

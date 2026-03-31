@@ -58,14 +58,21 @@ export async function process(inputs, ctx) {
       appName, packageName, appVersion, releaseTrack, outputDir
     });
     artifacts.push(...result.artifacts);
-  }
-
-  await ctx.breakpoint({
+  let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    // No preceding task identified for re-run with feedback
+    const finalApproval = await ctx.breakpoint({
     question: `Play Store publishing prepared for ${appName} v${appVersion}. Track: ${releaseTrack}. Ready to publish?`,
     title: 'Publishing Review',
-    context: { runId: ctx.runId, appName, packageName, appVersion, releaseTrack }
-  });
-
+    context: { runId: ctx.runId, appName, packageName, appVersion, releaseTrack },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   return {
     success: true,

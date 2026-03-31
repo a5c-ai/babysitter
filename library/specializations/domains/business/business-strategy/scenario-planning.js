@@ -82,7 +82,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 5: Developing scenario narratives');
-  const scenarioNarratives = await ctx.task(scenarioNarrativesTask, {
+  let scenarioNarratives = await ctx.task(scenarioNarrativesTask, {
     scenarioFramework: scenarioFramework.framework,
     drivingForces: drivingForces.forces,
     focalQuestion: focalQuestion.refinedQuestion,
@@ -92,8 +92,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...scenarioNarratives.artifacts);
 
-  // Breakpoint: Review scenarios
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      scenarioNarratives = await ctx.task(scenarioNarrativesTask, { ...{
+    scenarioFramework: scenarioFramework.framework,
+    drivingForces: drivingForces.forces,
+    focalQuestion: focalQuestion.refinedQuestion,
+    timeHorizon,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Scenario narratives complete. Developed ${scenarioNarratives.scenarios.length} distinct scenarios. Review scenario details?`,
     title: 'Scenario Planning Review',
     context: {
@@ -108,9 +118,15 @@ export async function process(inputs, ctx) {
         criticalUncertainties: criticalUncertainties.uncertainties.length,
         drivingForces: drivingForces.forces.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 6: SCENARIO IMPLICATIONS ANALYSIS
   // ============================================================================
@@ -204,8 +220,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

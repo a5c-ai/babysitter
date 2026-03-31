@@ -69,7 +69,6 @@ export async function process(inputs, ctx) {
     });
     artifacts.push(...thoughtExperiments.artifacts);
   }
-
   // Task 5: Argument Analysis and Evaluation
   ctx.log('info', 'Analyzing and evaluating arguments');
   const argumentAnalysis = await ctx.task(argumentAnalysisTask, {
@@ -83,7 +82,7 @@ export async function process(inputs, ctx) {
 
   // Task 6: Position Development
   ctx.log('info', 'Developing philosophical position');
-  const positionDevelopment = await ctx.task(positionDevelopmentTask, {
+  let positionDevelopment = await ctx.task(positionDevelopmentTask, {
     question: questionClarification.clarified,
     traditionSurvey,
     conceptualAnalysis,
@@ -93,8 +92,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...positionDevelopment.artifacts);
 
-  // Breakpoint: Review ontological analysis
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      positionDevelopment = await ctx.task(positionDevelopmentTask, { ...{
+    question: questionClarification.clarified,
+    traditionSurvey,
+    conceptualAnalysis,
+    argumentAnalysis,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Ontological analysis complete. Examined ${metaphysicalTraditions.length} traditions. Review the analysis?`,
     title: 'Ontological Analysis Results',
     context: {
@@ -106,9 +115,15 @@ export async function process(inputs, ctx) {
         keyConceptsAnalyzed: questionClarification.keyConcepts.length,
         thoughtExperimentsUsed: useThoughtExperiments
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 7: Generate Ontological Report
   ctx.log('info', 'Generating ontological analysis report');
   const ontologicalReport = await ctx.task(ontologicalReportTask, {
@@ -156,8 +171,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Question Clarification
+  // Task 1: Question Clarification
 export const questionClarificationTask = defineTask('question-clarification', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Clarify the ontological question',

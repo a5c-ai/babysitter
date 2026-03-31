@@ -89,7 +89,7 @@ export async function process(inputs, ctx) {
 
   // Task 6: Risk Assessment
   ctx.log('info', 'Assessing commercial risks');
-  const riskAssessment = await ctx.task(commercialRiskTask, {
+  let riskAssessment = await ctx.task(commercialRiskTask, {
     marketSizeAnalysis,
     competitiveAnalysis,
     gtmAssessment,
@@ -99,8 +99,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...riskAssessment.artifacts);
 
-  // Breakpoint: Review commercial DD findings
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      riskAssessment = await ctx.task(commercialRiskTask, { ...{
+    marketSizeAnalysis,
+    competitiveAnalysis,
+    gtmAssessment,
+    marketTrends,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Commercial DD complete for ${companyName}. TAM: $${marketSizeAnalysis.tam}B, SAM: $${marketSizeAnalysis.sam}B. Review findings?`,
     title: 'Commercial Due Diligence Results',
     context: {
@@ -114,9 +124,15 @@ export async function process(inputs, ctx) {
         gtmScore: gtmAssessment.score,
         riskLevel: riskAssessment.overallRisk
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 7: Generate Commercial DD Report
   ctx.log('info', 'Generating commercial due diligence report');
   const ddReport = await ctx.task(commercialDDReportTask, {
@@ -174,8 +190,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Market Size Analysis
+  // Task 1: Market Size Analysis
 export const marketSizeTask = defineTask('market-size-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Analyze market size (TAM/SAM/SOM)',

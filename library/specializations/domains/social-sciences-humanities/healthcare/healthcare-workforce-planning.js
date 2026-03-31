@@ -17,22 +17,32 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Starting Healthcare Workforce Planning for: ${organizationName}`);
 
-  const currentStateAnalysis = await ctx.task(wfCurrentStateTask, { organizationName, planningScope, departments, outputDir });
-  artifacts.push(...currentStateAnalysis.artifacts);
-
-  await ctx.breakpoint({ question: `Current state analyzed. Total FTEs: ${currentStateAnalysis.totalFTEs}. Turnover rate: ${currentStateAnalysis.turnoverRate}%. ${currentStateAnalysis.criticalVacancies} critical vacancies. Proceed?`, title: 'Workforce Current State Review', context: { runId: ctx.runId, ftes: currentStateAnalysis.totalFTEs, turnover: currentStateAnalysis.turnoverRate } });
-
+  let currentStateAnalysis = await ctx.task(wfCurrentStateTask, { organizationName, planningScope, departments, outputDir });
+    let lastFeedback_analysisApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_analysisApproval) {
+      currentStateAnalysis = await ctx.task(wfCurrentStateTask, { ...{ organizationName, planningScope, departments, outputDir }, feedback: lastFeedback_analysisApproval, attempt: attempt + 1 });
+    }
+  const analysisApproval = await ctx.breakpoint({ question: `Current state analyzed. Total FTEs: ${currentStateAnalysis.totalFTEs}. Turnover rate: ${currentStateAnalysis.turnoverRate}%. ${currentStateAnalysis.criticalVacancies} critical vacancies. Proceed?`, title: 'Workforce Current State Review', context: { runId: ctx.runId, ftes: currentStateAnalysis.totalFTEs, turnover: currentStateAnalysis.turnoverRate }, expert: 'owner', tags: ['approval-gate'], previousFeedback: lastFeedback_analysisApproval || undefined, attempt: attempt > 0 ? attempt + 1 : undefined });
+    if (analysisApproval.approved) break;
+    lastFeedback_analysisApproval = analysisApproval.response || analysisApproval.feedback || 'Changes requested';
+  }
   const demandForecasting = await ctx.task(wfDemandForecastTask, { currentStateAnalysis, planningHorizon, outputDir });
   artifacts.push(...demandForecasting.artifacts);
 
   const supplyAnalysis = await ctx.task(wfSupplyAnalysisTask, { currentStateAnalysis, demandForecasting, outputDir });
   artifacts.push(...supplyAnalysis.artifacts);
 
-  const gapAnalysis = await ctx.task(wfGapAnalysisTask, { demandForecasting, supplyAnalysis, outputDir });
-  artifacts.push(...gapAnalysis.artifacts);
-
-  await ctx.breakpoint({ question: `Gap analysis complete. ${gapAnalysis.shortfalls.length} skill shortfalls identified. ${gapAnalysis.surplusAreas.length} surplus areas. Proceed with staffing models?`, title: 'Workforce Gap Review', context: { runId: ctx.runId, shortfalls: gapAnalysis.shortfalls, surplus: gapAnalysis.surplusAreas } });
-
+  let gapAnalysis = await ctx.task(wfGapAnalysisTask, { demandForecasting, supplyAnalysis, outputDir });
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      gapAnalysis = await ctx.task(wfGapAnalysisTask, { ...{ demandForecasting, supplyAnalysis, outputDir }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({ question: `Gap analysis complete. ${gapAnalysis.shortfalls.length} skill shortfalls identified. ${gapAnalysis.surplusAreas.length} surplus areas. Proceed with staffing models?`, title: 'Workforce Gap Review', context: { runId: ctx.runId, shortfalls: gapAnalysis.shortfalls, surplus: gapAnalysis.surplusAreas }, expert: 'owner', tags: ['approval-gate'], previousFeedback: lastFeedback_finalApproval || undefined, attempt: attempt > 0 ? attempt + 1 : undefined });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const staffingModels = await ctx.task(wfStaffingModelsTask, { demandForecasting, gapAnalysis, outputDir });
   artifacts.push(...staffingModels.artifacts);
 

@@ -61,7 +61,6 @@ export async function process(inputs, ctx) {
     const imuSetup = await ctx.task(lidarImuIntegrationTask, { robotName, slamFramework, poseGraph, outputDir });
     artifacts.push(...imuSetup.artifacts);
   }
-
   // Phase 7: Testing
   const testing = await ctx.task(lidarSlamTestingTask, { robotName, slamFramework, outputDir });
   artifacts.push(...testing.artifacts);
@@ -71,15 +70,24 @@ export async function process(inputs, ctx) {
   artifacts.push(...accuracy.artifacts);
 
   // Phase 9: Optimization
-  const optimization = await ctx.task(lidarSlamOptimizationTask, { robotName, slamFramework, accuracy, outputDir });
-  artifacts.push(...optimization.artifacts);
-
-  await ctx.breakpoint({
+  let optimization = await ctx.task(lidarSlamOptimizationTask, { robotName, slamFramework, accuracy, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      optimization = await ctx.task(lidarSlamOptimizationTask, { ...{ robotName, slamFramework, accuracy, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `LiDAR SLAM Complete for ${robotName}. ATE: ${accuracy.ate}m. Review?`,
     title: 'LiDAR SLAM Complete',
-    context: { runId: ctx.runId, ate: accuracy.ate, framework: slamFramework }
-  });
-
+    context: { runId: ctx.runId, ate: accuracy.ate, framework: slamFramework },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: accuracy.meetsRequirements,
     robotName,

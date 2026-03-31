@@ -24,15 +24,24 @@ export async function process(inputs, ctx) {
   const applications = await ctx.task(fenwickApplicationsTask, { implementation, outputDir });
   artifacts.push(...applications.artifacts);
 
-  const testing = await ctx.task(fenwickTestingTask, { implementation, outputDir });
-  artifacts.push(...testing.artifacts);
-
-  await ctx.breakpoint({
+  let testing = await ctx.task(fenwickTestingTask, { implementation, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      testing = await ctx.task(fenwickTestingTask, { ...{ implementation, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Fenwick tree implemented. Variant: ${variant}. Applications: ${applications.demonstrated.length}. Review?`,
     title: 'Fenwick Tree Complete',
-    context: { runId: ctx.runId, variant, applications: applications.demonstrated }
-  });
-
+    context: { runId: ctx.runId, variant, applications: applications.demonstrated },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     variant,

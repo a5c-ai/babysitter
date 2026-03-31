@@ -33,15 +33,24 @@ export async function process(inputs, ctx) {
   } = inputs;
 
   // Phase 1: Characterize Renewable Resource and Generation Profile
-  const resourceCharacterization = await ctx.task(resourceCharacterizationTask, {
+  let resourceCharacterization = await ctx.task(resourceCharacterizationTask, {
     projectName,
     renewableType,
     capacity,
     interconnectionPoint
   });
 
-  // Breakpoint: Review resource characterization
-  await ctx.breakpoint({
+    let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      resourceCharacterization = await ctx.task(resourceCharacterizationTask, { ...{
+    projectName,
+    renewableType,
+    capacity,
+    interconnectionPoint
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Review renewable resource characterization for ${projectName}. Capacity factor: ${resourceCharacterization.capacityFactor}. Proceed with modeling?`,
     title: 'Resource Characterization Review',
     context: {
@@ -53,9 +62,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: resourceCharacterization
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // Phase 2: Model Inverter/Converter Control Characteristics
   const inverterModeling = await ctx.task(inverterModelingTask, {
     projectName,
@@ -65,7 +80,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 3: Perform Steady-State Impact Analysis
-  const steadyStateAnalysis = await ctx.task(steadyStateAnalysisTask, {
+  let steadyStateAnalysis = await ctx.task(steadyStateAnalysisTask, {
     projectName,
     capacity,
     interconnectionPoint,
@@ -74,17 +89,33 @@ export async function process(inputs, ctx) {
   });
 
   // Quality Gate: Check for steady-state violations
-  if (steadyStateAnalysis.violations && steadyStateAnalysis.violations.length > 0) {
-    await ctx.breakpoint({
+      let lastFeedback_phase3Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase3Review) {
+        steadyStateAnalysis = await ctx.task(steadyStateAnalysisTask, { ...{
+    projectName,
+    capacity,
+    interconnectionPoint,
+    gridData,
+    inverterModel: inverterModeling.model
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+      }
+  const phase3Review = await ctx.breakpoint({
       question: `Steady-state analysis found ${steadyStateAnalysis.violations.length} violations. Review mitigations before proceeding?`,
       title: 'Steady-State Violations',
       context: {
         runId: ctx.runId,
         violations: steadyStateAnalysis.violations,
         mitigations: steadyStateAnalysis.proposedMitigations
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase3Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase3Review.approved) break;
+      lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+    }  }
 
   // Phase 4: Analyze Voltage Regulation and Power Quality
   const powerQualityAnalysis = await ctx.task(powerQualityAnalysisTask, {
@@ -95,15 +126,24 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 5: Study Fault Ride-Through Capabilities
-  const faultRideThroughStudy = await ctx.task(faultRideThroughStudyTask, {
+  let faultRideThroughStudy = await ctx.task(faultRideThroughStudyTask, {
     projectName,
     inverterModel: inverterModeling.model,
     gridData,
     interconnectionPoint
   });
 
-  // Breakpoint: Review fault ride-through compliance
-  await ctx.breakpoint({
+    let lastFeedback_phase5Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase5Review) {
+      faultRideThroughStudy = await ctx.task(faultRideThroughStudyTask, { ...{
+    projectName,
+    inverterModel: inverterModeling.model,
+    gridData,
+    interconnectionPoint
+  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+    }
+  const phase5Review = await ctx.breakpoint({
     question: `Fault ride-through study complete for ${projectName}. Compliance: ${faultRideThroughStudy.compliant ? 'YES' : 'NO'}. Review results?`,
     title: 'Fault Ride-Through Review',
     context: {
@@ -115,11 +155,17 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: faultRideThroughStudy
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase5Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase5Review.approved) break;
+    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+  }
   // Phase 6: Assess Grid Stability and Frequency Response
-  const stabilityAssessment = await ctx.task(stabilityAssessmentTask, {
+  let stabilityAssessment = await ctx.task(stabilityAssessmentTask, {
     projectName,
     capacity,
     gridData,
@@ -128,17 +174,33 @@ export async function process(inputs, ctx) {
   });
 
   // Quality Gate: Check stability margins
-  if (!stabilityAssessment.stable) {
-    await ctx.breakpoint({
+      let lastFeedback_phase6Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase6Review) {
+        stabilityAssessment = await ctx.task(stabilityAssessmentTask, { ...{
+    projectName,
+    capacity,
+    gridData,
+    inverterModel: inverterModeling.model,
+    interconnectionPoint
+  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
+      }
+  const phase6Review = await ctx.breakpoint({
       question: `Stability assessment indicates potential issues: ${stabilityAssessment.concerns.join(', ')}. Review stability enhancements?`,
       title: 'Stability Concerns',
       context: {
         runId: ctx.runId,
         concerns: stabilityAssessment.concerns,
         recommendations: stabilityAssessment.recommendations
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase6Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase6Review.approved) break;
+      lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
+    }  }
 
   // Phase 7: Design Protection and Control Modifications
   const protectionControlDesign = await ctx.task(protectionControlDesignTask, {
@@ -150,7 +212,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 8: Document Compliance with Interconnection Standards
-  const complianceDocumentation = await ctx.task(complianceDocumentationTask, {
+  let complianceDocumentation = await ctx.task(complianceDocumentationTask, {
     projectName,
     renewableType,
     capacity,
@@ -164,8 +226,24 @@ export async function process(inputs, ctx) {
     interconnectionPoint
   });
 
-  // Final Breakpoint: Study Approval
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      complianceDocumentation = await ctx.task(complianceDocumentationTask, { ...{
+    projectName,
+    renewableType,
+    capacity,
+    resourceCharacterization,
+    inverterModeling,
+    steadyStateAnalysis,
+    powerQualityAnalysis,
+    faultRideThroughStudy,
+    stabilityAssessment,
+    protectionControlDesign,
+    interconnectionPoint
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Renewable integration study complete for ${projectName}. Overall compliance: ${complianceDocumentation.overallCompliance}. Approve study?`,
     title: 'Study Approval',
     context: {
@@ -177,9 +255,15 @@ export async function process(inputs, ctx) {
         { path: `artifacts/integration-study.json`, format: 'json', content: complianceDocumentation.technicalData },
         { path: `artifacts/integration-report.md`, format: 'markdown', content: complianceDocumentation.markdown }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     projectName,
@@ -210,8 +294,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const resourceCharacterizationTask = defineTask('resource-characterization', (args, taskCtx) => ({
   kind: 'agent',

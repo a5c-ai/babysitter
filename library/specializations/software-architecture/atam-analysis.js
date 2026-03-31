@@ -36,21 +36,33 @@ export async function process(inputs, ctx) {
   };
 
   // Phase 1: Preparation and Method Presentation
-  const phase1 = await ctx.task(presentMethodTask, {
+  let phase1 = await ctx.task(presentMethodTask, {
     systemName,
     stakeholders
   });
-  atamResults.phases.push({ phase: 1, name: 'Method Presentation', result: phase1 });
-
-  await ctx.breakpoint({
+    let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      phase1 = await ctx.task(presentMethodTask, { ...{
+    systemName,
+    stakeholders
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: 'ATAM method presented to stakeholders. Ready to proceed with business drivers?',
     title: 'Phase 1: Method Presentation Complete',
     context: {
       runId: ctx.runId,
       files: [{ path: `atam/phase-1-method-presentation.md`, format: 'markdown' }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // Phase 2: Business Drivers Presentation
   const phase2 = await ctx.task(presentBusinessDriversTask, {
     systemName,
@@ -59,13 +71,19 @@ export async function process(inputs, ctx) {
   atamResults.phases.push({ phase: 2, name: 'Business Drivers', result: phase2 });
 
   // Phase 3: Architecture Presentation
-  const phase3 = await ctx.task(presentArchitectureTask, {
+  let phase3 = await ctx.task(presentArchitectureTask, {
     systemName,
     architectureDocumentation
   });
-  atamResults.phases.push({ phase: 3, name: 'Architecture Presentation', result: phase3 });
-
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      phase3 = await ctx.task(presentArchitectureTask, { ...{
+    systemName,
+    architectureDocumentation
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: 'Business drivers and architecture presented. Ready to identify architectural approaches?',
     title: 'Phase 2-3: Business Context and Architecture Complete',
     context: {
@@ -74,9 +92,15 @@ export async function process(inputs, ctx) {
         { path: `atam/phase-2-business-drivers.md`, format: 'markdown' },
         { path: `atam/phase-3-architecture.md`, format: 'markdown' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // Phase 4: Identify Architectural Approaches
   const phase4 = await ctx.task(identifyArchitecturalApproachesTask, {
     systemName,
@@ -86,16 +110,24 @@ export async function process(inputs, ctx) {
   atamResults.phases.push({ phase: 4, name: 'Architectural Approaches', result: phase4 });
 
   // Phase 5: Generate Quality Attribute Utility Tree
-  const phase5 = await ctx.task(generateUtilityTreeTask, {
+  let phase5 = await ctx.task(generateUtilityTreeTask, {
     systemName,
     businessDrivers,
     qualityAttributes,
     architecturalApproaches: phase4.approaches
   });
   atamResults.utilityTree = phase5.utilityTree;
-  atamResults.phases.push({ phase: 5, name: 'Utility Tree', result: phase5 });
-
-  await ctx.breakpoint({
+    let lastFeedback_phase5Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase5Review) {
+      phase5 = await ctx.task(generateUtilityTreeTask, { ...{
+    systemName,
+    businessDrivers,
+    qualityAttributes,
+    architecturalApproaches: phase4.approaches
+  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+    }
+  const phase5Review = await ctx.breakpoint({
     question: 'Quality Attribute Utility Tree generated. Review and proceed with analysis?',
     title: 'Phase 5: Utility Tree Complete',
     context: {
@@ -104,9 +136,15 @@ export async function process(inputs, ctx) {
         { path: `atam/phase-4-architectural-approaches.md`, format: 'markdown' },
         { path: `atam/phase-5-utility-tree.json`, format: 'json' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase5Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase5Review.approved) break;
+    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+  }
   // Phase 6: Analyze Architectural Approaches (Initial)
   // Parallel analysis of top priority scenarios
   const topScenarios = phase5.utilityTree.scenarios
@@ -139,9 +177,17 @@ export async function process(inputs, ctx) {
     phase6.tradeoffs.push(...analysis.tradeoffs);
   });
 
-  atamResults.phases.push({ phase: 6, name: 'Initial Analysis', result: phase6 });
-
-  await ctx.breakpoint({
+    let lastFeedback_phase6Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase6Review) {
+      phase5 = await ctx.task(generateUtilityTreeTask, { ...{
+    systemName,
+    businessDrivers,
+    qualityAttributes,
+    architecturalApproaches: phase4.approaches
+  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
+    }
+  const phase6Review = await ctx.breakpoint({
     question: `Initial analysis of ${topScenarios.length} high-priority scenarios complete. Proceed to brainstorm additional scenarios?`,
     title: 'Phase 6: Initial Scenario Analysis Complete',
     context: {
@@ -150,27 +196,47 @@ export async function process(inputs, ctx) {
         { path: `atam/phase-6-initial-analysis.md`, format: 'markdown' },
         { path: `atam/phase-6-findings.json`, format: 'json' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase6Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase6Review.approved) break;
+    lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
+  }
   // Phase 7: Brainstorm and Prioritize Scenarios
-  const phase7 = await ctx.task(brainstormScenariosTask, {
+  let phase7 = await ctx.task(brainstormScenariosTask, {
     systemName,
     existingScenarios: phase5.utilityTree.scenarios,
     stakeholders,
     architecturalApproaches: phase4.approaches
   });
-  atamResults.phases.push({ phase: 7, name: 'Scenario Brainstorming', result: phase7 });
-
-  await ctx.breakpoint({
+    let lastFeedback_phase7Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase7Review) {
+      phase7 = await ctx.task(brainstormScenariosTask, { ...{
+    systemName,
+    existingScenarios: phase5.utilityTree.scenarios,
+    stakeholders,
+    architecturalApproaches: phase4.approaches
+  }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
+    }
+  const phase7Review = await ctx.breakpoint({
     question: `Brainstormed ${phase7.newScenarios.length} additional scenarios. Ready for final analysis?`,
     title: 'Phase 7: Scenario Brainstorming Complete',
     context: {
       runId: ctx.runId,
       files: [{ path: `atam/phase-7-brainstormed-scenarios.json`, format: 'json' }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase7Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase7Review.approved) break;
+    lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
+  }
   // Phase 8: Analyze Architectural Approaches (Revisited)
   // Parallel analysis of new high-priority scenarios
   const newTopScenarios = phase7.newScenarios
@@ -211,7 +277,7 @@ export async function process(inputs, ctx) {
   atamResults.tradeoffs = [...phase6.tradeoffs, ...phase8.tradeoffs];
 
   // Phase 9: Present Results
-  const phase9 = await ctx.task(presentResultsTask, {
+  let phase9 = await ctx.task(presentResultsTask, {
     systemName,
     utilityTree: phase5.utilityTree,
     architecturalApproaches: phase4.approaches,
@@ -223,9 +289,20 @@ export async function process(inputs, ctx) {
 
   atamResults.phases.push({ phase: 9, name: 'Results Presentation', result: phase9 });
   atamResults.report = phase9.report;
-  atamResults.recommendations = phase9.recommendations;
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      phase9 = await ctx.task(presentResultsTask, { ...{
+    systemName,
+    utilityTree: phase5.utilityTree,
+    architecturalApproaches: phase4.approaches,
+    risks: atamResults.risks,
+    sensitivities: atamResults.sensitivities,
+    tradeoffs: atamResults.tradeoffs,
+    totalScenarios: topScenarios.length + newTopScenarios.length
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: 'ATAM analysis complete. Review final report?',
     title: 'Phase 9: ATAM Results Ready',
     context: {
@@ -235,9 +312,15 @@ export async function process(inputs, ctx) {
         { path: `atam/phase-9-final-report.md`, format: 'markdown' },
         { path: `atam/atam-results.json`, format: 'json' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     processId: 'software-architecture/atam-analysis',
@@ -259,8 +342,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const presentMethodTask = defineTask('present-method', (args, taskCtx) => ({
   kind: 'agent',

@@ -52,9 +52,8 @@ export async function process(inputs, ctx) {
       phase: 'interview-strategy'
     };
   }
-
   // Phase 2: Interview Script Development
-  const interviewScript = await ctx.task(interviewScriptTask, {
+  let interviewScript = await ctx.task(interviewScriptTask, {
     projectName,
     interviewStrategy,
     problemHypotheses,
@@ -63,8 +62,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...(interviewScript.artifacts || []));
 
-  // Breakpoint: Review interview script before conducting interviews
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      interviewScript = await ctx.task(interviewScriptTask, { ...{
+    projectName,
+    interviewStrategy,
+    problemHypotheses,
+    existingInsights
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Review the interview script for ${projectName}. Does it follow Mom Test principles (focus on past behaviors, not future intentions)?`,
     title: 'Interview Script Review',
     context: {
@@ -73,9 +81,15 @@ export async function process(inputs, ctx) {
       interviewScript: interviewScript.script,
       keyQuestions: interviewScript.keyQuestions,
       files: artifacts
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // Phase 3: Interview Logistics Planning
   const logisticsPlanning = await ctx.task(logisticsPlanningTask, {
     projectName,
@@ -114,7 +128,7 @@ export async function process(inputs, ctx) {
   artifacts.push(...(validationFramework.artifacts || []));
 
   // Phase 7: Action Planning
-  const actionPlan = await ctx.task(actionPlanningTask, {
+  let actionPlan = await ctx.task(actionPlanningTask, {
     projectName,
     insightFramework,
     validationFramework,
@@ -123,8 +137,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...(actionPlan.artifacts || []));
 
-  // Final Breakpoint: Review complete discovery framework
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      actionPlan = await ctx.task(actionPlanningTask, { ...{
+    projectName,
+    insightFramework,
+    validationFramework,
+    interviewStrategy
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Customer Discovery framework complete for ${projectName}. Ready to begin interviews with ${interviewStrategy.targetedSegments.length} segments. Approve to proceed?`,
     title: 'Customer Discovery Framework Approval',
     context: {
@@ -134,9 +157,15 @@ export async function process(inputs, ctx) {
       hypothesesToTest: problemHypotheses.length,
       interviewsPlanned: logisticsPlanning.plannedInterviews,
       files: artifacts
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -161,8 +190,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const interviewStrategyTask = defineTask('interview-strategy', (args, taskCtx) => ({
   kind: 'agent',

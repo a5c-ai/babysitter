@@ -30,18 +30,31 @@ export async function process(inputs, ctx) {
   results.steps.push({ name: 'dd-planning', result: planningResult });
 
   // Step 2: Quality of Earnings Analysis
-  const qoeResult = await ctx.task(analyzeQualityOfEarningsTask, {
+  let qoeResult = await ctx.task(analyzeQualityOfEarningsTask, {
     targetFinancials: inputs.targetFinancials,
     managementData: inputs.managementData
   });
   results.steps.push({ name: 'quality-of-earnings', result: qoeResult });
 
-  // Breakpoint for QoE review
-  await ctx.breakpoint('qoe-review', {
+    let lastFeedback_reviewApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_reviewApproval) {
+      qoeResult = await ctx.task(analyzeQualityOfEarningsTask, { ...{
+    targetFinancials: inputs.targetFinancials,
+    managementData: inputs.managementData
+  }, feedback: lastFeedback_reviewApproval, attempt: attempt + 1 });
+    }
+  const reviewApproval = await ctx.breakpoint('qoe-review', {
     message: 'Review quality of earnings findings before continuing with detailed analysis',
-    data: qoeResult
-  });
-
+    data: qoeResult,
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_reviewApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (reviewApproval.approved) break;
+    lastFeedback_reviewApproval = reviewApproval.response || reviewApproval.feedback || 'Changes requested';
+  }
   // Step 3: Working Capital Analysis
   const workingCapitalResult = await ctx.task(analyzeWorkingCapitalTask, {
     targetFinancials: inputs.targetFinancials,
@@ -64,14 +77,21 @@ export async function process(inputs, ctx) {
   results.steps.push({ name: 'revenue-analysis', result: revenueResult });
 
   // Step 6: Cost Structure Analysis
-  const costResult = await ctx.task(analyzeCostStructureTask, {
+  let costResult = await ctx.task(analyzeCostStructureTask, {
     targetFinancials: inputs.targetFinancials,
     managementData: inputs.managementData
   });
   results.steps.push({ name: 'cost-analysis', result: costResult });
 
-  // Breakpoint for comprehensive review
-  await ctx.breakpoint('comprehensive-review', {
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      costResult = await ctx.task(analyzeCostStructureTask, { ...{
+    targetFinancials: inputs.targetFinancials,
+    managementData: inputs.managementData
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint('comprehensive-review', {
     message: 'Review all financial due diligence findings before deal structuring',
     data: {
       qoe: qoeResult,
@@ -79,9 +99,15 @@ export async function process(inputs, ctx) {
       netDebt: netDebtResult,
       revenue: revenueResult,
       cost: costResult
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Step 7: Synergy Assessment
   const synergyResult = await ctx.task(assessSynergiesTask, {
     targetFinancials: inputs.targetFinancials,
@@ -117,8 +143,7 @@ export async function process(inputs, ctx) {
 
   return results;
 }
-
-// Task definitions
+  // Task definitions
 export const planDueDiligenceTask = defineTask('plan-due-diligence', (args, taskCtx) => ({
   kind: 'agent',
   skill: { name: 'ma-advisory' },

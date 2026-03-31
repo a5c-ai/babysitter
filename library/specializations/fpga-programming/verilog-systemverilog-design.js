@@ -73,7 +73,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 2: Module Interface Design');
 
-  const interfaceDesign = await ctx.task(moduleInterfaceTask, {
+  let interfaceDesign = await ctx.task(moduleInterfaceTask, {
     moduleName,
     language,
     interfaces,
@@ -88,8 +88,23 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...interfaceDesign.artifacts);
 
-  // Quality Gate: Interface review
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      interfaceDesign = await ctx.task(moduleInterfaceTask, { ...{
+    moduleName,
+    language,
+    interfaces,
+    parameters,
+    clockDomain,
+    resetType,
+    resetSync,
+    useInterfaces,
+    specification,
+    outputDir
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Interface design complete for ${moduleName}. ${interfaceDesign.portCount} ports, ${interfaceDesign.parameterCount} parameters. Review module interface?`,
     title: 'Module Interface Review',
     context: {
@@ -99,9 +114,15 @@ export async function process(inputs, ctx) {
       ports: interfaceDesign.ports,
       parameters: interfaceDesign.parameterDetails,
       files: interfaceDesign.artifacts.map(a => ({ path: a.path, format: a.format || 'sv' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 3: RTL IMPLEMENTATION
   // ============================================================================
@@ -140,7 +161,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...svInterfaces.artifacts);
   }
-
   // ============================================================================
   // PHASE 5: ASSERTIONS (SVA)
   // ============================================================================
@@ -201,7 +221,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 8: Code Quality and Lint Check');
 
-  const codeQuality = await ctx.task(svCodeQualityTask, {
+  let codeQuality = await ctx.task(svCodeQualityTask, {
     moduleName,
     language,
     rtlImplementation,
@@ -212,8 +232,19 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...codeQuality.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      codeQuality = await ctx.task(svCodeQualityTask, { ...{
+    moduleName,
+    language,
+    rtlImplementation,
+    assertions,
+    synthesizable,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `${language} Design Complete for ${moduleName}. Quality score: ${codeQuality.score}/100. ${assertions.assertionCount} assertions. Review design package?`,
     title: 'Design Development Complete',
     context: {
@@ -232,9 +263,15 @@ export async function process(inputs, ctx) {
         { path: rtlImplementation.moduleFilePath, format: 'sv', label: 'Design Module' },
         { path: testbench.testbenchPath, format: 'sv', label: 'Testbench' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -275,8 +312,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

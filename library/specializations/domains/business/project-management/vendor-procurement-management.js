@@ -40,15 +40,24 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 2: Make-or-Buy Analysis
-  const makeOrBuy = await ctx.task(makeOrBuyTask, {
+  let makeOrBuy = await ctx.task(makeOrBuyTask, {
     projectName,
     procurementNeeds,
     budget,
     organizationalPolicies
   });
 
-  // Breakpoint: Review procurement decisions
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      makeOrBuy = await ctx.task(makeOrBuyTask, { ...{
+    projectName,
+    procurementNeeds,
+    budget,
+    organizationalPolicies
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Make-or-buy analysis complete for ${projectName}. ${makeOrBuy.buyDecisions?.length || 0} items to procure externally. Review decisions?`,
     title: 'Procurement Decision Review',
     context: {
@@ -59,9 +68,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: makeOrBuy
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // Phase 3: Vendor Identification
   const vendorIdentification = await ctx.task(vendorIdentificationTask, {
     projectName,
@@ -85,15 +100,24 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 6: Contract Negotiation
-  const contractNegotiation = await ctx.task(contractNegotiationTask, {
+  let contractNegotiation = await ctx.task(contractNegotiationTask, {
     projectName,
     selectedVendors: vendorEvaluation.selectedVendors,
     procurementNeeds: makeOrBuy.buyDecisions,
     budget
   });
 
-  // Breakpoint: Contract approval
-  await ctx.breakpoint({
+    let lastFeedback_phase6Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase6Review) {
+      contractNegotiation = await ctx.task(contractNegotiationTask, { ...{
+    projectName,
+    selectedVendors: vendorEvaluation.selectedVendors,
+    procurementNeeds: makeOrBuy.buyDecisions,
+    budget
+  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
+    }
+  const phase6Review = await ctx.breakpoint({
     question: `Contracts negotiated for ${projectName}. Total value: $${contractNegotiation.totalValue || 0}. Review and approve contracts?`,
     title: 'Contract Approval',
     context: {
@@ -104,9 +128,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: contractNegotiation
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase6Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase6Review.approved) break;
+    lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
+  }
   // Phase 7: Contract Administration
   const contractAdmin = await ctx.task(contractAdministrationTask, {
     projectName,
@@ -122,7 +152,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 9: Procurement Documentation
-  const procurementDocumentation = await ctx.task(procurementDocumentationTask, {
+  let procurementDocumentation = await ctx.task(procurementDocumentationTask, {
     projectName,
     procurementPlan,
     makeOrBuy,
@@ -130,8 +160,18 @@ export async function process(inputs, ctx) {
     performanceManagement
   });
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      procurementDocumentation = await ctx.task(procurementDocumentationTask, { ...{
+    projectName,
+    procurementPlan,
+    makeOrBuy,
+    contracts: contractNegotiation.contracts,
+    performanceManagement
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Procurement management complete for ${projectName}. ${contractNegotiation.contracts?.length || 0} contracts established. Approve final documentation?`,
     title: 'Procurement Complete',
     context: {
@@ -141,9 +181,15 @@ export async function process(inputs, ctx) {
         { path: `artifacts/procurement-complete.json`, format: 'json', content: procurementDocumentation },
         { path: `artifacts/procurement-complete.md`, format: 'markdown', content: procurementDocumentation.markdown }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     projectName,
@@ -159,8 +205,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const procurementPlanningTask = defineTask('procurement-planning', (args, taskCtx) => ({
   kind: 'agent',

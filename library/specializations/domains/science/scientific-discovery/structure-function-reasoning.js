@@ -42,7 +42,6 @@ export async function process(inputs, ctx) {
     });
     artifacts.push(...structuralAnalysis.artifacts);
   }
-
   // ============================================================================
   // PHASE 2: FUNCTIONAL REQUIREMENTS ANALYSIS (if function provided)
   // ============================================================================
@@ -58,7 +57,6 @@ export async function process(inputs, ctx) {
     });
     artifacts.push(...functionalAnalysis.artifacts);
   }
-
   // ============================================================================
   // PHASE 3: STRUCTURE-FUNCTION MAPPING
   // ============================================================================
@@ -110,7 +108,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 6: Generating structure-function inferences');
-  const inferences = await ctx.task(inferenceGenerationTask, {
+  let inferences = await ctx.task(inferenceGenerationTask, {
     structuralAnalysis,
     functionalAnalysis,
     mappingAnalysis,
@@ -126,8 +124,22 @@ export async function process(inputs, ctx) {
 
   const confidenceMet = inferences.confidenceScore >= targetConfidence;
 
-  // Breakpoint: Review inferences
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      inferences = await ctx.task(inferenceGenerationTask, { ...{
+    structuralAnalysis,
+    functionalAnalysis,
+    mappingAnalysis,
+    comparativeAnalysis,
+    constraintAnalysis,
+    inferenceDirection,
+    level,
+    targetConfidence,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Structure-function inference complete. Confidence: ${inferences.confidenceScore}/${targetConfidence}. ${confidenceMet ? 'Confidence target met!' : 'Additional analysis may be needed.'} Review inferences?`,
     title: 'Structure-Function Reasoning Results',
     context: {
@@ -146,9 +158,15 @@ export async function process(inputs, ctx) {
         mappingsIdentified: mappingAnalysis.mapping.relationships.length,
         constraintsIdentified: constraintAnalysis.constraints.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 7: PREDICTIONS AND VALIDATION
   // ============================================================================
@@ -188,8 +206,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

@@ -17,22 +17,32 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Starting Claims Management Workflow Design for: ${organizationName}`);
 
-  const currentStateAssessment = await ctx.task(claimsCurrentStateTask, { organizationName, claimsScope, currentMetrics, outputDir });
-  artifacts.push(...currentStateAssessment.artifacts);
-
-  await ctx.breakpoint({ question: `Current state assessed. Clean claim rate: ${currentStateAssessment.cleanClaimRate}%. ${currentStateAssessment.bottlenecks.length} bottlenecks identified. Proceed?`, title: 'Claims Assessment Review', context: { runId: ctx.runId, cleanClaimRate: currentStateAssessment.cleanClaimRate, bottlenecks: currentStateAssessment.bottlenecks } });
-
+  let currentStateAssessment = await ctx.task(claimsCurrentStateTask, { organizationName, claimsScope, currentMetrics, outputDir });
+    let lastFeedback_assessmentApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_assessmentApproval) {
+      currentStateAssessment = await ctx.task(claimsCurrentStateTask, { ...{ organizationName, claimsScope, currentMetrics, outputDir }, feedback: lastFeedback_assessmentApproval, attempt: attempt + 1 });
+    }
+  const assessmentApproval = await ctx.breakpoint({ question: `Current state assessed. Clean claim rate: ${currentStateAssessment.cleanClaimRate}%. ${currentStateAssessment.bottlenecks.length} bottlenecks identified. Proceed?`, title: 'Claims Assessment Review', context: { runId: ctx.runId, cleanClaimRate: currentStateAssessment.cleanClaimRate, bottlenecks: currentStateAssessment.bottlenecks }, expert: 'owner', tags: ['approval-gate'], previousFeedback: lastFeedback_assessmentApproval || undefined, attempt: attempt > 0 ? attempt + 1 : undefined });
+    if (assessmentApproval.approved) break;
+    lastFeedback_assessmentApproval = assessmentApproval.response || assessmentApproval.feedback || 'Changes requested';
+  }
   const chargeCaptureProcess = await ctx.task(chargeCaptureTask, { currentStateAssessment, outputDir });
   artifacts.push(...chargeCaptureProcess.artifacts);
 
   const claimsScrubbing = await ctx.task(claimsScrubbingTask, { currentStateAssessment, payerMix, outputDir });
   artifacts.push(...claimsScrubbing.artifacts);
 
-  const submissionWorkflow = await ctx.task(claimsSubmissionTask, { claimsScrubbing, payerMix, outputDir });
-  artifacts.push(...submissionWorkflow.artifacts);
-
-  await ctx.breakpoint({ question: `Charge capture and submission workflows designed. ${submissionWorkflow.automationOpportunities.length} automation opportunities. Proceed with payment posting?`, title: 'Submission Workflow Review', context: { runId: ctx.runId, automation: submissionWorkflow.automationOpportunities } });
-
+  let submissionWorkflow = await ctx.task(claimsSubmissionTask, { claimsScrubbing, payerMix, outputDir });
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      submissionWorkflow = await ctx.task(claimsSubmissionTask, { ...{ claimsScrubbing, payerMix, outputDir }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({ question: `Charge capture and submission workflows designed. ${submissionWorkflow.automationOpportunities.length} automation opportunities. Proceed with payment posting?`, title: 'Submission Workflow Review', context: { runId: ctx.runId, automation: submissionWorkflow.automationOpportunities }, expert: 'owner', tags: ['approval-gate'], previousFeedback: lastFeedback_finalApproval || undefined, attempt: attempt > 0 ? attempt + 1 : undefined });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const paymentPosting = await ctx.task(paymentPostingTask, { submissionWorkflow, outputDir });
   artifacts.push(...paymentPosting.artifacts);
 

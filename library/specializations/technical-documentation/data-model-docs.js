@@ -113,7 +113,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 2: Analyzing relationships between entities');
 
-  const relationshipAnalysis = await ctx.task(relationshipAnalysisTask, {
+  let relationshipAnalysis = await ctx.task(relationshipAnalysisTask, {
     projectName,
     entities: schemaDiscovery.entities,
     schemaMetadata: schemaDiscovery.metadata,
@@ -126,8 +126,19 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Identified ${relationshipAnalysis.relationships.length} relationships`);
 
-  // Breakpoint: Review discovered schema and relationships
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      relationshipAnalysis = await ctx.task(relationshipAnalysisTask, { ...{
+    projectName,
+    entities: schemaDiscovery.entities,
+    schemaMetadata: schemaDiscovery.metadata,
+    includeRelationshipCardinality,
+    includeConstraints,
+    outputDir
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Schema discovery complete for ${projectName}. Found ${schemaDiscovery.entities.length} entities and ${relationshipAnalysis.relationships.length} relationships. Review and approve to proceed with diagram generation?`,
     title: 'Schema Discovery Review',
     context: {
@@ -145,9 +156,15 @@ export async function process(inputs, ctx) {
         sourcesProcessed: schemaDiscovery.sourcesProcessed,
         schemaSource
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 3: ER DIAGRAM GENERATION (PARALLEL)
   // ============================================================================
@@ -242,7 +259,6 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Generated data dictionary with ${dataDictionary.totalFields} fields documented`);
   }
-
   // ============================================================================
   // PHASE 6: DATA FLOW DIAGRAMS (OPTIONAL)
   // ============================================================================
@@ -264,7 +280,6 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Generated ${dataFlowDiagrams.length} data flow diagrams`);
   }
-
   // ============================================================================
   // PHASE 7: COMPREHENSIVE DOCUMENTATION ASSEMBLY
   // ============================================================================
@@ -293,7 +308,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 8: Validating documentation quality and completeness');
 
-  const qualityValidation = await ctx.task(documentationQualityValidationTask, {
+  let qualityValidation = await ctx.task(documentationQualityValidationTask, {
     projectName,
     schemaDiscovery,
     relationshipAnalysis,
@@ -312,8 +327,22 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Quality validation complete. Score: ${qualityScore}/100`);
 
-  // Breakpoint: Final review
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      qualityValidation = await ctx.task(documentationQualityValidationTask, { ...{
+    projectName,
+    schemaDiscovery,
+    relationshipAnalysis,
+    erDiagrams,
+    schemaDocumentation,
+    dataDictionary: generateDataDictionary ? dataDictionary : null,
+    dataFlowDiagrams,
+    documentationAssembly,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Data model documentation complete for ${projectName}. Quality score: ${qualityScore}/100. ${qualityMet ? 'Documentation meets quality standards!' : 'Documentation may need refinement.'} Generated ${erDiagrams.length} ER diagrams, documented ${schemaDocumentation.documentedEntities} entities${generateDataDictionary ? `, and created data dictionary with ${dataDictionary.totalFields} fields` : ''}. Review and approve?`,
     title: 'Data Model Documentation Final Review',
     context: {
@@ -336,9 +365,15 @@ export async function process(inputs, ctx) {
         totalArtifacts: artifacts.length,
         masterDocumentPath: documentationAssembly.masterDocumentPath
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -384,8 +419,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

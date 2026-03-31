@@ -70,7 +70,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 3: Conducting iterative why analysis');
-  const whyAnalysis = await ctx.task(iterativeWhyAnalysisTask, {
+  let whyAnalysis = await ctx.task(iterativeWhyAnalysisTask, {
     problem: problemDefinition.clarifiedProblem,
     evidenceGathering,
     context,
@@ -80,8 +80,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...whyAnalysis.artifacts);
 
-  // Breakpoint: Review why chain
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      whyAnalysis = await ctx.task(iterativeWhyAnalysisTask, { ...{
+    problem: problemDefinition.clarifiedProblem,
+    evidenceGathering,
+    context,
+    maxIterations,
+    outputDir
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Why chain developed with ${whyAnalysis.depth} levels. Identified ${whyAnalysis.rootCauses?.length || 0} potential root causes. Review before validation?`,
     title: 'Why Chain Review',
     context: {
@@ -98,9 +108,15 @@ export async function process(inputs, ctx) {
         rootCausesCount: whyAnalysis.rootCauses?.length || 0,
         branchesExplored: whyAnalysis.branches?.length || 0
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 4: ROOT CAUSE VALIDATION
   // ============================================================================
@@ -150,7 +166,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 7: Scoring analysis quality');
-  const qualityScore = await ctx.task(analysisQualityScoringTask, {
+  let qualityScore = await ctx.task(analysisQualityScoringTask, {
     problemDefinition,
     whyAnalysis,
     rootCauseValidation,
@@ -163,8 +179,19 @@ export async function process(inputs, ctx) {
 
   const qualityMet = qualityScore.overallScore >= minimumDepthScore;
 
-  // Final breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      qualityScore = await ctx.task(analysisQualityScoringTask, { ...{
+    problemDefinition,
+    whyAnalysis,
+    rootCauseValidation,
+    countermeasures,
+    minimumDepthScore,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Five Whys analysis complete. ${rootCauseValidation.validatedRootCauses?.length || 0} validated root causes. Quality score: ${qualityScore.overallScore}/100. Approve analysis?`,
     title: 'Five Whys Analysis Approval',
     context: {
@@ -182,9 +209,15 @@ export async function process(inputs, ctx) {
         qualityScore: qualityScore.overallScore,
         qualityMet
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -220,8 +253,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

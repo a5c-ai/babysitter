@@ -37,7 +37,7 @@ export async function process(inputs, ctx) {
 
   // Task 1: Requirements Gathering and Analysis
   ctx.log('info', 'Phase 1: Gathering and analyzing dashboard requirements');
-  const requirementsResult = await ctx.task(requirementsGatheringTask, {
+  let requirementsResult = await ctx.task(requirementsGatheringTask, {
     projectName,
     dashboardScope,
     userRoles,
@@ -62,8 +62,21 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Requirements complete - ${dashboardCount} dashboards identified, ${requirementsResult.kpis.length} KPIs defined`);
 
-  // Breakpoint: Review requirements
-  await ctx.breakpoint({
+    let lastFeedback_reviewApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_reviewApproval) {
+      requirementsResult = await ctx.task(requirementsGatheringTask, { ...{
+    projectName,
+    dashboardScope,
+    userRoles,
+    dataWarehouse,
+    enableInteractivity,
+    enableMobileView,
+    enableRealTime,
+    outputDir
+  }, feedback: lastFeedback_reviewApproval, attempt: attempt + 1 });
+    }
+  const reviewApproval = await ctx.breakpoint({
     question: `Requirements gathering complete for ${projectName}. Identified ${dashboardCount} dashboards and ${requirementsResult.kpis.length} KPIs. Review requirements and user stories?`,
     title: 'Requirements Review',
     context: {
@@ -77,9 +90,15 @@ export async function process(inputs, ctx) {
         prioritizedFeatures: requirementsResult.prioritizedFeatures.slice(0, 10)
       },
       files: requirementsResult.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_reviewApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (reviewApproval.approved) break;
+    lastFeedback_reviewApproval = reviewApproval.response || reviewApproval.feedback || 'Changes requested';
+  }
   // Task 2: Platform Selection (if not specified)
   let selectedPlatform = platform;
   let platformEvaluation = null;
@@ -102,10 +121,22 @@ export async function process(inputs, ctx) {
   } else {
     ctx.log('info', `Using specified platform: ${selectedPlatform}`);
   }
-
   // Breakpoint: Platform selection review
-  if (platformEvaluation) {
-    await ctx.breakpoint({
+      let lastFeedback_reviewApproval2 = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_reviewApproval2) {
+        requirementsResult = await ctx.task(requirementsGatheringTask, { ...{
+    projectName,
+    dashboardScope,
+    userRoles,
+    dataWarehouse,
+    enableInteractivity,
+    enableMobileView,
+    enableRealTime,
+    outputDir
+  }, feedback: lastFeedback_reviewApproval2, attempt: attempt + 1 });
+      }
+  const reviewApproval2 = await ctx.breakpoint({
       question: `Platform evaluation complete. Recommended: ${selectedPlatform}. Review platform comparison and selection rationale?`,
       title: 'Platform Selection Review',
       context: {
@@ -117,13 +148,19 @@ export async function process(inputs, ctx) {
           costEstimate: platformEvaluation.costEstimate
         },
         files: platformEvaluation.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_reviewApproval2 || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (reviewApproval2.approved) break;
+      lastFeedback_reviewApproval2 = reviewApproval2.response || reviewApproval2.feedback || 'Changes requested';
+    } }
 
   // Task 3: Data Modeling and Source Preparation
   ctx.log('info', 'Phase 3: Designing data models and preparing data sources');
-  const dataModelingResult = await ctx.task(dataModelingTask, {
+  let dataModelingResult = await ctx.task(dataModelingTask, {
     projectName,
     platform: selectedPlatform,
     dataWarehouse,
@@ -137,8 +174,20 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Data modeling complete - ${dataModelingResult.dataModels.length} models, ${dataModelingResult.metrics.length} metrics defined`);
 
-  // Breakpoint: Data model review
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      dataModelingResult = await ctx.task(dataModelingTask, { ...{
+    projectName,
+    platform: selectedPlatform,
+    dataWarehouse,
+    requirements: requirementsResult.requirements,
+    kpis: requirementsResult.kpis,
+    performanceTarget,
+    outputDir
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Data modeling complete. Created ${dataModelingResult.dataModels.length} data models and ${dataModelingResult.metrics.length} metrics. Review data architecture and calculations?`,
     title: 'Data Model Review',
     context: {
@@ -151,12 +200,18 @@ export async function process(inputs, ctx) {
         performanceOptimizations: dataModelingResult.performanceOptimizations
       },
       files: dataModelingResult.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // Task 4: Visualization Design and UX Planning
   ctx.log('info', 'Phase 4: Designing visualizations and user experience');
-  const visualDesignResult = await ctx.task(visualizationDesignTask, {
+  let visualDesignResult = await ctx.task(visualizationDesignTask, {
     projectName,
     platform: selectedPlatform,
     requirements: requirementsResult.requirements,
@@ -172,8 +227,22 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Visualization design complete - ${visualDesignResult.visualizations.length} visualizations designed`);
 
-  // Breakpoint: Visualization design review
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      visualDesignResult = await ctx.task(visualizationDesignTask, { ...{
+    projectName,
+    platform: selectedPlatform,
+    requirements: requirementsResult.requirements,
+    kpis: requirementsResult.kpis,
+    userRoles,
+    enableInteractivity,
+    enableMobileView,
+    dashboardScope,
+    outputDir
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: `Visualization design complete. Created ${visualDesignResult.visualizations.length} visualizations and ${visualDesignResult.wireframes.length} wireframes. Review design mockups and UX flows?`,
     title: 'Visualization Design Review',
     context: {
@@ -186,12 +255,18 @@ export async function process(inputs, ctx) {
         mobileOptimized: enableMobileView
       },
       files: visualDesignResult.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
   // Task 5: Dashboard Implementation
   ctx.log('info', 'Phase 5: Implementing dashboards in ' + selectedPlatform);
-  const implementationResult = await ctx.task(dashboardImplementationTask, {
+  let implementationResult = await ctx.task(dashboardImplementationTask, {
     projectName,
     platform: selectedPlatform,
     dataWarehouse,
@@ -209,8 +284,24 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Implementation complete - ${implementationResult.dashboardsCreated} dashboards, ${implementationResult.worksheets.length} worksheets`);
 
-  // Breakpoint: Implementation review
-  await ctx.breakpoint({
+    let lastFeedback_reviewApproval3 = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_reviewApproval3) {
+      implementationResult = await ctx.task(dashboardImplementationTask, { ...{
+    projectName,
+    platform: selectedPlatform,
+    dataWarehouse,
+    dataModels: dataModelingResult.dataModels,
+    visualDesign: visualDesignResult,
+    requirements: requirementsResult.requirements,
+    enableInteractivity,
+    enableMobileView,
+    enableRealTime,
+    performanceTarget,
+    outputDir
+  }, feedback: lastFeedback_reviewApproval3, attempt: attempt + 1 });
+    }
+  const reviewApproval3 = await ctx.breakpoint({
     question: `Dashboard implementation complete. Created ${implementationResult.dashboardsCreated} dashboards with ${implementationResult.worksheets.length} worksheets. Review implementation and initial performance?`,
     title: 'Implementation Review',
     context: {
@@ -224,13 +315,19 @@ export async function process(inputs, ctx) {
         initialPerformance: implementationResult.performanceMetrics
       },
       files: implementationResult.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_reviewApproval3 || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (reviewApproval3.approved) break;
+    lastFeedback_reviewApproval3 = reviewApproval3.response || reviewApproval3.feedback || 'Changes requested';
+  }
   // Task 6: Access Control and Security Configuration
   if (accessControl !== 'none') {
     ctx.log('info', 'Phase 6: Configuring access control and security');
-    const securityResult = await ctx.task(securityConfigurationTask, {
+    let securityResult = await ctx.task(securityConfigurationTask, {
       projectName,
       platform: selectedPlatform,
       accessControl,
@@ -244,8 +341,20 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Security configured - ${securityResult.policies.length} policies, ${securityResult.userGroups.length} user groups`);
 
-    // Breakpoint: Security review
-    await ctx.breakpoint({
+      let lastFeedback_phase6Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase6Review) {
+        securityResult = await ctx.task(securityConfigurationTask, { ...{
+      projectName,
+      platform: selectedPlatform,
+      accessControl,
+      userRoles,
+      dashboards: implementationResult.dashboards,
+      dataModels: dataModelingResult.dataModels,
+      outputDir
+    }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
+      }
+  const phase6Review = await ctx.breakpoint({
       question: `Security configuration complete. Defined ${securityResult.policies.length} access policies and ${securityResult.userGroups.length} user groups. Review security settings?`,
       title: 'Security Configuration Review',
       context: {
@@ -258,13 +367,19 @@ export async function process(inputs, ctx) {
           dataGovernance: securityResult.dataGovernance
         },
         files: securityResult.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase6Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase6Review.approved) break;
+      lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
+    } }
 
   // Task 7: Performance Optimization
   ctx.log('info', 'Phase 7: Optimizing dashboard performance');
-  const optimizationResult = await ctx.task(performanceOptimizationTask, {
+  let optimizationResult = await ctx.task(performanceOptimizationTask, {
     projectName,
     platform: selectedPlatform,
     dataWarehouse,
@@ -279,8 +394,20 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Performance optimization complete - Score: ${performanceScore}/100, Avg load time: ${optimizationResult.avgLoadTime}s`);
 
-  // Breakpoint: Performance review
-  await ctx.breakpoint({
+    let lastFeedback_reviewApproval4 = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_reviewApproval4) {
+      optimizationResult = await ctx.task(performanceOptimizationTask, { ...{
+    projectName,
+    platform: selectedPlatform,
+    dataWarehouse,
+    dashboards: implementationResult.dashboards,
+    dataModels: dataModelingResult.dataModels,
+    performanceTarget,
+    outputDir
+  }, feedback: lastFeedback_reviewApproval4, attempt: attempt + 1 });
+    }
+  const reviewApproval4 = await ctx.breakpoint({
     question: `Performance optimization complete. Performance score: ${performanceScore}/100, Average load time: ${optimizationResult.avgLoadTime}s (target: ${performanceTarget}). Review optimization results?`,
     title: 'Performance Optimization Review',
     context: {
@@ -294,12 +421,18 @@ export async function process(inputs, ctx) {
         recommendations: optimizationResult.recommendations
       },
       files: optimizationResult.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_reviewApproval4 || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (reviewApproval4.approved) break;
+    lastFeedback_reviewApproval4 = reviewApproval4.response || reviewApproval4.feedback || 'Changes requested';
+  }
   // Task 8: Testing and Quality Assurance
   ctx.log('info', 'Phase 8: Testing dashboards and validating quality');
-  const testingResult = await ctx.task(dashboardTestingTask, {
+  let testingResult = await ctx.task(dashboardTestingTask, {
     projectName,
     platform: selectedPlatform,
     dashboards: implementationResult.dashboards,
@@ -314,8 +447,21 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Testing complete - ${testingResult.testsPassed}/${testingResult.testsRun} tests passed`);
 
-  // Breakpoint: Testing review
-  await ctx.breakpoint({
+    let lastFeedback_phase8Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase8Review) {
+      testingResult = await ctx.task(dashboardTestingTask, { ...{
+    projectName,
+    platform: selectedPlatform,
+    dashboards: implementationResult.dashboards,
+    requirements: requirementsResult.requirements,
+    kpis: requirementsResult.kpis,
+    userRoles,
+    enableMobileView,
+    outputDir
+  }, feedback: lastFeedback_phase8Review, attempt: attempt + 1 });
+    }
+  const phase8Review = await ctx.breakpoint({
     question: `Dashboard testing complete. ${testingResult.testsPassed}/${testingResult.testsRun} tests passed. ${testingResult.testsFailed > 0 ? `Review and fix ${testingResult.testsFailed} failed tests?` : 'Proceed to deployment?'}`,
     title: 'Testing Results Review',
     context: {
@@ -330,12 +476,18 @@ export async function process(inputs, ctx) {
         failedTests: testingResult.failedTests || []
       },
       files: testingResult.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase8Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase8Review.approved) break;
+    lastFeedback_phase8Review = phase8Review.response || phase8Review.feedback || 'Changes requested';
+  }
   // Task 9: Documentation Generation
   ctx.log('info', 'Phase 9: Generating comprehensive documentation');
-  const documentationResult = await ctx.task(documentationGenerationTask, {
+  let documentationResult = await ctx.task(documentationGenerationTask, {
     projectName,
     platform: selectedPlatform,
     requirements: requirementsResult.requirements,
@@ -351,8 +503,22 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Documentation complete - ${documentationResult.documents.length} documents generated`);
 
-  // Breakpoint: Documentation review
-  await ctx.breakpoint({
+    let lastFeedback_reviewApproval5 = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_reviewApproval5) {
+      documentationResult = await ctx.task(documentationGenerationTask, { ...{
+    projectName,
+    platform: selectedPlatform,
+    requirements: requirementsResult.requirements,
+    dashboards: implementationResult.dashboards,
+    dataModels: dataModelingResult.dataModels,
+    visualDesign: visualDesignResult,
+    userRoles,
+    includeTraining,
+    outputDir
+  }, feedback: lastFeedback_reviewApproval5, attempt: attempt + 1 });
+    }
+  const reviewApproval5 = await ctx.breakpoint({
     question: `Documentation generation complete. Created ${documentationResult.documents.length} documents including user guides and technical documentation. Review documentation?`,
     title: 'Documentation Review',
     context: {
@@ -365,12 +531,18 @@ export async function process(inputs, ctx) {
         videoTutorials: documentationResult.videoScripts?.length || 0
       },
       files: documentationResult.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_reviewApproval5 || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (reviewApproval5.approved) break;
+    lastFeedback_reviewApproval5 = reviewApproval5.response || reviewApproval5.feedback || 'Changes requested';
+  }
   // Task 10: Deployment and Release
   ctx.log('info', 'Phase 10: Deploying dashboards to production');
-  const deploymentResult = await ctx.task(dashboardDeploymentTask, {
+  let deploymentResult = await ctx.task(dashboardDeploymentTask, {
     projectName,
     platform: selectedPlatform,
     deploymentMode,
@@ -384,8 +556,20 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Deployment complete - ${deploymentResult.dashboardsDeployed} dashboards deployed to ${deploymentResult.environment}`);
 
-  // Breakpoint: Deployment verification
-  await ctx.breakpoint({
+    let lastFeedback_phase10Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase10Review) {
+      deploymentResult = await ctx.task(dashboardDeploymentTask, { ...{
+    projectName,
+    platform: selectedPlatform,
+    deploymentMode,
+    dashboards: implementationResult.dashboards,
+    dataModels: dataModelingResult.dataModels,
+    accessControl,
+    outputDir
+  }, feedback: lastFeedback_phase10Review, attempt: attempt + 1 });
+    }
+  const phase10Review = await ctx.breakpoint({
     question: `Dashboards deployed to ${deploymentResult.environment}. ${deploymentResult.dashboardsDeployed} dashboards live, ${deploymentResult.users.length} users configured. Verify deployment and access?`,
     title: 'Deployment Verification',
     context: {
@@ -399,12 +583,18 @@ export async function process(inputs, ctx) {
         monitoring: deploymentResult.monitoring
       },
       files: deploymentResult.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase10Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase10Review.approved) break;
+    lastFeedback_phase10Review = phase10Review.response || phase10Review.feedback || 'Changes requested';
+  }
   // Task 11: Quality Assessment and Final Validation
   ctx.log('info', 'Phase 11: Final quality assessment and validation');
-  const qualityResult = await ctx.task(qualityAssessmentTask, {
+  let qualityResult = await ctx.task(qualityAssessmentTask, {
     projectName,
     requirements: requirementsResult.requirements,
     implementation: implementationResult,
@@ -423,8 +613,21 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Quality assessment complete - Score: ${qualityScore}/100, Requirements coverage: ${qualityResult.requirementsCoverage}%`);
 
-  // Final Quality Gate
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      qualityResult = await ctx.task(qualityAssessmentTask, { ...{
+    projectName,
+    requirements: requirementsResult.requirements,
+    implementation: implementationResult,
+    testing: testingResult,
+    performance: optimizationResult,
+    documentation: documentationResult,
+    deployment: deploymentResult,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `BI Dashboard Development complete for ${projectName}. Quality score: ${qualityScore}/100, Performance: ${performanceScore}/100, Requirements met: ${qualityResult.requirementsCoverage}%. ${meetsRequirements && performanceMet ? 'Ready for sign-off!' : 'Review findings and improvements.'} Sign off?`,
     title: 'Final Quality Assessment',
     context: {
@@ -440,9 +643,15 @@ export async function process(inputs, ctx) {
         nextSteps: qualityResult.nextSteps
       },
       files: qualityResult.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -487,8 +696,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Requirements Gathering
+  // Task 1: Requirements Gathering
 export const requirementsGatheringTask = defineTask('requirements-gathering', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Gather and analyze dashboard requirements',

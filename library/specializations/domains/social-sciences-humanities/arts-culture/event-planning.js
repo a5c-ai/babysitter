@@ -99,7 +99,7 @@ export async function process(inputs, ctx) {
 
   // Task 6: Risk Assessment
   ctx.log('info', 'Conducting risk assessment');
-  const riskAssessment = await ctx.task(riskAssessmentTask, {
+  let riskAssessment = await ctx.task(riskAssessmentTask, {
     eventName,
     eventType,
     expectedAttendance,
@@ -109,8 +109,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...riskAssessment.artifacts);
 
-  // Breakpoint: Review event plan
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      riskAssessment = await ctx.task(riskAssessmentTask, { ...{
+    eventName,
+    eventType,
+    expectedAttendance,
+    venueSelection: venueSelection.venue,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Event plan for "${eventName}" complete. Expected attendance: ${expectedAttendance}. Budget: $${budget.toLocaleString()}. Review and approve?`,
     title: 'Event Planning Review',
     context: {
@@ -125,9 +135,15 @@ export async function process(inputs, ctx) {
         vendorCount: vendorCoordination.vendors.length,
         riskLevel: riskAssessment.overallRisk
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 7: Budget and Financial Planning
   ctx.log('info', 'Finalizing event budget');
   const budgetPlanning = await ctx.task(eventBudgetTask, {
@@ -202,8 +218,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Event Concept
+  // Task 1: Event Concept
 export const eventConceptTask = defineTask('event-concept', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Define event concept',

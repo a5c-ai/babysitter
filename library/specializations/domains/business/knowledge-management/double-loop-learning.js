@@ -27,15 +27,24 @@ export async function process(inputs, ctx) {
 
   // Phase 1: Learning Context Assessment
   ctx.log('info', 'Phase 1: Assessing learning context');
-  const contextAssessment = await ctx.task(contextAssessmentTask, { learningContext, triggeringEvent, outputDir });
-  artifacts.push(...contextAssessment.artifacts);
-
-  await ctx.breakpoint({
+  let contextAssessment = await ctx.task(contextAssessmentTask, { learningContext, triggeringEvent, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      contextAssessment = await ctx.task(contextAssessmentTask, { ...{ learningContext, triggeringEvent, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Learning context assessed. Trigger type: ${contextAssessment.triggerType}. Proceed with assumption examination?`,
     title: 'Context Assessment Review',
-    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })), summary: { triggerType: contextAssessment.triggerType } }
-  });
-
+    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })), summary: { triggerType: contextAssessment.triggerType } },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 2: Current Actions Analysis
   ctx.log('info', 'Phase 2: Analyzing current actions and outcomes');
   const actionsAnalysis = await ctx.task(actionsAnalysisTask, { learningContext, triggeringEvent, outputDir });
@@ -83,7 +92,6 @@ export async function process(inputs, ctx) {
     reviewResult = await ctx.task(stakeholderReviewTask, { learningOutcomes: mentalModelReframing.outcomes, newActions: newActionStrategy.strategy, qualityScore: qualityAssessment.overallScore, outputDir });
     artifacts.push(...reviewResult.artifacts);
   }
-
   const endTime = ctx.now();
   return {
     success: true,
@@ -101,8 +109,7 @@ export async function process(inputs, ctx) {
     metadata: { processId: 'domains/business/knowledge-management/double-loop-learning', timestamp: startTime, outputDir }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 export const contextAssessmentTask = defineTask('context-assessment', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Assess learning context',

@@ -24,11 +24,16 @@ export async function process(inputs, ctx) {
   const implementationTask = await ctx.task(remediationImplementationTask, { projectName, remediationPlan, outputDir });
   artifacts.push(...implementationTask.artifacts);
 
-  const testingTask = await ctx.task(accessibilityTestingTask, { projectName, outputDir });
-  artifacts.push(...testingTask.artifacts);
-
-  await ctx.breakpoint({ question: `Accessibility audit complete for ${projectName}. ${auditTask.issues.length} issues found. Approve remediation?`, title: 'Accessibility Review', context: { runId: ctx.runId, issues: auditTask.issues } });
-
+  let testingTask = await ctx.task(accessibilityTestingTask, { projectName, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      testingTask = await ctx.task(accessibilityTestingTask, { ...{ projectName, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({ question: `Accessibility audit complete for ${projectName}. ${auditTask.issues.length} issues found. Approve remediation?`, title: 'Accessibility Review', context: { runId: ctx.runId, issues: auditTask.issues }, expert: 'owner', tags: ['approval-gate'], previousFeedback: lastFeedback || undefined, attempt: attempt > 0 ? attempt + 1 : undefined });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const documentation = await ctx.task(documentationTask, { projectName, auditTask, outputDir });
   artifacts.push(...documentation.artifacts);
 

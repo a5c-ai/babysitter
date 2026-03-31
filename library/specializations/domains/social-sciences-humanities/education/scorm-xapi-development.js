@@ -120,7 +120,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Scoring package quality');
-  const qualityScore = await ctx.task(packageQualityScoringTask, {
+  let qualityScore = await ctx.task(packageQualityScoringTask, {
     courseName,
     targetStandard,
     standardsAnalysis,
@@ -137,8 +137,22 @@ export async function process(inputs, ctx) {
   const overallScore = qualityScore.overallScore;
   const qualityMet = overallScore >= qualityThreshold;
 
-  // Breakpoint: Review package
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      qualityScore = await ctx.task(packageQualityScoringTask, { ...{
+    courseName,
+    targetStandard,
+    standardsAnalysis,
+    structureDesign,
+    trackingConfiguration,
+    manifestDevelopment,
+    packageTesting,
+    qualityThreshold,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `${targetStandard} package development complete. Quality score: ${overallScore}/${qualityThreshold}. ${qualityMet ? 'Quality standards met!' : 'May need refinement.'} Review and approve?`,
     title: 'SCORM/xAPI Package Review',
     context: {
@@ -152,9 +166,15 @@ export async function process(inputs, ctx) {
         testsPassed: packageTesting.results?.passed || 0,
         totalArtifacts: artifacts.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -181,8 +201,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Standards Requirements
+  // Task 1: Standards Requirements
 export const standardsRequirementsTask = defineTask('standards-requirements', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Analyze standard requirements',

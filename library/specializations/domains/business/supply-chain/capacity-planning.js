@@ -72,7 +72,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 3: Identifying system constraints (Theory of Constraints)');
 
-  const constraintIdentification = await ctx.task(constraintIdentificationTask, {
+  let constraintIdentification = await ctx.task(constraintIdentificationTask, {
     demandAnalysis,
     capacityBaseline,
     constraints,
@@ -81,8 +81,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...constraintIdentification.artifacts);
 
-  // Breakpoint: Review bottlenecks
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      constraintIdentification = await ctx.task(constraintIdentificationTask, { ...{
+    demandAnalysis,
+    capacityBaseline,
+    constraints,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `${constraintIdentification.bottlenecks.length} bottlenecks identified. Primary constraint: ${constraintIdentification.primaryConstraint.name}. Review constraint analysis?`,
     title: 'Constraint Analysis Review',
     context: {
@@ -93,9 +102,15 @@ export async function process(inputs, ctx) {
         primaryConstraint: constraintIdentification.primaryConstraint,
         capacityGap: constraintIdentification.capacityGap
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 4: EXPLOIT THE CONSTRAINT
   // ============================================================================
@@ -192,8 +207,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

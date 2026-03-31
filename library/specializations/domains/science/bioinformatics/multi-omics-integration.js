@@ -48,29 +48,47 @@ export async function process(inputs, ctx) {
   artifacts.push(...loadingResult.artifacts);
 
   // Phase 2: Feature Harmonization
-  const harmonizationResult = await ctx.task(featureHarmonizationTask, { projectName, omicsMatrices: loadingResult.matrices, outputDir });
-  artifacts.push(...harmonizationResult.artifacts);
-
-  await ctx.breakpoint({
+  let harmonizationResult = await ctx.task(featureHarmonizationTask, { projectName, omicsMatrices: loadingResult.matrices, outputDir });
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      harmonizationResult = await ctx.task(featureHarmonizationTask, { ...{ projectName, omicsMatrices: loadingResult.matrices, outputDir }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Data harmonization complete. ${harmonizationResult.matchedSamples} matched samples across ${Object.keys(omicsData).length} omics layers. Proceed with integration?`,
     title: 'Data Harmonization Review',
-    context: { runId: ctx.runId, harmonizationStats: harmonizationResult.statistics, files: harmonizationResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label })) }
-  });
-
+    context: { runId: ctx.runId, harmonizationStats: harmonizationResult.statistics, files: harmonizationResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label })) },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // Phase 3: Multi-Omics Factor Analysis
   const factorResult = await ctx.task(multiOmicsFactorAnalysisTask, { projectName, harmonizedData: harmonizationResult.harmonizedData, integrationMethod, nFactors, outputDir });
   artifacts.push(...factorResult.artifacts);
 
   // Phase 4: Integrative Clustering
-  const clusteringResult = await ctx.task(integrativeClusteringTask, { projectName, factorData: factorResult.factors, sampleMetadata, outputDir });
-  artifacts.push(...clusteringResult.artifacts);
-
-  await ctx.breakpoint({
+  let clusteringResult = await ctx.task(integrativeClusteringTask, { projectName, factorData: factorResult.factors, sampleMetadata, outputDir });
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      clusteringResult = await ctx.task(integrativeClusteringTask, { ...{ projectName, factorData: factorResult.factors, sampleMetadata, outputDir }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: `Integrative clustering identified ${clusteringResult.nClusters} patient subtypes. Review clustering results?`,
     title: 'Integrative Clustering Review',
-    context: { runId: ctx.runId, clusters: clusteringResult.clusters, clusterStats: clusteringResult.statistics, files: clusteringResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label })) }
-  });
-
+    context: { runId: ctx.runId, clusters: clusteringResult.clusters, clusterStats: clusteringResult.statistics, files: clusteringResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label })) },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
   // Phase 5: Pathway-Level Integration
   const pathwayResult = await ctx.task(pathwayIntegrationTask, { projectName, omicsMatrices: harmonizationResult.harmonizedData, pathwayDatabases, outputDir });
   artifacts.push(...pathwayResult.artifacts);
@@ -88,15 +106,24 @@ export async function process(inputs, ctx) {
   artifacts.push(...causalResult.artifacts);
 
   // Phase 9: Report Generation
-  const reportResult = await ctx.task(generateMultiOmicsReportTask, { projectName, loadingResult, harmonizationResult, factorResult, clusteringResult, pathwayResult, correlationResult, biomarkerResult, causalResult, outputDir });
-  artifacts.push(...reportResult.artifacts);
-
-  await ctx.breakpoint({
+  let reportResult = await ctx.task(generateMultiOmicsReportTask, { projectName, loadingResult, harmonizationResult, factorResult, clusteringResult, pathwayResult, correlationResult, biomarkerResult, causalResult, outputDir });
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      reportResult = await ctx.task(generateMultiOmicsReportTask, { ...{ projectName, loadingResult, harmonizationResult, factorResult, clusteringResult, pathwayResult, correlationResult, biomarkerResult, causalResult, outputDir }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Multi-Omics Integration Complete. ${clusteringResult.nClusters} subtypes, ${biomarkerResult.biomarkers.length} biomarkers identified. Approve results?`,
     title: 'Multi-Omics Analysis Complete',
-    context: { runId: ctx.runId, summary: { clusters: clusteringResult.nClusters, biomarkers: biomarkerResult.biomarkers.length, pathways: pathwayResult.significantPathways }, files: [{ path: reportResult.reportPath, format: 'markdown', label: 'Report' }] }
-  });
-
+    context: { runId: ctx.runId, summary: { clusters: clusteringResult.nClusters, biomarkers: biomarkerResult.biomarkers.length, pathways: pathwayResult.significantPathways }, files: [{ path: reportResult.reportPath, format: 'markdown', label: 'Report' }] },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
 
   return {
@@ -113,8 +140,7 @@ export async function process(inputs, ctx) {
     metadata: { processId: 'specializations/domains/science/bioinformatics/multi-omics-integration', timestamp: startTime, integrationMethod }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 export const multiOmicsLoadingTask = defineTask('multiomics-loading', (args, taskCtx) => ({
   kind: 'agent',
   title: `Multi-Omics Loading - ${args.projectName}`,

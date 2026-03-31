@@ -67,7 +67,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...toxicityDetection.artifacts);
   }
-
   // ============================================================================
   // PHASE 3: PII REDACTION
   // ============================================================================
@@ -83,7 +82,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...piiRedaction.artifacts);
   }
-
   // ============================================================================
   // PHASE 4: HALLUCINATION DETECTION
   // ============================================================================
@@ -99,7 +97,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...hallucinationDetection.artifacts);
   }
-
   // ============================================================================
   // PHASE 5: ABUSE PREVENTION
   // ============================================================================
@@ -134,7 +131,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 7: Building moderation pipeline');
 
-  const moderationPipeline = await ctx.task(moderationPipelineTask, {
+  let moderationPipeline = await ctx.task(moderationPipelineTask, {
     systemName,
     toxicityDetection: toxicityDetection ? toxicityDetection.detector : null,
     piiRedaction: piiRedaction ? piiRedaction.redactor : null,
@@ -146,8 +143,20 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...moderationPipeline.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      moderationPipeline = await ctx.task(moderationPipelineTask, { ...{
+    systemName,
+    toxicityDetection: toxicityDetection ? toxicityDetection.detector : null,
+    piiRedaction: piiRedaction ? piiRedaction.redactor : null,
+    hallucinationDetection: hallucinationDetection ? hallucinationDetection.detector : null,
+    abusePrevention: abusePrevention.prevention,
+    alertSystem: alertSystem.system,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Content moderation system ${systemName} complete. Moderation level: ${moderationLevel}. Review implementation?`,
     title: 'Content Moderation Review',
     context: {
@@ -161,9 +170,15 @@ export async function process(inputs, ctx) {
         enableHallucinationDetection
       },
       files: artifacts.map(a => ({ path: a.path, format: a.format || 'python' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -187,8 +202,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

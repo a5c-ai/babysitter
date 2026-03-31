@@ -49,7 +49,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 2: Synthesizing user research for IA insights');
-  const iaResearchSynthesis = await ctx.task(iaResearchSynthesisTask, {
+  let iaResearchSynthesis = await ctx.task(iaResearchSynthesisTask, {
     projectName,
     userResearch,
     userTasks,
@@ -60,8 +60,19 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...iaResearchSynthesis.artifacts);
 
-  // Breakpoint: Review research synthesis before strategy
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      iaResearchSynthesis = await ctx.task(iaResearchSynthesisTask, { ...{
+    projectName,
+    userResearch,
+    userTasks,
+    targetAudience,
+    contentInventory,
+    outputDir
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Content inventory complete (${contentInventory.totalItems} items) and user research synthesized. Key finding: ${iaResearchSynthesis.topInsight}. Approve to proceed with IA strategy?`,
     title: 'IA Research Synthesis Review',
     context: {
@@ -81,9 +92,15 @@ export async function process(inputs, ctx) {
         userTasksIdentified: iaResearchSynthesis.userTaskCount,
         mentalModelInsights: iaResearchSynthesis.mentalModels.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 3: IA STRATEGY DEFINITION
   // ============================================================================
@@ -133,7 +150,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 5: Designing labeling scheme and taxonomy');
-  const labelingScheme = await ctx.task(labelingSchemeDesignTask, {
+  let labelingScheme = await ctx.task(labelingSchemeDesignTask, {
     projectName,
     sitemap,
     navigationStructure,
@@ -144,8 +161,19 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...labelingScheme.artifacts);
 
-  // Breakpoint: Review IA structure before validation
-  await ctx.breakpoint({
+    let lastFeedback_phase5Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase5Review) {
+      labelingScheme = await ctx.task(labelingSchemeDesignTask, { ...{
+    projectName,
+    sitemap,
+    navigationStructure,
+    iaResearchSynthesis,
+    platformType,
+    outputDir
+  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+    }
+  const phase5Review = await ctx.breakpoint({
     question: `IA structure complete with ${sitemap.totalPages} pages across ${sitemap.topLevelCategories} top-level categories. Navigation has ${navigationStructure.navigationLevels} levels. Review structure before validation testing?`,
     title: 'IA Structure Review',
     context: {
@@ -169,9 +197,15 @@ export async function process(inputs, ctx) {
         labelingApproach: labelingScheme.approach,
         totalLabels: labelingScheme.totalLabels
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase5Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase5Review.approved) break;
+    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 6: VALIDATION TESTING (PARALLEL)
   // ============================================================================
@@ -194,7 +228,6 @@ export async function process(inputs, ctx) {
       }
     });
   }
-
   // Tree Testing Validation
   if (includeTreeTesting) {
     validationTasks.push({
@@ -209,7 +242,6 @@ export async function process(inputs, ctx) {
       }
     });
   }
-
   let cardSortingResults = null;
   let treeTestingResults = null;
 
@@ -229,13 +261,12 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Validation testing complete: ${validationTasks.length} methods conducted`);
   }
-
   // ============================================================================
   // PHASE 7: IA REFINEMENT BASED ON VALIDATION
   // ============================================================================
 
   ctx.log('info', 'Phase 7: Refining IA based on validation results');
-  const iaRefinement = await ctx.task(iaRefinementTask, {
+  let iaRefinement = await ctx.task(iaRefinementTask, {
     projectName,
     sitemap,
     navigationStructure,
@@ -247,8 +278,20 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...iaRefinement.artifacts);
 
-  // Breakpoint: Review refinements before finalization
-  await ctx.breakpoint({
+    let lastFeedback_phase7Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase7Review) {
+      iaRefinement = await ctx.task(iaRefinementTask, { ...{
+    projectName,
+    sitemap,
+    navigationStructure,
+    labelingScheme,
+    cardSortingResults,
+    treeTestingResults,
+    outputDir
+  }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
+    }
+  const phase7Review = await ctx.breakpoint({
     question: `IA refinement complete. ${iaRefinement.changesCount} changes recommended based on validation. ${iaRefinement.criticalIssues} critical issues identified. Review refinements?`,
     title: 'IA Refinement Review',
     context: {
@@ -267,9 +310,15 @@ export async function process(inputs, ctx) {
         improvementAreas: iaRefinement.improvementAreas,
         validationSuccessRate: iaRefinement.validationSuccessRate
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase7Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase7Review.approved) break;
+    lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 8: IA DOCUMENTATION & SPECIFICATIONS
   // ============================================================================
@@ -310,13 +359,12 @@ export async function process(inputs, ctx) {
     artifacts.push(...wireframePrototype.artifacts);
     ctx.log('info', 'Wireframe prototype created');
   }
-
   // ============================================================================
   // PHASE 10: IA QUALITY ASSESSMENT
   // ============================================================================
 
   ctx.log('info', 'Phase 10: Assessing IA quality and completeness');
-  const qualityAssessment = await ctx.task(iaQualityAssessmentTask, {
+  let qualityAssessment = await ctx.task(iaQualityAssessmentTask, {
     projectName,
     iaStrategy,
     sitemap,
@@ -334,8 +382,23 @@ export async function process(inputs, ctx) {
   const qualityScore = qualityAssessment.overallScore;
   const qualityMet = qualityScore >= 80;
 
-  // Final Breakpoint: Review complete IA deliverables
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      qualityAssessment = await ctx.task(iaQualityAssessmentTask, { ...{
+    projectName,
+    iaStrategy,
+    sitemap,
+    navigationStructure,
+    labelingScheme,
+    cardSortingResults,
+    treeTestingResults,
+    iaDocumentation,
+    wireframePrototype,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Information Architecture complete! Quality score: ${qualityScore}/100. ${qualityMet ? 'IA meets quality standards!' : 'IA may benefit from additional refinement.'} Review and approve final deliverables?`,
     title: 'Information Architecture Final Review',
     context: {
@@ -367,9 +430,15 @@ export async function process(inputs, ctx) {
           validationScore: qualityAssessment.validationScore
         }
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -436,8 +505,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

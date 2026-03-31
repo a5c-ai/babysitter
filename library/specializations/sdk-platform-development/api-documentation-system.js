@@ -88,7 +88,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 4: Developing conceptual and explanation guides');
 
-  const conceptualGuides = await ctx.task(conceptualGuidesTask, {
+  let conceptualGuides = await ctx.task(conceptualGuidesTask, {
     projectName,
     apiSpecPath,
     strategy,
@@ -97,8 +97,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...conceptualGuides.artifacts);
 
-  // Quality Gate: Content Review
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      conceptualGuides = await ctx.task(conceptualGuidesTask, { ...{
+    projectName,
+    apiSpecPath,
+    strategy,
+    outputDir
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: `Core documentation created for ${projectName}. Quick start: ready, Conceptual guides: ${conceptualGuides.guides.length}. Approve content?`,
     title: 'Documentation Content Review',
     context: {
@@ -107,9 +116,15 @@ export async function process(inputs, ctx) {
       gettingStartedPath: gettingStarted.guidePath,
       conceptualGuides: conceptualGuides.guides,
       files: artifacts.slice(-5).map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 5: HOW-TO GUIDES
   // ============================================================================
@@ -171,7 +186,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...consoleSetup.artifacts);
   }
-
   // ============================================================================
   // PHASE 9: SEARCH AND NAVIGATION
   // ============================================================================
@@ -193,7 +207,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 10: Setting up documentation CI/CD pipeline');
 
-  const docsCicd = await ctx.task(docsCicdTask, {
+  let docsCicd = await ctx.task(docsCicdTask, {
     projectName,
     documentationFramework,
     apiSpecPath,
@@ -202,8 +216,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...docsCicd.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      docsCicd = await ctx.task(docsCicdTask, { ...{
+    projectName,
+    documentationFramework,
+    apiSpecPath,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `API Documentation System complete for ${projectName}. Review all documentation and approve?`,
     title: 'Documentation System Complete',
     context: {
@@ -220,9 +243,15 @@ export async function process(inputs, ctx) {
         { path: gettingStarted.guidePath, format: 'markdown', label: 'Getting Started' },
         { path: apiReference.referencePath, format: 'markdown', label: 'API Reference' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -253,8 +282,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

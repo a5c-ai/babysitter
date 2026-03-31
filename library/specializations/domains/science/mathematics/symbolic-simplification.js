@@ -31,7 +31,7 @@ export async function process(inputs, ctx) {
   } = inputs;
 
   // Phase 1: Parse Mathematical Expression
-  const expressionParsing = await ctx.task(expressionParsingTask, {
+  let expressionParsing = await ctx.task(expressionParsingTask, {
     expression,
     domain,
     assumptions
@@ -46,9 +46,16 @@ export async function process(inputs, ctx) {
       simplifiedExpression: null
     };
   }
-
-  // Breakpoint: Review parsed expression
-  await ctx.breakpoint({
+  let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      expressionParsing = await ctx.task(expressionParsingTask, { ...{
+    expression,
+    domain,
+    assumptions
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Expression parsed. Structure identified: ${expressionParsing.structure}. Continue with simplification?`,
     title: 'Expression Parsing Review',
     context: {
@@ -60,9 +67,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: expressionParsing
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // Phase 2: Apply Simplification Rules
   const simplificationApplication = await ctx.task(simplificationApplicationTask, {
     parsedExpression: expressionParsing.parsedExpression,
@@ -86,7 +99,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 5: Verify Simplification Correctness
-  const verificationResult = await ctx.task(simplificationVerificationTask, {
+  let verificationResult = await ctx.task(simplificationVerificationTask, {
     originalExpression: expression,
     simplifiedExpression: simplificationApplication.simplifiedExpression,
     equivalentForms: equivalentFormsGeneration.forms,
@@ -94,8 +107,18 @@ export async function process(inputs, ctx) {
     domain
   });
 
-  // Final Breakpoint: Simplification Complete
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      verificationResult = await ctx.task(simplificationVerificationTask, { ...{
+    originalExpression: expression,
+    simplifiedExpression: simplificationApplication.simplifiedExpression,
+    equivalentForms: equivalentFormsGeneration.forms,
+    assumptions,
+    domain
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Simplification complete. Original: "${expression}" -> Simplified: "${simplificationApplication.simplifiedExpression}". Verified: ${verificationResult.verified}. Accept result?`,
     title: 'Simplification Complete',
     context: {
@@ -106,9 +129,15 @@ export async function process(inputs, ctx) {
       files: [
         { path: `artifacts/simplification-result.json`, format: 'json', content: { simplificationApplication, verificationResult } }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     originalExpression: expression,
@@ -130,8 +159,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const expressionParsingTask = defineTask('expression-parsing', (args, taskCtx) => ({
   kind: 'agent',

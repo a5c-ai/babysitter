@@ -60,25 +60,39 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 2: Partitioning Hardware/Software Functionality');
 
-  const partitioning = await ctx.task(functionalPartitioningTask, {
+  let partitioning = await ctx.task(functionalPartitioningTask, {
     projectName,
     requirementsAnalysis,
     hardwareConstraints,
     outputDir
   });
 
-  artifacts.push(...partitioning.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      partitioning = await ctx.task(functionalPartitioningTask, { ...{
+    projectName,
+    requirementsAnalysis,
+    hardwareConstraints,
+    outputDir
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Functional partitioning complete. HW functions: ${partitioning.hardwareFunctions.length}, SW functions: ${partitioning.softwareFunctions.length}. Review?`,
     title: 'Partitioning Review',
     context: {
       runId: ctx.runId,
       partitioning: partitioning.summary,
       files: partitioning.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 3: INTERFACE SPECIFICATION
   // ============================================================================
@@ -148,7 +162,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 7: Generating Co-Design Documentation');
 
-  const documentation = await ctx.task(codesignDocumentationTask, {
+  let documentation = await ctx.task(codesignDocumentationTask, {
     projectName,
     partitioning,
     interfaceSpec,
@@ -160,8 +174,20 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...documentation.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      documentation = await ctx.task(codesignDocumentationTask, { ...{
+    projectName,
+    partitioning,
+    interfaceSpec,
+    protocolDesign,
+    architectureOptimization,
+    tradeoffAnalysis,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Hardware-Software Co-Design Complete for ${projectName}. Review final architecture?`,
     title: 'Co-Design Complete',
     context: {
@@ -175,9 +201,15 @@ export async function process(inputs, ctx) {
       files: [
         { path: documentation.specPath, format: 'markdown', label: 'Co-Design Spec' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -203,8 +235,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

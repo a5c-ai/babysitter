@@ -68,7 +68,6 @@ export async function process(inputs, ctx) {
     });
     artifacts.push(...rooflineAnalysis.artifacts);
   }
-
   // Phase 6: Bottleneck Identification
   const bottleneckAnalysis = await ctx.task(bottleneckIdentificationTask, {
     projectName, kernelProfiling, memoryAnalysis, occupancyAnalysis, rooflineAnalysis, outputDir
@@ -76,17 +75,28 @@ export async function process(inputs, ctx) {
   artifacts.push(...bottleneckAnalysis.artifacts);
 
   // Phase 7: Optimization Recommendations
-  const recommendations = await ctx.task(optimizationRecommendationsTask, {
+  let recommendations = await ctx.task(optimizationRecommendationsTask, {
     projectName, bottleneckAnalysis, kernelProfiling, outputDir
   });
-  artifacts.push(...recommendations.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      recommendations = await ctx.task(optimizationRecommendationsTask, { ...{
+    projectName, bottleneckAnalysis, kernelProfiling, outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Profiling complete for ${projectName}. Found ${bottleneckAnalysis.bottlenecks.length} bottlenecks. Review report?`,
     title: 'Profiling Complete',
-    context: { runId: ctx.runId, bottleneckAnalysis, recommendations }
-  });
-
+    context: { runId: ctx.runId, bottleneckAnalysis, recommendations },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     projectName,

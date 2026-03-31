@@ -24,15 +24,24 @@ export async function process(inputs, ctx) {
   const implementation = await ctx.task(segmentTreeImplementationTask, { design, language, outputDir });
   artifacts.push(...implementation.artifacts);
 
-  const testing = await ctx.task(segmentTreeTestingTask, { implementation, queryType, updateType, outputDir });
-  artifacts.push(...testing.artifacts);
-
-  await ctx.breakpoint({
+  let testing = await ctx.task(segmentTreeTestingTask, { implementation, queryType, updateType, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      testing = await ctx.task(segmentTreeTestingTask, { ...{ implementation, queryType, updateType, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Segment tree implemented. Variant: ${variant}. All tests passed: ${testing.allPassed}. Review?`,
     title: 'Segment Tree Complete',
-    context: { runId: ctx.runId, variant, complexity: design.complexity, testsPassed: testing.allPassed }
-  });
-
+    context: { runId: ctx.runId, variant, complexity: design.complexity, testsPassed: testing.allPassed },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     variant,

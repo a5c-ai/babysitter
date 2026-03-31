@@ -54,7 +54,6 @@ export async function process(inputs, ctx) {
       }
     };
   }
-
   // ============================================================================
   // PHASE 2: USER ACTIVITY IDENTIFICATION
   // ============================================================================
@@ -75,7 +74,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 3: Breaking down activities into user tasks');
-  const userTasks = await ctx.task(taskBreakdownTask, {
+  let userTasks = await ctx.task(taskBreakdownTask, {
     productName,
     userActivities: userActivities.activities,
     userPersonas: contextAnalysis.enrichedPersonas,
@@ -85,8 +84,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...userTasks.artifacts);
 
-  // Breakpoint: Review user activities and tasks
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      userTasks = await ctx.task(taskBreakdownTask, { ...{
+    productName,
+    userActivities: userActivities.activities,
+    userPersonas: contextAnalysis.enrichedPersonas,
+    userJourneys: contextAnalysis.userJourneys,
+    outputDir
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `User story map backbone created with ${userActivities.activities.length} activities and ${userTasks.tasks.length} tasks. Review structure before creating stories?`,
     title: 'Story Map Backbone Review',
     context: {
@@ -103,9 +112,15 @@ export async function process(inputs, ctx) {
         tasksCount: userTasks.tasks.length,
         personasCount: contextAnalysis.enrichedPersonas.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 4: USER STORY CREATION
   // ============================================================================
@@ -142,7 +157,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 6: Prioritizing stories using multiple frameworks');
-  const prioritization = await ctx.task(prioritizationTask, {
+  let prioritization = await ctx.task(prioritizationTask, {
     productName,
     productGoal: contextAnalysis.refinedProductGoal,
     userStories: userStories.stories,
@@ -154,8 +169,20 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...prioritization.artifacts);
 
-  // Breakpoint: Review prioritization
-  await ctx.breakpoint({
+    let lastFeedback_phase6Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase6Review) {
+      prioritization = await ctx.task(prioritizationTask, { ...{
+    productName,
+    productGoal: contextAnalysis.refinedProductGoal,
+    userStories: userStories.stories,
+    estimatedStories: storyEstimation.estimatedStories,
+    userPersonas: contextAnalysis.enrichedPersonas,
+    businessObjectives: contextAnalysis.businessObjectives,
+    outputDir
+  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
+    }
+  const phase6Review = await ctx.breakpoint({
     question: `Story prioritization complete with ${prioritization.criticalStories.length} critical, ${prioritization.highPriorityStories.length} high priority stories. Review prioritization?`,
     title: 'Prioritization Review',
     context: {
@@ -172,9 +199,15 @@ export async function process(inputs, ctx) {
         highPriorityStories: prioritization.highPriorityStories.length,
         mvpStories: prioritization.mvpCandidates.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase6Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase6Review.approved) break;
+    lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 7: RELEASE PLANNING
   // ============================================================================
@@ -267,7 +300,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 12: Validating story map quality and completeness');
-  const qualityValidation = await ctx.task(qualityValidationTask, {
+  let qualityValidation = await ctx.task(qualityValidationTask, {
     productName,
     userActivities: userActivities.activities,
     userTasks: userTasks.tasks,
@@ -283,8 +316,22 @@ export async function process(inputs, ctx) {
 
   const qualityMet = qualityValidation.overallScore >= minimumQualityScore;
 
-  // Final breakpoint: Review complete story map
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      qualityValidation = await ctx.task(qualityValidationTask, { ...{
+    productName,
+    userActivities: userActivities.activities,
+    userTasks: userTasks.tasks,
+    userStories: userStories.stories,
+    prioritizedStories: prioritization.prioritizedStories,
+    releaseMap: releasePlanning.releaseMap,
+    mvpDefinition,
+    minimumQualityScore,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `User story mapping complete for ${productName}. Quality score: ${qualityValidation.overallScore}/100. ${qualityMet ? 'Story map meets quality standards!' : 'Story map may need refinement.'} Review and approve?`,
     title: 'Final Story Map Review',
     context: {
@@ -306,9 +353,15 @@ export async function process(inputs, ctx) {
         plannedReleases: releasePlanning.releaseMap.releases.length,
         estimatedDuration: releasePlanning.estimatedDuration
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -371,8 +424,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

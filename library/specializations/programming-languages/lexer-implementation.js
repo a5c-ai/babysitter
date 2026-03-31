@@ -46,16 +46,24 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Designing Token Types');
 
-  const tokenDesign = await ctx.task(tokenDesignTask, {
+  let tokenDesign = await ctx.task(tokenDesignTask, {
     languageName,
     grammarSpec,
     implementationLanguage,
     outputDir
   });
 
-  artifacts.push(...tokenDesign.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      tokenDesign = await ctx.task(tokenDesignTask, { ...{
+    languageName,
+    grammarSpec,
+    implementationLanguage,
+    outputDir
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Token design complete for ${languageName}. ${tokenDesign.tokenCount} token types defined. Keywords: ${tokenDesign.keywords.length}, Operators: ${tokenDesign.operators.length}. Proceed with architecture?`,
     title: 'Token Design Review',
     context: {
@@ -63,9 +71,15 @@ export async function process(inputs, ctx) {
       tokenCount: tokenDesign.tokenCount,
       categories: tokenDesign.categories,
       files: tokenDesign.artifacts.map(a => ({ path: a.path, format: a.format || 'typescript' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 2: LEXER ARCHITECTURE
   // ============================================================================
@@ -199,7 +213,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 9: Implementing Error Recovery');
 
-  const errorHandling = await ctx.task(lexerErrorRecoveryTask, {
+  let errorHandling = await ctx.task(lexerErrorRecoveryTask, {
     languageName,
     implementationLanguage,
     errorRecovery,
@@ -207,9 +221,18 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...errorHandling.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase9Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase9Review) {
+      errorHandling = await ctx.task(lexerErrorRecoveryTask, { ...{
+    languageName,
+    implementationLanguage,
+    errorRecovery,
+    charStream,
+    outputDir
+  }, feedback: lastFeedback_phase9Review, attempt: attempt + 1 });
+    }
+  const phase9Review = await ctx.breakpoint({
     question: `Error recovery implemented. ${errorHandling.recoveryStrategies.length} recovery strategies. Error types: ${errorHandling.errorTypes.length}. Continue with testing?`,
     title: 'Error Recovery Review',
     context: {
@@ -217,9 +240,15 @@ export async function process(inputs, ctx) {
       recoveryStrategies: errorHandling.recoveryStrategies,
       errorTypes: errorHandling.errorTypes,
       files: errorHandling.artifacts.map(a => ({ path: a.path, format: a.format || 'typescript' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase9Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase9Review.approved) break;
+    lastFeedback_phase9Review = phase9Review.response || phase9Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 10: LEXER INTEGRATION
   // ============================================================================
@@ -280,7 +309,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 13: Generating Documentation');
 
-  const documentation = await ctx.task(lexerDocumentationTask, {
+  let documentation = await ctx.task(lexerDocumentationTask, {
     languageName,
     tokenDesign,
     lexerArchitecture,
@@ -290,9 +319,20 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...documentation.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      documentation = await ctx.task(lexerDocumentationTask, { ...{
+    languageName,
+    tokenDesign,
+    lexerArchitecture,
+    lexerIntegration,
+    testSuite,
+    benchmarks,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Lexer Implementation Complete for ${languageName}! Test coverage: ${testSuite.coverage}%, Performance: ${benchmarks.tokensPerSecond} tokens/sec. Review deliverables?`,
     title: 'Lexer Implementation Complete',
     context: {
@@ -308,9 +348,15 @@ export async function process(inputs, ctx) {
         { path: lexerIntegration.mainFilePath, format: implementationLanguage.toLowerCase(), label: 'Lexer Implementation' },
         { path: documentation.apiDocPath, format: 'markdown', label: 'API Documentation' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -358,8 +404,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

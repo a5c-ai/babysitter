@@ -27,15 +27,24 @@ export async function process(inputs, ctx) {
   const evaluation = await ctx.task(solutionEvaluationTask, { interview, problemSelection, outputDir });
   artifacts.push(...evaluation.artifacts);
 
-  const feedback = await ctx.task(detailedFeedbackTask, { interview, evaluation, outputDir });
-  artifacts.push(...feedback.artifacts);
-
-  await ctx.breakpoint({
+  let feedback = await ctx.task(detailedFeedbackTask, { interview, evaluation, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      feedback = await ctx.task(detailedFeedbackTask, { ...{ interview, evaluation, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Mock interview complete. Overall score: ${evaluation.overallScore}/100. Review detailed feedback?`,
     title: 'Mock Interview Complete',
-    context: { runId: ctx.runId, score: evaluation.overallScore, strengths: feedback.strengths, improvements: feedback.improvements }
-  });
-
+    context: { runId: ctx.runId, score: evaluation.overallScore, strengths: feedback.strengths, improvements: feedback.improvements },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     difficulty,

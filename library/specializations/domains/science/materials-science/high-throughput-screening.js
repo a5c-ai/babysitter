@@ -55,16 +55,24 @@ export async function process(inputs, ctx) {
 
   // Phase 2: Database Query
   ctx.log('info', 'Phase 2: Querying materials databases');
-  const databaseQuery = await ctx.task(databaseQueryTask, {
+  let databaseQuery = await ctx.task(databaseQueryTask, {
     searchCriteria: searchCriteria.criteria,
     databases,
     maxCandidates: maxCandidates * 10,
     outputDir
   });
 
-  artifacts.push(...databaseQuery.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      databaseQuery = await ctx.task(databaseQueryTask, { ...{
+    searchCriteria: searchCriteria.criteria,
+    databases,
+    maxCandidates: maxCandidates * 10,
+    outputDir
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Database query returned ${databaseQuery.totalHits} materials. After initial filters: ${databaseQuery.filteredCount}. Continue with detailed screening?`,
     title: 'Database Query Results',
     context: {
@@ -75,9 +83,15 @@ export async function process(inputs, ctx) {
         databases: databases
       },
       files: databaseQuery.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // Phase 3: Stability Screening
   ctx.log('info', 'Phase 3: Screening for thermodynamic stability');
   const stabilityScreening = await ctx.task(stabilityScreeningTask, {
@@ -112,7 +126,7 @@ export async function process(inputs, ctx) {
 
   // Phase 6: Multi-objective Ranking
   ctx.log('info', 'Phase 6: Ranking candidates');
-  const ranking = await ctx.task(candidateRankingTask, {
+  let ranking = await ctx.task(candidateRankingTask, {
     candidates: propertyCalculation.candidates,
     targetProperty,
     propertyRange,
@@ -120,9 +134,18 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...ranking.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      ranking = await ctx.task(candidateRankingTask, { ...{
+    candidates: propertyCalculation.candidates,
+    targetProperty,
+    propertyRange,
+    maxCandidates,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Screening complete. ${ranking.rankedCandidates.length} candidates identified. Top candidate: ${ranking.rankedCandidates[0]?.formula}. Review rankings?`,
     title: 'Screening Results Review',
     context: {
@@ -136,9 +159,15 @@ export async function process(inputs, ctx) {
         }))
       },
       files: ranking.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 7: Synthesizability Assessment
   ctx.log('info', 'Phase 7: Assessing synthesizability');
   const synthesizability = await ctx.task(synthesizabilityAssessmentTask, {
@@ -210,8 +239,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Define Search Criteria
+  // Task 1: Define Search Criteria
 export const defineSearchCriteriaTask = defineTask('hts-define-criteria', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Define Search Criteria',

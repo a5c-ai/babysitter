@@ -40,7 +40,7 @@ export async function process(inputs, ctx) {
 
   // PHASE 2: EXPIRATION RISK ASSESSMENT
   ctx.log('info', 'Phase 2: Assessing expiration risks');
-  const expirationAssessment = await ctx.task(expirationAssessmentTask, {
+  let expirationAssessment = await ctx.task(expirationAssessmentTask, {
     inventory,
     expirationRules,
     outputDir
@@ -48,8 +48,16 @@ export async function process(inputs, ctx) {
   artifacts.push(...expirationAssessment.artifacts);
 
   // Quality Gate: Critical expirations
-  if (expirationAssessment.criticalItems.length > 0) {
-    await ctx.breakpoint({
+      let lastFeedback_phase2Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase2Review) {
+        expirationAssessment = await ctx.task(expirationAssessmentTask, { ...{
+    inventory,
+    expirationRules,
+    outputDir
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+      }
+  const phase2Review = await ctx.breakpoint({
       question: `${expirationAssessment.criticalItems.length} items at critical expiration risk. Total value at risk: $${expirationAssessment.criticalValue}. Review and take action?`,
       title: 'Critical Expiration Alert',
       context: {
@@ -57,9 +65,15 @@ export async function process(inputs, ctx) {
         criticalItems: expirationAssessment.criticalItems,
         criticalValue: expirationAssessment.criticalValue,
         files: expirationAssessment.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase2Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase2Review.approved) break;
+      lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+    } }
 
   // PHASE 3: ROTATION SEQUENCE DETERMINATION
   ctx.log('info', 'Phase 3: Determining rotation sequence');
@@ -111,7 +125,7 @@ export async function process(inputs, ctx) {
 
   // PHASE 8: PERFORMANCE METRICS AND REPORTING
   ctx.log('info', 'Phase 8: Generating performance report');
-  const performanceReport = await ctx.task(rotationPerformanceTask, {
+  let performanceReport = await ctx.task(rotationPerformanceTask, {
     inventory,
     rotationSequence,
     expirationAssessment,
@@ -120,8 +134,18 @@ export async function process(inputs, ctx) {
   });
   artifacts.push(...performanceReport.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      performanceReport = await ctx.task(rotationPerformanceTask, { ...{
+    inventory,
+    rotationSequence,
+    expirationAssessment,
+    complianceValidation,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Inventory rotation analysis complete. Compliance: ${complianceValidation.complianceRate}%. Expiration alerts: ${expirationAssessment.alertCount}. Approve rotation plan?`,
     title: 'Inventory Rotation Complete',
     context: {
@@ -135,9 +159,15 @@ export async function process(inputs, ctx) {
         actionsRequired: actionPlan.actions.length
       },
       files: [{ path: performanceReport.reportPath, format: 'markdown', label: 'Performance Report' }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   return {
     success: true,
@@ -151,8 +181,7 @@ export async function process(inputs, ctx) {
     metadata: { processId: 'specializations/domains/business/logistics/fifo-lifo-inventory-control', timestamp: startTime, outputDir }
   };
 }
-
-// TASK DEFINITIONS
+  // TASK DEFINITIONS
 export const inventoryDateAnalysisTask = defineTask('inventory-date-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Analyze inventory dates',

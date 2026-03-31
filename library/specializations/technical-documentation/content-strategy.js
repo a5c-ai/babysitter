@@ -37,7 +37,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 1: Conducting discovery and stakeholder alignment');
-  const discovery = await ctx.task(discoveryStakeholderTask, {
+  let discovery = await ctx.task(discoveryStakeholderTask, {
     projectName,
     productType,
     targetAudiences,
@@ -50,8 +50,21 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...discovery.artifacts);
 
-  // Breakpoint: Review discovery findings
-  await ctx.breakpoint({
+    let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      discovery = await ctx.task(discoveryStakeholderTask, { ...{
+    projectName,
+    productType,
+    targetAudiences,
+    existingContent,
+    documentationGoals,
+    businessObjectives,
+    technicalConstraints,
+    outputDir
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Discovery complete with ${discovery.stakeholderCount} stakeholders interviewed and ${discovery.userNeedsCount} user needs identified. Review findings?`,
     title: 'Discovery and Stakeholder Alignment Review',
     context: {
@@ -68,9 +81,15 @@ export async function process(inputs, ctx) {
         keyInsights: discovery.keyInsights?.length || 0,
         contentGaps: discovery.contentGaps?.length || 0
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 2: USER RESEARCH AND PERSONA DEVELOPMENT
   // ============================================================================
@@ -124,7 +143,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 5: Conducting gap analysis and content inventory');
-  const gapAnalysis = await ctx.task(gapAnalysisInventoryTask, {
+  let gapAnalysis = await ctx.task(gapAnalysisInventoryTask, {
     projectName,
     contentAudit: contentAudit.auditResults,
     userJourneys: journeyMapping.journeys,
@@ -135,8 +154,19 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...gapAnalysis.artifacts);
 
-  // Breakpoint: Review gap analysis
-  await ctx.breakpoint({
+    let lastFeedback_phase5Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase5Review) {
+      gapAnalysis = await ctx.task(gapAnalysisInventoryTask, { ...{
+    projectName,
+    contentAudit: contentAudit.auditResults,
+    userJourneys: journeyMapping.journeys,
+    personas: userResearch.personas,
+    contentTypes,
+    outputDir
+  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+    }
+  const phase5Review = await ctx.breakpoint({
     question: `Gap analysis complete. Found ${gapAnalysis.criticalGapsCount} critical gaps and ${gapAnalysis.totalContentItems} content items inventoried. Review analysis?`,
     title: 'Content Gap Analysis Review',
     context: {
@@ -153,9 +183,15 @@ export async function process(inputs, ctx) {
         coverageScore: gapAnalysis.coverageScore,
         recommendedActions: gapAnalysis.recommendedActions?.length || 0
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase5Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase5Review.approved) break;
+    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 6: INFORMATION ARCHITECTURE DESIGN
   // ============================================================================
@@ -194,7 +230,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 8: Developing structured content model');
-  const contentModel = await ctx.task(contentModelDevelopmentTask, {
+  let contentModel = await ctx.task(contentModelDevelopmentTask, {
     projectName,
     informationArchitecture: informationArchitecture.structure,
     taxonomy: taxonomyDesign.taxonomy,
@@ -205,8 +241,19 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...contentModel.artifacts);
 
-  // Breakpoint: Review content model
-  await ctx.breakpoint({
+    let lastFeedback_phase8Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase8Review) {
+      contentModel = await ctx.task(contentModelDevelopmentTask, { ...{
+    projectName,
+    informationArchitecture: informationArchitecture.structure,
+    taxonomy: taxonomyDesign.taxonomy,
+    contentTypes,
+    platforms,
+    outputDir
+  }, feedback: lastFeedback_phase8Review, attempt: attempt + 1 });
+    }
+  const phase8Review = await ctx.breakpoint({
     question: `Content model developed with ${contentModel.contentTypeCount} content types and ${contentModel.componentCount} reusable components. Review model?`,
     title: 'Content Model Review',
     context: {
@@ -223,9 +270,15 @@ export async function process(inputs, ctx) {
         templates: contentModel.templateCount,
         structured: contentModel.isStructured
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase8Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase8Review.approved) break;
+    lastFeedback_phase8Review = phase8Review.response || phase8Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 9: NAVIGATION AND FINDABILITY STRATEGY
   // ============================================================================
@@ -311,7 +364,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 14: Creating content production strategy and roadmap');
-  const productionStrategy = await ctx.task(contentProductionStrategyTask, {
+  let productionStrategy = await ctx.task(contentProductionStrategyTask, {
     projectName,
     gapAnalysis: gapAnalysis.gaps,
     contentInventory: gapAnalysis.contentInventory,
@@ -323,8 +376,20 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...productionStrategy.artifacts);
 
-  // Breakpoint: Review production strategy
-  await ctx.breakpoint({
+    let lastFeedback_phase14Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase14Review) {
+      productionStrategy = await ctx.task(contentProductionStrategyTask, { ...{
+    projectName,
+    gapAnalysis: gapAnalysis.gaps,
+    contentInventory: gapAnalysis.contentInventory,
+    contentModel: contentModel.model,
+    userJourneys: journeyMapping.journeys,
+    timeframe,
+    outputDir
+  }, feedback: lastFeedback_phase14Review, attempt: attempt + 1 });
+    }
+  const phase14Review = await ctx.breakpoint({
     question: `Content production strategy created with ${productionStrategy.phaseCount} phases and ${productionStrategy.totalContentItems} items to produce. Review strategy?`,
     title: 'Content Production Strategy Review',
     context: {
@@ -341,9 +406,15 @@ export async function process(inputs, ctx) {
         estimatedDuration: productionStrategy.estimatedDuration,
         resourcesNeeded: productionStrategy.resourcesNeeded?.length || 0
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase14Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase14Review.approved) break;
+    lastFeedback_phase14Review = phase14Review.response || phase14Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 15: MEASUREMENT AND SUCCESS METRICS
   // ============================================================================
@@ -379,7 +450,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 17: Creating comprehensive implementation roadmap');
-  const implementationRoadmap = await ctx.task(implementationRoadmapTask, {
+  let implementationRoadmap = await ctx.task(implementationRoadmapTask, {
     projectName,
     informationArchitecture: informationArchitecture.structure,
     contentModel: contentModel.model,
@@ -410,8 +481,21 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...stakeholderApproval.artifacts);
 
-    // Breakpoint: Final approval gate
-    await ctx.breakpoint({
+      let lastFeedback_finalApproval = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_finalApproval) {
+        implementationRoadmap = await ctx.task(implementationRoadmapTask, { ...{
+    projectName,
+    informationArchitecture: informationArchitecture.structure,
+    contentModel: contentModel.model,
+    productionStrategy: productionStrategy.roadmap,
+    governanceFramework: governanceFramework.framework,
+    riskAssessment: riskAssessment.risks,
+    timeframe,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+      }
+  const finalApproval = await ctx.breakpoint({
       question: `Stakeholder review complete. ${stakeholderApproval.approved ? 'Strategy approved!' : 'Revisions needed.'} Proceed with finalization?`,
       title: 'Final Approval Gate',
       context: {
@@ -428,9 +512,15 @@ export async function process(inputs, ctx) {
           feedbackItems: stakeholderApproval.feedbackCount,
           revisionsNeeded: stakeholderApproval.revisionsNeeded
         }
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_finalApproval || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (finalApproval.approved) break;
+      lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 19: FINAL STRATEGY DOCUMENT GENERATION
@@ -548,8 +638,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

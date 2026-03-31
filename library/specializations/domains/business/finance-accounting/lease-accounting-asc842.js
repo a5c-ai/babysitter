@@ -37,18 +37,31 @@ export async function process(inputs, ctx) {
   results.steps.push({ name: 'lease-term', result: leaseTermResult });
 
   // Step 3: Calculate Lease Payments
-  const paymentsResult = await ctx.task(calculateLeasePaymentsTask, {
+  let paymentsResult = await ctx.task(calculateLeasePaymentsTask, {
     leaseContract: inputs.leaseContract,
     leaseTerm: leaseTermResult
   });
   results.steps.push({ name: 'lease-payments', result: paymentsResult });
 
-  // Breakpoint for payment calculation review
-  await ctx.breakpoint('payment-review', {
+    let lastFeedback_reviewApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_reviewApproval) {
+      paymentsResult = await ctx.task(calculateLeasePaymentsTask, { ...{
+    leaseContract: inputs.leaseContract,
+    leaseTerm: leaseTermResult
+  }, feedback: lastFeedback_reviewApproval, attempt: attempt + 1 });
+    }
+  const reviewApproval = await ctx.breakpoint('payment-review', {
     message: 'Review lease payment calculations before present value computation',
-    data: { term: leaseTermResult, payments: paymentsResult }
-  });
-
+    data: { term: leaseTermResult, payments: paymentsResult },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_reviewApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (reviewApproval.approved) break;
+    lastFeedback_reviewApproval = reviewApproval.response || reviewApproval.feedback || 'Changes requested';
+  }
   // Step 4: Calculate Present Value
   const presentValueResult = await ctx.task(calculatePresentValueTask, {
     leasePayments: paymentsResult,
@@ -66,19 +79,33 @@ export async function process(inputs, ctx) {
   results.steps.push({ name: 'initial-recognition', result: recognitionResult });
 
   // Step 6: Subsequent Measurement
-  const measurementResult = await ctx.task(performSubsequentMeasurementTask, {
+  let measurementResult = await ctx.task(performSubsequentMeasurementTask, {
     initialRecognition: recognitionResult,
     reportingPeriod: inputs.reportingPeriod,
     leaseClassification: identificationResult.classification
   });
   results.steps.push({ name: 'subsequent-measurement', result: measurementResult });
 
-  // Breakpoint for accounting review
-  await ctx.breakpoint('accounting-review', {
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      measurementResult = await ctx.task(performSubsequentMeasurementTask, { ...{
+    initialRecognition: recognitionResult,
+    reportingPeriod: inputs.reportingPeriod,
+    leaseClassification: identificationResult.classification
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint('accounting-review', {
     message: 'Review lease accounting entries and amortization schedules',
-    data: { recognition: recognitionResult, measurement: measurementResult }
-  });
-
+    data: { recognition: recognitionResult, measurement: measurementResult },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Step 7: Prepare Disclosures
   const disclosuresResult = await ctx.task(prepareLeaseDisclosuresTask, {
     allLeaseData: {
@@ -99,8 +126,7 @@ export async function process(inputs, ctx) {
 
   return results;
 }
-
-// Task definitions
+  // Task definitions
 export const identifyAndClassifyLeaseTask = defineTask('identify-classify-lease', (args, taskCtx) => ({
   kind: 'agent',
   skill: { name: 'lease-accounting' },

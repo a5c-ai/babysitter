@@ -75,7 +75,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 3: Performing Demand-Supply Gap Analysis');
 
-  const gapAnalysis = await ctx.task(gapAnalysisTask, {
+  let gapAnalysis = await ctx.task(gapAnalysisTask, {
     demandReview,
     supplyReview,
     financialPlan,
@@ -85,8 +85,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...gapAnalysis.artifacts);
 
-  // Breakpoint: Review gaps before pre-S&OP
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      gapAnalysis = await ctx.task(gapAnalysisTask, { ...{
+    demandReview,
+    supplyReview,
+    financialPlan,
+    productFamilies,
+    outputDir
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Gap analysis complete. ${gapAnalysis.criticalGaps.length} critical gaps identified. Total gap value: $${gapAnalysis.totalGapValue}. Review gaps and scenarios before pre-S&OP meeting?`,
     title: 'S&OP Gap Analysis Review',
     context: {
@@ -97,9 +107,15 @@ export async function process(inputs, ctx) {
         totalGapValue: gapAnalysis.totalGapValue,
         scenarios: gapAnalysis.scenarios
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 4: PRE-S&OP MEETING PREPARATION
   // ============================================================================
@@ -155,7 +171,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 7: Preparing Executive S&OP Package');
 
-  const executiveSopPrep = await ctx.task(executiveSopPrepTask, {
+  let executiveSopPrep = await ctx.task(executiveSopPrepTask, {
     demandReview,
     supplyReview,
     gapAnalysis,
@@ -167,8 +183,20 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...executiveSopPrep.artifacts);
 
-  // Breakpoint: Executive S&OP review
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      executiveSopPrep = await ctx.task(executiveSopPrepTask, { ...{
+    demandReview,
+    supplyReview,
+    gapAnalysis,
+    scenarioPlanning,
+    financialReconciliation,
+    stakeholders,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Executive S&OP package ready. ${executiveSopPrep.decisionsRequired.length} decisions required. Revenue at risk: $${financialReconciliation.revenueAtRisk}. Review executive package?`,
     title: 'Executive S&OP Package Review',
     context: {
@@ -179,9 +207,15 @@ export async function process(inputs, ctx) {
         revenueAtRisk: financialReconciliation.revenueAtRisk,
         recommendedScenario: scenarioPlanning.recommendedScenario
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 8: CONSENSUS PLAN GENERATION
   // ============================================================================
@@ -229,8 +263,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

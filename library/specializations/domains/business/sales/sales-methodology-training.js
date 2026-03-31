@@ -67,18 +67,30 @@ export async function process(inputs, ctx) {
   artifacts.push(...(reinforcementPlan.artifacts || []));
 
   // Phase 8: Program Compilation
-  const programCompilation = await ctx.task(trainingProgramCompilationTask, {
+  let programCompilation = await ctx.task(trainingProgramCompilationTask, {
     methodology, curriculumDesign, contentDevelopment, rolePlayScenarios,
     assessmentDesign, certificationProgram, reinforcementPlan, outputDir
   });
-  artifacts.push(...(programCompilation.artifacts || []));
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      programCompilation = await ctx.task(trainingProgramCompilationTask, { ...{
+    methodology, curriculumDesign, contentDevelopment, rolePlayScenarios,
+    assessmentDesign, certificationProgram, reinforcementPlan, outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `${methodology} training program ready for ${participants.length} participants. Review curriculum?`,
     title: 'Methodology Training Review',
-    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })) }
-  });
-
+    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })) },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     methodology,

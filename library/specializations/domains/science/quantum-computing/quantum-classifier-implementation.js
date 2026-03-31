@@ -44,24 +44,37 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Data Preprocessing');
 
-  const preprocessResult = await ctx.task(dataPreprocessingTask, {
+  let preprocessResult = await ctx.task(dataPreprocessingTask, {
     dataset,
     features,
     encodingType
   });
 
-  artifacts.push(...(preprocessResult.artifacts || []));
-
-  await ctx.breakpoint({
+    let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      preprocessResult = await ctx.task(dataPreprocessingTask, { ...{
+    dataset,
+    features,
+    encodingType
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Data preprocessed. Samples: ${preprocessResult.numSamples}, Features: ${preprocessResult.numFeatures}, Classes: ${preprocessResult.numClasses}. Proceed with encoding circuit design?`,
     title: 'Data Preprocessing Review',
     context: {
       runId: ctx.runId,
       preprocessing: preprocessResult,
       files: (preprocessResult.artifacts || []).map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 2: DATA ENCODING CIRCUIT DESIGN
   // ============================================================================
@@ -84,7 +97,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 3: Classifier Architecture Design');
 
-  const architectureResult = await ctx.task(classifierArchitectureTask, {
+  let architectureResult = await ctx.task(classifierArchitectureTask, {
     classifierType,
     encodingCircuit: encodingResult,
     numClasses: preprocessResult.numClasses,
@@ -93,18 +106,34 @@ export async function process(inputs, ctx) {
     framework
   });
 
-  artifacts.push(...(architectureResult.artifacts || []));
-
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      architectureResult = await ctx.task(classifierArchitectureTask, { ...{
+    classifierType,
+    encodingCircuit: encodingResult,
+    numClasses: preprocessResult.numClasses,
+    ansatzType,
+    numLayers,
+    framework
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Classifier architecture designed. Parameters: ${architectureResult.parameterCount}, Total depth: ${architectureResult.totalDepth}. Proceed with training?`,
     title: 'Classifier Architecture Review',
     context: {
       runId: ctx.runId,
       architecture: architectureResult,
       files: (architectureResult.artifacts || []).map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 4: CLASSIFIER TRAINING
   // ============================================================================
@@ -130,24 +159,37 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 5: Model Validation');
 
-  const validationResult = await ctx.task(classifierValidationTask, {
+  let validationResult = await ctx.task(classifierValidationTask, {
     trainedClassifier: trainingResult.trainedClassifier,
     valData: preprocessResult.valData,
     framework
   });
 
-  artifacts.push(...(validationResult.artifacts || []));
-
-  await ctx.breakpoint({
+    let lastFeedback_phase5Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase5Review) {
+      validationResult = await ctx.task(classifierValidationTask, { ...{
+    trainedClassifier: trainingResult.trainedClassifier,
+    valData: preprocessResult.valData,
+    framework
+  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+    }
+  const phase5Review = await ctx.breakpoint({
     question: `Validation complete. Accuracy: ${validationResult.accuracy}, F1-score: ${validationResult.f1Score}. Review validation metrics?`,
     title: 'Validation Results Review',
     context: {
       runId: ctx.runId,
       validation: validationResult,
       files: (validationResult.artifacts || []).map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase5Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase5Review.approved) break;
+    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 6: TEST SET EVALUATION
   // ============================================================================
@@ -194,7 +236,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 9: Documentation');
 
-  const reportResult = await ctx.task(classifierReportTask, {
+  let reportResult = await ctx.task(classifierReportTask, {
     classifierType,
     preprocessResult,
     encodingResult,
@@ -207,9 +249,23 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...(reportResult.artifacts || []));
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      reportResult = await ctx.task(classifierReportTask, { ...{
+    classifierType,
+    preprocessResult,
+    encodingResult,
+    architectureResult,
+    trainingResult,
+    validationResult,
+    testResult,
+    baselineResult,
+    convergenceResult,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Quantum classifier complete. Test accuracy: ${testResult.accuracy}, Classical baseline: ${baselineResult.bestClassicalAccuracy}. Approve results?`,
     title: 'Quantum Classifier Complete',
     context: {
@@ -221,9 +277,15 @@ export async function process(inputs, ctx) {
         quantumAdvantage: testResult.accuracy > baselineResult.bestClassicalAccuracy
       },
       files: artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
 
   return {
@@ -272,8 +334,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

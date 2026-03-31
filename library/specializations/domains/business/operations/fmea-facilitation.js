@@ -53,7 +53,7 @@ export async function process(inputs, ctx) {
 
   // Phase 2: Scope Definition
   ctx.log('info', 'Phase 2: Scope Definition and Boundary Analysis');
-  const scopeDefinition = await ctx.task(scopeDefinitionTask, {
+  let scopeDefinition = await ctx.task(scopeDefinitionTask, {
     fmeaId,
     fmeaType,
     scope,
@@ -63,8 +63,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...scopeDefinition.artifacts);
 
-  // Quality Gate: Scope Review
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      scopeDefinition = await ctx.task(scopeDefinitionTask, { ...{
+    fmeaId,
+    fmeaType,
+    scope,
+    planning,
+    outputDir
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `FMEA scope defined. Type: ${fmeaType}. Items to analyze: ${scopeDefinition.itemCount}. Functions/Steps: ${scopeDefinition.functionCount}. Team ready: ${planning.teamReady}. Proceed with analysis?`,
     title: 'FMEA Scope Review',
     context: {
@@ -73,9 +83,15 @@ export async function process(inputs, ctx) {
       scopeDetails: scopeDefinition.scopeDetails,
       boundaryDiagram: scopeDefinition.boundaryDiagram,
       files: [...planning.artifacts, ...scopeDefinition.artifacts].map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // Phase 3: Structure Analysis
   ctx.log('info', 'Phase 3: Structure Analysis');
   const structureAnalysis = await ctx.task(structureAnalysisTask, {
@@ -111,7 +127,7 @@ export async function process(inputs, ctx) {
 
   // Phase 6: Risk Analysis
   ctx.log('info', 'Phase 6: Risk Analysis - Severity, Occurrence, Detection');
-  const riskAnalysis = await ctx.task(riskAnalysisTask, {
+  let riskAnalysis = await ctx.task(riskAnalysisTask, {
     fmeaId,
     failureAnalysis,
     methodology,
@@ -120,8 +136,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...riskAnalysis.artifacts);
 
-  // Quality Gate: Risk Analysis Review
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      riskAnalysis = await ctx.task(riskAnalysisTask, { ...{
+    fmeaId,
+    failureAnalysis,
+    methodology,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Risk analysis complete. Total failure modes: ${failureAnalysis.totalFailureModes}. High RPN (>${rpnThreshold}): ${riskAnalysis.highRpnCount}. High AP items: ${riskAnalysis.highApCount}. Review before action planning?`,
     title: 'FMEA Risk Analysis Review',
     context: {
@@ -130,9 +155,15 @@ export async function process(inputs, ctx) {
       riskSummary: riskAnalysis.summary,
       highRiskItems: riskAnalysis.highRiskItems,
       files: riskAnalysis.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 7: Risk Prioritization
   ctx.log('info', 'Phase 7: Risk Prioritization');
   const prioritization = await ctx.task(riskPrioritizationTask, {
@@ -219,8 +250,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: FMEA Planning
+  // Task 1: FMEA Planning
 export const fmeaPlanningTask = defineTask('fmea-planning', (args, taskCtx) => ({
   kind: 'agent',
   title: `FMEA Planning - ${args.fmeaId}`,

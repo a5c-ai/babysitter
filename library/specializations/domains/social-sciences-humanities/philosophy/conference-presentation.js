@@ -86,7 +86,7 @@ export async function process(inputs, ctx) {
 
   // Task 6: Visual Aids Planning
   ctx.log('info', 'Planning visual aids');
-  const visualAids = await ctx.task(visualAidsTask, {
+  let visualAids = await ctx.task(visualAidsTask, {
     talkStructure: talkStructure.structure,
     arguments: argumentSelection.selected,
     timeLimit,
@@ -95,8 +95,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...visualAids.artifacts);
 
-  // Breakpoint: Review presentation materials
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      visualAids = await ctx.task(visualAidsTask, { ...{
+    talkStructure: talkStructure.structure,
+    arguments: argumentSelection.selected,
+    timeLimit,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Conference presentation materials complete. ${timeLimit}-minute talk prepared. Review the materials?`,
     title: 'Conference Presentation Results',
     context: {
@@ -108,9 +117,15 @@ export async function process(inputs, ctx) {
         argumentsIncluded: argumentSelection.selected.length,
         anticipatedQuestions: qaPreparation.questions.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 7: Generate Presentation Package
   ctx.log('info', 'Generating presentation package');
   const presentationPackage = await ctx.task(presentationPackageTask, {
@@ -156,8 +171,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task definitions
+  // Task definitions
 export const abstractDevelopmentTask = defineTask('abstract-development', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Develop conference abstract',

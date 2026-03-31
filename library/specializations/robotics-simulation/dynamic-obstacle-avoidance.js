@@ -57,15 +57,24 @@ export async function process(inputs, ctx) {
   const replanningOptimization = await ctx.task(replanningOptimizationTask, { robotName, safetyValidation, outputDir });
   artifacts.push(...replanningOptimization.artifacts);
 
-  const successRateMeasurement = await ctx.task(avoidanceSuccessRateTask, { robotName, dynamicTesting, safetyValidation, outputDir });
-  artifacts.push(...successRateMeasurement.artifacts);
-
-  await ctx.breakpoint({
+  let successRateMeasurement = await ctx.task(avoidanceSuccessRateTask, { robotName, dynamicTesting, safetyValidation, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      successRateMeasurement = await ctx.task(avoidanceSuccessRateTask, { ...{ robotName, dynamicTesting, safetyValidation, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Dynamic Avoidance Complete for ${robotName}. Success rate: ${successRateMeasurement.successRate}%, Collision-free: ${safetyValidation.collisionFree}. Review?`,
     title: 'Dynamic Avoidance Complete',
-    context: { runId: ctx.runId, successRate: successRateMeasurement.successRate, collisionFree: safetyValidation.collisionFree }
-  });
-
+    context: { runId: ctx.runId, successRate: successRateMeasurement.successRate, collisionFree: safetyValidation.collisionFree },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: successRateMeasurement.successRate >= 95 && safetyValidation.collisionFree,
     robotName,

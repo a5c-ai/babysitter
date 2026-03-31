@@ -136,7 +136,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 9: Creating journey map visualization');
-  const journeyVisualization = await ctx.task(journeyVisualizationTask, {
+  let journeyVisualization = await ctx.task(journeyVisualizationTask, {
     stageMapping,
     touchpointIdentification,
     emotionMapping,
@@ -149,9 +149,20 @@ export async function process(inputs, ctx) {
   artifacts.push(...journeyVisualization.artifacts);
 
   const painPointCount = painPointAnalysis.painPoints?.length || 0;
-  const improvementCount = improvementMapping.improvements?.length || 0;
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      journeyVisualization = await ctx.task(journeyVisualizationTask, { ...{
+    stageMapping,
+    touchpointIdentification,
+    emotionMapping,
+    painPointAnalysis,
+    momentOfTruthIdentification,
+    improvementMapping,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Customer journey mapping complete. Stages mapped: ${stageMapping.stages?.length || 0}. Touchpoints: ${touchpointIdentification.touchpoints?.length || 0}. Pain points: ${painPointCount}. Improvement opportunities: ${improvementCount}. Review and finalize?`,
     title: 'Journey Mapping Review',
     context: {
@@ -170,9 +181,15 @@ export async function process(inputs, ctx) {
         momentsOfTruth: momentOfTruthIdentification.moments?.length || 0,
         personasValidated: personaValidation.personas?.length || 0
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -198,8 +215,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

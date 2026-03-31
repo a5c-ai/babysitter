@@ -105,14 +105,13 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...userFeedback.artifacts);
   }
-
   // ============================================================================
   // PHASE 6: QUALITY REPORT
   // ============================================================================
 
   ctx.log('info', 'Phase 6: Generating quality report');
 
-  const qualityReport = await ctx.task(qualityReportTask, {
+  let qualityReport = await ctx.task(qualityReportTask, {
     systemName,
     intentAccuracy: intentAccuracy.results,
     dialogueSuccess: dialogueSuccess.results,
@@ -123,8 +122,19 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...qualityReport.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      qualityReport = await ctx.task(qualityReportTask, { ...{
+    systemName,
+    intentAccuracy: intentAccuracy.results,
+    dialogueSuccess: dialogueSuccess.results,
+    coherence: coherenceEvaluation.results,
+    userFeedback: userFeedback ? userFeedback.analysis : null,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Conversation quality testing for ${systemName} complete. Overall quality score: ${qualityReport.overallScore}. Review results?`,
     title: 'Conversation Quality Review',
     context: {
@@ -137,9 +147,15 @@ export async function process(inputs, ctx) {
         overallScore: qualityReport.overallScore
       },
       files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -164,8 +180,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

@@ -42,15 +42,24 @@ export async function process(inputs, ctx) {
   artifacts.push(...infrastructure.artifacts);
 
   // Phase 3: Instrument Services
-  const instrumentation = await ctx.task(instrumentServicesForTracingTask, { projectName, services, tracingBackend, outputDir });
-  artifacts.push(...instrumentation.artifacts);
-
-  await ctx.breakpoint({
+  let instrumentation = await ctx.task(instrumentServicesForTracingTask, { projectName, services, tracingBackend, outputDir });
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      instrumentation = await ctx.task(instrumentServicesForTracingTask, { ...{ projectName, services, tracingBackend, outputDir }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Instrumented ${instrumentation.instrumentedCount} services. Configure context propagation?`,
     title: 'Service Instrumentation',
-    context: { runId: ctx.runId, instrumentation }
-  });
-
+    context: { runId: ctx.runId, instrumentation },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // Phase 4: Configure Context Propagation
   const contextPropagation = await ctx.task(configureContextPropagationTask, { projectName, services, outputDir });
   artifacts.push(...contextPropagation.artifacts);
@@ -72,15 +81,24 @@ export async function process(inputs, ctx) {
   artifacts.push(...serviceMaps.artifacts);
 
   // Phase 9: Document Tracing Implementation
-  const documentation = await ctx.task(documentTracingImplementationTask, { projectName, instrumentation, sampling, outputDir });
-  artifacts.push(...documentation.artifacts);
-
-  await ctx.breakpoint({
+  let documentation = await ctx.task(documentTracingImplementationTask, { projectName, instrumentation, sampling, outputDir });
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      documentation = await ctx.task(documentTracingImplementationTask, { ...{ projectName, instrumentation, sampling, outputDir }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Distributed tracing complete. Sampling rate: ${sampling.rate}%. Service map created. Accept?`,
     title: 'Distributed Tracing Review',
-    context: { runId: ctx.runId, sampling, serviceMaps }
-  });
-
+    context: { runId: ctx.runId, sampling, serviceMaps },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     projectName,

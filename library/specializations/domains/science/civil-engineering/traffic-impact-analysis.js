@@ -91,7 +91,7 @@ export async function process(inputs, ctx) {
 
   // Task 6: Level of Service Analysis
   ctx.log('info', 'Performing level of service analysis');
-  const losAnalysis = await ctx.task(losAnalysisTask, {
+  let losAnalysis = await ctx.task(losAnalysisTask, {
     projectId,
     existingConditions,
     backgroundTraffic,
@@ -102,8 +102,19 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...losAnalysis.artifacts);
 
-  // Breakpoint: Review traffic analysis
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      losAnalysis = await ctx.task(losAnalysisTask, { ...{
+    projectId,
+    existingConditions,
+    backgroundTraffic,
+    tripDistribution,
+    analysisMethod,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Traffic impact analysis complete for ${projectId}. Total trips: ${tripGeneration.totalTrips}. Review LOS results?`,
     title: 'Traffic Impact Analysis Review',
     context: {
@@ -116,9 +127,15 @@ export async function process(inputs, ctx) {
         intersectionsAnalyzed: losAnalysis.intersectionCount,
         failingIntersections: losAnalysis.failingCount
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 7: Mitigation Analysis
   ctx.log('info', 'Developing mitigation recommendations');
   const mitigation = await ctx.task(mitigationTask, {
@@ -185,8 +202,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Study Scope Definition
+  // Task 1: Study Scope Definition
 export const studyScopeTask = defineTask('study-scope', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Define study scope and area',

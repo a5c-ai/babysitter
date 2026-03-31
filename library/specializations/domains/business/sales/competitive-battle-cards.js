@@ -65,17 +65,28 @@ export async function process(inputs, ctx) {
   artifacts.push(...(winStrategies.artifacts || []));
 
   // Phase 8: Battle Card Compilation
-  const battleCardCompilation = await ctx.task(battleCardCompilationTask, {
+  let battleCardCompilation = await ctx.task(battleCardCompilationTask, {
     competitor, swotAnalysis, positioningAnalysis, talkTracks, trapQuestions, winStrategies, outputDir
   });
-  artifacts.push(...(battleCardCompilation.artifacts || []));
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      battleCardCompilation = await ctx.task(battleCardCompilationTask, { ...{
+    competitor, swotAnalysis, positioningAnalysis, talkTracks, trapQuestions, winStrategies, outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Battle card complete for ${competitor}. Review before distribution?`,
     title: 'Competitive Battle Card Review',
-    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })) }
-  });
-
+    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })) },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     competitor,

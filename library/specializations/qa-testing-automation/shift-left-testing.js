@@ -180,8 +180,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Analyze Current State
+  // Task 1: Analyze Current State
 export const analyzeCurrentStateTask = defineTask('analyze-current-state', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Analyze Current Testing Practices',

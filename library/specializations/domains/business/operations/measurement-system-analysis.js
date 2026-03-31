@@ -54,7 +54,7 @@ export async function process(inputs, ctx) {
 
   // Phase 2: Data Collection
   ctx.log('info', 'Phase 2: Data Collection');
-  const dataCollection = await ctx.task(dataCollectionTask, {
+  let dataCollection = await ctx.task(dataCollectionTask, {
     measurementSystem,
     planning,
     outputDir
@@ -62,8 +62,16 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...dataCollection.artifacts);
 
-  // Quality Gate: Data Collection Review
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      dataCollection = await ctx.task(dataCollectionTask, { ...{
+    measurementSystem,
+    planning,
+    outputDir
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `MSA data collected. Parts: ${dataCollection.partsCount}, Operators: ${dataCollection.operatorsCount}, Trials: ${dataCollection.trialsCount}. Total measurements: ${dataCollection.totalMeasurements}. Proceed with analysis?`,
     title: 'MSA Data Collection Review',
     context: {
@@ -71,9 +79,15 @@ export async function process(inputs, ctx) {
       measurementSystem,
       dataCollection: dataCollection.summary,
       files: dataCollection.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // Phase 3: Repeatability Analysis
   ctx.log('info', 'Phase 3: Repeatability Analysis (Equipment Variation)');
   const repeatability = await ctx.task(repeatabilityTask, {
@@ -130,7 +144,7 @@ export async function process(inputs, ctx) {
 
   // Phase 8: Adequacy Assessment
   ctx.log('info', 'Phase 8: Measurement System Adequacy Assessment');
-  const adequacy = await ctx.task(adequacyAssessmentTask, {
+  let adequacy = await ctx.task(adequacyAssessmentTask, {
     measurementSystem,
     gageRR,
     ndcCalculation,
@@ -140,8 +154,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...adequacy.artifacts);
 
-  // Quality Gate: Adequacy Review
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      adequacy = await ctx.task(adequacyAssessmentTask, { ...{
+    measurementSystem,
+    gageRR,
+    ndcCalculation,
+    tolerance,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Gage R&R complete. Total GRR: ${gageRR.totalGRRPercent}%. NDC: ${ndcCalculation.ndc}. Assessment: ${adequacy.assessment}. ${adequacy.acceptable ? 'Measurement system is ACCEPTABLE.' : 'Measurement system NEEDS IMPROVEMENT.'} Review findings?`,
     title: 'MSA Adequacy Review',
     context: {
@@ -151,9 +175,15 @@ export async function process(inputs, ctx) {
       ndc: ndcCalculation.ndc,
       adequacy: adequacy,
       files: [...gageRR.artifacts, ...adequacy.artifacts].map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 9: Improvement Recommendations
   ctx.log('info', 'Phase 9: Improvement Recommendations');
   const recommendations = await ctx.task(improvementRecommendationsTask, {
@@ -222,8 +252,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: MSA Planning
+  // Task 1: MSA Planning
 export const msaPlanningTask = defineTask('msa-planning', (args, taskCtx) => ({
   kind: 'agent',
   title: `MSA Planning - ${args.measurementSystem}`,

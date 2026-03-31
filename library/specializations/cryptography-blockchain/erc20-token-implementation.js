@@ -93,7 +93,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...extensionsImplementation.artifacts);
   }
-
   // ============================================================================
   // PHASE 4: ACCESS CONTROL SETUP
   // ============================================================================
@@ -133,7 +132,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 6: Running security analysis');
 
-  const securityAudit = await ctx.task(securityAuditTask, {
+  let securityAudit = await ctx.task(securityAuditTask, {
     projectName,
     contractImplementation,
     outputDir
@@ -142,17 +141,31 @@ export async function process(inputs, ctx) {
   artifacts.push(...securityAudit.artifacts);
 
   // Quality Gate: Security Review
-  if (securityAudit.criticalFindings > 0) {
-    await ctx.breakpoint({
+      let lastFeedback = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback) {
+        securityAudit = await ctx.task(securityAuditTask, { ...{
+    projectName,
+    contractImplementation,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+      }
+  const phase6Review = await ctx.breakpoint({
       question: `Security analysis found ${securityAudit.criticalFindings} critical issues. Review and fix before deployment?`,
       title: 'Security Issues Found',
       context: {
         runId: ctx.runId,
         findings: securityAudit.findings,
         files: securityAudit.artifacts.map(a => ({ path: a.path, format: 'json' }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase6Review.approved) break;
+      lastFeedback = phase6Review.response || phase6Review.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 7: DEPLOYMENT PREPARATION
@@ -205,8 +218,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

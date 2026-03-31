@@ -49,7 +49,6 @@ export async function process(inputs, ctx) {
       equilibria: null
     };
   }
-
   // Phase 2: Strategy Space Enumeration
   const strategySpace = await ctx.task(strategySpaceEnumerationTask, {
     scenario,
@@ -74,15 +73,24 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 5: Nash Equilibrium Identification
-  const nashEquilibria = await ctx.task(nashEquilibriumIdentificationTask, {
+  let nashEquilibria = await ctx.task(nashEquilibriumIdentificationTask, {
     payoffMatrix,
     strategySpace,
     dominantStrategies,
     gameType: gameAnalysis.gameType
   });
 
-  // Breakpoint: Review equilibrium analysis
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      nashEquilibria = await ctx.task(nashEquilibriumIdentificationTask, { ...{
+    payoffMatrix,
+    strategySpace,
+    dominantStrategies,
+    gameType: gameAnalysis.gameType
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Review Nash equilibria for "${scenario}". Found ${nashEquilibria.equilibria?.length || 0} equilibria. Are assumptions valid?`,
     title: 'Equilibrium Analysis Review',
     context: {
@@ -95,9 +103,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: { nashEquilibria, dominantStrategies }
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 6: Mixed Strategy Analysis
   const mixedStrategies = await ctx.task(mixedStrategyAnalysisTask, {
     payoffMatrix,
@@ -134,7 +148,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 10: Strategic Recommendations Generation
-  const recommendations = await ctx.task(strategicRecommendationsTask, {
+  let recommendations = await ctx.task(strategicRecommendationsTask, {
     scenario,
     objectives,
     nashEquilibria,
@@ -154,9 +168,21 @@ export async function process(inputs, ctx) {
       equilibria: nashEquilibria.equilibria
     };
   }
-
-  // Final Breakpoint: Strategic Analysis Approval
-  await ctx.breakpoint({
+  let lastFeedback_finalApproval2 = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval2) {
+      recommendations = await ctx.task(strategicRecommendationsTask, { ...{
+    scenario,
+    objectives,
+    nashEquilibria,
+    mixedStrategies,
+    dynamicAnalysis,
+    coalitionAnalysis,
+    behavioralAnalysis,
+    agents
+  }, feedback: lastFeedback_finalApproval2, attempt: attempt + 1 });
+    }
+  const finalApproval2 = await ctx.breakpoint({
     question: `Game-theoretic analysis complete for "${scenario}". Review strategic recommendations and approve?`,
     title: 'Strategic Analysis Approval',
     context: {
@@ -168,9 +194,15 @@ export async function process(inputs, ctx) {
         { path: 'artifacts/strategic-analysis-report.json', format: 'json', content: recommendations },
         { path: 'artifacts/strategic-analysis-report.md', format: 'markdown', content: recommendations.markdown }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval2 || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval2.approved) break;
+    lastFeedback_finalApproval2 = finalApproval2.response || finalApproval2.feedback || 'Changes requested';
+  }
   return {
     success: true,
     scenario,
@@ -203,8 +235,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const gameStructureAnalysisTask = defineTask('game-structure-analysis', (args, taskCtx) => ({
   kind: 'agent',

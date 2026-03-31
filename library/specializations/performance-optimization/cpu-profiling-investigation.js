@@ -49,17 +49,28 @@ export async function process(inputs, ctx) {
   artifacts.push(...toolSelection.artifacts);
 
   // Phase 3: Execute Workload Under Profiler
-  const profilingExecution = await ctx.task(executeProfilingTask, {
+  let profilingExecution = await ctx.task(executeProfilingTask, {
     projectName, targetApplication, profilingTool, duration, workloadType, outputDir
   });
-  artifacts.push(...profilingExecution.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      profilingExecution = await ctx.task(executeProfilingTask, { ...{
+    projectName, targetApplication, profilingTool, duration, workloadType, outputDir
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Profiling completed. ${profilingExecution.sampleCount} samples collected. Generate flame graphs?`,
     title: 'Profiling Data Review',
-    context: { runId: ctx.runId, profilingExecution }
-  });
-
+    context: { runId: ctx.runId, profilingExecution },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // Phase 4: Generate Flame Graphs
   const flameGraphs = await ctx.task(generateFlameGraphsTask, {
     projectName, profilingData: profilingExecution.data, outputDir
@@ -85,17 +96,28 @@ export async function process(inputs, ctx) {
   artifacts.push(...findings.artifacts);
 
   // Phase 8: Prioritize Optimization Opportunities
-  const priorities = await ctx.task(prioritizeOptimizationsTask, {
+  let priorities = await ctx.task(prioritizeOptimizationsTask, {
     projectName, hotspots, findings, outputDir
   });
-  artifacts.push(...priorities.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      priorities = await ctx.task(prioritizeOptimizationsTask, { ...{
+    projectName, hotspots, findings, outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Found ${hotspots.hotspots.length} hotspots. Top: ${hotspots.hotspots[0]?.name}. Review recommendations?`,
     title: 'CPU Profiling Results',
-    context: { runId: ctx.runId, hotspots: hotspots.hotspots, recommendations: priorities.recommendations }
-  });
-
+    context: { runId: ctx.runId, hotspots: hotspots.hotspots, recommendations: priorities.recommendations },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     projectName,

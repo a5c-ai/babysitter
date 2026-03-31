@@ -87,7 +87,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 4: Validating dependency compatibility');
 
-  const dependencyCompatibility = await ctx.task(dependencyCompatibilityTask, {
+  let dependencyCompatibility = await ctx.task(dependencyCompatibilityTask, {
     projectName,
     sdkLanguages,
     matrixSetup,
@@ -96,8 +96,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...dependencyCompatibility.artifacts);
 
-  // Quality Gate: Compatibility Review
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      dependencyCompatibility = await ctx.task(dependencyCompatibilityTask, { ...{
+    projectName,
+    sdkLanguages,
+    matrixSetup,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Compatibility testing configured for ${projectName}. Test matrix size: ${matrixSetup.matrixSize}. Approve compatibility testing approach?`,
     title: 'Compatibility Testing Review',
     context: {
@@ -105,9 +114,15 @@ export async function process(inputs, ctx) {
       projectName,
       matrixSize: matrixSetup.matrixSize,
       files: artifacts.slice(-3).map(a => ({ path: a.path, format: a.format || 'yaml' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 5: BREAKING CHANGE DETECTION
   // ============================================================================
@@ -124,7 +139,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...breakingChanges.artifacts);
   }
-
   // ============================================================================
   // PHASE 6: BACKWARD COMPATIBILITY TESTS
   // ============================================================================
@@ -197,8 +211,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

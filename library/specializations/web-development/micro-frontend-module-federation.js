@@ -24,11 +24,16 @@ export async function process(inputs, ctx) {
   const remotesSetup = await ctx.task(remotesSetupTask, { projectName, apps, outputDir });
   artifacts.push(...remotesSetup.artifacts);
 
-  const sharedSetup = await ctx.task(sharedSetupTask, { projectName, outputDir });
-  artifacts.push(...sharedSetup.artifacts);
-
-  await ctx.breakpoint({ question: `Micro-frontend setup complete for ${projectName}. Approve?`, title: 'Module Federation Review', context: { runId: ctx.runId, remotes: remotesSetup.remotes } });
-
+  let sharedSetup = await ctx.task(sharedSetupTask, { projectName, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      sharedSetup = await ctx.task(sharedSetupTask, { ...{ projectName, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({ question: `Micro-frontend setup complete for ${projectName}. Approve?`, title: 'Module Federation Review', context: { runId: ctx.runId, remotes: remotesSetup.remotes }, expert: 'owner', tags: ['approval-gate'], previousFeedback: lastFeedback || undefined, attempt: attempt > 0 ? attempt + 1 : undefined });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const documentation = await ctx.task(documentationTask, { projectName, outputDir });
   artifacts.push(...documentation.artifacts);
 

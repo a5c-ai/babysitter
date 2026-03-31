@@ -76,7 +76,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 3: Remediation System Design');
 
-  const systemDesign = await ctx.task(gwRemediationDesignTask, {
+  let systemDesign = await ctx.task(gwRemediationDesignTask, {
     siteName,
     remediationApproach,
     contaminants,
@@ -88,8 +88,20 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...systemDesign.artifacts);
 
-  // Breakpoint: Design Review
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      systemDesign = await ctx.task(gwRemediationDesignTask, { ...{
+    siteName,
+    remediationApproach,
+    contaminants,
+    hydrogeologicAnalysis,
+    fateAndTransport,
+    remediationGoals,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Groundwater remediation design complete for ${siteName}. Approach: ${remediationApproach}. Review system design?`,
     title: 'Groundwater Remediation Design Review',
     context: {
@@ -98,9 +110,15 @@ export async function process(inputs, ctx) {
       designCapacity: systemDesign.designCapacity,
       estimatedTimeframe: systemDesign.estimatedTimeframe,
       files: systemDesign.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 4: MONITORING NETWORK DESIGN
   // ============================================================================
@@ -195,8 +213,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

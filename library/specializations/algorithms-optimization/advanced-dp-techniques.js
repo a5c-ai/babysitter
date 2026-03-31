@@ -24,15 +24,24 @@ export async function process(inputs, ctx) {
   const implementation = await ctx.task(advancedDPImplementationTask, { technique, learning, language, outputDir });
   artifacts.push(...implementation.artifacts);
 
-  const examples = await ctx.task(advancedDPExamplesTask, { technique, implementation, problem, outputDir });
-  artifacts.push(...examples.artifacts);
-
-  await ctx.breakpoint({
+  let examples = await ctx.task(advancedDPExamplesTask, { technique, implementation, problem, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      examples = await ctx.task(advancedDPExamplesTask, { ...{ technique, implementation, problem, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Advanced DP technique ${technique} mastered. ${examples.solved.length} examples solved. Review?`,
     title: 'Advanced DP Complete',
-    context: { runId: ctx.runId, technique, examplesSolved: examples.solved.length }
-  });
-
+    context: { runId: ctx.runId, technique, examplesSolved: examples.solved.length },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     technique,

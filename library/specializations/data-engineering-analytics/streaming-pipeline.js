@@ -73,7 +73,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Designing streaming pipeline architecture');
 
-  const pipelineDesign = await ctx.task(pipelineDesignTask, {
+  let pipelineDesign = await ctx.task(pipelineDesignTask, {
     projectName,
     streamingPlatform,
     processingFramework,
@@ -98,8 +98,20 @@ export async function process(inputs, ctx) {
   artifacts.push(...pipelineDesign.artifacts);
   pipelineConfig.design = pipelineDesign;
 
-  // Quality Gate: Review pipeline design
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      pipelineDesign = await ctx.task(pipelineDesignTask, { ...{
+    projectName,
+    streamingPlatform,
+    processingFramework,
+    requirements,
+    cloudProvider,
+    environment,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Phase 1 Review: Pipeline will handle ${pipelineDesign.estimatedThroughput} events/sec with ${pipelineDesign.latency} latency. Estimated cost: $${pipelineDesign.estimatedMonthlyCost}/month. Approve design?`,
     title: 'Pipeline Design Approval',
     context: {
@@ -110,9 +122,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: JSON.stringify(pipelineDesign, null, 2)
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 2: MESSAGING INFRASTRUCTURE SETUP
   // ============================================================================
@@ -171,7 +189,6 @@ export async function process(inputs, ctx) {
       ctx.log('info', `Schema registry configured: ${schemaRegistry.registryUrl}`);
     }
   }
-
   // ============================================================================
   // PHASE 4: STREAM PROCESSING FRAMEWORK SETUP
   // ============================================================================
@@ -212,7 +229,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 5: Configuring state management and checkpointing');
 
-  const stateManagement = await ctx.task(stateManagementTask, {
+  let stateManagement = await ctx.task(stateManagementTask, {
     projectName,
     processingFramework,
     processingSetup,
@@ -239,8 +256,19 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `State backend: ${stateManagement.stateBackend}, Checkpoint interval: ${stateManagement.checkpointInterval}`);
 
-  // Quality Gate: Review state management configuration
-  await ctx.breakpoint({
+    let lastFeedback_qualityGateApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_qualityGateApproval) {
+      stateManagement = await ctx.task(stateManagementTask, { ...{
+    projectName,
+    processingFramework,
+    processingSetup,
+    requirements,
+    cloudProvider,
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval, attempt: attempt + 1 });
+    }
+  const qualityGateApproval = await ctx.breakpoint({
     question: `Phase 5 Review: State management configured with ${stateManagement.stateBackend} backend. Exactly-once: ${stateManagement.exactlyOnceEnabled}. Proceed?`,
     title: 'State Management Review',
     context: {
@@ -251,9 +279,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: JSON.stringify(stateManagement, null, 2)
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_qualityGateApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (qualityGateApproval.approved) break;
+    lastFeedback_qualityGateApproval = qualityGateApproval.response || qualityGateApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 6: WINDOWING AND TIME SEMANTICS
   // ============================================================================
@@ -278,7 +312,6 @@ export async function process(inputs, ctx) {
       ctx.log('info', `Windowing configured: ${windowingConfig.windowTypes.join(', ')}`);
     }
   }
-
   // ============================================================================
   // PHASE 7: DATA CONNECTORS AND INTEGRATIONS
   // ============================================================================
@@ -312,7 +345,6 @@ export async function process(inputs, ctx) {
     pipelineConfig.connectors = { sourceConnectors, sinkConnectors };
     ctx.log('info', `Connectors configured: ${sourceConnectors.connectorCount} sources, ${sinkConnectors.connectorCount} sinks`);
   }
-
   // ============================================================================
   // PHASE 8: BACKPRESSURE AND FLOW CONTROL
   // ============================================================================
@@ -338,7 +370,6 @@ export async function process(inputs, ctx) {
       ctx.log('info', 'Backpressure handling configured');
     }
   }
-
   // ============================================================================
   // PHASE 9: MONITORING AND OBSERVABILITY
   // ============================================================================
@@ -412,7 +443,6 @@ export async function process(inputs, ctx) {
     pipelineConfig.alerting = alertingConfig;
     ctx.log('info', `Alerting configured: ${alertingConfig.alertRulesCount} rules`);
   }
-
   // ============================================================================
   // PHASE 11: AUTO-SCALING CONFIGURATION
   // ============================================================================
@@ -440,7 +470,6 @@ export async function process(inputs, ctx) {
       ctx.log('info', 'Auto-scaling configured for dynamic workload management');
     }
   }
-
   // ============================================================================
   // PHASE 12: DISASTER RECOVERY AND HIGH AVAILABILITY
   // ============================================================================
@@ -466,14 +495,13 @@ export async function process(inputs, ctx) {
     pipelineConfig.disasterRecovery = drConfig;
     ctx.log('info', `DR configured: Multi-AZ=${drConfig.multiAZ}, Backup interval=${drConfig.backupInterval}`);
   }
-
   // ============================================================================
   // PHASE 13: PIPELINE TESTING AND VALIDATION
   // ============================================================================
 
   ctx.log('info', 'Phase 13: Testing and validating streaming pipeline');
 
-  const pipelineValidation = await ctx.task(pipelineValidationTask, {
+  let pipelineValidation = await ctx.task(pipelineValidationTask, {
     projectName,
     streamingPlatform,
     processingFramework,
@@ -483,9 +511,19 @@ export async function process(inputs, ctx) {
   });
 
   if (!pipelineValidation.success) {
-    ctx.log('error', 'Pipeline validation failed');
-
-    await ctx.breakpoint({
+      let lastFeedback_phase13Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase13Review) {
+        pipelineValidation = await ctx.task(pipelineValidationTask, { ...{
+    projectName,
+    streamingPlatform,
+    processingFramework,
+    pipelineConfig,
+    requirements,
+    outputDir
+  }, feedback: lastFeedback_phase13Review, attempt: attempt + 1 });
+      }
+  const phase13Review = await ctx.breakpoint({
       question: `Phase 13 Alert: Pipeline validation failed with ${pipelineValidation.failedTests} failed tests. Review issues before proceeding?`,
       title: 'Pipeline Validation Failed',
       context: {
@@ -496,9 +534,15 @@ export async function process(inputs, ctx) {
           format: 'json',
           content: JSON.stringify(pipelineValidation, null, 2)
         }]
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase13Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase13Review.approved) break;
+      lastFeedback_phase13Review = phase13Review.response || phase13Review.feedback || 'Changes requested';
+    } }
 
   artifacts.push(...pipelineValidation.artifacts);
 
@@ -508,7 +552,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 14: Generating documentation and operational runbooks');
 
-  const documentation = await ctx.task(documentationGenerationTask, {
+  let documentation = await ctx.task(documentationGenerationTask, {
     projectName,
     streamingPlatform,
     processingFramework,
@@ -523,7 +567,6 @@ export async function process(inputs, ctx) {
   } else {
     artifacts.push(...documentation.artifacts);
   }
-
   // ============================================================================
   // FINAL QUALITY GATE AND HANDOFF
   // ============================================================================
@@ -538,9 +581,20 @@ export async function process(inputs, ctx) {
 
   const qualityThreshold = environment === 'production' ? 85 : 75;
 
-  ctx.log('info', `Overall pipeline quality score: ${overallScore.toFixed(1)}/100`);
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval2 = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval2) {
+      documentation = await ctx.task(documentationGenerationTask, { ...{
+    projectName,
+    streamingPlatform,
+    processingFramework,
+    pipelineConfig,
+    monitoring,
+    cloudProvider,
+    outputDir
+  }, feedback: lastFeedback_finalApproval2, attempt: attempt + 1 });
+    }
+  const finalApproval2 = await ctx.breakpoint({
     question: `Final Review: Streaming pipeline ${projectName} is ready. Overall quality score: ${overallScore.toFixed(1)}/100 (threshold: ${qualityThreshold}). Ready to handoff?`,
     title: 'Final Pipeline Review and Handoff',
     context: {
@@ -566,9 +620,15 @@ export async function process(inputs, ctx) {
           content: documentation.runbook || 'Runbook generation pending'
         }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval2 || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval2.approved) break;
+    lastFeedback_finalApproval2 = finalApproval2.response || finalApproval2.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -616,8 +676,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

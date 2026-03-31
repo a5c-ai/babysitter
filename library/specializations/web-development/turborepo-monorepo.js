@@ -24,11 +24,16 @@ export async function process(inputs, ctx) {
   const pipelineSetup = await ctx.task(pipelineSetupTask, { projectName, outputDir });
   artifacts.push(...pipelineSetup.artifacts);
 
-  const cachingSetup = await ctx.task(cachingSetupTask, { projectName, outputDir });
-  artifacts.push(...cachingSetup.artifacts);
-
-  await ctx.breakpoint({ question: `Turborepo setup complete for ${projectName}. Approve?`, title: 'Turborepo Review', context: { runId: ctx.runId, config: turboSetup.config } });
-
+  let cachingSetup = await ctx.task(cachingSetupTask, { projectName, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      cachingSetup = await ctx.task(cachingSetupTask, { ...{ projectName, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({ question: `Turborepo setup complete for ${projectName}. Approve?`, title: 'Turborepo Review', context: { runId: ctx.runId, config: turboSetup.config }, expert: 'owner', tags: ['approval-gate'], previousFeedback: lastFeedback || undefined, attempt: attempt > 0 ? attempt + 1 : undefined });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const documentation = await ctx.task(documentationTask, { projectName, outputDir });
   artifacts.push(...documentation.artifacts);
 

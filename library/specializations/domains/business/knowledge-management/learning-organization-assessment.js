@@ -27,15 +27,24 @@ export async function process(inputs, ctx) {
 
   // Phase 1: Assessment Framework Setup
   ctx.log('info', 'Phase 1: Setting up assessment framework');
-  const frameworkSetup = await ctx.task(frameworkSetupTask, { assessmentFramework, organizationalScope, outputDir });
-  artifacts.push(...frameworkSetup.artifacts);
-
-  await ctx.breakpoint({
+  let frameworkSetup = await ctx.task(frameworkSetupTask, { assessmentFramework, organizationalScope, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      frameworkSetup = await ctx.task(frameworkSetupTask, { ...{ assessmentFramework, organizationalScope, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Assessment framework "${assessmentFramework}" configured with ${frameworkSetup.dimensions.length} dimensions. Proceed?`,
     title: 'Framework Setup Review',
-    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })), summary: { dimensions: frameworkSetup.dimensions.length } }
-  });
-
+    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })), summary: { dimensions: frameworkSetup.dimensions.length } },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 2: Personal Mastery Assessment
   ctx.log('info', 'Phase 2: Assessing personal mastery');
   const personalMastery = await ctx.task(personalMasteryTask, { organizationalScope, outputDir });
@@ -83,7 +92,6 @@ export async function process(inputs, ctx) {
     reviewResult = await ctx.task(stakeholderReviewTask, { assessment: maturityDetermination.assessment, improvementPlan: improvementPlan.plan, qualityScore: qualityAssessment.overallScore, outputDir });
     artifacts.push(...reviewResult.artifacts);
   }
-
   const endTime = ctx.now();
   return {
     success: true,
@@ -106,8 +114,7 @@ export async function process(inputs, ctx) {
     metadata: { processId: 'domains/business/knowledge-management/learning-organization-assessment', timestamp: startTime, outputDir }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 export const frameworkSetupTask = defineTask('framework-setup', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Set up assessment framework',

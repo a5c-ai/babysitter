@@ -49,17 +49,28 @@ export async function process(inputs, ctx) {
   artifacts.push(...wireframes.artifacts);
 
   // Phase 3: Visual Design
-  const visualDesign = await ctx.task(uiVisualDesignTask, {
+  let visualDesign = await ctx.task(uiVisualDesignTask, {
     projectName, designDirection, wireframes, outputDir
   });
-  artifacts.push(...visualDesign.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      visualDesign = await ctx.task(uiVisualDesignTask, { ...{
+    projectName, designDirection, wireframes, outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `UI visual design complete for ${projectName}. ${visualDesign.screenCount} screens designed. Review mockups before implementation?`,
     title: 'UI Visual Design Review',
-    context: { runId: ctx.runId, screens: visualDesign.screens, styleGuide: visualDesign.styleGuidePath }
-  });
-
+    context: { runId: ctx.runId, screens: visualDesign.screens, styleGuide: visualDesign.styleGuidePath },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 4: HUD Implementation
   const hudImplementation = await ctx.task(hudImplementationTask, {
     projectName, visualDesign, outputDir

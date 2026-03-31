@@ -125,7 +125,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Scoring learning analytics quality');
-  const qualityScore = await ctx.task(analyticsQualityScoringTask, {
+  let qualityScore = await ctx.task(analyticsQualityScoringTask, {
     analyticsStrategy,
     dataCollection,
     metricsDefinition,
@@ -141,8 +141,21 @@ export async function process(inputs, ctx) {
   const overallScore = qualityScore.overallScore;
   const qualityMet = overallScore >= qualityThreshold;
 
-  // Breakpoint: Review analytics implementation
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      qualityScore = await ctx.task(analyticsQualityScoringTask, { ...{
+    analyticsStrategy,
+    dataCollection,
+    metricsDefinition,
+    analysisFramework,
+    dashboardDesign,
+    ethicsPrivacy,
+    qualityThreshold,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Learning analytics implementation complete. Quality score: ${overallScore}/${qualityThreshold}. ${qualityMet ? 'Quality standards met!' : 'May need refinement.'} Review and approve?`,
     title: 'Learning Analytics Review',
     context: {
@@ -155,9 +168,15 @@ export async function process(inputs, ctx) {
         totalDashboards: dashboardDesign.dashboards?.length || 0,
         totalArtifacts: artifacts.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -183,8 +202,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task definitions
+  // Task definitions
 export const analyticsStrategyTask = defineTask('analytics-strategy', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Develop analytics strategy',

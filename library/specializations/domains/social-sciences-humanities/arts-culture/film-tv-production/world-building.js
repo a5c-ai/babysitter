@@ -78,7 +78,7 @@ export async function process(inputs, ctx) {
 
   // Task 6: Compile World Bible
   ctx.log('info', 'Compiling world bible and production design package');
-  const bibleResult = await ctx.task(compileWorldBible, {
+  let bibleResult = await ctx.task(compileWorldBible, {
     worldOverview: overviewResult,
     locations: locationResult.locations,
     props: propsResult,
@@ -88,8 +88,19 @@ export async function process(inputs, ctx) {
   });
   artifacts.push(...(bibleResult.artifacts || []));
 
-  // Breakpoint: World Review
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      bibleResult = await ctx.task(compileWorldBible, { ...{
+    worldOverview: overviewResult,
+    locations: locationResult.locations,
+    props: propsResult,
+    costumes: costumeResult.characterWardrobes,
+    vfx: vfxResult,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `World building complete with ${locationResult.totalLocations} locations and ${vfxResult.summary?.totalShots || 0} VFX shots planned. Review world bible and production design?`,
     title: 'World Building Review',
     context: {
@@ -102,9 +113,15 @@ export async function process(inputs, ctx) {
         vfxShots: vfxResult.summary?.totalShots || 0,
         worldStyle: overviewResult.visualStyle?.overallAesthetic
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
 
   return {
@@ -126,8 +143,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const worldOverview = defineTask('world-overview', (args, taskCtx) => ({
   kind: 'agent',

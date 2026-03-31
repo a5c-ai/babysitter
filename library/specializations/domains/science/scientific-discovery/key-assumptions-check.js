@@ -30,15 +30,24 @@ export async function process(inputs, ctx) {
   const assumptionElicitation = await ctx.task(assumptionElicitationTask, { analysis, conclusions, evidence, outputDir });
   artifacts.push(...assumptionElicitation.artifacts);
 
-  const assumptionCategorization = await ctx.task(assumptionCategorizationTask, { assumptions: assumptionElicitation.assumptions, outputDir });
-  artifacts.push(...assumptionCategorization.artifacts);
-
-  await ctx.breakpoint({
+  let assumptionCategorization = await ctx.task(assumptionCategorizationTask, { assumptions: assumptionElicitation.assumptions, outputDir });
+    let lastFeedback_analysisApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_analysisApproval) {
+      assumptionCategorization = await ctx.task(assumptionCategorizationTask, { ...{ assumptions: assumptionElicitation.assumptions, outputDir }, feedback: lastFeedback_analysisApproval, attempt: attempt + 1 });
+    }
+  const analysisApproval = await ctx.breakpoint({
     question: `Elicited ${assumptionElicitation.assumptions?.length || 0} assumptions. ${assumptionCategorization.keyAssumptions?.length || 0} classified as key. Review before testing?`,
     title: 'Assumptions Review',
-    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })), summary: { totalAssumptions: assumptionElicitation.assumptions?.length || 0, keyAssumptions: assumptionCategorization.keyAssumptions?.length || 0 }}
-  });
-
+    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })), summary: { totalAssumptions: assumptionElicitation.assumptions?.length || 0, keyAssumptions: assumptionCategorization.keyAssumptions?.length || 0 }},
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_analysisApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (analysisApproval.approved) break;
+    lastFeedback_analysisApproval = analysisApproval.response || analysisApproval.feedback || 'Changes requested';
+  }
   const assumptionTesting = await ctx.task(assumptionTestingTask, { keyAssumptions: assumptionCategorization.keyAssumptions, evidence, outputDir });
   artifacts.push(...assumptionTesting.artifacts);
 
@@ -51,15 +60,24 @@ export async function process(inputs, ctx) {
   const recommendationGeneration = await ctx.task(kacRecommendationsTask, { vulnerableAssumptions: vulnerabilityAssessment.vulnerableAssumptions, impactAnalysis, analysis, outputDir });
   artifacts.push(...recommendationGeneration.artifacts);
 
-  const qualityScore = await ctx.task(kacQualityScoringTask, { assumptionElicitation, assumptionTesting, vulnerabilityAssessment, recommendationGeneration, minimumTestingCoverage, outputDir });
-  artifacts.push(...qualityScore.artifacts);
-
-  await ctx.breakpoint({
+  let qualityScore = await ctx.task(kacQualityScoringTask, { assumptionElicitation, assumptionTesting, vulnerabilityAssessment, recommendationGeneration, minimumTestingCoverage, outputDir });
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      qualityScore = await ctx.task(kacQualityScoringTask, { ...{ assumptionElicitation, assumptionTesting, vulnerabilityAssessment, recommendationGeneration, minimumTestingCoverage, outputDir }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `KAC complete. ${vulnerabilityAssessment.vulnerableAssumptions?.length || 0} vulnerable assumptions identified. Quality: ${qualityScore.overallScore}/100. Approve?`,
     title: 'Key Assumptions Check Approval',
-    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })), summary: { vulnerableAssumptions: vulnerabilityAssessment.vulnerableAssumptions?.length || 0, qualityScore: qualityScore.overallScore }}
-  });
-
+    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })), summary: { vulnerableAssumptions: vulnerabilityAssessment.vulnerableAssumptions?.length || 0, qualityScore: qualityScore.overallScore }},
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true, analysis: analysis.topic, assumptions: assumptionElicitation.assumptions,
     testedAssumptions: assumptionTesting.testedAssumptions, vulnerableAssumptions: vulnerabilityAssessment.vulnerableAssumptions,

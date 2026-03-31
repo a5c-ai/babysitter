@@ -11,38 +11,66 @@ import { defineTask } from '@a5c-ai/babysitter-sdk';
 export async function process(inputs, ctx) {
   const { projectName, testObjectives, aircraftConfiguration, flightEnvelope = {} } = inputs;
 
-  const testRequirements = await ctx.task(testRequirementsTask, { projectName, testObjectives, aircraftConfiguration });
-  const testMatrix = await ctx.task(testMatrixTask, { projectName, testRequirements, flightEnvelope });
-
-  await ctx.breakpoint({
+  let testRequirements = await ctx.task(testRequirementsTask, { projectName, testObjectives, aircraftConfiguration });
+    let lastFeedback_assessmentApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_assessmentApproval) {
+      testRequirements = await ctx.task(testRequirementsTask, { ...{ projectName, testObjectives, aircraftConfiguration }, feedback: lastFeedback_assessmentApproval, attempt: attempt + 1 });
+    }
+  const assessmentApproval = await ctx.breakpoint({
     question: `Test matrix developed for ${projectName}. ${testMatrix.totalPoints} test points. Proceed with test card development?`,
     title: 'Test Matrix Review',
-    context: { runId: ctx.runId, testMatrix }
-  });
-
+    context: { runId: ctx.runId, testMatrix },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_assessmentApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (assessmentApproval.approved) break;
+    lastFeedback_assessmentApproval = assessmentApproval.response || assessmentApproval.feedback || 'Changes requested';
+  }
   const testCards = await ctx.task(testCardDevelopmentTask, { projectName, testMatrix, aircraftConfiguration });
   const instrumentationPlan = await ctx.task(instrumentationPlanTask, { projectName, testRequirements, testCards });
-  const safetyAssessment = await ctx.task(flightTestSafetyTask, { projectName, testCards, aircraftConfiguration, flightEnvelope });
+  let safetyAssessment = await ctx.task(flightTestSafetyTask, { projectName, testCards, aircraftConfiguration, flightEnvelope });
 
-  if (safetyAssessment.highRiskPoints > 0) {
-    await ctx.breakpoint({
+      let lastFeedback_reviewApproval = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_reviewApproval) {
+        safetyAssessment = await ctx.task(flightTestSafetyTask, { ...{ projectName, testCards, aircraftConfiguration, flightEnvelope }, feedback: lastFeedback_reviewApproval, attempt: attempt + 1 });
+      }
+  const reviewApproval = await ctx.breakpoint({
       question: `${safetyAssessment.highRiskPoints} high-risk test points identified. Review risk mitigations?`,
       title: 'Flight Test Safety Warning',
-      context: { runId: ctx.runId, highRiskPoints: safetyAssessment.highRiskItems }
-    });
-  }
+      context: { runId: ctx.runId, highRiskPoints: safetyAssessment.highRiskItems },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_reviewApproval || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (reviewApproval.approved) break;
+      lastFeedback_reviewApproval = reviewApproval.response || reviewApproval.feedback || 'Changes requested';
+    } }
 
   const buildUpApproach = await ctx.task(buildUpApproachTask, { projectName, testCards, safetyAssessment });
   const crewBriefing = await ctx.task(crewBriefingTask, { projectName, testCards, safetyAssessment, buildUpApproach });
-  const testPlan = await ctx.task(testPlanTask, { projectName, testMatrix, testCards, instrumentationPlan, safetyAssessment, buildUpApproach });
-  const report = await ctx.task(flightTestReportTask, { projectName, testPlan, testCards, safetyAssessment });
-
-  await ctx.breakpoint({
+  let testPlan = await ctx.task(testPlanTask, { projectName, testMatrix, testCards, instrumentationPlan, safetyAssessment, buildUpApproach });
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      testPlan = await ctx.task(testPlanTask, { ...{ projectName, testMatrix, testCards, instrumentationPlan, safetyAssessment, buildUpApproach }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Flight test plan complete for ${projectName}. ${testCards.length} test cards, ${safetyAssessment.overallRisk} overall risk. Approve?`,
     title: 'Flight Test Plan Approval',
-    context: { runId: ctx.runId, summary: { testCards: testCards.length, totalPoints: testMatrix.totalPoints, overallRisk: safetyAssessment.overallRisk } }
-  });
-
+    context: { runId: ctx.runId, summary: { testCards: testCards.length, totalPoints: testMatrix.totalPoints, overallRisk: safetyAssessment.overallRisk } },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return { success: true, projectName, testPlan, testCards, safetyAssessment, report, metadata: { processId: 'flight-test-planning', timestamp: ctx.now() } };
 }
 

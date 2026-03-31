@@ -111,7 +111,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...replanning.artifacts);
   }
-
   // ============================================================================
   // PHASE 6: PROGRESS MONITORING
   // ============================================================================
@@ -132,7 +131,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 7: Evaluating planning quality');
 
-  const evaluation = await ctx.task(planningEvaluationTask, {
+  let evaluation = await ctx.task(planningEvaluationTask, {
     agentName,
     planningEngine: planningEngine.engine,
     taskDecomposer: taskDecomposer.decomposer,
@@ -142,8 +141,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...evaluation.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      evaluation = await ctx.task(planningEvaluationTask, { ...{
+    agentName,
+    planningEngine: planningEngine.engine,
+    taskDecomposer: taskDecomposer.decomposer,
+    executionFramework: executionFramework.framework,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Autonomous planner ${agentName} complete. Planning quality: ${evaluation.results.qualityScore}. Review implementation?`,
     title: 'Autonomous Planning Review',
     context: {
@@ -156,9 +165,15 @@ export async function process(inputs, ctx) {
         qualityScore: evaluation.results.qualityScore
       },
       files: artifacts.map(a => ({ path: a.path, format: a.format || 'python' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -178,8 +193,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

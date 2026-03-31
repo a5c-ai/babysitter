@@ -55,15 +55,24 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 5: Vision and Goals Development
-  const visionGoals = await ctx.task(visionGoalsDevelopmentTask, {
+  let visionGoals = await ctx.task(visionGoalsDevelopmentTask, {
     jurisdiction: inputs.jurisdiction,
     communityInput: communityInput,
     needsAssessment: needsAssessment,
     priorityAreas: inputs.priorityAreas
   });
 
-  // Breakpoint: Vision and Strategic Direction Review
-  await ctx.breakpoint('vision-review', {
+    let lastFeedback_phase5Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase5Review) {
+      visionGoals = await ctx.task(visionGoalsDevelopmentTask, { ...{
+    jurisdiction: inputs.jurisdiction,
+    communityInput: communityInput,
+    needsAssessment: needsAssessment,
+    priorityAreas: inputs.priorityAreas
+  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+    }
+  const phase5Review = await ctx.breakpoint('vision-review', {
     title: 'Cultural Plan Vision and Goals Review',
     description: 'Review proposed vision, goals, and strategic direction for cultural plan',
     context: {
@@ -71,9 +80,15 @@ export async function process(inputs, ctx) {
       visionGoals: visionGoals,
       communityInput: communityInput,
       needsAssessment: needsAssessment
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase5Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase5Review.approved) break;
+    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+  }
   // Phase 6: Strategic Framework Development
   const strategicFramework = await ctx.task(strategicFrameworkTask, {
     visionGoals: visionGoals,
@@ -90,7 +105,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 8: Cultural Plan Document Assembly
-  const culturalPlan = await ctx.task(planDocumentAssemblyTask, {
+  let culturalPlan = await ctx.task(planDocumentAssemblyTask, {
     jurisdiction: inputs.jurisdiction,
     culturalMapping: culturalMapping,
     communityInput: communityInput,
@@ -100,16 +115,34 @@ export async function process(inputs, ctx) {
     implementationPlan: implementationPlan
   });
 
-  // Final Breakpoint: Cultural Plan Approval
-  await ctx.breakpoint('plan-approval', {
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      culturalPlan = await ctx.task(planDocumentAssemblyTask, { ...{
+    jurisdiction: inputs.jurisdiction,
+    culturalMapping: culturalMapping,
+    communityInput: communityInput,
+    needsAssessment: needsAssessment,
+    visionGoals: visionGoals,
+    strategicFramework: strategicFramework,
+    implementationPlan: implementationPlan
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint('plan-approval', {
     title: 'Cultural Plan Final Approval',
     description: 'Review and approve final cultural plan document for adoption',
     context: {
       culturalPlan: culturalPlan,
       implementationPlan: implementationPlan
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     culturalMappingReport: culturalMapping,
     communityEngagementSummary: communityInput,

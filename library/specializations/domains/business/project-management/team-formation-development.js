@@ -31,7 +31,7 @@ export async function process(inputs, ctx) {
   } = inputs;
 
   // Phase 1: Team Structure Design
-  const teamStructure = await ctx.task(teamStructureDesignTask, {
+  let teamStructure = await ctx.task(teamStructureDesignTask, {
     projectName,
     teamMembers,
     projectScope,
@@ -48,9 +48,18 @@ export async function process(inputs, ctx) {
       teamCharter: null
     };
   }
-
-  // Breakpoint: Review team structure
-  await ctx.breakpoint({
+  let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      teamStructure = await ctx.task(teamStructureDesignTask, { ...{
+    projectName,
+    teamMembers,
+    projectScope,
+    teamModel,
+    organizationalContext
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Team structure designed for ${projectName}. Team size: ${teamMembers.length}. Model: ${teamModel}. Proceed with role definition?`,
     title: 'Team Structure Review',
     context: {
@@ -63,9 +72,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: teamStructure
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // Phase 2: Role and Responsibility Definition
   const roleDefinition = await ctx.task(roleDefinitionTask, {
     projectName,
@@ -82,7 +97,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 4: Skills Assessment
-  const skillsAssessment = await ctx.task(skillsAssessmentTask, {
+  let skillsAssessment = await ctx.task(skillsAssessmentTask, {
     projectName,
     teamMembers,
     roleDefinition,
@@ -91,17 +106,32 @@ export async function process(inputs, ctx) {
 
   // Quality Gate: Skills gaps identified
   const criticalGaps = skillsAssessment.gaps?.filter(g => g.severity === 'critical') || [];
-  if (criticalGaps.length > 0) {
-    await ctx.breakpoint({
+      let lastFeedback_phase4Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase4Review) {
+        skillsAssessment = await ctx.task(skillsAssessmentTask, { ...{
+    projectName,
+    teamMembers,
+    roleDefinition,
+    projectScope
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+      }
+  const phase4Review = await ctx.breakpoint({
       question: `${criticalGaps.length} critical skill gaps identified. Address before proceeding?`,
       title: 'Skills Gap Warning',
       context: {
         runId: ctx.runId,
         gaps: criticalGaps,
         recommendation: 'Plan training or additional hiring'
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase4Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase4Review.approved) break;
+      lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+    } }
 
   // Phase 5: Working Agreements Development
   const workingAgreements = await ctx.task(workingAgreementsDevelopmentTask, {
@@ -144,7 +174,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 10: Team Charter Generation
-  const teamCharter = await ctx.task(teamCharterGenerationTask, {
+  let teamCharter = await ctx.task(teamCharterGenerationTask, {
     projectName,
     teamStructure,
     roleDefinition,
@@ -161,8 +191,23 @@ export async function process(inputs, ctx) {
   const completenessScore = teamCharter.completenessScore || 0;
   const ready = completenessScore >= 80;
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      teamCharter = await ctx.task(teamCharterGenerationTask, { ...{
+    projectName,
+    teamStructure,
+    roleDefinition,
+    raciMatrix,
+    skillsAssessment,
+    workingAgreements,
+    teamCommunicationPlan,
+    developmentPlan,
+    teamBuildingPlan,
+    performanceFramework
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Team formation complete for ${projectName}. Team size: ${teamMembers.length}. Completeness: ${completenessScore}/100. Approve team charter?`,
     title: 'Team Charter Approval',
     context: {
@@ -174,9 +219,15 @@ export async function process(inputs, ctx) {
         { path: `artifacts/team-charter.json`, format: 'json', content: teamCharter },
         { path: `artifacts/team-charter.md`, format: 'markdown', content: teamCharter.markdown }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     projectName,
@@ -206,8 +257,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const teamStructureDesignTask = defineTask('team-structure-design', (args, taskCtx) => ({
   kind: 'agent',

@@ -63,22 +63,34 @@ export async function process(inputs, ctx) {
 
   ctx.log('phase:analyze', 'Analyzing project structure and Gemini CLI environment');
 
-  const analysisResult = await ctx.task(analyzeEnvironmentTask, {
+  let analysisResult = await ctx.task(analyzeEnvironmentTask, {
     projectDir
   });
 
   ctx.log('phase:analyze:complete', `Environment analysis complete. Gemini CLI detected: ${analysisResult.geminiCliDetected}`);
 
-  // Gate: confirm analysis before proceeding
-  await ctx.breakpoint({
+    let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      analysisResult = await ctx.task(analyzeEnvironmentTask, { ...{
+    projectDir
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: 'Environment analysis complete. Review the analysis and confirm to proceed with scaffolding.',
     title: 'Gemini CLI Integration: Analysis Review',
     context: {
       runId: ctx.runId,
       analysis: analysisResult
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // ==========================================================================
   // PHASE 2: SCAFFOLD
   // ==========================================================================
@@ -213,17 +225,35 @@ export async function process(inputs, ctx) {
   });
 
   // Gate: review test results
-  if (!testResult.allPassed) {
-    await ctx.breakpoint({
+    let lastFeedback_reviewApproval = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_reviewApproval) {
+        runtimeValidationResult = await ctx.task(runHarnessRuntimeValidationTask, { ...{
+    projectDir,
+    harnessName: 'Gemini CLI',
+    loopModel: 'Gemini hook chain where SessionStart initializes state, AfterAgent owns continuation, BeforeTool enforces guards, and hook payload or environment session identity is used directly instead of a synthetic bridge',
+    research: researchResult,
+    docs: docsResult,
+    integrationFiles,
+    localTestResult: testResult
+  }, feedback: lastFeedback_reviewApproval, attempt: attempt + 1 });
+      }
+  const reviewApproval = await ctx.breakpoint({
       question: `${testResult.total - testResult.passed} test(s) failed. Review failures and decide whether to fix or proceed.`,
       title: 'Gemini CLI Integration: Test Failures',
       context: {
         runId: ctx.runId,
         testResult
-      }
-    });
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_reviewApproval || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (reviewApproval.approved) break;
+      lastFeedback_reviewApproval = reviewApproval.response || reviewApproval.feedback || 'Changes requested';
+    }
   }
-
   // ==========================================================================
   // PHASE 5: VERIFY
   // ==========================================================================
@@ -277,7 +307,7 @@ export async function process(inputs, ctx) {
     });
 
     // Re-verify
-    const reconvergeResult = await ctx.task(verifyHarnessAssimilationTask, {
+    let reconvergeResult = await ctx.task(verifyHarnessAssimilationTask, {
       projectDir,
       harnessName: 'Gemini CLI',
       research: researchResult,
@@ -295,8 +325,22 @@ export async function process(inputs, ctx) {
 
     ctx.log('phase:converge:iteration', `Iteration ${iterations} complete: quality=${currentQuality}`);
 
-    if (currentQuality < targetQuality && iterations >= maxIterations) {
-      await ctx.breakpoint({
+        let lastFeedback_iterationApproval = null;
+      for (let attempt = 0; attempt < 3; attempt++) {
+        if (lastFeedback_iterationApproval) {
+          reconvergeResult = await ctx.task(verifyHarnessAssimilationTask, { ...{
+      projectDir,
+      harnessName: 'Gemini CLI',
+      research: researchResult,
+      assimilation: assimilationResult,
+      docs: docsResult,
+      integrationFiles,
+      localTestResult: testResult,
+      runtimeValidation: runtimeValidationResult,
+      targetQuality
+    }, feedback: lastFeedback_iterationApproval, attempt: attempt + 1 });
+        }
+  const iterationApproval = await ctx.breakpoint({
         question: `Quality target not met after ${iterations} iterations (${currentQuality}/${targetQuality}). Continue iterating or accept current state?`,
         title: 'Gemini CLI Integration: Convergence Stalled',
         context: {
@@ -305,9 +349,15 @@ export async function process(inputs, ctx) {
           targetQuality,
           iterations,
           remainingIssues: reconvergeResult.issues
-        }
-      });
-    }
+        },
+        expert: 'owner',
+        tags: ['approval-gate'],
+        previousFeedback: lastFeedback_iterationApproval || undefined,
+        attempt: attempt > 0 ? attempt + 1 : undefined
+        });
+        if (iterationApproval.approved) break;
+        lastFeedback_iterationApproval = iterationApproval.response || iterationApproval.feedback || 'Changes requested';
+      }   }
   }
 
   ctx.log('process:complete', `Integration complete. Quality: ${currentQuality}, Files: ${integrationFiles.length}, Iterations: ${iterations}`);
@@ -326,8 +376,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

@@ -65,10 +65,9 @@ export async function process(inputs, ctx) {
     });
     artifacts.push(...(scoreResult.artifacts || []));
   }
-
   // Task 5: Compile Audio Package
   ctx.log('info', 'Compiling audio design package');
-  const compileResult = await ctx.task(compileAudioPackage, {
+  let compileResult = await ctx.task(compileAudioPackage, {
     audioApproach: approachResult,
     musicCues: musicResult.musicCues,
     soundDesign: soundResult.sceneSoundDesign,
@@ -77,8 +76,18 @@ export async function process(inputs, ctx) {
   });
   artifacts.push(...(compileResult.artifacts || []));
 
-  // Breakpoint: Audio Review
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      compileResult = await ctx.task(compileAudioPackage, { ...{
+    audioApproach: approachResult,
+    musicCues: musicResult.musicCues,
+    soundDesign: soundResult.sceneSoundDesign,
+    scoreRequest: scoreResult,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Audio design complete with ${musicResult.summary?.totalCues || 0} music cues and ${soundResult.sceneSoundDesign?.length || 0} scenes with sound design. ${createOriginalScore ? 'Score composition request ready for music-album-creation. ' : ''}Review and approve?`,
     title: 'Audio Design Review',
     context: {
@@ -90,9 +99,15 @@ export async function process(inputs, ctx) {
         scenesWithSoundDesign: soundResult.sceneSoundDesign?.length,
         originalScoreRequested: createOriginalScore
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
 
   return {
@@ -112,8 +127,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const audioApproach = defineTask('audio-approach', (args, taskCtx) => ({
   kind: 'agent',

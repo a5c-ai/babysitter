@@ -59,23 +59,37 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 5: Segment Profiling and Sizing
-  const segmentProfiles = await ctx.task(segmentProfilingTask, {
+  let segmentProfiles = await ctx.task(segmentProfilingTask, {
     projectName,
     segmentationModel,
     dataAssessment
   });
 
-  // Breakpoint: Review segmentation results
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      segmentProfiles = await ctx.task(segmentProfilingTask, { ...{
+    projectName,
+    segmentationModel,
+    dataAssessment
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Review customer segmentation for ${projectName}. Are the segments distinct and actionable?`,
     title: 'Segmentation Review',
     context: {
       runId: ctx.runId,
       projectName,
       segmentCount: segmentProfiles.segments?.length || 0
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 6: Targeting Strategy Development
   const targetingStrategy = await ctx.task(targetingStrategyTask, {
     projectName,
@@ -115,8 +129,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const dataAssessmentTask = defineTask('data-assessment', (args, taskCtx) => ({
   kind: 'agent',

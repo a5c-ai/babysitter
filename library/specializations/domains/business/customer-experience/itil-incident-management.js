@@ -124,7 +124,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 8: Conducting post-incident review');
-  const postIncidentReview = await ctx.task(postIncidentReviewTask, {
+  let postIncidentReview = await ctx.task(postIncidentReviewTask, {
     incidentLogging,
     investigation,
     resolutionPlan,
@@ -135,9 +135,18 @@ export async function process(inputs, ctx) {
   artifacts.push(...postIncidentReview.artifacts);
 
   const incidentPriority = categorizationResult.priority;
-  const resolutionSuccess = incidentClosure.closureStatus === 'resolved';
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      postIncidentReview = await ctx.task(postIncidentReviewTask, { ...{
+    incidentLogging,
+    investigation,
+    resolutionPlan,
+    incidentClosure,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Incident management complete for ${incident.id || 'incident'}. Priority: ${incidentPriority}. Status: ${incidentClosure.closureStatus}. Root cause identified: ${investigation.rootCauseIdentified ? 'Yes' : 'No'}. Review and close?`,
     title: 'Incident Management Review',
     context: {
@@ -157,9 +166,15 @@ export async function process(inputs, ctx) {
         escalated: escalationDetermination.escalationRequired,
         timeToResolve: incidentClosure.timeToResolve
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -203,8 +218,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

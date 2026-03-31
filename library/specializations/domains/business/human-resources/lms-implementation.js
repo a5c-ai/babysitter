@@ -39,7 +39,7 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Starting LMS Implementation for ${organizationName}`);
 
   // Phase 1: Requirements Gathering
-  const requirements = await ctx.task(requirementsGatheringTask, {
+  let requirements = await ctx.task(requirementsGatheringTask, {
     organizationName,
     userCount,
     contentLibrary,
@@ -48,9 +48,19 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...requirements.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      requirements = await ctx.task(requirementsGatheringTask, { ...{
+    organizationName,
+    userCount,
+    contentLibrary,
+    existingLms,
+    integrationRequirements,
+    outputDir
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `LMS requirements gathered. ${requirements.functionalRequirements.length} functional requirements, ${requirements.technicalRequirements.length} technical requirements. Review before vendor selection?`,
     title: 'Requirements Review',
     context: {
@@ -59,9 +69,15 @@ export async function process(inputs, ctx) {
       technicalRequirements: requirements.technicalRequirements,
       integrationNeeds: requirements.integrationNeeds,
       files: requirements.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // Phase 2: Vendor Selection (if not pre-selected)
   let vendorSelection = null;
   if (!lmsVendor) {
@@ -71,9 +87,19 @@ export async function process(inputs, ctx) {
       userCount,
       outputDir
     });
-    artifacts.push(...vendorSelection.artifacts);
-
-    await ctx.breakpoint({
+      let lastFeedback_phase2Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase2Review) {
+        requirements = await ctx.task(requirementsGatheringTask, { ...{
+    organizationName,
+    userCount,
+    contentLibrary,
+    existingLms,
+    integrationRequirements,
+    outputDir
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+      }
+  const phase2Review = await ctx.breakpoint({
       question: `Vendor evaluation complete. Top recommendation: ${vendorSelection.recommendedVendor}. Score: ${vendorSelection.topScore}. Approve vendor selection?`,
       title: 'Vendor Selection Review',
       context: {
@@ -82,9 +108,15 @@ export async function process(inputs, ctx) {
         evaluationMatrix: vendorSelection.evaluationMatrix,
         demos: vendorSelection.demoResults,
         files: vendorSelection.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase2Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase2Review.approved) break;
+      lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+    } }
 
   const selectedVendor = lmsVendor || vendorSelection?.recommendedVendor;
 
@@ -112,7 +144,7 @@ export async function process(inputs, ctx) {
   artifacts.push(...systemConfiguration.artifacts);
 
   // Phase 5: Integration Development
-  const integrationDevelopment = await ctx.task(integrationDevelopmentTask, {
+  let integrationDevelopment = await ctx.task(integrationDevelopmentTask, {
     organizationName,
     selectedVendor,
     integrationRequirements,
@@ -120,9 +152,18 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...integrationDevelopment.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase5Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase5Review) {
+      integrationDevelopment = await ctx.task(integrationDevelopmentTask, { ...{
+    organizationName,
+    selectedVendor,
+    integrationRequirements,
+    systemConfiguration,
+    outputDir
+  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+    }
+  const phase5Review = await ctx.breakpoint({
     question: `Integrations developed. ${integrationDevelopment.integrationsCompleted} integrations completed. SSO: ${integrationDevelopment.ssoConfigured}. Review integration status?`,
     title: 'Integration Review',
     context: {
@@ -131,9 +172,15 @@ export async function process(inputs, ctx) {
       ssoConfigured: integrationDevelopment.ssoConfigured,
       hrisSync: integrationDevelopment.hrisSync,
       files: integrationDevelopment.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase5Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase5Review.approved) break;
+    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+  }
   // Phase 6: Content Migration
   const contentMigration = await ctx.task(contentMigrationTask, {
     organizationName,
@@ -157,7 +204,7 @@ export async function process(inputs, ctx) {
   artifacts.push(...userProvisioning.artifacts);
 
   // Phase 8: Testing
-  const testing = await ctx.task(testingTask, {
+  let testing = await ctx.task(testingTask, {
     organizationName,
     systemConfiguration,
     integrationDevelopment,
@@ -166,9 +213,19 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...testing.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      testing = await ctx.task(testingTask, { ...{
+    organizationName,
+    systemConfiguration,
+    integrationDevelopment,
+    contentMigration,
+    userProvisioning,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Testing complete. ${testing.passRate}% pass rate. ${testing.criticalIssues} critical issues. Ready for launch?`,
     title: 'Testing Results Review',
     context: {
@@ -177,9 +234,15 @@ export async function process(inputs, ctx) {
       criticalIssues: testing.criticalIssues,
       testResults: testing.testResults,
       files: testing.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 9: Training and Documentation
   const trainingDocs = await ctx.task(trainingDocsTask, {
     organizationName,
@@ -242,8 +305,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions (abbreviated for space - following same pattern as other processes)
+  // Task Definitions (abbreviated for space - following same pattern as other processes)
 
 export const requirementsGatheringTask = defineTask('requirements-gathering', (args, taskCtx) => ({
   kind: 'agent',

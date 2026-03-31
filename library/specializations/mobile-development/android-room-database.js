@@ -159,7 +159,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 9: Setting up database migrations');
 
-  const migrationsSetup = await ctx.task(migrationsSetupTask, {
+  let migrationsSetup = await ctx.task(migrationsSetupTask, {
     appName,
     migrationStrategy,
     databaseClass,
@@ -168,8 +168,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...migrationsSetup.artifacts);
 
-  // Quality Gate: Database Design Review
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      migrationsSetup = await ctx.task(migrationsSetupTask, { ...{
+    appName,
+    migrationStrategy,
+    databaseClass,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Room database designed for ${appName} with ${entityDefinition.entities.length} entities. Migration strategy: ${migrationStrategy}. Review design?`,
     title: 'Database Design Review',
     context: {
@@ -179,9 +188,15 @@ export async function process(inputs, ctx) {
       relationships: relationshipsSetup.relationships,
       migrationStrategy,
       files: artifacts.slice(-5).map(a => ({ path: a.path, format: 'kotlin' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 10: PRE-POPULATION
   // ============================================================================
@@ -271,8 +286,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

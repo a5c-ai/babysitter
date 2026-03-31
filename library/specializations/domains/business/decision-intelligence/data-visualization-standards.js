@@ -63,15 +63,24 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 5: Component Library Design
-  const componentLibrary = await ctx.task(componentLibraryTask, {
+  let componentLibrary = await ctx.task(componentLibraryTask, {
     projectName,
     visualIdentity,
     chartGuidelines,
     organizationContext
   });
 
-  // Breakpoint: Review visualization standards
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      componentLibrary = await ctx.task(componentLibraryTask, { ...{
+    projectName,
+    visualIdentity,
+    chartGuidelines,
+    organizationContext
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Review visualization standards for ${projectName}. Are they aligned with organizational needs?`,
     title: 'Visualization Standards Review',
     context: {
@@ -79,9 +88,15 @@ export async function process(inputs, ctx) {
       projectName,
       principles: visualizationPrinciples.principles?.length || 0,
       chartTypes: chartGuidelines.chartTypes?.length || 0
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 6: Style Guide Documentation
   const styleGuide = await ctx.task(styleGuideTask, {
     projectName,
@@ -126,8 +141,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const currentStateAssessmentTask = defineTask('current-state-assessment', (args, taskCtx) => ({
   kind: 'agent',

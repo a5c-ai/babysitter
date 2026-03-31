@@ -84,7 +84,7 @@ export async function process(inputs, ctx) {
 
   // Task 6: Valuation Range Calculation
   ctx.log('info', 'Calculating valuation range');
-  const valuationRange = await ctx.task(valuationRangeTask, {
+  let valuationRange = await ctx.task(valuationRangeTask, {
     tradingMultiples: normalization.normalizedTrading,
     transactionMultiples: normalization.normalizedTransaction,
     financials,
@@ -93,8 +93,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...valuationRange.artifacts);
 
-  // Breakpoint: Review comparable analysis
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      valuationRange = await ctx.task(valuationRangeTask, { ...{
+    tradingMultiples: normalization.normalizedTrading,
+    transactionMultiples: normalization.normalizedTransaction,
+    financials,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Comparable analysis complete for ${companyName}. Valuation range: $${valuationRange.lowValue}M - $${valuationRange.highValue}M. Review analysis?`,
     title: 'Comparable Analysis Results',
     context: {
@@ -107,9 +116,15 @@ export async function process(inputs, ctx) {
         medianTransactionMultiple: transactionAnalysis.medianMultiple,
         valuationRange: { low: valuationRange.lowValue, mid: valuationRange.midValue, high: valuationRange.highValue }
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 7: Generate Comparable Analysis Report
   ctx.log('info', 'Generating comparable analysis report');
   const compReport = await ctx.task(comparableReportTask, {
@@ -159,8 +174,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Peer Selection
+  // Task 1: Peer Selection
 export const peerSelectionTask = defineTask('peer-selection', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Select public company peers',

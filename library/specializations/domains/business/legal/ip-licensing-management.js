@@ -64,14 +64,21 @@ export async function process(inputs, ctx) {
   artifacts.push(...agreement.artifacts);
 
   // Phase 4: Negotiation Support
-  const negotiation = await ctx.task(licenseNegotiationTask, {
+  let negotiation = await ctx.task(licenseNegotiationTask, {
     agreement: agreement.draft,
     direction,
     outputDir
   });
-  artifacts.push(...negotiation.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      negotiation = await ctx.task(licenseNegotiationTask, { ...{
+    agreement: agreement.draft,
+    direction,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `License agreement draft complete for ${licenseType}. Royalty rate: ${valuation.recommendedRoyalty}. Review and finalize?`,
     title: 'License Agreement Review',
     context: {
@@ -80,9 +87,15 @@ export async function process(inputs, ctx) {
       direction,
       royaltyRate: valuation.recommendedRoyalty,
       files: [{ path: agreement.draftPath, format: 'docx', label: 'License Agreement' }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 5: Royalty Tracking Setup
   const royaltyTracking = await ctx.task(royaltyTrackingTask, {
     agreement: agreement.draft,

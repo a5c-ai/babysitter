@@ -24,11 +24,16 @@ export async function process(inputs, ctx) {
   const asyncThunks = await ctx.task(asyncThunksTask, { projectName, outputDir });
   artifacts.push(...asyncThunks.artifacts);
 
-  const selectors = await ctx.task(selectorsTask, { projectName, outputDir });
-  artifacts.push(...selectors.artifacts);
-
-  await ctx.breakpoint({ question: `Redux state management complete for ${projectName}. Approve?`, title: 'Redux Review', context: { runId: ctx.runId, slices: slicesCreation.slices } });
-
+  let selectors = await ctx.task(selectorsTask, { projectName, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      selectors = await ctx.task(selectorsTask, { ...{ projectName, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({ question: `Redux state management complete for ${projectName}. Approve?`, title: 'Redux Review', context: { runId: ctx.runId, slices: slicesCreation.slices }, expert: 'owner', tags: ['approval-gate'], previousFeedback: lastFeedback || undefined, attempt: attempt > 0 ? attempt + 1 : undefined });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const documentation = await ctx.task(documentationTask, { projectName, outputDir });
   artifacts.push(...documentation.artifacts);
 

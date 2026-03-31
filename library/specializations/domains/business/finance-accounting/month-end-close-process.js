@@ -45,19 +45,33 @@ export async function process(inputs, ctx) {
   results.steps.push({ name: 'recurring-entries', result: recurringResult });
 
   // Step 4: Account Reconciliations
-  const reconciliationResult = await ctx.task(performReconciliationsTask, {
+  let reconciliationResult = await ctx.task(performReconciliationsTask, {
     closePeriod: inputs.closePeriod,
     priorPeriodBalances: inputs.priorPeriodBalances,
     subLedgerData: inputs.subLedgerData
   });
   results.steps.push({ name: 'account-reconciliations', result: reconciliationResult });
 
-  // Breakpoint for reconciliation review
-  await ctx.breakpoint('reconciliation-review', {
+    let lastFeedback_reviewApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_reviewApproval) {
+      reconciliationResult = await ctx.task(performReconciliationsTask, { ...{
+    closePeriod: inputs.closePeriod,
+    priorPeriodBalances: inputs.priorPeriodBalances,
+    subLedgerData: inputs.subLedgerData
+  }, feedback: lastFeedback_reviewApproval, attempt: attempt + 1 });
+    }
+  const reviewApproval = await ctx.breakpoint('reconciliation-review', {
     message: 'Review account reconciliations and identify any unreconciled items',
-    data: reconciliationResult
-  });
-
+    data: reconciliationResult,
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_reviewApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (reviewApproval.approved) break;
+    lastFeedback_reviewApproval = reviewApproval.response || reviewApproval.feedback || 'Changes requested';
+  }
   // Step 5: Adjusting Journal Entries
   const adjustingResult = await ctx.task(prepareAdjustingEntriesTask, {
     closePeriod: inputs.closePeriod,
@@ -73,19 +87,33 @@ export async function process(inputs, ctx) {
   results.steps.push({ name: 'intercompany-reconciliation', result: intercompanyResult });
 
   // Step 7: Financial Statement Preparation
-  const financialsResult = await ctx.task(prepareFinancialStatementsTask, {
+  let financialsResult = await ctx.task(prepareFinancialStatementsTask, {
     closePeriod: inputs.closePeriod,
     adjustingEntries: adjustingResult,
     intercompanyEliminations: intercompanyResult
   });
   results.steps.push({ name: 'financial-statements', result: financialsResult });
 
-  // Breakpoint for controller review
-  await ctx.breakpoint('controller-review', {
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      financialsResult = await ctx.task(prepareFinancialStatementsTask, { ...{
+    closePeriod: inputs.closePeriod,
+    adjustingEntries: adjustingResult,
+    intercompanyEliminations: intercompanyResult
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint('controller-review', {
     message: 'Controller review of financial statements before finalization',
-    data: financialsResult
-  });
-
+    data: financialsResult,
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Step 8: Management Reporting
   const reportingResult = await ctx.task(prepareManagementReportsTask, {
     closePeriod: inputs.closePeriod,
@@ -109,8 +137,7 @@ export async function process(inputs, ctx) {
 
   return results;
 }
-
-// Task definitions
+  // Task definitions
 export const performCutoffProceduresTask = defineTask('perform-cutoff-procedures', (args, taskCtx) => ({
   kind: 'agent',
   skill: { name: 'accounting-operations' },

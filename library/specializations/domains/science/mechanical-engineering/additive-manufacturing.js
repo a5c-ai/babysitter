@@ -25,7 +25,7 @@ export async function process(inputs, ctx) {
   const artifacts = [];
 
   // Phase 1: DfAM Analysis
-  const dfamAnalysis = await ctx.task(dfamAnalysisTask, {
+  let dfamAnalysis = await ctx.task(dfamAnalysisTask, {
     cadModel: inputs.cadModel,
     requirements: inputs.requirements,
     printerSpec: inputs.printerSpec,
@@ -33,16 +33,31 @@ export async function process(inputs, ctx) {
   });
   artifacts.push({ phase: 'dfam-analysis', data: dfamAnalysis });
 
-  // Breakpoint: DfAM Review
-  await ctx.breakpoint('dfam-review', {
+    let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      dfamAnalysis = await ctx.task(dfamAnalysisTask, { ...{
+    cadModel: inputs.cadModel,
+    requirements: inputs.requirements,
+    printerSpec: inputs.printerSpec,
+    material: inputs.material
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint('dfam-review', {
     question: 'Review DfAM recommendations. Proceed with design modifications?',
     context: {
       printabilityScore: dfamAnalysis.printabilityScore,
       recommendations: dfamAnalysis.recommendations,
       supportVolume: dfamAnalysis.supportAnalysis.volume
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // Phase 2: Part Orientation Optimization
   const orientationOptimization = await ctx.task(orientationTask, {
     cadModel: inputs.cadModel,
@@ -105,24 +120,38 @@ export async function process(inputs, ctx) {
   artifacts.push({ phase: 'post-processing', data: postProcessingPlan });
 
   // Phase 9: Quality Plan Development
-  const qualityPlan = await ctx.task(qualityPlanTask, {
+  let qualityPlan = await ctx.task(qualityPlanTask, {
     requirements: inputs.requirements,
     material: inputs.material,
     printerSpec: inputs.printerSpec
   });
   artifacts.push({ phase: 'quality-plan', data: qualityPlan });
 
-  // Final Breakpoint: Build Approval
-  await ctx.breakpoint('build-approval', {
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      qualityPlan = await ctx.task(qualityPlanTask, { ...{
+    requirements: inputs.requirements,
+    material: inputs.material,
+    printerSpec: inputs.printerSpec
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint('build-approval', {
     question: 'Approve build package for production?',
     context: {
       partNumber: inputs.partNumber,
       buildTime: buildFile.estimatedBuildTime,
       materialCost: buildFile.materialCost,
       thermalRisk: thermalSimulation.riskAssessment
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     results: {
@@ -143,8 +172,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-const dfamAnalysisTask = defineTask('dfam-analysis', (args) => ({
+  const dfamAnalysisTask = defineTask('dfam-analysis', (args) => ({
   kind: 'agent',
   title: 'Design for Additive Manufacturing Analysis',
   agent: {

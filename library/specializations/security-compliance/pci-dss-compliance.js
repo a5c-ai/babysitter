@@ -61,7 +61,6 @@ export async function process(inputs, ctx) {
       metadata: { processId: 'specializations/security-compliance/pci-dss-compliance', timestamp: ctx.now() }
     };
   }
-
   const startTime = ctx.now();
   const artifacts = [];
   let complianceScore = 0;
@@ -79,7 +78,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Identifying and validating Cardholder Data Environment (CDE) scope');
 
-  const cdeScopeResult = await ctx.task(identifyCdeScopeTask, {
+  let cdeScopeResult = await ctx.task(identifyCdeScopeTask, {
     projectName,
     cdeScope,
     networkSegmentation,
@@ -91,8 +90,18 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `CDE scope identified - ${cdeScopeResult.cdeAssets.length} assets in scope, ${cdeScopeResult.connectedAssets.length} connected systems`);
 
-  // Quality Gate: CDE scope review
-  await ctx.breakpoint({
+    let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      cdeScopeResult = await ctx.task(identifyCdeScopeTask, { ...{
+    projectName,
+    cdeScope,
+    networkSegmentation,
+    environment,
+    outputDir
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `CDE scope identification complete for ${projectName}. ${cdeScopeResult.cdeAssets.length} in-scope assets, ${cdeScopeResult.connectedAssets.length} connected systems. Review scope before assessment?`,
     title: 'CDE Scope Review',
     context: {
@@ -106,9 +115,15 @@ export async function process(inputs, ctx) {
       },
       assetBreakdown: cdeScopeResult.assetBreakdown,
       files: cdeScopeResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 2: NETWORK SEGMENTATION VALIDATION
   // ============================================================================
@@ -116,7 +131,7 @@ export async function process(inputs, ctx) {
   if (networkSegmentation) {
     ctx.log('info', 'Phase 2: Validating network segmentation controls');
 
-    const segmentationResult = await ctx.task(validateNetworkSegmentationTask, {
+    let segmentationResult = await ctx.task(validateNetworkSegmentationTask, {
       projectName,
       cdeAssets: cdeScopeResult.cdeAssets,
       connectedAssets: cdeScopeResult.connectedAssets,
@@ -128,8 +143,18 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Network segmentation validation complete - ${segmentationResult.segmentationScore}/100 score`);
 
-    // Quality Gate: Network segmentation review
-    await ctx.breakpoint({
+      let lastFeedback_phase2Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase2Review) {
+        segmentationResult = await ctx.task(validateNetworkSegmentationTask, { ...{
+      projectName,
+      cdeAssets: cdeScopeResult.cdeAssets,
+      connectedAssets: cdeScopeResult.connectedAssets,
+      version,
+      outputDir
+    }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+      }
+  const phase2Review = await ctx.breakpoint({
       question: `Network segmentation validation complete. Segmentation Score: ${segmentationResult.segmentationScore}/100. ${segmentationResult.issues.length} issues found. Review segmentation?`,
       title: 'Network Segmentation Review',
       context: {
@@ -143,9 +168,15 @@ export async function process(inputs, ctx) {
         },
         issues: segmentationResult.issues,
         files: segmentationResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase2Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase2Review.approved) break;
+      lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 3: REQUIREMENT 1 - INSTALL AND MAINTAIN NETWORK SECURITY CONTROLS
@@ -191,7 +222,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 5: Assessing Requirement 3 - Protect Stored Cardholder Data');
 
-  const req3Result = await ctx.task(assessRequirement3Task, {
+  let req3Result = await ctx.task(assessRequirement3Task, {
     projectName,
     cdeAssets: cdeScopeResult.cdeAssets,
     version,
@@ -204,8 +235,17 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Requirement 3 complete - Compliance: ${req3Result.compliant ? 'YES' : 'NO'}, Score: ${req3Result.score}/100`);
 
-  // Quality Gate: Data protection review (critical requirement)
-  await ctx.breakpoint({
+    let lastFeedback_phase5Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase5Review) {
+      req3Result = await ctx.task(assessRequirement3Task, { ...{
+    projectName,
+    cdeAssets: cdeScopeResult.cdeAssets,
+    version,
+    outputDir
+  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+    }
+  const phase5Review = await ctx.breakpoint({
     question: `Requirement 3 (Data Protection) assessment complete. Compliance: ${req3Result.compliant ? 'YES' : 'NO'}. ${req3Result.gaps.length} gaps found. This is a critical requirement. Review findings?`,
     title: 'Requirement 3 - Data Protection Review',
     context: {
@@ -220,9 +260,15 @@ export async function process(inputs, ctx) {
       },
       gaps: req3Result.gaps,
       files: req3Result.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase5Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase5Review.approved) break;
+    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 6: REQUIREMENT 4 - PROTECT CARDHOLDER DATA IN TRANSIT
   // ============================================================================
@@ -363,7 +409,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 13: Assessing Requirement 11 - Test Security Systems and Processes');
 
-  const req11Result = await ctx.task(assessRequirement11Task, {
+  let req11Result = await ctx.task(assessRequirement11Task, {
     projectName,
     cdeAssets: cdeScopeResult.cdeAssets,
     version,
@@ -378,8 +424,19 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Requirement 11 complete - Compliance: ${req11Result.compliant ? 'YES' : 'NO'}, Score: ${req11Result.score}/100`);
 
-  // Quality Gate: Security testing review (ASV/Penetration Test)
-  await ctx.breakpoint({
+    let lastFeedback_qualityGateApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_qualityGateApproval) {
+      req11Result = await ctx.task(assessRequirement11Task, { ...{
+    projectName,
+    cdeAssets: cdeScopeResult.cdeAssets,
+    version,
+    asvScan,
+    penetrationTest,
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval, attempt: attempt + 1 });
+    }
+  const qualityGateApproval = await ctx.breakpoint({
     question: `Requirement 11 (Security Testing) assessment complete. ASV Scan: ${req11Result.asvScanCompliant ? 'PASS' : 'FAIL'}, Penetration Test: ${req11Result.penetrationTestCompliant ? 'PASS' : 'FAIL'}. Review findings?`,
     title: 'Requirement 11 - Security Testing Review',
     context: {
@@ -395,16 +452,22 @@ export async function process(inputs, ctx) {
       },
       gaps: req11Result.gaps,
       files: req11Result.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_qualityGateApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (qualityGateApproval.approved) break;
+    lastFeedback_qualityGateApproval = qualityGateApproval.response || qualityGateApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 14: REQUIREMENT 12 - SUPPORT INFORMATION SECURITY WITH POLICIES
   // ============================================================================
 
   ctx.log('info', 'Phase 14: Assessing Requirement 12 - Maintain Information Security Policy');
 
-  const req12Result = await ctx.task(assessRequirement12Task, {
+  let req12Result = await ctx.task(assessRequirement12Task, {
     projectName,
     merchantLevel,
     version,
@@ -437,8 +500,17 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `ASV scan complete - ${asvScanResult.passed ? 'PASSED' : 'FAILED'}, ${asvScanResult.vulnerabilitiesFound} vulnerabilities found`);
 
-    // Quality Gate: ASV scan review
-    await ctx.breakpoint({
+      let lastFeedback_phase15Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase15Review) {
+        req12Result = await ctx.task(assessRequirement12Task, { ...{
+    projectName,
+    merchantLevel,
+    version,
+    outputDir
+  }, feedback: lastFeedback_phase15Review, attempt: attempt + 1 });
+      }
+  const phase15Review = await ctx.breakpoint({
       question: `ASV quarterly vulnerability scan complete. Result: ${asvScanResult.passed ? 'PASSED' : 'FAILED'}. ${asvScanResult.vulnerabilitiesFound} vulnerabilities found. Review ASV results?`,
       title: 'ASV Scan Review',
       context: {
@@ -453,9 +525,15 @@ export async function process(inputs, ctx) {
         },
         topVulnerabilities: asvScanResult.topVulnerabilities,
         files: asvScanResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase15Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase15Review.approved) break;
+      lastFeedback_phase15Review = phase15Review.response || phase15Review.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 16: PENETRATION TESTING (IF REQUIRED)
@@ -478,8 +556,17 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Penetration test complete - ${penetrationTestResult.issuesFound} issues found, ${penetrationTestResult.criticalIssues} critical`);
 
-    // Quality Gate: Penetration test review
-    await ctx.breakpoint({
+      let lastFeedback_phase16Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase16Review) {
+        req12Result = await ctx.task(assessRequirement12Task, { ...{
+    projectName,
+    merchantLevel,
+    version,
+    outputDir
+  }, feedback: lastFeedback_phase16Review, attempt: attempt + 1 });
+      }
+  const phase16Review = await ctx.breakpoint({
       question: `Penetration testing complete. ${penetrationTestResult.issuesFound} issues found (${penetrationTestResult.criticalIssues} critical). Review penetration test results?`,
       title: 'Penetration Test Review',
       context: {
@@ -495,9 +582,15 @@ export async function process(inputs, ctx) {
         },
         criticalFindings: penetrationTestResult.criticalFindings,
         files: penetrationTestResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase16Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase16Review.approved) break;
+      lastFeedback_phase16Review = phase16Review.response || phase16Review.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 17: CALCULATE OVERALL COMPLIANCE SCORE
@@ -527,7 +620,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 18: Performing gap analysis and generating remediation plan');
 
-  const gapAnalysisResult = await ctx.task(performGapAnalysisTask, {
+  let gapAnalysisResult = await ctx.task(performGapAnalysisTask, {
     projectName,
     gaps,
     requirementResults,
@@ -542,8 +635,20 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Gap analysis complete - ${gaps.length} total gaps, ${gapAnalysisResult.criticalGaps} critical, ${gapAnalysisResult.autoRemediableGaps} auto-remediable`);
 
-  // Quality Gate: Gap analysis review
-  await ctx.breakpoint({
+    let lastFeedback_qualityGateApproval2 = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_qualityGateApproval2) {
+      gapAnalysisResult = await ctx.task(performGapAnalysisTask, { ...{
+    projectName,
+    gaps,
+    requirementResults,
+    complianceScore,
+    merchantLevel,
+    automatedRemediation,
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval2, attempt: attempt + 1 });
+    }
+  const qualityGateApproval2 = await ctx.breakpoint({
     question: `Gap analysis complete. ${gaps.length} gaps identified (${gapAnalysisResult.criticalGaps} critical). Review remediation plan?`,
     title: 'Gap Analysis and Remediation Plan Review',
     context: {
@@ -559,9 +664,15 @@ export async function process(inputs, ctx) {
       },
       remediationPriorities: gapAnalysisResult.remediationPriorities,
       files: gapAnalysisResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_qualityGateApproval2 || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (qualityGateApproval2.approved) break;
+    lastFeedback_qualityGateApproval2 = qualityGateApproval2.response || qualityGateApproval2.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 19: GENERATE ATTESTATION OF COMPLIANCE (AOC)
   // ============================================================================
@@ -587,7 +698,6 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `AOC generated - ${aocResult.aocPath}`);
   }
-
   // ============================================================================
   // PHASE 20: GENERATE REPORT ON COMPLIANCE (ROC) FOR LEVEL 1
   // ============================================================================
@@ -613,14 +723,13 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `ROC generated - ${rocResult.rocPath}`);
   }
-
   // ============================================================================
   // PHASE 21: GENERATE EXECUTIVE SUMMARY AND DOCUMENTATION
   // ============================================================================
 
   ctx.log('info', 'Phase 21: Generating executive summary and compliance documentation');
 
-  const documentationResult = await ctx.task(generatePciDocumentationTask, {
+  let documentationResult = await ctx.task(generatePciDocumentationTask, {
     projectName,
     merchantLevel,
     assessmentType,
@@ -641,8 +750,27 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Documentation generated - Report: ${documentationResult.reportPath}`);
 
-  // Final Breakpoint: PCI DSS compliance assessment complete
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      documentationResult = await ctx.task(generatePciDocumentationTask, { ...{
+    projectName,
+    merchantLevel,
+    assessmentType,
+    version,
+    complianceScore,
+    requirementResults,
+    cdeScopeResult,
+    asvScanResult,
+    penetrationTestResult,
+    gaps,
+    gapAnalysisResult,
+    aocResult,
+    rocResult,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `PCI DSS ${version} Compliance Assessment Complete for ${projectName}. Overall Score: ${complianceScore}/100. ${gaps.length} gaps identified. Review final results?`,
     title: 'Final PCI DSS Compliance Review',
     context: {
@@ -681,9 +809,15 @@ export async function process(inputs, ctx) {
         rocResult ? { path: rocResult.rocPath, format: 'pdf', label: 'Report on Compliance' } : null,
         { path: gapAnalysisResult.remediationPlanPath, format: 'json', label: 'Remediation Plan' }
       ].filter(Boolean)
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -753,8 +887,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

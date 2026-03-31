@@ -97,7 +97,7 @@ export async function process(inputs, ctx) {
 
   // Task 7: Generate Critical Edition Report
   ctx.log('info', 'Generating critical edition report');
-  const editionReport = await ctx.task(criticalEditionReportTask, {
+  let editionReport = await ctx.task(criticalEditionReportTask, {
     textTradition,
     collation,
     stemmaticAnalysis,
@@ -110,8 +110,21 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...editionReport.artifacts);
 
-  // Breakpoint: Review critical text
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      editionReport = await ctx.task(criticalEditionReportTask, { ...{
+    textTradition,
+    collation,
+    stemmaticAnalysis,
+    variantAnalysis,
+    editorialFramework,
+    textConstitution,
+    criticalApparatus,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Critical text established for ${textTradition.title || 'text'}. Variants documented: ${variantAnalysis.variants?.length || 0}. Review edition?`,
     title: 'Textual Criticism Results',
     context: {
@@ -123,9 +136,15 @@ export async function process(inputs, ctx) {
         variantsDocumented: variantAnalysis.variants?.length || 0,
         emendations: textConstitution.emendations?.length || 0
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -152,8 +171,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Manuscript Collation
+  // Task 1: Manuscript Collation
 export const manuscriptCollationTask = defineTask('manuscript-collation', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Collate manuscript witnesses',

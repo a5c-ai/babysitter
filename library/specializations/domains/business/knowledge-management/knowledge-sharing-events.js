@@ -29,15 +29,24 @@ export async function process(inputs, ctx) {
 
   // Phase 1: Event Planning
   ctx.log('info', 'Phase 1: Planning knowledge sharing event');
-  const eventPlanning = await ctx.task(eventPlanningTask, { eventType, topic, targetAudience, speakers, eventGoals, format, outputDir });
-  artifacts.push(...eventPlanning.artifacts);
-
-  await ctx.breakpoint({
+  let eventPlanning = await ctx.task(eventPlanningTask, { eventType, topic, targetAudience, speakers, eventGoals, format, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      eventPlanning = await ctx.task(eventPlanningTask, { ...{ eventType, topic, targetAudience, speakers, eventGoals, format, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Event plan created for "${topic}" ${eventType}. Review plan?`,
     title: 'Event Plan Review',
-    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })), summary: { eventType, topic, estimatedAttendees: eventPlanning.estimatedAttendees } }
-  });
-
+    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })), summary: { eventType, topic, estimatedAttendees: eventPlanning.estimatedAttendees } },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 2: Content Development
   ctx.log('info', 'Phase 2: Developing event content');
   const contentDevelopment = await ctx.task(contentDevelopmentTask, { eventPlan: eventPlanning.plan, speakers, topic, outputDir });
@@ -85,7 +94,6 @@ export async function process(inputs, ctx) {
     reviewResult = await ctx.task(stakeholderReviewTask, { eventPlan: eventPlanning.plan, materials: materialPreparation.materials, qualityScore: qualityAssessment.overallScore, outputDir });
     artifacts.push(...reviewResult.artifacts);
   }
-
   const endTime = ctx.now();
   return {
     success: true,
@@ -102,8 +110,7 @@ export async function process(inputs, ctx) {
     metadata: { processId: 'domains/business/knowledge-management/knowledge-sharing-events', timestamp: startTime, outputDir }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 export const eventPlanningTask = defineTask('event-planning', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Plan knowledge sharing event',

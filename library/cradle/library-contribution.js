@@ -58,7 +58,7 @@ export async function process(inputs, ctx) {
   });
 
   if (!validationResult.valid) {
-    await ctx.breakpoint({
+    const validationApproval = await ctx.breakpoint({
       question: [
         'Validation found issues with your library contribution:',
         '',
@@ -71,6 +71,9 @@ export async function process(inputs, ctx) {
       title: 'Library Validation Issues',
       context: { runId: ctx.runId }
     });
+    if (!validationApproval.approved) {
+      return { success: false, reason: 'User cancelled due to validation issues', feedback: validationApproval.response || validationApproval.feedback, validationResult };
+    }
   }
 
   // ============================================================================
@@ -90,7 +93,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 4: Forking repository');
 
-  await ctx.breakpoint({
+  const forkApproval = await ctx.breakpoint({
     question: [
       'To submit your library contribution, we need to fork the a5c-ai/babysitter repository.',
       '',
@@ -104,6 +107,9 @@ export async function process(inputs, ctx) {
     title: 'Confirm Repository Fork',
     context: { runId: ctx.runId }
   });
+  if (!forkApproval.approved) {
+    return { success: false, reason: 'User rejected at fork approval gate', feedback: forkApproval.response || forkApproval.feedback };
+  }
 
   const forkResult = await ctx.task(forkRepoTask, {});
 
@@ -116,13 +122,15 @@ export async function process(inputs, ctx) {
   const starCheck = await ctx.task(checkStarTask, {});
 
   if (!starCheck.starred) {
-    await ctx.breakpoint({
+    const starApproval = await ctx.breakpoint({
       question: 'Would you like to star the a5c-ai/babysitter repository? This helps the project gain visibility.',
       title: 'Star Repository',
       context: { runId: ctx.runId }
     });
 
-    await ctx.task(starRepoTask, {});
+    if (starApproval.approved) {
+      await ctx.task(starRepoTask, {});
+    }
   }
 
   // ============================================================================
@@ -173,7 +181,7 @@ export async function process(inputs, ctx) {
   // PHASE 9: REVIEW BREAKPOINT
   // ============================================================================
 
-  await ctx.breakpoint({
+  const reviewResult = await ctx.breakpoint({
     question: [
       'Please review your library contribution before submitting the PR:',
       '',
@@ -190,6 +198,9 @@ export async function process(inputs, ctx) {
     title: 'Review Library Contribution Before PR',
     context: { runId: ctx.runId }
   });
+  if (!reviewResult.approved) {
+    return { success: false, reason: 'User rejected at library contribution review gate', feedback: reviewResult.response || reviewResult.feedback };
+  }
 
   // ============================================================================
   // PHASE 10: SUBMIT PR
@@ -197,11 +208,14 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 10: Submitting pull request');
 
-  await ctx.breakpoint({
+  const submitApproval = await ctx.breakpoint({
     question: 'Confirm: Submit this library contribution as a pull request to a5c-ai/babysitter?',
     title: 'Confirm PR Submission',
     context: { runId: ctx.runId }
   });
+  if (!submitApproval.approved) {
+    return { success: false, reason: 'User rejected at PR submission gate', feedback: submitApproval.response || submitApproval.feedback };
+  }
 
   const prResult = await ctx.task(submitPrTask, {
     forkOwner: forkResult.forkOwner,

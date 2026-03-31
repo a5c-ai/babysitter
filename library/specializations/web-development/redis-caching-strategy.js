@@ -26,11 +26,16 @@ export async function process(inputs, ctx) {
   const invalidationSetup = await ctx.task(invalidationSetupTask, { projectName, outputDir });
   artifacts.push(...invalidationSetup.artifacts);
 
-  const sessionSetup = await ctx.task(sessionStorageTask, { projectName, features, outputDir });
-  artifacts.push(...sessionSetup.artifacts);
-
-  await ctx.breakpoint({ question: `Redis caching setup complete for ${projectName}. ${cachePatternsSetup.patterns.length} patterns implemented. Approve?`, title: 'Redis Caching Review', context: { runId: ctx.runId, patterns: cachePatternsSetup.patterns } });
-
+  let sessionSetup = await ctx.task(sessionStorageTask, { projectName, features, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      sessionSetup = await ctx.task(sessionStorageTask, { ...{ projectName, features, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({ question: `Redis caching setup complete for ${projectName}. ${cachePatternsSetup.patterns.length} patterns implemented. Approve?`, title: 'Redis Caching Review', context: { runId: ctx.runId, patterns: cachePatternsSetup.patterns }, expert: 'owner', tags: ['approval-gate'], previousFeedback: lastFeedback || undefined, attempt: attempt > 0 ? attempt + 1 : undefined });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const documentation = await ctx.task(documentationTask, { projectName, cachePatternsSetup, outputDir });
   artifacts.push(...documentation.artifacts);
 

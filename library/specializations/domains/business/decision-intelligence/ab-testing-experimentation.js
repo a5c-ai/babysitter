@@ -53,23 +53,37 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 4: Platform Requirements
-  const platformRequirements = await ctx.task(experimentPlatformTask, {
+  let platformRequirements = await ctx.task(experimentPlatformTask, {
     projectName,
     statisticalDesign,
     experimentContext
   });
 
-  // Breakpoint: Review experimentation framework
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      platformRequirements = await ctx.task(experimentPlatformTask, { ...{
+    projectName,
+    statisticalDesign,
+    experimentContext
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Review experimentation framework for ${projectName}. Is the statistical rigor appropriate?`,
     title: 'Experimentation Framework Review',
     context: {
       runId: ctx.runId,
       projectName,
       sampleSize: statisticalDesign.sampleSize || 'TBD'
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 5: Analysis Framework
   const analysisFramework = await ctx.task(experimentAnalysisFrameworkTask, {
     projectName,
@@ -118,8 +132,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const experimentationStrategyTask = defineTask('experimentation-strategy', (args, taskCtx) => ({
   kind: 'agent',

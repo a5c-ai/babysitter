@@ -51,7 +51,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 2: Designing tutorial structure and learning path');
-  const tutorialStructure = await ctx.task(tutorialStructureDesignTask, {
+  let tutorialStructure = await ctx.task(tutorialStructureDesignTask, {
     topic,
     learningAnalysis,
     tutorialFormat,
@@ -62,8 +62,19 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...tutorialStructure.artifacts);
 
-  // Breakpoint: Review tutorial structure with instructional designer
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      tutorialStructure = await ctx.task(tutorialStructureDesignTask, { ...{
+    topic,
+    learningAnalysis,
+    tutorialFormat,
+    includeQuizzes,
+    includeExercises,
+    outputDir
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Tutorial structure designed with ${tutorialStructure.sectionCount} sections and ${tutorialStructure.stepCount} total steps. Review learning flow and approve to proceed with content creation?`,
     title: 'Tutorial Structure Review',
     context: {
@@ -81,9 +92,15 @@ export async function process(inputs, ctx) {
         estimatedDuration: tutorialStructure.totalDuration,
         difficultyLevel
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 3: CONTENT CREATION (PARALLEL)
   // ============================================================================
@@ -117,7 +134,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 4: Setting up interactive code playgrounds');
-  const playgroundSetup = await ctx.task(codePlaygroundSetupTask, {
+  let playgroundSetup = await ctx.task(codePlaygroundSetupTask, {
     topic,
     sectionContents,
     playgroundPlatform,
@@ -146,7 +163,6 @@ export async function process(inputs, ctx) {
   } else {
     ctx.log('info', 'Phase 5: Skipping notebook creation (format not selected)');
   }
-
   // ============================================================================
   // PHASE 6: INTERACTIVE EXERCISES AND CHALLENGES
   // ============================================================================
@@ -166,7 +182,6 @@ export async function process(inputs, ctx) {
   } else {
     ctx.log('info', 'Phase 6: Skipping exercise creation');
   }
-
   // ============================================================================
   // PHASE 7: KNOWLEDGE CHECK QUIZZES
   // ============================================================================
@@ -185,9 +200,18 @@ export async function process(inputs, ctx) {
   } else {
     ctx.log('info', 'Phase 7: Skipping quiz creation');
   }
-
-  // Breakpoint: Review content quality before assembly
-  await ctx.breakpoint({
+  let lastFeedback_phase7Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase7Review) {
+      playgroundSetup = await ctx.task(codePlaygroundSetupTask, { ...{
+    topic,
+    sectionContents,
+    playgroundPlatform,
+    technologies,
+    outputDir
+  }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
+    }
+  const phase7Review = await ctx.breakpoint({
     question: `Tutorial content created with ${sectionContents.length} sections, ${playgroundSetup.playgroundCount} playgrounds, ${exerciseCreation.exercises?.length || 0} exercises, and ${quizCreation.quizzes?.length || 0} quizzes. Review content quality and approve assembly?`,
     title: 'Tutorial Content Quality Review',
     context: {
@@ -208,9 +232,15 @@ export async function process(inputs, ctx) {
         quizCount: quizCreation.quizzes?.length || 0,
         totalSteps: sectionContents.reduce((sum, s) => sum + (s.stepCount || 0), 0)
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase7Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase7Review.approved) break;
+    lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 8: TUTORIAL ASSEMBLY AND NAVIGATION
   // ============================================================================
@@ -250,7 +280,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 10: Validating tutorial quality and learning effectiveness');
-  const qualityValidation = await ctx.task(tutorialQualityValidationTask, {
+  let qualityValidation = await ctx.task(tutorialQualityValidationTask, {
     topic,
     learningAnalysis,
     tutorialStructure,
@@ -268,8 +298,23 @@ export async function process(inputs, ctx) {
   const qualityScore = qualityValidation.overallScore;
   const qualityMet = qualityScore >= 85;
 
-  // Final Breakpoint: Review complete interactive tutorial
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      qualityValidation = await ctx.task(tutorialQualityValidationTask, { ...{
+    topic,
+    learningAnalysis,
+    tutorialStructure,
+    sectionContents,
+    playgroundSetup,
+    exerciseCreation,
+    quizCreation,
+    tutorialAssembly,
+    accessibilityCheck,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Interactive tutorial complete. Quality score: ${qualityScore}/100. ${qualityMet ? 'Tutorial meets quality standards!' : 'Tutorial may need refinement.'} Review and approve for publication?`,
     title: 'Interactive Tutorial Final Review',
     context: {
@@ -297,9 +342,15 @@ export async function process(inputs, ctx) {
         estimatedDuration: tutorialStructure.totalDuration,
         mainTutorialPath: tutorialAssembly.mainTutorialPath
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -331,8 +382,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

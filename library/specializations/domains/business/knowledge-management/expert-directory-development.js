@@ -40,7 +40,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 1: Analyzing directory requirements');
-  const requirementsAnalysis = await ctx.task(requirementsAnalysisTask, {
+  let requirementsAnalysis = await ctx.task(requirementsAnalysisTask, {
     organizationalScope,
     expertiseDomains,
     existingSystems,
@@ -51,8 +51,19 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...requirementsAnalysis.artifacts);
 
-  // Breakpoint: Review requirements
-  await ctx.breakpoint({
+    let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      requirementsAnalysis = await ctx.task(requirementsAnalysisTask, { ...{
+    organizationalScope,
+    expertiseDomains,
+    existingSystems,
+    profileRequirements,
+    searchRequirements,
+    outputDir
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Analyzed requirements for ${expertiseDomains.length} expertise domains. Review?`,
     title: 'Requirements Analysis Review',
     context: {
@@ -67,9 +78,15 @@ export async function process(inputs, ctx) {
         expertiseDomains: expertiseDomains.length,
         keyRequirements: requirementsAnalysis.keyRequirements.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 2: EXPERTISE TAXONOMY DEVELOPMENT
   // ============================================================================
@@ -103,7 +120,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 4: Designing search and discovery');
-  const searchDesign = await ctx.task(searchDesignTask, {
+  let searchDesign = await ctx.task(searchDesignTask, {
     searchRequirements,
     expertiseTaxonomy: expertiseTaxonomy.taxonomy,
     profileSchema: profileSchema.schema,
@@ -112,8 +129,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...searchDesign.artifacts);
 
-  // Breakpoint: Review search design
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      searchDesign = await ctx.task(searchDesignTask, { ...{
+    searchRequirements,
+    expertiseTaxonomy: expertiseTaxonomy.taxonomy,
+    profileSchema: profileSchema.schema,
+    outputDir
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: `Search design completed with ${searchDesign.searchMethods.length} search methods. Review?`,
     title: 'Search Design Review',
     context: {
@@ -128,9 +154,15 @@ export async function process(inputs, ctx) {
         searchMethods: searchDesign.searchMethods.length,
         facets: searchDesign.facets.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 5: DATA COLLECTION STRATEGY
   // ============================================================================
@@ -193,7 +225,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 9: Assessing design quality');
-  const qualityAssessment = await ctx.task(qualityAssessmentTask, {
+  let qualityAssessment = await ctx.task(qualityAssessmentTask, {
     requirementsAnalysis,
     expertiseTaxonomy,
     profileSchema,
@@ -224,8 +256,19 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...reviewResult.artifacts);
 
-    // Breakpoint: Final approval gate
-    await ctx.breakpoint({
+      let lastFeedback_finalApproval = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_finalApproval) {
+        qualityAssessment = await ctx.task(qualityAssessmentTask, { ...{
+    requirementsAnalysis,
+    expertiseTaxonomy,
+    profileSchema,
+    searchDesign,
+    governanceFramework,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+      }
+  const finalApproval = await ctx.breakpoint({
       question: `Stakeholder review complete. ${reviewResult.approved ? 'Approved!' : 'Requires revisions.'} Finalize directory design?`,
       title: 'Final Approval Gate',
       context: {
@@ -240,9 +283,15 @@ export async function process(inputs, ctx) {
           approved: reviewResult.approved,
           qualityScore: qualityAssessment.overallScore
         }
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_finalApproval || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (finalApproval.approved) break;
+      lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+    } }
 
   const endTime = ctx.now();
   const duration = endTime - startTime;
@@ -276,8 +325,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

@@ -54,7 +54,6 @@ export async function process(inputs, ctx) {
       metadata: { processId: 'security-compliance/container-security', timestamp: ctx.now() }
     };
   }
-
   const startTime = ctx.now();
   const artifacts = [];
   const allVulnerabilities = [];
@@ -152,7 +151,6 @@ export async function process(inputs, ctx) {
     });
     artifacts.push(...registryValidation.artifacts);
   }
-
   // Task 8: Policy Enforcement
   if (policyEnforcement) {
     ctx.log('info', 'Enforcing security policies');
@@ -180,7 +178,6 @@ export async function process(inputs, ctx) {
       };
     }
   }
-
   // Task 9: Compliance Validation
   ctx.log('info', 'Validating compliance against security standards');
   const complianceValidation = await ctx.task(complianceValidationTask, {
@@ -205,7 +202,6 @@ export async function process(inputs, ctx) {
     });
     artifacts.push(...signingResults.artifacts);
   }
-
   // Task 11: Runtime Protection Setup (if requested)
   let runtimeProtectionSetup = null;
   if (runtimeProtection) {
@@ -217,7 +213,6 @@ export async function process(inputs, ctx) {
     });
     artifacts.push(...runtimeProtectionSetup.artifacts);
   }
-
   // Task 12: Security Score Calculation
   ctx.log('info', 'Calculating overall security score');
   const securityScoring = await ctx.task(securityScoringTask, {
@@ -251,7 +246,7 @@ export async function process(inputs, ctx) {
 
   // Task 14: Comprehensive Security Report
   ctx.log('info', 'Generating comprehensive security report');
-  const securityReport = await ctx.task(securityReportGenerationTask, {
+  let securityReport = await ctx.task(securityReportGenerationTask, {
     images: validatedImages,
     scanResults: scanResultsByImage,
     vulnerabilities: allVulnerabilities,
@@ -268,8 +263,25 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...securityReport.artifacts);
 
-  // Breakpoint: Review security findings
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      securityReport = await ctx.task(securityReportGenerationTask, { ...{
+    images: validatedImages,
+    scanResults: scanResultsByImage,
+    vulnerabilities: allVulnerabilities,
+    configAssessment,
+    malwareSecretScan,
+    layerAnalysis,
+    complianceValidation,
+    securityScore,
+    remediationPlan,
+    signingResults,
+    runtimeProtectionSetup,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Container security scan complete. Security score: ${securityScore}/100. ${allVulnerabilities.length} vulnerabilities found. Review findings?`,
     title: 'Container Security Scan Results',
     context: {
@@ -286,9 +298,15 @@ export async function process(inputs, ctx) {
         secretsDetected: malwareSecretScan.secretsFound,
         malwareDetected: malwareSecretScan.malwareFound
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -314,8 +332,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Image Discovery and Validation
+  // Task 1: Image Discovery and Validation
 export const imageDiscoveryTask = defineTask('image-discovery', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Discover and validate container images',

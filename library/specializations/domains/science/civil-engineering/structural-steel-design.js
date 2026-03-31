@@ -95,7 +95,7 @@ export async function process(inputs, ctx) {
 
   // Task 6: Connection Design
   ctx.log('info', 'Designing steel connections');
-  const connectionDesign = await ctx.task(connectionDesignTask, {
+  let connectionDesign = await ctx.task(connectionDesignTask, {
     projectId,
     beamDesign,
     columnDesign,
@@ -107,8 +107,20 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...connectionDesign.artifacts);
 
-  // Breakpoint: Review steel design
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      connectionDesign = await ctx.task(connectionDesignTask, { ...{
+    projectId,
+    beamDesign,
+    columnDesign,
+    bracingDesign,
+    momentFrameDesign,
+    designCriteria,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Structural steel design complete for ${projectId}. Review member sizes and connection designs?`,
     title: 'Structural Steel Design Review',
     context: {
@@ -121,9 +133,15 @@ export async function process(inputs, ctx) {
         connections: connectionDesign.connectionCount,
         totalSteelWeight: beamDesign.weight + columnDesign.weight + bracingDesign.weight
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 7: Steel Detailing
   ctx.log('info', 'Generating steel details');
   const steelDetailing = await ctx.task(steelDetailingTask, {
@@ -177,8 +195,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Design Criteria and Material Properties
+  // Task 1: Design Criteria and Material Properties
 export const steelDesignCriteriaTask = defineTask('steel-design-criteria', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Establish steel design criteria',

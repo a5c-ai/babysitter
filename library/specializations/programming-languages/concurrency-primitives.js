@@ -40,16 +40,24 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Designing Concurrency Model');
 
-  const modelDesign = await ctx.task(concurrencyModelTask, {
+  let modelDesign = await ctx.task(concurrencyModelTask, {
     languageName,
     concurrencyModel,
     implementationLanguage,
     outputDir
   });
 
-  artifacts.push(...modelDesign.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      modelDesign = await ctx.task(concurrencyModelTask, { ...{
+    languageName,
+    concurrencyModel,
+    implementationLanguage,
+    outputDir
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Concurrency model: ${concurrencyModel}. Features: ${modelDesign.features.join(', ')}. Proceed with runtime implementation?`,
     title: 'Model Design Review',
     context: {
@@ -57,9 +65,15 @@ export async function process(inputs, ctx) {
       model: concurrencyModel,
       features: modelDesign.features,
       files: modelDesign.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 2: SCHEDULER IMPLEMENTATION
   // ============================================================================
@@ -122,7 +136,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...asyncRuntime.artifacts);
   }
-
   // ============================================================================
   // PHASE 6: INTEGRATION
   // ============================================================================
@@ -163,7 +176,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 8: Generating Documentation');
 
-  const documentation = await ctx.task(concurrencyDocumentationTask, {
+  let documentation = await ctx.task(concurrencyDocumentationTask, {
     languageName,
     concurrencyModel,
     modelDesign,
@@ -172,9 +185,19 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...documentation.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      documentation = await ctx.task(concurrencyDocumentationTask, { ...{
+    languageName,
+    concurrencyModel,
+    modelDesign,
+    integration,
+    testSuite,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Concurrency Primitives Complete for ${languageName}! Model: ${concurrencyModel}, Primitives: ${syncPrimitives.primitiveCount + commPrimitives.primitiveCount}. Review deliverables?`,
     title: 'Concurrency Complete',
     context: {
@@ -190,9 +213,15 @@ export async function process(inputs, ctx) {
         { path: integration.mainFilePath, format: implementationLanguage.toLowerCase(), label: 'Concurrency Runtime' },
         { path: documentation.guidePath, format: 'markdown', label: 'Concurrency Guide' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -226,8 +255,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

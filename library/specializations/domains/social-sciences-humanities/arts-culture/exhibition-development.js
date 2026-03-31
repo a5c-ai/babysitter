@@ -91,7 +91,7 @@ export async function process(inputs, ctx) {
 
   // Task 6: Budget and Timeline Development
   ctx.log('info', 'Creating budget and timeline');
-  const budgetTimeline = await ctx.task(budgetTimelineTask, {
+  let budgetTimeline = await ctx.task(budgetTimelineTask, {
     exhibitionTitle,
     targetOpeningDate,
     budget,
@@ -103,8 +103,20 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...budgetTimeline.artifacts);
 
-  // Breakpoint: Review exhibition plan
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      budgetTimeline = await ctx.task(budgetTimelineTask, { ...{
+    exhibitionTitle,
+    targetOpeningDate,
+    budget,
+    loanCoordination,
+    installationDesign,
+    interpretiveProgramming,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Exhibition plan for "${exhibitionTitle}" complete. ${artworkSelection.selectedArtworks.length} artworks selected, budget: $${budget}. Review and approve?`,
     title: 'Exhibition Development Review',
     context: {
@@ -118,9 +130,15 @@ export async function process(inputs, ctx) {
         loanCount: loanCoordination.requiredLoans,
         estimatedBudget: budgetTimeline.totalEstimate
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 7: Generate Exhibition Documentation
   ctx.log('info', 'Generating comprehensive exhibition documentation');
   const documentation = await ctx.task(exhibitionDocumentationTask, {
@@ -160,8 +178,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Concept Development
+  // Task 1: Concept Development
 export const conceptDevelopmentTask = defineTask('concept-development', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Develop exhibition concept',

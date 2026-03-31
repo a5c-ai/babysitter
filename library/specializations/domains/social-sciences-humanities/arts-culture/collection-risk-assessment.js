@@ -88,7 +88,7 @@ export async function process(inputs, ctx) {
 
   // Task 6: Human Factor Risk Assessment
   ctx.log('info', 'Assessing human factor risks');
-  const humanFactorRisks = await ctx.task(humanFactorRiskTask, {
+  let humanFactorRisks = await ctx.task(humanFactorRiskTask, {
     collectionName,
     institutionType,
     facilityInfo,
@@ -97,8 +97,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...humanFactorRisks.artifacts);
 
-  // Breakpoint: Review risk assessment
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      humanFactorRisks = await ctx.task(humanFactorRiskTask, { ...{
+    collectionName,
+    institutionType,
+    facilityInfo,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Risk assessment for "${collectionName}" complete. Multiple risk categories evaluated. Review and prioritize risks?`,
     title: 'Collection Risk Assessment Review',
     context: {
@@ -111,9 +120,15 @@ export async function process(inputs, ctx) {
         securityRiskCount: securityRisks.risks.length,
         environmentalRiskCount: environmentalRisks.risks.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 7: Risk Prioritization and Scoring
   ctx.log('info', 'Prioritizing and scoring identified risks');
   const riskPrioritization = await ctx.task(riskPrioritizationTask, {
@@ -186,8 +201,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Risk Context
+  // Task 1: Risk Context
 export const riskContextTask = defineTask('risk-context', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Analyze risk context',

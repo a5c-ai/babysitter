@@ -29,11 +29,16 @@ export async function process(inputs, ctx) {
   const clsOptimization = await ctx.task(clsOptimizationTask, { projectName, outputDir });
   artifacts.push(...clsOptimization.artifacts);
 
-  const monitoringSetup = await ctx.task(monitoringSetupTask, { projectName, features, outputDir });
-  artifacts.push(...monitoringSetup.artifacts);
-
-  await ctx.breakpoint({ question: `Performance optimization complete for ${projectName}. ${auditTask.recommendations.length} optimizations identified. Approve?`, title: 'Performance Review', context: { runId: ctx.runId, metrics: auditTask.metrics } });
-
+  let monitoringSetup = await ctx.task(monitoringSetupTask, { projectName, features, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      monitoringSetup = await ctx.task(monitoringSetupTask, { ...{ projectName, features, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({ question: `Performance optimization complete for ${projectName}. ${auditTask.recommendations.length} optimizations identified. Approve?`, title: 'Performance Review', context: { runId: ctx.runId, metrics: auditTask.metrics }, expert: 'owner', tags: ['approval-gate'], previousFeedback: lastFeedback || undefined, attempt: attempt > 0 ? attempt + 1 : undefined });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const documentation = await ctx.task(documentationTask, { projectName, auditTask, outputDir });
   artifacts.push(...documentation.artifacts);
 

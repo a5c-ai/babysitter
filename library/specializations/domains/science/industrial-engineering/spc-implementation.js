@@ -45,15 +45,22 @@ export async function process(inputs, ctx) {
 
   // Task 2: Measurement System Analysis
   ctx.log('info', 'Phase 2: Conducting measurement system analysis');
-  const msaResults = await ctx.task(msaTask, {
+  let msaResults = await ctx.task(msaTask, {
     characteristicId,
     outputDir
   });
 
   artifacts.push(...msaResults.artifacts);
 
-  // Breakpoint: Review MSA
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      msaResults = await ctx.task(msaTask, { ...{
+    characteristicId,
+    outputDir
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `MSA complete. Gage R&R: ${msaResults.gageRR}%. Acceptable: ${msaResults.acceptable}. Proceed with SPC setup?`,
     title: 'Measurement System Analysis Review',
     context: {
@@ -62,9 +69,15 @@ export async function process(inputs, ctx) {
       acceptable: msaResults.acceptable,
       ndc: msaResults.ndc,
       files: msaResults.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // Task 3: Baseline Data Collection
   ctx.log('info', 'Phase 3: Collecting baseline process data');
   const baselineData = await ctx.task(baselineDataTask, {
@@ -138,7 +151,7 @@ export async function process(inputs, ctx) {
 
   // Task 10: OCAP Development
   ctx.log('info', 'Phase 10: Developing out-of-control action plans');
-  const ocapDevelopment = await ctx.task(ocapTask, {
+  let ocapDevelopment = await ctx.task(ocapTask, {
     chartSelection,
     processName,
     outputDir
@@ -146,8 +159,16 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...ocapDevelopment.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      ocapDevelopment = await ctx.task(ocapTask, { ...{
+    chartSelection,
+    processName,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `SPC implementation complete. Cpk: ${capabilityAnalysis.cpk.toFixed(2)}. Target met: ${capabilityAnalysis.cpk >= targetCapability}. Control charts ready. Review implementation?`,
     title: 'SPC Implementation Results',
     context: {
@@ -160,9 +181,15 @@ export async function process(inputs, ctx) {
         targetMet: capabilityAnalysis.cpk >= targetCapability
       },
       files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -192,8 +219,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Characteristic Identification
+  // Task 1: Characteristic Identification
 export const characteristicIdTask = defineTask('characteristic-identification', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Identify critical quality characteristics',

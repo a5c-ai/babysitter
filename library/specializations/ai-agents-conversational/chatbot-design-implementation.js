@@ -141,7 +141,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 7: Setting up multi-channel deployment');
 
-  const deployment = await ctx.task(multiChannelDeploymentTask, {
+  let deployment = await ctx.task(multiChannelDeploymentTask, {
     chatbotName,
     channels,
     dialoguePolicy: dialogueManagement.policy,
@@ -151,8 +151,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...deployment.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      deployment = await ctx.task(multiChannelDeploymentTask, { ...{
+    chatbotName,
+    channels,
+    dialoguePolicy: dialogueManagement.policy,
+    responseGeneration: responseGeneration.generator,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Chatbot ${chatbotName} implementation complete. ${conversationFlows.flows.length} flows, ${intentEntityDesign.intents.length} intents. Ready for testing?`,
     title: 'Chatbot Implementation Review',
     context: {
@@ -166,9 +176,15 @@ export async function process(inputs, ctx) {
         entityCount: intentEntityDesign.entities.length
       },
       files: artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -188,8 +204,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

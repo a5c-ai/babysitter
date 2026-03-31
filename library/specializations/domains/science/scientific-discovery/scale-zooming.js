@@ -43,7 +43,7 @@ export async function process(inputs, ctx) {
   // Phase 2: Analyze at Each Scale
   ctx.log('info', 'Analyzing phenomenon at each scale');
   for (const scale of scales) {
-    const scaleAnalysis = await ctx.task(analyzeAtScaleTask, {
+    let scaleAnalysis = await ctx.task(analyzeAtScaleTask, {
       phenomenon,
       scale,
       framework,
@@ -52,9 +52,18 @@ export async function process(inputs, ctx) {
     });
 
     scaleAnalyses[scale] = scaleAnalysis;
-  }
-
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      scaleAnalysis = await ctx.task(analyzeAtScaleTask, { ...{
+      phenomenon,
+      scale,
+      framework,
+      previousScales: Object.keys(scaleAnalyses),
+      domain
+    }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Analyzed ${scales.length} scales. Review scale analyses before cross-scale analysis?`,
     title: 'Scale Zooming - Scale Analyses Complete',
     context: {
@@ -63,9 +72,15 @@ export async function process(inputs, ctx) {
         path: `artifacts/scale-${scale}-analysis.json`,
         format: 'json'
       }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // Phase 3: Identify Cross-Scale Patterns
   ctx.log('info', 'Identifying cross-scale patterns');
   const crossScaleAnalysis = await ctx.task(identifyCrossScalePatternsTask, {
@@ -89,7 +104,6 @@ export async function process(inputs, ctx) {
 
     emergentProperties.push(...emergenceAnalysis.emergentProperties);
   }
-
   // Phase 5: Identify Scale-Dependent vs Scale-Invariant Features
   ctx.log('info', 'Identifying scale-dependent and scale-invariant features');
   const scaleInvarianceAnalysis = await ctx.task(analyzeScaleInvarianceTask, {
@@ -101,7 +115,7 @@ export async function process(inputs, ctx) {
 
   // Phase 6: Map Upward and Downward Causation
   ctx.log('info', 'Mapping causal relationships across scales');
-  const causalMapping = await ctx.task(mapCrossScaleCausationTask, {
+  let causalMapping = await ctx.task(mapCrossScaleCausationTask, {
     phenomenon,
     scaleAnalyses,
     emergentProperties,
@@ -119,9 +133,17 @@ export async function process(inputs, ctx) {
     scaleInvarianceAnalysis,
     causalMapping,
     domain
-  });
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      causalMapping = await ctx.task(mapCrossScaleCausationTask, { ...{
+    phenomenon,
+    scaleAnalyses,
+    emergentProperties,
+    domain
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: 'Multi-scale analysis complete. Review synthesized view?',
     title: 'Scale Zooming - Final Results',
     context: {
@@ -131,9 +153,15 @@ export async function process(inputs, ctx) {
         { path: 'artifacts/emergent-properties.json', format: 'json' },
         { path: 'artifacts/synthesized-view.md', format: 'markdown' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     processId: 'domains/science/scientific-discovery/scale-zooming',

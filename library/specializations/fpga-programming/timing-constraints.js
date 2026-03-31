@@ -43,15 +43,24 @@ export async function process(inputs, ctx) {
   const generatedClocks = await ctx.task(generatedClocksTask, { designName, clockSpecs, clockConstraints, constraintFormat, outputDir });
   artifacts.push(...generatedClocks.artifacts);
 
-  const ioConstraints = await ctx.task(ioConstraintsTask, { designName, ioInterfaces, clockSpecs, constraintFormat, outputDir });
-  artifacts.push(...ioConstraints.artifacts);
-
-  await ctx.breakpoint({
+  let ioConstraints = await ctx.task(ioConstraintsTask, { designName, ioInterfaces, clockSpecs, constraintFormat, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      ioConstraints = await ctx.task(ioConstraintsTask, { ...{ designName, ioInterfaces, clockSpecs, constraintFormat, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Clock and I/O constraints defined for ${designName}. ${clockConstraints.clockCount} clocks, ${ioConstraints.ioCount} I/O constraints. Review constraints?`,
     title: 'Timing Constraints Review',
-    context: { runId: ctx.runId, designName, clockCount: clockConstraints.clockCount, ioCount: ioConstraints.ioCount }
-  });
-
+    context: { runId: ctx.runId, designName, clockCount: clockConstraints.clockCount, ioCount: ioConstraints.ioCount },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const falsePaths = await ctx.task(falsePathsTask, { designName, clockSpecs, constraintFormat, outputDir });
   artifacts.push(...falsePaths.artifacts);
 

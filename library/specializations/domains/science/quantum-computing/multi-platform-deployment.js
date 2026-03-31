@@ -40,23 +40,35 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Platform Abstraction Layer');
 
-  const abstractionResult = await ctx.task(platformAbstractionLayerTask, {
+  let abstractionResult = await ctx.task(platformAbstractionLayerTask, {
     platforms,
     framework
   });
 
-  artifacts.push(...(abstractionResult.artifacts || []));
-
-  await ctx.breakpoint({
+    let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      abstractionResult = await ctx.task(platformAbstractionLayerTask, { ...{
+    platforms,
+    framework
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Platform abstraction created. Supported platforms: ${abstractionResult.supportedPlatforms.length}. Proceed with platform-specific transpilation?`,
     title: 'Platform Abstraction Review',
     context: {
       runId: ctx.runId,
       abstraction: abstractionResult,
       files: (abstractionResult.artifacts || []).map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 2: PLATFORM-SPECIFIC TRANSPILATION
   // ============================================================================
@@ -94,7 +106,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...(interfaceResult.artifacts || []));
   }
-
   // ============================================================================
   // PHASE 4: PLATFORM EXECUTION
   // ============================================================================
@@ -104,7 +115,7 @@ export async function process(inputs, ctx) {
   for (const platform of platforms) {
     ctx.log('info', `Executing on ${platform}...`);
 
-    const executionResult = await ctx.task(platformExecutionTask, {
+    let executionResult = await ctx.task(platformExecutionTask, {
       platform,
       transpilation: deployments[platform].transpilation,
       interface: interfaceResult
@@ -112,25 +123,38 @@ export async function process(inputs, ctx) {
 
     deployments[platform].execution = executionResult;
     artifacts.push(...(executionResult.artifacts || []));
-  }
-
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      executionResult = await ctx.task(platformExecutionTask, { ...{
+      platform,
+      transpilation: deployments[platform].transpilation,
+      interface: interfaceResult
+    }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: `Execution complete on ${platforms.length} platforms. Review execution results?`,
     title: 'Platform Execution Review',
     context: {
       runId: ctx.runId,
       deployments,
       files: artifacts.slice(-platforms.length * 2).map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 5: RESULT NORMALIZATION
   // ============================================================================
 
   ctx.log('info', 'Phase 5: Result Normalization');
 
-  const normalizationResult = await ctx.task(resultNormalizationTask, {
+  let normalizationResult = await ctx.task(resultNormalizationTask, {
     platforms,
     deployments,
     application
@@ -152,18 +176,31 @@ export async function process(inputs, ctx) {
       deployments
     });
 
-    artifacts.push(...(comparisonResult.artifacts || []));
-
-    await ctx.breakpoint({
+      let lastFeedback_phase6Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase6Review) {
+        normalizationResult = await ctx.task(resultNormalizationTask, { ...{
+    platforms,
+    deployments,
+    application
+  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
+      }
+  const phase6Review = await ctx.breakpoint({
       question: `Cross-platform comparison complete. Best performing: ${comparisonResult.bestPlatform}. Review comparison?`,
       title: 'Platform Comparison Review',
       context: {
         runId: ctx.runId,
         comparison: comparisonResult,
         files: (comparisonResult.artifacts || []).map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase6Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase6Review.approved) break;
+      lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 7: PLATFORM DIFFERENCES DOCUMENTATION
@@ -185,16 +222,24 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 8: Best Practices Documentation');
 
-  const bestPracticesResult = await ctx.task(bestPracticesDocumentationTask, {
+  let bestPracticesResult = await ctx.task(bestPracticesDocumentationTask, {
     platforms,
     deployments,
     comparison: comparisonResult,
     outputDir
   });
 
-  artifacts.push(...(bestPracticesResult.artifacts || []));
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      bestPracticesResult = await ctx.task(bestPracticesDocumentationTask, { ...{
+    platforms,
+    deployments,
+    comparison: comparisonResult,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Multi-platform deployment complete. Platforms: ${platforms.length}, Best performer: ${comparisonResult?.bestPlatform || platforms[0]}. Approve deployment?`,
     title: 'Multi-Platform Deployment Complete',
     context: {
@@ -206,9 +251,15 @@ export async function process(inputs, ctx) {
         unifiedInterface: unifiedInterface
       },
       files: artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
 
   return {
@@ -244,8 +295,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

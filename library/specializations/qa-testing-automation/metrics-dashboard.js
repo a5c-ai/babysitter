@@ -70,7 +70,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Defining metrics requirements and KPIs');
 
-  const metricsRequirements = await ctx.task(metricsRequirementsTask, {
+  let metricsRequirements = await ctx.task(metricsRequirementsTask, {
     projectName,
     testSources,
     alertingConfig,
@@ -80,8 +80,17 @@ export async function process(inputs, ctx) {
   artifacts.push(...metricsRequirements.artifacts);
 
   // Quality Gate: Comprehensive metrics coverage
-  if (metricsRequirements.kpiCount < 15) {
-    await ctx.breakpoint({
+      let lastFeedback_phase1Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase1Review) {
+        metricsRequirements = await ctx.task(metricsRequirementsTask, { ...{
+    projectName,
+    testSources,
+    alertingConfig,
+    outputDir
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+      }
+  const phase1Review = await ctx.breakpoint({
       question: `Phase 1: Only ${metricsRequirements.kpiCount} KPIs defined (recommended: 15+). Current categories: ${metricsRequirements.categories.join(', ')}. Add more metrics before proceeding?`,
       title: 'Metrics Requirements Review',
       context: {
@@ -90,9 +99,15 @@ export async function process(inputs, ctx) {
         categories: metricsRequirements.categories,
         missingCategories: metricsRequirements.missingCategories,
         files: metricsRequirements.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase1Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase1Review.approved) break;
+      lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 2: DATA SOURCES INTEGRATION
@@ -100,7 +115,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 2: Integrating test result data sources');
 
-  const dataSourceIntegration = await ctx.task(dataSourceIntegrationTask, {
+  let dataSourceIntegration = await ctx.task(dataSourceIntegrationTask, {
     projectName,
     testSources,
     cicdPlatform,
@@ -111,8 +126,18 @@ export async function process(inputs, ctx) {
   artifacts.push(...dataSourceIntegration.artifacts);
 
   // Quality Gate: All test sources integrated
-  if (dataSourceIntegration.integratedSources < testSources.length) {
-    await ctx.breakpoint({
+      let lastFeedback_phase2Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase2Review) {
+        dataSourceIntegration = await ctx.task(dataSourceIntegrationTask, { ...{
+    projectName,
+    testSources,
+    cicdPlatform,
+    metricsRequirements,
+    outputDir
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+      }
+  const phase2Review = await ctx.breakpoint({
       question: `Phase 2: Only ${dataSourceIntegration.integratedSources}/${testSources.length} test sources integrated. Failed: ${dataSourceIntegration.failedSources.join(', ')}. Fix integration issues?`,
       title: 'Data Source Integration Issues',
       context: {
@@ -121,9 +146,15 @@ export async function process(inputs, ctx) {
         failedSources: dataSourceIntegration.failedSources,
         integrationErrors: dataSourceIntegration.errors,
         files: dataSourceIntegration.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase2Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase2Review.approved) break;
+      lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 3: DATA PIPELINE AND STORAGE SETUP
@@ -131,7 +162,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 3: Setting up data pipeline and storage');
 
-  const dataPipeline = await ctx.task(dataPipelineSetupTask, {
+  let dataPipeline = await ctx.task(dataPipelineSetupTask, {
     projectName,
     dataSourceIntegration,
     metricsRequirements,
@@ -143,8 +174,19 @@ export async function process(inputs, ctx) {
   artifacts.push(...dataPipeline.artifacts);
 
   // Quality Gate: Data pipeline operational
-  if (!dataPipeline.pipelineOperational) {
-    await ctx.breakpoint({
+      let lastFeedback_phase3Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase3Review) {
+        dataPipeline = await ctx.task(dataPipelineSetupTask, { ...{
+    projectName,
+    dataSourceIntegration,
+    metricsRequirements,
+    dataRetentionDays,
+    historicalDataDays,
+    outputDir
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+      }
+  const phase3Review = await ctx.breakpoint({
       question: `Phase 3: Data pipeline not operational. Issues: ${dataPipeline.issues.join(', ')}. Database: ${dataPipeline.databaseStatus}, ETL: ${dataPipeline.etlStatus}. Fix pipeline?`,
       title: 'Data Pipeline Issues',
       context: {
@@ -154,9 +196,15 @@ export async function process(inputs, ctx) {
         etlStatus: dataPipeline.etlStatus,
         issues: dataPipeline.issues,
         files: dataPipeline.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase3Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase3Review.approved) break;
+      lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 4: METRICS CALCULATION ENGINE
@@ -179,7 +227,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 5: Designing dashboard UI and layout');
 
-  const dashboardDesign = await ctx.task(dashboardDesignTask, {
+  let dashboardDesign = await ctx.task(dashboardDesignTask, {
     projectName,
     dashboardType,
     metricsRequirements,
@@ -189,8 +237,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...dashboardDesign.artifacts);
 
-  // Quality Gate: Dashboard design review
-  await ctx.breakpoint({
+    let lastFeedback_phase5Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase5Review) {
+      dashboardDesign = await ctx.task(dashboardDesignTask, { ...{
+    projectName,
+    dashboardType,
+    metricsRequirements,
+    metricsEngine,
+    outputDir
+  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+    }
+  const phase5Review = await ctx.breakpoint({
     question: `Phase 5 Complete: Dashboard designed with ${dashboardDesign.widgetCount} widgets across ${dashboardDesign.sections.length} sections. Layout: ${dashboardDesign.layout}. Approve design?`,
     title: 'Dashboard Design Review',
     context: {
@@ -200,9 +258,15 @@ export async function process(inputs, ctx) {
       layout: dashboardDesign.layout,
       mockupPath: dashboardDesign.mockupPath,
       files: dashboardDesign.artifacts.map(a => ({ path: a.path, format: a.format || 'image' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase5Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase5Review.approved) break;
+    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 6: PARALLEL DASHBOARD COMPONENTS IMPLEMENTATION
   // ============================================================================
@@ -309,7 +373,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 8: Configuring alerting and notification system');
 
-  const alertingSystem = await ctx.task(alertingSystemTask, {
+  let alertingSystem = await ctx.task(alertingSystemTask, {
     projectName,
     alertingConfig,
     metricsEngine,
@@ -320,8 +384,18 @@ export async function process(inputs, ctx) {
   artifacts.push(...alertingSystem.artifacts);
 
   // Quality Gate: Alerting configured
-  if (!alertingSystem.alertsConfigured) {
-    await ctx.breakpoint({
+      let lastFeedback_phase8Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase8Review) {
+        alertingSystem = await ctx.task(alertingSystemTask, { ...{
+    projectName,
+    alertingConfig,
+    metricsEngine,
+    qualityGatesResult,
+    outputDir
+  }, feedback: lastFeedback_phase8Review, attempt: attempt + 1 });
+      }
+  const phase8Review = await ctx.breakpoint({
       question: `Phase 8: Alerting not fully configured. ${alertingSystem.configuredChannels}/${alertingConfig.channels.length} channels configured. Fix alerting?`,
       title: 'Alerting Configuration Issues',
       context: {
@@ -330,9 +404,15 @@ export async function process(inputs, ctx) {
         failedChannels: alertingSystem.failedChannels,
         alertRulesCreated: alertingSystem.alertRulesCreated,
         files: alertingSystem.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase8Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase8Review.approved) break;
+      lastFeedback_phase8Review = phase8Review.response || phase8Review.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 9: CI/CD INTEGRATION
@@ -357,7 +437,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 10: Deploying dashboard');
 
-  const dashboardDeployment = await ctx.task(dashboardDeploymentTask, {
+  let dashboardDeployment = await ctx.task(dashboardDeploymentTask, {
     projectName,
     dashboardType,
     dashboardDesign,
@@ -379,8 +459,27 @@ export async function process(inputs, ctx) {
   const dashboardUrl = dashboardDeployment.dashboardUrl;
 
   // Quality Gate: Dashboard accessible
-  if (!dashboardDeployment.dashboardAccessible) {
-    await ctx.breakpoint({
+      let lastFeedback_qualityGateApproval = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_qualityGateApproval) {
+        dashboardDeployment = await ctx.task(dashboardDeploymentTask, { ...{
+    projectName,
+    dashboardType,
+    dashboardDesign,
+    executionMetricsResult,
+    coverageMetricsResult,
+    flakinessMetricsResult,
+    performanceMetricsResult,
+    qualityGatesResult,
+    trendAnalysisResult,
+    defectMetricsResult,
+    roiMetricsResult,
+    dataPipeline,
+    cicdIntegration,
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval, attempt: attempt + 1 });
+      }
+  const qualityGateApproval = await ctx.breakpoint({
       question: `Phase 10: Dashboard deployed but not accessible. Deployment status: ${dashboardDeployment.status}. URL: ${dashboardUrl}. Debug deployment?`,
       title: 'Dashboard Deployment Issues',
       context: {
@@ -389,9 +488,15 @@ export async function process(inputs, ctx) {
         deploymentStatus: dashboardDeployment.status,
         accessibilityIssues: dashboardDeployment.issues,
         files: dashboardDeployment.artifacts.map(a => ({ path: a.path, format: a.format || 'log' }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_qualityGateApproval || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (qualityGateApproval.approved) break;
+      lastFeedback_qualityGateApproval = qualityGateApproval.response || qualityGateApproval.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 11: SAMPLE DATA POPULATION AND VALIDATION
@@ -399,7 +504,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 11: Populating sample data and validating metrics');
 
-  const dataValidation = await ctx.task(dataValidationTask, {
+  let dataValidation = await ctx.task(dataValidationTask, {
     projectName,
     dashboardUrl,
     metricsEngine,
@@ -411,8 +516,19 @@ export async function process(inputs, ctx) {
   artifacts.push(...dataValidation.artifacts);
 
   // Quality Gate: Data accuracy validation
-  if (dataValidation.accuracy < 95) {
-    await ctx.breakpoint({
+      let lastFeedback_phase11Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase11Review) {
+        dataValidation = await ctx.task(dataValidationTask, { ...{
+    projectName,
+    dashboardUrl,
+    metricsEngine,
+    dataPipeline,
+    dataSourceIntegration,
+    outputDir
+  }, feedback: lastFeedback_phase11Review, attempt: attempt + 1 });
+      }
+  const phase11Review = await ctx.breakpoint({
       question: `Phase 11: Data accuracy only ${dataValidation.accuracy}% (target: 95%+). Issues: ${dataValidation.accuracyIssues.join(', ')}. Fix data pipeline?`,
       title: 'Data Accuracy Issues',
       context: {
@@ -421,9 +537,15 @@ export async function process(inputs, ctx) {
         accuracyIssues: dataValidation.accuracyIssues,
         sampleDataLoaded: dataValidation.sampleDataLoaded,
         files: dataValidation.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase11Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase11Review.approved) break;
+      lastFeedback_phase11Review = phase11Review.response || phase11Review.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 12: DOCUMENTATION AND USER GUIDE
@@ -475,7 +597,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 14: Conducting user acceptance and training');
 
-  const userAcceptance = await ctx.task(userAcceptanceTask, {
+  let userAcceptance = await ctx.task(userAcceptanceTask, {
     projectName,
     dashboardUrl,
     documentation,
@@ -485,8 +607,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...userAcceptance.artifacts);
 
-  // Final Breakpoint: Dashboard Review and Approval
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      userAcceptance = await ctx.task(userAcceptanceTask, { ...{
+    projectName,
+    dashboardUrl,
+    documentation,
+    metricsRequirements,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Test Automation Metrics Dashboard Complete for ${projectName}! Quality Score: ${metricsScore}/100. Dashboard URL: ${dashboardUrl}. ${dataSourceIntegration.integratedSources} data sources integrated, ${alertingSystem.alertRulesCreated} alert rules configured. Dashboard quality: ${dashboardQualityMet ? 'EXCELLENT' : 'ACCEPTABLE'}. Approve for production use?`,
     title: 'Dashboard Setup Complete - Final Approval',
     context: {
@@ -513,9 +645,15 @@ export async function process(inputs, ctx) {
         { path: qualityAssessment.assessmentReportPath, format: 'markdown', label: 'Quality Assessment' },
         { path: userAcceptance.trainingMaterialsPath, format: 'markdown', label: 'Training Materials' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -588,8 +726,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

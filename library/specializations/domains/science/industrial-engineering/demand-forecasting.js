@@ -46,15 +46,22 @@ export async function process(inputs, ctx) {
 
   // Task 2: Pattern Analysis
   ctx.log('info', 'Phase 2: Identifying demand patterns');
-  const patternAnalysis = await ctx.task(patternAnalysisTask, {
+  let patternAnalysis = await ctx.task(patternAnalysisTask, {
     dataCollection,
     outputDir
   });
 
   artifacts.push(...patternAnalysis.artifacts);
 
-  // Breakpoint: Review patterns
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      patternAnalysis = await ctx.task(patternAnalysisTask, { ...{
+    dataCollection,
+    outputDir
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Demand patterns identified. Trend: ${patternAnalysis.trendType}. Seasonality: ${patternAnalysis.seasonalityType}. Intermittency: ${patternAnalysis.intermittencyLevel}. Proceed with model selection?`,
     title: 'Demand Pattern Review',
     context: {
@@ -65,9 +72,15 @@ export async function process(inputs, ctx) {
         intermittency: patternAnalysis.intermittencyLevel
       },
       files: patternAnalysis.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // Task 3: Model Selection
   ctx.log('info', 'Phase 3: Selecting appropriate forecasting models');
   const modelSelection = await ctx.task(modelSelectionTask, {
@@ -120,7 +133,7 @@ export async function process(inputs, ctx) {
 
   // Task 8: Review Process
   ctx.log('info', 'Phase 8: Establishing forecast review process');
-  const reviewProcess = await ctx.task(reviewProcessTask, {
+  let reviewProcess = await ctx.task(reviewProcessTask, {
     forecastGeneration,
     modelEvaluation,
     outputDir
@@ -128,8 +141,16 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...reviewProcess.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      reviewProcess = await ctx.task(reviewProcessTask, { ...{
+    forecastGeneration,
+    modelEvaluation,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Forecasting model developed. Best model: ${modelEvaluation.bestModel}. MAPE: ${modelEvaluation.bestMAPE.toFixed(1)}%. ${forecastHorizon} period forecast generated. Review forecasts?`,
     title: 'Demand Forecasting Results',
     context: {
@@ -141,9 +162,15 @@ export async function process(inputs, ctx) {
         nextPeriodForecast: forecastGeneration.forecasts[0]
       },
       files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -170,8 +197,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Data Collection
+  // Task 1: Data Collection
 export const dataCollectionTask = defineTask('data-collection', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Collect and cleanse historical data',

@@ -30,7 +30,7 @@ export async function process(inputs, ctx) {
   } = inputs;
 
   // Phase 1: Formalize Conjecture Statement
-  const conjectureFormalization = await ctx.task(conjectureFormalizationTask, {
+  let conjectureFormalization = await ctx.task(conjectureFormalizationTask, {
     conjectureStatement,
     parameterSpace
   });
@@ -44,9 +44,15 @@ export async function process(inputs, ctx) {
       explorationResults: null
     };
   }
-
-  // Breakpoint: Review formalized conjecture
-  await ctx.breakpoint({
+  let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      conjectureFormalization = await ctx.task(conjectureFormalizationTask, { ...{
+    conjectureStatement,
+    parameterSpace
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Review formalized conjecture: "${conjectureFormalization.formalizedConjecture}". Is this correctly interpreted?`,
     title: 'Conjecture Formalization Review',
     context: {
@@ -54,9 +60,15 @@ export async function process(inputs, ctx) {
       original: conjectureStatement,
       formalized: conjectureFormalization.formalizedConjecture,
       parameters: conjectureFormalization.identifiedParameters
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // Phase 2: Generate Test Cases
   const testCaseGeneration = await ctx.task(testCaseGenerationTask, {
     formalizedConjecture: conjectureFormalization.formalizedConjecture,
@@ -66,24 +78,38 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 3: Execute Computational Verification
-  const computationalVerification = await ctx.task(computationalVerificationTask, {
+  let computationalVerification = await ctx.task(computationalVerificationTask, {
     formalizedConjecture: conjectureFormalization.formalizedConjecture,
     testCases: testCaseGeneration.testCases,
     verificationMethod: testCaseGeneration.recommendedMethod
   });
 
   // Quality Gate: Check if counterexamples were found
-  if (computationalVerification.counterexamplesFound.length > 0) {
-    await ctx.breakpoint({
+      let lastFeedback_phase3Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase3Review) {
+        computationalVerification = await ctx.task(computationalVerificationTask, { ...{
+    formalizedConjecture: conjectureFormalization.formalizedConjecture,
+    testCases: testCaseGeneration.testCases,
+    verificationMethod: testCaseGeneration.recommendedMethod
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+      }
+  const phase3Review = await ctx.breakpoint({
       question: `Found ${computationalVerification.counterexamplesFound.length} potential counterexamples! Review and verify these results?`,
       title: 'Counterexamples Found',
       context: {
         runId: ctx.runId,
         counterexamples: computationalVerification.counterexamplesFound,
         recommendation: 'Verify counterexamples manually before concluding'
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase3Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase3Review.approved) break;
+      lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+    } }
 
   // Phase 4: Search for Counterexamples (focused search)
   const counterexampleSearch = await ctx.task(counterexampleSearchTask, {
@@ -93,15 +119,24 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 5: Pattern Analysis and Documentation
-  const patternAnalysis = await ctx.task(patternAnalysisTask, {
+  let patternAnalysis = await ctx.task(patternAnalysisTask, {
     conjectureStatement,
     formalizedConjecture: conjectureFormalization.formalizedConjecture,
     verificationResults: computationalVerification,
     counterexampleSearch
   });
 
-  // Final Breakpoint: Exploration Complete
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      patternAnalysis = await ctx.task(patternAnalysisTask, { ...{
+    conjectureStatement,
+    formalizedConjecture: conjectureFormalization.formalizedConjecture,
+    verificationResults: computationalVerification,
+    counterexampleSearch
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Conjecture exploration complete. Evidence strength: ${patternAnalysis.evidenceStrength}/100. Approve findings?`,
     title: 'Exploration Complete',
     context: {
@@ -113,9 +148,15 @@ export async function process(inputs, ctx) {
         { path: `artifacts/exploration-report.json`, format: 'json', content: patternAnalysis },
         { path: `artifacts/test-results.json`, format: 'json', content: computationalVerification }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     conjectureStatement,
@@ -139,8 +180,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const conjectureFormalizationTask = defineTask('conjecture-formalization', (args, taskCtx) => ({
   kind: 'agent',

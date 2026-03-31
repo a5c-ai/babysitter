@@ -59,20 +59,34 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 7: Differential Refinement
-  const refinedDifferential = await ctx.task(refineDifferentialTask, {
+  let refinedDifferential = await ctx.task(refineDifferentialTask, {
     differentials: differentialGeneration.differentialDiagnoses,
     testResults: testResults.results,
     bayesianUpdate: true
   });
 
   // Quality Gate: Diagnostic Confidence
-  if (refinedDifferential.topDiagnosis.confidence < 0.6) {
-    await ctx.breakpoint('additional-investigation-needed', {
+      let lastFeedback = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback) {
+        refinedDifferential = await ctx.task(refineDifferentialTask, { ...{
+    differentials: differentialGeneration.differentialDiagnoses,
+    testResults: testResults.results,
+    bayesianUpdate: true
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+      }
+  const phase7Review = await ctx.breakpoint('additional-investigation-needed', {
       message: 'Insufficient confidence for diagnosis',
       currentConfidence: refinedDifferential.topDiagnosis.confidence,
-      suggestedTests: refinedDifferential.recommendedAdditionalTests
-    });
-  }
+      suggestedTests: refinedDifferential.recommendedAdditionalTests,
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase7Review.approved) break;
+      lastFeedback = phase7Review.response || phase7Review.feedback || 'Changes requested';
+    }  }
 
   // Phase 8: Root Cause Analysis
   const rootCauseAnalysis = await ctx.task(analyzeRootCauseTask, {

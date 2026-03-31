@@ -76,7 +76,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Analyzing pipeline requirements and designing architecture');
 
-  const requirementsAnalysis = await ctx.task(requirementsAnalysisTask, {
+  let requirementsAnalysis = await ctx.task(requirementsAnalysisTask, {
     pipelineName,
     sources,
     destinations,
@@ -89,8 +89,21 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...requirementsAnalysis.artifacts);
 
-  // Quality Gate: Requirements must be clear and feasible
-  await ctx.breakpoint({
+    let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      requirementsAnalysis = await ctx.task(requirementsAnalysisTask, { ...{
+    pipelineName,
+    sources,
+    destinations,
+    pipelineType,
+    transformationLogic,
+    dataQualityRules,
+    orchestration,
+    outputDir
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Phase 1 Complete: Pipeline architecture designed for ${pipelineName}. Type: ${pipelineType}. Data sources: ${sources.length}, Destinations: ${destinations.length}. Estimated complexity: ${requirementsAnalysis.complexity}. Proceed with implementation?`,
     title: 'Requirements Analysis Review',
     context: {
@@ -101,9 +114,15 @@ export async function process(inputs, ctx) {
       dataFlows: requirementsAnalysis.dataFlows,
       estimatedVolume: requirementsAnalysis.estimatedDataVolume,
       files: requirementsAnalysis.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 2: SOURCE SYSTEM CONNECTIVITY SETUP
   // ============================================================================
@@ -174,7 +193,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 6: Developing data transformation logic and business rules');
 
-  const transformationDevelopment = await ctx.task(transformationDevelopmentTask, {
+  let transformationDevelopment = await ctx.task(transformationDevelopmentTask, {
     pipelineName,
     pipelineType,
     transformationLogic,
@@ -186,8 +205,20 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...transformationDevelopment.artifacts);
 
-  // Quality Gate: Transformation logic must be validated
-  await ctx.breakpoint({
+    let lastFeedback_phase6Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase6Review) {
+      transformationDevelopment = await ctx.task(transformationDevelopmentTask, { ...{
+    pipelineName,
+    pipelineType,
+    transformationLogic,
+    requirementsAnalysis,
+    stagingArea,
+    destinationSetup,
+    outputDir
+  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
+    }
+  const phase6Review = await ctx.breakpoint({
     question: `Phase 6 Complete: ${transformationDevelopment.transformationCount} transformations developed. Includes: ${transformationDevelopment.transformationTypes.join(', ')}. Review transformation logic?`,
     title: 'Transformation Logic Review',
     context: {
@@ -196,9 +227,15 @@ export async function process(inputs, ctx) {
       transformationTypes: transformationDevelopment.transformationTypes,
       lineage: transformationDevelopment.dataLineage,
       files: transformationDevelopment.artifacts.map(a => ({ path: a.path, format: a.format || 'sql' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase6Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase6Review.approved) break;
+    lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 7: DATA QUALITY VALIDATION FRAMEWORK
   // ============================================================================
@@ -402,7 +439,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 18: Validating pipeline configuration and executing dry run');
 
-  const validationResult = await ctx.task(pipelineValidationTask, {
+  let validationResult = await ctx.task(pipelineValidationTask, {
     pipelineName,
     pipelineType,
     requirementsAnalysis,
@@ -421,8 +458,23 @@ export async function process(inputs, ctx) {
   const validationPassed = pipelineScore >= 75;
 
   // Quality Gate: Pipeline must meet quality criteria
-  if (!validationPassed) {
-    await ctx.breakpoint({
+      let lastFeedback_qualityGateApproval = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_qualityGateApproval) {
+        validationResult = await ctx.task(pipelineValidationTask, { ...{
+    pipelineName,
+    pipelineType,
+    requirementsAnalysis,
+    sourceConnectivity,
+    destinationSetup,
+    transformationDevelopment,
+    qualityGatesConfig,
+    orchestrationSetup,
+    testingFramework,
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval, attempt: attempt + 1 });
+      }
+  const qualityGateApproval = await ctx.breakpoint({
       question: `Phase 18 Warning: Pipeline validation score: ${pipelineScore}/100 (below threshold of 75). ${validationResult.failedChecks.length} check(s) failed. Review and fix issues before deployment?`,
       title: 'Pipeline Validation Issues',
       context: {
@@ -432,9 +484,15 @@ export async function process(inputs, ctx) {
         failedChecks: validationResult.failedChecks,
         recommendations: validationResult.recommendations,
         files: validationResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_qualityGateApproval || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (qualityGateApproval.approved) break;
+      lastFeedback_qualityGateApproval = qualityGateApproval.response || qualityGateApproval.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 19: DEPLOYMENT PREPARATION
@@ -460,7 +518,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 20: Final review and handoff preparation');
 
-  const finalReview = await ctx.task(finalReviewTask, {
+  let finalReview = await ctx.task(finalReviewTask, {
     pipelineName,
     pipelineType,
     requirementsAnalysis,
@@ -478,8 +536,26 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...finalReview.artifacts);
 
-  // Final Breakpoint: Pipeline Approval
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      finalReview = await ctx.task(finalReviewTask, { ...{
+    pipelineName,
+    pipelineType,
+    requirementsAnalysis,
+    sourceConnectivity,
+    destinationSetup,
+    transformationDevelopment,
+    qualityGatesConfig,
+    orchestrationSetup,
+    monitoringSetup,
+    documentation,
+    validationResult,
+    deploymentPrep,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `ETL/ELT Pipeline Setup Complete for ${pipelineName}! Validation score: ${pipelineScore}/100. Pipeline includes ${transformationDevelopment.transformationCount} transformations, ${qualityGatesConfig.totalGates} quality gates, ${sources.length} sources, ${destinations.length} destinations. Review deliverables and approve for deployment?`,
     title: 'Pipeline Setup Complete - Final Approval',
     context: {
@@ -508,9 +584,15 @@ export async function process(inputs, ctx) {
         { path: validationResult.reportPath, format: 'json', label: 'Validation Report' },
         { path: deploymentPrep.deploymentPlanPath, format: 'markdown', label: 'Deployment Plan' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -592,8 +674,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

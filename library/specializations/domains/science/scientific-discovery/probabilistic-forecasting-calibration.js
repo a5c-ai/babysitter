@@ -35,15 +35,24 @@ export async function process(inputs, ctx) {
   const baseRateAnalysis = await ctx.task(baseRateAnalysisTask, { question: questionClarification.clarifiedQuestion, baseRates, outputDir });
   artifacts.push(...baseRateAnalysis.artifacts);
 
-  const informationGathering = await ctx.task(informationGatheringTask, { question: questionClarification.clarifiedQuestion, informationSources, baseRateAnalysis, outputDir });
-  artifacts.push(...informationGathering.artifacts);
-
-  await ctx.breakpoint({
+  let informationGathering = await ctx.task(informationGatheringTask, { question: questionClarification.clarifiedQuestion, informationSources, baseRateAnalysis, outputDir });
+    let lastFeedback_analysisApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_analysisApproval) {
+      informationGathering = await ctx.task(informationGatheringTask, { ...{ question: questionClarification.clarifiedQuestion, informationSources, baseRateAnalysis, outputDir }, feedback: lastFeedback_analysisApproval, attempt: attempt + 1 });
+    }
+  const analysisApproval = await ctx.breakpoint({
     question: `Base rate: ${baseRateAnalysis.baseRate || 'N/A'}. ${informationGathering.evidenceItems?.length || 0} evidence items gathered. Review before forecast generation?`,
     title: 'Forecast Inputs Review',
-    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })), summary: { baseRate: baseRateAnalysis.baseRate || 'N/A', evidenceItems: informationGathering.evidenceItems?.length || 0 }}
-  });
-
+    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })), summary: { baseRate: baseRateAnalysis.baseRate || 'N/A', evidenceItems: informationGathering.evidenceItems?.length || 0 }},
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_analysisApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (analysisApproval.approved) break;
+    lastFeedback_analysisApproval = analysisApproval.response || analysisApproval.feedback || 'Changes requested';
+  }
   const insideViewForecast = await ctx.task(insideViewTask, { question: questionClarification.clarifiedQuestion, information: informationGathering, outputDir });
   artifacts.push(...insideViewForecast.artifacts);
 
@@ -65,15 +74,24 @@ export async function process(inputs, ctx) {
   const scoringPlan = await ctx.task(scoringPlanTask, { forecast: debiasing.adjustedForecast || forecastSynthesis, question: questionClarification.clarifiedQuestion, timeHorizon, outputDir });
   artifacts.push(...scoringPlan.artifacts);
 
-  const qualityScore = await ctx.task(forecastQualityScoringTask, { questionClarification, baseRateAnalysis, forecastSynthesis, calibrationCheck, debiasing, minimumCalibrationScore, outputDir });
-  artifacts.push(...qualityScore.artifacts);
-
-  await ctx.breakpoint({
+  let qualityScore = await ctx.task(forecastQualityScoringTask, { questionClarification, baseRateAnalysis, forecastSynthesis, calibrationCheck, debiasing, minimumCalibrationScore, outputDir });
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      qualityScore = await ctx.task(forecastQualityScoringTask, { ...{ questionClarification, baseRateAnalysis, forecastSynthesis, calibrationCheck, debiasing, minimumCalibrationScore, outputDir }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Forecast: ${debiasing.adjustedForecast?.probability || forecastSynthesis.probability || 'N/A'}. Calibration: ${calibrationCheck.calibrationScore || 'N/A'}. Quality: ${qualityScore.overallScore}/100. Approve?`,
     title: 'Probabilistic Forecast Approval',
-    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })), summary: { forecast: debiasing.adjustedForecast?.probability || forecastSynthesis.probability || 'N/A', calibrationScore: calibrationCheck.calibrationScore || 'N/A', qualityScore: qualityScore.overallScore }}
-  });
-
+    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })), summary: { forecast: debiasing.adjustedForecast?.probability || forecastSynthesis.probability || 'N/A', calibrationScore: calibrationCheck.calibrationScore || 'N/A', qualityScore: qualityScore.overallScore }},
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true, question: questionClarification.clarifiedQuestion, forecast: { probability: debiasing.adjustedForecast?.probability || forecastSynthesis.probability, confidenceInterval: uncertaintyQuantification.confidenceInterval, rationale: forecastSynthesis.rationale },
     calibration: calibrationCheck, scoringPlan: scoringPlan,

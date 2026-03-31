@@ -78,7 +78,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 5: Analyzing resource requirements');
-  const resourceAnalysis = await ctx.task(resourceAnalysisTask, {
+  let resourceAnalysis = await ctx.task(resourceAnalysisTask, {
     initiatives: riskAssessment.assessedInitiatives,
     resourceConstraints,
     outputDir
@@ -86,8 +86,16 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...resourceAnalysis.artifacts);
 
-  // Breakpoint: Review initiative assessments
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      resourceAnalysis = await ctx.task(resourceAnalysisTask, { ...{
+    initiatives: riskAssessment.assessedInitiatives,
+    resourceConstraints,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Initiative assessments complete. ${initiativeInventory.classifiedInitiatives.length} initiatives analyzed. Review before prioritization?`,
     title: 'Initiative Portfolio Assessment Review',
     context: {
@@ -102,9 +110,15 @@ export async function process(inputs, ctx) {
         highValueCount: valueAssessment.highValueCount,
         highRiskCount: riskAssessment.highRiskCount
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 6: PRIORITIZATION FRAMEWORK
   // ============================================================================
@@ -213,8 +227,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

@@ -95,7 +95,7 @@ export async function process(inputs, ctx) {
 
   // Task 6: Digital Marketing Plan
   ctx.log('info', 'Developing digital marketing plan');
-  const digitalPlan = await ctx.task(digitalMarketingTask, {
+  let digitalPlan = await ctx.task(digitalMarketingTask, {
     campaignName,
     audienceSegments: audienceResearch.segments,
     budget: budget * 0.5,
@@ -105,8 +105,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...digitalPlan.artifacts);
 
-  // Breakpoint: Review campaign strategy
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      digitalPlan = await ctx.task(digitalMarketingTask, { ...{
+    campaignName,
+    audienceSegments: audienceResearch.segments,
+    budget: budget * 0.5,
+    channelStrategy: channelStrategy.channels,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Marketing campaign strategy for "${campaignName}" complete. Budget: $${budget.toLocaleString()}. ${audienceResearch.segments.length} audience segments targeted. Review and approve?`,
     title: 'Marketing Campaign Strategy Review',
     context: {
@@ -119,9 +129,15 @@ export async function process(inputs, ctx) {
         audienceSegments: audienceResearch.segments.length,
         channels: channelStrategy.channels.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 7: Partnership and PR Strategy
   ctx.log('info', 'Developing partnership and PR strategy');
   const partnershipPR = await ctx.task(partnershipPRTask, {
@@ -196,8 +212,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Audience Research
+  // Task 1: Audience Research
 export const audienceResearchTask = defineTask('audience-research', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Conduct audience research',

@@ -57,15 +57,24 @@ export async function process(inputs, ctx) {
   const transferGapMeasurement = await ctx.task(transferGapMeasurementTask, { projectName, simValidation, realWorldTesting, outputDir });
   artifacts.push(...transferGapMeasurement.artifacts);
 
-  const adaptationRefinement = await ctx.task(adaptationRefinementTask, { projectName, transferGapMeasurement, outputDir });
-  artifacts.push(...adaptationRefinement.artifacts);
-
-  await ctx.breakpoint({
+  let adaptationRefinement = await ctx.task(adaptationRefinementTask, { projectName, transferGapMeasurement, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      adaptationRefinement = await ctx.task(adaptationRefinementTask, { ...{ projectName, transferGapMeasurement, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Sim-to-Real Transfer Complete for ${projectName}. Sim success: ${simValidation.successRate}%, Real success: ${realWorldTesting.successRate}%, Transfer gap: ${transferGapMeasurement.gap}%. Review?`,
     title: 'Sim-to-Real Transfer Complete',
-    context: { runId: ctx.runId, simSuccess: simValidation.successRate, realSuccess: realWorldTesting.successRate, gap: transferGapMeasurement.gap }
-  });
-
+    context: { runId: ctx.runId, simSuccess: simValidation.successRate, realSuccess: realWorldTesting.successRate, gap: transferGapMeasurement.gap },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: realWorldTesting.successRate >= 80 && transferGapMeasurement.gap <= 15,
     projectName,

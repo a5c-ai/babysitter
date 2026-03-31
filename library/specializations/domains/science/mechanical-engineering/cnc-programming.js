@@ -66,7 +66,7 @@ export async function process(inputs, ctx) {
   artifacts.push({ phase: 'post-processing', data: postProcessing });
 
   // Phase 6: Simulation and Collision Detection
-  const simulation = await ctx.task(simulationTask, {
+  let simulation = await ctx.task(simulationTask, {
     gcode: postProcessing.gcode,
     machineSpec: inputs.machineSpec,
     fixtures: camSetup.fixtures,
@@ -74,16 +74,31 @@ export async function process(inputs, ctx) {
   });
   artifacts.push({ phase: 'simulation', data: simulation });
 
-  // Breakpoint: Simulation Review
-  await ctx.breakpoint('simulation-review', {
+    let lastFeedback_phase6Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase6Review) {
+      simulation = await ctx.task(simulationTask, { ...{
+    gcode: postProcessing.gcode,
+    machineSpec: inputs.machineSpec,
+    fixtures: camSetup.fixtures,
+    tools: toolSelection.selectedTools
+  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
+    }
+  const phase6Review = await ctx.breakpoint('simulation-review', {
     question: 'Review simulation results. Any collisions or issues detected?',
     context: {
       collisionReport: simulation.collisionReport,
       cycleTime: simulation.estimatedCycleTime,
       issues: simulation.issues
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase6Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase6Review.approved) break;
+    lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
+  }
   // Phase 7: Program Verification
   const verification = await ctx.task(verificationTask, {
     gcode: postProcessing.gcode,
@@ -103,24 +118,38 @@ export async function process(inputs, ctx) {
   artifacts.push({ phase: 'documentation', data: documentation });
 
   // Phase 9: Prove-out Planning
-  const proveoutPlan = await ctx.task(proveoutPlanTask, {
+  let proveoutPlan = await ctx.task(proveoutPlanTask, {
     partNumber: inputs.partNumber,
     gcode: postProcessing.gcode,
     criticalFeatures: inputs.processRouting.criticalFeatures
   });
   artifacts.push({ phase: 'proveout-plan', data: proveoutPlan });
 
-  // Final Breakpoint: Program Release Approval
-  await ctx.breakpoint('program-release', {
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      proveoutPlan = await ctx.task(proveoutPlanTask, { ...{
+    partNumber: inputs.partNumber,
+    gcode: postProcessing.gcode,
+    criticalFeatures: inputs.processRouting.criticalFeatures
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint('program-release', {
     question: 'Approve CNC program for production release?',
     context: {
       partNumber: inputs.partNumber,
       programNumber: postProcessing.programNumber,
       cycleTime: simulation.estimatedCycleTime,
       toolCount: toolSelection.selectedTools.length
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     results: {
@@ -140,8 +169,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-const camSetupTask = defineTask('cam-setup', (args) => ({
+  const camSetupTask = defineTask('cam-setup', (args) => ({
   kind: 'agent',
   title: 'CAM Setup and Stock Definition',
   agent: {

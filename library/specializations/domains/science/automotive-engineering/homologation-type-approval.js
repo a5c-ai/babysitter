@@ -40,14 +40,22 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 2: Compliance Planning
-  const compliancePlanning = await ctx.task(compliancePlanningTask, {
+  let compliancePlanning = await ctx.task(compliancePlanningTask, {
     vehicleProgram,
     regulatoryAnalysis,
     targetMarkets
   });
 
-  // Breakpoint: Compliance plan review
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      compliancePlanning = await ctx.task(compliancePlanningTask, { ...{
+    vehicleProgram,
+    regulatoryAnalysis,
+    targetMarkets
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Review compliance plan for ${vehicleProgram}. ${compliancePlanning.regulationsCount} regulations identified. Approve plan?`,
     title: 'Compliance Plan Review',
     context: {
@@ -59,9 +67,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: compliancePlanning
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // Phase 3: EU Type Approval (WVTA)
   const euTypeApproval = await ctx.task(euTypeApprovalTask, {
     vehicleProgram,
@@ -101,7 +115,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 8: Certification Completion
-  const certificationCompletion = await ctx.task(certificationCompletionTask, {
+  let certificationCompletion = await ctx.task(certificationCompletionTask, {
     vehicleProgram,
     euTypeApproval,
     usSelfCertification,
@@ -110,8 +124,19 @@ export async function process(inputs, ctx) {
     certificationDocs
   });
 
-  // Final Breakpoint: Homologation approval
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      certificationCompletion = await ctx.task(certificationCompletionTask, { ...{
+    vehicleProgram,
+    euTypeApproval,
+    usSelfCertification,
+    chinaCertification,
+    otherMarkets,
+    certificationDocs
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Homologation complete for ${vehicleProgram}. Markets approved: ${certificationCompletion.marketsApproved}. Approve for production?`,
     title: 'Homologation Approval',
     context: {
@@ -122,9 +147,15 @@ export async function process(inputs, ctx) {
         { path: `artifacts/certification-status.json`, format: 'json', content: certificationCompletion },
         { path: `artifacts/type-approval-docs.json`, format: 'json', content: certificationDocs }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     vehicleProgram,

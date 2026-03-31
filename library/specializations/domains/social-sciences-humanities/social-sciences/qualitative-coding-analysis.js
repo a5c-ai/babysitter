@@ -112,7 +112,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 7: Scoring analysis quality');
-  const qualityScore = await ctx.task(qualitativeAnalysisQualityScoringTask, {
+  let qualityScore = await ctx.task(qualitativeAnalysisQualityScoringTask, {
     dataPreparation,
     initialCoding,
     codeRefinement,
@@ -127,8 +127,20 @@ export async function process(inputs, ctx) {
   const analysisScore = qualityScore.overallScore;
   const qualityMet = analysisScore >= 80;
 
-  // Breakpoint: Review qualitative analysis
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      qualityScore = await ctx.task(qualitativeAnalysisQualityScoringTask, { ...{
+    dataPreparation,
+    initialCoding,
+    codeRefinement,
+    themeDevelopment,
+    trustworthiness,
+    analysisReport,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Qualitative analysis complete. Quality score: ${analysisScore}/100. ${qualityMet ? 'Analysis meets quality standards!' : 'Analysis may need refinement.'} Review and approve?`,
     title: 'Qualitative Analysis Review',
     context: {
@@ -144,9 +156,15 @@ export async function process(inputs, ctx) {
         totalCodes: codeRefinement.totalCodes,
         totalThemes: themeDevelopment.themes.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -173,8 +191,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Data Preparation
+  // Task 1: Data Preparation
 export const qualitativeDataPreparationTask = defineTask('qualitative-data-preparation', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Prepare qualitative data',

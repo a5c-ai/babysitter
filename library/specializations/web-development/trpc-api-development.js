@@ -44,15 +44,24 @@ export async function process(inputs, ctx) {
   const middlewareSetup = await ctx.task(middlewareSetupTask, { projectName, outputDir });
   artifacts.push(...middlewareSetup.artifacts);
 
-  const clientSetup = await ctx.task(clientSetupTask, { projectName, framework, outputDir });
-  artifacts.push(...clientSetup.artifacts);
-
-  await ctx.breakpoint({
+  let clientSetup = await ctx.task(clientSetupTask, { projectName, framework, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      clientSetup = await ctx.task(clientSetupTask, { ...{ projectName, framework, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `tRPC API setup complete for ${projectName}. ${routersSetup.routers.length} routers, ${proceduresSetup.procedures.length} procedures. Approve?`,
     title: 'tRPC API Review',
-    context: { runId: ctx.runId, routers: routersSetup.routers, procedures: proceduresSetup.procedures }
-  });
-
+    context: { runId: ctx.runId, routers: routersSetup.routers, procedures: proceduresSetup.procedures },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const testingSetup = await ctx.task(testingSetupTask, { projectName, outputDir });
   artifacts.push(...testingSetup.artifacts);
 

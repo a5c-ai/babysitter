@@ -43,15 +43,24 @@ export async function process(inputs, ctx) {
   const resourceOptimization = await ctx.task(resourceOptimizationTask, { designName, synthesisAnalysis, optimizationGoals, outputDir });
   artifacts.push(...resourceOptimization.artifacts);
 
-  const timingOptimization = await ctx.task(timingOptimizationTask, { designName, synthesisAnalysis, optimizationGoals, outputDir });
-  artifacts.push(...timingOptimization.artifacts);
-
-  await ctx.breakpoint({
+  let timingOptimization = await ctx.task(timingOptimizationTask, { designName, synthesisAnalysis, optimizationGoals, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      timingOptimization = await ctx.task(timingOptimizationTask, { ...{ designName, synthesisAnalysis, optimizationGoals, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Initial synthesis complete for ${designName}. LUT: ${synthesisAnalysis.lutUtilization}%, Timing: ${timingOptimization.timingMet ? 'MET' : 'FAILED'}. Apply optimizations?`,
     title: 'Synthesis Analysis Review',
-    context: { runId: ctx.runId, designName, lutUtilization: synthesisAnalysis.lutUtilization, timingMet: timingOptimization.timingMet }
-  });
-
+    context: { runId: ctx.runId, designName, lutUtilization: synthesisAnalysis.lutUtilization, timingMet: timingOptimization.timingMet },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const synthesisDirectives = await ctx.task(synthesisDirectivesTask, { designName, resourceOptimization, timingOptimization, targetDevice, outputDir });
   artifacts.push(...synthesisDirectives.artifacts);
 

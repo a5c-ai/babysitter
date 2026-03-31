@@ -97,7 +97,7 @@ export async function process(inputs, ctx) {
 
   // Task 7: Compile Screenplay
   ctx.log('info', 'Compiling final screenplay');
-  const compileResult = await ctx.task(compileScreenplay, {
+  let compileResult = await ctx.task(compileScreenplay, {
     titlePage: setupResult.titlePage,
     act1: act1Result,
     act2a: act2aResult,
@@ -109,8 +109,21 @@ export async function process(inputs, ctx) {
   });
   artifacts.push(...(compileResult.artifacts || []));
 
-  // Breakpoint: Screenplay Review
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      compileResult = await ctx.task(compileScreenplay, { ...{
+    titlePage: setupResult.titlePage,
+    act1: act1Result,
+    act2a: act2aResult,
+    act2b: act2bResult,
+    act3: act3Result,
+    dialogueRevisions: dialogueResult.revisions,
+    format,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Screenplay "${setupResult.titlePage?.title || 'Untitled'}" complete at ${compileResult.statistics?.totalPages || 0} pages with ${compileResult.statistics?.sceneCount || 0} scenes. Review and approve?`,
     title: 'Screenplay Review',
     context: {
@@ -123,9 +136,15 @@ export async function process(inputs, ctx) {
         format,
         genre
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
 
   return {
@@ -144,8 +163,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const scriptSetup = defineTask('script-setup', (args, taskCtx) => ({
   kind: 'agent',

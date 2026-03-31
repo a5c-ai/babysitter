@@ -87,7 +87,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 2: Incident Classification and Categorization');
 
-  const classification = await ctx.task(classificationTask, {
+  let classification = await ctx.task(classificationTask, {
     incidentId,
     incidentType,
     severity: actualSeverity,
@@ -105,8 +105,20 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Classification Complete - Category: ${classification.incidentCategory}, Regulatory Notification: ${regulatoryNotification}`);
 
-  // Quality Gate: Classification review
-  await ctx.breakpoint({
+    let lastFeedback_qualityGateApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_qualityGateApproval) {
+      classification = await ctx.task(classificationTask, { ...{
+    incidentId,
+    incidentType,
+    severity: actualSeverity,
+    affectedSystems,
+    initialTriage,
+    complianceFrameworks,
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval, attempt: attempt + 1 });
+    }
+  const qualityGateApproval = await ctx.breakpoint({
     question: `Incident ${incidentId} classified as ${classification.incidentCategory} with severity ${actualSeverity}. Regulatory notification required: ${regulatoryNotification}. Proceed with response?`,
     title: 'Incident Classification Review',
     context: {
@@ -120,16 +132,22 @@ export async function process(inputs, ctx) {
       complianceFrameworks: classification.applicableCompliance,
       recommendation: 'Verify classification accuracy before proceeding with response',
       files: classification.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_qualityGateApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (qualityGateApproval.approved) break;
+    lastFeedback_qualityGateApproval = qualityGateApproval.response || qualityGateApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 3: INCIDENT DECLARATION AND TEAM MOBILIZATION
   // ============================================================================
 
   ctx.log('info', 'Phase 3: Declaring security incident and mobilizing response team');
 
-  const incidentDeclaration = await ctx.task(declarationMobilizationTask, {
+  let incidentDeclaration = await ctx.task(declarationMobilizationTask, {
     incidentId,
     incidentType,
     severity: actualSeverity,
@@ -145,8 +163,23 @@ export async function process(inputs, ctx) {
   artifacts.push(...incidentDeclaration.artifacts);
 
   // Quality Gate: Team mobilization
-  if (!incidentDeclaration.teamMobilized) {
-    await ctx.breakpoint({
+      let lastFeedback_phase3Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase3Review) {
+        incidentDeclaration = await ctx.task(declarationMobilizationTask, { ...{
+    incidentId,
+    incidentType,
+    severity: actualSeverity,
+    classification,
+    affectedSystems,
+    securityTeam,
+    forensicsRequired,
+    regulatoryNotification,
+    lawEnforcementContact,
+    outputDir
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+      }
+  const phase3Review = await ctx.breakpoint({
       question: `Security incident ${incidentId} declared but team mobilization incomplete. Missing roles: ${incidentDeclaration.missingRoles.join(', ')}. Critical for security incident response. Manually assign roles?`,
       title: 'Security Incident Team Mobilization',
       context: {
@@ -159,9 +192,15 @@ export async function process(inputs, ctx) {
         warRoomUrl: incidentDeclaration.warRoomUrl,
         recommendation: 'Security incidents require full team with specialized roles before proceeding',
         files: incidentDeclaration.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase3Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase3Review.approved) break;
+      lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 4: CONTAINMENT STRATEGY DEVELOPMENT
@@ -169,7 +208,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 4: Developing containment strategy');
 
-  const containmentStrategy = await ctx.task(containmentStrategyTask, {
+  let containmentStrategy = await ctx.task(containmentStrategyTask, {
     incidentId,
     severity: actualSeverity,
     classification,
@@ -181,8 +220,19 @@ export async function process(inputs, ctx) {
   artifacts.push(...containmentStrategy.artifacts);
 
   // Quality Gate: Containment strategy approval
-  if (containmentStrategy.requiresApproval) {
-    await ctx.breakpoint({
+      let lastFeedback_phase4Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase4Review) {
+        containmentStrategy = await ctx.task(containmentStrategyTask, { ...{
+    incidentId,
+    severity: actualSeverity,
+    classification,
+    affectedSystems,
+    initialTriage,
+    outputDir
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+      }
+  const phase4Review = await ctx.breakpoint({
       question: `Containment strategy for ${incidentId} requires approval. Strategy: ${containmentStrategy.primaryStrategy}. Business Impact: ${containmentStrategy.businessImpact}. Approve containment actions?`,
       title: 'Containment Strategy Approval',
       context: {
@@ -195,9 +245,15 @@ export async function process(inputs, ctx) {
         estimatedDowntime: containmentStrategy.estimatedDowntime,
         riskOfNotContaining: containmentStrategy.riskOfNotContaining,
         files: containmentStrategy.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase4Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase4Review.approved) break;
+      lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 5: EVIDENCE COLLECTION AND FORENSICS (if required)
@@ -223,8 +279,19 @@ export async function process(inputs, ctx) {
     ctx.log('info', `Forensics Collection Complete - Evidence Items: ${forensicsData.evidenceItems.length}, Chain of Custody Established: ${forensicsData.chainOfCustodyEstablished}`);
 
     // Quality Gate: Forensics evidence preservation
-    if (!forensicsData.chainOfCustodyEstablished) {
-      await ctx.breakpoint({
+        let lastFeedback_qualityGateApproval2 = null;
+      for (let attempt = 0; attempt < 3; attempt++) {
+        if (lastFeedback_qualityGateApproval2) {
+          containmentStrategy = await ctx.task(containmentStrategyTask, { ...{
+    incidentId,
+    severity: actualSeverity,
+    classification,
+    affectedSystems,
+    initialTriage,
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval2, attempt: attempt + 1 });
+        }
+  const qualityGateApproval2 = await ctx.breakpoint({
         question: `Evidence collection for ${incidentId} completed but chain of custody not properly established. This may impact legal proceedings. Review and establish proper chain of custody?`,
         title: 'Forensics Chain of Custody',
         context: {
@@ -234,20 +301,25 @@ export async function process(inputs, ctx) {
           chainOfCustodyIssues: forensicsData.chainOfCustodyIssues,
           recommendation: 'Ensure proper evidence handling for potential legal/regulatory requirements',
           files: forensicsData.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-        }
-      });
-    }
+        },
+        expert: 'owner',
+        tags: ['approval-gate'],
+        previousFeedback: lastFeedback_qualityGateApproval2 || undefined,
+        attempt: attempt > 0 ? attempt + 1 : undefined
+        });
+        if (qualityGateApproval2.approved) break;
+        lastFeedback_qualityGateApproval2 = qualityGateApproval2.response || qualityGateApproval2.feedback || 'Changes requested';
+      }   }
   } else {
     ctx.log('info', 'Phase 5: Forensics not required for this incident, proceeding to containment execution');
   }
-
   // ============================================================================
   // PHASE 6: CONTAINMENT EXECUTION
   // ============================================================================
 
   ctx.log('info', 'Phase 6: Executing containment procedures');
 
-  const containmentExecution = await ctx.task(containmentExecutionTask, {
+  let containmentExecution = await ctx.task(containmentExecutionTask, {
     incidentId,
     severity: actualSeverity,
     containmentStrategy,
@@ -263,8 +335,19 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Containment Execution - Success: ${containmentSuccessful}, Time: ${containmentExecution.executionTime}s`);
 
   // Quality Gate: Containment verification
-  if (!containmentSuccessful) {
-    await ctx.breakpoint({
+      let lastFeedback_qualityGateApproval3 = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_qualityGateApproval3) {
+        containmentExecution = await ctx.task(containmentExecutionTask, { ...{
+    incidentId,
+    severity: actualSeverity,
+    containmentStrategy,
+    affectedSystems,
+    forensicsCompleted: forensicsRequired,
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval3, attempt: attempt + 1 });
+      }
+  const qualityGateApproval3 = await ctx.breakpoint({
       question: `Containment for ${incidentId} not successful. Status: ${containmentExecution.status}. Threat may still be active. Execute emergency containment or escalate?`,
       title: 'Containment Failed - Critical Decision Required',
       context: {
@@ -277,9 +360,15 @@ export async function process(inputs, ctx) {
         threatStillActive: containmentExecution.threatStillActive,
         recommendation: 'Critical security incident requires immediate containment to prevent further damage',
         files: containmentExecution.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_qualityGateApproval3 || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (qualityGateApproval3.approved) break;
+      lastFeedback_qualityGateApproval3 = qualityGateApproval3.response || qualityGateApproval3.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 7: PARALLEL INVESTIGATION AND IMPACT ASSESSMENT
@@ -326,8 +415,19 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Investigation Complete - Data Compromised: ${impactAssessment.dataCompromised}, IOCs Identified: ${threatIntelligence.iocsIdentified.length}`);
 
   // Quality Gate: High-impact data breach notification
-  if (impactAssessment.dataCompromised && impactAssessment.recordsAffected > 500) {
-    await ctx.breakpoint({
+      let lastFeedback_qualityGateApproval4 = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_qualityGateApproval4) {
+        containmentExecution = await ctx.task(containmentExecutionTask, { ...{
+    incidentId,
+    severity: actualSeverity,
+    containmentStrategy,
+    affectedSystems,
+    forensicsCompleted: forensicsRequired,
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval4, attempt: attempt + 1 });
+      }
+  const qualityGateApproval4 = await ctx.breakpoint({
       question: `Data breach confirmed for ${incidentId}. Records affected: ${impactAssessment.recordsAffected}. Sensitive data types: ${impactAssessment.sensitiveDataTypes.join(', ')}. Regulatory notification deadlines: ${impactAssessment.notificationDeadlines}. Proceed with notification procedures?`,
       title: 'Data Breach Notification Required',
       context: {
@@ -340,9 +440,15 @@ export async function process(inputs, ctx) {
         regulatoryRequirements: impactAssessment.regulatoryRequirements,
         recommendation: 'Initiate breach notification procedures according to regulatory requirements',
         files: impactAssessment.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_qualityGateApproval4 || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (qualityGateApproval4.approved) break;
+      lastFeedback_qualityGateApproval4 = qualityGateApproval4.response || qualityGateApproval4.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 8: ERADICATION STRATEGY AND EXECUTION
@@ -350,7 +456,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 8: Developing and executing eradication strategy');
 
-  const eradication = await ctx.task(eradicationTask, {
+  let eradication = await ctx.task(eradicationTask, {
     incidentId,
     severity: actualSeverity,
     classification,
@@ -368,8 +474,21 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Eradication Complete - Success: ${eradicationSuccessful}, Malware Removed: ${eradication.malwareRemoved}, Backdoors Closed: ${eradication.backdoorsClosed}`);
 
   // Quality Gate: Eradication verification
-  if (!eradicationSuccessful) {
-    await ctx.breakpoint({
+      let lastFeedback_qualityGateApproval5 = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_qualityGateApproval5) {
+        eradication = await ctx.task(eradicationTask, { ...{
+    incidentId,
+    severity: actualSeverity,
+    classification,
+    affectedSystems,
+    threatIntelligence,
+    vulnerabilityAnalysis,
+    containmentExecution,
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval5, attempt: attempt + 1 });
+      }
+  const qualityGateApproval5 = await ctx.breakpoint({
       question: `Eradication for ${incidentId} incomplete. Remaining threats: ${eradication.remainingThreats.join(', ')}. System may be re-compromised. Additional eradication steps required?`,
       title: 'Eradication Incomplete',
       context: {
@@ -381,9 +500,15 @@ export async function process(inputs, ctx) {
         verificationResults: eradication.verificationResults,
         recommendation: 'Complete eradication before proceeding to recovery',
         files: eradication.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_qualityGateApproval5 || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (qualityGateApproval5.approved) break;
+      lastFeedback_qualityGateApproval5 = qualityGateApproval5.response || qualityGateApproval5.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 9: RECOVERY AND RESTORATION
@@ -391,7 +516,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 9: Recovery and system restoration');
 
-  const recovery = await ctx.task(recoveryTask, {
+  let recovery = await ctx.task(recoveryTask, {
     incidentId,
     severity: actualSeverity,
     affectedSystems,
@@ -407,8 +532,19 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Recovery Complete - Success: ${recoverySuccessful}, Systems Restored: ${recovery.systemsRestored}/${recovery.totalSystems}`);
 
   // Quality Gate: Recovery verification
-  if (!recoverySuccessful) {
-    await ctx.breakpoint({
+      let lastFeedback_phase9Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase9Review) {
+        recovery = await ctx.task(recoveryTask, { ...{
+    incidentId,
+    severity: actualSeverity,
+    affectedSystems,
+    eradication,
+    vulnerabilityAnalysis,
+    outputDir
+  }, feedback: lastFeedback_phase9Review, attempt: attempt + 1 });
+      }
+  const phase9Review = await ctx.breakpoint({
       question: `Recovery for ${incidentId} incomplete. Systems restored: ${recovery.systemsRestored}/${recovery.totalSystems}. Continue monitoring or perform additional recovery?`,
       title: 'Recovery Verification',
       context: {
@@ -420,9 +556,15 @@ export async function process(inputs, ctx) {
         monitoringStatus: recovery.monitoringStatus,
         recommendation: 'Verify all systems fully operational before closing incident',
         files: recovery.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase9Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase9Review.approved) break;
+      lastFeedback_phase9Review = phase9Review.response || phase9Review.feedback || 'Changes requested';
+    } }
 
   incidentResolved = containmentSuccessful && eradicationSuccessful && recoverySuccessful;
 
@@ -505,7 +647,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 13: Generating comprehensive post-mortem report');
 
-  const postMortemReport = await ctx.task(postMortemReportTask, {
+  let postMortemReport = await ctx.task(postMortemReportTask, {
     incidentId,
     severity: actualSeverity,
     incidentType,
@@ -528,8 +670,31 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...postMortemReport.artifacts);
 
-  // Quality Gate: Post-mortem review
-  await ctx.breakpoint({
+    let lastFeedback_phase13Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase13Review) {
+      postMortemReport = await ctx.task(postMortemReportTask, { ...{
+    incidentId,
+    severity: actualSeverity,
+    incidentType,
+    affectedSystems,
+    startTime,
+    initialTriage,
+    classification,
+    containmentExecution,
+    forensicsData,
+    threatIntelligence,
+    impactAssessment,
+    vulnerabilityAnalysis,
+    eradication,
+    recovery,
+    communications,
+    postIncidentAnalysis,
+    lessonsLearned,
+    outputDir
+  }, feedback: lastFeedback_phase13Review, attempt: attempt + 1 });
+    }
+  const phase13Review = await ctx.breakpoint({
     question: `Post-mortem report for ${incidentId} generated. Review timeline, findings, impact assessment, and recommendations before sharing with stakeholders and closing incident?`,
     title: 'Security Incident Post-Mortem Review',
     context: {
@@ -546,16 +711,22 @@ export async function process(inputs, ctx) {
         { path: postIncidentAnalysis.timelinePath, format: 'json', label: 'Incident Timeline' },
         { path: lessonsLearned.recommendationsPath, format: 'markdown', label: 'Recommendations' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase13Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase13Review.approved) break;
+    lastFeedback_phase13Review = phase13Review.response || phase13Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 14: METRICS AND CONTINUOUS IMPROVEMENT
   // ============================================================================
 
   ctx.log('info', 'Phase 14: Computing security metrics and continuous improvement actions');
 
-  const metricsAndImprovement = await ctx.task(metricsImprovementTask, {
+  let metricsAndImprovement = await ctx.task(metricsImprovementTask, {
     incidentId,
     severity: actualSeverity,
     classification,
@@ -567,8 +738,20 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...metricsAndImprovement.artifacts);
 
-  // Final Breakpoint: Security Incident Response Complete
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      metricsAndImprovement = await ctx.task(metricsImprovementTask, { ...{
+    incidentId,
+    severity: actualSeverity,
+    classification,
+    postIncidentAnalysis,
+    impactAssessment,
+    lessonsLearned,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Security Incident Response Complete for ${incidentId}. Incident resolved: ${incidentResolved}. Data compromised: ${impactAssessment.dataCompromised}. Regulatory notifications: ${communications.regulatoryFilings}. Close incident and implement recommendations?`,
     title: 'Final Security Incident Review',
     context: {
@@ -597,9 +780,15 @@ export async function process(inputs, ctx) {
         { path: lessonsLearned.recommendationsPath, format: 'markdown', label: 'Recommendations' },
         ...(forensicsData ? [{ path: forensicsData.forensicsReportPath, format: 'markdown', label: 'Forensics Report' }] : [])
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const totalDuration = endTime - startTime;
 
@@ -724,8 +913,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

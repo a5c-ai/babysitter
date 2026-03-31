@@ -84,7 +84,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 4: Running 3D bin packing optimization');
 
-  const binPacking = await ctx.task(binPackingTask, {
+  let binPacking = await ctx.task(binPackingTask, {
     compatibleLoads: compatibilityAnalysis.compatibleGroups,
     trailers,
     constraints,
@@ -94,8 +94,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...binPacking.artifacts);
 
-  // Quality Gate: Review load plans
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      binPacking = await ctx.task(binPackingTask, { ...{
+    compatibleLoads: compatibilityAnalysis.compatibleGroups,
+    trailers,
+    constraints,
+    stackingRules,
+    outputDir
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: `Load planning complete. ${binPacking.loadPlans.length} loads created with ${binPacking.averageUtilization}% average utilization. Review load plans?`,
     title: 'Load Planning Results',
     context: {
@@ -104,9 +114,15 @@ export async function process(inputs, ctx) {
       averageUtilization: binPacking.averageUtilization,
       unassignedShipments: binPacking.unassignedShipments.length,
       files: binPacking.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 5: WEIGHT DISTRIBUTION OPTIMIZATION
   // ============================================================================
@@ -156,7 +172,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 8: Generating load documentation');
 
-  const loadDocumentation = await ctx.task(loadDocumentationTask, {
+  let loadDocumentation = await ctx.task(loadDocumentationTask, {
     loadPlans: loadingSequence.sequencedLoads,
     shipments,
     trailers,
@@ -165,8 +181,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...loadDocumentation.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      loadDocumentation = await ctx.task(loadDocumentationTask, { ...{
+    loadPlans: loadingSequence.sequencedLoads,
+    shipments,
+    trailers,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Load planning complete. ${shipments.length} shipments consolidated into ${binPacking.loadPlans.length} loads. Estimated savings: $${costSavings.totalSavings}. Approve load plans?`,
     title: 'Final Load Plan Review',
     context: {
@@ -182,9 +207,15 @@ export async function process(inputs, ctx) {
         { path: loadDocumentation.manifestPath, format: 'json', label: 'Load Manifests' },
         { path: costSavings.reportPath, format: 'markdown', label: 'Savings Report' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -214,8 +245,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

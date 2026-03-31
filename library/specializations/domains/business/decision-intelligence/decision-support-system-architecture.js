@@ -53,23 +53,37 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 4: User Interface Design
-  const userInterface = await ctx.task(dssUserInterfaceTask, {
+  let userInterface = await ctx.task(dssUserInterfaceTask, {
     projectName,
     requirementsAnalysis,
     userProfiles
   });
 
-  // Breakpoint: Review DSS architecture design
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      userInterface = await ctx.task(dssUserInterfaceTask, { ...{
+    projectName,
+    requirementsAnalysis,
+    userProfiles
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Review DSS architecture for ${projectName}. Does it address all decision support requirements?`,
     title: 'DSS Architecture Review',
     context: {
       runId: ctx.runId,
       projectName,
       decisionTypes: decisionTypes.length
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 5: Integration Architecture
   const integrationArchitecture = await ctx.task(dssIntegrationTask, {
     projectName,
@@ -126,8 +140,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const dssRequirementsTask = defineTask('dss-requirements', (args, taskCtx) => ({
   kind: 'agent',

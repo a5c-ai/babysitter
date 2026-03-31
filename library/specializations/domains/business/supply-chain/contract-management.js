@@ -59,7 +59,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 2: Planning negotiation approach');
 
-  const negotiationPlan = await ctx.task(negotiationPlanTask, {
+  let negotiationPlan = await ctx.task(negotiationPlanTask, {
     supplier,
     contractStrategy,
     negotiationPriorities,
@@ -68,8 +68,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...negotiationPlan.artifacts);
 
-  // Breakpoint: Review negotiation strategy
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      negotiationPlan = await ctx.task(negotiationPlanTask, { ...{
+    supplier,
+    contractStrategy,
+    negotiationPriorities,
+    outputDir
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Negotiation strategy ready for ${supplier}. Key priorities: ${negotiationPlan.keyPriorities.join(', ')}. BATNA defined. Review strategy before negotiation?`,
     title: 'Negotiation Strategy Review',
     context: {
@@ -81,9 +90,15 @@ export async function process(inputs, ctx) {
         targetOutcome: negotiationPlan.targetOutcome,
         batna: negotiationPlan.batna
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 3: CONTRACT DRAFTING
   // ============================================================================
@@ -121,7 +136,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 5: Finalizing contract');
 
-  const contractFinalization = await ctx.task(contractFinalizationTask, {
+  let contractFinalization = await ctx.task(contractFinalizationTask, {
     supplier,
     contractDraft,
     negotiationExecution,
@@ -131,8 +146,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...contractFinalization.artifacts);
 
-  // Breakpoint: Review final contract
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      contractFinalization = await ctx.task(contractFinalizationTask, { ...{
+    supplier,
+    contractDraft,
+    negotiationExecution,
+    stakeholders,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Contract finalized with ${supplier}. Value: $${contractFinalization.finalValue}. Duration: ${contractFinalization.duration}. Approve for execution?`,
     title: 'Contract Approval Review',
     context: {
@@ -143,9 +168,15 @@ export async function process(inputs, ctx) {
         duration: contractFinalization.duration,
         keyTerms: contractFinalization.keyTerms
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 6: CONTRACT EXECUTION
   // ============================================================================
@@ -210,8 +241,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

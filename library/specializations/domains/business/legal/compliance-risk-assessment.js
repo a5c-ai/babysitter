@@ -83,7 +83,6 @@ export async function process(inputs, ctx) {
     });
     artifacts.push(...heatMap.artifacts);
   }
-
   // Phase 6: Action Plan Development
   let actionPlan = null;
   if (includeActionPlan) {
@@ -93,9 +92,8 @@ export async function process(inputs, ctx) {
     });
     artifacts.push(...actionPlan.artifacts);
   }
-
   // Phase 7: Assessment Report
-  const assessmentReport = await ctx.task(riskAssessmentReportTask, {
+  let assessmentReport = await ctx.task(riskAssessmentReportTask, {
     organizationProfile,
     methodology,
     riskUniverse,
@@ -106,9 +104,22 @@ export async function process(inputs, ctx) {
     actionPlan,
     outputDir
   });
-  artifacts.push(...assessmentReport.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      assessmentReport = await ctx.task(riskAssessmentReportTask, { ...{
+    organizationProfile,
+    methodology,
+    riskUniverse,
+    riskIdentification,
+    riskAnalysis,
+    riskEvaluation,
+    heatMap,
+    actionPlan,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Risk assessment for ${organizationProfile.name} complete. ${riskEvaluation.prioritizedRisks.length} risks identified, ${riskEvaluation.highRiskCount} high priority. Approve assessment?`,
     title: 'Risk Assessment Review',
     context: {
@@ -116,9 +127,15 @@ export async function process(inputs, ctx) {
       riskCount: riskEvaluation.prioritizedRisks.length,
       highRiskCount: riskEvaluation.highRiskCount,
       files: [{ path: assessmentReport.reportPath, format: 'markdown', label: 'Risk Assessment Report' }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     organization: organizationProfile.name,
@@ -136,8 +153,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 export const riskUniverseTask = defineTask('risk-universe', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Develop risk universe',

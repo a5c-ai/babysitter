@@ -27,15 +27,24 @@ export async function process(inputs, ctx) {
   const factorization = await ctx.task(factorizationTask, { language, outputDir });
   artifacts.push(...factorization.artifacts);
 
-  const library = await ctx.task(primeLibraryTask, { sieve, primality, factorization, language, outputDir });
-  artifacts.push(...library.artifacts);
-
-  await ctx.breakpoint({
+  let library = await ctx.task(primeLibraryTask, { sieve, primality, factorization, language, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      library = await ctx.task(primeLibraryTask, { ...{ sieve, primality, factorization, language, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Prime algorithms library complete. Sieve up to ${maxN}. Review?`,
     title: 'Prime Algorithms Complete',
-    context: { runId: ctx.runId, maxN, algorithms }
-  });
-
+    context: { runId: ctx.runId, maxN, algorithms },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     maxN,

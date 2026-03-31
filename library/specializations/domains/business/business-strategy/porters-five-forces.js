@@ -92,7 +92,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 6: Calculating industry attractiveness');
-  const attractivenessScore = await ctx.task(industryAttractivenessTask, {
+  let attractivenessScore = await ctx.task(industryAttractivenessTask, {
     newEntrantsAnalysis,
     supplierPowerAnalysis,
     buyerPowerAnalysis,
@@ -104,8 +104,20 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...attractivenessScore.artifacts);
 
-  // Breakpoint: Review five forces analysis
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      attractivenessScore = await ctx.task(industryAttractivenessTask, { ...{
+    newEntrantsAnalysis,
+    supplierPowerAnalysis,
+    buyerPowerAnalysis,
+    substitutesAnalysis,
+    rivalryAnalysis,
+    includeScoring,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Five Forces analysis complete. Industry attractiveness score: ${attractivenessScore.overallScore}/100. Review detailed findings?`,
     title: 'Five Forces Analysis Review',
     context: {
@@ -122,9 +134,15 @@ export async function process(inputs, ctx) {
         rivalryForce: rivalryAnalysis.forceStrength,
         overallAttractiveness: attractivenessScore.overallScore
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 7: STRATEGIC IMPLICATIONS
   // ============================================================================
@@ -209,8 +227,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

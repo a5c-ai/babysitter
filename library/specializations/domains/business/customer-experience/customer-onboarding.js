@@ -123,7 +123,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 7: Assessing onboarding plan quality');
-  const qualityAssessment = await ctx.task(qualityAssessmentTask, {
+  let qualityAssessment = await ctx.task(qualityAssessmentTask, {
     customerName,
     discoveryAssessment,
     onboardingPlan,
@@ -139,8 +139,21 @@ export async function process(inputs, ctx) {
   const qualityScore = qualityAssessment.overallScore;
   const qualityMet = qualityScore >= 85;
 
-  // Breakpoint: Review onboarding plan
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      qualityAssessment = await ctx.task(qualityAssessmentTask, { ...{
+    customerName,
+    discoveryAssessment,
+    onboardingPlan,
+    trainingProgram,
+    successMilestones,
+    resourceAllocation,
+    communicationPlan,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Customer onboarding plan complete for ${customerName}. Quality score: ${qualityScore}/100. ${qualityMet ? 'Plan meets quality standards!' : 'Plan may need refinement.'} Review and approve?`,
     title: 'Customer Onboarding Plan Review',
     context: {
@@ -161,9 +174,15 @@ export async function process(inputs, ctx) {
         trainingModules: trainingProgram.modules?.length || 0,
         estimatedTimeToValue: onboardingPlan.estimatedTimeToValue || targetTimeToValue
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -204,8 +223,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

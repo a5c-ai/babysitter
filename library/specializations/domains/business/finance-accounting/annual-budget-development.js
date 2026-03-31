@@ -31,33 +31,61 @@ export async function process(inputs, ctx) {
   results.steps.push({ name: 'budget-calendar-development', result: calendarResult });
 
   // Step 2: Develop Budget Assumptions and Templates
-  const assumptionsResult = await ctx.task(developAssumptionsTask, {
+  let assumptionsResult = await ctx.task(developAssumptionsTask, {
     fiscalYear: inputs.fiscalYear,
     baseAssumptions: inputs.assumptions,
     strategicGoals: inputs.strategicGoals
   });
   results.steps.push({ name: 'budget-assumptions', result: assumptionsResult });
 
-  // Breakpoint for executive review of assumptions
-  await ctx.breakpoint('assumptions-review', {
+    let lastFeedback_reviewApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_reviewApproval) {
+      assumptionsResult = await ctx.task(developAssumptionsTask, { ...{
+    fiscalYear: inputs.fiscalYear,
+    baseAssumptions: inputs.assumptions,
+    strategicGoals: inputs.strategicGoals
+  }, feedback: lastFeedback_reviewApproval, attempt: attempt + 1 });
+    }
+  const reviewApproval = await ctx.breakpoint('assumptions-review', {
     message: 'Review budget assumptions and planning guidelines before distributing to departments',
-    data: { calendar: calendarResult, assumptions: assumptionsResult }
-  });
-
+    data: { calendar: calendarResult, assumptions: assumptionsResult },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_reviewApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (reviewApproval.approved) break;
+    lastFeedback_reviewApproval = reviewApproval.response || reviewApproval.feedback || 'Changes requested';
+  }
   // Step 3: Departmental Budget Collection
-  const departmentalResult = await ctx.task(collectDepartmentalBudgetsTask, {
+  let departmentalResult = await ctx.task(collectDepartmentalBudgetsTask, {
     departments: inputs.departments,
     assumptions: assumptionsResult,
     calendar: calendarResult
   });
   results.steps.push({ name: 'departmental-collection', result: departmentalResult });
 
-  // Breakpoint for initial departmental review
-  await ctx.breakpoint('departmental-review', {
+    let lastFeedback_reviewApproval2 = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_reviewApproval2) {
+      departmentalResult = await ctx.task(collectDepartmentalBudgetsTask, { ...{
+    departments: inputs.departments,
+    assumptions: assumptionsResult,
+    calendar: calendarResult
+  }, feedback: lastFeedback_reviewApproval2, attempt: attempt + 1 });
+    }
+  const reviewApproval2 = await ctx.breakpoint('departmental-review', {
     message: 'Review departmental submissions for completeness and alignment with guidelines',
-    data: departmentalResult
-  });
-
+    data: departmentalResult,
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_reviewApproval2 || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (reviewApproval2.approved) break;
+    lastFeedback_reviewApproval2 = reviewApproval2.response || reviewApproval2.feedback || 'Changes requested';
+  }
   // Step 4: Budget Consolidation
   const consolidationResult = await ctx.task(consolidateBudgetsTask, {
     departmentalBudgets: departmentalResult,
@@ -66,19 +94,33 @@ export async function process(inputs, ctx) {
   results.steps.push({ name: 'budget-consolidation', result: consolidationResult });
 
   // Step 5: Variance and Gap Analysis
-  const analysisResult = await ctx.task(analyzeGapsTask, {
+  let analysisResult = await ctx.task(analyzeGapsTask, {
     consolidatedBudget: consolidationResult,
     strategicGoals: inputs.strategicGoals,
     priorYearActuals: inputs.priorYearActuals
   });
   results.steps.push({ name: 'gap-analysis', result: analysisResult });
 
-  // Breakpoint for executive review
-  await ctx.breakpoint('executive-review', {
+    let lastFeedback_reviewApproval3 = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_reviewApproval3) {
+      analysisResult = await ctx.task(analyzeGapsTask, { ...{
+    consolidatedBudget: consolidationResult,
+    strategicGoals: inputs.strategicGoals,
+    priorYearActuals: inputs.priorYearActuals
+  }, feedback: lastFeedback_reviewApproval3, attempt: attempt + 1 });
+    }
+  const reviewApproval3 = await ctx.breakpoint('executive-review', {
     message: 'Executive review of consolidated budget and gap analysis before adjustments',
-    data: { consolidation: consolidationResult, analysis: analysisResult }
-  });
-
+    data: { consolidation: consolidationResult, analysis: analysisResult },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_reviewApproval3 || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (reviewApproval3.approved) break;
+    lastFeedback_reviewApproval3 = reviewApproval3.response || reviewApproval3.feedback || 'Changes requested';
+  }
   // Step 6: Budget Adjustments and Iterations
   const adjustmentsResult = await ctx.task(processAdjustmentsTask, {
     consolidatedBudget: consolidationResult,
@@ -88,20 +130,33 @@ export async function process(inputs, ctx) {
   results.steps.push({ name: 'budget-adjustments', result: adjustmentsResult });
 
   // Step 7: Final Budget Package Preparation
-  const packageResult = await ctx.task(prepareBudgetPackageTask, {
+  let packageResult = await ctx.task(prepareBudgetPackageTask, {
     finalBudget: adjustmentsResult,
     fiscalYear: inputs.fiscalYear,
     strategicGoals: inputs.strategicGoals
   });
   results.steps.push({ name: 'budget-package', result: packageResult });
 
-  // Breakpoint for board approval
-  await ctx.breakpoint('board-approval', {
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      packageResult = await ctx.task(prepareBudgetPackageTask, { ...{
+    finalBudget: adjustmentsResult,
+    fiscalYear: inputs.fiscalYear,
+    strategicGoals: inputs.strategicGoals
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint('board-approval', {
     message: 'Final budget package ready for board presentation and approval',
-    data: packageResult
-  });
-
-  results.outputs = {
+    data: packageResult,
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }  results.outputs = {
     approvedBudget: packageResult,
     fiscalYear: inputs.fiscalYear,
     approvalDate: new Date().toISOString()
@@ -109,8 +164,7 @@ export async function process(inputs, ctx) {
 
   return results;
 }
-
-// Task definitions
+  // Task definitions
 export const developBudgetCalendarTask = defineTask('develop-budget-calendar', (args, taskCtx) => ({
   kind: 'agent',
   skill: { name: 'financial-planning' },

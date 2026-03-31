@@ -68,17 +68,28 @@ export async function process(inputs, ctx) {
   artifacts.push(...audioIntegration.artifacts);
 
   // Phase 6: Playtesting
-  const playtesting = await ctx.task(slicePlaytestTask, {
+  let playtesting = await ctx.task(slicePlaytestTask, {
     projectName, systemsImpl, contentCreation, artPolish, audioIntegration, outputDir
   });
-  artifacts.push(...playtesting.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase6Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase6Review) {
+      playtesting = await ctx.task(slicePlaytestTask, { ...{
+    projectName, systemsImpl, contentCreation, artPolish, audioIntegration, outputDir
+  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
+    }
+  const phase6Review = await ctx.breakpoint({
     question: `Vertical slice playtest complete for ${projectName}. Player satisfaction: ${playtesting.satisfactionScore}/10. Quality bar met: ${playtesting.qualityBarMet}. Review and iterate?`,
     title: 'Vertical Slice Playtest Review',
-    context: { runId: ctx.runId, playtesting, files: playtesting.artifacts.map(a => ({ path: a.path, format: a.format || 'json' })) }
-  });
-
+    context: { runId: ctx.runId, playtesting, files: playtesting.artifacts.map(a => ({ path: a.path, format: a.format || 'json' })) },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase6Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase6Review.approved) break;
+    lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
+  }
   // Phase 7: Polish and Iteration
   const polishIteration = await ctx.task(slicePolishTask, {
     projectName, playtesting, qualityBar, outputDir
@@ -86,17 +97,28 @@ export async function process(inputs, ctx) {
   artifacts.push(...polishIteration.artifacts);
 
   // Phase 8: Stakeholder Review
-  const stakeholderReview = await ctx.task(sliceStakeholderReviewTask, {
+  let stakeholderReview = await ctx.task(sliceStakeholderReviewTask, {
     projectName, polishIteration, qualityBar, outputDir
   });
-  artifacts.push(...stakeholderReview.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      stakeholderReview = await ctx.task(sliceStakeholderReviewTask, { ...{
+    projectName, polishIteration, qualityBar, outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Vertical Slice complete for ${projectName}. Stakeholder approval: ${stakeholderReview.approved ? 'YES' : 'PENDING'}. Ready for full production?`,
     title: 'Vertical Slice Complete',
-    context: { runId: ctx.runId, summary: { projectName, qualityScore: polishIteration.qualityScore, approved: stakeholderReview.approved } }
-  });
-
+    context: { runId: ctx.runId, summary: { projectName, qualityScore: polishIteration.qualityScore, approved: stakeholderReview.approved } },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     projectName,

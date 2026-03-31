@@ -78,12 +78,13 @@ function formatHarnessAssignmentGuidance(context: HarnessPromptContext): string[
   return [
     "Harness assignment guidance:",
     `- Only assign installed harness names. Installed harnesses: ${installedList}.`,
-    "- Default `agent`, `node`, and `orchestrator_task` work to the internal PI worker. Set `task.metadata.harness` only when a task must explicitly override that default to a specific installed harness.",
+    "- Default `agent`, `node`, and `orchestrator_task` work to the internal PI worker. Prefer `task.execution.harness` to route a task to a specific installed harness. The legacy `task.metadata.harness` field is still supported but `execution.harness` takes precedence when both are present.",
     "- Treat `pi` / `oh-my-pi` as the internal harness. Its default worker mode is native/local PI execution with isolation disabled unless the task opts into stronger guardrails.",
     "- Shell effects run through the internal PI worker even when orchestration is bound to an external CLI harness. Keep shell work on that worker by default.",
     "- Do not set `task.metadata.bashSandbox`, `task.metadata.isolated`, or `task.metadata.enableCompaction` for ordinary internal PI work. Leave them unset unless the task truly requires stronger guardrails or long-running compaction.",
     "- For risky shell or system-changing subtasks that truly need stronger guardrails, encode them explicitly in task metadata: `bashSandbox: \"secure\"` to opt into AgentSH, `isolated: true` to disable repo/global extensions and skills, and `enableCompaction: true` when a long-running internal worker needs compaction.",
     "- Treat `claude-code`, `codex`, `gemini-cli`, and other external CLIs as text-agent harnesses. Use them only when their behavior is materially better for that task.",
+    "- Tasks may include an `execution` field with `model`, `harness`, and `permissions`. `execution.model` is universal (plugins and internal harness). `execution.harness` and `execution.permissions` are only used by the internal harness (`harness:create-run`) and ignored by plugins.",
     "- External CLI harnesses do not inherit AgentSH protection for their own internal shell or tool execution. Route security-sensitive shell work through the internal PI worker instead of assuming the external harness is guarded.",
     context.selectedHarnessName
       ? `- The selected orchestration binding harness for this run is ${context.selectedHarnessName}.`
@@ -126,7 +127,7 @@ export function buildProcessDefinitionSystemPrompt(
     "- The module must export a named `async function process(inputs, ctx)`.",
     "- The process must orchestrate the work through babysitter tasks instead of doing the main implementation directly in `process(inputs, ctx)`.",
     "- Define at least one task with `defineTask(...)`, and invoke tasks from `process(inputs, ctx)` via `await ctx.task(...)`.",
-    "- Default every task to the internal PI worker. Omit `task.metadata.harness` unless a task must explicitly override that default.",
+    "- Default every task to the internal PI worker. Prefer `task.execution.harness` to override the default harness for a task. The legacy `task.metadata.harness` field is still supported but `execution.harness` takes precedence when both are present.",
     "- If you define tasks with `defineTask(...)`, every returned TaskDef must include a top-level `kind` field.",
     "- Agent tasks must use `kind: \"agent\"` with `agent: { name, prompt, outputSchema }`; shell tasks must use `kind: \"shell\"` with `shell: { command: \"...\" }`; node tasks must use `kind: \"node\"` with `node: { entry, args? }`.",
     "- Call defined tasks with `await ctx.task(definedTask, args)`; do not invent alternate task runners.",

@@ -116,7 +116,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Scoring workshop design quality');
-  const qualityScore = await ctx.task(workshopQualityScoringTask, {
+  let qualityScore = await ctx.task(workshopQualityScoringTask, {
     workshopTopic,
     needsAssessment,
     workshopDesign,
@@ -132,8 +132,21 @@ export async function process(inputs, ctx) {
   const overallScore = qualityScore.overallScore;
   const qualityMet = overallScore >= qualityThreshold;
 
-  // Breakpoint: Review workshop design
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      qualityScore = await ctx.task(workshopQualityScoringTask, { ...{
+    workshopTopic,
+    needsAssessment,
+    workshopDesign,
+    activityDevelopment,
+    materialsCreation,
+    facilitatorGuide,
+    qualityThreshold,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Workshop design complete. Quality score: ${overallScore}/${qualityThreshold}. ${qualityMet ? 'Quality standards met!' : 'May need refinement.'} Review and approve?`,
     title: 'Teaching Effectiveness Workshop Review',
     context: {
@@ -147,9 +160,15 @@ export async function process(inputs, ctx) {
         totalActivities: activityDevelopment.activities?.length || 0,
         totalArtifacts: artifacts.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration_ms = endTime - startTime;
 
@@ -172,8 +191,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task definitions
+  // Task definitions
 export const facultyNeedsAssessmentTask = defineTask('faculty-needs-assessment', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Conduct faculty needs assessment',

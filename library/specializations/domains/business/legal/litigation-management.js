@@ -69,7 +69,6 @@ export async function process(inputs, ctx) {
     });
     artifacts.push(...counselCoordination.artifacts);
   }
-
   // Phase 5: Risk Assessment
   const riskAssessment = await ctx.task(litigationRiskAssessmentTask, {
     matterId,
@@ -88,7 +87,7 @@ export async function process(inputs, ctx) {
   artifacts.push(...strategy.artifacts);
 
   // Phase 7: Reporting
-  const report = await ctx.task(matterReportingTask, {
+  let report = await ctx.task(matterReportingTask, {
     matterId,
     matterStatus,
     timeline,
@@ -96,9 +95,19 @@ export async function process(inputs, ctx) {
     riskAssessment,
     outputDir
   });
-  artifacts.push(...report.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      report = await ctx.task(matterReportingTask, { ...{
+    matterId,
+    matterStatus,
+    timeline,
+    budget,
+    riskAssessment,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Litigation matter ${matterId} status updated. Budget: ${budget.spent}/${budget.total}. Risk: ${riskAssessment.riskLevel}. Review report?`,
     title: 'Litigation Matter Review',
     context: {
@@ -108,9 +117,15 @@ export async function process(inputs, ctx) {
       budgetSpent: budget.spent,
       riskLevel: riskAssessment.riskLevel,
       files: [{ path: report.reportPath, format: 'markdown', label: 'Matter Report' }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     matterId,

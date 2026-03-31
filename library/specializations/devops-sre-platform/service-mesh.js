@@ -84,7 +84,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Assessing service mesh requirements and planning implementation');
 
-  const assessmentResult = await ctx.task(assessServiceMeshRequirementsTask, {
+  let assessmentResult = await ctx.task(assessServiceMeshRequirementsTask, {
     projectName,
     serviceMeshType,
     clusterInfo,
@@ -111,8 +111,20 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Assessment complete - ${assessmentResult.servicesAnalyzed} services analyzed, readiness score: ${assessmentResult.readinessScore}/100`);
 
-  // Quality Gate: Assessment review
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      assessmentResult = await ctx.task(assessServiceMeshRequirementsTask, { ...{
+    projectName,
+    serviceMeshType,
+    clusterInfo,
+    services,
+    environment,
+    requirements,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Service mesh assessment complete for ${projectName}. Readiness score: ${assessmentResult.readinessScore}/100. ${assessmentResult.servicesAnalyzed} services analyzed. Proceed with ${serviceMeshType} implementation?`,
     title: 'Service Mesh Assessment Review',
     context: {
@@ -125,16 +137,22 @@ export async function process(inputs, ctx) {
         recommendations: assessmentResult.recommendations
       },
       files: assessmentResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 2: SERVICE MESH INSTALLATION
   // ============================================================================
 
   ctx.log('info', 'Phase 2: Installing service mesh control plane and data plane');
 
-  const installationResult = await ctx.task(installServiceMeshTask, {
+  let installationResult = await ctx.task(installServiceMeshTask, {
     projectName,
     serviceMeshType,
     clusterInfo,
@@ -160,8 +178,19 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Service mesh installed - Control plane: ${installationResult.controlPlane.status}, Version: ${installationResult.version}`);
 
-  // Quality Gate: Installation verification
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval2 = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval2) {
+      installationResult = await ctx.task(installServiceMeshTask, { ...{
+    projectName,
+    serviceMeshType,
+    clusterInfo,
+    environment,
+    requirements,
+    outputDir
+  }, feedback: lastFeedback_finalApproval2, attempt: attempt + 1 });
+    }
+  const finalApproval2 = await ctx.breakpoint({
     question: `${serviceMeshType} service mesh installed successfully. Control plane status: ${installationResult.controlPlane.status}. Verify installation before proceeding with sidecar injection?`,
     title: 'Service Mesh Installation Verification',
     context: {
@@ -174,9 +203,15 @@ export async function process(inputs, ctx) {
         namespaces: installationResult.namespaces
       },
       files: installationResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval2 || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval2.approved) break;
+    lastFeedback_finalApproval2 = finalApproval2.response || finalApproval2.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 3: SIDECAR INJECTION SETUP
   // ============================================================================
@@ -216,7 +251,7 @@ export async function process(inputs, ctx) {
   if (requirements.mtls) {
     ctx.log('info', 'Phase 4: Configuring mutual TLS (mTLS) for service-to-service encryption');
 
-    const mtlsResult = await ctx.task(configureMtlsTask, {
+    let mtlsResult = await ctx.task(configureMtlsTask, {
       projectName,
       serviceMeshType,
       clusterInfo,
@@ -243,8 +278,19 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `mTLS configured - Mode: ${mtlsResult.mode}, Certificates: ${mtlsResult.certificateManagement}`);
 
-    // Quality Gate: mTLS verification
-    await ctx.breakpoint({
+      let lastFeedback_finalApproval3 = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_finalApproval3) {
+        mtlsResult = await ctx.task(configureMtlsTask, { ...{
+      projectName,
+      serviceMeshType,
+      clusterInfo,
+      services,
+      environment,
+      outputDir
+    }, feedback: lastFeedback_finalApproval3, attempt: attempt + 1 });
+      }
+  const finalApproval3 = await ctx.breakpoint({
       question: `mTLS configured with mode: ${mtlsResult.mode}. ${mtlsResult.servicesSecured} services secured. Verify secure communication is working?`,
       title: 'mTLS Security Verification',
       context: {
@@ -256,9 +302,15 @@ export async function process(inputs, ctx) {
           certificateManagement: mtlsResult.certificateManagement
         },
         files: mtlsResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_finalApproval3 || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (finalApproval3.approved) break;
+      lastFeedback_finalApproval3 = finalApproval3.response || finalApproval3.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 5: TRAFFIC MANAGEMENT CONFIGURATION
@@ -293,7 +345,6 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Traffic management configured - Routes: ${trafficResult.virtualServices.length}, Gateways: ${trafficResult.gateways.length}`);
   }
-
   // ============================================================================
   // PHASE 6: RESILIENCE PATTERNS IMPLEMENTATION
   // ============================================================================
@@ -340,7 +391,6 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Resilience patterns configured - Circuit breakers: ${circuitBreakerResult.policies.length}, Retries: ${retryResult.policies.length}, Timeouts: ${timeoutResult.policies.length}`);
   }
-
   // ============================================================================
   // PHASE 7: OBSERVABILITY INTEGRATION
   // ============================================================================
@@ -348,7 +398,7 @@ export async function process(inputs, ctx) {
   if (requirements.observability) {
     ctx.log('info', 'Phase 7: Integrating observability (metrics, traces, logs)');
 
-    const observabilityResult = await ctx.task(integrateObservabilityTask, {
+    let observabilityResult = await ctx.task(integrateObservabilityTask, {
       projectName,
       serviceMeshType,
       clusterInfo,
@@ -363,9 +413,18 @@ export async function process(inputs, ctx) {
       observability = observabilityResult;
       ctx.log('info', `Observability integrated - Metrics: ${observabilityResult.metricsEnabled}, Traces: ${observabilityResult.tracingEnabled}, Dashboards: ${observabilityResult.dashboards.length}`);
     }
-
-    // Quality Gate: Observability verification
-    await ctx.breakpoint({
+  let lastFeedback_finalApproval4 = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_finalApproval4) {
+        observabilityResult = await ctx.task(integrateObservabilityTask, { ...{
+      projectName,
+      serviceMeshType,
+      clusterInfo,
+      services,
+      outputDir
+    }, feedback: lastFeedback_finalApproval4, attempt: attempt + 1 });
+      }
+  const finalApproval4 = await ctx.breakpoint({
       question: `Observability integration complete. Metrics: ${observabilityResult.metricsEnabled}, Tracing: ${observabilityResult.tracingEnabled}. ${observabilityResult.dashboards.length} dashboards created. Verify telemetry data is being collected?`,
       title: 'Observability Integration Review',
       context: {
@@ -377,9 +436,15 @@ export async function process(inputs, ctx) {
           dashboards: observabilityResult.dashboards.length
         },
         files: observabilityResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_finalApproval4 || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (finalApproval4.approved) break;
+      lastFeedback_finalApproval4 = finalApproval4.response || finalApproval4.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 8: EGRESS CONTROL AND EXTERNAL SERVICES
@@ -404,7 +469,6 @@ export async function process(inputs, ctx) {
       ctx.log('info', `Egress control configured - ${egressResult.serviceEntries.length} external services registered`);
     }
   }
-
   // ============================================================================
   // PHASE 9: RATE LIMITING AND QUOTAS
   // ============================================================================
@@ -428,14 +492,13 @@ export async function process(inputs, ctx) {
       ctx.log('info', `Rate limiting configured - ${rateLimitResult.policies.length} policies created`);
     }
   }
-
   // ============================================================================
   // PHASE 10: PROGRESSIVE TRAFFIC MIGRATION
   // ============================================================================
 
   ctx.log('info', 'Phase 10: Executing progressive traffic migration to service mesh');
 
-  const migrationResult = await ctx.task(executeTrafficMigrationTask, {
+  let migrationResult = await ctx.task(executeTrafficMigrationTask, {
     projectName,
     serviceMeshType,
     services,
@@ -460,8 +523,18 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Traffic migration ${migrationResult.status} - ${migrationResult.servicesMigrated}/${services.length} services migrated`);
 
-  // Quality Gate: Migration verification
-  await ctx.breakpoint({
+    let lastFeedback_qualityGateApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_qualityGateApproval) {
+      migrationResult = await ctx.task(executeTrafficMigrationTask, { ...{
+    projectName,
+    serviceMeshType,
+    services,
+    migrationStrategy,
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval, attempt: attempt + 1 });
+    }
+  const qualityGateApproval = await ctx.breakpoint({
     question: `Traffic migration ${migrationResult.status}. ${migrationResult.servicesMigrated}/${services.length} services migrated. Current traffic percentage: ${migrationResult.currentTrafficPercentage}%. Verify migration is successful before proceeding to 100%?`,
     title: 'Traffic Migration Verification',
     context: {
@@ -474,16 +547,22 @@ export async function process(inputs, ctx) {
         issues: migrationResult.issues
       },
       files: migrationResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_qualityGateApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (qualityGateApproval.approved) break;
+    lastFeedback_qualityGateApproval = qualityGateApproval.response || qualityGateApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 11: SERVICE MESH VALIDATION AND TESTING
   // ============================================================================
 
   ctx.log('info', 'Phase 11: Validating service mesh functionality');
 
-  const validationResult = await ctx.task(validateServiceMeshTask, {
+  let validationResult = await ctx.task(validateServiceMeshTask, {
     projectName,
     serviceMeshType,
     clusterInfo,
@@ -494,18 +573,35 @@ export async function process(inputs, ctx) {
   });
 
   if (!validationResult.success) {
-    ctx.log('error', 'Service mesh validation failed');
-
-    await ctx.breakpoint({
+      let lastFeedback_phase11Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase11Review) {
+        validationResult = await ctx.task(validateServiceMeshTask, { ...{
+    projectName,
+    serviceMeshType,
+    clusterInfo,
+    services,
+    serviceMeshInfo,
+    requirements,
+    outputDir
+  }, feedback: lastFeedback_phase11Review, attempt: attempt + 1 });
+      }
+  const phase11Review = await ctx.breakpoint({
       question: `Service mesh validation failed with ${validationResult.failedTests} failed tests. Issues: ${validationResult.issues.length}. Review and fix issues?`,
       title: 'Service Mesh Validation Failed',
       context: {
         runId: ctx.runId,
         validation: validationResult,
         files: validationResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase11Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase11Review.approved) break;
+      lastFeedback_phase11Review = phase11Review.response || phase11Review.feedback || 'Changes requested';
+    } }
 
   artifacts.push(...validationResult.artifacts);
 
@@ -517,7 +613,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 12: Creating operational runbooks and documentation');
 
-  const documentationResult = await ctx.task(generateServiceMeshDocumentationTask, {
+  let documentationResult = await ctx.task(generateServiceMeshDocumentationTask, {
     projectName,
     serviceMeshType,
     serviceMeshInfo,
@@ -533,7 +629,6 @@ export async function process(inputs, ctx) {
   } else {
     artifacts.push(...documentationResult.artifacts);
   }
-
   // ============================================================================
   // FINAL QUALITY GATE AND HANDOFF
   // ============================================================================
@@ -541,9 +636,21 @@ export async function process(inputs, ctx) {
   const overallScore = validationResult.validationScore;
   const qualityThreshold = environment === 'production' ? 85 : 75;
 
-  ctx.log('info', `Overall service mesh quality score: ${overallScore}/100`);
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval5 = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval5) {
+      documentationResult = await ctx.task(generateServiceMeshDocumentationTask, { ...{
+    projectName,
+    serviceMeshType,
+    serviceMeshInfo,
+    policies,
+    observability,
+    migrationStatus,
+    validationResult,
+    outputDir
+  }, feedback: lastFeedback_finalApproval5, attempt: attempt + 1 });
+    }
+  const finalApproval5 = await ctx.breakpoint({
     question: `Service mesh implementation complete for ${projectName}. Overall quality score: ${overallScore}/100 (threshold: ${qualityThreshold}). ${migrationResult.servicesMigrated} services migrated. Ready to handoff?`,
     title: 'Final Service Mesh Review and Handoff',
     context: {
@@ -565,9 +672,15 @@ export async function process(inputs, ctx) {
         { path: documentationResult.architecturePath, format: 'markdown', label: 'Architecture Documentation' },
         { path: `${outputDir}/service-mesh-summary.json`, format: 'json', label: 'Summary Report' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval5 || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval5.approved) break;
+    lastFeedback_finalApproval5 = finalApproval5.response || finalApproval5.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -619,8 +732,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

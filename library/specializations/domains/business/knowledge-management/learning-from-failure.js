@@ -27,15 +27,24 @@ export async function process(inputs, ctx) {
 
   // Phase 1: Psychological Safety Setup
   ctx.log('info', 'Phase 1: Establishing psychological safety framework');
-  const safetySetup = await ctx.task(psychologicalSafetyTask, { safetyPrinciples, organizationalContext, participantList, outputDir });
-  artifacts.push(...safetySetup.artifacts);
-
-  await ctx.breakpoint({
+  let safetySetup = await ctx.task(psychologicalSafetyTask, { safetyPrinciples, organizationalContext, participantList, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      safetySetup = await ctx.task(psychologicalSafetyTask, { ...{ safetyPrinciples, organizationalContext, participantList, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Psychological safety framework established with ${safetySetup.safeguards.length} safeguards. Ready to proceed?`,
     title: 'Safety Framework Review',
-    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })), summary: { safeguards: safetySetup.safeguards.length } }
-  });
-
+    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })), summary: { safeguards: safetySetup.safeguards.length } },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 2: Incident Documentation
   ctx.log('info', 'Phase 2: Documenting incident objectively');
   const incidentDocumentation = await ctx.task(incidentDocumentationTask, { incident, contextData, outputDir });
@@ -83,7 +92,6 @@ export async function process(inputs, ctx) {
     reviewResult = await ctx.task(stakeholderReviewTask, { failureAnalysis: rootCauseAnalysis.analysis, lessons: lessonExtraction.lessons, qualityScore: qualityAssessment.overallScore, outputDir });
     artifacts.push(...reviewResult.artifacts);
   }
-
   const endTime = ctx.now();
   return {
     success: true,
@@ -101,8 +109,7 @@ export async function process(inputs, ctx) {
     metadata: { processId: 'domains/business/knowledge-management/learning-from-failure', timestamp: startTime, outputDir }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 export const psychologicalSafetyTask = defineTask('psychological-safety', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Establish psychological safety',

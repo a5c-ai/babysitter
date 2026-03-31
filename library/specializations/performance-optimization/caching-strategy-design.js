@@ -37,15 +37,24 @@ export async function process(inputs, ctx) {
   artifacts.push(...accessPatterns.artifacts);
 
   // Phase 2: Identify Cacheable Data
-  const cacheableAnalysis = await ctx.task(identifyCacheableDataTask, { projectName, accessPatterns, outputDir });
-  artifacts.push(...cacheableAnalysis.artifacts);
-
-  await ctx.breakpoint({
+  let cacheableAnalysis = await ctx.task(identifyCacheableDataTask, { projectName, accessPatterns, outputDir });
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      cacheableAnalysis = await ctx.task(identifyCacheableDataTask, { ...{ projectName, accessPatterns, outputDir }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Identified ${cacheableAnalysis.cacheableItems.length} cacheable data items. Design cache layers?`,
     title: 'Cacheable Data Analysis',
-    context: { runId: ctx.runId, cacheableAnalysis }
-  });
-
+    context: { runId: ctx.runId, cacheableAnalysis },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // Phase 3: Select Cache Layers
   const layerSelection = await ctx.task(selectCacheLayersTask, { projectName, cacheableAnalysis, cacheLayers, outputDir });
   artifacts.push(...layerSelection.artifacts);
@@ -67,15 +76,24 @@ export async function process(inputs, ctx) {
   artifacts.push(...monitoring.artifacts);
 
   // Phase 8: Document Strategy
-  const documentation = await ctx.task(documentCachingStrategyTask, { projectName, layerSelection, keyStrategy, ttlConfig, invalidation, outputDir });
-  artifacts.push(...documentation.artifacts);
-
-  await ctx.breakpoint({
+  let documentation = await ctx.task(documentCachingStrategyTask, { projectName, layerSelection, keyStrategy, ttlConfig, invalidation, outputDir });
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      documentation = await ctx.task(documentCachingStrategyTask, { ...{ projectName, layerSelection, keyStrategy, ttlConfig, invalidation, outputDir }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Caching strategy designed with ${layerSelection.layers.length} layers. Target hit ratio: ${monitoring.hitRatioTarget}%. Accept?`,
     title: 'Caching Strategy Review',
-    context: { runId: ctx.runId, layerSelection, monitoring }
-  });
-
+    context: { runId: ctx.runId, layerSelection, monitoring },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     projectName,

@@ -65,14 +65,13 @@ export async function process(inputs, ctx) {
   if (inventoryAllocation.shortages.length > 0) {
     ctx.log('warn', `Inventory shortages detected for ${inventoryAllocation.shortages.length} items`);
   }
-
   // ============================================================================
   // PHASE 3: WAVE PLANNING
   // ============================================================================
 
   ctx.log('info', 'Phase 3: Planning pick waves');
 
-  const wavePlanning = await ctx.task(wavePlanningTask, {
+  let wavePlanning = await ctx.task(wavePlanningTask, {
     allocatedOrders: inventoryAllocation.allocatedOrders,
     warehouseConfig,
     shiftCapacity,
@@ -82,8 +81,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...wavePlanning.artifacts);
 
-  // Quality Gate: Review wave plan
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      wavePlanning = await ctx.task(wavePlanningTask, { ...{
+    allocatedOrders: inventoryAllocation.allocatedOrders,
+    warehouseConfig,
+    shiftCapacity,
+    pickingStrategy,
+    outputDir
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Wave planning complete. ${wavePlanning.waves.length} waves created for ${orders.length} orders. Review wave assignments?`,
     title: 'Wave Planning Review',
     context: {
@@ -92,9 +101,15 @@ export async function process(inputs, ctx) {
       ordersPerWave: wavePlanning.averageOrdersPerWave,
       estimatedDuration: wavePlanning.totalEstimatedTime,
       files: wavePlanning.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 4: PICK PATH OPTIMIZATION
   // ============================================================================
@@ -198,7 +213,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 11: Calculating performance metrics');
 
-  const performanceMetrics = await ctx.task(performanceMetricsTask, {
+  let performanceMetrics = await ctx.task(performanceMetricsTask, {
     wavePlanning,
     pickExecution,
     packingInstructions,
@@ -209,8 +224,19 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...performanceMetrics.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      performanceMetrics = await ctx.task(performanceMetricsTask, { ...{
+    wavePlanning,
+    pickExecution,
+    packingInstructions,
+    shipConfirmation,
+    startTime,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Pick-Pack-Ship complete. ${shipConfirmation.shippedOrders.length} orders shipped. Pick accuracy: ${performanceMetrics.metrics.pickAccuracy}%. Finalize?`,
     title: 'Pick-Pack-Ship Complete',
     context: {
@@ -226,9 +252,15 @@ export async function process(inputs, ctx) {
         { path: shipConfirmation.manifestPath, format: 'json', label: 'Ship Manifest' },
         { path: performanceMetrics.reportPath, format: 'markdown', label: 'Performance Report' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -256,8 +288,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

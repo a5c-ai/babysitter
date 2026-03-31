@@ -57,15 +57,24 @@ export async function process(inputs, ctx) {
   const fullSystemTest = await ctx.task(fullSystemTestTask, { robotName, subsystemIntegration, outputDir });
   artifacts.push(...fullSystemTest.artifacts);
 
-  const performanceValidation = await ctx.task(performanceValidationTask, { robotName, fullSystemTest, outputDir });
-  artifacts.push(...performanceValidation.artifacts);
-
-  await ctx.breakpoint({
+  let performanceValidation = await ctx.task(performanceValidationTask, { robotName, fullSystemTest, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      performanceValidation = await ctx.task(performanceValidationTask, { ...{ robotName, fullSystemTest, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Robot Bring-Up Complete for ${robotName}. All subsystems: ${fullSystemTest.allSubsystemsPassed ? 'PASSED' : 'FAILED'}. Performance: ${performanceValidation.performanceScore}%. Review?`,
     title: 'Robot Bring-Up Complete',
-    context: { runId: ctx.runId, subsystemsPassed: fullSystemTest.allSubsystemsPassed, performanceScore: performanceValidation.performanceScore }
-  });
-
+    context: { runId: ctx.runId, subsystemsPassed: fullSystemTest.allSubsystemsPassed, performanceScore: performanceValidation.performanceScore },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: fullSystemTest.allSubsystemsPassed && performanceValidation.performanceScore >= 90,
     robotName,

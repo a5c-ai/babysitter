@@ -110,7 +110,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 7: Scoring adaptation quality');
-  const qualityScore = await ctx.task(adaptationQualityScoringTask, {
+  let qualityScore = await ctx.task(adaptationQualityScoringTask, {
     adaptationPlanning,
     translation,
     backTranslation,
@@ -125,8 +125,20 @@ export async function process(inputs, ctx) {
   const adaptationScore = qualityScore.overallScore;
   const qualityMet = adaptationScore >= 80;
 
-  // Breakpoint: Review adaptation
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      qualityScore = await ctx.task(adaptationQualityScoringTask, { ...{
+    adaptationPlanning,
+    translation,
+    backTranslation,
+    expertCommittee,
+    cognitiveInterviewing,
+    invarianceTesting,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Cross-cultural adaptation complete. Quality score: ${adaptationScore}/100. ${qualityMet ? 'Adaptation meets quality standards!' : 'Adaptation may need refinement.'} Review and approve?`,
     title: 'Cross-Cultural Adaptation Review',
     context: {
@@ -141,9 +153,15 @@ export async function process(inputs, ctx) {
         targetLanguages,
         invarianceLevel: invarianceTesting.invarianceLevel
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 

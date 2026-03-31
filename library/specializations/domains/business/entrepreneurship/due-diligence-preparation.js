@@ -68,23 +68,35 @@ export async function process(inputs, ctx) {
   artifacts.push(...(customerDocs.artifacts || []));
 
   // Phase 5: IP Documentation
-  const ipDocs = await ctx.task(ipDocsTask, {
+  let ipDocs = await ctx.task(ipDocsTask, {
     companyName
   });
 
   artifacts.push(...(ipDocs.artifacts || []));
 
-  // Breakpoint: Review document status
-  await ctx.breakpoint({
+    let lastFeedback_phase5Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase5Review) {
+      ipDocs = await ctx.task(ipDocsTask, { ...{
+    companyName
+  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+    }
+  const phase5Review = await ctx.breakpoint({
     question: `Review due diligence document status for ${companyName}. Key documents identified. Continue with team and data room setup?`,
     title: 'Due Diligence Documents Review',
     context: {
       runId: ctx.runId,
       companyName,
       files: artifacts
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase5Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase5Review.approved) break;
+    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+  }
   // Phase 6: Team Documentation
   const teamDocs = await ctx.task(teamDocsTask, {
     companyName,
@@ -116,7 +128,7 @@ export async function process(inputs, ctx) {
   artifacts.push(...(mgmtPresentation.artifacts || []));
 
   // Phase 9: Risk Identification and Mitigation
-  const riskMitigation = await ctx.task(riskMitigationTask, {
+  let riskMitigation = await ctx.task(riskMitigationTask, {
     companyName,
     corporateDocs,
     financialDocs
@@ -124,8 +136,16 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...(riskMitigation.artifacts || []));
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      riskMitigation = await ctx.task(riskMitigationTask, { ...{
+    companyName,
+    corporateDocs,
+    financialDocs
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Due diligence preparation complete for ${companyName}. Data room organized, risks identified. Ready for investor diligence?`,
     title: 'Due Diligence Preparation Complete',
     context: {
@@ -133,9 +153,15 @@ export async function process(inputs, ctx) {
       companyName,
       risks: riskMitigation.riskCount,
       files: artifacts
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -164,8 +190,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const corporateDocsTask = defineTask('corporate-docs', (args, taskCtx) => ({
   kind: 'agent',

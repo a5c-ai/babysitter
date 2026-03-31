@@ -57,14 +57,22 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 5: Mesh Convergence Study
-  const meshConvergence = await ctx.task(meshConvergenceTask, {
+  let meshConvergence = await ctx.task(meshConvergenceTask, {
     deviceName,
     meshGeneration,
     boundaryConditions
   });
 
-  // Breakpoint: Review mesh convergence
-  await ctx.breakpoint({
+    let lastFeedback_phase5Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase5Review) {
+      meshConvergence = await ctx.task(meshConvergenceTask, { ...{
+    deviceName,
+    meshGeneration,
+    boundaryConditions
+  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+    }
+  const phase5Review = await ctx.breakpoint({
     question: `Review mesh convergence study for ${deviceName}. Is mesh refinement adequate?`,
     title: 'Mesh Convergence Review',
     context: {
@@ -76,9 +84,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: meshConvergence
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase5Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase5Review.approved) break;
+    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+  }
   // Phase 6: Stress and Strain Analysis
   const stressAnalysis = await ctx.task(stressStrainAnalysisTask, {
     deviceName,
@@ -96,15 +110,24 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 8: Model Validation Planning
-  const modelValidation = await ctx.task(modelValidationTask, {
+  let modelValidation = await ctx.task(modelValidationTask, {
     deviceName,
     stressAnalysis,
     fatigueAnalysis,
     loadingConditions
   });
 
-  // Final Breakpoint: FEA Approval
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      modelValidation = await ctx.task(modelValidationTask, { ...{
+    deviceName,
+    stressAnalysis,
+    fatigueAnalysis,
+    loadingConditions
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `FEA complete for ${deviceName}. Maximum stress: ${stressAnalysis.maxStress}. Approve analysis results?`,
     title: 'FEA Approval',
     context: {
@@ -115,9 +138,15 @@ export async function process(inputs, ctx) {
       files: [
         { path: `artifacts/fea-report.json`, format: 'json', content: { stress: stressAnalysis, fatigue: fatigueAnalysis } }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     deviceName,
@@ -135,8 +164,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const geometryPreparationTask = defineTask('geometry-preparation', (args, taskCtx) => ({
   kind: 'agent',

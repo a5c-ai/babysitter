@@ -56,19 +56,33 @@ export async function process(inputs, ctx) {
   });
 
   // Quality Gate: Transcendental Validity
-  const validityCheck = await ctx.task(checkTranscendentalValidityTask, {
+  let validityCheck = await ctx.task(checkTranscendentalValidityTask, {
     deduction: transcendentalDeduction,
     constitutiveStructures: constitutiveAnalysis.structures,
     regulativePrinciples: regulativePrinciples.principles
   });
 
-  if (validityCheck.validityScore < 0.6) {
-    await ctx.breakpoint('transcendental-revision', {
+      let lastFeedback = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback) {
+        validityCheck = await ctx.task(checkTranscendentalValidityTask, { ...{
+    deduction: transcendentalDeduction,
+    constitutiveStructures: constitutiveAnalysis.structures,
+    regulativePrinciples: regulativePrinciples.principles
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+      }
+  const qualityGateApproval = await ctx.breakpoint('transcendental-revision', {
       message: 'Transcendental argument has validity concerns',
       concerns: validityCheck.concerns,
-      suggestedRevisions: validityCheck.revisionSuggestions
-    });
-  }
+      suggestedRevisions: validityCheck.revisionSuggestions,
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (qualityGateApproval.approved) break;
+      lastFeedback = qualityGateApproval.response || qualityGateApproval.feedback || 'Changes requested';
+    } }
 
   // Phase 7: Modal Status Assessment
   const modalAssessment = await ctx.task(assessModalStatusTask, {

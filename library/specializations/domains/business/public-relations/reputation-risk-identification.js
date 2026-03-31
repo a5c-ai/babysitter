@@ -19,17 +19,25 @@ export async function process(inputs, ctx) {
     targetQuality = 85
   } = inputs;
 
-  // Phase 1: Environmental Scanning
-  await ctx.breakpoint({
+  let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    // No preceding task identified for re-run with feedback
+    const phase1Review = await ctx.breakpoint({
     question: 'Starting reputation risk identification. Conduct environmental scanning?',
     title: 'Phase 1: Environmental Scanning',
     context: {
       runId: ctx.runId,
       phase: 'environmental-scanning',
       organization: organization.name
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   const [mediaScanning, socialScanning, industryScanning] = await Promise.all([
     ctx.task(conductMediaScanningTask, {
       organization,
@@ -46,33 +54,55 @@ export async function process(inputs, ctx) {
     })
   ]);
 
-  // Phase 2: Stakeholder Sentiment Analysis
-  await ctx.breakpoint({
+  let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    // No preceding task identified for re-run with feedback
+    const phase2Review = await ctx.breakpoint({
     question: 'Environmental scanning complete. Analyze stakeholder sentiment?',
     title: 'Phase 2: Stakeholder Sentiment',
     context: {
       runId: ctx.runId,
       phase: 'stakeholder-sentiment'
-    }
-  });
-
-  const stakeholderAnalysis = await ctx.task(analyzeStakeholderSentimentTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
+  let stakeholderAnalysis = await ctx.task(analyzeStakeholderSentimentTask, {
     stakeholderIntelligence,
     socialScanning,
     organization
   });
 
-  // Phase 3: Issue Emergence Detection
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      stakeholderAnalysis = await ctx.task(analyzeStakeholderSentimentTask, { ...{
+    stakeholderIntelligence,
+    socialScanning,
+    organization
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: 'Sentiment analyzed. Detect emerging issues?',
     title: 'Phase 3: Issue Detection',
     context: {
       runId: ctx.runId,
       phase: 'issue-detection'
-    }
-  });
-
-  const emergingIssues = await ctx.task(detectEmergingIssuesTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
+  let emergingIssues = await ctx.task(detectEmergingIssuesTask, {
     mediaScanning,
     socialScanning,
     industryScanning,
@@ -80,98 +110,184 @@ export async function process(inputs, ctx) {
     historicalIssues
   });
 
-  // Phase 4: Threat Assessment
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      emergingIssues = await ctx.task(detectEmergingIssuesTask, { ...{
+    mediaScanning,
+    socialScanning,
+    industryScanning,
+    stakeholderAnalysis,
+    historicalIssues
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: 'Issues detected. Assess threat levels?',
     title: 'Phase 4: Threat Assessment',
     context: {
       runId: ctx.runId,
       phase: 'threat-assessment',
       issueCount: emergingIssues.issues.length
-    }
-  });
-
-  const threatAssessment = await ctx.task(assessThreatsTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
+  let threatAssessment = await ctx.task(assessThreatsTask, {
     emergingIssues,
     organization,
     historicalIssues
   });
 
-  // Phase 5: Vulnerability Mapping
-  await ctx.breakpoint({
+    let lastFeedback_phase5Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase5Review) {
+      threatAssessment = await ctx.task(assessThreatsTask, { ...{
+    emergingIssues,
+    organization,
+    historicalIssues
+  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+    }
+  const phase5Review = await ctx.breakpoint({
     question: 'Threats assessed. Map organizational vulnerabilities?',
     title: 'Phase 5: Vulnerability Mapping',
     context: {
       runId: ctx.runId,
       phase: 'vulnerability-mapping'
-    }
-  });
-
-  const vulnerabilityMap = await ctx.task(mapVulnerabilitiesTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase5Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase5Review.approved) break;
+    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+  }
+  let vulnerabilityMap = await ctx.task(mapVulnerabilitiesTask, {
     threatAssessment,
     organization,
     industryContext
   });
 
-  // Phase 6: Early Warning Indicators
-  await ctx.breakpoint({
+    let lastFeedback_phase6Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase6Review) {
+      vulnerabilityMap = await ctx.task(mapVulnerabilitiesTask, { ...{
+    threatAssessment,
+    organization,
+    industryContext
+  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
+    }
+  const phase6Review = await ctx.breakpoint({
     question: 'Vulnerabilities mapped. Define early warning indicators?',
     title: 'Phase 6: Early Warning Indicators',
     context: {
       runId: ctx.runId,
       phase: 'early-warning'
-    }
-  });
-
-  const earlyWarnings = await ctx.task(defineEarlyWarningsTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase6Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase6Review.approved) break;
+    lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
+  }
+  let earlyWarnings = await ctx.task(defineEarlyWarningsTask, {
     threatAssessment,
     vulnerabilityMap,
     emergingIssues
   });
 
-  // Phase 7: Risk Prioritization
-  await ctx.breakpoint({
+    let lastFeedback_phase7Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase7Review) {
+      earlyWarnings = await ctx.task(defineEarlyWarningsTask, { ...{
+    threatAssessment,
+    vulnerabilityMap,
+    emergingIssues
+  }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
+    }
+  const phase7Review = await ctx.breakpoint({
     question: 'Warnings defined. Prioritize risks for action?',
     title: 'Phase 7: Risk Prioritization',
     context: {
       runId: ctx.runId,
       phase: 'risk-prioritization'
-    }
-  });
-
-  const riskPrioritization = await ctx.task(prioritizeRisksTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase7Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase7Review.approved) break;
+    lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
+  }
+  let riskPrioritization = await ctx.task(prioritizeRisksTask, {
     threatAssessment,
     vulnerabilityMap,
     earlyWarnings
   });
 
-  // Phase 8: Intervention Recommendations
-  await ctx.breakpoint({
+    let lastFeedback_phase8Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase8Review) {
+      riskPrioritization = await ctx.task(prioritizeRisksTask, { ...{
+    threatAssessment,
+    vulnerabilityMap,
+    earlyWarnings
+  }, feedback: lastFeedback_phase8Review, attempt: attempt + 1 });
+    }
+  const phase8Review = await ctx.breakpoint({
     question: 'Risks prioritized. Develop intervention recommendations?',
     title: 'Phase 8: Intervention Recommendations',
     context: {
       runId: ctx.runId,
       phase: 'intervention-recommendations'
-    }
-  });
-
-  const interventionRecommendations = await ctx.task(developInterventionsTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase8Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase8Review.approved) break;
+    lastFeedback_phase8Review = phase8Review.response || phase8Review.feedback || 'Changes requested';
+  }
+  let interventionRecommendations = await ctx.task(developInterventionsTask, {
     riskPrioritization,
     threatAssessment,
     organization
   });
 
-  // Phase 9: Quality Validation
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      interventionRecommendations = await ctx.task(developInterventionsTask, { ...{
+    riskPrioritization,
+    threatAssessment,
+    organization
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: 'Validate risk identification quality?',
     title: 'Phase 9: Quality Validation',
     context: {
       runId: ctx.runId,
       phase: 'quality-validation',
       targetQuality
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const qualityResult = await ctx.task(validateRiskIdentificationTask, {
     mediaScanning,
     socialScanning,
@@ -225,8 +341,7 @@ export async function process(inputs, ctx) {
     };
   }
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const conductMediaScanningTask = defineTask('conduct-media-scanning', (args, taskCtx) => ({
   kind: 'agent',

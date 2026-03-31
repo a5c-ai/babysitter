@@ -93,7 +93,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Assessing current policy framework and planning');
 
-  const frameworkAssessmentResult = await ctx.task(assessPolicyFrameworkTask, {
+  let frameworkAssessmentResult = await ctx.task(assessPolicyFrameworkTask, {
     organization,
     policyScope,
     frameworks,
@@ -109,8 +109,21 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Framework assessment complete - ${frameworkAssessmentResult.gapsIdentified} gaps identified, ${frameworkAssessmentResult.policiesRequired} policies required`);
 
-  // Quality Gate: Framework assessment review
-  await ctx.breakpoint({
+    let lastFeedback_qualityGateApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_qualityGateApproval) {
+      frameworkAssessmentResult = await ctx.task(assessPolicyFrameworkTask, { ...{
+    organization,
+    policyScope,
+    frameworks,
+    complianceRequirements,
+    industryVertical,
+    existingPolicies,
+    organizationSize,
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval, attempt: attempt + 1 });
+    }
+  const qualityGateApproval = await ctx.breakpoint({
     question: `Policy framework assessed for ${organization}. ${frameworkAssessmentResult.policiesRequired} policies required, ${frameworkAssessmentResult.gapsIdentified} gaps identified. Review framework assessment?`,
     title: 'Policy Framework Assessment Review',
     context: {
@@ -128,9 +141,15 @@ export async function process(inputs, ctx) {
       gaps: frameworkAssessmentResult.gaps.slice(0, 10),
       recommendations: frameworkAssessmentResult.recommendations,
       files: frameworkAssessmentResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_qualityGateApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (qualityGateApproval.approved) break;
+    lastFeedback_qualityGateApproval = qualityGateApproval.response || qualityGateApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 2: POLICY HIERARCHY AND STRUCTURE DESIGN
   // ============================================================================
@@ -159,7 +178,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 3: Creating Information Security Master Policy');
 
-  const masterPolicyResult = await ctx.task(createMasterSecurityPolicyTask, {
+  let masterPolicyResult = await ctx.task(createMasterSecurityPolicyTask, {
     organization,
     frameworks,
     complianceRequirements,
@@ -205,7 +224,6 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Access control policies created - ${accessControlResult.policies.length} policies, ${accessControlResult.procedures.length} procedures`);
   }
-
   // ============================================================================
   // PHASE 5: DATA PROTECTION AND PRIVACY POLICIES
   // ============================================================================
@@ -235,7 +253,6 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Data protection policies created - ${dataProtectionResult.policies.length} policies, ${dataProtectionResult.procedures.length} procedures`);
   }
-
   // ============================================================================
   // PHASE 6: INCIDENT RESPONSE AND BUSINESS CONTINUITY POLICIES
   // ============================================================================
@@ -265,7 +282,6 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Incident response policies created - ${incidentResponseResult.policies.length} policies, ${incidentResponseResult.procedures.length} procedures`);
   }
-
   // ============================================================================
   // PHASE 7: ACCEPTABLE USE AND SECURITY AWARENESS POLICIES
   // ============================================================================
@@ -294,7 +310,6 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Acceptable use policies created - ${acceptableUseResult.policies.length} policies, ${acceptableUseResult.guidelines.length} guidelines`);
   }
-
   // ============================================================================
   // PHASE 8: ASSET MANAGEMENT AND PHYSICAL SECURITY POLICIES
   // ============================================================================
@@ -323,9 +338,20 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Asset management policies created - ${assetManagementResult.policies.length} policies, ${assetManagementResult.procedures.length} procedures`);
   }
-
-  // Quality Gate: Core policies review
-  await ctx.breakpoint({
+  let lastFeedback_qualityGateApproval2 = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_qualityGateApproval2) {
+      masterPolicyResult = await ctx.task(createMasterSecurityPolicyTask, { ...{
+    organization,
+    frameworks,
+    complianceRequirements,
+    industryVertical,
+    organizationSize,
+    policyStructure: policyStructureResult.structure,
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval2, attempt: attempt + 1 });
+    }
+  const qualityGateApproval2 = await ctx.breakpoint({
     question: `Core security policies created. ${policiesCreated} policies, ${proceduresCreated} procedures, ${standardsCreated} standards. Review core policies before continuing?`,
     title: 'Core Policies Review',
     context: {
@@ -346,9 +372,15 @@ export async function process(inputs, ctx) {
         assetManagement: assetManagementResult?.policies.length || 0
       },
       files: artifacts.filter(a => a.type === 'policy').slice(0, 15).map(a => ({ path: a.path, format: a.format || 'markdown', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_qualityGateApproval2 || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (qualityGateApproval2.approved) break;
+    lastFeedback_qualityGateApproval2 = qualityGateApproval2.response || qualityGateApproval2.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 9: VENDOR AND THIRD-PARTY MANAGEMENT POLICIES
   // ============================================================================
@@ -377,7 +409,6 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Vendor management policies created - ${vendorManagementResult.policies.length} policies, ${vendorManagementResult.procedures.length} procedures`);
   }
-
   // ============================================================================
   // PHASE 10: CHANGE MANAGEMENT AND SYSTEM DEVELOPMENT POLICIES
   // ============================================================================
@@ -406,7 +437,6 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Change management policies created - ${changeManagementResult.policies.length} policies, ${changeManagementResult.procedures.length} procedures`);
   }
-
   // ============================================================================
   // PHASE 11: CRYPTOGRAPHY AND ENCRYPTION POLICIES
   // ============================================================================
@@ -435,7 +465,6 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Cryptography policies created - ${cryptographyResult.policies.length} policies, ${cryptographyResult.standards.length} standards`);
   }
-
   // ============================================================================
   // PHASE 12: CLOUD SECURITY AND REMOTE WORK POLICIES
   // ============================================================================
@@ -464,7 +493,6 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Cloud security policies created - ${cloudSecurityResult.policies.length} policies, ${cloudSecurityResult.procedures.length} procedures`);
   }
-
   // ============================================================================
   // PHASE 13: POLICY APPROVAL WORKFLOW AND VERSION CONTROL
   // ============================================================================
@@ -488,7 +516,6 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Approval workflow setup - ${approvalWorkflowResult.approversAssigned} approvers assigned, ${approvalWorkflowResult.workflowsCreated} workflows created`);
   }
-
   // ============================================================================
   // PHASE 14: POLICY ACKNOWLEDGMENT AND TRAINING PROGRAM
   // ============================================================================
@@ -496,7 +523,7 @@ export async function process(inputs, ctx) {
   if (employeeAcknowledgment || policyTraining) {
     ctx.log('info', 'Phase 14: Creating policy acknowledgment and training program');
 
-    const trainingProgramResult = await ctx.task(createTrainingProgramTask, {
+    let trainingProgramResult = await ctx.task(createTrainingProgramTask, {
       organization,
       policies,
       procedures,
@@ -512,8 +539,21 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Training program created - ${trainingProgramResult.trainingModules} modules, ${trainingProgramResult.acknowledgmentForms} acknowledgment forms`);
 
-    // Quality Gate: Training program review
-    await ctx.breakpoint({
+      let lastFeedback_qualityGateApproval3 = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_qualityGateApproval3) {
+        trainingProgramResult = await ctx.task(createTrainingProgramTask, { ...{
+      organization,
+      policies,
+      procedures,
+      guidelines,
+      employeeAcknowledgment,
+      policyTraining,
+      organizationSize,
+      outputDir
+    }, feedback: lastFeedback_qualityGateApproval3, attempt: attempt + 1 });
+      }
+  const qualityGateApproval3 = await ctx.breakpoint({
       question: `Policy training program created with ${trainingProgramResult.trainingModules} modules and ${trainingProgramResult.acknowledgmentForms} acknowledgment forms. Review training program?`,
       title: 'Policy Training Program Review',
       context: {
@@ -525,9 +565,15 @@ export async function process(inputs, ctx) {
           deliveryMethods: trainingProgramResult.deliveryMethods
         },
         files: trainingProgramResult.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown', label: a.label }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_qualityGateApproval3 || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (qualityGateApproval3.approved) break;
+      lastFeedback_qualityGateApproval3 = qualityGateApproval3.response || qualityGateApproval3.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 15: POLICY REVIEW AND MAINTENANCE SCHEDULE
@@ -576,7 +622,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 17: Creating executive summary and policy handbook');
 
-  const policyHandbookResult = await ctx.task(createPolicyHandbookTask, {
+  let policyHandbookResult = await ctx.task(createPolicyHandbookTask, {
     organization,
     policies,
     procedures,
@@ -594,8 +640,23 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Policy handbook created - ${policyHandbookResult.handbookPages} pages, ${policyHandbookResult.languageVersions} language versions`);
 
-  // Final Breakpoint: Security policy documentation complete
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      policyHandbookResult = await ctx.task(createPolicyHandbookTask, { ...{
+    organization,
+    policies,
+    procedures,
+    standards,
+    guidelines,
+    frameworkMapping: frameworkMappingResult,
+    executiveSummary,
+    multiLanguage,
+    languages,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Security Policy Documentation Complete for ${organization}. ${policiesCreated} policies, ${proceduresCreated} procedures, ${standardsCreated} standards created. Approve final policy package?`,
     title: 'Final Security Policy Package Review',
     context: {
@@ -634,9 +695,15 @@ export async function process(inputs, ctx) {
         { path: frameworkMappingResult.mappingMatrixPath, format: 'xlsx', label: 'Framework Mapping Matrix' },
         { path: maintenanceScheduleResult.schedulePath, format: 'json', label: 'Policy Maintenance Schedule' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -712,8 +779,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

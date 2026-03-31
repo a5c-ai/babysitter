@@ -119,7 +119,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Scoring formative assessment design quality');
-  const qualityScore = await ctx.task(formativeQualityScoringTask, {
+  let qualityScore = await ctx.task(formativeQualityScoringTask, {
     courseName,
     assessmentStrategy,
     techniqueSelection,
@@ -135,8 +135,21 @@ export async function process(inputs, ctx) {
   const overallScore = qualityScore.overallScore;
   const qualityMet = overallScore >= qualityThreshold;
 
-  // Breakpoint: Review formative assessment design
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      qualityScore = await ctx.task(formativeQualityScoringTask, { ...{
+    courseName,
+    assessmentStrategy,
+    techniqueSelection,
+    instrumentDevelopment,
+    feedbackDesign,
+    dataCollectionPlan,
+    qualityThreshold,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Formative assessment design complete. Quality score: ${overallScore}/${qualityThreshold}. ${qualityMet ? 'Quality standards met!' : 'May need refinement.'} Review and approve?`,
     title: 'Formative Assessment Design Review',
     context: {
@@ -150,9 +163,15 @@ export async function process(inputs, ctx) {
         totalTechniques: techniqueSelection.techniques?.length || 0,
         totalArtifacts: artifacts.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -180,8 +199,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Formative Assessment Strategy
+  // Task 1: Formative Assessment Strategy
 export const formativeStrategyTask = defineTask('formative-strategy', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Develop formative assessment strategy',

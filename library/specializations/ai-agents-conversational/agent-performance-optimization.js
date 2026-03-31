@@ -80,7 +80,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...streamingOptimization.artifacts);
   }
-
   // ============================================================================
   // PHASE 4: BATCHING AND THROUGHPUT
   // ============================================================================
@@ -97,7 +96,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...batchingOptimization.artifacts);
   }
-
   // ============================================================================
   // PHASE 5: INFERENCE OPTIMIZATION
   // ============================================================================
@@ -117,7 +115,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 6: Running benchmarks');
 
-  const benchmarks = await ctx.task(benchmarkingTask, {
+  let benchmarks = await ctx.task(benchmarkingTask, {
     agentName,
     optimizations: [
       latencyOptimization.optimization,
@@ -132,8 +130,23 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...benchmarks.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      benchmarks = await ctx.task(benchmarkingTask, { ...{
+    agentName,
+    optimizations: [
+      latencyOptimization.optimization,
+      ...(streamingOptimization ? [streamingOptimization.optimization] : []),
+      ...(batchingOptimization ? [batchingOptimization.optimization] : []),
+      inferenceOptimization.optimization
+    ],
+    performanceGoals,
+    currentMetrics,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Performance optimization for ${agentName} complete. Latency improvement: ${benchmarks.improvements.latencyReduction}%. Review optimizations?`,
     title: 'Performance Optimization Review',
     context: {
@@ -146,9 +159,15 @@ export async function process(inputs, ctx) {
         enableBatching
       },
       files: artifacts.map(a => ({ path: a.path, format: a.format || 'python' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -173,8 +192,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

@@ -51,15 +51,24 @@ export async function process(inputs, ctx) {
   const uvmEnv = await ctx.task(uvmEnvironmentTask, { dutName, agents, uvmScoreboard, configDb, outputDir });
   artifacts.push(...uvmEnv.artifacts);
 
-  const uvmTests = await ctx.task(uvmTestsTask, { dutName, uvmEnv, factoryOverrides, outputDir });
-  artifacts.push(...uvmTests.artifacts);
-
-  await ctx.breakpoint({
+  let uvmTests = await ctx.task(uvmTestsTask, { dutName, uvmEnv, factoryOverrides, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      uvmTests = await ctx.task(uvmTestsTask, { ...{ dutName, uvmEnv, factoryOverrides, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `UVM Testbench Complete for ${dutName}. ${agents.length} agents, ${uvmTests.testCount} tests. Review UVM environment?`,
     title: 'UVM Testbench Complete',
-    context: { runId: ctx.runId, dutName, agentCount: agents.length, testCount: uvmTests.testCount }
-  });
-
+    context: { runId: ctx.runId, dutName, agentCount: agents.length, testCount: uvmTests.testCount },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
 
   return {

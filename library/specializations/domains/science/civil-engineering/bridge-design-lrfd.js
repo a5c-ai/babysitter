@@ -95,7 +95,7 @@ export async function process(inputs, ctx) {
 
   // Task 6: Foundation Design
   ctx.log('info', 'Designing bridge foundations');
-  const foundationDesign = await ctx.task(bridgeFoundationTask, {
+  let foundationDesign = await ctx.task(bridgeFoundationTask, {
     projectId,
     substructureDesign,
     geotechnicalData,
@@ -105,8 +105,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...foundationDesign.artifacts);
 
-  // Breakpoint: Review bridge design
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      foundationDesign = await ctx.task(bridgeFoundationTask, { ...{
+    projectId,
+    substructureDesign,
+    geotechnicalData,
+    loadAnalysis,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Bridge design complete for ${projectId}. Total length: ${bridgeGeometry.totalLength}ft. Review design and proceed to load rating?`,
     title: 'Bridge Design Review',
     context: {
@@ -121,9 +131,15 @@ export async function process(inputs, ctx) {
         abutmentType: substructureDesign.abutmentType,
         foundationType: foundationDesign.type
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 7: Bearing Design
   ctx.log('info', 'Designing bridge bearings');
   const bearingDesign = await ctx.task(bearingDesignTask, {
@@ -192,8 +208,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Bridge Geometry
+  // Task 1: Bridge Geometry
 export const bridgeGeometryTask = defineTask('bridge-geometry', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Determine bridge type and geometry',

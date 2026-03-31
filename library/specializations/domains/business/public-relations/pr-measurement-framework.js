@@ -19,65 +19,115 @@ export async function process(inputs, ctx) {
     targetQuality = 90
   } = inputs;
 
-  // Phase 1: Measurement Audit
-  await ctx.breakpoint({
+  let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    // No preceding task identified for re-run with feedback
+    const phase1Review = await ctx.breakpoint({
     question: 'Starting PR measurement framework. Audit current measurement?',
     title: 'Phase 1: Measurement Audit',
     context: {
       runId: ctx.runId,
       phase: 'measurement-audit',
       organization: organization.name
-    }
-  });
-
-  const measurementAudit = await ctx.task(auditCurrentMeasurementTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
+  let measurementAudit = await ctx.task(auditCurrentMeasurementTask, {
     currentMeasurement,
     prProgram,
     organization
   });
 
-  // Phase 2: Barcelona Principles Alignment
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      measurementAudit = await ctx.task(auditCurrentMeasurementTask, { ...{
+    currentMeasurement,
+    prProgram,
+    organization
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: 'Audit complete. Align with Barcelona Principles 3.0?',
     title: 'Phase 2: Barcelona Principles',
     context: {
       runId: ctx.runId,
       phase: 'barcelona-principles'
-    }
-  });
-
-  const barcelonaAlignment = await ctx.task(alignBarcelonaPrinciplesTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
+  let barcelonaAlignment = await ctx.task(alignBarcelonaPrinciplesTask, {
     measurementAudit,
     objectives,
     prProgram
   });
 
-  // Phase 3: AMEC Framework Integration
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      barcelonaAlignment = await ctx.task(alignBarcelonaPrinciplesTask, { ...{
+    measurementAudit,
+    objectives,
+    prProgram
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: 'Barcelona aligned. Integrate AMEC evaluation framework?',
     title: 'Phase 3: AMEC Framework',
     context: {
       runId: ctx.runId,
       phase: 'amec-framework'
-    }
-  });
-
-  const amecFramework = await ctx.task(integrateAmecFrameworkTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
+  let amecFramework = await ctx.task(integrateAmecFrameworkTask, {
     barcelonaAlignment,
     objectives,
     prProgram
   });
 
-  // Phase 4: KPI Definition
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      amecFramework = await ctx.task(integrateAmecFrameworkTask, { ...{
+    barcelonaAlignment,
+    objectives,
+    prProgram
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: 'AMEC integrated. Define KPIs and metrics?',
     title: 'Phase 4: KPI Definition',
     context: {
       runId: ctx.runId,
       phase: 'kpi-definition'
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
   const [outputMetrics, outcomeMetrics, impactMetrics] = await Promise.all([
     ctx.task(defineOutputMetricsTask, {
       amecFramework,
@@ -94,66 +144,123 @@ export async function process(inputs, ctx) {
     })
   ]);
 
-  // Phase 5: Data Collection Strategy
-  await ctx.breakpoint({
+    let lastFeedback_phase5Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase5Review) {
+      amecFramework = await ctx.task(integrateAmecFrameworkTask, { ...{
+    barcelonaAlignment,
+    objectives,
+    prProgram
+  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+    }
+  const phase5Review = await ctx.breakpoint({
     question: 'KPIs defined. Plan data collection strategy?',
     title: 'Phase 5: Data Collection',
     context: {
       runId: ctx.runId,
       phase: 'data-collection'
-    }
-  });
-
-  const dataCollectionStrategy = await ctx.task(planDataCollectionTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase5Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase5Review.approved) break;
+    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+  }
+  let dataCollectionStrategy = await ctx.task(planDataCollectionTask, {
     outputMetrics,
     outcomeMetrics,
     impactMetrics
   });
 
-  // Phase 6: Dashboard Design
-  await ctx.breakpoint({
+    let lastFeedback_phase6Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase6Review) {
+      dataCollectionStrategy = await ctx.task(planDataCollectionTask, { ...{
+    outputMetrics,
+    outcomeMetrics,
+    impactMetrics
+  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
+    }
+  const phase6Review = await ctx.breakpoint({
     question: 'Collection planned. Design measurement dashboard?',
     title: 'Phase 6: Dashboard Design',
     context: {
       runId: ctx.runId,
       phase: 'dashboard-design'
-    }
-  });
-
-  const dashboardDesign = await ctx.task(designDashboardTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase6Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase6Review.approved) break;
+    lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
+  }
+  let dashboardDesign = await ctx.task(designDashboardTask, {
     outputMetrics,
     outcomeMetrics,
     impactMetrics,
     stakeholders
   });
 
-  // Phase 7: Reporting Framework
-  await ctx.breakpoint({
+    let lastFeedback_phase7Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase7Review) {
+      dashboardDesign = await ctx.task(designDashboardTask, { ...{
+    outputMetrics,
+    outcomeMetrics,
+    impactMetrics,
+    stakeholders
+  }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
+    }
+  const phase7Review = await ctx.breakpoint({
     question: 'Dashboard designed. Define reporting framework?',
     title: 'Phase 7: Reporting Framework',
     context: {
       runId: ctx.runId,
       phase: 'reporting-framework'
-    }
-  });
-
-  const reportingFramework = await ctx.task(defineReportingFrameworkTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase7Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase7Review.approved) break;
+    lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
+  }
+  let reportingFramework = await ctx.task(defineReportingFrameworkTask, {
     dashboardDesign,
     stakeholders,
     amecFramework
   });
 
-  // Phase 8: Quality Validation
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      reportingFramework = await ctx.task(defineReportingFrameworkTask, { ...{
+    dashboardDesign,
+    stakeholders,
+    amecFramework
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: 'Validate PR measurement framework quality?',
     title: 'Phase 8: Quality Validation',
     context: {
       runId: ctx.runId,
       phase: 'quality-validation',
       targetQuality
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const qualityResult = await ctx.task(validateMeasurementFrameworkTask, {
     measurementAudit,
     barcelonaAlignment,
@@ -208,8 +315,7 @@ export async function process(inputs, ctx) {
     };
   }
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const auditCurrentMeasurementTask = defineTask('audit-current-measurement', (args, taskCtx) => ({
   kind: 'agent',

@@ -85,7 +85,7 @@ export async function process(inputs, ctx) {
 
   // Task 6: Reception History
   ctx.log('info', 'Examining reception history');
-  const receptionHistory = await ctx.task(receptionHistoryTask, {
+  let receptionHistory = await ctx.task(receptionHistoryTask, {
     textSource,
     textPassage,
     textInfo: textIdentification.textInfo,
@@ -94,8 +94,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...receptionHistory.artifacts);
 
-  // Breakpoint: Review exegesis results
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      receptionHistory = await ctx.task(receptionHistoryTask, { ...{
+    textSource,
+    textPassage,
+    textInfo: textIdentification.textInfo,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Textual exegesis complete using ${interpretiveMethod} method. Review the interpretation?`,
     title: 'Textual Exegesis Results',
     context: {
@@ -107,9 +116,15 @@ export async function process(inputs, ctx) {
         keyConceptsIdentified: semanticAnalysis.analysis.keyConcepts?.length || 0,
         interpretationCount: receptionHistory.interpretations?.length || 0
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 7: Generate Exegesis Report
   ctx.log('info', 'Generating textual exegesis report');
   const exegesisReport = await ctx.task(exegesisReportTask, {
@@ -159,8 +174,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Text Identification
+  // Task 1: Text Identification
 export const textIdentificationTask = defineTask('text-identification', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Identify text and establish context',

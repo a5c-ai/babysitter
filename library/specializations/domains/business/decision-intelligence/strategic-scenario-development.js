@@ -53,24 +53,39 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 4: Scenario Narrative Development
-  const scenarioNarratives = await ctx.task(scenarioNarrativesTask, {
+  let scenarioNarratives = await ctx.task(scenarioNarrativesTask, {
     projectName,
     scenarioFramework,
     drivingForces,
     timeHorizon
   });
 
-  // Breakpoint: Review scenario narratives
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      scenarioNarratives = await ctx.task(scenarioNarrativesTask, { ...{
+    projectName,
+    scenarioFramework,
+    drivingForces,
+    timeHorizon
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Review scenario narratives for ${projectName}. Are they plausible and distinct?`,
     title: 'Scenario Narrative Review',
     context: {
       runId: ctx.runId,
       projectName,
       scenarioCount: scenarioNarratives.scenarios?.length || 0
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 5: Scenario Quantification
   const scenarioQuantification = await ctx.task(scenarioQuantificationTask, {
     projectName,
@@ -118,8 +133,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const drivingForcesTask = defineTask('driving-forces', (args, taskCtx) => ({
   kind: 'agent',

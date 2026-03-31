@@ -53,24 +53,39 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 4: Prioritization
-  const prioritization = await ctx.task(actionPrioritizationTask, {
+  let prioritization = await ctx.task(actionPrioritizationTask, {
     projectName,
     actionTranslation,
     businessContext,
     constraints
   });
 
-  // Breakpoint: Review action recommendations
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      prioritization = await ctx.task(actionPrioritizationTask, { ...{
+    projectName,
+    actionTranslation,
+    businessContext,
+    constraints
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Review insight-to-action recommendations for ${projectName}. Are they feasible and impactful?`,
     title: 'Action Recommendations Review',
     context: {
       runId: ctx.runId,
       projectName,
       actionCount: prioritization.prioritized?.length || 0
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 5: Implementation Planning
   const implementationPlanning = await ctx.task(actionImplementationTask, {
     projectName,
@@ -116,8 +131,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const insightValidationTask = defineTask('insight-validation', (args, taskCtx) => ({
   kind: 'agent',

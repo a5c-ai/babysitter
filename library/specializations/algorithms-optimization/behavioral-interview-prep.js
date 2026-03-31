@@ -25,15 +25,24 @@ export async function process(inputs, ctx) {
   const starFormatting = await ctx.task(starFormattingTask, { stories: storyGeneration.stories, outputDir });
   artifacts.push(...starFormatting.artifacts);
 
-  const practice = await ctx.task(behavioralPracticeTask, { starFormatting, company, outputDir });
-  artifacts.push(...practice.artifacts);
-
-  await ctx.breakpoint({
+  let practice = await ctx.task(behavioralPracticeTask, { starFormatting, company, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      practice = await ctx.task(behavioralPracticeTask, { ...{ starFormatting, company, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Behavioral prep complete. ${starFormatting.formattedStories.length} stories prepared. Practice score: ${practice.score}/100. Review?`,
     title: 'Behavioral Interview Prep Complete',
-    context: { runId: ctx.runId, company, storiesCount: starFormatting.formattedStories.length }
-  });
-
+    context: { runId: ctx.runId, company, storiesCount: starFormatting.formattedStories.length },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     company,

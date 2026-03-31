@@ -32,18 +32,31 @@ export async function process(inputs, ctx) {
   results.steps.push({ name: 'entity-validation', result: validationResult });
 
   // Step 2: Intercompany Transaction Matching
-  const matchingResult = await ctx.task(matchIntercompanyTransactionsTask, {
+  let matchingResult = await ctx.task(matchIntercompanyTransactionsTask, {
     intercompanyTransactions: inputs.intercompanyTransactions,
     entities: inputs.entities
   });
   results.steps.push({ name: 'ic-matching', result: matchingResult });
 
-  // Breakpoint for unmatched items review
-  await ctx.breakpoint('matching-review', {
+    let lastFeedback_reviewApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_reviewApproval) {
+      matchingResult = await ctx.task(matchIntercompanyTransactionsTask, { ...{
+    intercompanyTransactions: inputs.intercompanyTransactions,
+    entities: inputs.entities
+  }, feedback: lastFeedback_reviewApproval, attempt: attempt + 1 });
+    }
+  const reviewApproval = await ctx.breakpoint('matching-review', {
     message: 'Review unmatched intercompany transactions before proceeding',
-    data: matchingResult
-  });
-
+    data: matchingResult,
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_reviewApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (reviewApproval.approved) break;
+    lastFeedback_reviewApproval = reviewApproval.response || reviewApproval.feedback || 'Changes requested';
+  }
   // Step 3: Currency Translation
   const translationResult = await ctx.task(performCurrencyTranslationTask, {
     entityFinancials: validationResult,
@@ -61,19 +74,33 @@ export async function process(inputs, ctx) {
   results.steps.push({ name: 'elimination-entries', result: eliminationsResult });
 
   // Step 5: Calculate Minority Interest
-  const minorityInterestResult = await ctx.task(calculateMinorityInterestTask, {
+  let minorityInterestResult = await ctx.task(calculateMinorityInterestTask, {
     entityFinancials: translationResult,
     ownershipStructure: inputs.ownershipStructure,
     eliminations: eliminationsResult
   });
   results.steps.push({ name: 'minority-interest', result: minorityInterestResult });
 
-  // Breakpoint for elimination review
-  await ctx.breakpoint('elimination-review', {
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      minorityInterestResult = await ctx.task(calculateMinorityInterestTask, { ...{
+    entityFinancials: translationResult,
+    ownershipStructure: inputs.ownershipStructure,
+    eliminations: eliminationsResult
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint('elimination-review', {
     message: 'Review elimination entries and minority interest calculations',
-    data: { eliminations: eliminationsResult, minorityInterest: minorityInterestResult }
-  });
-
+    data: { eliminations: eliminationsResult, minorityInterest: minorityInterestResult },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Step 6: Perform Consolidation
   const consolidationResult = await ctx.task(performConsolidationTask, {
     entityFinancials: translationResult,
@@ -107,8 +134,7 @@ export async function process(inputs, ctx) {
 
   return results;
 }
-
-// Task definitions
+  // Task definitions
 export const validateEntityPackagesTask = defineTask('validate-entity-packages', (args, taskCtx) => ({
   kind: 'agent',
   skill: { name: 'consolidation-accounting' },

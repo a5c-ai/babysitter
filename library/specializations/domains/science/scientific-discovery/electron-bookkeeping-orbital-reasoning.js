@@ -65,7 +65,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 4: Analyzing frontier orbitals (HOMO/LUMO)');
-  const frontierOrbitalAnalysis = await ctx.task(frontierOrbitalTask, {
+  let frontierOrbitalAnalysis = await ctx.task(frontierOrbitalTask, {
     molecule,
     orbitalConfiguration: orbitalConfiguration.configuration,
     outputDir
@@ -73,8 +73,16 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...frontierOrbitalAnalysis.artifacts);
 
-  // Breakpoint: Review orbital analysis
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      frontierOrbitalAnalysis = await ctx.task(frontierOrbitalTask, { ...{
+    molecule,
+    orbitalConfiguration: orbitalConfiguration.configuration,
+    outputDir
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: `Orbital analysis complete. HOMO-LUMO gap: ${frontierOrbitalAnalysis.homoLumoGap}. Review before mechanism analysis?`,
     title: 'Orbital Analysis Review',
     context: {
@@ -89,9 +97,15 @@ export async function process(inputs, ctx) {
         totalElectrons: electronCounting.totalElectrons,
         homoLumoGap: frontierOrbitalAnalysis.homoLumoGap
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 5: ELECTRON FLOW MAPPING
   // ============================================================================
@@ -142,7 +156,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 8: Synthesizing mechanistic insights');
-  const mechanisticInsight = await ctx.task(mechanisticInsightTask, {
+  let mechanisticInsight = await ctx.task(mechanisticInsightTask, {
     electronFlow: electronFlowMapping.electronFlow,
     orbitalSymmetry: orbitalSymmetryAnalysis.symmetryAnalysis,
     frontierOrbitals: frontierOrbitalAnalysis.frontierOrbitals,
@@ -153,8 +167,19 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...mechanisticInsight.artifacts);
 
-  // Final breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      mechanisticInsight = await ctx.task(mechanisticInsightTask, { ...{
+    electronFlow: electronFlowMapping.electronFlow,
+    orbitalSymmetry: orbitalSymmetryAnalysis.symmetryAnalysis,
+    frontierOrbitals: frontierOrbitalAnalysis.frontierOrbitals,
+    redoxBalance: redoxBalanceCheck.balance,
+    reactionType,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Electron bookkeeping complete. Reaction mechanism: ${mechanisticInsight.mechanismType}. Orbital symmetry: ${orbitalSymmetryAnalysis.symmetryAllowed ? 'allowed' : 'forbidden'}. Review findings?`,
     title: 'Electron Bookkeeping Complete',
     context: {
@@ -170,9 +195,15 @@ export async function process(inputs, ctx) {
         symmetryAllowed: orbitalSymmetryAnalysis.symmetryAllowed,
         redoxBalanced: redoxBalanceCheck.balanced
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -206,8 +237,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

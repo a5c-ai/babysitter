@@ -45,15 +45,24 @@ export async function process(inputs, ctx) {
   const channelDesign = await ctx.task(channelDesignTask, { designName, axiType, interfaceRole, protocolAnalysis, burstSupport, outputDir });
   artifacts.push(...channelDesign.artifacts);
 
-  const handshakeLogic = await ctx.task(handshakeLogicTask, { designName, channelDesign, axiType, outputDir });
-  artifacts.push(...handshakeLogic.artifacts);
-
-  await ctx.breakpoint({
+  let handshakeLogic = await ctx.task(handshakeLogicTask, { designName, channelDesign, axiType, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      handshakeLogic = await ctx.task(handshakeLogicTask, { ...{ designName, channelDesign, axiType, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `AXI interface channels designed for ${designName}. ${channelDesign.channelCount} channels, ${handshakeLogic.signalCount} signals. Review interface design?`,
     title: 'AXI Interface Review',
-    context: { runId: ctx.runId, designName, axiType, channels: channelDesign.channelCount, signals: handshakeLogic.signalCount }
-  });
-
+    context: { runId: ctx.runId, designName, axiType, channels: channelDesign.channelCount, signals: handshakeLogic.signalCount },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const dataPathDesign = await ctx.task(dataPathDesignTask, { designName, channelDesign, dataWidth, outputDir });
   artifacts.push(...dataPathDesign.artifacts);
 

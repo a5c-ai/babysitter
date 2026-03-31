@@ -46,7 +46,6 @@ export async function process(inputs, ctx) {
       modalAnalysis: null
     };
   }
-
   // Phase 2: Modal Operator Identification
   const modalOperators = await ctx.task(modalOperatorTask, {
     proposition: propositionAnalysis,
@@ -62,14 +61,22 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 4: Necessity Analysis
-  const necessityAnalysis = await ctx.task(necessityAnalysisTask, {
+  let necessityAnalysis = await ctx.task(necessityAnalysisTask, {
     proposition: propositionAnalysis,
     possibleWorlds,
     modalContext
   });
 
-  // Breakpoint: Review modal framework
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      necessityAnalysis = await ctx.task(necessityAnalysisTask, { ...{
+    proposition: propositionAnalysis,
+    possibleWorlds,
+    modalContext
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: `Review modal framework for "${proposition}". ${possibleWorlds.worlds?.length || 0} possible worlds constructed. Continue analysis?`,
     title: 'Modal Framework Review',
     context: {
@@ -82,9 +89,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: { propositionAnalysis, modalOperators, possibleWorlds, necessityAnalysis }
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
   // Phase 5: Possibility Analysis
   const possibilityAnalysis = await ctx.task(possibilityAnalysisTask, {
     proposition: propositionAnalysis,
@@ -125,7 +138,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 10: Modal Analysis Synthesis
-  const modalSynthesis = await ctx.task(modalSynthesisTask, {
+  let modalSynthesis = await ctx.task(modalSynthesisTask, {
     proposition: propositionAnalysis,
     possibleWorlds,
     necessityAnalysis,
@@ -138,8 +151,23 @@ export async function process(inputs, ctx) {
     modalContext
   });
 
-  // Final Breakpoint: Modal Analysis Approval
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      modalSynthesis = await ctx.task(modalSynthesisTask, { ...{
+    proposition: propositionAnalysis,
+    possibleWorlds,
+    necessityAnalysis,
+    possibilityAnalysis,
+    epistemicAnalysis,
+    dynamicAnalysis,
+    counterfactualAnalysis,
+    modalInferences,
+    domain,
+    modalContext
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Modal analysis complete for "${proposition}". Approve findings?`,
     title: 'Modal Analysis Approval',
     context: {
@@ -150,9 +178,15 @@ export async function process(inputs, ctx) {
         { path: 'artifacts/modal-analysis-report.json', format: 'json', content: modalSynthesis },
         { path: 'artifacts/modal-analysis-report.md', format: 'markdown', content: modalSynthesis.markdown }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     proposition,
@@ -175,8 +209,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const propositionAnalysisTask = defineTask('proposition-analysis', (args, taskCtx) => ({
   kind: 'agent',

@@ -62,15 +62,24 @@ export async function process(inputs, ctx) {
   const releaseNotes = await ctx.task(releaseNotesTask, { projectName, outputDir });
   artifacts.push(...releaseNotes.artifacts);
 
-  const publishDocumentation = await ctx.task(publishDocumentationTask, { projectName, registries, outputDir });
-  artifacts.push(...publishDocumentation.artifacts);
-
-  await ctx.breakpoint({
+  let publishDocumentation = await ctx.task(publishDocumentationTask, { projectName, registries, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      publishDocumentation = await ctx.task(publishDocumentationTask, { ...{ projectName, registries, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Package Manager Publishing complete for ${registries.length} registries. Review and approve?`,
     title: 'Package Publishing Complete',
-    context: { runId: ctx.runId, summary: { projectName, registries, versioningStrategy } }
-  });
-
+    context: { runId: ctx.runId, summary: { projectName, registries, versioningStrategy } },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     projectName,

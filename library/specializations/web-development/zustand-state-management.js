@@ -24,11 +24,16 @@ export async function process(inputs, ctx) {
   const middleware = await ctx.task(middlewareTask, { projectName, outputDir });
   artifacts.push(...middleware.artifacts);
 
-  const persistSetup = await ctx.task(persistSetupTask, { projectName, outputDir });
-  artifacts.push(...persistSetup.artifacts);
-
-  await ctx.breakpoint({ question: `Zustand state management complete for ${projectName}. Approve?`, title: 'Zustand Review', context: { runId: ctx.runId, stores: storePatterns.stores } });
-
+  let persistSetup = await ctx.task(persistSetupTask, { projectName, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      persistSetup = await ctx.task(persistSetupTask, { ...{ projectName, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({ question: `Zustand state management complete for ${projectName}. Approve?`, title: 'Zustand Review', context: { runId: ctx.runId, stores: storePatterns.stores }, expert: 'owner', tags: ['approval-gate'], previousFeedback: lastFeedback || undefined, attempt: attempt > 0 ? attempt + 1 : undefined });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const documentation = await ctx.task(documentationTask, { projectName, outputDir });
   artifacts.push(...documentation.artifacts);
 

@@ -132,7 +132,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 8: Scoring experimental design quality');
-  const qualityScore = await ctx.task(designQualityScoringTask, {
+  let qualityScore = await ctx.task(designQualityScoringTask, {
     questionAnalysis,
     designSelection,
     powerAnalysis,
@@ -148,8 +148,21 @@ export async function process(inputs, ctx) {
   const designScore = qualityScore.overallScore;
   const qualityMet = designScore >= 80;
 
-  // Breakpoint: Review experimental design
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      qualityScore = await ctx.task(designQualityScoringTask, { ...{
+    questionAnalysis,
+    designSelection,
+    powerAnalysis,
+    randomizationPlan,
+    controlDesign,
+    validityAssessment,
+    protocolDevelopment,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Experimental design complete. Quality score: ${designScore}/100. ${qualityMet ? 'Design meets quality standards!' : 'Design may need refinement.'} Review and approve?`,
     title: 'Experimental Design Review',
     context: {
@@ -168,9 +181,15 @@ export async function process(inputs, ctx) {
         randomizationMethod: randomizationPlan.method,
         validityThreats: validityAssessment.threatsIdentified
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -214,8 +233,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Research Question Analysis
+  // Task 1: Research Question Analysis
 export const researchQuestionAnalysisTask = defineTask('research-question-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Analyze research question and hypotheses',

@@ -45,15 +45,22 @@ export async function process(inputs, ctx) {
 
   // Task 2: Demand Variability Analysis
   ctx.log('info', 'Phase 2: Analyzing demand and lead time variability');
-  const variabilityAnalysis = await ctx.task(variabilityAnalysisTask, {
+  let variabilityAnalysis = await ctx.task(variabilityAnalysisTask, {
     inventoryClassification,
     outputDir
   });
 
   artifacts.push(...variabilityAnalysis.artifacts);
 
-  // Breakpoint: Review classification
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      variabilityAnalysis = await ctx.task(variabilityAnalysisTask, { ...{
+    inventoryClassification,
+    outputDir
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Inventory classified. A-items: ${inventoryClassification.aItemCount}. High variability items: ${variabilityAnalysis.highVariabilityCount}. Proceed with policy optimization?`,
     title: 'Inventory Classification Review',
     context: {
@@ -61,9 +68,15 @@ export async function process(inputs, ctx) {
       classification: inventoryClassification.summary,
       variability: variabilityAnalysis.summary,
       files: inventoryClassification.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // Task 3: Safety Stock Calculation
   ctx.log('info', 'Phase 3: Calculating optimal safety stock levels');
   const safetyStockCalc = await ctx.task(safetyStockTask, {
@@ -122,15 +135,22 @@ export async function process(inputs, ctx) {
 
   // Task 8: Implementation Plan
   ctx.log('info', 'Phase 8: Creating implementation plan');
-  const implementationPlan = await ctx.task(implementationPlanTask, {
+  let implementationPlan = await ctx.task(implementationPlanTask, {
     policyRecommendations,
     outputDir
   });
 
   artifacts.push(...implementationPlan.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      implementationPlan = await ctx.task(implementationPlanTask, { ...{
+    policyRecommendations,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Inventory optimization complete. Expected inventory reduction: ${tradeoffAnalysis.inventoryReduction}%. Service level target: ${targetServiceLevel * 100}%. Review recommendations?`,
     title: 'Inventory Optimization Results',
     context: {
@@ -142,9 +162,15 @@ export async function process(inputs, ctx) {
         expectedSavings: tradeoffAnalysis.expectedSavings
       },
       files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -177,8 +203,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: ABC/XYZ Classification
+  // Task 1: ABC/XYZ Classification
 export const classificationTask = defineTask('inventory-classification', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Classify inventory using ABC/XYZ',

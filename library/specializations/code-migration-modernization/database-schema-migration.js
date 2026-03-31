@@ -58,7 +58,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 2: Developing migration scripts');
-  const migrationScripts = await ctx.task(migrationScriptDevelopmentTask, {
+  let migrationScripts = await ctx.task(migrationScriptDevelopmentTask, {
     projectName,
     schemaAnalysis,
     migrationTool,
@@ -68,8 +68,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...migrationScripts.artifacts);
 
-  // Breakpoint: Script review
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      migrationScripts = await ctx.task(migrationScriptDevelopmentTask, { ...{
+    projectName,
+    schemaAnalysis,
+    migrationTool,
+    downtimeConstraint,
+    outputDir
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Migration scripts developed for ${projectName}. Total scripts: ${migrationScripts.scriptCount}. Pattern: ${migrationScripts.pattern}. Review scripts before testing?`,
     title: 'Migration Script Review',
     context: {
@@ -77,9 +87,15 @@ export async function process(inputs, ctx) {
       projectName,
       scripts: migrationScripts,
       files: migrationScripts.artifacts.map(a => ({ path: a.path, format: a.format || 'sql' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 3: TEST ENVIRONMENT PREPARATION
   // ============================================================================
@@ -99,7 +115,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 4: Executing test migration');
-  const testMigration = await ctx.task(testMigrationExecutionTask, {
+  let testMigration = await ctx.task(testMigrationExecutionTask, {
     projectName,
     migrationScripts,
     testEnvironment,
@@ -109,8 +125,17 @@ export async function process(inputs, ctx) {
   artifacts.push(...testMigration.artifacts);
 
   // Quality Gate: Test migration success
-  if (!testMigration.success) {
-    await ctx.breakpoint({
+      let lastFeedback_phase4Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase4Review) {
+        testMigration = await ctx.task(testMigrationExecutionTask, { ...{
+    projectName,
+    migrationScripts,
+    testEnvironment,
+    outputDir
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+      }
+  const phase4Review = await ctx.breakpoint({
       question: `Test migration failed for ${projectName}. Errors: ${testMigration.errors.length}. Review errors and fix scripts before proceeding?`,
       title: 'Test Migration Failed',
       context: {
@@ -118,9 +143,15 @@ export async function process(inputs, ctx) {
         projectName,
         errors: testMigration.errors,
         recommendation: 'Fix migration scripts and re-run test migration'
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase4Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase4Review.approved) break;
+      lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 5: DATA VALIDATION PLANNING
@@ -141,7 +172,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 6: Testing performance');
-  const performanceTesting = await ctx.task(performanceTestingTask, {
+  let performanceTesting = await ctx.task(performanceTestingTask, {
     projectName,
     testEnvironment,
     testMigration,
@@ -151,8 +182,17 @@ export async function process(inputs, ctx) {
   artifacts.push(...performanceTesting.artifacts);
 
   // Quality Gate: Performance regression
-  if (performanceTesting.hasRegression) {
-    await ctx.breakpoint({
+      let lastFeedback_phase6Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase6Review) {
+        performanceTesting = await ctx.task(performanceTestingTask, { ...{
+    projectName,
+    testEnvironment,
+    testMigration,
+    outputDir
+  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
+      }
+  const phase6Review = await ctx.breakpoint({
       question: `Performance regression detected in ${projectName}. Degraded queries: ${performanceTesting.degradedQueries.length}. Review and optimize before proceeding?`,
       title: 'Performance Regression Warning',
       context: {
@@ -160,9 +200,15 @@ export async function process(inputs, ctx) {
         projectName,
         degradedQueries: performanceTesting.degradedQueries,
         recommendation: 'Add indexes or optimize queries before production migration'
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase6Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase6Review.approved) break;
+      lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 7: APPLICATION COMPATIBILITY TESTING
@@ -196,7 +242,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 9: Planning production migration');
-  const productionPlan = await ctx.task(productionMigrationPlanningTask, {
+  let productionPlan = await ctx.task(productionMigrationPlanningTask, {
     projectName,
     migrationScripts,
     stagingMigration,
@@ -206,8 +252,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...productionPlan.artifacts);
 
-  // Final Breakpoint: Production migration approval
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      productionPlan = await ctx.task(productionMigrationPlanningTask, { ...{
+    projectName,
+    migrationScripts,
+    stagingMigration,
+    downtimeConstraint,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Production migration plan ready for ${projectName}. Estimated downtime: ${productionPlan.estimatedDowntime}. Rollback plan: ${productionPlan.rollbackReady ? 'Ready' : 'Not Ready'}. Approve for production?`,
     title: 'Production Migration Approval',
     context: {
@@ -215,9 +271,15 @@ export async function process(inputs, ctx) {
       projectName,
       productionPlan,
       files: artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 10: PRODUCTION MIGRATION EXECUTION
   // ============================================================================
@@ -274,8 +336,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

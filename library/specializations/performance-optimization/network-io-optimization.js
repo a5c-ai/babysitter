@@ -37,15 +37,24 @@ export async function process(inputs, ctx) {
   artifacts.push(...trafficAnalysis.artifacts);
 
   // Phase 2: Identify Chatty Communication
-  const chattyCommunication = await ctx.task(identifyChattyCommunicationTask, { projectName, trafficAnalysis, outputDir });
-  artifacts.push(...chattyCommunication.artifacts);
-
-  await ctx.breakpoint({
+  let chattyCommunication = await ctx.task(identifyChattyCommunicationTask, { projectName, trafficAnalysis, outputDir });
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      chattyCommunication = await ctx.task(identifyChattyCommunicationTask, { ...{ projectName, trafficAnalysis, outputDir }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Found ${chattyCommunication.issues.length} chatty communication patterns. Review optimizations?`,
     title: 'Network Traffic Analysis',
-    context: { runId: ctx.runId, chattyCommunication }
-  });
-
+    context: { runId: ctx.runId, chattyCommunication },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // Phase 3: Implement Connection Pooling
   const connectionPooling = await ctx.task(implementConnectionPoolingTask, { projectName, targetServices, outputDir });
   artifacts.push(...connectionPooling.artifacts);
@@ -67,15 +76,24 @@ export async function process(inputs, ctx) {
   artifacts.push(...protocolOpt.artifacts);
 
   // Phase 8: Benchmark Network Improvements
-  const benchmarks = await ctx.task(benchmarkNetworkImprovementsTask, { projectName, connectionPooling, tcpTuning, compression, batching, outputDir });
-  artifacts.push(...benchmarks.artifacts);
-
-  await ctx.breakpoint({
+  let benchmarks = await ctx.task(benchmarkNetworkImprovementsTask, { projectName, connectionPooling, tcpTuning, compression, batching, outputDir });
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      benchmarks = await ctx.task(benchmarkNetworkImprovementsTask, { ...{ projectName, connectionPooling, tcpTuning, compression, batching, outputDir }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Network optimization complete. Latency: -${benchmarks.latencyImprovement}%. Throughput: +${benchmarks.throughputImprovement}%. Accept?`,
     title: 'Network I/O Results',
-    context: { runId: ctx.runId, benchmarks }
-  });
-
+    context: { runId: ctx.runId, benchmarks },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     projectName,

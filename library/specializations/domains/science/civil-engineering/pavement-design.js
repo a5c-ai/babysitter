@@ -82,7 +82,7 @@ export async function process(inputs, ctx) {
 
   // Task 5: Drainage Design
   ctx.log('info', 'Designing pavement drainage');
-  const drainageDesign = await ctx.task(pavementDrainageTask, {
+  let drainageDesign = await ctx.task(pavementDrainageTask, {
     projectId,
     thicknessDesign,
     subgradeCharacterization,
@@ -91,8 +91,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...drainageDesign.artifacts);
 
-  // Breakpoint: Review pavement design
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      drainageDesign = await ctx.task(pavementDrainageTask, { ...{
+    projectId,
+    thicknessDesign,
+    subgradeCharacterization,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Pavement design complete for ${projectId}. Type: ${pavementType}, Total thickness: ${thicknessDesign.totalThickness}in. Review design?`,
     title: 'Pavement Design Review',
     context: {
@@ -106,9 +115,15 @@ export async function process(inputs, ctx) {
         surfaceThickness: thicknessDesign.surfaceThickness,
         baseThickness: thicknessDesign.baseThickness
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 6: Joint Design (for rigid pavement)
   let jointDesign = null;
   if (pavementType === 'rigid') {
@@ -123,7 +138,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...jointDesign.artifacts);
   }
-
   // Task 7: Typical Sections
   ctx.log('info', 'Developing typical sections');
   const typicalSections = await ctx.task(typicalSectionsTask, {
@@ -192,8 +206,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Traffic Analysis
+  // Task 1: Traffic Analysis
 export const trafficAnalysisTask = defineTask('traffic-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Perform pavement traffic analysis',

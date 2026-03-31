@@ -45,10 +45,13 @@ export async function process(inputs, ctx) {
   artifacts.push(...constraintAnalysis.artifacts);
 
   // PHASE 4: Algorithm Selection
-  const algoSelection = await ctx.task(algorithmSelectionTask, { patternId, constraintAnalysis, outputDir });
-  artifacts.push(...algoSelection.artifacts);
-
-  await ctx.breakpoint({
+  let algoSelection = await ctx.task(algorithmSelectionTask, { patternId, constraintAnalysis, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      algoSelection = await ctx.task(algorithmSelectionTask, { ...{ patternId, constraintAnalysis, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Pattern analysis complete. Identified patterns: ${patternId.patterns.join(', ')}. Recommended algorithm: ${algoSelection.recommendation}. Review?`,
     title: 'Pattern Recognition Complete',
     context: {
@@ -57,9 +60,15 @@ export async function process(inputs, ctx) {
       recommendation: algoSelection.recommendation,
       complexity: algoSelection.expectedComplexity,
       files: algoSelection.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     patterns: patternId.patterns,

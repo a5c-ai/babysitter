@@ -33,7 +33,6 @@ export async function process(inputs, ctx) {
   if (teamMembers.length < minimumTeamSize) {
     ctx.log('warn', `Team size (${teamMembers.length}) is below recommended minimum (${minimumTeamSize}). Consider expanding the on-call pool.`);
   }
-
   // ============================================================================
   // PHASE 1: CURRENT STATE ASSESSMENT
   // ============================================================================
@@ -303,7 +302,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 10: Validating setup and preparing for go-live');
-  const validation = await ctx.task(validateAndGoLiveTask, {
+  let validation = await ctx.task(validateAndGoLiveTask, {
     currentStateAssessment,
     toolSetup,
     rotationDesign,
@@ -320,9 +319,24 @@ export async function process(inputs, ctx) {
   artifacts.push(...validation.artifacts);
 
   const teamReadiness = validation.readinessScore;
-  const success = validation.readyForGoLive;
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      validation = await ctx.task(validateAndGoLiveTask, { ...{
+    currentStateAssessment,
+    toolSetup,
+    rotationDesign,
+    escalationPolicies,
+    alertRouting,
+    runbooksAndDocs,
+    training,
+    scheduleImplementation,
+    metricsSetup,
+    minimumTeamSize,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `On-call setup validation complete. Readiness score: ${teamReadiness}/100. ${success ? 'System is ready for go-live!' : 'Additional work needed before go-live.'} Approve final configuration and activate on-call schedule?`,
     title: 'Final Go-Live Approval',
     context: {
@@ -342,9 +356,15 @@ export async function process(inputs, ctx) {
         escalationPoliciesActive: escalationPolicies.policies.length,
         setupDuration: ctx.now() - startTime
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -395,8 +415,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

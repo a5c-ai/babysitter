@@ -123,7 +123,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 8: Assessing reasoning quality');
-  const qualityScore = await ctx.task(defeasibleQualityTask, {
+  let qualityScore = await ctx.task(defeasibleQualityTask, {
     ruleFormalization,
     defeaterIdentification,
     argumentConstruction,
@@ -136,8 +136,19 @@ export async function process(inputs, ctx) {
 
   const qualityMet = qualityScore.overallScore >= 75;
 
-  // Breakpoint: Review defeasible reasoning results
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      qualityScore = await ctx.task(defeasibleQualityTask, { ...{
+    ruleFormalization,
+    defeaterIdentification,
+    argumentConstruction,
+    defeatAnalysis,
+    warrantedConclusions,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Defeasible reasoning complete. Quality score: ${qualityScore.overallScore}/100. Warranted: ${warrantedConclusions.warranted.length}, Defeated: ${warrantedConclusions.defeated.length}. ${qualityMet ? 'Quality meets standards!' : 'Review defeaters and priorities.'} Review results?`,
     title: 'Defeasible Reasoning Results Review',
     context: {
@@ -156,9 +167,15 @@ export async function process(inputs, ctx) {
         defeatedCount: warrantedConclusions.defeated.length,
         qualityScore: qualityScore.overallScore
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 9: REPORT GENERATION
   // ============================================================================
@@ -198,8 +215,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

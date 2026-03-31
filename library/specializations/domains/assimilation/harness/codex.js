@@ -73,7 +73,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('Phase 1: Analyze -- Assessing Codex project and environment');
 
-  const analysis = await ctx.task(analyzeCodexProjectTask, {
+  let analysis = await ctx.task(analyzeCodexProjectTask, {
     projectDir,
     strategy
   });
@@ -85,8 +85,15 @@ export async function process(inputs, ctx) {
     existingConfig: analysis.existingConfigFiles
   });
 
-  // Breakpoint: review analysis before scaffolding
-  await ctx.breakpoint({
+    let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      analysis = await ctx.task(analyzeCodexProjectTask, { ...{
+    projectDir,
+    strategy
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Codex project analysis complete. Codex version: ${analysis.codexVersion}. Hook model: ${strategy}. Proceed with scaffolding?`,
     title: 'Review Codex Analysis',
     context: {
@@ -94,9 +101,15 @@ export async function process(inputs, ctx) {
       files: [
         { path: `artifacts/analysis/codex-project-report.md`, format: 'markdown', label: 'Project Analysis' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 2: SCAFFOLD -- Create integration file structure
   // ============================================================================
@@ -273,9 +286,22 @@ export async function process(inputs, ctx) {
       currentQuality: finalQuality,
       target: targetQuality,
       remaining: maxIterations - iteration
-    });
-
-    await ctx.breakpoint({
+    let lastFeedback_iterationApproval = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_iterationApproval) {
+        verifyResult = await ctx.task(verifyHarnessAssimilationTask, { ...{
+    projectDir,
+    harnessName: 'Codex CLI',
+    research: researchResult,
+    assimilation: assimilationResult,
+    docs: docsResult,
+    integrationFiles,
+    localTestResult: testResult,
+    runtimeValidation: runtimeValidationResult,
+    targetQuality
+  }, feedback: lastFeedback_iterationApproval, attempt: attempt + 1 });
+      }
+  const iterationApproval = await ctx.breakpoint({
       question: `Integration quality: ${finalQuality}/${targetQuality} after iteration ${iteration - 1}. Issues: ${verifyResult.issues?.join(', ') || 'none'}. Continue refinement?`,
       title: `Convergence Iteration ${iteration}`,
       context: {
@@ -283,10 +309,16 @@ export async function process(inputs, ctx) {
         files: [
           { path: `artifacts/convergence/iteration-${iteration - 1}.md`, format: 'markdown', label: `Iteration ${iteration - 1} Report` }
         ]
-      }
-    });
-
-    // Refine based on feedback
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_iterationApproval || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (iterationApproval.approved) break;
+      lastFeedback_iterationApproval = iterationApproval.response || iterationApproval.feedback || 'Changes requested';
+    }
+  // Refine based on feedback
     const refinement = await ctx.task(refineHarnessAssimilationTask, {
       projectDir,
       harnessName: 'Codex CLI',
@@ -335,7 +367,6 @@ export async function process(inputs, ctx) {
       converged: finalQuality >= targetQuality
     });
   }
-
   // ============================================================================
   // RESULT
   // ============================================================================
@@ -365,8 +396,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

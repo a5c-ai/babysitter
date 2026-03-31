@@ -90,7 +90,7 @@ export async function process(inputs, ctx) {
 
   // Task 6: Model Convergence and Solution
   ctx.log('info', 'Running simulation and achieving convergence');
-  const convergenceResult = await ctx.task(modelConvergenceTask, {
+  let convergenceResult = await ctx.task(modelConvergenceTask, {
     processName,
     modelConfiguration: {
       thermoModel: thermoSelectionResult.selectedModel,
@@ -104,8 +104,22 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...convergenceResult.artifacts);
 
-  // Breakpoint: Review simulation convergence
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      convergenceResult = await ctx.task(modelConvergenceTask, { ...{
+    processName,
+    modelConfiguration: {
+      thermoModel: thermoSelectionResult.selectedModel,
+      unitOperations: unitOpsResult.unitOperations,
+      connectivity: connectivityResult.connectivity,
+      feedConditions: feedConditionsResult.feedConditions
+    },
+    simulationTool,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Simulation model converged for ${processName}. Convergence status: ${convergenceResult.converged ? 'SUCCESS' : 'FAILED'}. ${convergenceResult.warnings?.length || 0} warnings. Proceed with validation?`,
     title: 'Simulation Model Convergence Review',
     context: {
@@ -117,9 +131,15 @@ export async function process(inputs, ctx) {
         warnings: convergenceResult.warnings,
         thermoModel: thermoSelectionResult.selectedModel.name
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 7: Model Validation
   ctx.log('info', 'Validating model against experimental/plant data');
   const validationResult = await ctx.task(modelValidationTask, {
@@ -182,8 +202,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Thermodynamic Model Selection
+  // Task 1: Thermodynamic Model Selection
 export const thermodynamicSelectionTask = defineTask('thermodynamic-selection', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Select appropriate thermodynamic models',

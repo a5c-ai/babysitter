@@ -69,15 +69,24 @@ export async function process(inputs, ctx) {
   artifacts.push(...testing.artifacts);
 
   // Phase 9: Performance Measurement
-  const performance = await ctx.task(detectionPerformanceTask, { projectName, testing, deploymentTarget, outputDir });
-  artifacts.push(...performance.artifacts);
-
-  await ctx.breakpoint({
+  let performance = await ctx.task(detectionPerformanceTask, { projectName, testing, deploymentTarget, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      performance = await ctx.task(detectionPerformanceTask, { ...{ projectName, testing, deploymentTarget, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Object Detection Pipeline Complete. mAP: ${testing.mAP}, Latency: ${performance.latency}ms. Review?`,
     title: 'Object Detection Complete',
-    context: { runId: ctx.runId, mAP: testing.mAP, latency: performance.latency }
-  });
-
+    context: { runId: ctx.runId, mAP: testing.mAP, latency: performance.latency },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: testing.mAP >= 0.5,
     projectName,

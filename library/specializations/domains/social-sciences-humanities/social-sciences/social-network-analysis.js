@@ -109,7 +109,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 7: Scoring analysis quality');
-  const qualityScore = await ctx.task(snaQualityScoringTask, {
+  let qualityScore = await ctx.task(snaQualityScoringTask, {
     dataPreparation,
     networkDescriptives,
     centralityAnalysis,
@@ -124,8 +124,20 @@ export async function process(inputs, ctx) {
   const snaScore = qualityScore.overallScore;
   const qualityMet = snaScore >= 80;
 
-  // Breakpoint: Review SNA analysis
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      qualityScore = await ctx.task(snaQualityScoringTask, { ...{
+    dataPreparation,
+    networkDescriptives,
+    centralityAnalysis,
+    communityDetection,
+    tieStrengthAnalysis,
+    networkVisualization,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Social network analysis complete. Quality score: ${snaScore}/100. ${qualityMet ? 'Analysis meets quality standards!' : 'Analysis may need refinement.'} Review and approve?`,
     title: 'Social Network Analysis Review',
     context: {
@@ -142,9 +154,15 @@ export async function process(inputs, ctx) {
         density: networkDescriptives.density,
         communities: communityDetection.communityCount
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -174,8 +192,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Network Data Preparation
+  // Task 1: Network Data Preparation
 export const networkDataPreparationTask = defineTask('network-data-preparation', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Prepare network data',

@@ -124,7 +124,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 8: Defining success metrics');
-  const successMetrics = await ctx.task(successMetricsTask, {
+  let successMetrics = await ctx.task(successMetricsTask, {
     deflectionAnalysis,
     optimizationRecommendations,
     targetDeflectionRate,
@@ -134,9 +134,17 @@ export async function process(inputs, ctx) {
   artifacts.push(...successMetrics.artifacts);
 
   const currentDeflectionRate = deflectionAnalysis.currentRate;
-  const targetMet = currentDeflectionRate >= targetDeflectionRate;
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      successMetrics = await ctx.task(successMetricsTask, { ...{
+    deflectionAnalysis,
+    optimizationRecommendations,
+    targetDeflectionRate,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Self-service optimization analysis complete. Current deflection rate: ${currentDeflectionRate}%. Target: ${targetDeflectionRate}%. ${targetMet ? 'Target met!' : 'Optimization needed.'} Improvements identified: ${optimizationRecommendations.recommendations?.length || 0}. Review and implement?`,
     title: 'Self-Service Optimization Review',
     context: {
@@ -155,9 +163,15 @@ export async function process(inputs, ctx) {
         recommendationsCount: optimizationRecommendations.recommendations?.length || 0,
         searchIssues: searchAnalysis.issues?.length || 0
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -189,8 +203,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

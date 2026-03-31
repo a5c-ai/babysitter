@@ -61,7 +61,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 2: Developing comprehensive search strategy');
-  const searchStrategy = await ctx.task(searchStrategyTask, {
+  let searchStrategy = await ctx.task(searchStrategyTask, {
     researchQuestion,
     reviewProtocol,
     databases,
@@ -70,8 +70,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...searchStrategy.artifacts);
 
-  // Breakpoint: Review search strategy
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      searchStrategy = await ctx.task(searchStrategyTask, { ...{
+    researchQuestion,
+    reviewProtocol,
+    databases,
+    outputDir
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Search strategy developed with ${searchStrategy.searchStrings?.length || 0} database-specific queries. Total estimated results: ${searchStrategy.estimatedResults}. Review and approve before execution?`,
     title: 'Search Strategy Review',
     context: {
@@ -87,9 +96,15 @@ export async function process(inputs, ctx) {
         searchTerms: searchStrategy.keyTerms?.length || 0,
         estimatedResults: searchStrategy.estimatedResults
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 3: TITLE/ABSTRACT SCREENING
   // ============================================================================
@@ -200,7 +215,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 10: Scoring review quality');
-  const reviewQuality = await ctx.task(reviewQualityScoringTask, {
+  let reviewQuality = await ctx.task(reviewQualityScoringTask, {
     reviewProtocol,
     searchStrategy,
     screeningResults: { titleAbstract: titleAbstractScreening, fullText: fullTextScreening },
@@ -215,8 +230,21 @@ export async function process(inputs, ctx) {
 
   const qualityMet = reviewQuality.overallScore >= minimumQualityScore;
 
-  // Final breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      reviewQuality = await ctx.task(reviewQualityScoringTask, { ...{
+    reviewProtocol,
+    searchStrategy,
+    screeningResults: { titleAbstract: titleAbstractScreening, fullText: fullTextScreening },
+    qualityAssessment,
+    synthesis,
+    prismaReport,
+    minimumQualityScore,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Literature review complete. ${fullTextScreening.includedCount} studies included. Quality score: ${reviewQuality.overallScore}/100. Approve final review?`,
     title: 'Literature Review Approval',
     context: {
@@ -234,9 +262,15 @@ export async function process(inputs, ctx) {
         qualityMet,
         gapsIdentified: gapAnalysis.gaps?.length || 0
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -293,8 +327,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

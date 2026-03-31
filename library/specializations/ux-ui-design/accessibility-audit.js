@@ -81,7 +81,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 2: Reviewing WCAG compliance standards and success criteria');
-  const complianceReview = await ctx.task(wcagComplianceReviewTask, {
+  let complianceReview = await ctx.task(wcagComplianceReviewTask, {
     projectName,
     wcagLevel,
     complianceStandards,
@@ -120,7 +120,6 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Automated scanning complete: ${barriers.length} potential barriers identified`);
   }
-
   // ============================================================================
   // PHASE 4: MANUAL ACCESSIBILITY TESTING
   // ============================================================================
@@ -146,9 +145,18 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Manual testing complete: ${manualTestResults.barriers.length} additional barriers identified`);
   }
-
-  // Breakpoint: Review initial audit findings
-  await ctx.breakpoint({
+  let lastFeedback_reviewApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_reviewApproval) {
+      complianceReview = await ctx.task(wcagComplianceReviewTask, { ...{
+    projectName,
+    wcagLevel,
+    complianceStandards,
+    scope,
+    outputDir
+  }, feedback: lastFeedback_reviewApproval, attempt: attempt + 1 });
+    }
+  const reviewApproval = await ctx.breakpoint({
     question: `Initial accessibility audit complete. ${barriers.length} total barriers identified. Review findings and approve to continue with barrier analysis and prioritization?`,
     title: 'Initial Audit Findings Review',
     context: {
@@ -165,9 +173,15 @@ export async function process(inputs, ctx) {
         format: a.format || 'html',
         label: a.label
       }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_reviewApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (reviewApproval.approved) break;
+    lastFeedback_reviewApproval = reviewApproval.response || reviewApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 5: KEYBOARD NAVIGATION ASSESSMENT
   // ============================================================================
@@ -313,7 +327,6 @@ export async function process(inputs, ctx) {
     recommendations.push(...usabilityReport.recommendations);
     artifacts.push(...usabilityReport.artifacts);
   }
-
   // ============================================================================
   // PHASE 13: INCLUSIVE DESIGN RECOMMENDATIONS
   // ============================================================================
@@ -339,7 +352,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 14: Generating comprehensive accessibility audit report');
-  const auditReport = await ctx.task(comprehensiveAuditReportTask, {
+  let auditReport = await ctx.task(comprehensiveAuditReportTask, {
     projectName,
     productUrl,
     wcagLevel,
@@ -386,7 +399,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...vpatReport.artifacts);
   }
-
   // ============================================================================
   // PHASE 16: REMEDIATION PLAN CREATION
   // ============================================================================
@@ -408,8 +420,33 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...remediationPlan.artifacts);
 
-    // Breakpoint: Review remediation plan
-    await ctx.breakpoint({
+      let lastFeedback_phase16Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase16Review) {
+        auditReport = await ctx.task(comprehensiveAuditReportTask, { ...{
+    projectName,
+    productUrl,
+    wcagLevel,
+    complianceScore,
+    achievedComplianceLevel,
+    complianceStandards,
+    scope,
+    barriers,
+    prioritizedBarriers,
+    recommendations,
+    keyboardAssessment,
+    screenReaderEvaluation,
+    visualDesignAnalysis,
+    cognitiveReview,
+    formsAssessment,
+    multimediaEvaluation,
+    barrierAnalysis,
+    usabilityReport,
+    inclusiveDesignRecs,
+    outputDir
+  }, feedback: lastFeedback_phase16Review, attempt: attempt + 1 });
+      }
+  const phase16Review = await ctx.breakpoint({
       question: `Remediation plan created with ${remediationPlan.phases.length} phases and ${remediationPlan.totalTasks} tasks. Estimated effort: ${remediationPlan.estimatedEffort}. Expected compliance improvement: +${remediationPlan.expectedImprovementScore} points. Review and approve for implementation?`,
       title: 'Remediation Plan Review',
       context: {
@@ -428,9 +465,15 @@ export async function process(inputs, ctx) {
           { path: remediationPlan.roadmapPath, format: 'markdown', label: 'Implementation Roadmap' },
           { path: auditReport.mainReportPath, format: 'html', label: 'Accessibility Audit Report' }
         ]
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase16Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase16Review.approved) break;
+      lastFeedback_phase16Review = phase16Review.response || phase16Review.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 17: ACCESSIBILITY GOVERNANCE RECOMMENDATIONS
@@ -455,7 +498,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 18: Conducting final accessibility assessment and recommendations');
-  const finalAssessment = await ctx.task(finalAccessibilityAssessmentTask, {
+  let finalAssessment = await ctx.task(finalAccessibilityAssessmentTask, {
     projectName,
     wcagLevel,
     complianceScore,
@@ -476,8 +519,25 @@ export async function process(inputs, ctx) {
     (wcagLevel === 'AA' && achievedComplianceLevel === 'AAA') ||
     (wcagLevel === 'A' && ['AA', 'AAA'].includes(achievedComplianceLevel));
 
-  // Final Breakpoint: Review complete audit
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      finalAssessment = await ctx.task(finalAccessibilityAssessmentTask, { ...{
+    projectName,
+    wcagLevel,
+    complianceScore,
+    achievedComplianceLevel,
+    targetComplianceLevel: wcagLevel,
+    barriers,
+    prioritizedBarriers,
+    recommendations,
+    remediationPlan,
+    usabilityReport,
+    auditReport,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Accessibility audit complete. WCAG ${wcagLevel} compliance: ${meetsCompliance ? 'ACHIEVED' : 'NOT MET'} (Current: ${achievedComplianceLevel}, Score: ${complianceScore}/100). ${barriers.length} barriers identified, ${recommendations.length} recommendations provided. ${finalAssessment.verdict}. Approve final audit deliverables?`,
     title: 'Final Accessibility Audit Approval',
     context: {
@@ -511,9 +571,15 @@ export async function process(inputs, ctx) {
         ...(vpatReport ? [{ path: vpatReport.vpatPath, format: 'html', label: 'VPAT Report' }] : []),
         { path: finalAssessment.reportPath, format: 'markdown', label: 'Final Assessment' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -607,8 +673,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

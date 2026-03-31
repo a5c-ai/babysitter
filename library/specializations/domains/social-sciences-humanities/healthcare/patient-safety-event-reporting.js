@@ -54,15 +54,22 @@ export async function process(inputs, ctx) {
 
   // Phase 2: Event Classification
   ctx.log('info', 'Phase 2: Event Classification');
-  const eventClassification = await ctx.task(eventClassificationTask, {
+  let eventClassification = await ctx.task(eventClassificationTask, {
     eventCapture,
     severityEstimate,
     outputDir
   });
 
-  artifacts.push(...eventClassification.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      eventClassification = await ctx.task(eventClassificationTask, { ...{
+    eventCapture,
+    severityEstimate,
+    outputDir
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Event classified. Category: ${eventClassification.category}. Severity: ${eventClassification.severityLevel}. Harm score: ${eventClassification.harmScore}. Proceed with analysis?`,
     title: 'Event Classification Review',
     context: {
@@ -71,9 +78,15 @@ export async function process(inputs, ctx) {
       severity: eventClassification.severityLevel,
       taxonomy: eventClassification.taxonomy,
       files: eventClassification.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // Phase 3: Contributing Factor Analysis
   ctx.log('info', 'Phase 3: Contributing Factor Analysis');
   const factorAnalysis = await ctx.task(contributingFactorAnalysisTask, {
@@ -96,16 +109,24 @@ export async function process(inputs, ctx) {
 
   // Phase 5: Response Determination
   ctx.log('info', 'Phase 5: Response Determination');
-  const responseDetermination = await ctx.task(responseDeterminationTask, {
+  let responseDetermination = await ctx.task(responseDeterminationTask, {
     eventClassification,
     factorAnalysis,
     trendAnalysis,
     outputDir
   });
 
-  artifacts.push(...responseDetermination.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      responseDetermination = await ctx.task(responseDeterminationTask, { ...{
+    eventClassification,
+    factorAnalysis,
+    trendAnalysis,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Response level: ${responseDetermination.responseLevel}. RCA required: ${responseDetermination.rcaRequired}. Immediate actions: ${responseDetermination.immediateActions.length}. Proceed with action tracking?`,
     title: 'Response Determination Review',
     context: {
@@ -113,9 +134,15 @@ export async function process(inputs, ctx) {
       responseLevel: responseDetermination.responseLevel,
       actions: responseDetermination.recommendedActions,
       files: responseDetermination.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 6: Action Tracking Setup
   ctx.log('info', 'Phase 6: Action Tracking Setup');
   const actionTracking = await ctx.task(actionTrackingTask, {
@@ -209,8 +236,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Event Capture
+  // Task 1: Event Capture
 export const eventCaptureTask = defineTask('pser-capture', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Safety Event Capture',

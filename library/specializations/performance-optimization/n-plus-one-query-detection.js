@@ -36,15 +36,24 @@ export async function process(inputs, ctx) {
   artifacts.push(...queryLogging.artifacts);
 
   // Phase 2: Identify N+1 Patterns
-  const patterns = await ctx.task(identifyNPlusOnePatternsTask, { projectName, queryLogging, outputDir });
-  artifacts.push(...patterns.artifacts);
-
-  await ctx.breakpoint({
+  let patterns = await ctx.task(identifyNPlusOnePatternsTask, { projectName, queryLogging, outputDir });
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      patterns = await ctx.task(identifyNPlusOnePatternsTask, { ...{ projectName, queryLogging, outputDir }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Found ${patterns.issues.length} N+1 query patterns executing ${patterns.totalExtraQueries} extra queries. Fix issues?`,
     title: 'N+1 Query Analysis',
-    context: { runId: ctx.runId, patterns }
-  });
-
+    context: { runId: ctx.runId, patterns },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // Phase 3: Analyze ORM/Data Access Code
   const codeAnalysis = await ctx.task(analyzeDataAccessCodeTask, { projectName, patterns, ormFramework, outputDir });
   artifacts.push(...codeAnalysis.artifacts);
@@ -66,15 +75,24 @@ export async function process(inputs, ctx) {
   artifacts.push(...validation.artifacts);
 
   // Phase 8: Document Patterns to Avoid
-  const documentation = await ctx.task(documentNPlusOnePatternsTask, { projectName, patterns, eagerLoading, batchQueries, outputDir });
-  artifacts.push(...documentation.artifacts);
-
-  await ctx.breakpoint({
+  let documentation = await ctx.task(documentNPlusOnePatternsTask, { projectName, patterns, eagerLoading, batchQueries, outputDir });
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      documentation = await ctx.task(documentNPlusOnePatternsTask, { ...{ projectName, patterns, eagerLoading, batchQueries, outputDir }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `N+1 fixes applied. Query reduction: ${validation.queryReduction}%. Accept changes?`,
     title: 'N+1 Query Resolution',
-    context: { runId: ctx.runId, validation }
-  });
-
+    context: { runId: ctx.runId, validation },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     projectName,

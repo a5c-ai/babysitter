@@ -68,21 +68,35 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 7: Proof verification
-  const proofVerification = await ctx.task(lowerBoundVerifier, {
+  let proofVerification = await ctx.task(lowerBoundVerifier, {
     proof: proofAssembly,
     lemmas: lemmaDevlopment,
     reduction: reductionConstruction
   });
 
-  // Phase 8: Review breakpoint
-  await ctx.breakpoint('lower-bound-review', {
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      proofVerification = await ctx.task(lowerBoundVerifier, { ...{
+    proof: proofAssembly,
+    lemmas: lemmaDevlopment,
+    reduction: reductionConstruction
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint('lower-bound-review', {
     message: 'Review complexity lower bound proof construction',
     proofAssembly,
     reductionConstruction,
     tightnessAnalysis,
-    proofVerification
-  });
-
+    proofVerification,
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 9: Implications analysis
   const implicationsAnalysis = await ctx.task(implicationsAnalyzer, {
     lowerBound: proofAssembly,

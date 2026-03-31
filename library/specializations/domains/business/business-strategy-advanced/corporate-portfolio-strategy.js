@@ -73,18 +73,30 @@ export async function process(inputs, ctx) {
 
   // Phase 8: Generate Report
   ctx.log('info', 'Phase 8: Generating comprehensive report');
-  const portfolioReport = await ctx.task(corporatePortfolioReportTask, {
+  let portfolioReport = await ctx.task(corporatePortfolioReportTask, {
     organizationName, verticalIntegration, horizontalIntegration, diversificationStrategy,
     restructuringAssessment, synergyAnalysis, parentingAdvantage, portfolioOptimization, outputDir
   });
-  artifacts.push(...portfolioReport.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      portfolioReport = await ctx.task(corporatePortfolioReportTask, { ...{
+    organizationName, verticalIntegration, horizontalIntegration, diversificationStrategy,
+    restructuringAssessment, synergyAnalysis, parentingAdvantage, portfolioOptimization, outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Corporate portfolio strategy complete for ${organizationName}. Review recommendations?`,
     title: 'Corporate Portfolio Strategy Review',
-    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })) }
-  });
-
+    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })) },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true, organizationName,
     portfolioStrategy: portfolioOptimization.strategy,

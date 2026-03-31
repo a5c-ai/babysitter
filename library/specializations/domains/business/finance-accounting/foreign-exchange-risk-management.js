@@ -32,18 +32,31 @@ export async function process(inputs, ctx) {
   results.steps.push({ name: 'exposure-identification', result: exposureResult });
 
   // Step 2: FX Risk Assessment
-  const riskResult = await ctx.task(assessFXRiskTask, {
+  let riskResult = await ctx.task(assessFXRiskTask, {
     exposures: exposureResult,
     existingHedges: inputs.existingHedges
   });
   results.steps.push({ name: 'risk-assessment', result: riskResult });
 
-  // Breakpoint for exposure review
-  await ctx.breakpoint('exposure-review', {
+    let lastFeedback_reviewApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_reviewApproval) {
+      riskResult = await ctx.task(assessFXRiskTask, { ...{
+    exposures: exposureResult,
+    existingHedges: inputs.existingHedges
+  }, feedback: lastFeedback_reviewApproval, attempt: attempt + 1 });
+    }
+  const reviewApproval = await ctx.breakpoint('exposure-review', {
     message: 'Review FX exposures and risk assessment before developing hedging strategy',
-    data: { exposures: exposureResult, risks: riskResult }
-  });
-
+    data: { exposures: exposureResult, risks: riskResult },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_reviewApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (reviewApproval.approved) break;
+    lastFeedback_reviewApproval = reviewApproval.response || reviewApproval.feedback || 'Changes requested';
+  }
   // Step 3: Hedging Strategy Development
   const strategyResult = await ctx.task(developHedgingStrategyTask, {
     riskAssessment: riskResult,
@@ -53,18 +66,31 @@ export async function process(inputs, ctx) {
   results.steps.push({ name: 'hedging-strategy', result: strategyResult });
 
   // Step 4: Hedge Execution Planning
-  const executionResult = await ctx.task(planHedgeExecutionTask, {
+  let executionResult = await ctx.task(planHedgeExecutionTask, {
     hedgingStrategy: strategyResult,
     hedgingPolicy: inputs.hedgingPolicy
   });
   results.steps.push({ name: 'execution-planning', result: executionResult });
 
-  // Breakpoint for hedge approval
-  await ctx.breakpoint('hedge-approval', {
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      executionResult = await ctx.task(planHedgeExecutionTask, { ...{
+    hedgingStrategy: strategyResult,
+    hedgingPolicy: inputs.hedgingPolicy
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint('hedge-approval', {
     message: 'Review and approve proposed hedge transactions',
-    data: executionResult
-  });
-
+    data: executionResult,
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Step 5: Hedge Accounting Documentation
   const hedgeAccountingResult = await ctx.task(documentHedgeAccountingTask, {
     hedgeTransactions: executionResult,
@@ -99,8 +125,7 @@ export async function process(inputs, ctx) {
 
   return results;
 }
-
-// Task definitions
+  // Task definitions
 export const identifyFXExposuresTask = defineTask('identify-fx-exposures', (args, taskCtx) => ({
   kind: 'agent',
   skill: { name: 'fx-risk-management' },

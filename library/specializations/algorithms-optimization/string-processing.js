@@ -25,15 +25,24 @@ export async function process(inputs, ctx) {
   const solution = await ctx.task(stringSolutionTask, { problemType, analysis, language, outputDir });
   artifacts.push(...solution.artifacts);
 
-  const testing = await ctx.task(stringTestingTask, { problemType, solution, strings, outputDir });
-  artifacts.push(...testing.artifacts);
-
-  await ctx.breakpoint({
+  let testing = await ctx.task(stringTestingTask, { problemType, solution, strings, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      testing = await ctx.task(stringTestingTask, { ...{ problemType, solution, strings, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `String problem ${problemType} solved. Complexity: O(${solution.complexity}). Tests passed: ${testing.passed}. Review?`,
     title: 'String Processing Complete',
-    context: { runId: ctx.runId, problemType, complexity: solution.complexity, testsPassed: testing.passed }
-  });
-
+    context: { runId: ctx.runId, problemType, complexity: solution.complexity, testsPassed: testing.passed },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     problemType,

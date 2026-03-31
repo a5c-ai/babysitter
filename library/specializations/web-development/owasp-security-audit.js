@@ -24,11 +24,16 @@ export async function process(inputs, ctx) {
   const remediationPlan = await ctx.task(remediationPlanTask, { projectName, outputDir });
   artifacts.push(...remediationPlan.artifacts);
 
-  const securityHardening = await ctx.task(securityHardeningTask, { projectName, outputDir });
-  artifacts.push(...securityHardening.artifacts);
-
-  await ctx.breakpoint({ question: `OWASP security audit complete for ${projectName}. Approve?`, title: 'Security Audit Review', context: { runId: ctx.runId, vulnerabilities: vulnerabilityScan.vulnerabilities } });
-
+  let securityHardening = await ctx.task(securityHardeningTask, { projectName, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      securityHardening = await ctx.task(securityHardeningTask, { ...{ projectName, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({ question: `OWASP security audit complete for ${projectName}. Approve?`, title: 'Security Audit Review', context: { runId: ctx.runId, vulnerabilities: vulnerabilityScan.vulnerabilities }, expert: 'owner', tags: ['approval-gate'], previousFeedback: lastFeedback || undefined, attempt: attempt > 0 ? attempt + 1 : undefined });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const documentation = await ctx.task(documentationTask, { projectName, outputDir });
   artifacts.push(...documentation.artifacts);
 

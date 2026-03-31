@@ -53,7 +53,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 3: Applying Noether\'s theorem to derive conserved quantities');
-  const noetherAnalysis = await ctx.task(noetherAnalysisTask, {
+  let noetherAnalysis = await ctx.task(noetherAnalysisTask, {
     symmetries: symmetryIdentification.symmetries,
     physicalSystem,
     outputDir
@@ -61,8 +61,16 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...noetherAnalysis.artifacts);
 
-  // Breakpoint: Review symmetries and conservation laws
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      noetherAnalysis = await ctx.task(noetherAnalysisTask, { ...{
+    symmetries: symmetryIdentification.symmetries,
+    physicalSystem,
+    outputDir
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Identified ${symmetryIdentification.symmetries.length} symmetries yielding ${noetherAnalysis.conservedQuantities.length} conserved quantities. Review before constraint analysis?`,
     title: 'Symmetry-Conservation Analysis Review',
     context: {
@@ -78,9 +86,15 @@ export async function process(inputs, ctx) {
         symmetryCount: symmetryIdentification.symmetries.length,
         conservedQuantityCount: noetherAnalysis.conservedQuantities.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 4: SYMMETRY BREAKING ANALYSIS
   // ============================================================================
@@ -128,7 +142,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 7: Generating predictions from symmetry analysis');
-  const predictionGeneration = await ctx.task(predictionGenerationTask, {
+  let predictionGeneration = await ctx.task(predictionGenerationTask, {
     symmetries: symmetryIdentification.symmetries,
     conservedQuantities: noetherAnalysis.conservedQuantities,
     constraints: constraintDerivation.constraints,
@@ -138,8 +152,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...predictionGeneration.artifacts);
 
-  // Final breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      predictionGeneration = await ctx.task(predictionGenerationTask, { ...{
+    symmetries: symmetryIdentification.symmetries,
+    conservedQuantities: noetherAnalysis.conservedQuantities,
+    constraints: constraintDerivation.constraints,
+    selectionRules: selectionRuleDerivation.selectionRules,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Symmetry analysis complete. ${constraintDerivation.constraints.length} constraints and ${predictionGeneration.predictions.length} predictions derived. Review findings?`,
     title: 'Symmetry-Conservation Analysis Complete',
     context: {
@@ -156,9 +180,15 @@ export async function process(inputs, ctx) {
         selectionRuleCount: selectionRuleDerivation.selectionRules.length,
         predictionCount: predictionGeneration.predictions.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -180,8 +210,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

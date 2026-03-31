@@ -97,7 +97,7 @@ export async function process(inputs, ctx) {
 
   // Phase 5: Combined Uncertainty Budget
   ctx.log('info', 'Phase 5: Developing combined uncertainty budget');
-  const uncertaintyBudget = await ctx.task(developUncertaintyBudget, {
+  let uncertaintyBudget = await ctx.task(developUncertaintyBudget, {
     measurementUncertainty: measurementAnalysis.uncertainty,
     materialVariability: variabilityAnalysis.variability,
     modelUncertainty: modelAnalysis.uncertainty,
@@ -106,8 +106,18 @@ export async function process(inputs, ctx) {
   });
   artifacts.push(...(uncertaintyBudget.artifacts || []));
 
-  // Quality Gate: Review uncertainty budget
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      uncertaintyBudget = await ctx.task(developUncertaintyBudget, { ...{
+    measurementUncertainty: measurementAnalysis.uncertainty,
+    materialVariability: variabilityAnalysis.variability,
+    modelUncertainty: modelAnalysis.uncertainty,
+    correlations: inputs.correlations,
+    combinationMethod: inputs.combinationMethod || 'GUM'
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: 'Review the uncertainty budget. Are all significant sources captured and properly quantified?',
     title: 'Uncertainty Budget Review',
     context: {
@@ -119,9 +129,15 @@ export async function process(inputs, ctx) {
         materialContribution: variabilityAnalysis.contribution
       },
       files: artifacts
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 6: Statistical Allowables Calculation
   ctx.log('info', 'Phase 6: Calculating statistical allowables');
   const allowablesCalculation = await ctx.task(calculateAllowables, {

@@ -37,15 +37,24 @@ export async function process(inputs, ctx) {
   const migrationsSetup = await ctx.task(migrationsSetupTask, { projectName, orm, outputDir });
   artifacts.push(...migrationsSetup.artifacts);
 
-  const performanceSetup = await ctx.task(performanceSetupTask, { projectName, outputDir });
-  artifacts.push(...performanceSetup.artifacts);
-
-  await ctx.breakpoint({
+  let performanceSetup = await ctx.task(performanceSetupTask, { projectName, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      performanceSetup = await ctx.task(performanceSetupTask, { ...{ projectName, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `PostgreSQL database design complete for ${projectName}. ${schemaDesign.tables.length} tables designed. Approve?`,
     title: 'Database Design Review',
-    context: { runId: ctx.runId, tables: schemaDesign.tables, indexes: indexesSetup.indexes }
-  });
-
+    context: { runId: ctx.runId, tables: schemaDesign.tables, indexes: indexesSetup.indexes },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const documentation = await ctx.task(documentationTask, { projectName, schemaDesign, outputDir });
   artifacts.push(...documentation.artifacts);
 

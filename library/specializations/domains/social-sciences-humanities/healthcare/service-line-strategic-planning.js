@@ -17,22 +17,32 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Starting Service Line Strategic Planning for: ${organizationName} - ${serviceLine}`);
 
-  const marketAnalysis = await ctx.task(slMarketAnalysisTask, { organizationName, serviceLine, marketData, outputDir });
-  artifacts.push(...marketAnalysis.artifacts);
-
-  await ctx.breakpoint({ question: `Market analysis complete. Market size: ${marketAnalysis.marketSize}. Growth rate: ${marketAnalysis.growthRate}%. Competitive position: ${marketAnalysis.competitivePosition}. Proceed?`, title: 'Market Analysis Review', context: { runId: ctx.runId, market: marketAnalysis.summary } });
-
+  let marketAnalysis = await ctx.task(slMarketAnalysisTask, { organizationName, serviceLine, marketData, outputDir });
+    let lastFeedback_analysisApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_analysisApproval) {
+      marketAnalysis = await ctx.task(slMarketAnalysisTask, { ...{ organizationName, serviceLine, marketData, outputDir }, feedback: lastFeedback_analysisApproval, attempt: attempt + 1 });
+    }
+  const analysisApproval = await ctx.breakpoint({ question: `Market analysis complete. Market size: ${marketAnalysis.marketSize}. Growth rate: ${marketAnalysis.growthRate}%. Competitive position: ${marketAnalysis.competitivePosition}. Proceed?`, title: 'Market Analysis Review', context: { runId: ctx.runId, market: marketAnalysis.summary }, expert: 'owner', tags: ['approval-gate'], previousFeedback: lastFeedback_analysisApproval || undefined, attempt: attempt > 0 ? attempt + 1 : undefined });
+    if (analysisApproval.approved) break;
+    lastFeedback_analysisApproval = analysisApproval.response || analysisApproval.feedback || 'Changes requested';
+  }
   const internalAssessment = await ctx.task(slInternalAssessmentTask, { serviceLine, organizationName, outputDir });
   artifacts.push(...internalAssessment.artifacts);
 
   const swotAnalysis = await ctx.task(slSWOTTask, { marketAnalysis, internalAssessment, outputDir });
   artifacts.push(...swotAnalysis.artifacts);
 
-  const strategicOptions = await ctx.task(slStrategicOptionsTask, { swotAnalysis, marketAnalysis, planningHorizon, outputDir });
-  artifacts.push(...strategicOptions.artifacts);
-
-  await ctx.breakpoint({ question: `${strategicOptions.options.length} strategic options developed. Top option: ${strategicOptions.recommendedOption}. Proceed with financial modeling?`, title: 'Strategic Options Review', context: { runId: ctx.runId, options: strategicOptions.options, recommended: strategicOptions.recommendedOption } });
-
+  let strategicOptions = await ctx.task(slStrategicOptionsTask, { swotAnalysis, marketAnalysis, planningHorizon, outputDir });
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      strategicOptions = await ctx.task(slStrategicOptionsTask, { ...{ swotAnalysis, marketAnalysis, planningHorizon, outputDir }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({ question: `${strategicOptions.options.length} strategic options developed. Top option: ${strategicOptions.recommendedOption}. Proceed with financial modeling?`, title: 'Strategic Options Review', context: { runId: ctx.runId, options: strategicOptions.options, recommended: strategicOptions.recommendedOption }, expert: 'owner', tags: ['approval-gate'], previousFeedback: lastFeedback_finalApproval || undefined, attempt: attempt > 0 ? attempt + 1 : undefined });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const financialProforma = await ctx.task(slFinancialProformaTask, { strategicOptions, planningHorizon, outputDir });
   artifacts.push(...financialProforma.artifacts);
 

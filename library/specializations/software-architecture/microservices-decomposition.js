@@ -62,7 +62,6 @@ export async function process(inputs, ctx) {
       domainAnalysis
     };
   }
-
   // ============================================================================
   // PHASE 2: SERVICE BOUNDARY IDENTIFICATION
   // ============================================================================
@@ -83,7 +82,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 3: Analyzing dependencies and designing decoupling strategies');
-  const dependencyAnalysis = await ctx.task(dependencyAnalysisTask, {
+  let dependencyAnalysis = await ctx.task(dependencyAnalysisTask, {
     projectName,
     currentArchitecture,
     serviceBoundaries,
@@ -93,8 +92,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...dependencyAnalysis.artifacts);
 
-  // Breakpoint: Review service boundaries and dependencies
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      dependencyAnalysis = await ctx.task(dependencyAnalysisTask, { ...{
+    projectName,
+    currentArchitecture,
+    serviceBoundaries,
+    domainAnalysis,
+    outputDir
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Domain analysis complete. Identified ${domainAnalysis.boundedContexts.length} bounded contexts and ${serviceBoundaries.services.length} potential services. Review service boundaries and dependencies before proceeding?`,
     title: 'Service Boundary Review',
     context: {
@@ -108,9 +117,15 @@ export async function process(inputs, ctx) {
         format: a.format || 'markdown',
         label: a.label
       }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 4: DATA DECOMPOSITION STRATEGY
   // ============================================================================
@@ -245,7 +260,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 12: Conducting comprehensive risk assessment and mitigation planning');
-  const riskAssessment = await ctx.task(riskAssessmentTask, {
+  let riskAssessment = await ctx.task(riskAssessmentTask, {
     projectName,
     currentArchitecture,
     serviceBoundaries,
@@ -262,8 +277,20 @@ export async function process(inputs, ctx) {
     risk => risk.severity === 'critical' && !risk.mitigationPlan
   );
 
-  if (criticalRisksWithoutMitigation.length > 0) {
-    await ctx.breakpoint({
+      let lastFeedback_phase12Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase12Review) {
+        riskAssessment = await ctx.task(riskAssessmentTask, { ...{
+    projectName,
+    currentArchitecture,
+    serviceBoundaries,
+    migrationStrategy,
+    migrationRoadmap,
+    constraints,
+    outputDir
+  }, feedback: lastFeedback_phase12Review, attempt: attempt + 1 });
+      }
+  const phase12Review = await ctx.breakpoint({
       question: `${criticalRisksWithoutMitigation.length} critical risks lack mitigation plans. Should we develop mitigation strategies before proceeding?`,
       title: 'Critical Risk Warning',
       context: {
@@ -271,9 +298,15 @@ export async function process(inputs, ctx) {
         projectName,
         criticalRisks: criticalRisksWithoutMitigation,
         recommendation: 'Develop mitigation strategies for all critical risks before proceeding'
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase12Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase12Review.approved) break;
+      lastFeedback_phase12Review = phase12Review.response || phase12Review.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 13: DECOMPOSITION QUALITY SCORING
@@ -303,7 +336,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 14: Generating comprehensive decomposition strategy document');
-  const strategyDocument = await ctx.task(strategyDocumentTask, {
+  let strategyDocument = await ctx.task(strategyDocumentTask, {
     projectName,
     currentArchitecture,
     businessDomain,
@@ -326,8 +359,31 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...strategyDocument.artifacts);
 
-  // Final Breakpoint: Review complete decomposition strategy
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      strategyDocument = await ctx.task(strategyDocumentTask, { ...{
+    projectName,
+    currentArchitecture,
+    businessDomain,
+    constraints,
+    domainAnalysis,
+    serviceBoundaries,
+    dependencyAnalysis,
+    dataDecomposition,
+    apiContracts,
+    crossCuttingConcerns,
+    migrationStrategy,
+    servicePrioritization,
+    deploymentArchitecture,
+    observabilityStrategy,
+    migrationRoadmap,
+    riskAssessment,
+    qualityScore,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Microservices decomposition strategy complete for ${projectName}. Overall quality score: ${overallScore}/100. ${qualityMet ? 'Strategy meets quality standards!' : 'Strategy may need refinement.'} Total services identified: ${serviceBoundaries.services.length}. Estimated migration duration: ${migrationRoadmap.timeline.totalDuration}. Approve to proceed with implementation?`,
     title: 'Decomposition Strategy Approval',
     context: {
@@ -354,9 +410,15 @@ export async function process(inputs, ctx) {
         estimatedCost: migrationRoadmap.cost.total,
         qualityScore: overallScore
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -441,8 +503,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

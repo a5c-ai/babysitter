@@ -89,7 +89,7 @@ export async function process(inputs, ctx) {
 
   // Task 6: Previous Report Comparison
   ctx.log('info', 'Comparing with previous condition reports');
-  const reportComparison = await ctx.task(reportComparisonTask, {
+  let reportComparison = await ctx.task(reportComparisonTask, {
     objectTitle,
     previousReports,
     currentFindings: visualExamination.findings,
@@ -98,8 +98,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...reportComparison.artifacts);
 
-  // Breakpoint: Review condition assessment
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      reportComparison = await ctx.task(reportComparisonTask, { ...{
+    objectTitle,
+    previousReports,
+    currentFindings: visualExamination.findings,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Condition report for "${objectTitle}" complete. ${visualExamination.findings.issues.length} condition issues documented. Review and approve?`,
     title: 'Condition Report Review',
     context: {
@@ -112,9 +121,15 @@ export async function process(inputs, ctx) {
         overallCondition: visualExamination.findings.overallCondition,
         issueCount: visualExamination.findings.issues.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 7: Digital Documentation
   ctx.log('info', 'Creating digital documentation package');
   const digitalDocumentation = await ctx.task(digitalDocumentationTask, {
@@ -190,8 +205,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Report Setup
+  // Task 1: Report Setup
 export const reportSetupTask = defineTask('report-setup', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Set up condition report',

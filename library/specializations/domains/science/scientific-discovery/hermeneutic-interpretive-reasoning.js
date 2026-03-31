@@ -53,7 +53,6 @@ export async function process(inputs, ctx) {
       interpretations: null
     };
   }
-
   // Phase 3: Contextual Horizon Mapping
   const horizonMapping = await ctx.task(contextualHorizonTask, {
     artifact,
@@ -63,14 +62,22 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 4: Part-Whole Dialectic (Hermeneutic Circle)
-  const partWholeAnalysis = await ctx.task(partWholeDialecticTask, {
+  let partWholeAnalysis = await ctx.task(partWholeDialecticTask, {
     artifact,
     structuralAnalysis,
     horizonMapping
   });
 
-  // Breakpoint: Review initial interpretation
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      partWholeAnalysis = await ctx.task(partWholeDialecticTask, { ...{
+    artifact,
+    structuralAnalysis,
+    horizonMapping
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: `Review initial hermeneutic analysis of "${artifact.type}". Hermeneutic circle iterations: ${partWholeAnalysis.iterations}. Continue with deeper interpretation?`,
     title: 'Hermeneutic Analysis Review',
     context: {
@@ -83,9 +90,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: { preUnderstanding, structuralAnalysis, horizonMapping, partWholeAnalysis }
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
   // Phase 5: Authorial Intent Analysis
   const authorialIntent = await ctx.task(authorialIntentTask, {
     artifact,
@@ -129,7 +142,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 10: Understanding Synthesis
-  const understandingSynthesis = await ctx.task(understandingSynthesisTask, {
+  let understandingSynthesis = await ctx.task(understandingSynthesisTask, {
     artifact,
     preUnderstanding,
     partWholeAnalysis,
@@ -140,8 +153,21 @@ export async function process(inputs, ctx) {
     context
   });
 
-  // Final Breakpoint: Interpretation Approval
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      understandingSynthesis = await ctx.task(understandingSynthesisTask, { ...{
+    artifact,
+    preUnderstanding,
+    partWholeAnalysis,
+    fusionOfHorizons,
+    interpretations: multipleInterpretations.interpretations,
+    validation: interpretationValidation,
+    interpretiveGoals,
+    context
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Hermeneutic interpretation complete for "${artifact.type}". ${multipleInterpretations.interpretations?.length || 0} interpretations developed. Approve understanding?`,
     title: 'Hermeneutic Interpretation Approval',
     context: {
@@ -153,9 +179,15 @@ export async function process(inputs, ctx) {
         { path: 'artifacts/hermeneutic-report.json', format: 'json', content: understandingSynthesis },
         { path: 'artifacts/hermeneutic-report.md', format: 'markdown', content: understandingSynthesis.markdown }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     artifact: artifact,
@@ -181,8 +213,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const preUnderstandingTask = defineTask('pre-understanding', (args, taskCtx) => ({
   kind: 'agent',

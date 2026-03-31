@@ -112,7 +112,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 5: Mechanical Architecture and Kinematics Design');
 
-  const mechanicalArchitecture = await ctx.task(mechanicalArchitectureTask, {
+  let mechanicalArchitecture = await ctx.task(mechanicalArchitectureTask, {
     projectName,
     missionProfile,
     sensorActuatorReqs,
@@ -120,9 +120,18 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...mechanicalArchitecture.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase5Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase5Review) {
+      mechanicalArchitecture = await ctx.task(mechanicalArchitectureTask, { ...{
+    projectName,
+    missionProfile,
+    sensorActuatorReqs,
+    environmentalConstraints,
+    outputDir
+  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+    }
+  const phase5Review = await ctx.breakpoint({
     question: `Mechanical architecture designed for ${projectName}. Robot type: ${mechanicalArchitecture.robotType}. DoF: ${mechanicalArchitecture.degreesOfFreedom}. Approve and proceed with software architecture?`,
     title: 'Mechanical Architecture Review',
     context: {
@@ -130,9 +139,15 @@ export async function process(inputs, ctx) {
       robotType: mechanicalArchitecture.robotType,
       kinematics: mechanicalArchitecture.kinematicsType,
       files: mechanicalArchitecture.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase5Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase5Review.approved) break;
+    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 6: SOFTWARE ARCHITECTURE DESIGN
   // ============================================================================
@@ -191,7 +206,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 9: Comprehensive Design Documentation');
 
-  const designDocumentation = await ctx.task(designDocumentationTask, {
+  let designDocumentation = await ctx.task(designDocumentationTask, {
     projectName,
     missionAnalysis,
     performanceMetrics,
@@ -206,8 +221,23 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...designDocumentation.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      designDocumentation = await ctx.task(designDocumentationTask, { ...{
+    projectName,
+    missionAnalysis,
+    performanceMetrics,
+    environmentalConstraints,
+    sensorActuatorReqs,
+    mechanicalArchitecture,
+    softwareArchitecture,
+    safetyAnalysis,
+    integrationPlan,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Robot System Design Complete for ${projectName}. ${issues.length} issues identified. Review comprehensive design documentation?`,
     title: 'Robot System Design Complete',
     context: {
@@ -223,9 +253,15 @@ export async function process(inputs, ctx) {
         { path: designDocumentation.docPath, format: 'markdown', label: 'Design Document' },
         ...designDocumentation.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -257,8 +293,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

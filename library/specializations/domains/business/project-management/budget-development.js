@@ -36,7 +36,7 @@ export async function process(inputs, ctx) {
   } = inputs;
 
   // Phase 1: Cost Estimation Strategy Selection
-  const estimationStrategy = await ctx.task(estimationStrategyTask, {
+  let estimationStrategy = await ctx.task(estimationStrategyTask, {
     projectName,
     projectScope,
     historicalData,
@@ -52,9 +52,17 @@ export async function process(inputs, ctx) {
       budgetDocument: null
     };
   }
-
-  // Breakpoint: Review estimation strategy
-  await ctx.breakpoint({
+  let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      estimationStrategy = await ctx.task(estimationStrategyTask, { ...{
+    projectName,
+    projectScope,
+    historicalData,
+    constraints
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Review cost estimation strategy for ${projectName}. Selected approaches: ${estimationStrategy.selectedApproaches.join(', ')}. Proceed with estimation?`,
     title: 'Cost Estimation Strategy Review',
     context: {
@@ -67,9 +75,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: estimationStrategy
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // Phase 2: Resource Cost Analysis
   const resourceCostAnalysis = await ctx.task(resourceCostAnalysisTask, {
     projectName,
@@ -96,7 +110,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 5: Estimate Reconciliation
-  const reconciledEstimate = await ctx.task(estimateReconciliationTask, {
+  let reconciledEstimate = await ctx.task(estimateReconciliationTask, {
     projectName,
     bottomUpEstimate,
     comparativeEstimates,
@@ -105,8 +119,17 @@ export async function process(inputs, ctx) {
 
   // Quality Gate: Estimates must converge within acceptable variance
   const estimateVariance = reconciledEstimate.variancePercentage || 100;
-  if (estimateVariance > 25) {
-    await ctx.breakpoint({
+      let lastFeedback_phase5Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase5Review) {
+        reconciledEstimate = await ctx.task(estimateReconciliationTask, { ...{
+    projectName,
+    bottomUpEstimate,
+    comparativeEstimates,
+    estimationStrategy
+  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+      }
+  const phase5Review = await ctx.breakpoint({
       question: `Estimate variance is ${estimateVariance}% (threshold: 25%). Review estimation discrepancies and determine approach?`,
       title: 'Estimate Variance Warning',
       context: {
@@ -115,9 +138,15 @@ export async function process(inputs, ctx) {
         bottomUpTotal: bottomUpEstimate.totalCost,
         analogousTotal: comparativeEstimates.analogousEstimate?.total,
         recommendation: 'Review assumptions and refine estimates before proceeding'
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase5Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase5Review.approved) break;
+      lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+    } }
 
   // Phase 6: Contingency and Reserve Analysis
   const reserveAnalysis = await ctx.task(reserveAnalysisTask, {
@@ -156,7 +185,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 10: Final Budget Document Generation
-  const budgetDocument = await ctx.task(budgetDocumentGenerationTask, {
+  let budgetDocument = await ctx.task(budgetDocumentGenerationTask, {
     projectName,
     projectScope,
     resources,
@@ -175,8 +204,25 @@ export async function process(inputs, ctx) {
   const budgetApprovalScore = budgetDocument.approvalReadinessScore || 0;
   const ready = budgetApprovalScore >= 80;
 
-  // Final Breakpoint: Budget Approval
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      budgetDocument = await ctx.task(budgetDocumentGenerationTask, { ...{
+    projectName,
+    projectScope,
+    resources,
+    estimationStrategy,
+    resourceCostAnalysis,
+    reconciledEstimate,
+    reserveAnalysis,
+    costBaseline,
+    cashFlowAnalysis,
+    budgetRiskAssessment,
+    currency,
+    constraints
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Budget development complete for ${projectName}. Total Budget: ${currency} ${costBaseline.totalBudget?.toLocaleString()}. Approval readiness: ${budgetApprovalScore}/100. Submit for approval?`,
     title: 'Budget Approval Review',
     context: {
@@ -190,9 +236,15 @@ export async function process(inputs, ctx) {
         { path: `artifacts/final-budget-document.json`, format: 'json', content: budgetDocument },
         { path: `artifacts/final-budget-document.md`, format: 'markdown', content: budgetDocument.markdown }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     projectName,
@@ -229,8 +281,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const estimationStrategyTask = defineTask('estimation-strategy', (args, taskCtx) => ({
   kind: 'agent',

@@ -82,7 +82,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 4: Detecting shipment exceptions');
 
-  const exceptionDetection = await ctx.task(exceptionDetectionTask, {
+  let exceptionDetection = await ctx.task(exceptionDetectionTask, {
     normalizedStatus: statusNormalization.normalizedStatus,
     etaPredictions: etaPrediction.predictions,
     alertThresholds,
@@ -92,8 +92,17 @@ export async function process(inputs, ctx) {
   artifacts.push(...exceptionDetection.artifacts);
 
   // Quality Gate: Review critical exceptions
-  if (exceptionDetection.criticalExceptions.length > 0) {
-    await ctx.breakpoint({
+      let lastFeedback_phase4Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase4Review) {
+        exceptionDetection = await ctx.task(exceptionDetectionTask, { ...{
+    normalizedStatus: statusNormalization.normalizedStatus,
+    etaPredictions: etaPrediction.predictions,
+    alertThresholds,
+    outputDir
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+      }
+  const phase4Review = await ctx.breakpoint({
       question: `${exceptionDetection.criticalExceptions.length} critical exceptions detected. Review and take action?`,
       title: 'Critical Shipment Exceptions',
       context: {
@@ -101,9 +110,15 @@ export async function process(inputs, ctx) {
         criticalExceptions: exceptionDetection.criticalExceptions,
         totalExceptions: exceptionDetection.allExceptions.length,
         files: exceptionDetection.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase4Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase4Review.approved) break;
+      lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 5: ROOT CAUSE ANALYSIS FOR EXCEPTIONS
@@ -172,7 +187,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 9: Generating tracking report');
 
-  const trackingReport = await ctx.task(trackingReportTask, {
+  let trackingReport = await ctx.task(trackingReportTask, {
     shipmentCount: shipments.length,
     statusSummary: statusNormalization.statusSummary,
     exceptions: exceptionDetection.allExceptions,
@@ -183,8 +198,19 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...trackingReport.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      trackingReport = await ctx.task(trackingReportTask, { ...{
+    shipmentCount: shipments.length,
+    statusSummary: statusNormalization.statusSummary,
+    exceptions: exceptionDetection.allExceptions,
+    carrierPerformance: carrierPerformance.metrics,
+    notifications: customerNotifications.sentNotifications,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Shipment tracking complete. ${shipments.length} shipments monitored, ${exceptionDetection.allExceptions.length} exceptions detected, ${customerNotifications.sentNotifications.length} notifications sent. Review summary?`,
     title: 'Shipment Tracking Summary',
     context: {
@@ -200,9 +226,15 @@ export async function process(inputs, ctx) {
         { path: trackingReport.reportPath, format: 'markdown', label: 'Tracking Report' },
         { path: dashboardUpdate.dashboardPath, format: 'json', label: 'Dashboard Data' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -227,8 +259,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

@@ -66,10 +66,9 @@ export async function process(inputs, ctx) {
     });
     artifacts.push(...atheisticArguments.artifacts);
   }
-
   // Task 6: Dialectical Synthesis
   ctx.log('info', 'Synthesizing dialectical analysis');
-  const dialecticalSynthesis = await ctx.task(dialecticalSynthesisTask, {
+  let dialecticalSynthesis = await ctx.task(dialecticalSynthesisTask, {
     cosmologicalAnalysis,
     teleologicalAnalysis,
     ontologicalAnalysis,
@@ -80,8 +79,19 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...dialecticalSynthesis.artifacts);
 
-  // Breakpoint: Review arguments evaluation
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      dialecticalSynthesis = await ctx.task(dialecticalSynthesisTask, { ...{
+    cosmologicalAnalysis,
+    teleologicalAnalysis,
+    ontologicalAnalysis,
+    moralAnalysis,
+    atheisticArguments,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Theistic arguments evaluation complete. Analyzed 4 major argument types. Review the analysis?`,
     title: 'Theistic Arguments Evaluation Results',
     context: {
@@ -93,9 +103,15 @@ export async function process(inputs, ctx) {
         includesCounterarguments: includeCounterarguments,
         overallAssessment: dialecticalSynthesis.overallAssessment
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 7: Generate Arguments Report
   ctx.log('info', 'Generating theistic arguments evaluation report');
   const argumentsReport = await ctx.task(argumentsReportTask, {
@@ -143,8 +159,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task definitions
+  // Task definitions
 export const cosmologicalAnalysisTask = defineTask('cosmological-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Analyze cosmological arguments',

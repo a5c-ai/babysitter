@@ -36,15 +36,24 @@ export async function process(inputs, ctx) {
   artifacts.push(...allocationPatterns.artifacts);
 
   // Phase 2: Identify High-Allocation Code Paths
-  const highAllocation = await ctx.task(identifyHighAllocationPathsTask, { projectName, allocationPatterns, outputDir });
-  artifacts.push(...highAllocation.artifacts);
-
-  await ctx.breakpoint({
+  let highAllocation = await ctx.task(identifyHighAllocationPathsTask, { projectName, allocationPatterns, outputDir });
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      highAllocation = await ctx.task(identifyHighAllocationPathsTask, { ...{ projectName, allocationPatterns, outputDir }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Found ${highAllocation.paths.length} high-allocation paths. Review optimization strategies?`,
     title: 'Allocation Analysis',
-    context: { runId: ctx.runId, highAllocation }
-  });
-
+    context: { runId: ctx.runId, highAllocation },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // Phase 3: Implement Object Pooling
   const objectPooling = await ctx.task(implementObjectPoolingTask, { projectName, highAllocation, outputDir });
   artifacts.push(...objectPooling.artifacts);
@@ -66,15 +75,24 @@ export async function process(inputs, ctx) {
   artifacts.push(...benchmarks.artifacts);
 
   // Phase 8: Validate Reduced GC Pressure
-  const validation = await ctx.task(validateReducedGCPressureTask, { projectName, benchmarks, outputDir });
-  artifacts.push(...validation.artifacts);
-
-  await ctx.breakpoint({
+  let validation = await ctx.task(validateReducedGCPressureTask, { projectName, benchmarks, outputDir });
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      validation = await ctx.task(validateReducedGCPressureTask, { ...{ projectName, benchmarks, outputDir }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Allocation optimization complete. Reduction: ${validation.allocationReduction}%. Accept changes?`,
     title: 'Allocation Optimization Results',
-    context: { runId: ctx.runId, validation }
-  });
-
+    context: { runId: ctx.runId, validation },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     projectName,

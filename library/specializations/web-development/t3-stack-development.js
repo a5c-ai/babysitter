@@ -128,7 +128,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 7: Building type-safe React components');
 
-  const componentsSetup = await ctx.task(componentsSetupTask, {
+  let componentsSetup = await ctx.task(componentsSetupTask, {
     projectName,
     trpcSetup,
     outputDir
@@ -136,8 +136,16 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...componentsSetup.artifacts);
 
-  // Quality Gate
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      componentsSetup = await ctx.task(componentsSetupTask, { ...{
+    projectName,
+    trpcSetup,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `T3 Stack setup complete for ${projectName}. ${routersSetup.routers.length} tRPC routers, ${prismaSetup.models.length} Prisma models. Approve configuration?`,
     title: 'T3 Stack Review',
     context: {
@@ -146,9 +154,15 @@ export async function process(inputs, ctx) {
       models: prismaSetup.models,
       components: componentsSetup.components,
       files: artifacts.slice(-5).map(a => ({ path: a.path, format: a.format || 'typescript' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 8: VALIDATION (ZOD)
   // ============================================================================
@@ -220,8 +234,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

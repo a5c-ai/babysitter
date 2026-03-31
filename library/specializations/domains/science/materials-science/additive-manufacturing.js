@@ -50,7 +50,7 @@ export async function process(inputs, ctx) {
 
   // Phase 2: Process Parameter Development
   ctx.log('info', 'Phase 2: Developing process parameters');
-  const parameterDevelopment = await ctx.task(amParameterDevelopmentTask, {
+  let parameterDevelopment = await ctx.task(amParameterDevelopmentTask, {
     material,
     amProcess,
     targetProperties,
@@ -58,9 +58,18 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...parameterDevelopment.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      parameterDevelopment = await ctx.task(amParameterDevelopmentTask, { ...{
+    material,
+    amProcess,
+    targetProperties,
+    buildOrientation,
+    outputDir
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Process parameters developed. Power: ${parameterDevelopment.parameters.laserPower}W, Speed: ${parameterDevelopment.parameters.scanSpeed}mm/s. Review parameters?`,
     title: 'AM Parameter Review',
     context: {
@@ -70,9 +79,15 @@ export async function process(inputs, ctx) {
         energyDensity: parameterDevelopment.energyDensity
       },
       files: parameterDevelopment.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // Phase 3: Build Execution
   ctx.log('info', 'Phase 3: Executing qualification builds');
   const buildExecution = await ctx.task(qualificationBuildTask, {
@@ -108,16 +123,24 @@ export async function process(inputs, ctx) {
 
   // Phase 6: Mechanical Property Testing
   ctx.log('info', 'Phase 6: Testing mechanical properties');
-  const mechanicalTesting = await ctx.task(amMechanicalTestingTask, {
+  let mechanicalTesting = await ctx.task(amMechanicalTestingTask, {
     material,
     targetProperties,
     buildOrientation,
     outputDir
   });
 
-  artifacts.push(...mechanicalTesting.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      mechanicalTesting = await ctx.task(amMechanicalTestingTask, { ...{
+    material,
+    targetProperties,
+    buildOrientation,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Mechanical testing complete. UTS: ${mechanicalTesting.tensileStrength} MPa, Elongation: ${mechanicalTesting.elongation}%. Meets requirements: ${mechanicalTesting.meetsRequirements}. Review?`,
     title: 'Mechanical Properties Review',
     context: {
@@ -129,9 +152,15 @@ export async function process(inputs, ctx) {
         meetsRequirements: mechanicalTesting.meetsRequirements
       },
       files: mechanicalTesting.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 7: Post-Processing Optimization
   ctx.log('info', 'Phase 7: Optimizing post-processing');
   const postProcessing = await ctx.task(amPostProcessingTask, {
@@ -211,8 +240,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Feedstock Qualification
+  // Task 1: Feedstock Qualification
 export const feedstockQualificationTask = defineTask('am-feedstock-qualification', (args, taskCtx) => ({
   kind: 'agent',
   title: `Feedstock Qualification - ${args.material}`,

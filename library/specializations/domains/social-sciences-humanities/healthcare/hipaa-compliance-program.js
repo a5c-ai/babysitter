@@ -17,22 +17,32 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Starting HIPAA Compliance Program for: ${organizationName}`);
 
-  const gapAssessment = await ctx.task(hipaaGapAssessmentTask, { organizationName, complianceScope, entityType, currentState, outputDir });
-  artifacts.push(...gapAssessment.artifacts);
-
-  await ctx.breakpoint({ question: `Gap assessment complete. Compliance score: ${gapAssessment.complianceScore}%. ${gapAssessment.criticalGaps.length} critical gaps identified. Proceed?`, title: 'HIPAA Gap Assessment Review', context: { runId: ctx.runId, score: gapAssessment.complianceScore, criticalGaps: gapAssessment.criticalGaps } });
-
+  let gapAssessment = await ctx.task(hipaaGapAssessmentTask, { organizationName, complianceScope, entityType, currentState, outputDir });
+    let lastFeedback_assessmentApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_assessmentApproval) {
+      gapAssessment = await ctx.task(hipaaGapAssessmentTask, { ...{ organizationName, complianceScope, entityType, currentState, outputDir }, feedback: lastFeedback_assessmentApproval, attempt: attempt + 1 });
+    }
+  const assessmentApproval = await ctx.breakpoint({ question: `Gap assessment complete. Compliance score: ${gapAssessment.complianceScore}%. ${gapAssessment.criticalGaps.length} critical gaps identified. Proceed?`, title: 'HIPAA Gap Assessment Review', context: { runId: ctx.runId, score: gapAssessment.complianceScore, criticalGaps: gapAssessment.criticalGaps }, expert: 'owner', tags: ['approval-gate'], previousFeedback: lastFeedback_assessmentApproval || undefined, attempt: attempt > 0 ? attempt + 1 : undefined });
+    if (assessmentApproval.approved) break;
+    lastFeedback_assessmentApproval = assessmentApproval.response || assessmentApproval.feedback || 'Changes requested';
+  }
   const riskAssessment = await ctx.task(hipaaRiskAssessmentTask, { gapAssessment, outputDir });
   artifacts.push(...riskAssessment.artifacts);
 
   const privacyProgram = await ctx.task(hipaaPrivacyTask, { gapAssessment, entityType, outputDir });
   artifacts.push(...privacyProgram.artifacts);
 
-  const securityProgram = await ctx.task(hipaaSecurityTask, { gapAssessment, riskAssessment, outputDir });
-  artifacts.push(...securityProgram.artifacts);
-
-  await ctx.breakpoint({ question: `Privacy and Security programs designed. ${privacyProgram.policies.length} privacy policies, ${securityProgram.safeguards.length} security safeguards. Proceed?`, title: 'Privacy/Security Program Review', context: { runId: ctx.runId, privacy: privacyProgram.policies, security: securityProgram.safeguards } });
-
+  let securityProgram = await ctx.task(hipaaSecurityTask, { gapAssessment, riskAssessment, outputDir });
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      securityProgram = await ctx.task(hipaaSecurityTask, { ...{ gapAssessment, riskAssessment, outputDir }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({ question: `Privacy and Security programs designed. ${privacyProgram.policies.length} privacy policies, ${securityProgram.safeguards.length} security safeguards. Proceed?`, title: 'Privacy/Security Program Review', context: { runId: ctx.runId, privacy: privacyProgram.policies, security: securityProgram.safeguards }, expert: 'owner', tags: ['approval-gate'], previousFeedback: lastFeedback_finalApproval || undefined, attempt: attempt > 0 ? attempt + 1 : undefined });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const breachProgram = await ctx.task(hipaaBreachTask, { securityProgram, outputDir });
   artifacts.push(...breachProgram.artifacts);
 

@@ -53,16 +53,23 @@ export async function process(inputs, ctx) {
   // Phase 2: XPS Analysis (if requested)
   if (techniques.includes('XPS')) {
     ctx.log('info', 'Phase 2a: Performing XPS analysis');
-    const xpsResult = await ctx.task(xpsAnalysisTask, {
+    let xpsResult = await ctx.task(xpsAnalysisTask, {
       sampleId,
       params: xpsParams,
       outputDir
     });
 
     spectralResults.xps = xpsResult;
-    artifacts.push(...xpsResult.artifacts);
-
-    await ctx.breakpoint({
+      let lastFeedback_phase2Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase2Review) {
+        xpsResult = await ctx.task(xpsAnalysisTask, { ...{
+      sampleId,
+      params: xpsParams,
+      outputDir
+    }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+      }
+  const phase2Review = await ctx.breakpoint({
       question: `XPS analysis complete. Detected elements: ${xpsResult.detectedElements.join(', ')}. Review survey and high-resolution spectra?`,
       title: 'XPS Analysis Review',
       context: {
@@ -73,9 +80,15 @@ export async function process(inputs, ctx) {
           chemicalStates: xpsResult.chemicalStates
         },
         files: xpsResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase2Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase2Review.approved) break;
+      lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+    } }
 
   // Phase 3: FTIR Analysis (if requested)
   if (techniques.includes('FTIR')) {
@@ -89,7 +102,6 @@ export async function process(inputs, ctx) {
     spectralResults.ftir = ftirResult;
     artifacts.push(...ftirResult.artifacts);
   }
-
   // Phase 4: Raman Analysis (if requested)
   if (techniques.includes('Raman')) {
     ctx.log('info', 'Phase 2c: Performing Raman spectroscopy');
@@ -102,7 +114,6 @@ export async function process(inputs, ctx) {
     spectralResults.raman = ramanResult;
     artifacts.push(...ramanResult.artifacts);
   }
-
   // Phase 5: NMR Analysis (if requested)
   if (techniques.includes('NMR')) {
     ctx.log('info', 'Phase 2d: Performing NMR analysis');
@@ -115,7 +126,6 @@ export async function process(inputs, ctx) {
     spectralResults.nmr = nmrResult;
     artifacts.push(...nmrResult.artifacts);
   }
-
   // Phase 6: Integrated Spectral Interpretation
   ctx.log('info', 'Phase 3: Performing integrated spectral interpretation');
   const interpretation = await ctx.task(spectralInterpretationTask, {
@@ -129,7 +139,7 @@ export async function process(inputs, ctx) {
 
   // Phase 7: Report Generation
   ctx.log('info', 'Phase 4: Generating spectroscopy report');
-  const report = await ctx.task(spectroscopyReportTask, {
+  let report = await ctx.task(spectroscopyReportTask, {
     sampleId,
     techniques,
     spectralResults,
@@ -139,8 +149,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...report.artifacts);
 
-  // Final breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      report = await ctx.task(spectroscopyReportTask, { ...{
+    sampleId,
+    techniques,
+    spectralResults,
+    interpretation,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Spectroscopic analysis complete for ${sampleId}. Review comprehensive results?`,
     title: 'Spectroscopy Analysis Complete',
     context: {
@@ -153,9 +173,15 @@ export async function process(inputs, ctx) {
         surfaceChemistry: spectralResults.xps?.surfaceComposition
       },
       files: artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -181,8 +207,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Sample Verification
+  // Task 1: Sample Verification
 export const sampleVerificationTask = defineTask('spectroscopy-sample-verification', (args, taskCtx) => ({
   kind: 'agent',
   title: `Sample Verification - ${args.sampleId}`,

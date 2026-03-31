@@ -36,7 +36,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Gathering feature and implementation details');
 
-  const details = await ctx.task(gatherFeatureImplDetailsTask, {
+  let details = await ctx.task(gatherFeatureImplDetailsTask, {
     featureDescription,
     implementationDetails,
     component,
@@ -63,20 +63,42 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 3: Forking repository');
 
-  await ctx.breakpoint({
-    question: [
-      'To submit your feature implementation, we need to fork the a5c-ai/babysitter repository.',
-      '',
-      `**Feature:** ${details.featureSummary}`,
-      `**Component:** ${details.component}`,
-      `**Files:** ${details.affectedFiles.join(', ')}`,
-      relatedResults.relatedIssue ? `**Related issue:** #${relatedResults.relatedIssue}` : '',
-      '',
-      'Approve to fork the repository, or reject to cancel.'
-    ].join('\n'),
-    title: 'Confirm Repository Fork',
-    context: { runId: ctx.runId }
-  });
+  let forkLastFeedback = null;
+  for (let forkAttempt = 0; forkAttempt < 3; forkAttempt++) {
+    if (forkLastFeedback) {
+      details = await ctx.task(gatherFeatureImplDetailsTask, {
+        featureDescription,
+        implementationDetails,
+        component,
+        filesToChange,
+        relatedIssue,
+        additionalContext,
+        feedback: forkLastFeedback,
+        attempt: forkAttempt + 1
+      });
+    }
+    const forkApproval = await ctx.breakpoint({
+      question: [
+          'To submit your feature implementation, we need to fork the a5c-ai/babysitter repository.',
+          '',
+          `**Feature:** ${details.featureSummary}`,
+          `**Component:** ${details.component}`,
+          `**Files:** ${details.affectedFiles.join(', ')}`,
+          relatedResults.relatedIssue ? `**Related issue:** #${relatedResults.relatedIssue}` : '',
+          '',
+          'Approve to fork the repository, or request changes.'
+        ].join('\n'),
+      previousFeedback: forkLastFeedback || undefined,
+      attempt: forkAttempt > 0 ? forkAttempt + 1 : undefined,
+      title: 'Confirm Repository Fork',
+      options: ['Approve', 'Request changes'],
+      expert: 'owner',
+      tags: ['approval-gate', 'fork'],
+      context: { runId: ctx.runId }
+    });
+    if (forkApproval.approved) break;
+    forkLastFeedback = forkApproval.response || forkApproval.feedback || 'Changes requested';
+  }
 
   const forkResult = await ctx.task(forkRepoTask, {});
 
@@ -89,13 +111,15 @@ export async function process(inputs, ctx) {
   const starCheck = await ctx.task(checkStarTask, {});
 
   if (!starCheck.starred) {
-    await ctx.breakpoint({
+    const starApproval = await ctx.breakpoint({
       question: 'Would you like to star the a5c-ai/babysitter repository? This helps the project gain visibility.',
       title: 'Star Repository',
       context: { runId: ctx.runId }
     });
 
-    await ctx.task(starRepoTask, {});
+    if (starApproval.approved) {
+      await ctx.task(starRepoTask, {});
+    }
   }
 
   // ============================================================================
@@ -148,7 +172,7 @@ export async function process(inputs, ctx) {
   // PHASE 8: REVIEW BREAKPOINT
   // ============================================================================
 
-  await ctx.breakpoint({
+  const reviewResult = await ctx.breakpoint({
     question: [
       'Please review your feature implementation before submitting the PR:',
       '',
@@ -165,6 +189,9 @@ export async function process(inputs, ctx) {
     title: 'Review Feature Implementation Before PR',
     context: { runId: ctx.runId }
   });
+  if (!reviewResult.approved) {
+    return { success: false, reason: 'User rejected at feature implementation review gate', feedback: reviewResult.response || reviewResult.feedback };
+  }
 
   // ============================================================================
   // PHASE 9: SUBMIT PR
@@ -172,11 +199,14 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 9: Submitting pull request');
 
-  await ctx.breakpoint({
+  const submitApproval = await ctx.breakpoint({
     question: 'Confirm: Submit this feature implementation as a pull request to a5c-ai/babysitter?',
     title: 'Confirm PR Submission',
     context: { runId: ctx.runId }
   });
+  if (!submitApproval.approved) {
+    return { success: false, reason: 'User rejected at PR submission gate', feedback: submitApproval.response || submitApproval.feedback };
+  }
 
   const prResult = await ctx.task(submitPrTask, {
     forkOwner: forkResult.forkOwner,

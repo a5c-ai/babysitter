@@ -56,15 +56,22 @@ export async function process(inputs, ctx) {
 
   // Task 3: Loss Categorization
   ctx.log('info', 'Phase 3: Categorizing losses (Six Big Losses)');
-  const lossCategorization = await ctx.task(lossCategorizationTask, {
+  let lossCategorization = await ctx.task(lossCategorizationTask, {
     oeeCalculation,
     outputDir
   });
 
   artifacts.push(...lossCategorization.artifacts);
 
-  // Breakpoint: Review losses
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      lossCategorization = await ctx.task(lossCategorizationTask, { ...{
+    oeeCalculation,
+    outputDir
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `OEE: ${oeeCalculation.oee.toFixed(1)}% (A: ${oeeCalculation.availability.toFixed(1)}%, P: ${oeeCalculation.performance.toFixed(1)}%, Q: ${oeeCalculation.quality.toFixed(1)}%). Top loss: ${lossCategorization.topLoss}. Review loss analysis?`,
     title: 'OEE Analysis Review',
     context: {
@@ -77,9 +84,15 @@ export async function process(inputs, ctx) {
       },
       topLoss: lossCategorization.topLoss,
       files: oeeCalculation.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // Task 4: Pareto Analysis
   ctx.log('info', 'Phase 4: Performing Pareto analysis of losses');
   const paretoAnalysis = await ctx.task(paretoAnalysisTask, {
@@ -111,7 +124,7 @@ export async function process(inputs, ctx) {
 
   // Task 7: OEE Dashboard
   ctx.log('info', 'Phase 7: Creating OEE tracking dashboard');
-  const oeeDashboard = await ctx.task(oeeDashboardTask, {
+  let oeeDashboard = await ctx.task(oeeDashboardTask, {
     oeeCalculation,
     measurementSystem,
     outputDir
@@ -119,8 +132,16 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...oeeDashboard.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      oeeDashboard = await ctx.task(oeeDashboardTask, { ...{
+    oeeCalculation,
+    measurementSystem,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `OEE improvement plan developed. Current: ${oeeCalculation.oee.toFixed(1)}%, Target: ${targetOEE * 100}%. ${focusedImprovement.actionCount} improvement actions identified. Expected improvement: ${focusedImprovement.expectedImprovement}%. Review plan?`,
     title: 'OEE Improvement Results',
     context: {
@@ -133,9 +154,15 @@ export async function process(inputs, ctx) {
         expectedImprovement: focusedImprovement.expectedImprovement
       },
       files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -164,8 +191,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task definitions
+  // Task definitions
 export const measurementSystemTask = defineTask('measurement-system', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Establish OEE measurement system',

@@ -133,7 +133,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 7: Setting up testing infrastructure');
 
-  const testingSetup = await ctx.task(testingSetupTask, {
+  let testingSetup = await ctx.task(testingSetupTask, {
     projectName,
     componentLibrary,
     outputDir
@@ -141,8 +141,16 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...testingSetup.artifacts);
 
-  // Quality Gate
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      testingSetup = await ctx.task(testingSetupTask, { ...{
+    projectName,
+    componentLibrary,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `SvelteKit application setup complete for ${projectName}. ${routingSetup.routes.length} routes, ${storesSetup.stores.length} stores created. Approve configuration?`,
     title: 'SvelteKit Application Review',
     context: {
@@ -151,9 +159,15 @@ export async function process(inputs, ctx) {
       stores: storesSetup.stores,
       components: componentLibrary.components,
       files: artifacts.slice(-5).map(a => ({ path: a.path, format: a.format || 'svelte' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 8: DEPLOYMENT CONFIGURATION
   // ============================================================================
@@ -212,8 +226,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

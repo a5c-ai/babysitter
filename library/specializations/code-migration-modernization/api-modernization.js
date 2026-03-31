@@ -58,7 +58,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 2: Designing target API');
-  const targetDesign = await ctx.task(targetApiDesignTask, {
+  let targetDesign = await ctx.task(targetApiDesignTask, {
     projectName,
     apiInventory,
     targetApiStyle,
@@ -67,8 +67,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...targetDesign.artifacts);
 
-  // Breakpoint: API design review
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      targetDesign = await ctx.task(targetApiDesignTask, { ...{
+    projectName,
+    apiInventory,
+    targetApiStyle,
+    outputDir
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Target API design complete for ${projectName}. Style: ${targetApiStyle}. Endpoints: ${targetDesign.endpointCount}. Review OpenAPI specification?`,
     title: 'Target API Design Review',
     context: {
@@ -76,9 +85,15 @@ export async function process(inputs, ctx) {
       projectName,
       targetDesign,
       files: targetDesign.artifacts.map(a => ({ path: a.path, format: a.format || 'yaml' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 3: BACKWARD COMPATIBILITY PLANNING
   // ============================================================================
@@ -115,7 +130,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 5: Migrating endpoints');
-  const endpointMigration = await ctx.task(endpointMigrationTask, {
+  let endpointMigration = await ctx.task(endpointMigrationTask, {
     projectName,
     apiInventory,
     targetDesign,
@@ -125,8 +140,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...endpointMigration.artifacts);
 
-  // Breakpoint: Migration progress
-  await ctx.breakpoint({
+    let lastFeedback_phase5Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase5Review) {
+      endpointMigration = await ctx.task(endpointMigrationTask, { ...{
+    projectName,
+    apiInventory,
+    targetDesign,
+    gatewaySetup,
+    outputDir
+  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+    }
+  const phase5Review = await ctx.breakpoint({
     question: `Endpoint migration progress for ${projectName}. Completed: ${endpointMigration.completedCount}/${endpointMigration.totalCount}. Continue with consumer migration support?`,
     title: 'Endpoint Migration Progress',
     context: {
@@ -134,9 +159,15 @@ export async function process(inputs, ctx) {
       projectName,
       migration: endpointMigration,
       recommendation: 'Ensure all critical endpoints are migrated before consumer notification'
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase5Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase5Review.approved) break;
+    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 6: CONSUMER MIGRATION SUPPORT
   // ============================================================================
@@ -172,7 +203,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 8: Updating documentation and SDKs');
-  const documentationUpdate = await ctx.task(documentationSdkUpdateTask, {
+  let documentationUpdate = await ctx.task(documentationSdkUpdateTask, {
     projectName,
     targetDesign,
     consumerSupport,
@@ -181,8 +212,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...documentationUpdate.artifacts);
 
-  // Final Breakpoint: API Modernization Complete
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      documentationUpdate = await ctx.task(documentationSdkUpdateTask, { ...{
+    projectName,
+    targetDesign,
+    consumerSupport,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `API Modernization complete for ${projectName}. New endpoints: ${endpointMigration.completedCount}. Documentation ready. Consumers notified: ${consumerSupport.notifiedCount}. Approve modernization?`,
     title: 'API Modernization Approval',
     context: {
@@ -194,9 +234,15 @@ export async function process(inputs, ctx) {
         documentationUrl: documentationUpdate.portalUrl
       },
       files: artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -244,8 +290,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

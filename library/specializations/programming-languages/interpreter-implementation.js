@@ -41,16 +41,24 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Selecting Interpreter Strategy');
 
-  const strategySelection = await ctx.task(interpreterStrategyTask, {
+  let strategySelection = await ctx.task(interpreterStrategyTask, {
     languageName,
     interpreterStyle,
     implementationLanguage,
     outputDir
   });
 
-  artifacts.push(...strategySelection.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      strategySelection = await ctx.task(interpreterStrategyTask, { ...{
+    languageName,
+    interpreterStyle,
+    implementationLanguage,
+    outputDir
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Interpreter strategy: ${interpreterStyle}. Trade-offs: ${strategySelection.tradeoffs.join(', ')}. Proceed with value system?`,
     title: 'Strategy Review',
     context: {
@@ -58,9 +66,15 @@ export async function process(inputs, ctx) {
       strategy: interpreterStyle,
       tradeoffs: strategySelection.tradeoffs,
       files: strategySelection.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 2: VALUE REPRESENTATION
   // ============================================================================
@@ -215,7 +229,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 11: Generating Documentation');
 
-  const documentation = await ctx.task(interpreterDocumentationTask, {
+  let documentation = await ctx.task(interpreterDocumentationTask, {
     languageName,
     interpreterStyle,
     valueRepresentation,
@@ -225,9 +239,20 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...documentation.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      documentation = await ctx.task(interpreterDocumentationTask, { ...{
+    languageName,
+    interpreterStyle,
+    valueRepresentation,
+    builtinFunctions,
+    integration,
+    testSuite,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Interpreter Implementation Complete for ${languageName}! Test coverage: ${testSuite.coverage}%, Built-in functions: ${builtinFunctions.functionCount}. Review deliverables?`,
     title: 'Interpreter Complete',
     context: {
@@ -243,9 +268,15 @@ export async function process(inputs, ctx) {
         { path: integration.mainFilePath, format: implementationLanguage.toLowerCase(), label: 'Interpreter' },
         { path: documentation.apiDocPath, format: 'markdown', label: 'API Documentation' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -286,8 +317,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

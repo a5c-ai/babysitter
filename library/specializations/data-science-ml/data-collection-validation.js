@@ -66,7 +66,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 2: Schema validation and inference');
 
-  const schemaValidation = await ctx.task(schemaValidationTask, {
+  let schemaValidation = await ctx.task(schemaValidationTask, {
     dataSources: sourceAssessment.accessibleSources,
     schemaPath,
     outputDir
@@ -76,17 +76,31 @@ export async function process(inputs, ctx) {
   validationResults.schema = schemaValidation;
 
   // Quality Gate: Schema must be valid or inferrable
-  if (!schemaValidation.schemaValid && !schemaValidation.schemaInferred) {
-    await ctx.breakpoint({
+      let lastFeedback_phase2Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase2Review) {
+        schemaValidation = await ctx.task(schemaValidationTask, { ...{
+    dataSources: sourceAssessment.accessibleSources,
+    schemaPath,
+    outputDir
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+      }
+  const phase2Review = await ctx.breakpoint({
       question: `Schema validation failed for some sources. ${schemaValidation.errors.length} errors found. Review and approve to continue?`,
       title: 'Schema Validation Issues',
       context: {
         runId: ctx.runId,
         errors: schemaValidation.errors,
         files: schemaValidation.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase2Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase2Review.approved) break;
+      lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 3: PARALLEL DATA INGESTION
@@ -109,7 +123,6 @@ export async function process(inputs, ctx) {
   if (failedIngestions.length > 0) {
     ctx.log('warn', `${failedIngestions.length} data source(s) failed to ingest`);
   }
-
   const successfulIngestions = ingestionResults.filter(r => r.success);
   artifacts.push(...successfulIngestions.flatMap(r => r.artifacts));
 
@@ -121,7 +134,6 @@ export async function process(inputs, ctx) {
       metadata: { processId: 'data-science-ml/data-collection-validation', timestamp: startTime }
     };
   }
-
   // ============================================================================
   // PHASE 4: PARALLEL DATA QUALITY CHECKS
   // ============================================================================
@@ -182,7 +194,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 5: Computing overall data quality score');
 
-  const qualityScore = await ctx.task(qualityScoringTask, {
+  let qualityScore = await ctx.task(qualityScoringTask, {
     validationResults: {
       completeness: completenessCheck,
       consistency: consistencyCheck,
@@ -200,8 +212,22 @@ export async function process(inputs, ctx) {
   const qualityMet = overallScore >= targetQuality;
 
   // Quality Gate: Quality threshold
-  if (!qualityMet) {
-    await ctx.breakpoint({
+      let lastFeedback_phase5Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase5Review) {
+        qualityScore = await ctx.task(qualityScoringTask, { ...{
+    validationResults: {
+      completeness: completenessCheck,
+      consistency: consistencyCheck,
+      validity: validityCheck,
+      uniqueness: uniquenessCheck,
+      timeliness: timelinessCheck
+    },
+    targetQuality,
+    outputDir
+  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+      }
+  const phase5Review = await ctx.breakpoint({
       question: `Data quality score: ${overallScore}/${targetQuality}. Quality target not met. Review issues and approve to continue?`,
       title: 'Data Quality Below Target',
       context: {
@@ -211,9 +237,15 @@ export async function process(inputs, ctx) {
         criticalIssues: qualityScore.criticalIssues,
         recommendations: qualityScore.recommendations,
         files: qualityScore.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase5Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase5Review.approved) break;
+      lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 6: DATA PROFILING AND STATISTICS
@@ -250,14 +282,13 @@ export async function process(inputs, ctx) {
     datasetVersion = versioningResult.version;
     artifacts.push(...versioningResult.artifacts);
   }
-
   // ============================================================================
   // PHASE 8: QUALITY REPORT GENERATION
   // ============================================================================
 
   ctx.log('info', 'Phase 8: Generating comprehensive quality report');
 
-  const qualityReport = await ctx.task(qualityReportGenerationTask, {
+  let qualityReport = await ctx.task(qualityReportGenerationTask, {
     dataSources,
     sourceAssessment,
     schemaValidation,
@@ -290,12 +321,25 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...remediationPlan.artifacts);
   }
-
   // ============================================================================
   // FINAL BREAKPOINT: REVIEW AND APPROVAL
-  // ============================================================================
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      qualityReport = await ctx.task(qualityReportGenerationTask, { ...{
+    dataSources,
+    sourceAssessment,
+    schemaValidation,
+    ingestionResults: successfulIngestions,
+    validationResults,
+    qualityScore,
+    dataProfile,
+    versioningResult,
+    targetQuality,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Data collection and validation complete. Quality: ${overallScore}/${targetQuality}. ${qualityMet ? 'Quality target met!' : 'Quality target not met.'} ${datasetVersion ? `Version: ${datasetVersion}` : ''} Approve pipeline result?`,
     title: 'Data Pipeline Completion Review',
     context: {
@@ -311,9 +355,15 @@ export async function process(inputs, ctx) {
         { path: `${outputDir}/quality-scorecard.json`, format: 'json' },
         ...artifacts.slice(0, 5).map(a => ({ path: a.path, format: a.format || 'json' }))
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -368,8 +418,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

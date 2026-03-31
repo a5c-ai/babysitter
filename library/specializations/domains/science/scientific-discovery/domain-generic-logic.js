@@ -35,7 +35,7 @@ export async function process(inputs, ctx) {
 
   // Phase 2: Identify Structural Properties
   ctx.log('info', 'Identifying structural properties');
-  const structuralProperties = await ctx.task(identifyStructuralPropertiesTask, {
+  let structuralProperties = await ctx.task(identifyStructuralPropertiesTask, {
     abstraction,
     domain
   });
@@ -46,9 +46,15 @@ export async function process(inputs, ctx) {
     abstraction,
     structuralProperties,
     domain
-  });
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      structuralProperties = await ctx.task(identifyStructuralPropertiesTask, { ...{
+    abstraction,
+    domain
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: 'Formalization complete. Review before derivation?',
     title: 'Domain Generic Logic - Formalization Complete',
     context: {
@@ -57,9 +63,15 @@ export async function process(inputs, ctx) {
         { path: 'artifacts/abstraction.json', format: 'json' },
         { path: 'artifacts/formalization.json', format: 'json' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 4: Apply Generic Derivation Rules
   ctx.log('info', 'Applying generic derivation rules');
   const derivations = await ctx.task(applyDerivationRulesTask, {

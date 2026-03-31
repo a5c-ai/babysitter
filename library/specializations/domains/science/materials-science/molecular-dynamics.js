@@ -55,16 +55,24 @@ export async function process(inputs, ctx) {
 
   // Phase 2: Potential Selection and Validation
   ctx.log('info', 'Phase 2: Validating interatomic potential');
-  const potentialValidation = await ctx.task(potentialValidationTask, {
+  let potentialValidation = await ctx.task(potentialValidationTask, {
     materialId,
     potential,
     structure: systemSetup.structure,
     outputDir
   });
 
-  artifacts.push(...potentialValidation.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      potentialValidation = await ctx.task(potentialValidationTask, { ...{
+    materialId,
+    potential,
+    structure: systemSetup.structure,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Potential validation complete. Lattice constant error: ${potentialValidation.latticeError}%. Elastic constant error: ${potentialValidation.elasticError}%. Proceed with simulation?`,
     title: 'Potential Validation Review',
     context: {
@@ -76,9 +84,15 @@ export async function process(inputs, ctx) {
         cohesiveEnergyError: potentialValidation.cohesiveEnergyError
       },
       files: potentialValidation.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 3: Energy Minimization
   ctx.log('info', 'Phase 3: Performing energy minimization');
   const minimization = await ctx.task(energyMinimizationTask, {
@@ -226,8 +240,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: System Setup
+  // Task 1: System Setup
 export const mdSystemSetupTask = defineTask('md-system-setup', (args, taskCtx) => ({
   kind: 'agent',
   title: `MD System Setup - ${args.materialId}`,

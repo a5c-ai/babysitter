@@ -84,7 +84,7 @@ export async function process(inputs, ctx) {
   // PHASE 4: USER INTERVIEW
   // ============================================================================
 
-  await ctx.breakpoint({
+  const interviewResult = await ctx.breakpoint({
     question: [
       'Welcome to babysitter project setup! Please tell us about this project so we can customize your experience.',
       '',
@@ -122,6 +122,9 @@ export async function process(inputs, ctx) {
       }
     }
   });
+  if (!interviewResult.approved) {
+    return { success: false, reason: 'User cancelled during project onboarding interview', feedback: interviewResult.response || interviewResult.feedback, metadata: { processId: 'cradle/project-install', timestamp: ctx.now() } };
+  }
 
   // ============================================================================
   // PHASE 5: PROFILE BUILDING
@@ -154,7 +157,7 @@ export async function process(inputs, ctx) {
 
   let cicdResult = null;
 
-  await ctx.breakpoint({
+  const cicdApproval = await ctx.breakpoint({
     question: [
       'Would you like to set up CI/CD integration for babysitter?',
       '',
@@ -182,11 +185,13 @@ export async function process(inputs, ctx) {
     }
   });
 
-  cicdResult = await ctx.task(configureCicdTask, {
-    profile: profileResult.profile,
-    toolSelection,
-    projectRoot
-  });
+  if (cicdApproval.approved) {
+    cicdResult = await ctx.task(configureCicdTask, {
+      profile: profileResult.profile,
+      toolSelection,
+      projectRoot
+    });
+  }
 
   // ============================================================================
   // PHASE 8: CLAUDE.MD UPDATES
@@ -213,7 +218,7 @@ export async function process(inputs, ctx) {
     });
 
     // Phase 9b: Breakpoint — review vision document and requirements before proceeding
-    await ctx.breakpoint({
+    const scaffoldReview = await ctx.breakpoint({
       question: [
         '**New Project Scaffolding — Review Required**',
         '',
@@ -241,6 +246,9 @@ export async function process(inputs, ctx) {
         ]
       }
     });
+    if (!scaffoldReview.approved) {
+      return { success: false, reason: 'User rejected new project scaffolding at review gate', feedback: scaffoldReview.response || scaffoldReview.feedback, metadata: { processId: 'cradle/project-install', timestamp: ctx.now() } };
+    }
   }
 
   // ============================================================================
@@ -258,7 +266,7 @@ export async function process(inputs, ctx) {
   // PHASE 9d: GITIGNORE CONFIGURATION
   // ============================================================================
 
-  await ctx.breakpoint({
+  const gitignoreApproval = await ctx.breakpoint({
     question: [
       '**Configure .gitignore for babysitter files**',
       '',
@@ -280,15 +288,18 @@ export async function process(inputs, ctx) {
     }
   });
 
-  const gitignoreResult = await ctx.task(configureGitignoreTask, {
-    projectRoot
-  });
+  let gitignoreResult = null;
+  if (gitignoreApproval.approved) {
+    gitignoreResult = await ctx.task(configureGitignoreTask, {
+      projectRoot
+    });
+  }
 
   // ============================================================================
   // PHASE 10: REVIEW BREAKPOINT
   // ============================================================================
 
-  await ctx.breakpoint({
+  const profileReview = await ctx.breakpoint({
     question: [
       'Please review the complete project profile before we save it.',
       '',
@@ -321,6 +332,9 @@ export async function process(inputs, ctx) {
       ]
     }
   });
+  if (!profileReview.approved) {
+    return { success: false, reason: 'User rejected project profile at review gate', feedback: profileReview.response || profileReview.feedback, metadata: { processId: 'cradle/project-install', timestamp: ctx.now() } };
+  }
 
   // ============================================================================
   // PHASE 11: SAVE

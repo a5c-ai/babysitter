@@ -47,7 +47,7 @@ export async function process(inputs, ctx) {
 
   // Task 2: Time Study Analysis
   ctx.log('info', 'Phase 2: Analyzing time study data');
-  const timeStudyAnalysis = await ctx.task(timeStudyAnalysisTask, {
+  let timeStudyAnalysis = await ctx.task(timeStudyAnalysisTask, {
     processObservation,
     taktTime,
     outputDir
@@ -55,8 +55,16 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...timeStudyAnalysis.artifacts);
 
-  // Breakpoint: Review time study
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      timeStudyAnalysis = await ctx.task(timeStudyAnalysisTask, { ...{
+    processObservation,
+    taktTime,
+    outputDir
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Time study complete. Cycle time: ${timeStudyAnalysis.cycleTime} sec. Takt time: ${taktTime || 'Not specified'}. ${timeStudyAnalysis.workElements.length} work elements identified. Review before standardization?`,
     title: 'Time Study Review',
     context: {
@@ -65,9 +73,15 @@ export async function process(inputs, ctx) {
       workElements: timeStudyAnalysis.workElements,
       variation: timeStudyAnalysis.variationAnalysis,
       files: timeStudyAnalysis.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // Task 3: Best Method Identification
   ctx.log('info', 'Phase 3: Identifying safest and most efficient method');
   const bestMethodIdentification = await ctx.task(bestMethodTask, {
@@ -130,7 +144,7 @@ export async function process(inputs, ctx) {
 
   // Task 9: Audit System
   ctx.log('info', 'Phase 9: Creating audit checklist and schedule');
-  const auditSystem = await ctx.task(auditSystemTask, {
+  let auditSystem = await ctx.task(auditSystemTask, {
     combinationSheet,
     jobInstructions,
     outputDir
@@ -138,8 +152,16 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...auditSystem.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      auditSystem = await ctx.task(auditSystemTask, { ...{
+    combinationSheet,
+    jobInstructions,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Standard work development complete. ${jobInstructions.instructionCount} job instructions created. Training materials ready. Review documentation?`,
     title: 'Standard Work Development Results',
     context: {
@@ -151,9 +173,15 @@ export async function process(inputs, ctx) {
         trainingModules: trainingMaterials.moduleCount
       },
       files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -181,8 +209,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Process Observation
+  // Task 1: Process Observation
 export const processObservationTask = defineTask('process-observation', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Observe and time operators',

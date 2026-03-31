@@ -125,7 +125,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 8: Assessing reasoning quality');
-  const qualityScore = await ctx.task(prototypeQualityTask, {
+  let qualityScore = await ctx.task(prototypeQualityTask, {
     prototypeRep,
     similarityComputation,
     typicalityScoring,
@@ -137,8 +137,18 @@ export async function process(inputs, ctx) {
 
   const qualityMet = qualityScore.overallScore >= 75;
 
-  // Breakpoint: Review prototype reasoning results
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      qualityScore = await ctx.task(prototypeQualityTask, { ...{
+    prototypeRep,
+    similarityComputation,
+    typicalityScoring,
+    categorization,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Prototype reasoning complete. Quality score: ${qualityScore.overallScore}/100. Categorized ${categorization.categorizedCount}/${instances.length} instances. ${qualityMet ? 'Quality meets standards!' : 'Review similarity metrics and thresholds.'} Review results?`,
     title: 'Prototype Reasoning Results Review',
     context: {
@@ -157,9 +167,15 @@ export async function process(inputs, ctx) {
         averageTypicality: typicalityScoring.averageTypicality,
         qualityScore: qualityScore.overallScore
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 9: REPORT GENERATION
   // ============================================================================
@@ -200,8 +216,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

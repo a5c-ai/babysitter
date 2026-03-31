@@ -87,8 +87,10 @@ export async function process(inputs, ctx) {
     ]
   });
 
-  // Phase 5: Assessment Review
-  await ctx.breakpoint('assessment-review', {
+  let lastFeedback_phase5Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    // No preceding task identified for re-run with feedback
+    const phase5Review = await ctx.breakpoint('assessment-review', {
     title: 'Culture Assessment Review',
     description: 'Review culture assessment findings and gap analysis',
     artifacts: {
@@ -100,9 +102,15 @@ export async function process(inputs, ctx) {
       'Is the current culture accurately characterized?',
       'Is the desired culture clearly defined?',
       'Are the priority gaps correctly identified?'
-    ]
-  });
-
+    ],
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase5Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase5Review.approved) break;
+    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+  }
   // Phase 6: Change Readiness Assessment
   const readinessAssessment = await ctx.task('assess-change-readiness', {
     gapAnalysis,
@@ -145,8 +153,10 @@ export async function process(inputs, ctx) {
     ]
   });
 
-  // Phase 9: Strategy Approval
-  await ctx.breakpoint('strategy-approval', {
+  let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    // No preceding task identified for re-run with feedback
+    const finalApproval = await ctx.breakpoint('strategy-approval', {
     title: 'Transformation Strategy Approval',
     description: 'Review and approve culture transformation strategy',
     artifacts: {
@@ -157,9 +167,15 @@ export async function process(inputs, ctx) {
       'Is the transformation vision compelling?',
       'Are the strategic initiatives appropriate?',
       'Is the resource commitment sufficient?'
-    ]
-  });
-
+    ],
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 10: Implementation Planning
   const implementationPlan = await ctx.task('create-implementation-plan', {
     strategyDevelopment,

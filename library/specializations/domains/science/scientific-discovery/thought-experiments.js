@@ -54,7 +54,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 3: Establishing idealizations and simplifications');
-  const idealizationSetup = await ctx.task(idealizationSetupTask, {
+  let idealizationSetup = await ctx.task(idealizationSetupTask, {
     thoughtExperiment: experimentDesign.thoughtExperiment,
     constraints,
     outputDir
@@ -62,8 +62,16 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...idealizationSetup.artifacts);
 
-  // Breakpoint: Review thought experiment setup
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      idealizationSetup = await ctx.task(idealizationSetupTask, { ...{
+    thoughtExperiment: experimentDesign.thoughtExperiment,
+    constraints,
+    outputDir
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Thought experiment "${experimentDesign.thoughtExperiment.name}" designed. ${idealizationSetup.idealizations.length} idealizations established. Proceed with logical exploration?`,
     title: 'Thought Experiment Design Review',
     context: {
@@ -79,9 +87,15 @@ export async function process(inputs, ctx) {
         question: questionFormulation.refinedQuestion,
         idealizationCount: idealizationSetup.idealizations.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 4: LOGICAL EXPLORATION
   // ============================================================================
@@ -145,7 +159,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 8: Crystallizing insights');
-  const insightCrystallization = await ctx.task(insightCrystallizationTask, {
+  let insightCrystallization = await ctx.task(insightCrystallizationTask, {
     thoughtExperiment: experimentDesign.thoughtExperiment,
     conclusions: logicalExploration.conclusions,
     paradoxes: paradoxDetection.paradoxes,
@@ -156,8 +170,19 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...insightCrystallization.artifacts);
 
-  // Final breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      insightCrystallization = await ctx.task(insightCrystallizationTask, { ...{
+    thoughtExperiment: experimentDesign.thoughtExperiment,
+    conclusions: logicalExploration.conclusions,
+    paradoxes: paradoxDetection.paradoxes,
+    resolutions: resolutionAnalysis.resolutions,
+    implications: implicationDerivation.implications,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Thought experiment complete. ${logicalExploration.conclusions.length} conclusions drawn. ${paradoxDetection.paradoxes.length} paradoxes found. ${insightCrystallization.insights.length} insights crystallized. Review findings?`,
     title: 'Thought Experiment Complete',
     context: {
@@ -174,9 +199,15 @@ export async function process(inputs, ctx) {
         paradoxCount: paradoxDetection.paradoxes.length,
         insightCount: insightCrystallization.insights.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -203,8 +234,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

@@ -111,7 +111,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 7: Scoring mixed methods design quality');
-  const qualityScore = await ctx.task(mixedMethodsQualityScoringTask, {
+  let qualityScore = await ctx.task(mixedMethodsQualityScoringTask, {
     paradigmAnalysis,
     designSelection,
     quantitativeDesign,
@@ -126,8 +126,20 @@ export async function process(inputs, ctx) {
   const designScore = qualityScore.overallScore;
   const qualityMet = designScore >= 80;
 
-  // Breakpoint: Review mixed methods design
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      qualityScore = await ctx.task(mixedMethodsQualityScoringTask, { ...{
+    paradigmAnalysis,
+    designSelection,
+    quantitativeDesign,
+    qualitativeDesign,
+    integrationStrategy,
+    validityFramework,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Mixed methods design complete. Quality score: ${designScore}/100. ${qualityMet ? 'Design meets quality standards!' : 'Design may need refinement.'} Review and approve?`,
     title: 'Mixed Methods Research Design Review',
     context: {
@@ -143,9 +155,15 @@ export async function process(inputs, ctx) {
         priorityStrand: designSelection.priorityStrand,
         integrationPoints: integrationStrategy.integrationPoints
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -184,8 +202,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Paradigm Analysis
+  // Task 1: Paradigm Analysis
 export const paradigmAnalysisTask = defineTask('paradigm-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Analyze paradigm orientation and research purpose',

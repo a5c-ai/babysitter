@@ -40,15 +40,24 @@ export async function process(inputs, ctx) {
   artifacts.push(...fsEvaluation.artifacts);
 
   // Phase 3: Optimize Directory Structures
-  const dirOpt = await ctx.task(optimizeDirectoryStructuresTask, { projectName, accessAnalysis, outputDir });
-  artifacts.push(...dirOpt.artifacts);
-
-  await ctx.breakpoint({
+  let dirOpt = await ctx.task(optimizeDirectoryStructuresTask, { projectName, accessAnalysis, outputDir });
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      dirOpt = await ctx.task(optimizeDirectoryStructuresTask, { ...{ projectName, accessAnalysis, outputDir }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `File access patterns analyzed. Found ${accessAnalysis.issues.length} optimization opportunities. Proceed?`,
     title: 'File System Analysis',
-    context: { runId: ctx.runId, accessAnalysis }
-  });
-
+    context: { runId: ctx.runId, accessAnalysis },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // Phase 4: Configure File System Mount Options
   const mountOptions = await ctx.task(configureFilesystemMountOptionsTask, { projectName, fileSystemType, outputDir });
   artifacts.push(...mountOptions.artifacts);
@@ -66,15 +75,24 @@ export async function process(inputs, ctx) {
   artifacts.push(...benchmarks.artifacts);
 
   // Phase 8: Document Best Practices
-  const documentation = await ctx.task(documentFileSystemBestPracticesTask, { projectName, benchmarks, outputDir });
-  artifacts.push(...documentation.artifacts);
-
-  await ctx.breakpoint({
+  let documentation = await ctx.task(documentFileSystemBestPracticesTask, { projectName, benchmarks, outputDir });
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      documentation = await ctx.task(documentFileSystemBestPracticesTask, { ...{ projectName, benchmarks, outputDir }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `File system optimization complete. Improvement: ${benchmarks.improvementPercent}%. Accept changes?`,
     title: 'File System Optimization Results',
-    context: { runId: ctx.runId, benchmarks }
-  });
-
+    context: { runId: ctx.runId, benchmarks },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     projectName,

@@ -70,7 +70,6 @@ export async function process(inputs, ctx) {
       optimalAction: null
     };
   }
-
   // Phase 5: Expected Utility Calculation
   const expectedUtility = await ctx.task(expectedUtilityCalculationTask, {
     alternatives,
@@ -87,24 +86,39 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 7: Sensitivity Analysis
-  const sensitivityAnalysis = await ctx.task(decisionSensitivityTask, {
+  let sensitivityAnalysis = await ctx.task(decisionSensitivityTask, {
     expectedUtility,
     probabilityAssessment,
     utilityAssessment,
     alternatives
   });
 
-  // Breakpoint: Review expected utilities
-  await ctx.breakpoint({
+    let lastFeedback_phase7Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase7Review) {
+      sensitivityAnalysis = await ctx.task(decisionSensitivityTask, { ...{
+    expectedUtility,
+    probabilityAssessment,
+    utilityAssessment,
+    alternatives
+  }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
+    }
+  const phase7Review = await ctx.breakpoint({
     question: `Decision analysis complete. Top choice: ${expectedUtility.optimalAction} with EU=${expectedUtility.maxEU.toFixed(3)}. Review sensitivity analysis?`,
     title: 'Decision Analysis Review',
     context: {
       runId: ctx.runId,
       domain,
       alternatives: expectedUtility.ranking.slice(0, 3)
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase7Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase7Review.approved) break;
+    lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
+  }
   // Phase 8: Information Value Analysis
   const informationValue = await ctx.task(informationValueTask, {
     expectedUtility,
@@ -122,7 +136,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 10: Decision Recommendation
-  const recommendation = await ctx.task(decisionRecommendationTask, {
+  let recommendation = await ctx.task(decisionRecommendationTask, {
     expectedUtility,
     dominanceAnalysis,
     sensitivityAnalysis,
@@ -131,8 +145,19 @@ export async function process(inputs, ctx) {
     domain
   });
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      recommendation = await ctx.task(decisionRecommendationTask, { ...{
+    expectedUtility,
+    dominanceAnalysis,
+    sensitivityAnalysis,
+    informationValue,
+    riskAnalysis,
+    domain
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Recommendation: ${recommendation.recommendedAction}. Confidence: ${recommendation.confidence}. Accept recommendation?`,
     title: 'Final Decision Review',
     context: {
@@ -142,9 +167,15 @@ export async function process(inputs, ctx) {
         { path: 'artifacts/decision-analysis.json', format: 'json', content: expectedUtility },
         { path: 'artifacts/recommendation.json', format: 'json', content: recommendation }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     domain,
@@ -171,8 +202,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const problemStructuringTask = defineTask('problem-structuring', (args, taskCtx) => ({
   kind: 'agent',

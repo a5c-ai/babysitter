@@ -57,7 +57,7 @@ export async function process(inputs, ctx) {
 
   // Phase 3: Compaction Design
   ctx.log('info', 'Phase 3: Designing compaction parameters');
-  const compactionDesign = await ctx.task(compactionDesignTask, {
+  let compactionDesign = await ctx.task(compactionDesignTask, {
     materialSystem,
     powderCharacterization,
     processingRoute,
@@ -65,9 +65,18 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...compactionDesign.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      compactionDesign = await ctx.task(compactionDesignTask, { ...{
+    materialSystem,
+    powderCharacterization,
+    processingRoute,
+    targetDensity,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Compaction design complete. Compaction pressure: ${compactionDesign.compactionPressure} MPa, Green density: ${compactionDesign.predictedGreenDensity}%. Review parameters?`,
     title: 'Compaction Design Review',
     context: {
@@ -78,9 +87,15 @@ export async function process(inputs, ctx) {
         toolingRequirements: compactionDesign.toolingRequirements
       },
       files: compactionDesign.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 4: Sintering Parameter Development
   ctx.log('info', 'Phase 4: Developing sintering parameters');
   const sinteringDevelopment = await ctx.task(sinteringDevelopmentTask, {
@@ -176,8 +191,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Powder Characterization
+  // Task 1: Powder Characterization
 export const powderCharacterizationTask = defineTask('pm-powder-characterization', (args, taskCtx) => ({
   kind: 'agent',
   title: `Powder Characterization - ${args.materialSystem}`,

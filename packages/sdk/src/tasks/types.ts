@@ -36,6 +36,15 @@ export interface SleepTaskOptions {
   targetEpochMs: number;
 }
 
+export interface EffectExecutionHints {
+  /** Preferred harness CLI (e.g., 'pi', 'claude-code'). Only used by internal harness. */
+  harness?: string;
+  /** Preferred model identifier (e.g., 'claude-opus-4-6'). Used for subagent model selection. */
+  model?: string;
+  /** Free-form permission list. Only used by internal harness. */
+  permissions?: string[];
+}
+
 export interface TaskDef {
   kind: TaskKind;
   title?: string;
@@ -43,6 +52,7 @@ export interface TaskDef {
   labels?: string[];
   io?: TaskIOHints;
   metadata?: JsonRecord;
+  execution?: EffectExecutionHints;
   node?: NodeTaskOptions;
   breakpoint?: BreakpointTaskOptions;
   orchestratorTask?: OrchestratorTaskOptions;

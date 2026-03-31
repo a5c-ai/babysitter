@@ -70,7 +70,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 4: Selecting approximations');
-  const approximationSelection = await ctx.task(approximationSelectionTask, {
+  let approximationSelection = await ctx.task(approximationSelectionTask, {
     idealizations: idealizationDesign.idealizations,
     acceptableError,
     modelComplexityLimit,
@@ -79,8 +79,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...approximationSelection.artifacts);
 
-  // Breakpoint: Review idealizations and approximations
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      approximationSelection = await ctx.task(approximationSelectionTask, { ...{
+    idealizations: idealizationDesign.idealizations,
+    acceptableError,
+    modelComplexityLimit,
+    outputDir
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: `Identified ${idealizationDesign.idealizations.length} idealizations and ${approximationSelection.approximations.length} approximations. Estimated error: ${approximationSelection.estimatedError}. Proceed with model construction?`,
     title: 'Idealization and Approximation Review',
     context: {
@@ -98,9 +107,15 @@ export async function process(inputs, ctx) {
         approximationCount: approximationSelection.approximations.length,
         estimatedError: approximationSelection.estimatedError
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 5: MODEL CONSTRUCTION
   // ============================================================================
@@ -152,7 +167,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 8: Performing sensitivity analysis');
-  const sensitivityAnalysis = await ctx.task(sensitivityAnalysisTask, {
+  let sensitivityAnalysis = await ctx.task(sensitivityAnalysisTask, {
     model: modelConstruction.model,
     idealizations: idealizationDesign.idealizations,
     approximations: approximationSelection.approximations,
@@ -161,8 +176,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...sensitivityAnalysis.artifacts);
 
-  // Final breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      sensitivityAnalysis = await ctx.task(sensitivityAnalysisTask, { ...{
+    model: modelConstruction.model,
+    idealizations: idealizationDesign.idealizations,
+    approximations: approximationSelection.approximations,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Model construction complete. Verification score: ${modelVerification.verificationScore}%. Validity domain established. Review final model?`,
     title: 'Model Construction Complete',
     context: {
@@ -179,9 +203,15 @@ export async function process(inputs, ctx) {
         validityDomainSize: validityAnalysis.domainSize,
         criticalParameters: sensitivityAnalysis.criticalParameters.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -212,8 +242,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

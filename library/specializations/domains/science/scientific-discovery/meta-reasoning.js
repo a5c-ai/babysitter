@@ -68,20 +68,35 @@ export async function process(inputs, ctx) {
   });
 
   // Quality Gate: Meta-Strategy Coherence
-  const coherenceCheck = await ctx.task(checkCoherenceTask, {
+  let coherenceCheck = await ctx.task(checkCoherenceTask, {
     strategySelection: strategySelection,
     resourceAllocation: resourceAllocation,
     stoppingCriteria: stoppingCriteria,
     adaptationTriggers: adaptationTriggers
   });
 
-  if (coherenceCheck.coherenceScore < 0.7) {
-    await ctx.breakpoint('meta-strategy-revision', {
+      let lastFeedback = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback) {
+        coherenceCheck = await ctx.task(checkCoherenceTask, { ...{
+    strategySelection: strategySelection,
+    resourceAllocation: resourceAllocation,
+    stoppingCriteria: stoppingCriteria,
+    adaptationTriggers: adaptationTriggers
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+      }
+  const qualityGateApproval = await ctx.breakpoint('meta-strategy-revision', {
       message: 'Meta-reasoning strategy has coherence issues',
       issues: coherenceCheck.issues,
-      suggestedRevisions: coherenceCheck.revisionSuggestions
-    });
-  }
+      suggestedRevisions: coherenceCheck.revisionSuggestions,
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (qualityGateApproval.approved) break;
+      lastFeedback = qualityGateApproval.response || qualityGateApproval.feedback || 'Changes requested';
+    } }
 
   // Phase 8: Reasoning Process Simulation
   const processSimulation = await ctx.task(simulateReasoningProcessTask, {

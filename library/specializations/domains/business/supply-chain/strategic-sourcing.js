@@ -73,7 +73,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 3: Developing sourcing strategy');
 
-  const strategyDevelopment = await ctx.task(strategyDevelopmentTask, {
+  let strategyDevelopment = await ctx.task(strategyDevelopmentTask, {
     category,
     spendAnalysis,
     marketAssessment,
@@ -84,8 +84,19 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...strategyDevelopment.artifacts);
 
-  // Breakpoint: Review sourcing strategy
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      strategyDevelopment = await ctx.task(strategyDevelopmentTask, { ...{
+    category,
+    spendAnalysis,
+    marketAssessment,
+    objectives,
+    sourcingApproach,
+    outputDir
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Sourcing strategy developed for ${category}. Recommended approach: ${strategyDevelopment.recommendedApproach}. Target savings: ${strategyDevelopment.targetSavings}%. Review strategy before RFx?`,
     title: 'Sourcing Strategy Review',
     context: {
@@ -97,9 +108,15 @@ export async function process(inputs, ctx) {
         targetSavings: strategyDevelopment.targetSavings,
         keyStrategies: strategyDevelopment.keyStrategies
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 4: RFx DEVELOPMENT
   // ============================================================================
@@ -153,7 +170,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 7: Developing award recommendation');
 
-  const awardRecommendation = await ctx.task(awardRecommendationTask, {
+  let awardRecommendation = await ctx.task(awardRecommendationTask, {
     category,
     supplierEvaluation,
     negotiationPlanning,
@@ -163,8 +180,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...awardRecommendation.artifacts);
 
-  // Breakpoint: Review award recommendation
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      awardRecommendation = await ctx.task(awardRecommendationTask, { ...{
+    category,
+    supplierEvaluation,
+    negotiationPlanning,
+    objectives,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Award recommendation ready for ${category}. Recommended supplier(s): ${awardRecommendation.recommendedSuppliers.join(', ')}. Projected savings: $${awardRecommendation.projectedSavings}. Approve award?`,
     title: 'Award Recommendation Review',
     context: {
@@ -175,9 +202,15 @@ export async function process(inputs, ctx) {
         projectedSavings: awardRecommendation.projectedSavings,
         savingsPercentage: awardRecommendation.savingsPercentage
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -210,8 +243,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

@@ -121,7 +121,6 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Created escalation matrix with ${escalationDevelopment.escalationLevels} levels`);
   }
-
   // ============================================================================
   // PHASE 5: TEMPLATE LANGUAGE
   // ============================================================================
@@ -143,7 +142,6 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Created ${templateLanguage.clauseCount} template clauses`);
   }
-
   // ============================================================================
   // PHASE 6: PLAYBOOK ASSEMBLY
   // ============================================================================
@@ -172,7 +170,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 7: Validating playbook');
 
-  const validation = await ctx.task(playbookValidationTask, {
+  let validation = await ctx.task(playbookValidationTask, {
     playbook,
     positions,
     fallbacks: fallbackPositions.fallbacks,
@@ -182,8 +180,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...validation.artifacts);
 
-  // Breakpoint: Review and Approval
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      validation = await ctx.task(playbookValidationTask, { ...{
+    playbook,
+    positions,
+    fallbacks: fallbackPositions.fallbacks,
+    escalationMatrix,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Playbook for ${contractType} complete. ${positions.length} positions, ${fallbackPositions.fallbacks.length} fallbacks. Validation score: ${validation.score}/100. Approve playbook?`,
     title: 'Playbook Review',
     context: {
@@ -200,9 +208,15 @@ export async function process(inputs, ctx) {
         { path: playbookAssembly.playbookPath, format: 'markdown', label: 'Playbook Document' },
         { path: playbookAssembly.summaryPath, format: 'json', label: 'Playbook Summary' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -241,8 +255,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

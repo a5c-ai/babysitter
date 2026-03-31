@@ -77,7 +77,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 3: Finalizing supplier list');
 
-  const supplierListFinalization = await ctx.task(supplierListFinalizationTask, {
+  let supplierListFinalization = await ctx.task(supplierListFinalizationTask, {
     category,
     suppliers,
     requirementsGathering,
@@ -86,8 +86,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...supplierListFinalization.artifacts);
 
-  // Breakpoint: Review RFx package before distribution
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      supplierListFinalization = await ctx.task(supplierListFinalizationTask, { ...{
+    category,
+    suppliers,
+    requirementsGathering,
+    outputDir
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `RFx package ready for ${category}. ${supplierListFinalization.approvedSuppliers.length} suppliers to invite. Review and approve for distribution?`,
     title: 'RFx Package Review',
     context: {
@@ -99,9 +108,15 @@ export async function process(inputs, ctx) {
         supplierCount: supplierListFinalization.approvedSuppliers.length,
         responseDeadline: timeline.responseDeadline
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 4: RFx DISTRIBUTION
   // ============================================================================
@@ -170,7 +185,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 8: Developing award recommendation');
 
-  const awardRecommendation = await ctx.task(rfxAwardRecommendationTask, {
+  let awardRecommendation = await ctx.task(rfxAwardRecommendationTask, {
     rfxType,
     responseEvaluation,
     evaluationCriteria,
@@ -179,8 +194,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...awardRecommendation.artifacts);
 
-  // Breakpoint: Review award recommendation
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      awardRecommendation = await ctx.task(rfxAwardRecommendationTask, { ...{
+    rfxType,
+    responseEvaluation,
+    evaluationCriteria,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Evaluation complete. Recommended supplier: ${awardRecommendation.recommendedSupplier}. Score: ${awardRecommendation.winningScore}/100. Review and approve award?`,
     title: 'Award Recommendation Review',
     context: {
@@ -191,9 +215,15 @@ export async function process(inputs, ctx) {
         winningScore: awardRecommendation.winningScore,
         runnerUp: awardRecommendation.runnerUp
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -232,8 +262,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

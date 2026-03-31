@@ -17,131 +17,237 @@ export async function process(inputs, ctx) {
     targetQuality = 85
   } = inputs;
 
-  // Phase 1: Stakeholder Identification
-  await ctx.breakpoint({
+  let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    // No preceding task identified for re-run with feedback
+    const phase1Review = await ctx.breakpoint({
     question: 'Starting stakeholder mapping. Identify all stakeholder groups?',
     title: 'Phase 1: Stakeholder Identification',
     context: {
       runId: ctx.runId,
       phase: 'stakeholder-identification',
       organization: organization.name
-    }
-  });
-
-  const stakeholderIdentification = await ctx.task(identifyStakeholdersTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
+  let stakeholderIdentification = await ctx.task(identifyStakeholdersTask, {
     organization,
     existingStakeholders,
     businessContext
   });
 
-  // Phase 2: Salience Analysis (Power, Legitimacy, Urgency)
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      stakeholderIdentification = await ctx.task(identifyStakeholdersTask, { ...{
+    organization,
+    existingStakeholders,
+    businessContext
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: 'Stakeholders identified. Conduct salience analysis?',
     title: 'Phase 2: Salience Analysis',
     context: {
       runId: ctx.runId,
       phase: 'salience-analysis',
       stakeholderCount: stakeholderIdentification.stakeholders.length
-    }
-  });
-
-  const salienceAnalysis = await ctx.task(conductSalienceAnalysisTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
+  let salienceAnalysis = await ctx.task(conductSalienceAnalysisTask, {
     stakeholders: stakeholderIdentification.stakeholders,
     organization,
     businessContext
   });
 
-  // Phase 3: Stakeholder Categorization
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      salienceAnalysis = await ctx.task(conductSalienceAnalysisTask, { ...{
+    stakeholders: stakeholderIdentification.stakeholders,
+    organization,
+    businessContext
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: 'Salience analyzed. Categorize stakeholders by type?',
     title: 'Phase 3: Stakeholder Categorization',
     context: {
       runId: ctx.runId,
       phase: 'categorization'
-    }
-  });
-
-  const categorization = await ctx.task(categorizeStakeholdersTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
+  let categorization = await ctx.task(categorizeStakeholdersTask, {
     salienceAnalysis,
     stakeholderIdentification
   });
 
-  // Phase 4: Relationship Assessment
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      categorization = await ctx.task(categorizeStakeholdersTask, { ...{
+    salienceAnalysis,
+    stakeholderIdentification
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: 'Stakeholders categorized. Assess current relationships?',
     title: 'Phase 4: Relationship Assessment',
     context: {
       runId: ctx.runId,
       phase: 'relationship-assessment'
-    }
-  });
-
-  const relationshipAssessment = await ctx.task(assessRelationshipsTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
+  let relationshipAssessment = await ctx.task(assessRelationshipsTask, {
     categorization,
     existingStakeholders,
     organization
   });
 
-  // Phase 5: Interest and Influence Mapping
-  await ctx.breakpoint({
+    let lastFeedback_phase5Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase5Review) {
+      relationshipAssessment = await ctx.task(assessRelationshipsTask, { ...{
+    categorization,
+    existingStakeholders,
+    organization
+  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+    }
+  const phase5Review = await ctx.breakpoint({
     question: 'Relationships assessed. Map interests and influence?',
     title: 'Phase 5: Interest/Influence Mapping',
     context: {
       runId: ctx.runId,
       phase: 'interest-influence-mapping'
-    }
-  });
-
-  const interestInfluenceMap = await ctx.task(mapInterestInfluenceTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase5Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase5Review.approved) break;
+    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+  }
+  let interestInfluenceMap = await ctx.task(mapInterestInfluenceTask, {
     categorization,
     salienceAnalysis,
     businessContext
   });
 
-  // Phase 6: Engagement Strategy Development
-  await ctx.breakpoint({
+    let lastFeedback_phase6Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase6Review) {
+      interestInfluenceMap = await ctx.task(mapInterestInfluenceTask, { ...{
+    categorization,
+    salienceAnalysis,
+    businessContext
+  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
+    }
+  const phase6Review = await ctx.breakpoint({
     question: 'Mapping complete. Develop engagement strategies?',
     title: 'Phase 6: Engagement Strategies',
     context: {
       runId: ctx.runId,
       phase: 'engagement-strategies'
-    }
-  });
-
-  const engagementStrategies = await ctx.task(developEngagementStrategiesTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase6Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase6Review.approved) break;
+    lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
+  }
+  let engagementStrategies = await ctx.task(developEngagementStrategiesTask, {
     categorization,
     salienceAnalysis,
     relationshipAssessment,
     interestInfluenceMap
   });
 
-  // Phase 7: Communication Plan per Stakeholder
-  await ctx.breakpoint({
+    let lastFeedback_phase7Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase7Review) {
+      engagementStrategies = await ctx.task(developEngagementStrategiesTask, { ...{
+    categorization,
+    salienceAnalysis,
+    relationshipAssessment,
+    interestInfluenceMap
+  }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
+    }
+  const phase7Review = await ctx.breakpoint({
     question: 'Strategies developed. Create communication plans?',
     title: 'Phase 7: Communication Plans',
     context: {
       runId: ctx.runId,
       phase: 'communication-plans'
-    }
-  });
-
-  const communicationPlans = await ctx.task(createCommunicationPlansTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase7Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase7Review.approved) break;
+    lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
+  }
+  let communicationPlans = await ctx.task(createCommunicationPlansTask, {
     engagementStrategies,
     categorization,
     organization
   });
 
-  // Phase 8: Quality Validation
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      communicationPlans = await ctx.task(createCommunicationPlansTask, { ...{
+    engagementStrategies,
+    categorization,
+    organization
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: 'Validate stakeholder mapping quality?',
     title: 'Phase 8: Quality Validation',
     context: {
       runId: ctx.runId,
       phase: 'quality-validation',
       targetQuality
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const qualityResult = await ctx.task(validateStakeholderMappingTask, {
     stakeholderIdentification,
     salienceAnalysis,
@@ -199,8 +305,7 @@ export async function process(inputs, ctx) {
     };
   }
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const identifyStakeholdersTask = defineTask('identify-stakeholders', (args, taskCtx) => ({
   kind: 'agent',

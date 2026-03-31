@@ -69,22 +69,37 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 7: Visualization generation
-  const visualizations = await ctx.task(visualizationGenerator, {
+  let visualizations = await ctx.task(visualizationGenerator, {
     statisticalAnalysis,
     performanceComparison,
     experimentalDesign,
     metrics: inputs.evaluationMetrics
   });
 
-  // Phase 8: Review breakpoint
-  await ctx.breakpoint('evaluation-review', {
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      visualizations = await ctx.task(visualizationGenerator, { ...{
+    statisticalAnalysis,
+    performanceComparison,
+    experimentalDesign,
+    metrics: inputs.evaluationMetrics
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint('evaluation-review', {
     message: 'Review algorithm engineering evaluation results',
     experimentalDesign,
     statisticalAnalysis,
     performanceComparison,
-    visualizations
-  });
-
+    visualizations,
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 9: Reproducibility packaging
   const reproducibilityPackage = await ctx.task(reproducibilityPackager, {
     experimentalDesign,

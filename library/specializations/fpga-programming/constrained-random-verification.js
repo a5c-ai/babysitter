@@ -48,15 +48,24 @@ export async function process(inputs, ctx) {
   const sequenceLibrary = await ctx.task(sequenceLibraryTask, { dutName, transactionClasses, constraintDefinition, outputDir });
   artifacts.push(...sequenceLibrary.artifacts);
 
-  const coverageModel = await ctx.task(coverageModelTask, { dutName, interfaces, coverageGoals, transactionClasses, outputDir });
-  artifacts.push(...coverageModel.artifacts);
-
-  await ctx.breakpoint({
+  let coverageModel = await ctx.task(coverageModelTask, { dutName, interfaces, coverageGoals, transactionClasses, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      coverageModel = await ctx.task(coverageModelTask, { ...{ dutName, interfaces, coverageGoals, transactionClasses, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `CRV environment defined for ${dutName}. ${transactionClasses.classCount} transaction classes, ${constraintDefinition.constraintCount} constraints. Review CRV setup?`,
     title: 'CRV Setup Review',
-    context: { runId: ctx.runId, dutName, classCount: transactionClasses.classCount, constraintCount: constraintDefinition.constraintCount }
-  });
-
+    context: { runId: ctx.runId, dutName, classCount: transactionClasses.classCount, constraintCount: constraintDefinition.constraintCount },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const coverageClosure = await ctx.task(coverageClosureTask, { dutName, coverageModel, coverageGoals, coverageDriven, outputDir });
   artifacts.push(...coverageClosure.artifacts);
 

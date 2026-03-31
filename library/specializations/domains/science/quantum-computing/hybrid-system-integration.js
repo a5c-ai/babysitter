@@ -41,25 +41,39 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Hybrid Architecture Design');
 
-  const architectureResult = await ctx.task(hybridArchitectureDesignTask, {
+  let architectureResult = await ctx.task(hybridArchitectureDesignTask, {
     application,
     backends,
     workflowType,
     framework
   });
 
-  artifacts.push(...(architectureResult.artifacts || []));
-
-  await ctx.breakpoint({
+    let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      architectureResult = await ctx.task(hybridArchitectureDesignTask, { ...{
+    application,
+    backends,
+    workflowType,
+    framework
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Hybrid architecture designed. Components: ${architectureResult.componentCount}, Workflow steps: ${architectureResult.workflowSteps}. Proceed with job pipeline implementation?`,
     title: 'Hybrid Architecture Review',
     context: {
       runId: ctx.runId,
       architecture: architectureResult,
       files: (architectureResult.artifacts || []).map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 2: JOB SUBMISSION PIPELINE
   // ============================================================================
@@ -97,25 +111,39 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 4: Classical Optimization Integration');
 
-  const optimizationResult = await ctx.task(classicalOptimizationIntegrationTask, {
+  let optimizationResult = await ctx.task(classicalOptimizationIntegrationTask, {
     application,
     workflowType,
     resultProcessor: resultProcessingResult,
     framework
   });
 
-  artifacts.push(...(optimizationResult.artifacts || []));
-
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      optimizationResult = await ctx.task(classicalOptimizationIntegrationTask, { ...{
+    application,
+    workflowType,
+    resultProcessor: resultProcessingResult,
+    framework
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: `Optimization integration complete. Supported optimizers: ${optimizationResult.supportedOptimizers.length}. Review optimization pipeline?`,
     title: 'Optimization Integration Review',
     context: {
       runId: ctx.runId,
       optimization: optimizationResult,
       files: (optimizationResult.artifacts || []).map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 5: ERROR HANDLING AND RETRY LOGIC
   // ============================================================================
@@ -146,7 +174,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...(resourceResult.artifacts || []));
   }
-
   // ============================================================================
   // PHASE 7: MONITORING AND LOGGING
   // ============================================================================
@@ -168,7 +195,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 8: Integration Testing');
 
-  const integrationTestResult = await ctx.task(hybridIntegrationTestingTask, {
+  let integrationTestResult = await ctx.task(hybridIntegrationTestingTask, {
     application,
     backends,
     hybridComponents: {
@@ -180,25 +207,44 @@ export async function process(inputs, ctx) {
     framework
   });
 
-  artifacts.push(...(integrationTestResult.artifacts || []));
-
-  await ctx.breakpoint({
+    let lastFeedback_phase8Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase8Review) {
+      integrationTestResult = await ctx.task(hybridIntegrationTestingTask, { ...{
+    application,
+    backends,
+    hybridComponents: {
+      architecture: architectureResult,
+      jobPipeline: jobPipelineResult,
+      resultProcessor: resultProcessingResult,
+      optimization: optimizationResult
+    },
+    framework
+  }, feedback: lastFeedback_phase8Review, attempt: attempt + 1 });
+    }
+  const phase8Review = await ctx.breakpoint({
     question: `Integration tests complete. Passed: ${integrationTestResult.passedTests}/${integrationTestResult.totalTests}. Review test results?`,
     title: 'Integration Testing Review',
     context: {
       runId: ctx.runId,
       tests: integrationTestResult,
       files: (integrationTestResult.artifacts || []).map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase8Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase8Review.approved) break;
+    lastFeedback_phase8Review = phase8Review.response || phase8Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 9: DOCUMENTATION
   // ============================================================================
 
   ctx.log('info', 'Phase 9: Documentation');
 
-  const docResult = await ctx.task(hybridSystemDocumentationTask, {
+  let docResult = await ctx.task(hybridSystemDocumentationTask, {
     application,
     architectureResult,
     jobPipelineResult,
@@ -211,9 +257,23 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...(docResult.artifacts || []));
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      docResult = await ctx.task(hybridSystemDocumentationTask, { ...{
+    application,
+    architectureResult,
+    jobPipelineResult,
+    resultProcessingResult,
+    optimizationResult,
+    errorHandlingResult,
+    resourceResult,
+    monitoringResult,
+    integrationTestResult,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Hybrid system integration complete. Components: ${architectureResult.componentCount}, Tests passing: ${integrationTestResult.passedTests}. Approve system?`,
     title: 'Hybrid System Complete',
     context: {
@@ -225,9 +285,15 @@ export async function process(inputs, ctx) {
         testsPass: integrationTestResult.passedTests === integrationTestResult.totalTests
       },
       files: artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
 
   return {
@@ -264,8 +330,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

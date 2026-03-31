@@ -43,15 +43,24 @@ export async function process(inputs, ctx) {
   const partitionDesign = await ctx.task(partitionDesignTask, { designName, systemAnalysis, partitionStrategy, outputDir });
   artifacts.push(...partitionDesign.artifacts);
 
-  const acceleratorDesign = await ctx.task(acceleratorDesignTask, { designName, partitionDesign, targetPlatform, outputDir });
-  artifacts.push(...acceleratorDesign.artifacts);
-
-  await ctx.breakpoint({
+  let acceleratorDesign = await ctx.task(acceleratorDesignTask, { designName, partitionDesign, targetPlatform, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      acceleratorDesign = await ctx.task(acceleratorDesignTask, { ...{ designName, partitionDesign, targetPlatform, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `HW-SW partition defined for ${designName}. ${partitionDesign.hwBlocks} HW blocks, ${partitionDesign.swFunctions} SW functions. Review partition?`,
     title: 'HW-SW Partition Review',
-    context: { runId: ctx.runId, designName, hwBlocks: partitionDesign.hwBlocks, swFunctions: partitionDesign.swFunctions }
-  });
-
+    context: { runId: ctx.runId, designName, hwBlocks: partitionDesign.hwBlocks, swFunctions: partitionDesign.swFunctions },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const dmaDesign = await ctx.task(dmaDesignTask, { designName, acceleratorDesign, dmaArchitecture, outputDir });
   artifacts.push(...dmaDesign.artifacts);
 

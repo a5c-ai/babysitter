@@ -64,7 +64,6 @@ export async function process(inputs, ctx) {
       }
     };
   }
-
   const refinedProblem = problemAnalysis.refinedProblemStatement;
   ctx.log('info', `Problem validated. Impact score: ${problemAnalysis.impactScore}/100`);
 
@@ -110,7 +109,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 4: Defining acceptance criteria for user stories');
 
-  const acceptanceCriteriaDefinition = await ctx.task(acceptanceCriteriaDefinitionTask, {
+  let acceptanceCriteriaDefinition = await ctx.task(acceptanceCriteriaDefinitionTask, {
     featureName,
     userStories,
     problemStatement: refinedProblem,
@@ -123,8 +122,18 @@ export async function process(inputs, ctx) {
   const acceptanceCriteria = acceptanceCriteriaDefinition.acceptanceCriteria;
   ctx.log('info', `Defined acceptance criteria for ${acceptanceCriteria.length} stories`);
 
-  // Breakpoint: Review user stories and acceptance criteria
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      acceptanceCriteriaDefinition = await ctx.task(acceptanceCriteriaDefinitionTask, { ...{
+    featureName,
+    userStories,
+    problemStatement: refinedProblem,
+    constraints,
+    outputDir
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: `Generated ${userStories.length} user stories with acceptance criteria. Review before proceeding to technical specifications?`,
     title: 'User Stories Review',
     context: {
@@ -142,9 +151,15 @@ export async function process(inputs, ctx) {
         impactScore: problemAnalysis.impactScore,
         personasCount: userResearch.personas.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 5: TECHNICAL SPECIFICATIONS (IF ENABLED)
   // ============================================================================
@@ -165,7 +180,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...technicalSpecs.artifacts);
   }
-
   // ============================================================================
   // PHASE 6: DESIGN REQUIREMENTS AND MOCKS (IF ENABLED)
   // ============================================================================
@@ -185,7 +199,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...designRequirements.artifacts);
   }
-
   // ============================================================================
   // PHASE 7: SUCCESS METRICS AND KPI DEFINITION
   // ============================================================================
@@ -295,7 +308,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 12: Validating PRD quality and completeness');
 
-  const qualityValidation = await ctx.task(prdQualityValidationTask, {
+  let qualityValidation = await ctx.task(prdQualityValidationTask, {
     featureName,
     prdDocument: prdAssembly.prdDocument,
     userStories,
@@ -311,8 +324,21 @@ export async function process(inputs, ctx) {
   const qualityScore = qualityValidation.overallScore;
   const qualityMet = qualityScore >= 80;
 
-  // Breakpoint: Review PRD quality
-  await ctx.breakpoint({
+    let lastFeedback_phase12Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase12Review) {
+      qualityValidation = await ctx.task(prdQualityValidationTask, { ...{
+    featureName,
+    prdDocument: prdAssembly.prdDocument,
+    userStories,
+    acceptanceCriteria,
+    successMetrics,
+    technicalSpecs,
+    designRequirements,
+    outputDir
+  }, feedback: lastFeedback_phase12Review, attempt: attempt + 1 });
+    }
+  const phase12Review = await ctx.breakpoint({
     question: `PRD quality score: ${qualityScore}/100. ${qualityMet ? 'Quality meets standards!' : 'Quality may need improvement.'} Review PRD?`,
     title: 'PRD Quality Review',
     context: {
@@ -332,9 +358,15 @@ export async function process(inputs, ctx) {
         format: 'markdown',
         label: 'Quality Report'
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase12Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase12Review.approved) break;
+    lastFeedback_phase12Review = phase12Review.response || phase12Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 13: STAKEHOLDER REVIEW AND APPROVAL (IF ENABLED)
   // ============================================================================
@@ -356,8 +388,21 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...stakeholderReview.artifacts);
 
-    // Breakpoint: Approval gate
-    await ctx.breakpoint({
+      let lastFeedback_finalApproval = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_finalApproval) {
+        qualityValidation = await ctx.task(prdQualityValidationTask, { ...{
+    featureName,
+    prdDocument: prdAssembly.prdDocument,
+    userStories,
+    acceptanceCriteria,
+    successMetrics,
+    technicalSpecs,
+    designRequirements,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+      }
+  const finalApproval = await ctx.breakpoint({
       question: `Stakeholder review complete. ${stakeholderReview.approved ? 'PRD approved!' : 'Revisions needed.'} Proceed?`,
       title: 'PRD Approval Gate',
       context: {
@@ -371,10 +416,16 @@ export async function process(inputs, ctx) {
           format: a.format || 'markdown',
           label: a.label || undefined
         }))
-      }
-    });
-
-    // If revisions needed, incorporate feedback
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_finalApproval || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (finalApproval.approved) break;
+      lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+    }
+  // If revisions needed, incorporate feedback
     if (stakeholderReview.revisionsNeeded) {
       ctx.log('info', 'Incorporating stakeholder feedback');
 
@@ -390,7 +441,6 @@ export async function process(inputs, ctx) {
       artifacts.push(...revision.artifacts);
     }
   }
-
   // ============================================================================
   // PHASE 14: PRD PUBLISHING AND DISTRIBUTION
   // ============================================================================
@@ -504,8 +554,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

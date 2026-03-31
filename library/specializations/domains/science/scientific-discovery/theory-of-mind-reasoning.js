@@ -47,7 +47,6 @@ export async function process(inputs, ctx) {
       mentalModels: null
     };
   }
-
   // Phase 2: Knowledge State Inference
   const knowledgeStates = await ctx.task(knowledgeStateInferenceTask, {
     agentProfiles: agentProfiles.profiles,
@@ -72,15 +71,24 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 5: Desire and Preference Modeling
-  const desireModeling = await ctx.task(desirePreferenceModelingTask, {
+  let desireModeling = await ctx.task(desirePreferenceModelingTask, {
     agentProfiles: agentProfiles.profiles,
     intentionInference,
     observedBehaviors,
     context
   });
 
-  // Breakpoint: Review mental model construction
-  await ctx.breakpoint({
+    let lastFeedback_phase5Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase5Review) {
+      desireModeling = await ctx.task(desirePreferenceModelingTask, { ...{
+    agentProfiles: agentProfiles.profiles,
+    intentionInference,
+    observedBehaviors,
+    context
+  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+    }
+  const phase5Review = await ctx.breakpoint({
     question: `Review mental models constructed for ${agentProfiles.profiles.length} agents. Are the inferred beliefs, intentions, and goals plausible?`,
     title: 'Mental Model Review',
     context: {
@@ -93,9 +101,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: { beliefAttribution, intentionInference, desireModeling }
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase5Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase5Review.approved) break;
+    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+  }
   // Phase 6: Nested Belief Reasoning (What A thinks B thinks)
   const nestedBeliefs = await ctx.task(nestedBeliefReasoningTask, {
     agentProfiles: agentProfiles.profiles,
@@ -134,7 +148,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 10: Synthesis and Recommendations
-  const synthesis = await ctx.task(theoryOfMindSynthesisTask, {
+  let synthesis = await ctx.task(theoryOfMindSynthesisTask, {
     agentProfiles: agentProfiles.profiles,
     knowledgeStates,
     beliefAttribution,
@@ -148,8 +162,24 @@ export async function process(inputs, ctx) {
     context
   });
 
-  // Final Breakpoint: Analysis Approval
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      synthesis = await ctx.task(theoryOfMindSynthesisTask, { ...{
+    agentProfiles: agentProfiles.profiles,
+    knowledgeStates,
+    beliefAttribution,
+    intentionInference,
+    desireModeling,
+    nestedBeliefs,
+    perspectiveSimulation,
+    behaviorPrediction,
+    communicationStrategy,
+    inferenceGoals,
+    context
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Theory of Mind analysis complete for "${context}". Review predictions and recommendations?`,
     title: 'Theory of Mind Analysis Approval',
     context: {
@@ -161,9 +191,15 @@ export async function process(inputs, ctx) {
         { path: 'artifacts/theory-of-mind-report.json', format: 'json', content: synthesis },
         { path: 'artifacts/theory-of-mind-report.md', format: 'markdown', content: synthesis.markdown }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     context,
@@ -183,8 +219,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const agentProfileConstructionTask = defineTask('agent-profile-construction', (args, taskCtx) => ({
   kind: 'agent',

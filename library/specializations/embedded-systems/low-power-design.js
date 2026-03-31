@@ -155,7 +155,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 8: Generating Implementation Guide');
 
-  const implementationGuide = await ctx.task(lowPowerImplementationTask, {
+  let implementationGuide = await ctx.task(lowPowerImplementationTask, {
     projectName,
     sleepModeDesign,
     clockManagement,
@@ -166,8 +166,19 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...implementationGuide.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      implementationGuide = await ctx.task(lowPowerImplementationTask, { ...{
+    projectName,
+    sleepModeDesign,
+    clockManagement,
+    peripheralManagement,
+    dutyCycleOptimization,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Low-Power Design Complete for ${projectName}. Estimated battery life: ${batteryEstimation.estimatedLife}. Meets target: ${batteryEstimation.meetsTarget}. Review?`,
     title: 'Low-Power Design Complete',
     context: {
@@ -181,9 +192,15 @@ export async function process(inputs, ctx) {
       files: [
         { path: implementationGuide.guidePath, format: 'markdown', label: 'Implementation Guide' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -212,8 +229,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

@@ -100,7 +100,7 @@ export async function process(inputs, ctx) {
 
   // Task 7: Generate Source Analysis Report
   ctx.log('info', 'Generating source analysis report');
-  const analysisReport = await ctx.task(sourceAnalysisReportTask, {
+  let analysisReport = await ctx.task(sourceAnalysisReportTask, {
     sourceDocument,
     authentication,
     provenanceAnalysis,
@@ -114,8 +114,22 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...analysisReport.artifacts);
 
-  // Breakpoint: Review source analysis
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      analysisReport = await ctx.task(sourceAnalysisReportTask, { ...{
+    sourceDocument,
+    authentication,
+    provenanceAnalysis,
+    authorshipAnalysis,
+    biasAssessment,
+    reliabilityEvaluation,
+    contextualization,
+    researchQuestion,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Source analysis complete. Reliability score: ${reliabilityEvaluation.score}/100. Authentication: ${authentication.verdict}. Review analysis?`,
     title: 'Primary Source Analysis Results',
     context: {
@@ -127,9 +141,15 @@ export async function process(inputs, ctx) {
         reliabilityScore: reliabilityEvaluation.score,
         biasFactors: biasAssessment.factors?.length || 0
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -167,8 +187,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Document Authentication
+  // Task 1: Document Authentication
 export const authenticationTask = defineTask('authentication', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Authenticate source document',

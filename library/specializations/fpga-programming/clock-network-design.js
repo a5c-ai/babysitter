@@ -42,15 +42,24 @@ export async function process(inputs, ctx) {
   const pllMmcmDesign = await ctx.task(pllMmcmDesignTask, { designName, clockRequirements, pllConfiguration, targetDevice, outputDir });
   artifacts.push(...pllMmcmDesign.artifacts);
 
-  const clockDistribution = await ctx.task(clockDistributionTask, { designName, clockArchitecture, pllMmcmDesign, clockBufferStrategy, outputDir });
-  artifacts.push(...clockDistribution.artifacts);
-
-  await ctx.breakpoint({
+  let clockDistribution = await ctx.task(clockDistributionTask, { designName, clockArchitecture, pllMmcmDesign, clockBufferStrategy, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      clockDistribution = await ctx.task(clockDistributionTask, { ...{ designName, clockArchitecture, pllMmcmDesign, clockBufferStrategy, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Clock network designed for ${designName}. ${pllMmcmDesign.outputClocks} PLL outputs, ${clockDistribution.bufferCount} clock buffers. Review clock design?`,
     title: 'Clock Network Review',
-    context: { runId: ctx.runId, designName, pllOutputs: pllMmcmDesign.outputClocks, buffers: clockDistribution.bufferCount }
-  });
-
+    context: { runId: ctx.runId, designName, pllOutputs: pllMmcmDesign.outputClocks, buffers: clockDistribution.bufferCount },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const clockConstraints = await ctx.task(clockConstraintsNetworkTask, { designName, clockArchitecture, pllMmcmDesign, clockDistribution, outputDir });
   artifacts.push(...clockConstraints.artifacts);
 

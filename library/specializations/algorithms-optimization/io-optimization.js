@@ -24,15 +24,24 @@ export async function process(inputs, ctx) {
   const implementation = await ctx.task(fastIOImplementationTask, { language, analysis, outputDir });
   artifacts.push(...implementation.artifacts);
 
-  const benchmarking = await ctx.task(ioBenchmarkingTask, { language, implementation, inputSize, outputDir });
-  artifacts.push(...benchmarking.artifacts);
-
-  await ctx.breakpoint({
+  let benchmarking = await ctx.task(ioBenchmarkingTask, { language, implementation, inputSize, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      benchmarking = await ctx.task(ioBenchmarkingTask, { ...{ language, implementation, inputSize, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `I/O optimization complete for ${language}. Speedup: ${benchmarking.speedup}x. Review template?`,
     title: 'I/O Optimization Complete',
-    context: { runId: ctx.runId, language, speedup: benchmarking.speedup }
-  });
-
+    context: { runId: ctx.runId, language, speedup: benchmarking.speedup },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     optimizedTemplate: implementation.template,

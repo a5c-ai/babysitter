@@ -123,7 +123,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 8: Generating CSAT report');
-  const csatReport = await ctx.task(csatReportTask, {
+  let csatReport = await ctx.task(csatReportTask, {
     csatCalculation,
     touchpointAnalysis,
     trendAnalysis,
@@ -135,9 +135,19 @@ export async function process(inputs, ctx) {
   artifacts.push(...csatReport.artifacts);
 
   const overallCSAT = csatCalculation.overallCSAT;
-  const targetMet = overallCSAT >= targetCSAT;
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      csatReport = await ctx.task(csatReportTask, { ...{
+    csatCalculation,
+    touchpointAnalysis,
+    trendAnalysis,
+    insightGeneration,
+    benchmarks,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `CSAT analysis complete. Overall CSAT: ${overallCSAT}%. Target: ${targetCSAT}%. ${targetMet ? 'Target met!' : 'Below target.'} Touchpoints analyzed: ${touchpointAnalysis.touchpoints?.length || 0}. Review and distribute?`,
     title: 'CSAT Analysis Review',
     context: {
@@ -157,9 +167,15 @@ export async function process(inputs, ctx) {
         topPerformingTouchpoint: touchpointAnalysis.topPerformer,
         lowestPerformingTouchpoint: touchpointAnalysis.lowestPerformer
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -192,8 +208,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

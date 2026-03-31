@@ -101,7 +101,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...deviationHandling.artifacts);
   }
-
   // ============================================================================
   // PHASE 5: CODE REMEDIATION GUIDANCE
   // ============================================================================
@@ -139,7 +138,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 7: Generating Compliance Report');
 
-  const complianceReport = await ctx.task(misraComplianceReportTask, {
+  let complianceReport = await ctx.task(misraComplianceReportTask, {
     projectName,
     misraVersion,
     staticAnalysis,
@@ -156,8 +155,21 @@ export async function process(inputs, ctx) {
   const deviations = deviationHandling?.approvedDeviations?.length || 0;
   const remainingViolations = totalViolations - deviations;
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      complianceReport = await ctx.task(misraComplianceReportTask, { ...{
+    projectName,
+    misraVersion,
+    staticAnalysis,
+    violationAnalysis,
+    deviationHandling,
+    complianceMatrix,
+    remediationGuidance,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `MISRA C Compliance Check Complete for ${projectName}. Violations: ${remainingViolations}, Deviations: ${deviations}. Compliance: ${complianceMatrix.complianceLevel}. Review?`,
     title: 'MISRA Compliance Complete',
     context: {
@@ -172,9 +184,15 @@ export async function process(inputs, ctx) {
         { path: complianceReport.reportPath, format: 'markdown', label: 'Compliance Report' },
         { path: complianceMatrix.matrixPath, format: 'csv', label: 'Compliance Matrix' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -203,8 +221,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

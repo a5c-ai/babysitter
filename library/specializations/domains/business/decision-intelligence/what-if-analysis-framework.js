@@ -62,23 +62,37 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 5: Scenario Execution
-  const scenarioExecution = await ctx.task(scenarioExecutionTask, {
+  let scenarioExecution = await ctx.task(scenarioExecutionTask, {
     projectName,
     modelDevelopment,
     scenarioDesign
   });
 
-  // Breakpoint: Review scenario results
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      scenarioExecution = await ctx.task(scenarioExecutionTask, { ...{
+    projectName,
+    modelDevelopment,
+    scenarioDesign
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Review what-if analysis results for ${projectName}. Are the insights actionable?`,
     title: 'What-If Analysis Review',
     context: {
       runId: ctx.runId,
       projectName,
       scenarioCount: scenarioExecution.results?.length || 0
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 6: Sensitivity Analysis
   const sensitivityAnalysis = await ctx.task(whatIfSensitivityTask, {
     projectName,
@@ -121,8 +135,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const analysisSetupTask = defineTask('analysis-setup', (args, taskCtx) => ({
   kind: 'agent',

@@ -171,7 +171,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 10: Developing recommendations and action plan');
-  const recommendationsReport = await ctx.task(brandHealthRecommendationsTask, {
+  let recommendationsReport = await ctx.task(brandHealthRecommendationsTask, {
     brandName,
     salienceAnalysis,
     performanceAnalysis,
@@ -189,8 +189,23 @@ export async function process(inputs, ctx) {
   const brandHealthScore = cbbeScoring.overallScore;
   const qualityMet = brandHealthScore >= 70;
 
-  // Breakpoint: Review brand health assessment
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      recommendationsReport = await ctx.task(brandHealthRecommendationsTask, { ...{
+    brandName,
+    salienceAnalysis,
+    performanceAnalysis,
+    imageryAnalysis,
+    judgmentsAnalysis,
+    feelingsAnalysis,
+    resonanceAnalysis,
+    cbbeScoring,
+    competitors,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Brand health assessment complete. Overall score: ${brandHealthScore}/100. ${qualityMet ? 'Brand health is strong!' : 'Brand health needs attention.'} Review and approve?`,
     title: 'Brand Health Assessment Review & Approval',
     context: {
@@ -213,9 +228,15 @@ export async function process(inputs, ctx) {
         feelingsScore: feelingsAnalysis.score || 0,
         resonanceScore: resonanceAnalysis.score || 0
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -252,8 +273,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

@@ -45,7 +45,6 @@ export async function process(inputs, ctx) {
       temporalAnalysis: null
     };
   }
-
   // Phase 2: Temporal Relation Extraction
   const temporalRelations = await ctx.task(temporalRelationTask, {
     events: eventAnnotation.annotatedEvents,
@@ -59,14 +58,22 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 4: Ordering and Precedence Analysis
-  const orderingAnalysis = await ctx.task(orderingAnalysisTask, {
+  let orderingAnalysis = await ctx.task(orderingAnalysisTask, {
     events: eventAnnotation.annotatedEvents,
     relations: temporalRelations.relations,
     intervals: intervalAnalysis.intervals
   });
 
-  // Breakpoint: Review temporal structure
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      orderingAnalysis = await ctx.task(orderingAnalysisTask, { ...{
+    events: eventAnnotation.annotatedEvents,
+    relations: temporalRelations.relations,
+    intervals: intervalAnalysis.intervals
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: `Review temporal structure. ${eventAnnotation.annotatedEvents.length} events, ${temporalRelations.relations?.length || 0} relations. Continue analysis?`,
     title: 'Temporal Structure Review',
     context: {
@@ -78,9 +85,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: { eventAnnotation, temporalRelations, intervalAnalysis, orderingAnalysis }
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
   // Phase 5: Duration and Persistence Analysis
   const durationAnalysis = await ctx.task(durationPersistenceTask, {
     events: eventAnnotation.annotatedEvents,
@@ -122,7 +135,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 10: Temporal Synthesis
-  const temporalSynthesis = await ctx.task(temporalSynthesisTask, {
+  let temporalSynthesis = await ctx.task(temporalSynthesisTask, {
     events: eventAnnotation.annotatedEvents,
     relations: temporalRelations.relations,
     intervals: intervalAnalysis.intervals,
@@ -135,8 +148,23 @@ export async function process(inputs, ctx) {
     temporalQueries
   });
 
-  // Final Breakpoint: Temporal Analysis Approval
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      temporalSynthesis = await ctx.task(temporalSynthesisTask, { ...{
+    events: eventAnnotation.annotatedEvents,
+    relations: temporalRelations.relations,
+    intervals: intervalAnalysis.intervals,
+    ordering: orderingAnalysis.ordering,
+    durations: durationAnalysis,
+    causal: causalAnalysis,
+    changes: changeAnalysis,
+    queryAnswers: queryResolution.answers,
+    timeline: timelineConstruction.timeline,
+    temporalQueries
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Temporal analysis complete. ${queryResolution.answers?.length || 0} queries resolved. Approve analysis?`,
     title: 'Temporal Analysis Approval',
     context: {
@@ -147,9 +175,15 @@ export async function process(inputs, ctx) {
         { path: 'artifacts/temporal-report.json', format: 'json', content: temporalSynthesis },
         { path: 'artifacts/temporal-report.md', format: 'markdown', content: temporalSynthesis.markdown }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     temporalAnalysis: {
@@ -172,8 +206,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const eventAnnotationTask = defineTask('event-annotation', (args, taskCtx) => ({
   kind: 'agent',

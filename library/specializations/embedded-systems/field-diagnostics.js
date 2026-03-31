@@ -88,7 +88,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...crashDumpSystem.artifacts);
   }
-
   // ============================================================================
   // PHASE 4: HEALTH MONITORING
   // ============================================================================
@@ -105,7 +104,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...healthMonitor.artifacts);
   }
-
   // ============================================================================
   // PHASE 5: DIAGNOSTIC PROTOCOL IMPLEMENTATION
   // ============================================================================
@@ -160,7 +158,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 8: Generating Diagnostics Documentation');
 
-  const documentation = await ctx.task(diagnosticsDocumentationTask, {
+  let documentation = await ctx.task(diagnosticsDocumentationTask, {
     projectName,
     loggingInfra,
     crashDumpSystem,
@@ -173,8 +171,21 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...documentation.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      documentation = await ctx.task(diagnosticsDocumentationTask, { ...{
+    projectName,
+    loggingInfra,
+    crashDumpSystem,
+    healthMonitor,
+    protocolImpl,
+    diagnosticCommands,
+    dataExport,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Field Diagnostics Design Complete for ${projectName}. Crash dumps: ${crashDumpEnabled}, Health monitoring: ${healthMonitoring}. Review?`,
     title: 'Field Diagnostics Complete',
     context: {
@@ -188,9 +199,15 @@ export async function process(inputs, ctx) {
       files: [
         { path: documentation.docPath, format: 'markdown', label: 'Diagnostics Documentation' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -222,8 +239,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

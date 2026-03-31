@@ -97,14 +97,20 @@ export async function process(inputs, ctx) {
   artifacts.push(...(distributionStrategy.artifacts || []));
 
   // Phase 8: Engagement Tracking
-  const engagementTracking = await ctx.task(engagementTrackingTask, {
+  let engagementTracking = await ctx.task(engagementTrackingTask, {
     companyName
   });
 
   artifacts.push(...(engagementTracking.artifacts || []));
 
-  // Breakpoint: Review update
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      engagementTracking = await ctx.task(engagementTrackingTask, { ...{
+    companyName
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Review investor update for ${companyName} - ${period}. Ready to send to investor list?`,
     title: 'Investor Update Review',
     context: {
@@ -112,9 +118,15 @@ export async function process(inputs, ctx) {
       companyName,
       period,
       files: artifacts
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -134,8 +146,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const updateStructureTask = defineTask('update-structure', (args, taskCtx) => ({
   kind: 'agent',

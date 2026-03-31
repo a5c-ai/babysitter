@@ -62,7 +62,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...serviceOverview.artifacts);
   }
-
   // ============================================================================
   // PHASE 3: DEPLOYMENT PROCEDURES DOCUMENTATION
   // ============================================================================
@@ -80,7 +79,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...deploymentProcedures.artifacts);
   }
-
   // ============================================================================
   // PHASE 4: INCIDENT RESPONSE DOCUMENTATION
   // ============================================================================
@@ -99,7 +97,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...incidentResponse.artifacts);
   }
-
   // ============================================================================
   // PHASE 5: TROUBLESHOOTING GUIDES DOCUMENTATION
   // ============================================================================
@@ -117,7 +114,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...troubleshootingGuides.artifacts);
   }
-
   // ============================================================================
   // PHASE 6: MONITORING AND ALERTING DOCUMENTATION
   // ============================================================================
@@ -135,7 +131,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...monitoringDocs.artifacts);
   }
-
   // ============================================================================
   // PHASE 7: MAINTENANCE PROCEDURES DOCUMENTATION
   // ============================================================================
@@ -152,7 +147,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...maintenanceProcedures.artifacts);
   }
-
   // ============================================================================
   // PHASE 8: ACCESS AND PERMISSIONS DOCUMENTATION
   // ============================================================================
@@ -170,13 +164,12 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...accessDocs.artifacts);
   }
-
   // ============================================================================
   // PHASE 9: ASSEMBLE COMPLETE RUNBOOK
   // ============================================================================
 
   ctx.log('info', 'Phase 9: Assembling complete runbook document');
-  const runbookAssembly = await ctx.task(runbookAssemblyTask, {
+  let runbookAssembly = await ctx.task(runbookAssemblyTask, {
     serviceName,
     serviceType,
     environment,
@@ -195,8 +188,27 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...runbookAssembly.artifacts);
 
-  // Breakpoint: Review assembled runbook
-  await ctx.breakpoint({
+    let lastFeedback_phase9Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase9Review) {
+      runbookAssembly = await ctx.task(runbookAssemblyTask, { ...{
+    serviceName,
+    serviceType,
+    environment,
+    sections: {
+      serviceOverview,
+      deploymentProcedures,
+      incidentResponse,
+      troubleshootingGuides,
+      monitoringDocs,
+      maintenanceProcedures,
+      accessDocs
+    },
+    teamContacts,
+    outputDir
+  }, feedback: lastFeedback_phase9Review, attempt: attempt + 1 });
+    }
+  const phase9Review = await ctx.breakpoint({
     question: `Complete runbook for ${serviceName} assembled. Review the runbook structure and content?`,
     title: 'Runbook Assembly Review',
     context: {
@@ -215,9 +227,15 @@ export async function process(inputs, ctx) {
         totalPages: runbookAssembly.estimatedPages,
         checklistItems: runbookAssembly.checklistCount
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase9Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase9Review.approved) break;
+    lastFeedback_phase9Review = phase9Review.response || phase9Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 10: QUALITY VALIDATION
   // ============================================================================
@@ -240,7 +258,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 11: Generating operational readiness checklist');
-  const readinessChecklist = await ctx.task(operationalReadinessTask, {
+  let readinessChecklist = await ctx.task(operationalReadinessTask, {
     serviceName,
     serviceType,
     runbookSections: runbookAssembly.sections,
@@ -250,8 +268,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...readinessChecklist.artifacts);
 
-  // Breakpoint: Review quality and readiness
-  await ctx.breakpoint({
+    let lastFeedback_phase11Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase11Review) {
+      readinessChecklist = await ctx.task(operationalReadinessTask, { ...{
+    serviceName,
+    serviceType,
+    runbookSections: runbookAssembly.sections,
+    qualityScore: qualityValidation.overallScore,
+    outputDir
+  }, feedback: lastFeedback_phase11Review, attempt: attempt + 1 });
+    }
+  const phase11Review = await ctx.breakpoint({
     question: `Runbook quality score: ${qualityValidation.overallScore}/100. ${qualityMet ? 'Quality standards met!' : 'May need improvements.'} Operational readiness: ${readinessChecklist.readinessPercentage}%. Proceed with finalization?`,
     title: 'Quality and Readiness Review',
     context: {
@@ -269,9 +297,15 @@ export async function process(inputs, ctx) {
         missingItems: readinessChecklist.missingItems.length,
         recommendations: qualityValidation.recommendations.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase11Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase11Review.approved) break;
+    lastFeedback_phase11Review = phase11Review.response || phase11Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 12: TEAM REVIEW (IF REQUIRED)
   // ============================================================================
@@ -289,8 +323,18 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...reviewResult.artifacts);
 
-    // Breakpoint: Review approval gate
-    await ctx.breakpoint({
+      let lastFeedback_finalApproval = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_finalApproval) {
+        readinessChecklist = await ctx.task(operationalReadinessTask, { ...{
+    serviceName,
+    serviceType,
+    runbookSections: runbookAssembly.sections,
+    qualityScore: qualityValidation.overallScore,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+      }
+  const finalApproval = await ctx.breakpoint({
       question: `Runbook review complete. ${reviewResult.approved ? 'Approved by team!' : 'Requires revisions.'} Finalize and publish?`,
       title: 'Runbook Review Approval',
       context: {
@@ -307,9 +351,15 @@ export async function process(inputs, ctx) {
           feedbackItems: reviewResult.feedback.length,
           criticalIssues: reviewResult.criticalIssues
         }
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_finalApproval || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (finalApproval.approved) break;
+      lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 13: FINALIZE AND PUBLISH RUNBOOK
@@ -355,8 +405,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

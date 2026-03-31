@@ -19,130 +19,235 @@ export async function process(inputs, ctx) {
     targetQuality = 90
   } = inputs;
 
-  // Phase 1: Narrative Alignment Assessment
-  await ctx.breakpoint({
+  let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    // No preceding task identified for re-run with feedback
+    const phase1Review = await ctx.breakpoint({
     question: 'Starting investor communications support. Assess narrative alignment?',
     title: 'Phase 1: Narrative Alignment',
     context: {
       runId: ctx.runId,
       phase: 'narrative-alignment',
       organization: organization.name
-    }
-  });
-
-  const narrativeAlignment = await ctx.task(assessNarrativeAlignmentTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
+  let narrativeAlignment = await ctx.task(assessNarrativeAlignmentTask, {
     corporateNarrative,
     financialData,
     organization
   });
 
-  // Phase 2: Earnings Communications Development
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      narrativeAlignment = await ctx.task(assessNarrativeAlignmentTask, { ...{
+    corporateNarrative,
+    financialData,
+    organization
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: 'Alignment assessed. Develop earnings communications?',
     title: 'Phase 2: Earnings Communications',
     context: {
       runId: ctx.runId,
       phase: 'earnings-communications'
-    }
-  });
-
-  const earningsCommunications = await ctx.task(developEarningsCommunicationsTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
+  let earningsCommunications = await ctx.task(developEarningsCommunicationsTask, {
     financialData,
     narrativeAlignment,
     corporateNarrative
   });
 
-  // Phase 3: Corporate Announcement Support
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      earningsCommunications = await ctx.task(developEarningsCommunicationsTask, { ...{
+    financialData,
+    narrativeAlignment,
+    corporateNarrative
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: 'Earnings comms developed. Create corporate announcement templates?',
     title: 'Phase 3: Corporate Announcements',
     context: {
       runId: ctx.runId,
       phase: 'corporate-announcements'
-    }
-  });
-
-  const corporateAnnouncements = await ctx.task(createAnnouncementTemplatesTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
+  let corporateAnnouncements = await ctx.task(createAnnouncementTemplatesTask, {
     narrativeAlignment,
     organization
   });
 
-  // Phase 4: Executive Presentation Support
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      corporateAnnouncements = await ctx.task(createAnnouncementTemplatesTask, { ...{
+    narrativeAlignment,
+    organization
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: 'Templates created. Develop executive presentation support?',
     title: 'Phase 4: Presentation Support',
     context: {
       runId: ctx.runId,
       phase: 'presentation-support',
       eventCount: upcomingEvents.length
-    }
-  });
-
-  const presentationSupport = await ctx.task(developPresentationSupportTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
+  let presentationSupport = await ctx.task(developPresentationSupportTask, {
     upcomingEvents,
     narrativeAlignment,
     financialData
   });
 
-  // Phase 5: Q&A Preparation
-  await ctx.breakpoint({
+    let lastFeedback_phase5Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase5Review) {
+      presentationSupport = await ctx.task(developPresentationSupportTask, { ...{
+    upcomingEvents,
+    narrativeAlignment,
+    financialData
+  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+    }
+  const phase5Review = await ctx.breakpoint({
     question: 'Presentation support ready. Prepare investor Q&A?',
     title: 'Phase 5: Q&A Preparation',
     context: {
       runId: ctx.runId,
       phase: 'qa-preparation'
-    }
-  });
-
-  const qaPreparation = await ctx.task(prepareInvestorQaTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase5Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase5Review.approved) break;
+    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+  }
+  let qaPreparation = await ctx.task(prepareInvestorQaTask, {
     financialData,
     corporateNarrative,
     narrativeAlignment
   });
 
-  // Phase 6: Investor Targeting Support
-  await ctx.breakpoint({
+    let lastFeedback_phase6Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase6Review) {
+      qaPreparation = await ctx.task(prepareInvestorQaTask, { ...{
+    financialData,
+    corporateNarrative,
+    narrativeAlignment
+  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
+    }
+  const phase6Review = await ctx.breakpoint({
     question: 'Q&A prepared. Support investor targeting?',
     title: 'Phase 6: Investor Targeting',
     context: {
       runId: ctx.runId,
       phase: 'investor-targeting'
-    }
-  });
-
-  const investorTargeting = await ctx.task(supportInvestorTargetingTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase6Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase6Review.approved) break;
+    lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
+  }
+  let investorTargeting = await ctx.task(supportInvestorTargetingTask, {
     investorTargets,
     narrativeAlignment,
     organization
   });
 
-  // Phase 7: Multi-Channel Coordination
-  await ctx.breakpoint({
+    let lastFeedback_phase7Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase7Review) {
+      investorTargeting = await ctx.task(supportInvestorTargetingTask, { ...{
+    investorTargets,
+    narrativeAlignment,
+    organization
+  }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
+    }
+  const phase7Review = await ctx.breakpoint({
     question: 'Targeting supported. Coordinate multi-channel delivery?',
     title: 'Phase 7: Multi-Channel Coordination',
     context: {
       runId: ctx.runId,
       phase: 'multi-channel'
-    }
-  });
-
-  const channelCoordination = await ctx.task(coordinateChannelsTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase7Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase7Review.approved) break;
+    lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
+  }
+  let channelCoordination = await ctx.task(coordinateChannelsTask, {
     earningsCommunications,
     corporateAnnouncements,
     presentationSupport
   });
 
-  // Phase 8: Quality Validation
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      channelCoordination = await ctx.task(coordinateChannelsTask, { ...{
+    earningsCommunications,
+    corporateAnnouncements,
+    presentationSupport
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: 'Validate investor communications quality?',
     title: 'Phase 8: Quality Validation',
     context: {
       runId: ctx.runId,
       phase: 'quality-validation',
       targetQuality
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const qualityResult = await ctx.task(validateInvestorCommsTask, {
     narrativeAlignment,
     earningsCommunications,
@@ -190,8 +295,7 @@ export async function process(inputs, ctx) {
     };
   }
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const assessNarrativeAlignmentTask = defineTask('assess-narrative-alignment', (args, taskCtx) => ({
   kind: 'agent',

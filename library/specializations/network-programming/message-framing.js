@@ -36,15 +36,24 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Strategy: ${framingStrategy}, Max Size: ${maxMessageSize}`);
 
   // Phase 1: Strategy Selection and Design
-  const strategyDesign = await ctx.task(strategyDesignTask, { projectName, framingStrategy, maxMessageSize, outputDir });
-  artifacts.push(...strategyDesign.artifacts);
-
-  await ctx.breakpoint({
+  let strategyDesign = await ctx.task(strategyDesignTask, { projectName, framingStrategy, maxMessageSize, outputDir });
+    let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      strategyDesign = await ctx.task(strategyDesignTask, { ...{ projectName, framingStrategy, maxMessageSize, outputDir }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Phase 1 Complete: ${framingStrategy} framing strategy designed. Proceed with encoder implementation?`,
     title: 'Framing Strategy Review',
-    context: { runId: ctx.runId, strategy: strategyDesign.strategy }
-  });
-
+    context: { runId: ctx.runId, strategy: strategyDesign.strategy },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // Phase 2: Frame Encoder Implementation
   const frameEncoder = await ctx.task(frameEncoderTask, { projectName, language, strategyDesign, outputDir });
   artifacts.push(...frameEncoder.artifacts);
@@ -70,7 +79,7 @@ export async function process(inputs, ctx) {
   artifacts.push(...errorRecovery.artifacts);
 
   // Phase 8: Performance Optimization
-  const performanceOptimization = await ctx.task(performanceTask, { projectName, language, strategyDesign, outputDir });
+  let performanceOptimization = await ctx.task(performanceTask, { projectName, language, strategyDesign, outputDir });
   artifacts.push(...performanceOptimization.artifacts);
 
   // Phase 9: Testing and Validation
@@ -78,14 +87,23 @@ export async function process(inputs, ctx) {
     () => ctx.task(testSuiteTask, { projectName, language, frameEncoder, frameDecoder, outputDir }),
     () => ctx.task(validationTask, { projectName, framingStrategy, outputDir })
   ]);
-  artifacts.push(...testSuite.artifacts, ...validation.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      performanceOptimization = await ctx.task(performanceTask, { ...{ projectName, language, strategyDesign, outputDir }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Message Framing Complete for ${projectName}! Validation: ${validation.overallScore}/100. Review?`,
     title: 'Message Framing Complete',
-    context: { runId: ctx.runId, validationScore: validation.overallScore }
-  });
-
+    context: { runId: ctx.runId, validationScore: validation.overallScore },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: validation.overallScore >= 80,
     projectName,

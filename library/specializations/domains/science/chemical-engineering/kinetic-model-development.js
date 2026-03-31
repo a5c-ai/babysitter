@@ -75,7 +75,7 @@ export async function process(inputs, ctx) {
 
   // Task 5: Validate Model Over Operating Range
   ctx.log('info', 'Validating kinetic model');
-  const validationResult = await ctx.task(modelValidationTask, {
+  let validationResult = await ctx.task(modelValidationTask, {
     processName,
     kineticModel: parameterEstimationResult.kineticModel,
     validationData: dataCollectionResult.validationSet,
@@ -84,8 +84,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...validationResult.artifacts);
 
-  // Breakpoint: Review kinetic model results
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      validationResult = await ctx.task(modelValidationTask, { ...{
+    processName,
+    kineticModel: parameterEstimationResult.kineticModel,
+    validationData: dataCollectionResult.validationSet,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Kinetic model developed for ${processName}. R-squared: ${parameterEstimationResult.rSquared}. Validation RMSE: ${validationResult.rmse}. Activation energy: ${parameterEstimationResult.kineticModel.activationEnergy} kJ/mol. Review model?`,
     title: 'Kinetic Model Development Review',
     context: {
@@ -98,9 +107,15 @@ export async function process(inputs, ctx) {
         activationEnergy: parameterEstimationResult.kineticModel.activationEnergy,
         preExponentialFactor: parameterEstimationResult.kineticModel.preExponentialFactor
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 6: Assess Model Uncertainty and Limitations
   ctx.log('info', 'Assessing model uncertainty');
   const uncertaintyResult = await ctx.task(uncertaintyAssessmentTask, {
@@ -153,8 +168,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Experiment Design
+  // Task 1: Experiment Design
 export const experimentDesignTask = defineTask('experiment-design', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Design kinetic experiments using DOE',

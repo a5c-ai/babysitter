@@ -130,7 +130,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...pushSetup.artifacts);
   }
-
   // ============================================================================
   // PHASE 7: INSTALLATION PROMPTS
   // ============================================================================
@@ -151,7 +150,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 8: Setting up PWA testing');
 
-  const testingSetup = await ctx.task(pwaTestingTask, {
+  let testingSetup = await ctx.task(pwaTestingTask, {
     projectName,
     serviceWorkerSetup,
     manifestSetup,
@@ -160,8 +159,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...testingSetup.artifacts);
 
-  // Quality Gate
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      testingSetup = await ctx.task(pwaTestingTask, { ...{
+    projectName,
+    serviceWorkerSetup,
+    manifestSetup,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `PWA configuration complete for ${projectName}. Service Worker with ${offlineStrategy} strategy, ${features.offline ? 'offline support enabled' : 'offline support disabled'}. Approve configuration?`,
     title: 'PWA Configuration Review',
     context: {
@@ -170,9 +178,15 @@ export async function process(inputs, ctx) {
       cachingStrategies: cachingSetup.strategies,
       lighthouseScore: testingSetup.estimatedScore,
       files: artifacts.slice(-5).map(a => ({ path: a.path, format: a.format || 'javascript' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 9: DOCUMENTATION
   // ============================================================================
@@ -217,8 +231,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

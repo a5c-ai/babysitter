@@ -31,7 +31,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Gathering bug details');
 
-  const bugDetails = await ctx.task(gatherBugDetailsTask, {
+  let bugDetails = await ctx.task(gatherBugDetailsTask, {
     bugDescription,
     component,
     additionalContext
@@ -67,20 +67,39 @@ export async function process(inputs, ctx) {
   });
 
   if (existingIssues.duplicateFound) {
-    await ctx.breakpoint({
-      question: [
-        'A similar issue may already exist:',
-        '',
-        ...existingIssues.matches.map(m => `- #${m.number}: ${m.title} (${m.state})`),
-        '',
-        'Would you like to:',
-        '1. Continue creating a new issue anyway',
-        '2. Add a comment to an existing issue instead',
-        '3. Cancel the bug report'
-      ].join('\n'),
-      title: 'Potential Duplicate Issue Found',
-      context: { runId: ctx.runId }
-    });
+    let dupLastFeedback = null;
+    for (let dupAttempt = 0; dupAttempt < 3; dupAttempt++) {
+      if (dupLastFeedback) {
+        bugDetails = await ctx.task(gatherBugDetailsTask, {
+          bugDescription,
+          component,
+          additionalContext,
+          feedback: dupLastFeedback,
+          attempt: dupAttempt + 1
+        });
+      }
+      const duplicateApproval = await ctx.breakpoint({
+        question: [
+            'A similar issue may already exist:',
+            '',
+            ...existingIssues.matches.map(m => `- #${m.number}: ${m.title} (${m.state})`),
+            '',
+            'Would you like to:',
+            '1. Continue creating a new issue anyway',
+            '2. Add a comment to an existing issue instead',
+            '3. Provide feedback to refine'
+          ].join('\n'),
+        previousFeedback: dupLastFeedback || undefined,
+        attempt: dupAttempt > 0 ? dupAttempt + 1 : undefined,
+        title: 'Potential Duplicate Issue Found',
+        options: ['Approve', 'Request changes'],
+        expert: 'owner',
+        tags: ['approval-gate', 'duplicate-check'],
+        context: { runId: ctx.runId }
+      });
+      if (duplicateApproval.approved) break;
+      dupLastFeedback = duplicateApproval.response || duplicateApproval.feedback || 'Changes requested';
+    }
   }
 
   // ============================================================================
@@ -100,22 +119,43 @@ export async function process(inputs, ctx) {
   // PHASE 5: REVIEW BREAKPOINT
   // ============================================================================
 
-  await ctx.breakpoint({
-    question: [
-      'Please review the bug report before submission:',
-      '',
-      `**Title:** ${issueComposition.title}`,
-      '',
-      '**Labels:** ' + issueComposition.labels.join(', '),
-      '',
-      '**Body preview:**',
-      issueComposition.bodyPreview,
-      '',
-      'Approve to submit this issue to a5c-ai/babysitter, or reject to cancel.'
-    ].join('\n'),
-    title: 'Review Bug Report Before Submission',
-    context: { runId: ctx.runId }
-  });
+  let reviewLastFeedback = null;
+  let currentIssueComposition = issueComposition;
+  for (let reviewAttempt = 0; reviewAttempt < 3; reviewAttempt++) {
+    if (reviewLastFeedback) {
+      currentIssueComposition = await ctx.task(composeIssueTask, {
+        bugDetails,
+        reproResult,
+        envInfo,
+        existingIssues,
+        feedback: reviewLastFeedback,
+        attempt: reviewAttempt + 1
+      });
+    }
+    const reviewApproval = await ctx.breakpoint({
+      question: [
+          'Please review the bug report before submission:',
+          '',
+          `**Title:** ${currentIssueComposition.title}`,
+          '',
+          '**Labels:** ' + currentIssueComposition.labels.join(', '),
+          '',
+          '**Body preview:**',
+          currentIssueComposition.bodyPreview,
+          '',
+          'Approve to submit this issue to a5c-ai/babysitter, or request changes.'
+        ].join('\n'),
+      previousFeedback: reviewLastFeedback || undefined,
+      attempt: reviewAttempt > 0 ? reviewAttempt + 1 : undefined,
+      title: 'Review Bug Report Before Submission',
+      options: ['Approve', 'Request changes'],
+      expert: 'owner',
+      tags: ['approval-gate', 'review'],
+      context: { runId: ctx.runId }
+    });
+    if (reviewApproval.approved) break;
+    reviewLastFeedback = reviewApproval.response || reviewApproval.feedback || 'Changes requested';
+  }
 
   // ============================================================================
   // PHASE 6: SUBMIT ISSUE
@@ -123,11 +163,21 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 6: Submitting issue to GitHub');
 
-  await ctx.breakpoint({
-    question: 'Confirm: Open this issue on a5c-ai/babysitter GitHub repository?',
-    title: 'Confirm GitHub Issue Submission',
-    context: { runId: ctx.runId }
-  });
+  let submitLastFeedback = null;
+  for (let submitAttempt = 0; submitAttempt < 3; submitAttempt++) {
+    const submitApproval = await ctx.breakpoint({
+      question: 'Confirm: Open this issue on a5c-ai/babysitter GitHub repository?',
+      previousFeedback: submitLastFeedback || undefined,
+      attempt: submitAttempt > 0 ? submitAttempt + 1 : undefined,
+      title: 'Confirm GitHub Issue Submission',
+      options: ['Approve', 'Request changes'],
+      expert: 'owner',
+      tags: ['approval-gate', 'submit'],
+      context: { runId: ctx.runId }
+    });
+    if (submitApproval.approved) break;
+    submitLastFeedback = submitApproval.response || submitApproval.feedback || 'Changes requested';
+  }
 
   const submitResult = await ctx.task(submitIssueTask, {
     title: issueComposition.title,

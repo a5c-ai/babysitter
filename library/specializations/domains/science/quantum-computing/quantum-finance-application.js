@@ -39,23 +39,35 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Financial Model Definition');
 
-  const modelResult = await ctx.task(financialModelDefinitionTask, {
+  let modelResult = await ctx.task(financialModelDefinitionTask, {
     applicationArea,
     financialData
   });
 
-  artifacts.push(...(modelResult.artifacts || []));
-
-  await ctx.breakpoint({
+    let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      modelResult = await ctx.task(financialModelDefinitionTask, { ...{
+    applicationArea,
+    financialData
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Financial model defined. Model type: ${modelResult.modelType}, Parameters: ${modelResult.parameterCount}. Proceed with quantum encoding?`,
     title: 'Financial Model Review',
     context: {
       runId: ctx.runId,
       model: modelResult,
       files: (modelResult.artifacts || []).map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 2: PROBABILITY DISTRIBUTION ENCODING
   // ============================================================================
@@ -94,25 +106,39 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 4: Quantum Execution');
 
-  const executionResult = await ctx.task(quantumFinanceExecutionTask, {
+  let executionResult = await ctx.task(quantumFinanceExecutionTask, {
     circuit: aeCircuitResult,
     model: modelResult,
     algorithm,
     framework
   });
 
-  artifacts.push(...(executionResult.artifacts || []));
-
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      executionResult = await ctx.task(quantumFinanceExecutionTask, { ...{
+    circuit: aeCircuitResult,
+    model: modelResult,
+    algorithm,
+    framework
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: `Quantum execution complete. Estimated value: ${executionResult.estimatedValue}, Confidence interval: ${executionResult.confidenceInterval}. Review results?`,
     title: 'Quantum Execution Review',
     context: {
       runId: ctx.runId,
       execution: executionResult,
       files: (executionResult.artifacts || []).map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 5: CLASSICAL VALIDATION
   // ============================================================================
@@ -148,7 +174,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 7: Regulatory Compliance Documentation');
 
-  const complianceResult = await ctx.task(regulatoryComplianceDocumentationTask, {
+  let complianceResult = await ctx.task(regulatoryComplianceDocumentationTask, {
     applicationArea,
     model: modelResult,
     executionResult,
@@ -156,9 +182,18 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...(complianceResult.artifacts || []));
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      complianceResult = await ctx.task(regulatoryComplianceDocumentationTask, { ...{
+    applicationArea,
+    model: modelResult,
+    executionResult,
+    validationResult,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Quantum finance application complete. Area: ${applicationArea}, Quantum result: ${executionResult.estimatedValue}, Classical validation: ${validationResult.classicalResult}. Approve application?`,
     title: 'Finance Application Complete',
     context: {
@@ -170,9 +205,15 @@ export async function process(inputs, ctx) {
         error: validationResult.relativeError
       },
       files: artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
 
   return {
@@ -207,8 +248,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

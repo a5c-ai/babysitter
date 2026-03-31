@@ -79,18 +79,30 @@ export async function process(inputs, ctx) {
 
   // Phase 9: Generate Report
   ctx.log('info', 'Phase 9: Generating comprehensive scenario planning report');
-  const scenarioReport = await ctx.task(scenarioPlanningReportTask, {
+  let scenarioReport = await ctx.task(scenarioPlanningReportTask, {
     organizationName, drivingForces, criticalUncertainties, scenarioFramework, scenarioNarratives,
     strategicImplications, strategyStressTest, signpostSystem, strategicOptions, outputDir
   });
-  artifacts.push(...scenarioReport.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      scenarioReport = await ctx.task(scenarioPlanningReportTask, { ...{
+    organizationName, drivingForces, criticalUncertainties, scenarioFramework, scenarioNarratives,
+    strategicImplications, strategyStressTest, signpostSystem, strategicOptions, outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Scenario planning complete for ${organizationName}. ${scenarioNarratives.scenarios?.length || 4} scenarios developed. Review?`,
     title: 'Scenario Planning Review',
-    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })) }
-  });
-
+    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })) },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true, organizationName, timeHorizon,
     drivingForces: drivingForces.forces,

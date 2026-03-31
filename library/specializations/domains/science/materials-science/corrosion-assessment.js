@@ -105,7 +105,7 @@ export async function process(inputs, ctx) {
 
   // Phase 6: Lifetime Prediction Modeling
   ctx.log('info', 'Phase 6: Developing lifetime prediction models');
-  const lifetimePrediction = await ctx.task(predictServiceLifetime, {
+  let lifetimePrediction = await ctx.task(predictServiceLifetime, {
     materialSystem,
     serviceConditions,
     corrosionRates: exposureTesting.corrosionRates,
@@ -114,8 +114,18 @@ export async function process(inputs, ctx) {
   });
   artifacts.push(...(lifetimePrediction.artifacts || []));
 
-  // Quality Gate: Review corrosion assessment
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      lifetimePrediction = await ctx.task(predictServiceLifetime, { ...{
+    materialSystem,
+    serviceConditions,
+    corrosionRates: exposureTesting.corrosionRates,
+    mechanisticModel: mechanisticAnalysis.model,
+    electrochemicalParameters: electrochemicalTesting.parameters
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: 'Review corrosion assessment results. Are the degradation mechanisms properly identified and lifetime predictions reasonable?',
     title: 'Corrosion Assessment Review',
     context: {
@@ -128,9 +138,15 @@ export async function process(inputs, ctx) {
         predictedLifetime: lifetimePrediction.serviceLife
       },
       files: artifacts
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 7: Mitigation Strategy Development
   ctx.log('info', 'Phase 7: Developing corrosion mitigation strategies');
   const mitigationStrategies = await ctx.task(developMitigationStrategies, {

@@ -41,25 +41,39 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Test Architecture Design');
 
-  const architectureResult = await ctx.task(testArchitectureDesignTask, {
+  let architectureResult = await ctx.task(testArchitectureDesignTask, {
     project,
     circuitModules,
     framework,
     quantumFramework
   });
 
-  artifacts.push(...(architectureResult.artifacts || []));
-
-  await ctx.breakpoint({
+    let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      architectureResult = await ctx.task(testArchitectureDesignTask, { ...{
+    project,
+    circuitModules,
+    framework,
+    quantumFramework
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Test architecture designed. Test categories: ${architectureResult.testCategories.length}, Estimated test count: ${architectureResult.estimatedTestCount}. Proceed with unit test implementation?`,
     title: 'Test Architecture Review',
     context: {
       runId: ctx.runId,
       architecture: architectureResult,
       files: (architectureResult.artifacts || []).map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 2: UNIT TEST IMPLEMENTATION
   // ============================================================================
@@ -96,7 +110,6 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Integration tests created: ${integrationTestResult.testCount}`);
   }
-
   // ============================================================================
   // PHASE 4: PROPERTY-BASED TEST IMPLEMENTATION
   // ============================================================================
@@ -116,31 +129,43 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Property-based tests created: ${propertyTestResult.testCount}`);
   }
-
   // ============================================================================
   // PHASE 5: SIMULATION VALIDATION TESTS
   // ============================================================================
 
   ctx.log('info', 'Phase 5: Simulation Validation Tests');
 
-  const simulationTestResult = await ctx.task(simulationValidationTestsTask, {
+  let simulationTestResult = await ctx.task(simulationValidationTestsTask, {
     circuitModules,
     testArchitecture: architectureResult,
     quantumFramework
   });
 
-  artifacts.push(...(simulationTestResult.artifacts || []));
-
-  await ctx.breakpoint({
+    let lastFeedback_phase5Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase5Review) {
+      simulationTestResult = await ctx.task(simulationValidationTestsTask, { ...{
+    circuitModules,
+    testArchitecture: architectureResult,
+    quantumFramework
+  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+    }
+  const phase5Review = await ctx.breakpoint({
     question: `Simulation validation tests created: ${simulationTestResult.testCount}. Review simulation test coverage?`,
     title: 'Simulation Tests Review',
     context: {
       runId: ctx.runId,
       simulationTests: simulationTestResult,
       files: (simulationTestResult.artifacts || []).map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase5Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase5Review.approved) break;
+    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 6: TEST FIXTURE AND MOCK CREATION
   // ============================================================================
@@ -183,7 +208,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 8: Test Execution and Coverage');
 
-  const executionResult = await ctx.task(testExecutionCoverageTask, {
+  let executionResult = await ctx.task(testExecutionCoverageTask, {
     project,
     testSuites: {
       unit: unitTestResult,
@@ -195,25 +220,44 @@ export async function process(inputs, ctx) {
     framework
   });
 
-  artifacts.push(...(executionResult.artifacts || []));
-
-  await ctx.breakpoint({
+    let lastFeedback_phase8Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase8Review) {
+      executionResult = await ctx.task(testExecutionCoverageTask, { ...{
+    project,
+    testSuites: {
+      unit: unitTestResult,
+      integration: integrationTestResult,
+      property: propertyTestResult,
+      simulation: simulationTestResult
+    },
+    coverageTarget,
+    framework
+  }, feedback: lastFeedback_phase8Review, attempt: attempt + 1 });
+    }
+  const phase8Review = await ctx.breakpoint({
     question: `Test execution complete. Passed: ${executionResult.passedTests}/${executionResult.totalTests}, Coverage: ${executionResult.coveragePercentage}%. Review test results?`,
     title: 'Test Execution Review',
     context: {
       runId: ctx.runId,
       execution: executionResult,
       files: (executionResult.artifacts || []).map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase8Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase8Review.approved) break;
+    lastFeedback_phase8Review = phase8Review.response || phase8Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 9: DOCUMENTATION
   // ============================================================================
 
   ctx.log('info', 'Phase 9: Documentation');
 
-  const docResult = await ctx.task(testingDocumentationTask, {
+  let docResult = await ctx.task(testingDocumentationTask, {
     project,
     architectureResult,
     unitTestResult,
@@ -226,9 +270,23 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...(docResult.artifacts || []));
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      docResult = await ctx.task(testingDocumentationTask, { ...{
+    project,
+    architectureResult,
+    unitTestResult,
+    integrationTestResult,
+    propertyTestResult,
+    simulationTestResult,
+    fixtureResult,
+    cicdResult,
+    executionResult,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Testing framework setup complete. Total tests: ${executionResult.totalTests}, Coverage: ${executionResult.coveragePercentage}%. Approve framework?`,
     title: 'Testing Framework Complete',
     context: {
@@ -240,9 +298,15 @@ export async function process(inputs, ctx) {
         cicdConfigured: true
       },
       files: artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
 
   return {
@@ -281,8 +345,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

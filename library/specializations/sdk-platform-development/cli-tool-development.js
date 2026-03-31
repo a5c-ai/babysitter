@@ -77,24 +77,37 @@ export async function process(inputs, ctx) {
 
   // Phase 5: Distribution and Installation
   ctx.log.info('Phase 5: Setting up distribution');
-  const distribution = await ctx.task(cliDistributionSetupTask, {
+  let distribution = await ctx.task(cliDistributionSetupTask, {
     cliName,
     languages,
     architecture: cliArchitecture.result
   });
 
-  // Quality Gate
-  await ctx.breakpoint('cli-development-review', {
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      distribution = await ctx.task(cliDistributionSetupTask, { ...{
+    cliName,
+    languages,
+    architecture: cliArchitecture.result
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint('cli-development-review', {
     question: 'Review the CLI tool implementation. Is the UX intuitive and the command structure logical?',
     context: {
       cliArchitecture: cliArchitecture.result,
       commandStructure: commandStructure.result,
       scaffolding: scaffolding.result,
       interactiveFeatures: interactiveFeatures.result
-    }
-  });
-
-  ctx.log.info('CLI tool development completed');
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }  ctx.log.info('CLI tool development completed');
 
   return {
     cliArchitecture: cliArchitecture.result,

@@ -67,7 +67,6 @@ export async function process(inputs, ctx) {
     });
     artifacts.push(...justificationAnalysis.artifacts);
   }
-
   // Task 5: Warrant Evaluation
   ctx.log('info', 'Evaluating epistemic warrant');
   const warrantEvaluation = await ctx.task(warrantEvaluationTask, {
@@ -83,7 +82,7 @@ export async function process(inputs, ctx) {
 
   // Task 6: Gettier Problem Check
   ctx.log('info', 'Checking for Gettier-style problems');
-  const gettierCheck = await ctx.task(gettierCheckTask, {
+  let gettierCheck = await ctx.task(gettierCheckTask, {
     claim: claimAnalysis.analyzed,
     justificationAnalysis,
     warrantEvaluation,
@@ -92,8 +91,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...gettierCheck.artifacts);
 
-  // Breakpoint: Review epistemic evaluation
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      gettierCheck = await ctx.task(gettierCheckTask, { ...{
+    claim: claimAnalysis.analyzed,
+    justificationAnalysis,
+    warrantEvaluation,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Epistemic evaluation complete. Claim ${warrantEvaluation.knowledgeStatus}. Review the evaluation?`,
     title: 'Epistemic Evaluation Results',
     context: {
@@ -105,9 +113,15 @@ export async function process(inputs, ctx) {
         knowledgeStatus: warrantEvaluation.knowledgeStatus,
         gettierIssues: gettierCheck.hasGettierIssues
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 7: Generate Epistemic Report
   ctx.log('info', 'Generating epistemic evaluation report');
   const epistemicReport = await ctx.task(epistemicReportTask, {
@@ -158,8 +172,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Claim Analysis
+  // Task 1: Claim Analysis
 export const claimAnalysisTask = defineTask('claim-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Analyze the knowledge claim',

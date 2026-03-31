@@ -25,15 +25,24 @@ export async function process(inputs, ctx) {
   const pruning = await ctx.task(pruningStrategyTask, { design, constraints, outputDir });
   artifacts.push(...pruning.artifacts);
 
-  const implementation = await ctx.task(backtrackingImplementationTask, { design, pruning, language, outputDir });
-  artifacts.push(...implementation.artifacts);
-
-  await ctx.breakpoint({
+  let implementation = await ctx.task(backtrackingImplementationTask, { design, pruning, language, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      implementation = await ctx.task(backtrackingImplementationTask, { ...{ design, pruning, language, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Backtracking solution designed. Pruning strategies: ${pruning.strategies.length}. Review?`,
     title: 'Backtracking Complete',
-    context: { runId: ctx.runId, pruningStrategies: pruning.strategies }
-  });
-
+    context: { runId: ctx.runId, pruningStrategies: pruning.strategies },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     solution: design.solution,

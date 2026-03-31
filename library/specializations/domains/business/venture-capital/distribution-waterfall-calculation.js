@@ -90,7 +90,7 @@ export async function process(inputs, ctx) {
 
   // Task 6: Tax Allocation and Reporting
   ctx.log('info', 'Preparing tax allocation');
-  const taxAllocation = await ctx.task(taxAllocationTask, {
+  let taxAllocation = await ctx.task(taxAllocationTask, {
     fundName,
     waterfallCalc,
     lpAllocation,
@@ -100,8 +100,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...taxAllocation.artifacts);
 
-  // Breakpoint: Review distribution calculations
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      taxAllocation = await ctx.task(taxAllocationTask, { ...{
+    fundName,
+    waterfallCalc,
+    lpAllocation,
+    carryCalculation,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Distribution calculation complete for ${fundName}. Total distribution: $${eventAnalysis.distributionAmount}M. GP carry: $${carryCalculation.carryAmount}M. Review calculations?`,
     title: 'Distribution Waterfall Calculation',
     context: {
@@ -114,9 +124,15 @@ export async function process(inputs, ctx) {
         clawbackRequired: clawbackAnalysis.clawbackRequired,
         clawbackAmount: clawbackAnalysis.clawbackAmount
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 7: Distribution Notice Preparation
   ctx.log('info', 'Preparing distribution notices');
   const distributionNotices = await ctx.task(distributionNoticeTask, {
@@ -187,8 +203,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Distribution Event Analysis
+  // Task 1: Distribution Event Analysis
 export const distributionEventTask = defineTask('distribution-event', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Analyze distribution event',

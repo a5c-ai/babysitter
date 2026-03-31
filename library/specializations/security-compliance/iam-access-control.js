@@ -83,7 +83,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Conducting identity inventory and discovery');
 
-  const inventoryResult = await ctx.task(identityInventoryTask, {
+  let inventoryResult = await ctx.task(identityInventoryTask, {
     projectName,
     iamPlatform,
     environment,
@@ -99,8 +99,20 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Identity inventory complete - ${totalUsers} identities: ${inventoryResult.humanUsers} human, ${inventoryResult.serviceAccounts} service accounts, ${inventoryResult.orphanedAccounts} orphaned`);
 
-  // Quality Gate: Identity inventory review
-  await ctx.breakpoint({
+    let lastFeedback_qualityGateApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_qualityGateApproval) {
+      inventoryResult = await ctx.task(identityInventoryTask, { ...{
+    projectName,
+    iamPlatform,
+    environment,
+    userCount,
+    privilegedAccountsCount,
+    complianceFrameworks,
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval, attempt: attempt + 1 });
+    }
+  const qualityGateApproval = await ctx.breakpoint({
     question: `Identity inventory complete for ${projectName}. Found ${totalUsers} total identities including ${inventoryResult.privilegedAccounts} privileged accounts, ${inventoryResult.inactiveAccounts} inactive accounts, and ${inventoryResult.orphanedAccounts} orphaned accounts. Review inventory and proceed?`,
     title: 'Identity Inventory Review',
     context: {
@@ -116,16 +128,22 @@ export async function process(inputs, ctx) {
         identityTypes: inventoryResult.identityTypes
       },
       files: inventoryResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_qualityGateApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (qualityGateApproval.approved) break;
+    lastFeedback_qualityGateApproval = qualityGateApproval.response || qualityGateApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 2: RBAC/ABAC MODEL ASSESSMENT
   // ============================================================================
 
   ctx.log('info', `Phase 2: Assessing ${accessControlModel.toUpperCase()} access control model`);
 
-  const accessModelResult = await ctx.task(accessControlModelTask, {
+  let accessModelResult = await ctx.task(accessControlModelTask, {
     projectName,
     iamPlatform,
     accessControlModel,
@@ -141,8 +159,20 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Access control model assessment complete - ${accessModelResult.rolesAnalyzed} roles, ${accessModelResult.policiesAnalyzed} policies, ${accessModelResult.policyViolations} violations`);
 
-  // Quality Gate: Access model review
-  await ctx.breakpoint({
+    let lastFeedback_qualityGateApproval2 = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_qualityGateApproval2) {
+      accessModelResult = await ctx.task(accessControlModelTask, { ...{
+    projectName,
+    iamPlatform,
+    accessControlModel,
+    inventoryResult,
+    environment,
+    complianceFrameworks,
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval2, attempt: attempt + 1 });
+    }
+  const qualityGateApproval2 = await ctx.breakpoint({
     question: `${accessControlModel.toUpperCase()} access control model assessed. Analyzed ${accessModelResult.rolesAnalyzed} roles and ${accessModelResult.policiesAnalyzed} policies. Found ${accessModelResult.policyViolations} policy violations. Overly permissive roles: ${accessModelResult.overlyPermissiveRoles}. Review findings?`,
     title: 'Access Control Model Assessment Review',
     context: {
@@ -158,16 +188,22 @@ export async function process(inputs, ctx) {
         modelComplexity: accessModelResult.modelComplexity
       },
       files: accessModelResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_qualityGateApproval2 || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (qualityGateApproval2.approved) break;
+    lastFeedback_qualityGateApproval2 = qualityGateApproval2.response || qualityGateApproval2.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 3: LEAST PRIVILEGE ANALYSIS
   // ============================================================================
 
   ctx.log('info', 'Phase 3: Conducting least privilege analysis');
 
-  const leastPrivilegeResult = await ctx.task(leastPrivilegeAnalysisTask, {
+  let leastPrivilegeResult = await ctx.task(leastPrivilegeAnalysisTask, {
     projectName,
     iamPlatform,
     inventoryResult,
@@ -184,8 +220,20 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Least privilege analysis complete - ${leastPrivilegeResult.excessivePermissions} excessive permissions, ${leastPrivilegeResult.unusedPermissions} unused permissions, ${leastPrivilegeResult.violations} violations`);
 
   // Quality Gate: Least privilege violations
-  if (leastPrivilegeResult.criticalViolations > 0) {
-    await ctx.breakpoint({
+      let lastFeedback_qualityGateApproval3 = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_qualityGateApproval3) {
+        leastPrivilegeResult = await ctx.task(leastPrivilegeAnalysisTask, { ...{
+    projectName,
+    iamPlatform,
+    inventoryResult,
+    accessModelResult,
+    environment,
+    complianceFrameworks,
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval3, attempt: attempt + 1 });
+      }
+  const qualityGateApproval3 = await ctx.breakpoint({
       question: `CRITICAL: Found ${leastPrivilegeResult.criticalViolations} critical least privilege violations! ${leastPrivilegeResult.excessivePermissions} users have excessive permissions. ${leastPrivilegeResult.adminAccessViolations} unauthorized admin access instances. Review and remediate immediately?`,
       title: 'Critical Least Privilege Violations',
       context: {
@@ -201,9 +249,15 @@ export async function process(inputs, ctx) {
         },
         recommendation: 'Revoke excessive permissions and implement least privilege immediately',
         files: leastPrivilegeResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_qualityGateApproval3 || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (qualityGateApproval3.approved) break;
+      lastFeedback_qualityGateApproval3 = qualityGateApproval3.response || qualityGateApproval3.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 4: ACCESS REVIEWS AND CERTIFICATION
@@ -212,7 +266,7 @@ export async function process(inputs, ctx) {
   if (enableAccessReviews) {
     ctx.log('info', 'Phase 4: Conducting access reviews and certification');
 
-    const accessReviewResult = await ctx.task(accessReviewsTask, {
+    let accessReviewResult = await ctx.task(accessReviewsTask, {
       projectName,
       iamPlatform,
       inventoryResult,
@@ -229,8 +283,21 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Access reviews complete - ${accessReviewResult.reviewsCompleted} reviews completed, ${accessReviewResult.accessRevoked} access revoked, ${accessReviewResult.uncertifiedAccess} uncertified`);
 
-    // Quality Gate: Access certification status
-    await ctx.breakpoint({
+      let lastFeedback_qualityGateApproval4 = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_qualityGateApproval4) {
+        accessReviewResult = await ctx.task(accessReviewsTask, { ...{
+      projectName,
+      iamPlatform,
+      inventoryResult,
+      accessModelResult,
+      accessReviewFrequency,
+      environment,
+      enableAccessCertification,
+      outputDir
+    }, feedback: lastFeedback_qualityGateApproval4, attempt: attempt + 1 });
+      }
+  const qualityGateApproval4 = await ctx.breakpoint({
       question: `Access reviews and certification completed. ${accessReviewResult.reviewsCompleted} reviews completed with ${accessReviewResult.accessRevoked} access revocations. ${accessReviewResult.uncertifiedAccess} accounts require certification. Last review: ${accessReviewResult.lastReviewDate}. Approve findings?`,
       title: 'Access Review and Certification Status',
       context: {
@@ -246,9 +313,15 @@ export async function process(inputs, ctx) {
           managerApprovalRequired: accessReviewResult.managerApprovalRequired
         },
         files: accessReviewResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_qualityGateApproval4 || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (qualityGateApproval4.approved) break;
+      lastFeedback_qualityGateApproval4 = qualityGateApproval4.response || qualityGateApproval4.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 5: PRIVILEGED ACCOUNT MANAGEMENT
@@ -257,7 +330,7 @@ export async function process(inputs, ctx) {
   if (enablePrivilegedAccessManagement) {
     ctx.log('info', 'Phase 5: Assessing privileged account management');
 
-    const privilegedAccessResult = await ctx.task(privilegedAccessManagementTask, {
+    let privilegedAccessResult = await ctx.task(privilegedAccessManagementTask, {
       projectName,
       iamPlatform,
       inventoryResult,
@@ -275,8 +348,21 @@ export async function process(inputs, ctx) {
     ctx.log('info', `Privileged access management assessed - ${privilegedAccessResult.privilegedAccountsManaged} accounts managed, ${privilegedAccessResult.violationsFound} violations, JIT: ${privilegedAccessResult.jitEnabled}`);
 
     // Quality Gate: Privileged access violations
-    if (privilegedAccessResult.violationsFound > 0) {
-      await ctx.breakpoint({
+        let lastFeedback_qualityGateApproval5 = null;
+      for (let attempt = 0; attempt < 3; attempt++) {
+        if (lastFeedback_qualityGateApproval5) {
+          privilegedAccessResult = await ctx.task(privilegedAccessManagementTask, { ...{
+      projectName,
+      iamPlatform,
+      inventoryResult,
+      privilegedAccountsCount,
+      enableJustInTimeAccess,
+      environment,
+      complianceFrameworks,
+      outputDir
+    }, feedback: lastFeedback_qualityGateApproval5, attempt: attempt + 1 });
+        }
+  const qualityGateApproval5 = await ctx.breakpoint({
         question: `Privileged account management assessment complete. Found ${privilegedAccessResult.violationsFound} violations: ${privilegedAccessResult.sharedAdminAccounts} shared admin accounts, ${privilegedAccessResult.permanentPrivilegedAccess} permanent privileged access, ${privilegedAccessResult.unmonitoredPrivilegedAccess} unmonitored privileged sessions. Review and remediate?`,
         title: 'Privileged Access Management Review',
         context: {
@@ -292,11 +378,16 @@ export async function process(inputs, ctx) {
             approvalWorkflowEnabled: privilegedAccessResult.approvalWorkflowEnabled
           },
           files: privilegedAccessResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-        }
-      });
-    }
+        },
+        expert: 'owner',
+        tags: ['approval-gate'],
+        previousFeedback: lastFeedback_qualityGateApproval5 || undefined,
+        attempt: attempt > 0 ? attempt + 1 : undefined
+        });
+        if (qualityGateApproval5.approved) break;
+        lastFeedback_qualityGateApproval5 = qualityGateApproval5.response || qualityGateApproval5.feedback || 'Changes requested';
+      }   }
   }
-
   // ============================================================================
   // PHASE 6: MFA ENFORCEMENT REVIEW
   // ============================================================================
@@ -304,7 +395,7 @@ export async function process(inputs, ctx) {
   if (enableMFA) {
     ctx.log('info', 'Phase 6: Reviewing MFA enforcement and authentication controls');
 
-    const mfaResult = await ctx.task(mfaEnforcementTask, {
+    let mfaResult = await ctx.task(mfaEnforcementTask, {
       projectName,
       iamPlatform,
       inventoryResult,
@@ -321,8 +412,20 @@ export async function process(inputs, ctx) {
     ctx.log('info', `MFA enforcement reviewed - ${mfaResult.mfaEnrollmentRate}% enrollment, ${mfaResult.usersWithoutMFA} users without MFA, ${mfaResult.privilegedAccountsWithoutMFA} privileged accounts without MFA`);
 
     // Quality Gate: MFA compliance
-    if (mfaResult.privilegedAccountsWithoutMFA > 0) {
-      await ctx.breakpoint({
+        let lastFeedback_qualityGateApproval6 = null;
+      for (let attempt = 0; attempt < 3; attempt++) {
+        if (lastFeedback_qualityGateApproval6) {
+          mfaResult = await ctx.task(mfaEnforcementTask, { ...{
+      projectName,
+      iamPlatform,
+      inventoryResult,
+      environment,
+      complianceFrameworks,
+      enableConditionalAccess,
+      outputDir
+    }, feedback: lastFeedback_qualityGateApproval6, attempt: attempt + 1 });
+        }
+  const qualityGateApproval6 = await ctx.breakpoint({
         question: `CRITICAL: ${mfaResult.privilegedAccountsWithoutMFA} privileged accounts do not have MFA enabled! Overall MFA enrollment: ${mfaResult.mfaEnrollmentRate}%. ${mfaResult.usersWithoutMFA} total users without MFA. Enforce MFA immediately for privileged accounts?`,
         title: 'MFA Enforcement Critical Gap',
         context: {
@@ -338,11 +441,16 @@ export async function process(inputs, ctx) {
           },
           recommendation: 'Enforce MFA for all privileged accounts within 24 hours',
           files: mfaResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-        }
-      });
-    }
+        },
+        expert: 'owner',
+        tags: ['approval-gate'],
+        previousFeedback: lastFeedback_qualityGateApproval6 || undefined,
+        attempt: attempt > 0 ? attempt + 1 : undefined
+        });
+        if (qualityGateApproval6.approved) break;
+        lastFeedback_qualityGateApproval6 = qualityGateApproval6.response || qualityGateApproval6.feedback || 'Changes requested';
+      }   }
   }
-
   // ============================================================================
   // PHASE 7: IDENTITY LIFECYCLE MANAGEMENT
   // ============================================================================
@@ -350,7 +458,7 @@ export async function process(inputs, ctx) {
   if (enableIdentityGovernance) {
     ctx.log('info', 'Phase 7: Assessing identity lifecycle management');
 
-    const lifecycleResult = await ctx.task(identityLifecycleTask, {
+    let lifecycleResult = await ctx.task(identityLifecycleTask, {
       projectName,
       iamPlatform,
       inventoryResult,
@@ -364,8 +472,18 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Identity lifecycle assessed - Onboarding: ${lifecycleResult.onboardingAutomation}%, Offboarding: ${lifecycleResult.offboardingAutomation}%, ${lifecycleResult.staleBirthright} stale birthright access`);
 
-    // Quality Gate: Lifecycle management review
-    await ctx.breakpoint({
+      let lastFeedback_qualityGateApproval7 = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_qualityGateApproval7) {
+        lifecycleResult = await ctx.task(identityLifecycleTask, { ...{
+      projectName,
+      iamPlatform,
+      inventoryResult,
+      environment,
+      outputDir
+    }, feedback: lastFeedback_qualityGateApproval7, attempt: attempt + 1 });
+      }
+  const qualityGateApproval7 = await ctx.breakpoint({
       question: `Identity lifecycle management assessed. Onboarding automation: ${lifecycleResult.onboardingAutomation}%, Offboarding automation: ${lifecycleResult.offboardingAutomation}%. Found ${lifecycleResult.terminatedUsersWithAccess} terminated users with active access. Review lifecycle processes?`,
       title: 'Identity Lifecycle Management Review',
       context: {
@@ -380,9 +498,15 @@ export async function process(inputs, ctx) {
           provisioningTimeAverage: lifecycleResult.provisioningTimeAverage
         },
         files: lifecycleResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_qualityGateApproval7 || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (qualityGateApproval7.approved) break;
+      lastFeedback_qualityGateApproval7 = qualityGateApproval7.response || qualityGateApproval7.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 8: SEGREGATION OF DUTIES (SOD)
@@ -391,7 +515,7 @@ export async function process(inputs, ctx) {
   if (enableSegregationOfDuties) {
     ctx.log('info', 'Phase 8: Analyzing segregation of duties controls');
 
-    const sodResult = await ctx.task(segregationOfDutiesTask, {
+    let sodResult = await ctx.task(segregationOfDutiesTask, {
       projectName,
       iamPlatform,
       inventoryResult,
@@ -408,8 +532,20 @@ export async function process(inputs, ctx) {
     ctx.log('info', `Segregation of duties analyzed - ${sodResult.sodPoliciesEvaluated} policies evaluated, ${sodResult.sodViolations} violations, ${sodResult.conflictingRoles} conflicting role assignments`);
 
     // Quality Gate: SOD violations
-    if (sodResult.sodViolations > 0) {
-      await ctx.breakpoint({
+        let lastFeedback_qualityGateApproval8 = null;
+      for (let attempt = 0; attempt < 3; attempt++) {
+        if (lastFeedback_qualityGateApproval8) {
+          sodResult = await ctx.task(segregationOfDutiesTask, { ...{
+      projectName,
+      iamPlatform,
+      inventoryResult,
+      accessModelResult,
+      complianceFrameworks,
+      environment,
+      outputDir
+    }, feedback: lastFeedback_qualityGateApproval8, attempt: attempt + 1 });
+        }
+  const qualityGateApproval8 = await ctx.breakpoint({
         question: `Found ${sodResult.sodViolations} segregation of duties violations! ${sodResult.conflictingRoles} users have conflicting roles. Common violations: ${sodResult.commonViolations.slice(0, 3).join(', ')}. Review and remediate SOD violations?`,
         title: 'Segregation of Duties Violations',
         context: {
@@ -423,11 +559,16 @@ export async function process(inputs, ctx) {
             mitigatingControls: sodResult.mitigatingControls
           },
           files: sodResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-        }
-      });
-    }
+        },
+        expert: 'owner',
+        tags: ['approval-gate'],
+        previousFeedback: lastFeedback_qualityGateApproval8 || undefined,
+        attempt: attempt > 0 ? attempt + 1 : undefined
+        });
+        if (qualityGateApproval8.approved) break;
+        lastFeedback_qualityGateApproval8 = qualityGateApproval8.response || qualityGateApproval8.feedback || 'Changes requested';
+      }   }
   }
-
   // ============================================================================
   // PHASE 9: SESSION MANAGEMENT AND AUTHENTICATION SECURITY
   // ============================================================================
@@ -459,7 +600,7 @@ export async function process(inputs, ctx) {
   if (enableAnomalyDetection) {
     ctx.log('info', 'Phase 10: Assessing anomaly detection and access monitoring');
 
-    const anomalyResult = await ctx.task(anomalyDetectionTask, {
+    let anomalyResult = await ctx.task(anomalyDetectionTask, {
       projectName,
       iamPlatform,
       inventoryResult,
@@ -474,8 +615,19 @@ export async function process(inputs, ctx) {
     ctx.log('info', `Anomaly detection assessed - ${anomalyResult.anomaliesDetected} anomalies detected, ${anomalyResult.suspiciousAccess} suspicious access patterns, Monitoring coverage: ${anomalyResult.monitoringCoverage}%`);
 
     // Quality Gate: Suspicious activity review
-    if (anomalyResult.highRiskAnomalies > 0) {
-      await ctx.breakpoint({
+        let lastFeedback_qualityGateApproval9 = null;
+      for (let attempt = 0; attempt < 3; attempt++) {
+        if (lastFeedback_qualityGateApproval9) {
+          anomalyResult = await ctx.task(anomalyDetectionTask, { ...{
+      projectName,
+      iamPlatform,
+      inventoryResult,
+      environment,
+      complianceFrameworks,
+      outputDir
+    }, feedback: lastFeedback_qualityGateApproval9, attempt: attempt + 1 });
+        }
+  const qualityGateApproval9 = await ctx.breakpoint({
         question: `Detected ${anomalyResult.highRiskAnomalies} high-risk access anomalies: ${anomalyResult.unusualAccessPatterns} unusual access patterns, ${anomalyResult.geographicAnomalies} geographic anomalies, ${anomalyResult.timebasedAnomalies} time-based anomalies. Investigate immediately?`,
         title: 'High-Risk Access Anomalies Detected',
         context: {
@@ -490,18 +642,23 @@ export async function process(inputs, ctx) {
             monitoringCoverage: anomalyResult.monitoringCoverage
           },
           files: anomalyResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-        }
-      });
-    }
+        },
+        expert: 'owner',
+        tags: ['approval-gate'],
+        previousFeedback: lastFeedback_qualityGateApproval9 || undefined,
+        attempt: attempt > 0 ? attempt + 1 : undefined
+        });
+        if (qualityGateApproval9.approved) break;
+        lastFeedback_qualityGateApproval9 = qualityGateApproval9.response || qualityGateApproval9.feedback || 'Changes requested';
+      }   }
   }
-
   // ============================================================================
   // PHASE 11: COMPLIANCE VALIDATION
   // ============================================================================
 
   ctx.log('info', 'Phase 11: Validating compliance requirements');
 
-  const complianceResult = await ctx.task(complianceValidationTask, {
+  let complianceResult = await ctx.task(complianceValidationTask, {
     projectName,
     iamPlatform,
     complianceFrameworks,
@@ -520,8 +677,23 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Compliance validation complete - ${complianceResult.frameworksCompliant}/${complianceFrameworks.length} frameworks compliant`);
 
-  // Quality Gate: Compliance review
-  await ctx.breakpoint({
+    let lastFeedback_qualityGateApproval10 = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_qualityGateApproval10) {
+      complianceResult = await ctx.task(complianceValidationTask, { ...{
+    projectName,
+    iamPlatform,
+    complianceFrameworks,
+    environment,
+    totalUsers,
+    policyViolations,
+    enableMFA,
+    enableAccessReviews,
+    enablePrivilegedAccessManagement,
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval10, attempt: attempt + 1 });
+    }
+  const qualityGateApproval10 = await ctx.breakpoint({
     question: `Compliance validation complete for ${projectName}. ${complianceResult.frameworksCompliant}/${complianceFrameworks.length} frameworks compliant. Compliance gaps: ${complianceResult.complianceGaps.length}. ${complianceResult.complianceGaps.length > 0 ? 'Review gaps and remediation plan?' : 'All compliance requirements met!'}`,
     title: 'Compliance Validation Review',
     context: {
@@ -535,9 +707,15 @@ export async function process(inputs, ctx) {
         auditReady: complianceResult.auditReady
       },
       files: complianceResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_qualityGateApproval10 || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (qualityGateApproval10.approved) break;
+    lastFeedback_qualityGateApproval10 = qualityGateApproval10.response || qualityGateApproval10.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 12: REMEDIATION PLANNING
   // ============================================================================
@@ -566,7 +744,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 13: Generating documentation and reports');
 
-  const docResult = await ctx.task(documentationTask, {
+  let docResult = await ctx.task(documentationTask, {
     projectName,
     iamPlatform,
     environment,
@@ -604,8 +782,23 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Duration: ${Math.round(duration / 1000)}s`);
   ctx.log('info', '='.repeat(80));
 
-  // Final Quality Gate
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      docResult = await ctx.task(documentationTask, { ...{
+    projectName,
+    iamPlatform,
+    environment,
+    totalUsers,
+    policyViolations,
+    securityScore,
+    complianceFrameworks,
+    remediationResult,
+    artifacts,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Access Control and IAM Review complete for ${projectName}! Security Score: ${finalSecurityScore}/100. Found ${policyViolations} policy violations across ${totalUsers} identities. Compliance: ${complianceResult.frameworksCompliant}/${complianceFrameworks.length} frameworks. ${remediationResult.totalRecommendations} remediation recommendations. Review summary and approve?`,
     title: 'IAM Review Complete',
     context: {
@@ -645,9 +838,15 @@ export async function process(inputs, ctx) {
         ]
       },
       files: artifacts.slice(0, 20).map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     securityScore: finalSecurityScore,
@@ -682,8 +881,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

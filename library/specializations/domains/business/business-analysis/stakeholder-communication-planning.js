@@ -102,7 +102,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 6: Creating message templates');
-  const templateCreation = await ctx.task(templateCreationTask, {
+  let templateCreation = await ctx.task(templateCreationTask, {
     projectName,
     messageDevelopment,
     channelSelection,
@@ -111,8 +111,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...templateCreation.artifacts);
 
-  // Breakpoint: Review communication plan
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      templateCreation = await ctx.task(templateCreationTask, { ...{
+    projectName,
+    messageDevelopment,
+    channelSelection,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Communication plan complete for ${projectName}. ${communicationPlan.communicationItems?.length || 0} communication items defined. Review and approve?`,
     title: 'Communication Plan Review',
     context: {
@@ -129,9 +138,15 @@ export async function process(inputs, ctx) {
         channelsUsed: channelSelection.selectedChannels?.length || 0,
         templatesCreated: templateCreation.templates?.length || 0
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 7: GOVERNANCE AND APPROVAL
   // ============================================================================
@@ -175,8 +190,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

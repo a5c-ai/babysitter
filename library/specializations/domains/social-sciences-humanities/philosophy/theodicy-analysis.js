@@ -82,7 +82,7 @@ export async function process(inputs, ctx) {
 
   // Task 6: Dialectical Assessment
   ctx.log('info', 'Assessing the dialectical situation');
-  const dialecticalAssessment = await ctx.task(dialecticalAssessmentTask, {
+  let dialecticalAssessment = await ctx.task(dialecticalAssessmentTask, {
     logicalProblem,
     evidentialProblem,
     theodicyEvaluation,
@@ -91,8 +91,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...dialecticalAssessment.artifacts);
 
-  // Breakpoint: Review theodicy analysis
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      dialecticalAssessment = await ctx.task(dialecticalAssessmentTask, { ...{
+    logicalProblem,
+    evidentialProblem,
+    theodicyEvaluation,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Theodicy analysis complete. ${theodiciesSurvey.theodicies.length} theodicies evaluated. Review the analysis?`,
     title: 'Theodicy Analysis Results',
     context: {
@@ -104,9 +113,15 @@ export async function process(inputs, ctx) {
         logicalProblemStatus: logicalProblem.status,
         evidentialProblemStatus: evidentialProblem.status
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 7: Generate Theodicy Report
   ctx.log('info', 'Generating theodicy analysis report');
   const theodicyReport = await ctx.task(theodicyReportTask, {
@@ -149,8 +164,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task definitions
+  // Task definitions
 export const problemFormulationTask = defineTask('problem-formulation', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Formulate the problem of evil',

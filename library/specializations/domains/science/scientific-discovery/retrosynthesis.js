@@ -54,7 +54,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 3: Performing retrosynthetic disconnections');
-  const disconnectionAnalysis = await ctx.task(disconnectionTask, {
+  let disconnectionAnalysis = await ctx.task(disconnectionTask, {
     targetMolecule,
     strategicBonds: strategicBondIdentification.strategicBonds,
     outputDir
@@ -62,8 +62,16 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...disconnectionAnalysis.artifacts);
 
-  // Breakpoint: Review disconnection strategy
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      disconnectionAnalysis = await ctx.task(disconnectionTask, { ...{
+    targetMolecule,
+    strategicBonds: strategicBondIdentification.strategicBonds,
+    outputDir
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Identified ${disconnectionAnalysis.disconnections.length} possible disconnections. Generating ${strategicBondIdentification.strategicBonds.length} synthetic tree branches. Continue with synthon analysis?`,
     title: 'Disconnection Strategy Review',
     context: {
@@ -79,9 +87,15 @@ export async function process(inputs, ctx) {
         disconnectionCount: disconnectionAnalysis.disconnections.length,
         strategicBondCount: strategicBondIdentification.strategicBonds.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 4: SYNTHON TO REAGENT CONVERSION
   // ============================================================================
@@ -144,7 +158,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 8: Selecting optimal synthetic route');
-  const optimalRouteSelection = await ctx.task(optimalRouteTask, {
+  let optimalRouteSelection = await ctx.task(optimalRouteTask, {
     evaluatedRoutes: routeEvaluation.evaluatedRoutes,
     constraints,
     outputDir
@@ -152,8 +166,16 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...optimalRouteSelection.artifacts);
 
-  // Final breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      optimalRouteSelection = await ctx.task(optimalRouteTask, { ...{
+    evaluatedRoutes: routeEvaluation.evaluatedRoutes,
+    constraints,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Retrosynthesis complete. ${routeEnumeration.routes.length} routes found. Optimal route: ${optimalRouteSelection.optimalRoute.steps.length} steps with ${optimalRouteSelection.optimalRoute.overallYield}% estimated yield. Review synthesis plan?`,
     title: 'Retrosynthesis Complete',
     context: {
@@ -169,9 +191,15 @@ export async function process(inputs, ctx) {
         optimalSteps: optimalRouteSelection.optimalRoute.steps.length,
         estimatedYield: optimalRouteSelection.optimalRoute.overallYield
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -197,8 +225,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

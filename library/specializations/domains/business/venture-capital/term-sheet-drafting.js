@@ -97,7 +97,7 @@ export async function process(inputs, ctx) {
 
   // Task 7: Founder Terms
   ctx.log('info', 'Structuring founder terms');
-  const founderTerms = await ctx.task(founderTermsTask, {
+  let founderTerms = await ctx.task(founderTermsTask, {
     companyName,
     roundDetails,
     existingTerms,
@@ -106,8 +106,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...founderTerms.artifacts);
 
-  // Breakpoint: Review term sheet structure
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      founderTerms = await ctx.task(founderTermsTask, { ...{
+    companyName,
+    roundDetails,
+    existingTerms,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Term sheet structure complete for ${companyName}. Pre-money: $${economicTerms.preMoney}M. Review terms?`,
     title: 'Term Sheet Drafting Results',
     context: {
@@ -120,9 +129,15 @@ export async function process(inputs, ctx) {
         antiDilution: antiDilution.type,
         boardSeats: boardComposition.structure
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 8: Generate Term Sheet Document
   ctx.log('info', 'Generating term sheet document');
   const termSheetDoc = await ctx.task(termSheetDocumentTask, {
@@ -177,8 +192,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Economic Terms Structuring
+  // Task 1: Economic Terms Structuring
 export const economicTermsTask = defineTask('economic-terms', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Structure economic terms',

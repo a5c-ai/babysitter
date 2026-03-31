@@ -100,7 +100,7 @@ export async function process(inputs, ctx) {
 
   // Task 7: Generate Survey Protocol Document
   ctx.log('info', 'Generating survey protocol document');
-  const protocolDocument = await ctx.task(protocolDocumentTask, {
+  let protocolDocument = await ctx.task(protocolDocumentTask, {
     researchQuestion,
     researchDesign,
     samplingStrategy,
@@ -113,8 +113,21 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...protocolDocument.artifacts);
 
-  // Breakpoint: Review survey design
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      protocolDocument = await ctx.task(protocolDocumentTask, { ...{
+    researchQuestion,
+    researchDesign,
+    samplingStrategy,
+    instrumentDevelopment,
+    ethicsProtocols,
+    dataCollectionProtocol,
+    analysisFramework,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Sociolinguistic survey design complete for: ${researchQuestion}. Sample size: ${samplingStrategy.sampleSize}. Review design?`,
     title: 'Sociolinguistic Survey Design Results',
     context: {
@@ -126,9 +139,15 @@ export async function process(inputs, ctx) {
         sampleSize: samplingStrategy.sampleSize,
         instruments: instrumentDevelopment.instruments?.length || 0
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -156,8 +175,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Research Design Framework
+  // Task 1: Research Design Framework
 export const researchDesignTask = defineTask('research-design', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Establish research design framework',

@@ -44,7 +44,6 @@ export async function process(inputs, ctx) {
     const metrics = await ctx.task(metricsCollectionTask, { projectName, sessions, outputDir });
     artifacts.push(...metrics.artifacts);
   }
-
   // Phase 6: Qualitative Analysis
   const qualitative = await ctx.task(qualitativeAnalysisTask, { projectName, sessions, outputDir });
   artifacts.push(...qualitative.artifacts);
@@ -54,15 +53,24 @@ export async function process(inputs, ctx) {
   artifacts.push(...quantitative.artifacts);
 
   // Phase 8: Research Synthesis
-  const synthesis = await ctx.task(researchSynthesisTask, { projectName, qualitative, quantitative, outputDir });
-  artifacts.push(...synthesis.artifacts);
-
-  await ctx.breakpoint({
+  let synthesis = await ctx.task(researchSynthesisTask, { projectName, qualitative, quantitative, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      synthesis = await ctx.task(researchSynthesisTask, { ...{ projectName, qualitative, quantitative, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Playtesting complete for ${projectName}. ${sessions.sessionCount} sessions. ${synthesis.findingCount} findings. ${synthesis.recommendationCount} recommendations. Review?`,
     title: 'Playtesting Research Review',
-    context: { runId: ctx.runId, sessions, qualitative, quantitative, synthesis }
-  });
-
+    context: { runId: ctx.runId, sessions, qualitative, quantitative, synthesis },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     projectName,

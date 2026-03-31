@@ -70,7 +70,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 3: Implementing Macro Expansion');
 
-  const macroExpansion = await ctx.task(macroExpansionTask, {
+  let macroExpansion = await ctx.task(macroExpansionTask, {
     languageName,
     macroStyle,
     hygienic,
@@ -79,18 +79,34 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...macroExpansion.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      macroExpansion = await ctx.task(macroExpansionTask, { ...{
+    languageName,
+    macroStyle,
+    hygienic,
+    patternMatching,
+    implementationLanguage,
+    outputDir
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Macro expansion implemented. Hygienic: ${hygienic}, Features: ${macroExpansion.features.join(', ')}. Proceed with integration?`,
     title: 'Macro Expansion Review',
     context: {
       runId: ctx.runId,
       features: macroExpansion.features,
       files: macroExpansion.artifacts.map(a => ({ path: a.path, format: a.format || 'rust' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 4: HYGIENE (if enabled)
   // ============================================================================
@@ -108,7 +124,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...hygieneSystem.artifacts);
   }
-
   // ============================================================================
   // PHASE 5: INTEGRATION
   // ============================================================================
@@ -148,7 +163,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 7: Generating Documentation');
 
-  const documentation = await ctx.task(macroDocumentationTask, {
+  let documentation = await ctx.task(macroDocumentationTask, {
     languageName,
     macroStyle,
     integration,
@@ -156,9 +171,18 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...documentation.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      documentation = await ctx.task(macroDocumentationTask, { ...{
+    languageName,
+    macroStyle,
+    integration,
+    testSuite,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Macro System Complete for ${languageName}! Style: ${macroStyle}, Hygienic: ${hygienic}, Test coverage: ${testSuite.coverage}%. Review deliverables?`,
     title: 'Macro System Complete',
     context: {
@@ -173,9 +197,15 @@ export async function process(inputs, ctx) {
         { path: integration.mainFilePath, format: implementationLanguage.toLowerCase(), label: 'Macro System' },
         { path: documentation.guidePath, format: 'markdown', label: 'Macro Guide' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -203,8 +233,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

@@ -39,14 +39,22 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 2: UDS Services Implementation
-  const udsImplementation = await ctx.task(udsImplementationTask, {
+  let udsImplementation = await ctx.task(udsImplementationTask, {
     projectName,
     diagRequirements,
     diagnosticServices
   });
 
-  // Breakpoint: UDS implementation review
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      udsImplementation = await ctx.task(udsImplementationTask, { ...{
+    projectName,
+    diagRequirements,
+    diagnosticServices
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Review UDS implementation for ${projectName}. ${udsImplementation.services?.length || 0} services implemented. Approve?`,
     title: 'UDS Implementation Review',
     context: {
@@ -58,9 +66,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: udsImplementation
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // Phase 3: DTC Configuration
   const dtcConfiguration = await ctx.task(dtcConfigurationTask, {
     projectName,
@@ -76,15 +90,24 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 5: Diagnostic Validation
-  const diagValidation = await ctx.task(diagValidationTask, {
+  let diagValidation = await ctx.task(diagValidationTask, {
     projectName,
     udsImplementation,
     dtcConfiguration,
     obdMonitors
   });
 
-  // Final Breakpoint: Diagnostic implementation approval
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      diagValidation = await ctx.task(diagValidationTask, { ...{
+    projectName,
+    udsImplementation,
+    dtcConfiguration,
+    obdMonitors
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Diagnostic Implementation complete for ${projectName}. Validation pass rate: ${diagValidation.passRate}%. Approve?`,
     title: 'Diagnostic Implementation Approval',
     context: {
@@ -95,9 +118,15 @@ export async function process(inputs, ctx) {
         { path: `artifacts/diagnostic-spec.json`, format: 'json', content: udsImplementation },
         { path: `artifacts/dtc-mapping.json`, format: 'json', content: dtcConfiguration }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     projectName,

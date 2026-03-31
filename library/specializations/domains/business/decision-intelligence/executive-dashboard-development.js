@@ -32,7 +32,7 @@ export async function process(inputs, ctx) {
   } = inputs;
 
   // Phase 1: Stakeholder Requirements Analysis
-  const requirementsAnalysis = await ctx.task(requirementsAnalysisTask, {
+  let requirementsAnalysis = await ctx.task(requirementsAnalysisTask, {
     projectName,
     businessObjectives,
     stakeholders,
@@ -48,9 +48,17 @@ export async function process(inputs, ctx) {
       dashboardDesign: null
     };
   }
-
-  // Breakpoint: Review requirements with stakeholders
-  await ctx.breakpoint({
+  let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      requirementsAnalysis = await ctx.task(requirementsAnalysisTask, { ...{
+    projectName,
+    businessObjectives,
+    stakeholders,
+    kpiRequirements
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Review dashboard requirements for ${projectName}. Are these aligned with executive needs?`,
     title: 'Dashboard Requirements Review',
     context: {
@@ -58,9 +66,15 @@ export async function process(inputs, ctx) {
       projectName,
       requirements: requirementsAnalysis.requirements,
       stakeholderNeeds: requirementsAnalysis.stakeholderNeeds
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // Phase 2: KPI Framework Definition
   const kpiFramework = await ctx.task(kpiFrameworkDefinitionTask, {
     projectName,
@@ -111,7 +125,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 8: Implementation Plan
-  const implementationPlan = await ctx.task(implementationPlanTask, {
+  let implementationPlan = await ctx.task(implementationPlanTask, {
     projectName,
     dashboardArchitecture,
     visualDesign,
@@ -120,8 +134,19 @@ export async function process(inputs, ctx) {
     dataSourceAssessment
   });
 
-  // Final Breakpoint: Approval
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      implementationPlan = await ctx.task(implementationPlanTask, { ...{
+    projectName,
+    dashboardArchitecture,
+    visualDesign,
+    drillDownConfig,
+    alertingConfig,
+    dataSourceAssessment
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Executive Dashboard design complete for ${projectName}. Ready for implementation?`,
     title: 'Dashboard Design Approval',
     context: {
@@ -130,9 +155,15 @@ export async function process(inputs, ctx) {
       kpiCount: kpiFramework.kpis?.length || 0,
       dashboardSections: dashboardArchitecture.sections?.length || 0,
       alertCount: alertingConfig.alerts?.length || 0
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     projectName,
@@ -152,8 +183,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const requirementsAnalysisTask = defineTask('requirements-analysis', (args, taskCtx) => ({
   kind: 'agent',

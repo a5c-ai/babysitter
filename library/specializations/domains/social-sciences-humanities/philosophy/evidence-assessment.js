@@ -86,7 +86,7 @@ export async function process(inputs, ctx) {
 
   // Task 6: Counterevidence and Defeaters
   ctx.log('info', 'Analyzing counterevidence and defeaters');
-  const counterEvidenceAnalysis = await ctx.task(counterEvidenceTask, {
+  let counterEvidenceAnalysis = await ctx.task(counterEvidenceTask, {
     claim: cataloging.catalogedClaim,
     evidence: cataloging.catalogedEvidence,
     outputDir
@@ -94,8 +94,16 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...counterEvidenceAnalysis.artifacts);
 
-  // Breakpoint: Review evidence assessment
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      counterEvidenceAnalysis = await ctx.task(counterEvidenceTask, { ...{
+    claim: cataloging.catalogedClaim,
+    evidence: cataloging.catalogedEvidence,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Evidence assessment complete. Evidence is ${sufficiencyJudgment.isSufficient ? 'SUFFICIENT' : 'INSUFFICIENT'} for the claim. Review the assessment?`,
     title: 'Evidence Assessment Results',
     context: {
@@ -108,9 +116,15 @@ export async function process(inputs, ctx) {
         isSufficient: sufficiencyJudgment.isSufficient,
         overallQuality: qualityEvaluation.overallQuality
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 7: Generate Evidence Report
   ctx.log('info', 'Generating evidence assessment report');
   const evidenceReport = await ctx.task(evidenceReportTask, {
@@ -161,8 +175,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Cataloging
+  // Task 1: Cataloging
 export const catalogingTask = defineTask('cataloging', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Catalog claim and evidence',

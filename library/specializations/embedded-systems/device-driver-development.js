@@ -47,7 +47,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Driver Requirements Analysis');
 
-  const requirements = await ctx.task(driverRequirementsTask, {
+  let requirements = await ctx.task(driverRequirementsTask, {
     driverName,
     peripheralType,
     targetMcu,
@@ -57,9 +57,20 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...requirements.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      requirements = await ctx.task(driverRequirementsTask, { ...{
+    driverName,
+    peripheralType,
+    targetMcu,
+    interfaceType,
+    dmaSupport,
+    threadSafe,
+    outputDir
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Driver requirements defined for ${driverName}. Features: ${requirements.features.join(', ')}. Proceed with design?`,
     title: 'Driver Requirements Review',
     context: {
@@ -67,9 +78,15 @@ export async function process(inputs, ctx) {
       driverName,
       features: requirements.features,
       files: requirements.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 2: HARDWARE REGISTER MAPPING
   // ============================================================================
@@ -175,7 +192,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...dmaImplementation.artifacts);
   }
-
   // ============================================================================
   // PHASE 8: ERROR HANDLING
   // ============================================================================
@@ -209,7 +225,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...threadSafetyImpl.artifacts);
   }
-
   // ============================================================================
   // PHASE 10: UNIT TEST DEVELOPMENT
   // ============================================================================
@@ -250,7 +265,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 12: Code Review and Quality Check');
 
-  const codeReview = await ctx.task(driverCodeReviewTask, {
+  let codeReview = await ctx.task(driverCodeReviewTask, {
     driverName,
     coreImplementation,
     interruptHandling,
@@ -263,8 +278,21 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...codeReview.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      codeReview = await ctx.task(driverCodeReviewTask, { ...{
+    driverName,
+    coreImplementation,
+    interruptHandling,
+    dmaImplementation,
+    errorHandlingImpl,
+    threadSafetyImpl,
+    unitTests,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Device Driver Development Complete for ${driverName}. Review score: ${codeReview.qualityScore}/100. Review driver package?`,
     title: 'Driver Development Complete',
     context: {
@@ -285,9 +313,15 @@ export async function process(inputs, ctx) {
         { path: documentation.apiDocPath, format: 'markdown', label: 'API Documentation' },
         { path: coreImplementation.headerPath, format: 'c', label: 'Driver Header' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -334,8 +368,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

@@ -32,16 +32,24 @@ export async function process(inputs, ctx) {
     artifacts.push(...solution.artifacts);
     library[problem] = solution;
   }
-
-  const documentation = await ctx.task(libraryDocumentationTask, { library, outputDir });
-  artifacts.push(...documentation.artifacts);
-
-  await ctx.breakpoint({
+  let documentation = await ctx.task(libraryDocumentationTask, { library, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      documentation = await ctx.task(libraryDocumentationTask, { ...{ library, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Classic DP library complete. ${problems.length} problems solved. Review?`,
     title: 'Classic DP Library Complete',
-    context: { runId: ctx.runId, problems, files: documentation.artifacts.map(a => ({ path: a.path, format: a.format || 'json' })) }
-  });
-
+    context: { runId: ctx.runId, problems, files: documentation.artifacts.map(a => ({ path: a.path, format: a.format || 'json' })) },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     problemsSolved: problems.length,

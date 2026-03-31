@@ -141,7 +141,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 8: Validating refactoring plan quality and feasibility');
-  const planQualityScore = await ctx.task(planQualityScoringTask, {
+  let planQualityScore = await ctx.task(planQualityScoringTask, {
     projectName,
     technicalDebtIdentification,
     debtPrioritization,
@@ -159,8 +159,23 @@ export async function process(inputs, ctx) {
   const planScore = planQualityScore.overallScore;
   const qualityMet = planScore >= 85;
 
-  // Breakpoint: Review refactoring plan
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      planQualityScore = await ctx.task(planQualityScoringTask, { ...{
+    projectName,
+    technicalDebtIdentification,
+    debtPrioritization,
+    refactoringGoals,
+    testSafetyNet,
+    refactoringApproach,
+    refactoringSchedule,
+    refactoringPlanDocument,
+    targetQualityScore,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Refactoring plan complete. Quality score: ${planScore}/100. ${qualityMet ? 'Plan meets quality standards!' : 'Plan may need refinement.'} Review and approve?`,
     title: 'Refactoring Plan Review & Approval',
     context: {
@@ -182,9 +197,15 @@ export async function process(inputs, ctx) {
         currentTestCoverage: testSafetyNet.currentCoverage || 0,
         targetTestCoverage: minTestCoverage
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 9: GENERATE IMPLEMENTATION ROADMAP (if approved)
   // ============================================================================
@@ -203,7 +224,6 @@ export async function process(inputs, ctx) {
     });
     artifacts.push(...implementationRoadmap.artifacts);
   }
-
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -264,8 +284,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

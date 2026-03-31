@@ -138,7 +138,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 7: Generating Test Report');
 
-  const reportGeneration = await ctx.task(testReportGenerationTask, {
+  let reportGeneration = await ctx.task(testReportGenerationTask, {
     projectName,
     testExecution,
     coverageAnalysis,
@@ -147,8 +147,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...reportGeneration.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      reportGeneration = await ctx.task(testReportGenerationTask, { ...{
+    projectName,
+    testExecution,
+    coverageAnalysis,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Unit Testing Complete for ${projectName}. Pass rate: ${testExecution.passRate}%, Coverage: ${coverageAnalysis.totalCoverage}%. Review?`,
     title: 'Unit Testing Complete',
     context: {
@@ -162,9 +171,15 @@ export async function process(inputs, ctx) {
       files: [
         { path: reportGeneration.reportPath, format: 'markdown', label: 'Test Report' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -195,8 +210,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

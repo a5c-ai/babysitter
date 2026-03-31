@@ -64,7 +64,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...goldenTests.artifacts);
   }
-
   // ============================================================================
   // PHASE 3: SNAPSHOT TESTING
   // ============================================================================
@@ -80,7 +79,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...snapshotTests.artifacts);
   }
-
   // ============================================================================
   // PHASE 4: AUTOMATED VALIDATION
   // ============================================================================
@@ -112,14 +110,13 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...cicd.artifacts);
   }
-
   // ============================================================================
   // PHASE 6: REPORTING SETUP
   // ============================================================================
 
   ctx.log('info', 'Phase 6: Setting up test reporting');
 
-  const testReporting = await ctx.task(testReportingTask, {
+  let testReporting = await ctx.task(testReportingTask, {
     agentName,
     testSuites: automatedValidation.testSuites,
     outputDir
@@ -127,8 +124,16 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...testReporting.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      testReporting = await ctx.task(testReportingTask, { ...{
+    agentName,
+    testSuites: automatedValidation.testSuites,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Regression testing for ${agentName} complete. ${testCaseManagement.testCases.length} test cases, CI/CD: ${cicdIntegration}. Review setup?`,
     title: 'Regression Testing Review',
     context: {
@@ -141,9 +146,15 @@ export async function process(inputs, ctx) {
         cicdIntegration
       },
       files: artifacts.map(a => ({ path: a.path, format: a.format || 'yaml' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -163,8 +174,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

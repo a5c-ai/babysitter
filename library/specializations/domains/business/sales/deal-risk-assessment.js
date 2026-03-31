@@ -143,7 +143,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 8: Developing Mitigation Plan');
-  const mitigationPlan = await ctx.task(mitigationPlanTask, {
+  let mitigationPlan = await ctx.task(mitigationPlanTask, {
     opportunityName,
     compositeRisk,
     buyerEngagementRisk,
@@ -155,8 +155,20 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...(mitigationPlan.artifacts || []));
 
-  // Breakpoint: Review risk assessment
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      mitigationPlan = await ctx.task(mitigationPlanTask, { ...{
+    opportunityName,
+    compositeRisk,
+    buyerEngagementRisk,
+    competitiveRisk,
+    timelineRisk,
+    budgetRisk,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Deal risk assessment complete for ${opportunityName}. Risk Score: ${compositeRisk.overallRiskScore}/100. Review mitigation plan?`,
     title: 'Deal Risk Assessment Review',
     context: {
@@ -174,9 +186,15 @@ export async function process(inputs, ctx) {
         topRisks: compositeRisk.topRisks,
         mitigationActionsCount: mitigationPlan.actions?.length || 0
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -212,8 +230,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

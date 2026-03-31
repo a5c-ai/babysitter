@@ -55,7 +55,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 2: Decomposing into functions');
-  const functionDecomposition = await ctx.task(functionDecompositionTask, {
+  let functionDecomposition = await ctx.task(functionDecompositionTask, {
     projectName,
     serverlessAssessment,
     functions,
@@ -64,8 +64,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...functionDecomposition.artifacts);
 
-  // Breakpoint: Decomposition review
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      functionDecomposition = await ctx.task(functionDecompositionTask, { ...{
+    projectName,
+    serverlessAssessment,
+    functions,
+    outputDir
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Function decomposition complete for ${projectName}. Functions: ${functionDecomposition.functionCount}. Estimated cold start: ${functionDecomposition.estimatedColdStart}. Approve decomposition?`,
     title: 'Function Decomposition Review',
     context: {
@@ -73,9 +82,15 @@ export async function process(inputs, ctx) {
       projectName,
       functionDecomposition,
       recommendation: 'Review function boundaries and granularity'
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 3: CODE REFACTORING
   // ============================================================================
@@ -123,7 +138,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 6: Testing serverless functions');
-  const testing = await ctx.task(serverlessTestingTask, {
+  let testing = await ctx.task(serverlessTestingTask, {
     projectName,
     codeRefactoring,
     deploymentConfig,
@@ -132,8 +147,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...testing.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      testing = await ctx.task(serverlessTestingTask, { ...{
+    projectName,
+    codeRefactoring,
+    deploymentConfig,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Serverless migration complete for ${projectName}. Functions: ${functionDecomposition.functionCount}. Tests passing: ${testing.allPassed}. Approve?`,
     title: 'Serverless Migration Complete',
     context: {
@@ -144,9 +168,15 @@ export async function process(inputs, ctx) {
         functions: functionDecomposition.functionCount,
         testsPass: testing.allPassed
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -170,8 +200,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

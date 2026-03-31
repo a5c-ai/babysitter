@@ -67,16 +67,25 @@ export async function process(inputs, ctx) {
   artifacts.push(...proceduralSetup.artifacts);
 
   // Phase 4: Document Preparation
-  const documentPrep = await ctx.task(adrDocumentPrepTask, {
+  let documentPrep = await ctx.task(adrDocumentPrepTask, {
     disputeId,
     adrType,
     parties,
     proceduralSetup,
     outputDir
   });
-  artifacts.push(...documentPrep.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      documentPrep = await ctx.task(adrDocumentPrepTask, { ...{
+    disputeId,
+    adrType,
+    parties,
+    proceduralSetup,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `ADR proceedings for ${disputeId} set up. Type: ${adrType}. Neutral: ${neutralSelection.selectedNeutral?.name}. Proceed with proceedings?`,
     title: 'ADR Setup Review',
     context: {
@@ -86,9 +95,15 @@ export async function process(inputs, ctx) {
       neutral: neutralSelection.selectedNeutral?.name,
       scheduledDate: proceduralSetup.scheduledDate,
       files: documentPrep.artifacts.map(a => ({ path: a.path, format: a.format || 'docx' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 5: Proceedings Management
   const proceedings = await ctx.task(proceedingsManagementTask, {
     disputeId,

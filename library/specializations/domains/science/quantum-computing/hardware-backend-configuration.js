@@ -43,23 +43,35 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Backend Analysis');
 
-  const backendAnalysisResult = await ctx.task(backendAnalysisTask, {
+  let backendAnalysisResult = await ctx.task(backendAnalysisTask, {
     backend,
     framework
   });
 
-  artifacts.push(...(backendAnalysisResult.artifacts || []));
-
-  await ctx.breakpoint({
+    let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      backendAnalysisResult = await ctx.task(backendAnalysisTask, { ...{
+    backend,
+    framework
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Backend analyzed. Qubits: ${backendAnalysisResult.qubitCount}, Connectivity: ${backendAnalysisResult.connectivityType}, Native gates: ${backendAnalysisResult.nativeGates.join(', ')}. Proceed with qubit mapping?`,
     title: 'Backend Analysis Review',
     context: {
       runId: ctx.runId,
       backend: backendAnalysisResult,
       files: (backendAnalysisResult.artifacts || []).map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 2: QUBIT MAPPING STRATEGY
   // ============================================================================
@@ -83,7 +95,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 3: Routing and SWAP Insertion');
 
-  const routingResult = await ctx.task(routingSwapInsertionTask, {
+  let routingResult = await ctx.task(routingSwapInsertionTask, {
     circuit,
     mapping: mappingResult,
     backendInfo: backendAnalysisResult,
@@ -91,18 +103,33 @@ export async function process(inputs, ctx) {
     framework
   });
 
-  artifacts.push(...(routingResult.artifacts || []));
-
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      routingResult = await ctx.task(routingSwapInsertionTask, { ...{
+    circuit,
+    mapping: mappingResult,
+    backendInfo: backendAnalysisResult,
+    routingMethod,
+    framework
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Routing complete. SWAPs inserted: ${routingResult.swapCount}, Depth increase: ${routingResult.depthIncrease}. Review routing decisions?`,
     title: 'Routing Review',
     context: {
       runId: ctx.runId,
       routing: routingResult,
       files: (routingResult.artifacts || []).map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 4: NATIVE GATE TRANSPILATION
   // ============================================================================
@@ -151,7 +178,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...(ddResult.artifacts || []));
   }
-
   // ============================================================================
   // PHASE 7: NOISE-AWARE OPTIMIZATION
   // ============================================================================
@@ -173,7 +199,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 8: Validation');
 
-  const validationResult = await ctx.task(hardwareConfigValidationTask, {
+  let validationResult = await ctx.task(hardwareConfigValidationTask, {
     originalCircuit: circuit,
     configuredCircuit: noiseOptResult.optimizedCircuit,
     backend,
@@ -181,25 +207,40 @@ export async function process(inputs, ctx) {
     framework
   });
 
-  artifacts.push(...(validationResult.artifacts || []));
-
-  await ctx.breakpoint({
+    let lastFeedback_phase8Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase8Review) {
+      validationResult = await ctx.task(hardwareConfigValidationTask, { ...{
+    originalCircuit: circuit,
+    configuredCircuit: noiseOptResult.optimizedCircuit,
+    backend,
+    backendInfo: backendAnalysisResult,
+    framework
+  }, feedback: lastFeedback_phase8Review, attempt: attempt + 1 });
+    }
+  const phase8Review = await ctx.breakpoint({
     question: `Validation complete. Fidelity estimate: ${validationResult.fidelityEstimate}, Constraints satisfied: ${validationResult.constraintsSatisfied}. Review validation?`,
     title: 'Validation Review',
     context: {
       runId: ctx.runId,
       validation: validationResult,
       files: (validationResult.artifacts || []).map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase8Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase8Review.approved) break;
+    lastFeedback_phase8Review = phase8Review.response || phase8Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 9: CONFIGURATION PROFILE GENERATION
   // ============================================================================
 
   ctx.log('info', 'Phase 9: Configuration Profile Generation');
 
-  const profileResult = await ctx.task(configurationProfileGenerationTask, {
+  let profileResult = await ctx.task(configurationProfileGenerationTask, {
     backend,
     backendInfo: backendAnalysisResult,
     mapping: mappingResult,
@@ -211,9 +252,22 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...(profileResult.artifacts || []));
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      profileResult = await ctx.task(configurationProfileGenerationTask, { ...{
+    backend,
+    backendInfo: backendAnalysisResult,
+    mapping: mappingResult,
+    routing: routingResult,
+    transpilation: transpilationResult,
+    scheduling: schedulingResult,
+    noiseOptimization: noiseOptResult,
+    validation: validationResult,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Hardware configuration complete for ${backend}. Final depth: ${noiseOptResult.finalDepth}, Estimated fidelity: ${validationResult.fidelityEstimate}. Approve configuration?`,
     title: 'Hardware Configuration Complete',
     context: {
@@ -226,9 +280,15 @@ export async function process(inputs, ctx) {
         fidelityEstimate: validationResult.fidelityEstimate
       },
       files: artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
 
   return {
@@ -271,8 +331,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

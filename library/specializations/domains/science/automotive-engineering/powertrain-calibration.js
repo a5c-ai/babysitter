@@ -47,17 +47,25 @@ export async function process(inputs, ctx) {
       calibrationDatasets: null
     };
   }
-
   // Phase 2: Test Plan Development
-  const testPlan = await ctx.task(testPlanDevelopmentTask, {
+  let testPlan = await ctx.task(testPlanDevelopmentTask, {
     projectName,
     calibrationTargets,
     powertrainType,
     targetMarkets
   });
 
-  // Breakpoint: Test plan review
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      testPlan = await ctx.task(testPlanDevelopmentTask, { ...{
+    projectName,
+    calibrationTargets,
+    powertrainType,
+    targetMarkets
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Review calibration test plan for ${projectName}. ${testPlan.testCases?.length || 0} test cases defined. Approve test plan?`,
     title: 'Calibration Test Plan Review',
     context: {
@@ -69,9 +77,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: testPlan
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // Phase 3: Dynamometer Calibration
   const dynoCalibration = await ctx.task(dynoCalibrationTask, {
     projectName,
@@ -98,7 +112,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 6: Environmental Validation
-  const environmentalValidation = await ctx.task(environmentalValidationTask, {
+  let environmentalValidation = await ctx.task(environmentalValidationTask, {
     projectName,
     vehicleCalibration,
     efficiencyOptimization,
@@ -106,17 +120,32 @@ export async function process(inputs, ctx) {
   });
 
   // Quality Gate: Environmental coverage
-  if (environmentalValidation.coverage < 80) {
-    await ctx.breakpoint({
+      let lastFeedback_phase6Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase6Review) {
+        environmentalValidation = await ctx.task(environmentalValidationTask, { ...{
+    projectName,
+    vehicleCalibration,
+    efficiencyOptimization,
+    targetMarkets
+  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
+      }
+  const phase6Review = await ctx.breakpoint({
       question: `Environmental validation coverage is ${environmentalValidation.coverage}%. Review gaps and approve extension?`,
       title: 'Environmental Validation Coverage',
       context: {
         runId: ctx.runId,
         environmentalValidation,
         recommendation: 'Extend testing to cover missing conditions'
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase6Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase6Review.approved) break;
+      lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
+    } }
 
   // Phase 7: Certification Data Package
   const certificationPackage = await ctx.task(certificationPackageTask, {
@@ -129,7 +158,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 8: Documentation and Release
-  const calibrationRelease = await ctx.task(calibrationReleaseTask, {
+  let calibrationRelease = await ctx.task(calibrationReleaseTask, {
     projectName,
     calibrationTargets,
     dynoCalibration,
@@ -139,8 +168,20 @@ export async function process(inputs, ctx) {
     certificationPackage
   });
 
-  // Final Breakpoint: Calibration release approval
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      calibrationRelease = await ctx.task(calibrationReleaseTask, { ...{
+    projectName,
+    calibrationTargets,
+    dynoCalibration,
+    vehicleCalibration,
+    efficiencyOptimization,
+    environmentalValidation,
+    certificationPackage
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Powertrain Calibration complete for ${projectName}. Ready for release. Approve calibration dataset?`,
     title: 'Calibration Release Approval',
     context: {
@@ -151,9 +192,15 @@ export async function process(inputs, ctx) {
         { path: `artifacts/calibration-datasets.json`, format: 'json', content: calibrationRelease },
         { path: `artifacts/certification-data.json`, format: 'json', content: certificationPackage }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     projectName,
@@ -172,8 +219,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const calibrationTargetsTask = defineTask('calibration-targets', (args, taskCtx) => ({
   kind: 'agent',

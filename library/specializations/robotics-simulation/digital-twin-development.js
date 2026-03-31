@@ -88,7 +88,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 4: Simulation Fidelity Validation Against Real Robot');
 
-  const fidelityValidation = await ctx.task(fidelityValidationTask, {
+  let fidelityValidation = await ctx.task(fidelityValidationTask, {
     robotName,
     physicalModeling,
     stateSync,
@@ -96,9 +96,17 @@ export async function process(inputs, ctx) {
   });
 
   artifacts.push(...fidelityValidation.artifacts);
-  if (fidelityValidation.issues) issues.push(...fidelityValidation.issues);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      fidelityValidation = await ctx.task(fidelityValidationTask, { ...{
+    robotName,
+    physicalModeling,
+    stateSync,
+    outputDir
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: `Fidelity validation for ${robotName}: ${fidelityValidation.fidelityScore}% match. ${fidelityValidation.discrepancies.length} discrepancies found. Continue with HIL setup?`,
     title: 'Fidelity Validation Review',
     context: {
@@ -106,9 +114,15 @@ export async function process(inputs, ctx) {
       fidelityScore: fidelityValidation.fidelityScore,
       discrepancies: fidelityValidation.discrepancies,
       files: fidelityValidation.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 5: HARDWARE-IN-THE-LOOP TESTING
   // ============================================================================
@@ -125,7 +139,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...hilSetup.artifacts);
   }
-
   // ============================================================================
   // PHASE 6: SIM-TO-REAL TRANSFER VALIDATION
   // ============================================================================
@@ -163,7 +176,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 8: Digital Twin Documentation');
 
-  const documentation = await ctx.task(digitalTwinDocumentationTask, {
+  let documentation = await ctx.task(digitalTwinDocumentationTask, {
     robotName,
     physicalModeling,
     communicationSetup,
@@ -174,8 +187,19 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...documentation.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      documentation = await ctx.task(digitalTwinDocumentationTask, { ...{
+    robotName,
+    physicalModeling,
+    communicationSetup,
+    fidelityValidation,
+    realityGapMonitoring,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Digital Twin Complete for ${robotName}. Fidelity: ${fidelityValidation.fidelityScore}%. Reality Gap: ${realityGapMonitoring.gapMetrics.overall}. Review digital twin package?`,
     title: 'Digital Twin Complete',
     context: {
@@ -189,9 +213,15 @@ export async function process(inputs, ctx) {
       files: [
         { path: documentation.docPath, format: 'markdown', label: 'Documentation' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -215,8 +245,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

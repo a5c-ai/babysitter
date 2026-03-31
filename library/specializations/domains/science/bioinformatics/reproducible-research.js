@@ -45,15 +45,24 @@ export async function process(inputs, ctx) {
   artifacts.push(...architectureResult.artifacts);
 
   // Phase 2: Tool Dependency Resolution
-  const dependencyResult = await ctx.task(dependencyResolutionTask, { projectName, tools, workflowType, outputDir });
-  artifacts.push(...dependencyResult.artifacts);
-
-  await ctx.breakpoint({
+  let dependencyResult = await ctx.task(dependencyResolutionTask, { projectName, tools, workflowType, outputDir });
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      dependencyResult = await ctx.task(dependencyResolutionTask, { ...{ projectName, tools, workflowType, outputDir }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Workflow architecture defined. ${architectureResult.modules} modules, ${dependencyResult.resolvedTools} tools resolved. Review architecture?`,
     title: 'Workflow Architecture Review',
-    context: { runId: ctx.runId, architecture: architectureResult.design, dependencies: dependencyResult.summary, files: architectureResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label })) }
-  });
-
+    context: { runId: ctx.runId, architecture: architectureResult.design, dependencies: dependencyResult.summary, files: architectureResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label })) },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // Phase 3: Container Definition
   const containerResult = await ctx.task(containerDefinitionTask, { projectName, dependencies: dependencyResult.resolved, containerEngine, outputDir });
   artifacts.push(...containerResult.artifacts);
@@ -74,7 +83,6 @@ export async function process(inputs, ctx) {
     testResult = await ctx.task(testDataValidationTask, { projectName, workflowType, workflow: implementationResult.workflow, outputDir });
     artifacts.push(...testResult.artifacts);
   }
-
   // Phase 7: Documentation Generation
   const docsResult = await ctx.task(documentationGenerationTask, { projectName, workflowType, architecture: architectureResult.design, implementation: implementationResult, outputDir });
   artifacts.push(...docsResult.artifacts);
@@ -93,17 +101,25 @@ export async function process(inputs, ctx) {
     publishResult = await ctx.task(registryPublicationTask, { projectName, workflowType, registry: publishRegistry, containers: containerResult.images, outputDir });
     artifacts.push(...publishResult.artifacts);
   }
-
   // Phase 11: Reproducibility Report
-  const reportResult = await ctx.task(generateReproducibilityReportTask, { projectName, workflowType, architectureResult, containerResult, implementationResult, testResult, docsResult, outputDir });
-  artifacts.push(...reportResult.artifacts);
-
-  await ctx.breakpoint({
+  let reportResult = await ctx.task(generateReproducibilityReportTask, { projectName, workflowType, architectureResult, containerResult, implementationResult, testResult, docsResult, outputDir });
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      reportResult = await ctx.task(generateReproducibilityReportTask, { ...{ projectName, workflowType, architectureResult, containerResult, implementationResult, testResult, docsResult, outputDir }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Reproducible Workflow Complete. ${implementationResult.processCount} processes, ${containerResult.imageCount} containers, tests: ${testResult?.passed || 'N/A'}. Approve workflow?`,
     title: 'Reproducible Workflow Complete',
-    context: { runId: ctx.runId, summary: { processes: implementationResult.processCount, containers: containerResult.imageCount, testsPassed: testResult?.passed }, files: [{ path: reportResult.reportPath, format: 'markdown', label: 'Reproducibility Report' }] }
-  });
-
+    context: { runId: ctx.runId, summary: { processes: implementationResult.processCount, containers: containerResult.imageCount, testsPassed: testResult?.passed }, files: [{ path: reportResult.reportPath, format: 'markdown', label: 'Reproducibility Report' }] },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
 
   return {
@@ -120,8 +136,7 @@ export async function process(inputs, ctx) {
     metadata: { processId: 'specializations/domains/science/bioinformatics/reproducible-research', timestamp: startTime, workflowType, containerEngine }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 export const workflowArchitectureTask = defineTask('workflow-architecture', (args, taskCtx) => ({
   kind: 'agent',
   title: `Workflow Architecture - ${args.projectName}`,

@@ -72,18 +72,30 @@ export async function process(inputs, ctx) {
 
   // Phase 8: Generate Report
   ctx.log('info', 'Phase 8: Generating comprehensive report');
-  const competenceReport = await ctx.task(coreCompetenceReportTask, {
+  let competenceReport = await ctx.task(coreCompetenceReportTask, {
     organizationName, competenceIdentification, competenceTests, competenceMapping,
     strengthAssessment, gapAnalysis, leverageStrategy, investmentPlan, outputDir
   });
-  artifacts.push(...competenceReport.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      competenceReport = await ctx.task(coreCompetenceReportTask, { ...{
+    organizationName, competenceIdentification, competenceTests, competenceMapping,
+    strengthAssessment, gapAnalysis, leverageStrategy, investmentPlan, outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Core competence analysis complete for ${organizationName}. ${competenceTests.validatedCompetencies?.length || 0} core competencies validated. Review?`,
     title: 'Core Competence Analysis Review',
-    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })) }
-  });
-
+    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })) },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true, organizationName,
     coreCompetencies: competenceTests.validatedCompetencies,

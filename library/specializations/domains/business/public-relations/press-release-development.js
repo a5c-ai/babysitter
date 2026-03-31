@@ -22,62 +22,110 @@ export async function process(inputs, ctx) {
     targetQuality = 90
   } = inputs;
 
-  // Phase 1: News Assessment and Angle Development
-  await ctx.breakpoint({
+  let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    // No preceding task identified for re-run with feedback
+    const phase1Review = await ctx.breakpoint({
     question: 'Starting press release development. Analyze news value and develop angle?',
     title: 'Phase 1: News Assessment',
     context: {
       runId: ctx.runId,
       phase: 'news-assessment',
       announcement
-    }
-  });
-
-  const newsAssessment = await ctx.task(assessNewsValueTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
+  let newsAssessment = await ctx.task(assessNewsValueTask, {
     announcement,
     targetAudience
   });
 
-  if (newsAssessment.newsValue < 3) {
-    await ctx.breakpoint({
+      let lastFeedback_phase1Review2 = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase1Review2) {
+        newsAssessment = await ctx.task(assessNewsValueTask, { ...{
+    announcement,
+    targetAudience
+  }, feedback: lastFeedback_phase1Review2, attempt: attempt + 1 });
+      }
+  const phase1Review2 = await ctx.breakpoint({
       question: `News value assessed as low (${newsAssessment.newsValue}/10). Consider alternative communications approach?`,
       title: 'Low News Value Warning',
       context: {
         runId: ctx.runId,
         newsValue: newsAssessment.newsValue,
         alternatives: newsAssessment.alternatives
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase1Review2 || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase1Review2.approved) break;
+      lastFeedback_phase1Review2 = phase1Review2.response || phase1Review2.feedback || 'Changes requested';
+    } }
 
-  // Phase 2: Headline and Lead Development
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      newsAssessment = await ctx.task(assessNewsValueTask, { ...{
+    announcement,
+    targetAudience
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: 'News assessment complete. Develop headlines and lead paragraph?',
     title: 'Phase 2: Headline Development',
     context: {
       runId: ctx.runId,
       phase: 'headline-development',
       newsAngle: newsAssessment.primaryAngle
-    }
-  });
-
-  const headlineOptions = await ctx.task(developHeadlinesTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
+  let headlineOptions = await ctx.task(developHeadlinesTask, {
     announcement,
     newsAssessment,
     targetAudience
   });
 
-  // Phase 3: Full Press Release Draft
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      headlineOptions = await ctx.task(developHeadlinesTask, { ...{
+    announcement,
+    newsAssessment,
+    targetAudience
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: 'Headlines developed. Draft full press release following AP style?',
     title: 'Phase 3: Press Release Draft',
     context: {
       runId: ctx.runId,
       phase: 'draft-release',
       selectedHeadline: headlineOptions.recommended
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   const [draftRelease, quotesDeveloped] = await Promise.all([
     ctx.task(draftPressReleaseTask, {
       announcement,
@@ -92,39 +140,73 @@ export async function process(inputs, ctx) {
     })
   ]);
 
-  // Phase 4: Quote Integration and Refinement
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      headlineOptions = await ctx.task(developHeadlinesTask, { ...{
+    announcement,
+    newsAssessment,
+    targetAudience
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: 'Draft and quotes ready. Integrate quotes and refine release?',
     title: 'Phase 4: Quote Integration',
     context: {
       runId: ctx.runId,
       phase: 'quote-integration',
       quoteCount: quotesDeveloped.quotes.length
-    }
-  });
-
-  const refinedRelease = await ctx.task(integrateAndRefineTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
+  let refinedRelease = await ctx.task(integrateAndRefineTask, {
     draftRelease,
     quotes: quotesDeveloped.quotes,
     boilerplate
   });
 
-  // Phase 5: AP Style and Quality Review
-  await ctx.breakpoint({
+    let lastFeedback_phase5Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase5Review) {
+      refinedRelease = await ctx.task(integrateAndRefineTask, { ...{
+    draftRelease,
+    quotes: quotesDeveloped.quotes,
+    boilerplate
+  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+    }
+  const phase5Review = await ctx.breakpoint({
     question: 'Release refined. Conduct AP style review and quality check?',
     title: 'Phase 5: Style Review',
     context: {
       runId: ctx.runId,
       phase: 'style-review'
-    }
-  });
-
-  const styleReview = await ctx.task(reviewApStyleTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase5Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase5Review.approved) break;
+    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+  }
+  let styleReview = await ctx.task(reviewApStyleTask, {
     pressRelease: refinedRelease
   });
 
-  // Phase 6: Distribution Planning
-  await ctx.breakpoint({
+    let lastFeedback_phase6Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase6Review) {
+      styleReview = await ctx.task(reviewApStyleTask, { ...{
+    pressRelease: refinedRelease
+  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
+    }
+  const phase6Review = await ctx.breakpoint({
     question: 'Style review complete. Develop distribution plan?',
     title: 'Phase 6: Distribution Planning',
     context: {
@@ -132,9 +214,15 @@ export async function process(inputs, ctx) {
       phase: 'distribution-planning',
       channels: distributionChannels,
       embargoed
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase6Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase6Review.approved) break;
+    lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
+  }
   const [distributionPlan, targetedOutreach] = await Promise.all([
     ctx.task(developDistributionPlanTask, {
       pressRelease: styleReview.finalRelease,
@@ -150,17 +238,29 @@ export async function process(inputs, ctx) {
     })
   ]);
 
-  // Phase 7: Final Quality Validation
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      styleReview = await ctx.task(reviewApStyleTask, { ...{
+    pressRelease: refinedRelease
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: 'Validate press release quality and distribution readiness?',
     title: 'Phase 7: Final Validation',
     context: {
       runId: ctx.runId,
       phase: 'final-validation',
       targetQuality
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const qualityResult = await ctx.task(validatePressReleaseQualityTask, {
     pressRelease: styleReview.finalRelease,
     styleReview,
@@ -221,8 +321,7 @@ export async function process(inputs, ctx) {
     };
   }
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const assessNewsValueTask = defineTask('assess-news-value', (args, taskCtx) => ({
   kind: 'agent',

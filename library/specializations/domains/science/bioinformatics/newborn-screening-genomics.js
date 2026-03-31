@@ -49,16 +49,26 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Panel analysis complete. ${panelResult.genesAnalyzed} genes, ${panelResult.variantsInPanel} variants in panel`);
 
   // Phase 3: Pathogenic Variant Identification
-  const pathogenicResult = await ctx.task(pathogenicIdentificationTask, { projectName, panelVariants: panelResult.panelVariants, screeningPanel, outputDir });
+  let pathogenicResult = await ctx.task(pathogenicIdentificationTask, { projectName, panelVariants: panelResult.panelVariants, screeningPanel, outputDir });
   artifacts.push(...pathogenicResult.artifacts);
 
-  if (pathogenicResult.actionableFindings > 0) {
-    await ctx.breakpoint({
+      let lastFeedback_phase3Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase3Review) {
+        pathogenicResult = await ctx.task(pathogenicIdentificationTask, { ...{ projectName, panelVariants: panelResult.panelVariants, screeningPanel, outputDir }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+      }
+  const phase3Review = await ctx.breakpoint({
       question: `URGENT: ${pathogenicResult.actionableFindings} actionable pathogenic variants identified. Review immediately for clinical action.`,
       title: 'Actionable Findings Alert',
-      context: { runId: ctx.runId, actionableVariants: pathogenicResult.actionable, urgentRecommendations: pathogenicResult.urgentRecommendations, files: pathogenicResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label })) }
-    });
-  }
+      context: { runId: ctx.runId, actionableVariants: pathogenicResult.actionable, urgentRecommendations: pathogenicResult.urgentRecommendations, files: pathogenicResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label })) },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase3Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase3Review.approved) break;
+      lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+    } }
 
   // Phase 4: Carrier Status Determination
   let carrierResult = null;
@@ -66,14 +76,12 @@ export async function process(inputs, ctx) {
     carrierResult = await ctx.task(carrierStatusTask, { projectName, variants: processingResult.variants, outputDir });
     artifacts.push(...carrierResult.artifacts);
   }
-
   // Phase 5: Pharmacogenomics Panel
   let pgxResult = null;
   if (includePGx) {
     pgxResult = await ctx.task(newbornPgxTask, { projectName, variants: processingResult.variants, outputDir });
     artifacts.push(...pgxResult.artifacts);
   }
-
   // Phase 6: Biochemical Integration
   const biochemResult = await ctx.task(biochemicalIntegrationTask, { projectName, genomicFindings: pathogenicResult, biochemicalResults: newborn.biochemical, outputDir });
   artifacts.push(...biochemResult.artifacts);
@@ -87,15 +95,24 @@ export async function process(inputs, ctx) {
   artifacts.push(...qaResult.artifacts);
 
   // Phase 9: Follow-up Recommendations
-  const followupResult = await ctx.task(followupRecommendationsTask, { projectName, screeningResults: pathogenicResult, carrierStatus: carrierResult, pgxResults: pgxResult, outputDir });
-  artifacts.push(...followupResult.artifacts);
-
-  await ctx.breakpoint({
+  let followupResult = await ctx.task(followupRecommendationsTask, { projectName, screeningResults: pathogenicResult, carrierStatus: carrierResult, pgxResults: pgxResult, outputDir });
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      followupResult = await ctx.task(followupRecommendationsTask, { ...{ projectName, screeningResults: pathogenicResult, carrierStatus: carrierResult, pgxResults: pgxResult, outputDir }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Newborn Screening Complete. ${pathogenicResult.actionableFindings} actionable, ${carrierResult?.carrierConditions || 0} carrier conditions. Approve clinical report?`,
     title: 'Newborn Screening Complete',
-    context: { runId: ctx.runId, summary: { actionable: pathogenicResult.actionableFindings, carriers: carrierResult?.carrierConditions || 0, pgxFindings: pgxResult?.significantFindings || 0 }, files: [{ path: reportResult.reportPath, format: 'markdown', label: 'Screening Report' }] }
-  });
-
+    context: { runId: ctx.runId, summary: { actionable: pathogenicResult.actionableFindings, carriers: carrierResult?.carrierConditions || 0, pgxFindings: pgxResult?.significantFindings || 0 }, files: [{ path: reportResult.reportPath, format: 'markdown', label: 'Screening Report' }] },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
 
   return {
@@ -113,8 +130,7 @@ export async function process(inputs, ctx) {
     metadata: { processId: 'specializations/domains/science/bioinformatics/newborn-screening-genomics', timestamp: startTime, screeningPanel, urgentMode }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 export const rapidDataProcessingTask = defineTask('rapid-data-processing', (args, taskCtx) => ({
   kind: 'agent',
   title: `Rapid Processing - ${args.projectName}`,

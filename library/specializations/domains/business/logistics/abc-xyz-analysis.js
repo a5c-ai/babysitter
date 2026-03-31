@@ -57,24 +57,38 @@ export async function process(inputs, ctx) {
 
   // PHASE 4: MATRIX COMBINATION
   ctx.log('info', 'Phase 4: Combining ABC-XYZ matrix');
-  const matrixCombination = await ctx.task(matrixCombinationTask, {
+  let matrixCombination = await ctx.task(matrixCombinationTask, {
     abcClassification: abcClassification.classifications,
     xyzClassification: xyzClassification.classifications,
     outputDir
   });
   artifacts.push(...matrixCombination.artifacts);
 
-  // Quality Gate: Review classification results
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      matrixCombination = await ctx.task(matrixCombinationTask, { ...{
+    abcClassification: abcClassification.classifications,
+    xyzClassification: xyzClassification.classifications,
+    outputDir
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: `ABC-XYZ classification complete for ${inventory.length} items. Review distribution before policy recommendations?`,
     title: 'Classification Review',
     context: {
       runId: ctx.runId,
       distribution: matrixCombination.distribution,
       files: matrixCombination.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
   // PHASE 5: INVENTORY POLICY RECOMMENDATIONS
   ctx.log('info', 'Phase 5: Generating policy recommendations');
   const policyRecommendations = await ctx.task(policyRecommendationTask, {
@@ -103,7 +117,7 @@ export async function process(inputs, ctx) {
 
   // PHASE 8: GENERATE ANALYSIS REPORT
   ctx.log('info', 'Phase 8: Generating analysis report');
-  const analysisReport = await ctx.task(analysisReportTask, {
+  let analysisReport = await ctx.task(analysisReportTask, {
     abcClassification,
     xyzClassification,
     matrixCombination,
@@ -114,8 +128,20 @@ export async function process(inputs, ctx) {
   });
   artifacts.push(...analysisReport.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      analysisReport = await ctx.task(analysisReportTask, { ...{
+    abcClassification,
+    xyzClassification,
+    matrixCombination,
+    policyRecommendations: policyRecommendations.policies,
+    serviceLevelStrategy: serviceLevelStrategy.strategies,
+    replenishmentStrategy: replenishmentStrategy.strategies,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `ABC-XYZ analysis complete. ${matrixCombination.classifications.length} items classified. Review and approve policy recommendations?`,
     title: 'ABC-XYZ Analysis Complete',
     context: {
@@ -128,9 +154,15 @@ export async function process(inputs, ctx) {
         czItems: matrixCombination.distribution.CZ
       },
       files: [{ path: analysisReport.reportPath, format: 'markdown', label: 'Analysis Report' }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   return {
     success: true,
@@ -146,8 +178,7 @@ export async function process(inputs, ctx) {
     metadata: { processId: 'specializations/domains/business/logistics/abc-xyz-analysis', timestamp: startTime, outputDir }
   };
 }
-
-// TASK DEFINITIONS
+  // TASK DEFINITIONS
 export const dataPreparationTask = defineTask('data-preparation', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Prepare and validate data',

@@ -17,22 +17,32 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Starting Medical Coding Compliance Program for: ${organizationName}`);
 
-  const currentStateAssessment = await ctx.task(codingCurrentStateTask, { organizationName, codingScope, currentMetrics, outputDir });
-  artifacts.push(...currentStateAssessment.artifacts);
-
-  await ctx.breakpoint({ question: `Current state assessed. Accuracy rate: ${currentStateAssessment.accuracyRate}%. ${currentStateAssessment.riskAreas.length} risk areas identified. Proceed?`, title: 'Coding Compliance Assessment', context: { runId: ctx.runId, accuracy: currentStateAssessment.accuracyRate, risks: currentStateAssessment.riskAreas } });
-
+  let currentStateAssessment = await ctx.task(codingCurrentStateTask, { organizationName, codingScope, currentMetrics, outputDir });
+    let lastFeedback_assessmentApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_assessmentApproval) {
+      currentStateAssessment = await ctx.task(codingCurrentStateTask, { ...{ organizationName, codingScope, currentMetrics, outputDir }, feedback: lastFeedback_assessmentApproval, attempt: attempt + 1 });
+    }
+  const assessmentApproval = await ctx.breakpoint({ question: `Current state assessed. Accuracy rate: ${currentStateAssessment.accuracyRate}%. ${currentStateAssessment.riskAreas.length} risk areas identified. Proceed?`, title: 'Coding Compliance Assessment', context: { runId: ctx.runId, accuracy: currentStateAssessment.accuracyRate, risks: currentStateAssessment.riskAreas }, expert: 'owner', tags: ['approval-gate'], previousFeedback: lastFeedback_assessmentApproval || undefined, attempt: attempt > 0 ? attempt + 1 : undefined });
+    if (assessmentApproval.approved) break;
+    lastFeedback_assessmentApproval = assessmentApproval.response || assessmentApproval.feedback || 'Changes requested';
+  }
   const compliancePolicies = await ctx.task(codingCompliancePoliciesTask, { currentStateAssessment, outputDir });
   artifacts.push(...compliancePolicies.artifacts);
 
   const auditProgram = await ctx.task(codingAuditProgramTask, { currentStateAssessment, focusAreas, outputDir });
   artifacts.push(...auditProgram.artifacts);
 
-  const educationProgram = await ctx.task(codingEducationTask, { currentStateAssessment, auditProgram, outputDir });
-  artifacts.push(...educationProgram.artifacts);
-
-  await ctx.breakpoint({ question: `Audit program covers ${auditProgram.auditTypes.length} audit types. Education includes ${educationProgram.modules.length} modules. Proceed with monitoring design?`, title: 'Audit and Education Review', context: { runId: ctx.runId, audits: auditProgram.auditTypes, education: educationProgram.modules } });
-
+  let educationProgram = await ctx.task(codingEducationTask, { currentStateAssessment, auditProgram, outputDir });
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      educationProgram = await ctx.task(codingEducationTask, { ...{ currentStateAssessment, auditProgram, outputDir }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({ question: `Audit program covers ${auditProgram.auditTypes.length} audit types. Education includes ${educationProgram.modules.length} modules. Proceed with monitoring design?`, title: 'Audit and Education Review', context: { runId: ctx.runId, audits: auditProgram.auditTypes, education: educationProgram.modules }, expert: 'owner', tags: ['approval-gate'], previousFeedback: lastFeedback_finalApproval || undefined, attempt: attempt > 0 ? attempt + 1 : undefined });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const queryManagement = await ctx.task(codingQueryManagementTask, { compliancePolicies, outputDir });
   artifacts.push(...queryManagement.artifacts);
 

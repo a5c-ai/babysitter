@@ -59,7 +59,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 2: Developing characterization tests');
-  const characterizationTests = await ctx.task(characterizationTestDevelopmentTask, {
+  let characterizationTests = await ctx.task(characterizationTestDevelopmentTask, {
     projectName,
     legacySystemAccess,
     testScope,
@@ -68,8 +68,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...characterizationTests.artifacts);
 
-  // Breakpoint: Characterization baseline approval
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      characterizationTests = await ctx.task(characterizationTestDevelopmentTask, { ...{
+    projectName,
+    legacySystemAccess,
+    testScope,
+    outputDir
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Characterization tests developed for ${projectName}. Test count: ${characterizationTests.testCount}. Coverage: ${characterizationTests.coverage}%. Approve baselines before proceeding?`,
     title: 'Characterization Test Baseline Approval',
     context: {
@@ -78,9 +87,15 @@ export async function process(inputs, ctx) {
       testCount: characterizationTests.testCount,
       coverage: characterizationTests.coverage,
       files: characterizationTests.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 3: REGRESSION TEST PLANNING
   // ============================================================================
@@ -141,7 +156,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 7: Setting up test automation');
-  const automationSetup = await ctx.task(testAutomationSetupTask, {
+  let automationSetup = await ctx.task(testAutomationSetupTask, {
     projectName,
     characterizationTests,
     regressionPlan,
@@ -153,8 +168,20 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...automationSetup.artifacts);
 
-  // Breakpoint: Automation framework review
-  await ctx.breakpoint({
+    let lastFeedback_phase7Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase7Review) {
+      automationSetup = await ctx.task(testAutomationSetupTask, { ...{
+    projectName,
+    characterizationTests,
+    regressionPlan,
+    dataValidationDesign,
+    performanceTestDesign,
+    testAutomationTarget,
+    outputDir
+  }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
+    }
+  const phase7Review = await ctx.breakpoint({
     question: `Test automation framework ready for ${projectName}. Automation coverage: ${automationSetup.automationCoverage}%. CI/CD integrated: ${automationSetup.cicdIntegrated}. Approve automation setup?`,
     title: 'Test Automation Framework Review',
     context: {
@@ -162,9 +189,15 @@ export async function process(inputs, ctx) {
       projectName,
       automationSetup,
       recommendation: 'Ensure CI/CD pipeline runs tests on every commit'
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase7Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase7Review.approved) break;
+    lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 8: TEST EXECUTION PLANNING
   // ============================================================================
@@ -200,7 +233,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 10: Setting up test reporting');
-  const testReporting = await ctx.task(testReportingSetupTask, {
+  let testReporting = await ctx.task(testReportingSetupTask, {
     projectName,
     testScope,
     executionPlan,
@@ -209,8 +242,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...testReporting.artifacts);
 
-  // Final Breakpoint: Testing Strategy Approval
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      testReporting = await ctx.task(testReportingSetupTask, { ...{
+    projectName,
+    testScope,
+    executionPlan,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Migration Testing Strategy complete for ${projectName}. Total test cases: ${testScope.totalTestCases}. Automation target: ${testAutomationTarget}%. Approve testing strategy?`,
     title: 'Migration Testing Strategy Approval',
     context: {
@@ -223,9 +265,15 @@ export async function process(inputs, ctx) {
         executionPhases: executionPlan.phases.length
       },
       files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -280,8 +328,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

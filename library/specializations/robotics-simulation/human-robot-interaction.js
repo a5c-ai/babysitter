@@ -57,15 +57,24 @@ export async function process(inputs, ctx) {
   const userStudyTesting = await ctx.task(userStudyTestingTask, { robotName, collaborativeBehaviors, outputDir });
   artifacts.push(...userStudyTesting.artifacts);
 
-  const safetyValidation = await ctx.task(hriSafetyValidationTask, { robotName, safetyLevel, safetyMonitoring, outputDir });
-  artifacts.push(...safetyValidation.artifacts);
-
-  await ctx.breakpoint({
+  let safetyValidation = await ctx.task(hriSafetyValidationTask, { robotName, safetyLevel, safetyMonitoring, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      safetyValidation = await ctx.task(hriSafetyValidationTask, { ...{ robotName, safetyLevel, safetyMonitoring, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `HRI Development Complete for ${robotName}. User satisfaction: ${userStudyTesting.satisfaction}%, Safety compliant: ${safetyValidation.compliant}. Review?`,
     title: 'HRI Development Complete',
-    context: { runId: ctx.runId, satisfaction: userStudyTesting.satisfaction, compliant: safetyValidation.compliant }
-  });
-
+    context: { runId: ctx.runId, satisfaction: userStudyTesting.satisfaction, compliant: safetyValidation.compliant },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: userStudyTesting.satisfaction >= 80 && safetyValidation.compliant,
     robotName,

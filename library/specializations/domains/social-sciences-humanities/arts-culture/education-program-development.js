@@ -95,7 +95,7 @@ export async function process(inputs, ctx) {
 
   // Task 6: Teacher and Docent Training
   ctx.log('info', 'Developing training program for educators');
-  const educatorTraining = await ctx.task(educatorTrainingTask, {
+  let educatorTraining = await ctx.task(educatorTrainingTask, {
     programName,
     curriculumDesign: curriculumDesign.curriculum,
     instructionalStrategies: instructionalStrategies.strategies,
@@ -104,8 +104,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...educatorTraining.artifacts);
 
-  // Breakpoint: Review education program
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      educatorTraining = await ctx.task(educatorTrainingTask, { ...{
+    programName,
+    curriculumDesign: curriculumDesign.curriculum,
+    instructionalStrategies: instructionalStrategies.strategies,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Education program "${programName}" design complete. Target: ${targetAudience}. ${learningObjectives.objectives.length} learning objectives. Review and approve?`,
     title: 'Education Program Review',
     context: {
@@ -118,9 +127,15 @@ export async function process(inputs, ctx) {
         objectivesCount: learningObjectives.objectives.length,
         lessonsCount: curriculumDesign.curriculum.lessons?.length || 0
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 7: Delivery Plan
   ctx.log('info', 'Creating program delivery plan');
   const deliveryPlan = await ctx.task(deliveryPlanTask, {
@@ -193,8 +208,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Needs Assessment
+  // Task 1: Needs Assessment
 export const needsAssessmentTask = defineTask('needs-assessment', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Conduct needs assessment',

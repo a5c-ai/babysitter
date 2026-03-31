@@ -41,15 +41,24 @@ export async function process(inputs, ctx) {
   artifacts.push(...contentionAnalysis.artifacts);
 
   // Phase 3: Analyze Lock Usage
-  const lockAnalysis = await ctx.task(analyzeLockUsageTask, { projectName, contentionAnalysis, outputDir });
-  artifacts.push(...lockAnalysis.artifacts);
-
-  await ctx.breakpoint({
+  let lockAnalysis = await ctx.task(analyzeLockUsageTask, { projectName, contentionAnalysis, outputDir });
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      lockAnalysis = await ctx.task(analyzeLockUsageTask, { ...{ projectName, contentionAnalysis, outputDir }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Found ${contentionAnalysis.contentionPoints.length} contention points and ${lockAnalysis.lockIssues.length} lock issues. Proceed with optimization design?`,
     title: 'Contention Analysis Review',
-    context: { runId: ctx.runId, contentionAnalysis, lockAnalysis }
-  });
-
+    context: { runId: ctx.runId, contentionAnalysis, lockAnalysis },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // Phase 4: Design Lock Optimizations
   const lockOptimizations = await ctx.task(designLockOptimizationsTask, { projectName, lockAnalysis, outputDir });
   artifacts.push(...lockOptimizations.artifacts);
@@ -71,15 +80,24 @@ export async function process(inputs, ctx) {
   artifacts.push(...benchmarkResults.artifacts);
 
   // Phase 9: Document Concurrency Patterns
-  const documentation = await ctx.task(documentConcurrencyPatternsTask, { projectName, lockOptimizations, lockFreeEvaluation, threadPoolConfig, outputDir });
-  artifacts.push(...documentation.artifacts);
-
-  await ctx.breakpoint({
+  let documentation = await ctx.task(documentConcurrencyPatternsTask, { projectName, lockOptimizations, lockFreeEvaluation, threadPoolConfig, outputDir });
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      documentation = await ctx.task(documentConcurrencyPatternsTask, { ...{ projectName, lockOptimizations, lockFreeEvaluation, threadPoolConfig, outputDir }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Concurrency optimization complete. ${lockOptimizations.optimizations.length} lock optimizations, ${lockFreeEvaluation.recommendations.length} lock-free candidates. Throughput improvement: ${benchmarkResults.throughputImprovement}%. Accept?`,
     title: 'Concurrency Optimization Review',
-    context: { runId: ctx.runId, lockOptimizations, benchmarkResults }
-  });
-
+    context: { runId: ctx.runId, lockOptimizations, benchmarkResults },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     projectName,

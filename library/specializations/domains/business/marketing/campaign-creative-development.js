@@ -166,7 +166,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 10: Assessing creative development quality');
-  const qualityAssessment = await ctx.task(creativeQualityAssessmentTask, {
+  let qualityAssessment = await ctx.task(creativeQualityAssessmentTask, {
     campaignName,
     briefAnalysis,
     conceptDevelopment,
@@ -182,8 +182,21 @@ export async function process(inputs, ctx) {
   const creativeScore = qualityAssessment.overallScore;
   const qualityMet = creativeScore >= 80;
 
-  // Breakpoint: Review creative development
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      qualityAssessment = await ctx.task(creativeQualityAssessmentTask, { ...{
+    campaignName,
+    briefAnalysis,
+    conceptDevelopment,
+    copywriting,
+    visualDesign,
+    brandCompliance,
+    productionPlan,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Creative development complete. Quality score: ${creativeScore}/100. ${qualityMet ? 'Creative meets quality standards!' : 'Creative may need refinement.'} Review and approve?`,
     title: 'Creative Development Review & Approval',
     context: {
@@ -203,9 +216,15 @@ export async function process(inputs, ctx) {
         assetCount: assetSpecification.assets?.length || 0,
         brandComplianceScore: brandCompliance.score || 0
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -241,8 +260,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

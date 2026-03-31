@@ -41,7 +41,7 @@ export async function process(inputs, ctx) {
   artifacts.push({ phase: 'preliminary-wps', data: preliminaryWps });
 
   // Phase 3: Filler Metal Selection
-  const fillerSelection = await ctx.task(fillerSelectionTask, {
+  let fillerSelection = await ctx.task(fillerSelectionTask, {
     baseMaterials: inputs.baseMaterials,
     weldProcess: preliminaryWps.weldProcess,
     applicationRequirements: inputs.applicationRequirements,
@@ -49,16 +49,31 @@ export async function process(inputs, ctx) {
   });
   artifacts.push({ phase: 'filler-selection', data: fillerSelection });
 
-  // Breakpoint: pWPS Review
-  await ctx.breakpoint('pwps-review', {
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      fillerSelection = await ctx.task(fillerSelectionTask, { ...{
+    baseMaterials: inputs.baseMaterials,
+    weldProcess: preliminaryWps.weldProcess,
+    applicationRequirements: inputs.applicationRequirements,
+    codeRequirements: codeAnalysis
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint('pwps-review', {
     question: 'Review preliminary WPS parameters before test coupon fabrication?',
     context: {
       weldProcess: preliminaryWps.weldProcess,
       fillerMetal: fillerSelection.selectedFiller,
       essentialVariables: preliminaryWps.essentialVariables
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // Phase 4: Test Coupon Design
   const couponDesign = await ctx.task(couponDesignTask, {
     jointDesign: inputs.jointDesign,
@@ -101,7 +116,7 @@ export async function process(inputs, ctx) {
   artifacts.push({ phase: 'testing-plan', data: testingPlan });
 
   // Phase 9: Final WPS Documentation
-  const finalWps = await ctx.task(finalWpsTask, {
+  let finalWps = await ctx.task(finalWpsTask, {
     projectId: inputs.projectId,
     preliminaryWps: preliminaryWps,
     fillerSelection: fillerSelection,
@@ -110,16 +125,32 @@ export async function process(inputs, ctx) {
   });
   artifacts.push({ phase: 'final-wps', data: finalWps });
 
-  // Final Breakpoint: WPS Approval
-  await ctx.breakpoint('wps-approval', {
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      finalWps = await ctx.task(finalWpsTask, { ...{
+    projectId: inputs.projectId,
+    preliminaryWps: preliminaryWps,
+    fillerSelection: fillerSelection,
+    parameterOptimization: parameterOptimization,
+    applicableCode: inputs.applicableCode
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint('wps-approval', {
     question: 'Approve WPS for welder qualification testing?',
     context: {
       wpsNumber: finalWps.wpsNumber,
       weldProcess: finalWps.weldProcess,
       qualificationRange: finalWps.qualificationRange
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     results: {
@@ -138,8 +169,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-const codeAnalysisTask = defineTask('code-analysis', (args) => ({
+  const codeAnalysisTask = defineTask('code-analysis', (args) => ({
   kind: 'agent',
   title: 'Welding Code Requirements Analysis',
   agent: {

@@ -36,7 +36,6 @@ export async function process(inputs, ctx) {
   if (!applicationUrl) {
     throw new Error('Application URL is required for DAST scanning');
   }
-
   // ============================================================================
   // PHASE 1: ENVIRONMENT ASSESSMENT AND SETUP
   // ============================================================================
@@ -368,7 +367,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 10: Generating reports and remediation guidance');
-  const reporting = await ctx.task(generateReportsTask, {
+  let reporting = await ctx.task(generateReportsTask, {
     environmentAssessment,
     scopeDefinition,
     passiveScan,
@@ -442,7 +441,6 @@ export async function process(inputs, ctx) {
       }
     });
   }
-
   // ============================================================================
   // FINAL ASSESSMENT AND SUMMARY
   // ============================================================================
@@ -450,9 +448,24 @@ export async function process(inputs, ctx) {
   const totalVulnerabilities = vulnerabilityValidation.confirmedVulnerabilities;
   const criticalIssues = activeScan.criticalCount + apiScan.criticalCount;
   const securityScore = complianceMapping.overallSecurityScore || 0;
-  const success = criticalIssues === 0 && securityScore >= 70;
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      reporting = await ctx.task(generateReportsTask, { ...{
+    environmentAssessment,
+    scopeDefinition,
+    passiveScan,
+    activeScan,
+    apiScan,
+    vulnerabilityValidation,
+    complianceMapping,
+    reportFormats,
+    severityThreshold,
+    complianceStandards,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `DAST scan complete! Found ${totalVulnerabilities} confirmed vulnerabilities (${criticalIssues} critical). Security score: ${securityScore}/100. ${success ? 'Application meets security baseline!' : 'Remediation required before production deployment.'} Review findings and proceed?`,
     title: 'DAST Process Complete - Review Required',
     context: {
@@ -472,9 +485,15 @@ export async function process(inputs, ctx) {
         topFindings: reporting.topFindings,
         reportPaths: reporting.reportLinks
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -540,8 +559,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

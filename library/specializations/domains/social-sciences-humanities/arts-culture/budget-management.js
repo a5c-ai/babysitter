@@ -91,7 +91,7 @@ export async function process(inputs, ctx) {
 
   // Task 6: Financial Reporting Framework
   ctx.log('info', 'Establishing financial reporting framework');
-  const reportingFramework = await ctx.task(reportingFrameworkTask, {
+  let reportingFramework = await ctx.task(reportingFrameworkTask, {
     fiscalYear,
     organizationType,
     reportingPeriod,
@@ -101,8 +101,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...reportingFramework.artifacts);
 
-  // Breakpoint: Review budget
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      reportingFramework = await ctx.task(reportingFrameworkTask, { ...{
+    fiscalYear,
+    organizationType,
+    reportingPeriod,
+    budgetAllocation,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Budget for FY${fiscalYear} complete. Total: $${annualBudget}. Projected surplus/deficit: $${revenueProjection.totalRevenue - expensePlanning.totalExpenses}. Review?`,
     title: 'Budget Management Review',
     context: {
@@ -115,9 +125,15 @@ export async function process(inputs, ctx) {
         netResult: revenueProjection.totalRevenue - expensePlanning.totalExpenses,
         cashFlowStatus: cashFlowForecast.status
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 7: Generate Budget Documentation
   ctx.log('info', 'Generating budget documentation');
   const documentation = await ctx.task(budgetDocumentationTask, {
@@ -157,8 +173,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Revenue Projection
+  // Task 1: Revenue Projection
 export const revenueProjectionTask = defineTask('revenue-projection', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Project revenue',

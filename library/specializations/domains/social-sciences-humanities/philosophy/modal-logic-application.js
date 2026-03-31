@@ -72,7 +72,7 @@ export async function process(inputs, ctx) {
 
   // Task 5: Modal Fallacy Check
   ctx.log('info', 'Checking for modal fallacies');
-  const modalFallacyCheck = await ctx.task(modalFallacyCheckTask, {
+  let modalFallacyCheck = await ctx.task(modalFallacyCheckTask, {
     argument: modalFormalization.formalized,
     modalSystem,
     outputDir
@@ -80,8 +80,16 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...modalFallacyCheck.artifacts);
 
-  // Breakpoint: Review modal analysis
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      modalFallacyCheck = await ctx.task(modalFallacyCheckTask, { ...{
+    argument: modalFormalization.formalized,
+    modalSystem,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Modal logic analysis complete using ${modalSystem} system. Argument is ${validityEvaluation.validity.isValid ? 'modally valid' : 'modally invalid'}. Review the analysis?`,
     title: 'Modal Logic Analysis Results',
     context: {
@@ -94,9 +102,15 @@ export async function process(inputs, ctx) {
         modalOperators: modalIdentification.claims.operators,
         fallaciesFound: modalFallacyCheck.fallacies.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 6: Generate Modal Analysis Report
   ctx.log('info', 'Generating modal logic analysis report');
   const analysisReport = await ctx.task(modalReportTask, {
@@ -147,8 +161,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Modal Identification
+  // Task 1: Modal Identification
 export const modalIdentificationTask = defineTask('modal-identification', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Identify modal claims in argument',

@@ -64,17 +64,28 @@ export async function process(inputs, ctx) {
   artifacts.push(...warpSync.artifacts);
 
   // Phase 6: Efficiency Measurement
-  const efficiencyMeasurement = await ctx.task(warpEfficiencyMeasurementTask, {
+  let efficiencyMeasurement = await ctx.task(warpEfficiencyMeasurementTask, {
     projectName, targetKernels, divergenceReport, outputDir
   });
-  artifacts.push(...efficiencyMeasurement.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      efficiencyMeasurement = await ctx.task(warpEfficiencyMeasurementTask, { ...{
+    projectName, targetKernels, divergenceReport, outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Warp efficiency optimization complete for ${projectName}. Efficiency: ${efficiencyMeasurement.warpEfficiency}%. Review?`,
     title: 'Warp Efficiency Complete',
-    context: { runId: ctx.runId, efficiencyMeasurement }
-  });
-
+    context: { runId: ctx.runId, efficiencyMeasurement },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: efficiencyMeasurement.warpEfficiency >= 80,
     projectName,

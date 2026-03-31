@@ -59,7 +59,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 2: Establishing membership structure and role definitions');
 
-  const membershipStructure = await ctx.task(membershipStructureTask, {
+  let membershipStructure = await ctx.task(membershipStructureTask, {
     organizationName,
     councilCharter,
     productLines,
@@ -73,8 +73,20 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Membership structure defined: ${membershipStructure.coreMembers.length} core members, ${membershipStructure.exOfficio.length} ex-officio members`);
 
-  // Breakpoint: Review charter and membership
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      membershipStructure = await ctx.task(membershipStructureTask, { ...{
+    organizationName,
+    councilCharter,
+    productLines,
+    stakeholders,
+    councilSize,
+    decisionModel,
+    outputDir
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Council charter and membership structure complete. ${membershipStructure.coreMembers.length} core members, ${councilCharter.principles.length} guiding principles. Review before proceeding?`,
     title: 'Charter and Membership Review',
     context: {
@@ -91,9 +103,15 @@ export async function process(inputs, ctx) {
         principlesCount: councilCharter.principles.length,
         decisionModel
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 3: REVIEW CADENCE AND MEETING STRUCTURE
   // ============================================================================
@@ -141,7 +159,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 5: Designing review process and workflows');
 
-  const reviewProcessDesign = await ctx.task(reviewProcessDesignTask, {
+  let reviewProcessDesign = await ctx.task(reviewProcessDesignTask, {
     organizationName,
     councilCharter,
     membershipStructure,
@@ -155,8 +173,20 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Review process designed with ${reviewProcessDesign.workflows.length} workflows`);
 
-  // Breakpoint: Review process and criteria
-  await ctx.breakpoint({
+    let lastFeedback_phase5Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase5Review) {
+      reviewProcessDesign = await ctx.task(reviewProcessDesignTask, { ...{
+    organizationName,
+    councilCharter,
+    membershipStructure,
+    reviewCadence,
+    decisionCriteria,
+    decisionModel,
+    outputDir
+  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+    }
+  const phase5Review = await ctx.breakpoint({
     question: `Review process and decision criteria complete. ${decisionCriteria.length} decision criteria, ${reviewProcessDesign.workflows.length} workflows defined. Review before escalation process?`,
     title: 'Review Process and Criteria Review',
     context: {
@@ -173,9 +203,15 @@ export async function process(inputs, ctx) {
         decisionCriteriaCount: decisionCriteria.length,
         workflowsCount: reviewProcessDesign.workflows.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase5Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase5Review.approved) break;
+    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 6: ESCALATION PROCESS DEFINITION
   // ============================================================================
@@ -239,7 +275,6 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Metrics framework established with ${metricsFramework.kpis.length} KPIs`);
   }
-
   // ============================================================================
   // PHASE 9: ONBOARDING AND TRAINING MATERIALS
   // ============================================================================
@@ -265,7 +300,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 10: Validating governance framework completeness');
 
-  const governanceValidation = await ctx.task(governanceValidationTask, {
+  let governanceValidation = await ctx.task(governanceValidationTask, {
     organizationName,
     councilCharter,
     membershipStructure,
@@ -283,8 +318,23 @@ export async function process(inputs, ctx) {
   const validationScore = governanceValidation.validationScore;
   const validationPassed = validationScore >= 85;
 
-  // Breakpoint: Governance validation results
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      governanceValidation = await ctx.task(governanceValidationTask, { ...{
+    organizationName,
+    councilCharter,
+    membershipStructure,
+    reviewCadence,
+    decisionCriteria,
+    escalationProcess,
+    documentationFramework,
+    metricsFramework,
+    existingGovernance,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Governance validation complete. Validation score: ${validationScore}/100. ${validationPassed ? 'Framework ready for implementation!' : 'Some gaps identified.'} Review validation results?`,
     title: 'Governance Validation Results',
     context: {
@@ -302,9 +352,15 @@ export async function process(inputs, ctx) {
         gapsIdentified: governanceValidation.gaps.length,
         recommendations: governanceValidation.recommendations.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 11: IMPLEMENTATION ROADMAP
   // ============================================================================
@@ -411,8 +467,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

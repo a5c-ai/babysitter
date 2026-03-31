@@ -104,7 +104,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 5: Developing category strategy');
 
-  const strategyDevelopment = await ctx.task(categoryStrategyTask, {
+  let strategyDevelopment = await ctx.task(categoryStrategyTask, {
     categoryName,
     categoryProfile,
     spendAnalysis,
@@ -116,8 +116,20 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...strategyDevelopment.artifacts);
 
-  // Breakpoint: Review category strategy
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      strategyDevelopment = await ctx.task(categoryStrategyTask, { ...{
+    categoryName,
+    categoryProfile,
+    spendAnalysis,
+    kraljicPositioning,
+    supplyMarketAnalysis,
+    objectives,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Category strategy developed for ${categoryName}. Kraljic Position: ${kraljicPositioning.quadrant}. Recommended approach: ${strategyDevelopment.primaryStrategy}. Review strategy?`,
     title: 'Category Strategy Review',
     context: {
@@ -129,9 +141,15 @@ export async function process(inputs, ctx) {
         primaryStrategy: strategyDevelopment.primaryStrategy,
         savingsTarget: strategyDevelopment.savingsTarget
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 6: INITIATIVE IDENTIFICATION
   // ============================================================================
@@ -197,8 +215,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

@@ -119,7 +119,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Scoring evaluation design quality');
-  const qualityScore = await ctx.task(kirkpatrickQualityScoringTask, {
+  let qualityScore = await ctx.task(kirkpatrickQualityScoringTask, {
     programName,
     level1Design,
     level2Design,
@@ -135,8 +135,21 @@ export async function process(inputs, ctx) {
   const overallScore = qualityScore.overallScore;
   const qualityMet = overallScore >= qualityThreshold;
 
-  // Breakpoint: Review evaluation plan
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      qualityScore = await ctx.task(kirkpatrickQualityScoringTask, { ...{
+    programName,
+    level1Design,
+    level2Design,
+    level3Design,
+    level4Design,
+    roiFramework,
+    qualityThreshold,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Kirkpatrick evaluation design complete. Quality score: ${overallScore}/${qualityThreshold}. ${qualityMet ? 'Quality standards met!' : 'May need refinement.'} Review and approve?`,
     title: 'Kirkpatrick Evaluation Review',
     context: {
@@ -150,9 +163,15 @@ export async function process(inputs, ctx) {
         totalInstruments: evaluationPlan.plan?.instruments?.length || 0,
         totalArtifacts: artifacts.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -183,8 +202,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task definitions
+  // Task definitions
 export const level1ReactionTask = defineTask('level1-reaction', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Design Level 1: Reaction evaluation',

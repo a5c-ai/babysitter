@@ -55,7 +55,6 @@ export async function process(inputs, ctx) {
       predictions: null
     };
   }
-
   // Phase 3: Initial State Setup
   const initialState = await ctx.task(initialStateSetupTask, {
     model,
@@ -86,14 +85,22 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 7: Uncertainty Quantification
-  const uncertaintyAnalysis = await ctx.task(uncertaintyQuantificationTask, {
+  let uncertaintyAnalysis = await ctx.task(uncertaintyQuantificationTask, {
     simulationExecution,
     sensitivityAnalysis,
     model
   });
 
-  // Breakpoint: Review simulation results
-  await ctx.breakpoint({
+    let lastFeedback_phase7Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase7Review) {
+      uncertaintyAnalysis = await ctx.task(uncertaintyQuantificationTask, { ...{
+    simulationExecution,
+    sensitivityAnalysis,
+    model
+  }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
+    }
+  const phase7Review = await ctx.breakpoint({
     question: `Simulation complete for: "${simulationGoal}". Key prediction: ${trajectoryAnalysis.keyPrediction}. Review detailed results?`,
     title: 'Simulation Results Review',
     context: {
@@ -101,9 +108,15 @@ export async function process(inputs, ctx) {
       domain,
       scenario: scenarioSpec.summary,
       keyFindings: trajectoryAnalysis.keyFindings
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase7Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase7Review.approved) break;
+    lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
+  }
   // Phase 8: Scenario Comparison (alternative scenarios)
   const scenarioComparison = await ctx.task(scenarioComparisonTask, {
     primarySimulation: simulationExecution,
@@ -122,15 +135,24 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 10: Validation
-  const validation = await ctx.task(simulationValidationTask, {
+  let validation = await ctx.task(simulationValidationTask, {
     simulationExecution,
     modelAnalysis,
     uncertaintyAnalysis,
     domain
   });
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      validation = await ctx.task(simulationValidationTask, { ...{
+    simulationExecution,
+    modelAnalysis,
+    uncertaintyAnalysis,
+    domain
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Model-based simulation analysis complete. Confidence: ${validation.confidence}. Accept findings?`,
     title: 'Simulation Analysis Review',
     context: {
@@ -140,9 +162,15 @@ export async function process(inputs, ctx) {
         { path: 'artifacts/trajectories.json', format: 'json', content: trajectoryAnalysis },
         { path: 'artifacts/insights.json', format: 'json', content: insightExtraction }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     domain,
@@ -164,8 +192,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const modelAnalysisTask = defineTask('model-analysis', (args, taskCtx) => ({
   kind: 'agent',

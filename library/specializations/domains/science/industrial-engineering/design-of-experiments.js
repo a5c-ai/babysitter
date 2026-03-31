@@ -58,7 +58,7 @@ export async function process(inputs, ctx) {
 
   // Task 3: Design Selection
   ctx.log('info', 'Phase 3: Selecting experimental design');
-  const designSelection = await ctx.task(designSelectionTask, {
+  let designSelection = await ctx.task(designSelectionTask, {
     factorIdentification,
     designType,
     outputDir
@@ -66,8 +66,16 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...designSelection.artifacts);
 
-  // Breakpoint: Review design
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      designSelection = await ctx.task(designSelectionTask, { ...{
+    factorIdentification,
+    designType,
+    outputDir
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Experimental design selected: ${designSelection.selectedDesign}. ${designSelection.runCount} runs required. Review design matrix before execution?`,
     title: 'DOE Design Review',
     context: {
@@ -76,9 +84,15 @@ export async function process(inputs, ctx) {
       runCount: designSelection.runCount,
       factors: factorIdentification.factors,
       files: designSelection.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // Task 4: Randomization
   ctx.log('info', 'Phase 4: Creating randomization schedule');
   const randomization = await ctx.task(randomizationTask, {
@@ -131,7 +145,7 @@ export async function process(inputs, ctx) {
 
   // Task 9: Report Generation
   ctx.log('info', 'Phase 9: Generating experiment report');
-  const reportGeneration = await ctx.task(reportGenerationTask, {
+  let reportGeneration = await ctx.task(reportGenerationTask, {
     experimentPlanning,
     designSelection,
     statisticalAnalysis,
@@ -142,8 +156,19 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...reportGeneration.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      reportGeneration = await ctx.task(reportGenerationTask, { ...{
+    experimentPlanning,
+    designSelection,
+    statisticalAnalysis,
+    optimization,
+    confirmationRuns,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `DOE analysis complete. ${statisticalAnalysis.significantFactors.length} significant factors identified. Confirmation runs ${confirmationRuns.confirmed ? 'validated' : 'did not validate'} optimal settings. Review report?`,
     title: 'DOE Results Review',
     context: {
@@ -156,9 +181,15 @@ export async function process(inputs, ctx) {
         actualResponse: confirmationRuns.actualResponse
       },
       files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -183,8 +214,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Experiment Planning
+  // Task 1: Experiment Planning
 export const experimentPlanningTask = defineTask('experiment-planning', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Plan experiment objectives',

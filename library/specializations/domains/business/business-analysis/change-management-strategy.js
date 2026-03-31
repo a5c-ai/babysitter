@@ -507,7 +507,7 @@ export async function process(inputs, ctx) {
 
   // Phase 7: Metrics Framework
   ctx.log('Phase 7: Defining change metrics framework');
-  const metricsResult = await ctx.task(metricsFrameworkTask, {
+  let metricsResult = await ctx.task(metricsFrameworkTask, {
     strategyFoundation: artifacts.strategyFoundation,
     communicationStrategy: artifacts.communicationStrategy,
     trainingStrategy: artifacts.trainingStrategy,
@@ -515,12 +515,27 @@ export async function process(inputs, ctx) {
   });
   artifacts.metricsFramework = metricsResult;
 
-  // Breakpoint for strategy review
-  await ctx.breakpoint('strategy-review', {
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      metricsResult = await ctx.task(metricsFrameworkTask, { ...{
+    strategyFoundation: artifacts.strategyFoundation,
+    communicationStrategy: artifacts.communicationStrategy,
+    trainingStrategy: artifacts.trainingStrategy,
+    changeContext: inputs.changeContext
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint('strategy-review', {
     question: 'Review the change management strategy components. Is the approach comprehensive and appropriate?',
-    artifacts: artifacts
-  });
-
+    artifacts: artifacts,
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 8: Strategy Integration
   ctx.log('Phase 8: Integrating change management strategy');
   const integrationResult = await ctx.task(strategyIntegrationTask, {

@@ -61,8 +61,10 @@ export async function process(inputs, ctx) {
     ]
   });
 
-  // Phase 3: Stakeholder Alignment
-  await ctx.breakpoint('methodology-approval', {
+  let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    // No preceding task identified for re-run with feedback
+    const phase3Review = await ctx.breakpoint('methodology-approval', {
     title: 'Job Evaluation Methodology Approval',
     description: 'Review and approve the proposed job evaluation methodology',
     artifacts: {
@@ -73,9 +75,15 @@ export async function process(inputs, ctx) {
       'Does the methodology align with organizational values?',
       'Are the compensable factors appropriate for the industry?',
       'Is the weighting scheme fair and defensible?'
-    ]
-  });
-
+    ],
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // Phase 4: Job Family Framework Development
   const jobFamilyFramework = await ctx.task('develop-job-family-framework', {
     methodologyDesign,
@@ -142,8 +150,10 @@ export async function process(inputs, ctx) {
     ]
   });
 
-  // Phase 9: Quality Assurance Review
-  await ctx.breakpoint('evaluation-results-review', {
+  let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    // No preceding task identified for re-run with feedback
+    const finalApproval = await ctx.breakpoint('evaluation-results-review', {
     title: 'Job Evaluation Results Review',
     description: 'Review job evaluations and level assignments for accuracy and equity',
     artifacts: {
@@ -156,9 +166,15 @@ export async function process(inputs, ctx) {
       'Are evaluation results internally consistent?',
       'Do level assignments support pay equity?',
       'Are there any unexpected outcomes requiring investigation?'
-    ]
-  });
-
+    ],
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 10: Career Path Mapping
   const careerPaths = await ctx.task('map-career-paths', {
     levelArchitecture,

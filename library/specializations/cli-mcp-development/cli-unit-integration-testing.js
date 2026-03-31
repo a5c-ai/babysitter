@@ -66,15 +66,24 @@ export async function process(inputs, ctx) {
   const ciPipeline = await ctx.task(ciPipelineTask, { projectName, testFramework, outputDir });
   artifacts.push(...ciPipeline.artifacts);
 
-  const documentation = await ctx.task(testDocumentationTask, { projectName, testFramework, testTypes, outputDir });
-  artifacts.push(...documentation.artifacts);
-
-  await ctx.breakpoint({
+  let documentation = await ctx.task(testDocumentationTask, { projectName, testFramework, testTypes, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      documentation = await ctx.task(testDocumentationTask, { ...{ projectName, testFramework, testTypes, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `CLI Testing setup complete with ${testTypes.length} test types. Review and approve?`,
     title: 'CLI Testing Complete',
-    context: { runId: ctx.runId, summary: { projectName, testFramework, testTypes } }
-  });
-
+    context: { runId: ctx.runId, summary: { projectName, testFramework, testTypes } },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     projectName,

@@ -31,7 +31,7 @@ export async function process(inputs, ctx) {
   } = inputs;
 
   // Phase 1: Develop Single-Line Diagram and System Model
-  const systemModeling = await ctx.task(systemModelingTask, {
+  let systemModeling = await ctx.task(systemModelingTask, {
     systemName,
     networkModel,
     loadData,
@@ -47,9 +47,17 @@ export async function process(inputs, ctx) {
       missingData: systemModeling.missingData
     };
   }
-
-  // Breakpoint: Review system model
-  await ctx.breakpoint({
+  let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      systemModeling = await ctx.task(systemModelingTask, { ...{
+    systemName,
+    networkModel,
+    loadData,
+    generationSchedule
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Review system model for ${systemName}. ${systemModeling.busCount} buses, ${systemModeling.branchCount} branches. Proceed with data gathering?`,
     title: 'System Model Review',
     context: {
@@ -61,9 +69,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: systemModeling
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // Phase 2: Gather Load Data and Generation Schedules
   const dataGathering = await ctx.task(dataGatheringTask, {
     systemName,
@@ -81,7 +95,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 4: Run Base Case Power Flow Analysis
-  const baseCasePowerFlow = await ctx.task(baseCasePowerFlowTask, {
+  let baseCasePowerFlow = await ctx.task(baseCasePowerFlowTask, {
     systemName,
     systemModel: systemModeling.model,
     loadProfile: dataGathering.loadProfile,
@@ -90,20 +104,46 @@ export async function process(inputs, ctx) {
   });
 
   // Quality Gate: Power flow must converge
-  if (!baseCasePowerFlow.converged) {
-    await ctx.breakpoint({
+      let lastFeedback_phase4Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase4Review) {
+        baseCasePowerFlow = await ctx.task(baseCasePowerFlowTask, { ...{
+    systemName,
+    systemModel: systemModeling.model,
+    loadProfile: dataGathering.loadProfile,
+    generationDispatch: dataGathering.generationDispatch,
+    solverSettings: solverConfiguration.settings
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+      }
+  const phase4Review = await ctx.breakpoint({
       question: `Base case power flow did not converge. ${baseCasePowerFlow.convergenceIssue}. Adjust model or solver settings?`,
       title: 'Convergence Issue',
       context: {
         runId: ctx.runId,
         convergenceDetails: baseCasePowerFlow.convergenceDetails,
         recommendations: baseCasePowerFlow.recommendations
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase4Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase4Review.approved) break;
+      lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+    }  }
 
-  // Breakpoint: Review base case results
-  await ctx.breakpoint({
+    let lastFeedback_qualityGateApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_qualityGateApproval) {
+      baseCasePowerFlow = await ctx.task(baseCasePowerFlowTask, { ...{
+    systemName,
+    systemModel: systemModeling.model,
+    loadProfile: dataGathering.loadProfile,
+    generationDispatch: dataGathering.generationDispatch,
+    solverSettings: solverConfiguration.settings
+  }, feedback: lastFeedback_qualityGateApproval, attempt: attempt + 1 });
+    }
+  const qualityGateApproval = await ctx.breakpoint({
     question: `Base case power flow complete for ${systemName}. Total losses: ${baseCasePowerFlow.totalLosses}. Review results?`,
     title: 'Base Case Results Review',
     context: {
@@ -115,9 +155,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: baseCasePowerFlow
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_qualityGateApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (qualityGateApproval.approved) break;
+    lastFeedback_qualityGateApproval = qualityGateApproval.response || qualityGateApproval.feedback || 'Changes requested';
+  }
   // Phase 5: Analyze Voltage Profiles and Power Losses
   const voltageAndLossAnalysis = await ctx.task(voltageAndLossAnalysisTask, {
     systemName,
@@ -126,7 +172,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 6: Perform Contingency Analysis (N-1, N-2)
-  const contingencyAnalysis = await ctx.task(contingencyAnalysisTask, {
+  let contingencyAnalysis = await ctx.task(contingencyAnalysisTask, {
     systemName,
     systemModel: systemModeling.model,
     baseCaseResults: baseCasePowerFlow.results,
@@ -135,17 +181,33 @@ export async function process(inputs, ctx) {
   });
 
   // Quality Gate: Check for critical contingencies
-  if (contingencyAnalysis.criticalContingencies && contingencyAnalysis.criticalContingencies.length > 0) {
-    await ctx.breakpoint({
+      let lastFeedback_phase6Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase6Review) {
+        contingencyAnalysis = await ctx.task(contingencyAnalysisTask, { ...{
+    systemName,
+    systemModel: systemModeling.model,
+    baseCaseResults: baseCasePowerFlow.results,
+    loadProfile: dataGathering.loadProfile,
+    solverSettings: solverConfiguration.settings
+  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
+      }
+  const phase6Review = await ctx.breakpoint({
       question: `Contingency analysis found ${contingencyAnalysis.criticalContingencies.length} critical contingencies causing violations. Review and plan mitigations?`,
       title: 'Critical Contingencies Found',
       context: {
         runId: ctx.runId,
         criticalContingencies: contingencyAnalysis.criticalContingencies,
         violations: contingencyAnalysis.worstViolations
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase6Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase6Review.approved) break;
+      lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
+    }  }
 
   // Phase 7: Identify Congestion and Voltage Violations
   const violationIdentification = await ctx.task(violationIdentificationTask, {
@@ -156,7 +218,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 8: Recommend System Improvements and Document Results
-  const recommendationsAndDocumentation = await ctx.task(recommendationsAndDocumentationTask, {
+  let recommendationsAndDocumentation = await ctx.task(recommendationsAndDocumentationTask, {
     systemName,
     systemModeling,
     dataGathering,
@@ -166,8 +228,20 @@ export async function process(inputs, ctx) {
     violationIdentification
   });
 
-  // Final Breakpoint: Analysis Approval
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      recommendationsAndDocumentation = await ctx.task(recommendationsAndDocumentationTask, { ...{
+    systemName,
+    systemModeling,
+    dataGathering,
+    baseCasePowerFlow,
+    voltageAndLossAnalysis,
+    contingencyAnalysis,
+    violationIdentification
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Power flow analysis complete for ${systemName}. ${violationIdentification.totalViolations} violations identified. Approve analysis report?`,
     title: 'Analysis Approval',
     context: {
@@ -179,9 +253,15 @@ export async function process(inputs, ctx) {
         { path: `artifacts/final-analysis.json`, format: 'json', content: baseCasePowerFlow.results },
         { path: `artifacts/analysis-report.md`, format: 'markdown', content: recommendationsAndDocumentation.markdown }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     systemName,
@@ -208,8 +288,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const systemModelingTask = defineTask('system-modeling', (args, taskCtx) => ({
   kind: 'agent',

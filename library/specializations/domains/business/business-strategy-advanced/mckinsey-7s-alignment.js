@@ -158,7 +158,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 10: Generating comprehensive 7S Alignment report');
-  const sevenSReport = await ctx.task(sevenSReportTask, {
+  let sevenSReport = await ctx.task(sevenSReportTask, {
     organizationName,
     strategyAssessment,
     structureAssessment,
@@ -174,8 +174,24 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...sevenSReport.artifacts);
 
-  // Breakpoint: Review 7S alignment analysis
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      sevenSReport = await ctx.task(sevenSReportTask, { ...{
+    organizationName,
+    strategyAssessment,
+    structureAssessment,
+    systemsAssessment,
+    sharedValuesAssessment,
+    skillsAssessment,
+    styleAssessment,
+    staffAssessment,
+    alignmentGapAnalysis,
+    remediationPlanning,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `McKinsey 7S alignment analysis complete for ${organizationName}. Overall alignment score: ${alignmentGapAnalysis.overallAlignment}/100. Review findings?`,
     title: 'McKinsey 7S Alignment Analysis Review',
     context: {
@@ -200,9 +216,15 @@ export async function process(inputs, ctx) {
         overallAlignment: alignmentGapAnalysis.overallAlignment,
         criticalGaps: alignmentGapAnalysis.criticalGaps?.length || 0
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -232,8 +254,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

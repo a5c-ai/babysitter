@@ -180,7 +180,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 10: Implementing accessibility features');
 
-  const accessibilitySetup = await ctx.task(accessibilitySetupTask, {
+  let accessibilitySetup = await ctx.task(accessibilitySetupTask, {
     appName,
     viewsImplementation,
     reusableComponents,
@@ -189,8 +189,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...accessibilitySetup.artifacts);
 
-  // Quality Gate: Design Implementation Review
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      accessibilitySetup = await ctx.task(accessibilitySetupTask, { ...{
+    appName,
+    viewsImplementation,
+    reusableComponents,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `SwiftUI views implemented for ${appName}. ${viewsImplementation.screens.length} screens, ${reusableComponents.components.length} components. Review implementation?`,
     title: 'Design Implementation Review',
     context: {
@@ -200,9 +209,15 @@ export async function process(inputs, ctx) {
       components: reusableComponents.components,
       accessibilityScore: accessibilitySetup.complianceScore,
       files: artifacts.slice(-5).map(a => ({ path: a.path, format: 'swift' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 11: ANIMATIONS AND TRANSITIONS
   // ============================================================================
@@ -305,8 +320,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

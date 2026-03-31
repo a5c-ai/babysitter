@@ -81,7 +81,7 @@ export async function process(inputs, ctx) {
 
   // Task 6: Pipeline Health Assessment
   ctx.log('info', 'Assessing overall pipeline health');
-  const healthAssessment = await ctx.task(pipelineHealthTask, {
+  let healthAssessment = await ctx.task(pipelineHealthTask, {
     conversionAnalysis,
     sourceAnalysis,
     velocityAnalysis,
@@ -91,8 +91,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...healthAssessment.artifacts);
 
-  // Breakpoint: Review pipeline analysis
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      healthAssessment = await ctx.task(pipelineHealthTask, { ...{
+    conversionAnalysis,
+    sourceAnalysis,
+    velocityAnalysis,
+    relationshipMapping,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Deal flow analysis complete for ${fundName}. Pipeline health score: ${healthAssessment.healthScore}/100. Review findings?`,
     title: 'Deal Flow Tracking Results',
     context: {
@@ -105,9 +115,15 @@ export async function process(inputs, ctx) {
         averageVelocity: velocityAnalysis.averageDaysToClose,
         healthScore: healthAssessment.healthScore
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 7: Generate Pipeline Report
   ctx.log('info', 'Generating deal flow report');
   const pipelineReport = await ctx.task(pipelineReportTask, {
@@ -158,8 +174,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Pipeline Data Extraction
+  // Task 1: Pipeline Data Extraction
 export const pipelineDataExtractionTask = defineTask('pipeline-data-extraction', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Extract and normalize deal pipeline data',

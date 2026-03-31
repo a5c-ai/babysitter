@@ -48,7 +48,7 @@ export async function process(inputs, ctx) {
 
   // Phase 2: Current Capacity Assessment
   ctx.log('info', 'Phase 2: Current Capacity Assessment');
-  const capacityAssessment = await ctx.task(capacityAssessmentTask, {
+  let capacityAssessment = await ctx.task(capacityAssessmentTask, {
     currentCapacity,
     resourceTypes,
     outputDir
@@ -56,8 +56,16 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...capacityAssessment.artifacts);
 
-  // Quality Gate: Demand vs Capacity Overview
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      capacityAssessment = await ctx.task(capacityAssessmentTask, { ...{
+    currentCapacity,
+    resourceTypes,
+    outputDir
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Demand analysis: Peak ${demandAnalysis.peakDemand}, Average ${demandAnalysis.averageDemand}. Current capacity: ${capacityAssessment.totalCapacity}. Initial gap: ${demandAnalysis.peakDemand - capacityAssessment.totalCapacity}. Proceed with detailed gap analysis?`,
     title: 'Capacity Planning Initial Assessment',
     context: {
@@ -65,9 +73,15 @@ export async function process(inputs, ctx) {
       demandProfile: demandAnalysis.demandProfile,
       capacityProfile: capacityAssessment.capacityProfile,
       files: [...demandAnalysis.artifacts, ...capacityAssessment.artifacts].map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // Phase 3: Capacity-Demand Gap Analysis
   ctx.log('info', 'Phase 3: Capacity-Demand Gap Analysis');
   const gapAnalysis = await ctx.task(gapAnalysisTask, {
@@ -92,7 +106,7 @@ export async function process(inputs, ctx) {
 
   // Phase 5: Capacity Options Analysis
   ctx.log('info', 'Phase 5: Capacity Options Analysis');
-  const optionsAnalysis = await ctx.task(optionsAnalysisTask, {
+  let optionsAnalysis = await ctx.task(optionsAnalysisTask, {
     gapAnalysis,
     strategyDevelopment,
     resourceTypes,
@@ -101,8 +115,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...optionsAnalysis.artifacts);
 
-  // Quality Gate: Strategy and Options Review
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      optionsAnalysis = await ctx.task(optionsAnalysisTask, { ...{
+    gapAnalysis,
+    strategyDevelopment,
+    resourceTypes,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Strategy: ${strategyDevelopment.recommendedStrategy}. ${optionsAnalysis.options.length} capacity options identified. Total investment range: ${optionsAnalysis.investmentRange}. Review options before planning?`,
     title: 'Capacity Strategy Review',
     context: {
@@ -111,9 +134,15 @@ export async function process(inputs, ctx) {
       options: optionsAnalysis.options,
       investmentRange: optionsAnalysis.investmentRange,
       files: [...strategyDevelopment.artifacts, ...optionsAnalysis.artifacts].map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 6: Rough-Cut Capacity Planning
   ctx.log('info', 'Phase 6: Rough-Cut Capacity Planning');
   const rccp = await ctx.task(rccpTask, {
@@ -223,8 +252,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Demand Analysis
+  // Task 1: Demand Analysis
 export const demandAnalysisTask = defineTask('capacity-demand-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Capacity Planning - Demand Analysis',

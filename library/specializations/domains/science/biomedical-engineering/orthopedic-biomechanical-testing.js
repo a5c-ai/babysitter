@@ -51,15 +51,24 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 4: Static Mechanical Testing
-  const staticTesting = await ctx.task(staticTestingTask, {
+  let staticTesting = await ctx.task(staticTestingTask, {
     implantName,
     standards: standardIdentification.standards,
     fixtureDesign,
     testRequirements
   });
 
-  // Breakpoint: Review static test results
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      staticTesting = await ctx.task(staticTestingTask, { ...{
+    implantName,
+    standards: standardIdentification.standards,
+    fixtureDesign,
+    testRequirements
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: `Review static mechanical test results for ${implantName}. Are results within acceptance criteria?`,
     title: 'Static Testing Review',
     context: {
@@ -71,9 +80,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: staticTesting
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
   // Phase 5: Dynamic Fatigue Testing
   const fatigueTesting = await ctx.task(fatigueTestingTask, {
     implantName,
@@ -91,7 +106,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 7: Data Analysis and Reporting
-  const dataAnalysis = await ctx.task(dataAnalysisTask, {
+  let dataAnalysis = await ctx.task(dataAnalysisTask, {
     implantName,
     staticTesting,
     fatigueTesting,
@@ -99,8 +114,18 @@ export async function process(inputs, ctx) {
     testRequirements
   });
 
-  // Final Breakpoint: Test Report Approval
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      dataAnalysis = await ctx.task(dataAnalysisTask, { ...{
+    implantName,
+    staticTesting,
+    fatigueTesting,
+    wearTesting,
+    testRequirements
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Biomechanical testing complete for ${implantName}. Pass/Fail: ${dataAnalysis.overallResult}. Approve test reports?`,
     title: 'Test Report Approval',
     context: {
@@ -110,9 +135,15 @@ export async function process(inputs, ctx) {
       files: [
         { path: `artifacts/biomechanical-test-report.json`, format: 'json', content: dataAnalysis }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     implantName,
@@ -130,8 +161,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const standardIdentificationTask = defineTask('standard-identification', (args, taskCtx) => ({
   kind: 'agent',

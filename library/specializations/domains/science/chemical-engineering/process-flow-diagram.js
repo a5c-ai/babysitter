@@ -91,7 +91,7 @@ export async function process(inputs, ctx) {
 
   // Task 6: Specify Operating Conditions and Control Points
   ctx.log('info', 'Specifying operating conditions and control points');
-  const operatingConditionsResult = await ctx.task(operatingConditionsTask, {
+  let operatingConditionsResult = await ctx.task(operatingConditionsTask, {
     processName,
     equipmentList: equipmentResult.equipmentList,
     streamTable: streamTableResult.streamTable,
@@ -101,8 +101,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...operatingConditionsResult.artifacts);
 
-  // Breakpoint: Review PFD components before final assembly
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      operatingConditionsResult = await ctx.task(operatingConditionsTask, { ...{
+    processName,
+    equipmentList: equipmentResult.equipmentList,
+    streamTable: streamTableResult.streamTable,
+    designBasis,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `PFD components developed for ${processName}. Material balance closure: ${materialBalanceResult.closurePercentage}%. Equipment count: ${equipmentResult.equipmentList.length}. Proceed with PFD assembly?`,
     title: 'PFD Development Review',
     context: {
@@ -115,9 +125,15 @@ export async function process(inputs, ctx) {
         equipmentCount: equipmentResult.equipmentList.length,
         streamCount: streamTableResult.streamCount
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 7: Generate PFD Drawing
   ctx.log('info', 'Generating PFD drawing');
   const pfdDrawingResult = await ctx.task(pfdDrawingTask, {
@@ -172,8 +188,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Process Boundary Definition
+  // Task 1: Process Boundary Definition
 export const processBoundaryDefinitionTask = defineTask('process-boundary-definition', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Define process boundaries and battery limits',

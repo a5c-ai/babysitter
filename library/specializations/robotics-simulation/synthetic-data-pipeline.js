@@ -69,7 +69,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...drConfig.artifacts);
   }
-
   // ============================================================================
   // PHASE 3: OBJECT PLACEMENT CONFIGURATION
   // ============================================================================
@@ -120,7 +119,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 6: Data Generation Execution');
 
-  const dataGeneration = await ctx.task(dataGenerationExecutionTask, {
+  let dataGeneration = await ctx.task(dataGenerationExecutionTask, {
     datasetName,
     numImages,
     scenarioDesign,
@@ -130,9 +129,20 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...dataGeneration.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase6Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase6Review) {
+      dataGeneration = await ctx.task(dataGenerationExecutionTask, { ...{
+    datasetName,
+    numImages,
+    scenarioDesign,
+    objectPlacement,
+    sensorConfig,
+    annotationConfig,
+    outputDir
+  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
+    }
+  const phase6Review = await ctx.breakpoint({
     question: `Generated ${dataGeneration.generatedImages} images for ${datasetName}. Quality checks: ${dataGeneration.qualityPassed ? 'PASSED' : 'ISSUES'}. Continue with balancing?`,
     title: 'Data Generation Review',
     context: {
@@ -140,9 +150,15 @@ export async function process(inputs, ctx) {
       generatedImages: dataGeneration.generatedImages,
       qualityMetrics: dataGeneration.qualityMetrics,
       files: dataGeneration.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase6Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase6Review.approved) break;
+    lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 7: DATASET BALANCING
   // ============================================================================
@@ -196,7 +212,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 10: Domain Gap Metrics Measurement');
 
-  const domainGapMetrics = await ctx.task(domainGapMetricsTask, {
+  let domainGapMetrics = await ctx.task(domainGapMetricsTask, {
     datasetName,
     dataGeneration,
     qualityValidation,
@@ -205,8 +221,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...domainGapMetrics.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      domainGapMetrics = await ctx.task(domainGapMetricsTask, { ...{
+    datasetName,
+    dataGeneration,
+    qualityValidation,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Synthetic Data Pipeline Complete for ${datasetName}. ${dataGeneration.generatedImages} images in ${outputFormats.join(', ')} formats. Domain gap score: ${domainGapMetrics.gapScore}. Review dataset?`,
     title: 'Synthetic Data Pipeline Complete',
     context: {
@@ -221,9 +246,15 @@ export async function process(inputs, ctx) {
         { path: datasetExport.datasetPath, format: 'folder', label: 'Dataset' },
         { path: qualityValidation.reportPath, format: 'markdown', label: 'Quality Report' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -248,8 +279,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

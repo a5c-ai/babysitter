@@ -152,7 +152,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 8: Generating Header Files');
 
-  const headerGeneration = await ctx.task(headerFileGenerationTask, {
+  let headerGeneration = await ctx.task(headerFileGenerationTask, {
     projectName,
     registerMaps,
     memoryMap,
@@ -161,8 +161,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...headerGeneration.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      headerGeneration = await ctx.task(headerFileGenerationTask, { ...{
+    projectName,
+    registerMaps,
+    memoryMap,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `HW-SW Interface Specification Complete for ${projectName}. Interfaces: ${interfaceInventory.interfaces.length}, Registers: ${registerMaps.totalRegisters}. Review?`,
     title: 'Interface Specification Complete',
     context: {
@@ -176,9 +185,15 @@ export async function process(inputs, ctx) {
         { path: documentation.specPath, format: documentFormat, label: 'Interface Specification' },
         { path: headerGeneration.headerPath, format: 'c', label: 'Generated Headers' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -206,8 +221,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

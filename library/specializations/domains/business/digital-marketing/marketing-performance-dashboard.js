@@ -84,15 +84,23 @@ export async function process(inputs, ctx) {
 
   // Task 8: Test Dashboard Accuracy
   ctx.log('info', 'Phase 8: Testing dashboard accuracy and performance');
-  const dashboardTesting = await ctx.task(dashboardTestingTask, {
+  let dashboardTesting = await ctx.task(dashboardTestingTask, {
     dashboardBuild,
     kpiDefinition,
     outputDir
   });
   artifacts.push(...dashboardTesting.artifacts);
 
-  // Breakpoint: Review dashboards
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      dashboardTesting = await ctx.task(dashboardTestingTask, { ...{
+    dashboardBuild,
+    kpiDefinition,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Dashboard development complete. ${dashboardBuild.dashboardCount} dashboards built. ${dashboardTesting.passedTests}/${dashboardTesting.totalTests} accuracy tests passed. Review and approve?`,
     title: 'Marketing Dashboard Review',
     context: {
@@ -104,9 +112,15 @@ export async function process(inputs, ctx) {
         dataSourceCount: dataSourceMapping.sourceCount,
         testsPassed: dashboardTesting.passedTests
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 9: Train Stakeholders
   ctx.log('info', 'Phase 9: Creating training materials for stakeholders');
   const trainingMaterials = await ctx.task(stakeholderTrainingTask, {
@@ -156,8 +170,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task definitions
+  // Task definitions
 export const requirementsGatheringTask = defineTask('requirements-gathering', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Gather dashboard requirements from stakeholders',

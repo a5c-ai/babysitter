@@ -60,7 +60,7 @@ export async function process(inputs, ctx) {
   artifacts.push(...monitoring.artifacts);
 
   // Phase 8: API and CLI
-  const apiCli = await ctx.task(apiCliTask, { projectName, language, outputDir });
+  let apiCli = await ctx.task(apiCliTask, { projectName, language, outputDir });
   artifacts.push(...apiCli.artifacts);
 
   // Phase 9: Testing and Validation
@@ -68,14 +68,23 @@ export async function process(inputs, ctx) {
     () => ctx.task(testSuiteTask, { projectName, language, outputDir }),
     () => ctx.task(validationTask, { projectName, outputDir })
   ]);
-  artifacts.push(...testSuite.artifacts, ...validation.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      apiCli = await ctx.task(apiCliTask, { ...{ projectName, language, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Certificate Management System Complete for ${projectName}! Validation: ${validation.overallScore}/100. Review?`,
     title: 'Certificate Management Complete',
-    context: { runId: ctx.runId, validationScore: validation.overallScore }
-  });
-
+    context: { runId: ctx.runId, validationScore: validation.overallScore },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: validation.overallScore >= 80,
     projectName,

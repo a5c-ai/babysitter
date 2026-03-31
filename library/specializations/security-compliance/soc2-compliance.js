@@ -83,7 +83,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Defining audit scope and system boundaries');
 
-  const scopeDefinitionResult = await ctx.task(defineScopeAndBoundariesTask, {
+  let scopeDefinitionResult = await ctx.task(defineScopeAndBoundariesTask, {
     organization,
     reportType,
     scope,
@@ -97,8 +97,19 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Scope defined - ${scopeDefinitionResult.inScopeSystemsCount} systems, ${scopeDefinitionResult.inScopeServicesCount} services in scope`);
 
-  // Quality Gate: Scope review
-  await ctx.breakpoint({
+    let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      scopeDefinitionResult = await ctx.task(defineScopeAndBoundariesTask, { ...{
+    organization,
+    reportType,
+    scope,
+    trustServiceCategories,
+    includeSubServiceOrgs,
+    outputDir
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `SOC 2 scope defined for ${organization}. ${scopeDefinitionResult.inScopeSystemsCount} systems, ${scopeDefinitionResult.inScopeServicesCount} services, ${scopeDefinitionResult.trustServiceCategories.length} TSC categories. Review scope before proceeding?`,
     title: 'SOC 2 Scope Definition Review',
     context: {
@@ -113,16 +124,22 @@ export async function process(inputs, ctx) {
         subServiceOrgs: scopeDefinitionResult.subServiceOrgs
       },
       files: scopeDefinitionResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 2: TSC CRITERIA ASSESSMENT - SECURITY (REQUIRED)
   // ============================================================================
 
   ctx.log('info', 'Phase 2: Assessing Trust Services Criteria - Security (Common Criteria)');
 
-  const securityCriteriaResult = await ctx.task(assessSecurityCriteriaTask, {
+  let securityCriteriaResult = await ctx.task(assessSecurityCriteriaTask, {
     organization,
     reportType,
     scope: scopeDefinitionResult.scope,
@@ -160,7 +177,6 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Availability criteria assessed - ${availabilityCriteriaResult.controls.length} controls evaluated, ${availabilityCriteriaResult.gaps.length} gaps identified`);
   }
-
   // ============================================================================
   // PHASE 4: TSC CRITERIA ASSESSMENT - PROCESSING INTEGRITY (IF SELECTED)
   // ============================================================================
@@ -184,7 +200,6 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Processing Integrity criteria assessed - ${processingIntegrityCriteriaResult.controls.length} controls evaluated, ${processingIntegrityCriteriaResult.gaps.length} gaps identified`);
   }
-
   // ============================================================================
   // PHASE 5: TSC CRITERIA ASSESSMENT - CONFIDENTIALITY (IF SELECTED)
   // ============================================================================
@@ -208,7 +223,6 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Confidentiality criteria assessed - ${confidentialityCriteriaResult.controls.length} controls evaluated, ${confidentialityCriteriaResult.gaps.length} gaps identified`);
   }
-
   // ============================================================================
   // PHASE 6: TSC CRITERIA ASSESSMENT - PRIVACY (IF SELECTED)
   // ============================================================================
@@ -232,9 +246,18 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Privacy criteria assessed - ${privacyCriteriaResult.controls.length} controls evaluated, ${privacyCriteriaResult.gaps.length} gaps identified`);
   }
-
-  // Quality Gate: TSC criteria assessment review
-  await ctx.breakpoint({
+  let lastFeedback_qualityGateApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_qualityGateApproval) {
+      securityCriteriaResult = await ctx.task(assessSecurityCriteriaTask, { ...{
+    organization,
+    reportType,
+    scope: scopeDefinitionResult.scope,
+    existingControls,
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval, attempt: attempt + 1 });
+    }
+  const qualityGateApproval = await ctx.breakpoint({
     question: `TSC criteria assessment complete. ${controls.length} total controls evaluated across ${trustServiceCategories.length} categories. ${gaps.length} gaps identified. Review criteria assessment?`,
     title: 'TSC Criteria Assessment Review',
     context: {
@@ -261,9 +284,15 @@ export async function process(inputs, ctx) {
         description: g.description
       })),
       files: artifacts.filter(a => a.label && a.label.includes('criteria')).map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_qualityGateApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (qualityGateApproval.approved) break;
+    lastFeedback_qualityGateApproval = qualityGateApproval.response || qualityGateApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 7: RISK ASSESSMENT AND THREAT ANALYSIS
   // ============================================================================
@@ -285,14 +314,13 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Risk assessment complete - ${riskAssessmentResult.risksIdentified} risks identified, ${riskAssessmentResult.criticalRisks} critical`);
   }
-
   // ============================================================================
   // PHASE 8: GAP REMEDIATION PLANNING
   // ============================================================================
 
   ctx.log('info', 'Phase 8: Creating gap remediation plan');
 
-  const remediationPlanResult = await ctx.task(createRemediationPlanTask, {
+  let remediationPlanResult = await ctx.task(createRemediationPlanTask, {
     organization,
     gaps,
     controls,
@@ -306,8 +334,19 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Remediation plan created - ${remediationPlanResult.remediationActions} actions across ${remediationPlanResult.phases.length} phases`);
 
-  // Quality Gate: Remediation plan review
-  await ctx.breakpoint({
+    let lastFeedback_phase8Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase8Review) {
+      remediationPlanResult = await ctx.task(createRemediationPlanTask, { ...{
+    organization,
+    gaps,
+    controls,
+    auditTimeline,
+    reportType,
+    outputDir
+  }, feedback: lastFeedback_phase8Review, attempt: attempt + 1 });
+    }
+  const phase8Review = await ctx.breakpoint({
     question: `Gap remediation plan created with ${remediationPlanResult.remediationActions} actions over ${remediationPlanResult.estimatedTimeline}. ${remediationPlanResult.criticalActions} critical actions. Approve remediation plan?`,
     title: 'Gap Remediation Plan Review',
     context: {
@@ -328,9 +367,15 @@ export async function process(inputs, ctx) {
         estimatedEffort: a.estimatedEffort
       })),
       files: remediationPlanResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase8Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase8Review.approved) break;
+    lastFeedback_phase8Review = phase8Review.response || phase8Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 9: CONTROL IMPLEMENTATION AND DOCUMENTATION
   // ============================================================================
@@ -357,7 +402,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 10: Setting up evidence collection and management');
 
-  const evidenceCollectionResult = await ctx.task(setupEvidenceCollectionTask, {
+  let evidenceCollectionResult = await ctx.task(setupEvidenceCollectionTask, {
     organization,
     reportType,
     controls,
@@ -373,8 +418,20 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Evidence collection setup complete - ${evidenceCollectionResult.evidenceItems.length} evidence items configured, ${evidenceCollectionResult.automatedItems} automated`);
 
-  // Quality Gate: Evidence collection review
-  await ctx.breakpoint({
+    let lastFeedback_qualityGateApproval2 = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_qualityGateApproval2) {
+      evidenceCollectionResult = await ctx.task(setupEvidenceCollectionTask, { ...{
+    organization,
+    reportType,
+    controls,
+    scope: scopeDefinitionResult.scope,
+    auditPeriod: scopeDefinitionResult.auditPeriod,
+    automateEvidenceCollection,
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval2, attempt: attempt + 1 });
+    }
+  const qualityGateApproval2 = await ctx.breakpoint({
     question: `Evidence collection configured for ${evidenceCollectionResult.evidenceItems.length} items. ${evidenceCollectionResult.automatedItems} automated, ${evidenceCollectionResult.manualItems} manual. Review evidence collection setup?`,
     title: 'Evidence Collection Review',
     context: {
@@ -394,9 +451,15 @@ export async function process(inputs, ctx) {
         source: e.source
       })),
       files: evidenceCollectionResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_qualityGateApproval2 || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (qualityGateApproval2.approved) break;
+    lastFeedback_qualityGateApproval2 = qualityGateApproval2.response || qualityGateApproval2.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 11: CONTROL TESTING (TYPE II ONLY)
   // ============================================================================
@@ -419,8 +482,20 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Control testing complete - ${controlTestingResult.controlsTested} controls tested, ${controlTestingResult.exceptions} exceptions identified`);
 
-    // Quality Gate: Control testing review
-    await ctx.breakpoint({
+      let lastFeedback_qualityGateApproval3 = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_qualityGateApproval3) {
+        evidenceCollectionResult = await ctx.task(setupEvidenceCollectionTask, { ...{
+    organization,
+    reportType,
+    controls,
+    scope: scopeDefinitionResult.scope,
+    auditPeriod: scopeDefinitionResult.auditPeriod,
+    automateEvidenceCollection,
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval3, attempt: attempt + 1 });
+      }
+  const qualityGateApproval3 = await ctx.breakpoint({
       question: `Control testing complete for Type II audit. ${controlTestingResult.controlsTested} controls tested, ${controlTestingResult.exceptions} exceptions found. Review test results?`,
       title: 'Control Testing Review',
       context: {
@@ -440,9 +515,15 @@ export async function process(inputs, ctx) {
           remediation: ex.remediation
         })),
         files: controlTestingResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_qualityGateApproval3 || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (qualityGateApproval3.approved) break;
+      lastFeedback_qualityGateApproval3 = qualityGateApproval3.response || qualityGateApproval3.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 12: CONTINUOUS MONITORING SETUP (IF ENABLED)
@@ -466,7 +547,6 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Continuous monitoring configured - ${monitoringResult.monitoredControls} controls, ${monitoringResult.alertsConfigured} alerts configured`);
   }
-
   // ============================================================================
   // PHASE 13: FRAMEWORK MAPPING (IF REQUESTED)
   // ============================================================================
@@ -488,7 +568,6 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Framework mapping complete - Mapped to ${frameworkMappingResult.frameworksMapped.length} frameworks`);
   }
-
   // ============================================================================
   // PHASE 14: AUDIT PREPARATION AND READINESS ASSESSMENT
   // ============================================================================
@@ -544,7 +623,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 16: Calculating SOC 2 compliance score and readiness level');
 
-  const scoringResult = await ctx.task(calculateComplianceScoreTask, {
+  let scoringResult = await ctx.task(calculateComplianceScoreTask, {
     organization,
     reportType,
     controls,
@@ -563,8 +642,22 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `SOC 2 Compliance Score: ${complianceScore}/100, Readiness Level: ${readinessLevel}`);
 
-  // Final Breakpoint: SOC 2 preparation complete
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      scoringResult = await ctx.task(calculateComplianceScoreTask, { ...{
+    organization,
+    reportType,
+    controls,
+    gaps,
+    evidenceCollection: evidenceCollectionResult,
+    controlTesting: controlTestingResult,
+    auditPreparation: auditPreparationResult,
+    trustServiceCategories,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `SOC 2 Compliance Preparation Complete for ${organization}. Compliance Score: ${complianceScore}/100, Readiness: ${readinessLevel}. ${reportType} audit preparation for ${trustServiceCategories.join(', ')}. Approve SOC 2 readiness?`,
     title: 'Final SOC 2 Compliance Review',
     context: {
@@ -618,9 +711,15 @@ export async function process(inputs, ctx) {
         { path: documentationResult.controlMatrixPath, format: 'xlsx', label: 'Control Matrix' },
         { path: scoringResult.readinessSummaryPath, format: 'json', label: 'Readiness Summary' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -702,8 +801,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

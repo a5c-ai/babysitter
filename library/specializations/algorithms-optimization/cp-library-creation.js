@@ -45,10 +45,13 @@ export async function process(inputs, ctx) {
   artifacts.push(...testing.artifacts);
 
   // PHASE 4: Documentation
-  const documentation = await ctx.task(documentationTask, { design, implementation, outputDir });
-  artifacts.push(...documentation.artifacts);
-
-  await ctx.breakpoint({
+  let documentation = await ctx.task(documentationTask, { design, implementation, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      documentation = await ctx.task(documentationTask, { ...{ design, implementation, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `CP Library created for ${category}. ${implementation.algorithmCount} algorithms implemented. Review?`,
     title: 'CP Library Creation Complete',
     context: {
@@ -59,9 +62,15 @@ export async function process(inputs, ctx) {
         { path: implementation.libraryPath, format: language, label: 'Library' },
         { path: documentation.docPath, format: 'markdown', label: 'Documentation' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     category,

@@ -24,11 +24,16 @@ export async function process(inputs, ctx) {
   const backendSetup = await ctx.task(backendSetupTask, { projectName, outputDir });
   artifacts.push(...backendSetup.artifacts);
 
-  const cicdSetup = await ctx.task(cicdSetupTask, { projectName, outputDir });
-  artifacts.push(...cicdSetup.artifacts);
-
-  await ctx.breakpoint({ question: `AWS Amplify deployment complete for ${projectName}. Approve?`, title: 'Amplify Review', context: { runId: ctx.runId, config: amplifySetup.config } });
-
+  let cicdSetup = await ctx.task(cicdSetupTask, { projectName, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      cicdSetup = await ctx.task(cicdSetupTask, { ...{ projectName, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({ question: `AWS Amplify deployment complete for ${projectName}. Approve?`, title: 'Amplify Review', context: { runId: ctx.runId, config: amplifySetup.config }, expert: 'owner', tags: ['approval-gate'], previousFeedback: lastFeedback || undefined, attempt: attempt > 0 ? attempt + 1 : undefined });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const documentation = await ctx.task(documentationTask, { projectName, outputDir });
   artifacts.push(...documentation.artifacts);
 

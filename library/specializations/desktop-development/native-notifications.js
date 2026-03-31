@@ -40,7 +40,7 @@ export async function process(inputs, ctx) {
   artifacts.push(...requirements.artifacts);
 
   // Phase 2: Core Notification Module
-  const coreModule = await ctx.task(implementCoreNotificationTask, { projectName, framework, notificationTypes, outputDir });
+  let coreModule = await ctx.task(implementCoreNotificationTask, { projectName, framework, notificationTypes, outputDir });
   artifacts.push(...coreModule.artifacts);
 
   // Phase 3: Platform-specific implementations
@@ -56,27 +56,34 @@ export async function process(inputs, ctx) {
     actionNotifications = await ctx.task(implementActionNotificationsTask, { projectName, framework, targetPlatforms, outputDir });
     artifacts.push(...actionNotifications.artifacts);
   }
-
   // Phase 5: Progress Notifications
   let progressNotifications = null;
   if (notificationTypes.includes('progress')) {
     progressNotifications = await ctx.task(implementProgressNotificationsTask, { projectName, framework, targetPlatforms, outputDir });
     artifacts.push(...progressNotifications.artifacts);
   }
-
   // Phase 6: Scheduled Notifications
   let scheduledNotifications = null;
   if (notificationTypes.includes('scheduled')) {
     scheduledNotifications = await ctx.task(implementScheduledNotificationsTask, { projectName, framework, targetPlatforms, outputDir });
     artifacts.push(...scheduledNotifications.artifacts);
-  }
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      coreModule = await ctx.task(implementCoreNotificationTask, { ...{ projectName, framework, notificationTypes, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Notification types implemented: ${notificationTypes.join(', ')}. Platforms: ${targetPlatforms.join(', ')}. Review implementation?`,
     title: 'Notification Implementation Review',
-    context: { runId: ctx.runId, notificationTypes, targetPlatforms }
-  });
-
+    context: { runId: ctx.runId, notificationTypes, targetPlatforms },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 7: Permission Handling
   const permissions = await ctx.task(implementNotificationPermissionsTask, { projectName, framework, targetPlatforms, outputDir });
   artifacts.push(...permissions.artifacts);

@@ -43,7 +43,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Benchmark Suite Design');
 
-  const suiteDesignResult = await ctx.task(benchmarkSuiteDesignTask, {
+  let suiteDesignResult = await ctx.task(benchmarkSuiteDesignTask, {
     algorithms,
     problemSuite,
     classicalBaselines,
@@ -51,18 +51,33 @@ export async function process(inputs, ctx) {
     numTrials
   });
 
-  artifacts.push(...(suiteDesignResult.artifacts || []));
-
-  await ctx.breakpoint({
+    let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      suiteDesignResult = await ctx.task(benchmarkSuiteDesignTask, { ...{
+    algorithms,
+    problemSuite,
+    classicalBaselines,
+    metrics,
+    numTrials
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Benchmark suite designed. ${suiteDesignResult.totalBenchmarks} benchmarks planned across ${suiteDesignResult.problemCount} problems. Proceed with classical baselines?`,
     title: 'Benchmark Suite Review',
     context: {
       runId: ctx.runId,
       suiteDesign: suiteDesignResult,
       files: (suiteDesignResult.artifacts || []).map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 2: CLASSICAL BASELINE EXECUTION
   // ============================================================================
@@ -85,7 +100,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 3: Quantum Simulator Execution');
 
-  const simulatorResult = await ctx.task(quantumSimulatorExecutionTask, {
+  let simulatorResult = await ctx.task(quantumSimulatorExecutionTask, {
     algorithms,
     problemSuite: suiteDesignResult.problemInstances,
     numTrials,
@@ -93,18 +108,33 @@ export async function process(inputs, ctx) {
     framework
   });
 
-  artifacts.push(...(simulatorResult.artifacts || []));
-
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      simulatorResult = await ctx.task(quantumSimulatorExecutionTask, { ...{
+    algorithms,
+    problemSuite: suiteDesignResult.problemInstances,
+    numTrials,
+    metrics,
+    framework
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Simulator benchmarks complete. Average fidelity: ${simulatorResult.averageFidelity}. Proceed with hardware execution?`,
     title: 'Simulator Results Review',
     context: {
       runId: ctx.runId,
       simulatorResults: simulatorResult,
       files: (simulatorResult.artifacts || []).map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 4: QUANTUM HARDWARE EXECUTION (if targets include hardware)
   // ============================================================================
@@ -128,7 +158,6 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Hardware benchmarks complete on ${hardwareBackends.length} backends`);
   }
-
   // ============================================================================
   // PHASE 5: PERFORMANCE METRIC CALCULATION
   // ============================================================================
@@ -150,23 +179,35 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 6: Scaling Analysis');
 
-  const scalingResult = await ctx.task(scalingAnalysisTask, {
+  let scalingResult = await ctx.task(scalingAnalysisTask, {
     benchmarkResults: metricsResult.consolidatedResults,
     problemSizes: problemSuite.sizes || suiteDesignResult.problemSizes
   });
 
-  artifacts.push(...(scalingResult.artifacts || []));
-
-  await ctx.breakpoint({
+    let lastFeedback_phase6Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase6Review) {
+      scalingResult = await ctx.task(scalingAnalysisTask, { ...{
+    benchmarkResults: metricsResult.consolidatedResults,
+    problemSizes: problemSuite.sizes || suiteDesignResult.problemSizes
+  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
+    }
+  const phase6Review = await ctx.breakpoint({
     question: `Scaling analysis complete. Quantum advantage threshold: ${scalingResult.advantageThreshold} qubits. Review scaling behavior?`,
     title: 'Scaling Analysis Review',
     context: {
       runId: ctx.runId,
       scaling: scalingResult,
       files: (scalingResult.artifacts || []).map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase6Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase6Review.approved) break;
+    lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 7: QUANTUM ADVANTAGE ANALYSIS
   // ============================================================================
@@ -190,7 +231,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 8: Report Generation');
 
-  const reportResult = await ctx.task(benchmarkReportGenerationTask, {
+  let reportResult = await ctx.task(benchmarkReportGenerationTask, {
     suiteDesign: suiteDesignResult,
     classicalResults: classicalResult,
     simulatorResults: simulatorResult,
@@ -201,9 +242,21 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...(reportResult.artifacts || []));
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      reportResult = await ctx.task(benchmarkReportGenerationTask, { ...{
+    suiteDesign: suiteDesignResult,
+    classicalResults: classicalResult,
+    simulatorResults: simulatorResult,
+    hardwareResults: hardwareResult,
+    metricsResults: metricsResult,
+    scalingResults: scalingResult,
+    advantageResults: advantageResult,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Benchmarking complete. ${algorithms.length} algorithms tested across ${suiteDesignResult.problemCount} problems. Quantum advantage identified: ${advantageResult.advantageIdentified}. Approve results?`,
     title: 'Benchmark Complete',
     context: {
@@ -214,9 +267,15 @@ export async function process(inputs, ctx) {
         quantumAdvantage: advantageResult.advantageIdentified
       },
       files: artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
 
   return {
@@ -245,8 +304,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

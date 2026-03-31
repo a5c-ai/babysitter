@@ -37,15 +37,24 @@ export async function process(inputs, ctx) {
   artifacts.push(...slowQueries.artifacts);
 
   // Phase 2: Analyze Query Execution Plans
-  const executionPlans = await ctx.task(analyzeExecutionPlansTask, { projectName, slowQueries, database, outputDir });
-  artifacts.push(...executionPlans.artifacts);
-
-  await ctx.breakpoint({
+  let executionPlans = await ctx.task(analyzeExecutionPlansTask, { projectName, slowQueries, database, outputDir });
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      executionPlans = await ctx.task(analyzeExecutionPlansTask, { ...{ projectName, slowQueries, database, outputDir }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Found ${slowQueries.queries.length} slow queries. ${executionPlans.fullScans} full table scans detected. Analyze?`,
     title: 'Slow Query Analysis',
-    context: { runId: ctx.runId, slowQueries, executionPlans }
-  });
-
+    context: { runId: ctx.runId, slowQueries, executionPlans },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // Phase 3: Identify Missing Indexes
   const missingIndexes = await ctx.task(identifyMissingIndexesTask, { projectName, executionPlans, outputDir });
   artifacts.push(...missingIndexes.artifacts);
@@ -67,15 +76,24 @@ export async function process(inputs, ctx) {
   artifacts.push(...optimizations.artifacts);
 
   // Phase 8: Prioritize by Impact
-  const priorities = await ctx.task(prioritizeQueryOptimizationsTask, { projectName, optimizations, outputDir });
-  artifacts.push(...priorities.artifacts);
-
-  await ctx.breakpoint({
+  let priorities = await ctx.task(prioritizeQueryOptimizationsTask, { projectName, optimizations, outputDir });
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      priorities = await ctx.task(prioritizeQueryOptimizationsTask, { ...{ projectName, optimizations, outputDir }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Query analysis complete. ${optimizations.opportunities.length} optimization opportunities identified. Review recommendations?`,
     title: 'Query Optimization Recommendations',
-    context: { runId: ctx.runId, priorities }
-  });
-
+    context: { runId: ctx.runId, priorities },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     projectName,

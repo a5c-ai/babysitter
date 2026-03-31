@@ -62,7 +62,6 @@ export async function process(inputs, ctx) {
       optimalSolution: null
     };
   }
-
   // Phase 4: Method Selection
   const methodSelection = await ctx.task(methodSelectionTask, {
     problemClassification,
@@ -85,14 +84,22 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 7: Solution Comparison
-  const solutionComparison = await ctx.task(solutionComparisonTask, {
+  let solutionComparison = await ctx.task(solutionComparisonTask, {
     exactOptimization,
     heuristicOptimization,
     objective
   });
 
-  // Breakpoint: Review solutions
-  await ctx.breakpoint({
+    let lastFeedback_phase7Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase7Review) {
+      solutionComparison = await ctx.task(solutionComparisonTask, { ...{
+    exactOptimization,
+    heuristicOptimization,
+    objective
+  }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
+    }
+  const phase7Review = await ctx.breakpoint({
     question: `Optimization complete. Best objective: ${solutionComparison.bestSolution.objectiveValue}. Review solutions and sensitivity?`,
     title: 'Optimization Review',
     context: {
@@ -100,9 +107,15 @@ export async function process(inputs, ctx) {
       domain,
       bestMethod: solutionComparison.bestMethod,
       objectiveValue: solutionComparison.bestSolution.objectiveValue
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase7Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase7Review.approved) break;
+    lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
+  }
   // Phase 8: Sensitivity Analysis
   const sensitivityAnalysis = await ctx.task(optimizationSensitivityTask, {
     bestSolution: solutionComparison.bestSolution,
@@ -118,15 +131,24 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 10: Solution Validation
-  const solutionValidation = await ctx.task(solutionValidationTask, {
+  let solutionValidation = await ctx.task(solutionValidationTask, {
     bestSolution: solutionComparison.bestSolution,
     modelFormulation,
     constraints,
     domain
   });
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      solutionValidation = await ctx.task(solutionValidationTask, { ...{
+    bestSolution: solutionComparison.bestSolution,
+    modelFormulation,
+    constraints,
+    domain
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Validation complete. Solution feasible: ${solutionValidation.isFeasible}. Optimality gap: ${boundAnalysis.optimalityGap}%. Accept solution?`,
     title: 'Final Optimization Review',
     context: {
@@ -136,9 +158,15 @@ export async function process(inputs, ctx) {
         { path: 'artifacts/solution.json', format: 'json', content: solutionComparison.bestSolution },
         { path: 'artifacts/sensitivity.json', format: 'json', content: sensitivityAnalysis }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     domain,
@@ -160,8 +188,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const problemClassificationTask = defineTask('problem-classification', (args, taskCtx) => ({
   kind: 'agent',

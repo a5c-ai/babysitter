@@ -34,15 +34,23 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Starting Trademark Process for ${trademark.name} - Action: ${action}`);
 
   // Phase 1: Trademark Clearance Search
-  const clearanceSearch = await ctx.task(trademarkClearanceTask, {
+  let clearanceSearch = await ctx.task(trademarkClearanceTask, {
     trademark,
     jurisdiction,
     outputDir
   });
   artifacts.push(...clearanceSearch.artifacts);
 
-  // Quality Gate: Clearance Decision
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      clearanceSearch = await ctx.task(trademarkClearanceTask, { ...{
+    trademark,
+    jurisdiction,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Trademark clearance for "${trademark.name}". Risk Level: ${clearanceSearch.riskLevel}. ${clearanceSearch.conflictsFound} potential conflicts. Proceed with filing?`,
     title: 'Trademark Clearance Review',
     context: {
@@ -50,13 +58,17 @@ export async function process(inputs, ctx) {
       riskLevel: clearanceSearch.riskLevel,
       conflictsFound: clearanceSearch.conflictsFound,
       files: clearanceSearch.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
-  if (action === 'clearance') {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }  if (action === 'clearance') {
     return { success: true, action, clearanceReport: clearanceSearch, artifacts, metadata: { processId: 'specializations/domains/business/legal/trademark-registration-protection', timestamp: startTime } };
   }
-
   // Phase 2: Application Preparation
   const applicationPrep = await ctx.task(trademarkApplicationTask, {
     trademark,
@@ -76,7 +88,6 @@ export async function process(inputs, ctx) {
   if (action === 'file') {
     return { success: true, action, clearanceReport: clearanceSearch, application: filing, artifacts, metadata: { processId: 'specializations/domains/business/legal/trademark-registration-protection', timestamp: startTime } };
   }
-
   // Phase 4: Monitoring Setup
   const monitoring = await ctx.task(trademarkMonitoringTask, {
     trademark,
@@ -96,7 +107,6 @@ export async function process(inputs, ctx) {
     });
     artifacts.push(...enforcement.artifacts);
   }
-
   return {
     success: true,
     action,

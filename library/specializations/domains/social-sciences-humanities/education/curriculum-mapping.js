@@ -149,7 +149,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Scoring curriculum mapping quality');
-  const qualityScore = await ctx.task(mappingQualityScoringTask, {
+  let qualityScore = await ctx.task(mappingQualityScoringTask, {
     contentMapping,
     skillsMapping,
     assessmentMapping,
@@ -164,8 +164,20 @@ export async function process(inputs, ctx) {
   const overallScore = qualityScore.overallScore;
   const qualityMet = overallScore >= qualityThreshold;
 
-  // Breakpoint: Review curriculum map
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      qualityScore = await ctx.task(mappingQualityScoringTask, { ...{
+    contentMapping,
+    skillsMapping,
+    assessmentMapping,
+    gapAnalysis,
+    redundancyAnalysis,
+    qualityThreshold,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Curriculum mapping complete. Quality score: ${overallScore}/${qualityThreshold}. ${qualityMet ? 'Quality standards met!' : 'Issues identified - review recommended.'} Review and approve?`,
     title: 'Curriculum Mapping Review',
     context: {
@@ -180,9 +192,15 @@ export async function process(inputs, ctx) {
         redundancies: redundancyAnalysis.totalRedundancies,
         totalArtifacts: artifacts.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -221,8 +239,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Content Mapping
+  // Task 1: Content Mapping
 export const contentMappingTask = defineTask('content-mapping', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Map curriculum content by time and subject',

@@ -32,7 +32,7 @@ export async function process(inputs, ctx) {
   } = inputs;
 
   // Phase 1: Data Requirements Analysis
-  const dataRequirements = await ctx.task(dataRequirementsAnalysisTask, {
+  let dataRequirements = await ctx.task(dataRequirementsAnalysisTask, {
     projectName,
     requirements,
     existingArchitecture,
@@ -48,9 +48,17 @@ export async function process(inputs, ctx) {
       dataRequirements: null
     };
   }
-
-  // Breakpoint: Review data requirements
-  await ctx.breakpoint({
+  let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      dataRequirements = await ctx.task(dataRequirementsAnalysisTask, { ...{
+    projectName,
+    requirements,
+    existingArchitecture,
+    constraints
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Review data requirements for ${projectName}. Identified ${dataRequirements.dataDomains.length} data domains and ${dataRequirements.entities.length} entities. Are requirements complete?`,
     title: 'Data Requirements Review',
     context: {
@@ -66,9 +74,15 @@ export async function process(inputs, ctx) {
         format: 'markdown',
         content: dataRequirements.requirementsReport
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // Phase 2: Conceptual Data Model Design
   const conceptualModel = await ctx.task(conceptualDataModelTask, {
     projectName,
@@ -77,15 +91,24 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 3: Logical Data Model Design
-  const logicalModel = await ctx.task(logicalDataModelTask, {
+  let logicalModel = await ctx.task(logicalDataModelTask, {
     projectName,
     conceptualModel,
     dataRequirements,
     requirements
   });
 
-  // Breakpoint: Review data models
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      logicalModel = await ctx.task(logicalDataModelTask, { ...{
+    projectName,
+    conceptualModel,
+    dataRequirements,
+    requirements
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Review data models for ${projectName}. Conceptual model defines ${conceptualModel.entities.length} entities. Logical model includes ${logicalModel.tables?.length || logicalModel.collections?.length || 0} tables/collections. Approve?`,
     title: 'Data Models Review',
     context: {
@@ -106,9 +129,15 @@ export async function process(inputs, ctx) {
         format: 'markdown',
         content: logicalModel.diagram
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // Phase 4: Storage Technology Selection (Parallel evaluation of candidates)
   const storageCandidates = await ctx.task(storageSelectionTask, {
     projectName,
@@ -133,7 +162,7 @@ export async function process(inputs, ctx) {
   );
 
   // Phase 5: Storage Architecture Design
-  const storageArchitecture = await ctx.task(storageArchitectureTask, {
+  let storageArchitecture = await ctx.task(storageArchitectureTask, {
     projectName,
     storageCandidates,
     detailedStorageEvaluations,
@@ -148,8 +177,19 @@ export async function process(inputs, ctx) {
     attr => !storageArchitecture.qualityAttributes?.[attr]
   );
 
-  if (missingAttributes.length > 0) {
-    await ctx.breakpoint({
+      let lastFeedback_phase5Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase5Review) {
+        storageArchitecture = await ctx.task(storageArchitectureTask, { ...{
+    projectName,
+    storageCandidates,
+    detailedStorageEvaluations,
+    logicalModel,
+    dataRequirements,
+    constraints
+  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+      }
+  const phase5Review = await ctx.breakpoint({
       question: `Storage architecture missing quality attributes: ${missingAttributes.join(', ')}. Should we refine the architecture?`,
       title: 'Storage Architecture Quality Gate Warning',
       context: {
@@ -157,12 +197,29 @@ export async function process(inputs, ctx) {
         projectName,
         missingAttributes,
         recommendation: 'Define scalability, availability, and consistency strategies'
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase5Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase5Review.approved) break;
+      lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+    } }
 
-  // Breakpoint: Review storage architecture
-  await ctx.breakpoint({
+    let lastFeedback_qualityGateApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_qualityGateApproval) {
+      storageArchitecture = await ctx.task(storageArchitectureTask, { ...{
+    projectName,
+    storageCandidates,
+    detailedStorageEvaluations,
+    logicalModel,
+    dataRequirements,
+    constraints
+  }, feedback: lastFeedback_qualityGateApproval, attempt: attempt + 1 });
+    }
+  const qualityGateApproval = await ctx.breakpoint({
     question: `Review storage architecture for ${projectName}. Recommended: ${storageArchitecture.recommendation.primaryDatabase} with ${storageArchitecture.recommendation.additionalStores?.length || 0} additional stores. Approve?`,
     title: 'Storage Architecture Review',
     context: {
@@ -178,9 +235,15 @@ export async function process(inputs, ctx) {
         format: 'markdown',
         content: storageArchitecture.architectureDiagram
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_qualityGateApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (qualityGateApproval.approved) break;
+    lastFeedback_qualityGateApproval = qualityGateApproval.response || qualityGateApproval.feedback || 'Changes requested';
+  }
   // Phase 6: Physical Data Model Design
   const physicalModel = await ctx.task(physicalDataModelTask, {
     projectName,
@@ -218,7 +281,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 10: Data Security Design
-  const dataSecurity = await ctx.task(dataSecurityTask, {
+  let dataSecurity = await ctx.task(dataSecurityTask, {
     projectName,
     physicalModel,
     storageArchitecture,
@@ -233,8 +296,18 @@ export async function process(inputs, ctx) {
       c => !addressedCompliance.includes(c)
     );
 
-    if (missingCompliance.length > 0) {
-      await ctx.breakpoint({
+        let lastFeedback_phase10Review = null;
+      for (let attempt = 0; attempt < 3; attempt++) {
+        if (lastFeedback_phase10Review) {
+          dataSecurity = await ctx.task(dataSecurityTask, { ...{
+    projectName,
+    physicalModel,
+    storageArchitecture,
+    dataGovernance,
+    constraints
+  }, feedback: lastFeedback_phase10Review, attempt: attempt + 1 });
+        }
+  const phase10Review = await ctx.breakpoint({
         question: `Security design missing compliance controls for: ${missingCompliance.join(', ')}. Should we add these controls?`,
         title: 'Compliance Gap Warning',
         context: {
@@ -242,13 +315,28 @@ export async function process(inputs, ctx) {
           projectName,
           missingCompliance,
           recommendation: 'Add compliance controls for all required standards'
-        }
-      });
-    }
+        },
+        expert: 'owner',
+        tags: ['approval-gate'],
+        previousFeedback: lastFeedback_phase10Review || undefined,
+        attempt: attempt > 0 ? attempt + 1 : undefined
+        });
+        if (phase10Review.approved) break;
+        lastFeedback_phase10Review = phase10Review.response || phase10Review.feedback || 'Changes requested';
+      }   }
   }
-
-  // Breakpoint: Review governance and security
-  await ctx.breakpoint({
+  let lastFeedback_reviewApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_reviewApproval) {
+      dataSecurity = await ctx.task(dataSecurityTask, { ...{
+    projectName,
+    physicalModel,
+    storageArchitecture,
+    dataGovernance,
+    constraints
+  }, feedback: lastFeedback_reviewApproval, attempt: attempt + 1 });
+    }
+  const reviewApproval = await ctx.breakpoint({
     question: `Review data governance and security for ${projectName}. Governance policies: ${dataGovernance.policies?.length || 0}. Security controls: ${dataSecurity.controls?.length || 0}. Approve?`,
     title: 'Governance and Security Review',
     context: {
@@ -265,9 +353,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: dataSecurity
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_reviewApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (reviewApproval.approved) break;
+    lastFeedback_reviewApproval = reviewApproval.response || reviewApproval.feedback || 'Changes requested';
+  }
   // Phase 11: Data Migration Strategy (if existing architecture)
   let dataMigration = null;
   if (existingArchitecture && Object.keys(existingArchitecture).length > 0) {
@@ -281,8 +375,18 @@ export async function process(inputs, ctx) {
     });
 
     // Quality Gate: Migration must have rollback strategy
-    if (!dataMigration.rollbackStrategy) {
-      await ctx.breakpoint({
+        let lastFeedback_phase11Review = null;
+      for (let attempt = 0; attempt < 3; attempt++) {
+        if (lastFeedback_phase11Review) {
+          dataSecurity = await ctx.task(dataSecurityTask, { ...{
+    projectName,
+    physicalModel,
+    storageArchitecture,
+    dataGovernance,
+    constraints
+  }, feedback: lastFeedback_phase11Review, attempt: attempt + 1 });
+        }
+  const phase11Review = await ctx.breakpoint({
         question: `Migration plan lacks rollback strategy. Should we develop one before proceeding?`,
         title: 'Migration Rollback Missing',
         context: {
@@ -290,11 +394,16 @@ export async function process(inputs, ctx) {
           projectName,
           migration: dataMigration,
           recommendation: 'Always include rollback strategy for data migrations'
-        }
-      });
-    }
+        },
+        expert: 'owner',
+        tags: ['approval-gate'],
+        previousFeedback: lastFeedback_phase11Review || undefined,
+        attempt: attempt > 0 ? attempt + 1 : undefined
+        });
+        if (phase11Review.approved) break;
+        lastFeedback_phase11Review = phase11Review.response || phase11Review.feedback || 'Changes requested';
+      }   }
   }
-
   // Phase 12: Performance Optimization Strategy
   const performanceStrategy = await ctx.task(performanceOptimizationTask, {
     projectName,
@@ -328,7 +437,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 15: Risk Analysis
-  const riskAnalysis = await ctx.task(dataArchitectureRiskAnalysisTask, {
+  let riskAnalysis = await ctx.task(dataArchitectureRiskAnalysisTask, {
     projectName,
     storageArchitecture,
     dataMigration,
@@ -341,8 +450,18 @@ export async function process(inputs, ctx) {
     risk => risk.severity === 'critical' && !risk.mitigationPlan
   );
 
-  if (criticalRisksWithoutMitigation.length > 0) {
-    await ctx.breakpoint({
+      let lastFeedback_phase15Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase15Review) {
+        riskAnalysis = await ctx.task(dataArchitectureRiskAnalysisTask, { ...{
+    projectName,
+    storageArchitecture,
+    dataMigration,
+    implementationRoadmap,
+    constraints
+  }, feedback: lastFeedback_phase15Review, attempt: attempt + 1 });
+      }
+  const phase15Review = await ctx.breakpoint({
       question: `${criticalRisksWithoutMitigation.length} critical risks lack mitigation plans. Should we develop mitigation strategies before proceeding?`,
       title: 'Critical Risk Warning',
       context: {
@@ -350,12 +469,28 @@ export async function process(inputs, ctx) {
         projectName,
         criticalRisks: criticalRisksWithoutMitigation,
         recommendation: 'Develop mitigation strategies for all critical risks'
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase15Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase15Review.approved) break;
+      lastFeedback_phase15Review = phase15Review.response || phase15Review.feedback || 'Changes requested';
+    } }
 
-  // Final Breakpoint: Architecture Design Approval
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      riskAnalysis = await ctx.task(dataArchitectureRiskAnalysisTask, { ...{
+    projectName,
+    storageArchitecture,
+    dataMigration,
+    implementationRoadmap,
+    constraints
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Data Architecture Design complete for ${projectName}. Storage: ${storageArchitecture.recommendation.primaryDatabase}. Timeline: ${implementationRoadmap.timeline.totalDuration}. Cost: ${implementationRoadmap.cost.total}. Approve to proceed?`,
     title: 'Data Architecture Design Approval',
     context: {
@@ -373,9 +508,15 @@ export async function process(inputs, ctx) {
         { path: 'artifacts/final-data-architecture.md', format: 'markdown', content: implementationRoadmap.architectureDocument },
         { path: 'artifacts/implementation-roadmap.md', format: 'markdown', content: implementationRoadmap.roadmapMarkdown }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     projectName,
@@ -402,8 +543,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const dataRequirementsAnalysisTask = defineTask('data-requirements-analysis', (args, taskCtx) => ({
   kind: 'agent',

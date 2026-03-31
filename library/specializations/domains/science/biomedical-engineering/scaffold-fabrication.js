@@ -51,14 +51,22 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 4: Mechanical Property Testing
-  const mechanicalTesting = await ctx.task(mechanicalTestingTask, {
+  let mechanicalTesting = await ctx.task(mechanicalTestingTask, {
     scaffoldName,
     targetTissue,
     poreCharacterization
   });
 
-  // Breakpoint: Review mechanical properties
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      mechanicalTesting = await ctx.task(mechanicalTestingTask, { ...{
+    scaffoldName,
+    targetTissue,
+    poreCharacterization
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: `Review mechanical properties for ${scaffoldName}. Do properties match target tissue requirements?`,
     title: 'Mechanical Properties Review',
     context: {
@@ -70,9 +78,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: mechanicalTesting
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
   // Phase 5: Degradation Rate Evaluation
   const degradationEvaluation = await ctx.task(degradationEvaluationTask, {
     scaffoldName,
@@ -94,7 +108,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 8: Scaffold Specifications Documentation
-  const scaffoldDocumentation = await ctx.task(scaffoldDocumentationTask, {
+  let scaffoldDocumentation = await ctx.task(scaffoldDocumentationTask, {
     scaffoldName,
     targetTissue,
     fabricationMethod,
@@ -107,8 +121,23 @@ export async function process(inputs, ctx) {
     biocompatibilityAssessment
   });
 
-  // Final Breakpoint: Scaffold Approval
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      scaffoldDocumentation = await ctx.task(scaffoldDocumentationTask, { ...{
+    scaffoldName,
+    targetTissue,
+    fabricationMethod,
+    designSpecification,
+    methodOptimization,
+    poreCharacterization,
+    mechanicalTesting,
+    degradationEvaluation,
+    surfaceCharacterization,
+    biocompatibilityAssessment
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Scaffold fabrication complete for ${scaffoldName}. Approve specifications for tissue construct development?`,
     title: 'Scaffold Approval',
     context: {
@@ -117,9 +146,15 @@ export async function process(inputs, ctx) {
       files: [
         { path: `artifacts/scaffold-specifications.json`, format: 'json', content: scaffoldDocumentation }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     scaffoldName,
@@ -138,8 +173,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const designSpecificationTask = defineTask('design-specification', (args, taskCtx) => ({
   kind: 'agent',

@@ -99,7 +99,7 @@ export async function process(inputs, ctx) {
     ...scaffoldConfigResult.filesCreated
   );
 
-  const assimilationResult = await ctx.task(adaptOriginalBabysitTask, {
+  let assimilationResult = await ctx.task(adaptOriginalBabysitTask, {
     projectDir,
     harnessName: 'OpenCode',
     upstreamSource: 'the canonical babysitter plugin repo and its babysit process library',
@@ -110,8 +110,17 @@ export async function process(inputs, ctx) {
 
   ctx.log(`Scaffolding complete: ${integrationFiles.length} files created`);
 
-  // Breakpoint: confirm scaffold before implementation
-  await ctx.breakpoint({
+    let lastFeedback_implementationApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_implementationApproval) {
+      assimilationResult = await ctx.task(adaptOriginalBabysitTask, { ...{
+    projectDir,
+    harnessName: 'OpenCode',
+    upstreamSource: 'the canonical babysitter plugin repo and its babysit process library',
+    research: researchResult
+  }, feedback: lastFeedback_implementationApproval, attempt: attempt + 1 });
+    }
+  const implementationApproval = await ctx.breakpoint({
     question: 'Scaffolding complete. Review the created directories and config before proceeding to implementation.',
     title: 'Scaffold Review',
     context: {
@@ -121,9 +130,15 @@ export async function process(inputs, ctx) {
         format: 'text',
         label: f.split('/').pop()
       }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_implementationApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (implementationApproval.approved) break;
+    lastFeedback_implementationApproval = implementationApproval.response || implementationApproval.feedback || 'Changes requested';
+  }
   // ==========================================================================
   // PHASE 3: IMPLEMENT
   // ==========================================================================
@@ -212,8 +227,20 @@ export async function process(inputs, ctx) {
     localTestResult: testResult
   });
 
-  if (!testResult.allPassed) {
-    await ctx.breakpoint({
+    let lastFeedback_validationApproval = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_validationApproval) {
+        runtimeValidationResult = await ctx.task(runHarnessRuntimeValidationTask, { ...{
+    projectDir,
+    harnessName: 'OpenCode',
+    loopModel: 'session.idle continuation with plugin state, client prompt reentry, and documented SDK or server fallback only when the host event model is insufficient',
+    research: researchResult,
+    docs: docsResult,
+    integrationFiles,
+    localTestResult: testResult
+  }, feedback: lastFeedback_validationApproval, attempt: attempt + 1 });
+      }
+  const validationApproval = await ctx.breakpoint({
       question: `Integration tests failed: ${testResult.failures.join(', ')}. Fix issues and retry?`,
       title: 'Test Failures',
       context: {
@@ -221,10 +248,16 @@ export async function process(inputs, ctx) {
         files: [
           { path: 'test-results.json', format: 'json', label: 'Test Results' }
         ]
-      }
-    });
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_validationApproval || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (validationApproval.approved) break;
+      lastFeedback_validationApproval = validationApproval.response || validationApproval.feedback || 'Changes requested';
+    }
   }
-
   // ==========================================================================
   // PHASE 5: VERIFY
   // ==========================================================================
@@ -277,7 +310,7 @@ export async function process(inputs, ctx) {
       localTestResult: testResult
     });
 
-    const reVerify = await ctx.task(verifyHarnessAssimilationTask, {
+    let reVerify = await ctx.task(verifyHarnessAssimilationTask, {
       projectDir,
       harnessName: 'OpenCode',
       research: researchResult,
@@ -297,14 +330,33 @@ export async function process(inputs, ctx) {
       break;
     }
   }
-
-  if (finalQuality < targetQuality) {
-    await ctx.breakpoint({
+  let lastFeedback_finalApproval = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_finalApproval) {
+        reVerify = await ctx.task(verifyHarnessAssimilationTask, { ...{
+      projectDir,
+      harnessName: 'OpenCode',
+      research: researchResult,
+      assimilation: assimilationResult,
+      docs: docsResult,
+      integrationFiles,
+      localTestResult: testResult,
+      runtimeValidation: runtimeValidationResult,
+      targetQuality
+    }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+      }
+  const finalApproval = await ctx.breakpoint({
       question: `Quality ${finalQuality} did not reach target ${targetQuality} after ${iterations} iterations. Accept or continue manually?`,
       title: 'Convergence Incomplete',
-      context: { runId: ctx.runId }
-    });
-  }
+      context: { runId: ctx.runId },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_finalApproval || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (finalApproval.approved) break;
+      lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+    } }
 
   // Deduplicate integration files
   const uniqueFiles = [...new Set(integrationFiles)];
@@ -324,8 +376,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

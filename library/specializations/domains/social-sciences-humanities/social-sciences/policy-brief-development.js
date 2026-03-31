@@ -112,7 +112,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 7: Scoring policy brief quality');
-  const qualityScore = await ctx.task(policyBriefQualityScoringTask, {
+  let qualityScore = await ctx.task(policyBriefQualityScoringTask, {
     audienceAnalysis,
     keyMessages,
     evidenceTranslation,
@@ -127,8 +127,20 @@ export async function process(inputs, ctx) {
   const briefScore = qualityScore.overallScore;
   const qualityMet = briefScore >= 80;
 
-  // Breakpoint: Review policy brief
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      qualityScore = await ctx.task(policyBriefQualityScoringTask, { ...{
+    audienceAnalysis,
+    keyMessages,
+    evidenceTranslation,
+    recommendations,
+    visualizations,
+    briefComposition,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Policy brief complete. Quality score: ${briefScore}/100. ${qualityMet ? 'Brief meets quality standards!' : 'Brief may need refinement.'} Review and approve?`,
     title: 'Policy Brief Review',
     context: {
@@ -143,9 +155,15 @@ export async function process(inputs, ctx) {
         targetAudience: audienceAnalysis.audienceType,
         recommendationCount: recommendations.recommendations.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 

@@ -51,7 +51,7 @@ export async function process(inputs, ctx) {
 
   // Phase 2: Process Parameter Design
   ctx.log('info', 'Phase 2: Designing deposition parameters');
-  const processDesign = await ctx.task(depositionParameterDesignTask, {
+  let processDesign = await ctx.task(depositionParameterDesignTask, {
     material,
     substrate,
     technique,
@@ -60,9 +60,19 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...processDesign.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      processDesign = await ctx.task(depositionParameterDesignTask, { ...{
+    material,
+    substrate,
+    technique,
+    targetThickness,
+    targetComposition,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Deposition parameters designed. Power: ${processDesign.parameters.power}W, Pressure: ${processDesign.parameters.pressure} mTorr. Review parameters?`,
     title: 'Deposition Parameter Review',
     context: {
@@ -73,9 +83,15 @@ export async function process(inputs, ctx) {
         estimatedRate: processDesign.estimatedDepositionRate
       },
       files: processDesign.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 3: Deposition Execution
   ctx.log('info', 'Phase 3: Executing deposition process');
   const depositionExecution = await ctx.task(depositionExecutionTask, {
@@ -201,8 +217,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Substrate Preparation
+  // Task 1: Substrate Preparation
 export const substratePreparationTask = defineTask('tf-substrate-preparation', (args, taskCtx) => ({
   kind: 'agent',
   title: `Substrate Preparation - ${args.substrate}`,

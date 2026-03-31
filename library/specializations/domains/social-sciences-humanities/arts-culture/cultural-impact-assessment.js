@@ -61,23 +61,37 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 6: Cultural Heritage Impact Analysis
-  const heritageImpact = await ctx.task(heritageImpactAnalysisTask, {
+  let heritageImpact = await ctx.task(heritageImpactAnalysisTask, {
     assessmentSubject: inputs.assessmentSubject,
     baselineAssessment: baselineAssessment,
     scope: inputs.scope
   });
 
-  // Breakpoint: Impact Findings Review
-  await ctx.breakpoint('impact-findings-review', {
+    let lastFeedback_phase6Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase6Review) {
+      heritageImpact = await ctx.task(heritageImpactAnalysisTask, { ...{
+    assessmentSubject: inputs.assessmentSubject,
+    baselineAssessment: baselineAssessment,
+    scope: inputs.scope
+  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
+    }
+  const phase6Review = await ctx.breakpoint('impact-findings-review', {
     title: 'Cultural Impact Findings Review',
     description: 'Review comprehensive impact analysis findings before mitigation planning',
     context: {
       socialImpact: socialImpact,
       economicImpact: economicImpact,
       heritageImpact: heritageImpact
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase6Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase6Review.approved) break;
+    lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
+  }
   // Phase 7: Cumulative Impact Assessment
   const cumulativeImpact = await ctx.task(cumulativeImpactTask, {
     socialImpact: socialImpact,
@@ -101,7 +115,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 10: Final Assessment Report
-  const finalReport = await ctx.task(finalReportTask, {
+  let finalReport = await ctx.task(finalReportTask, {
     scopingReport: scopingReport,
     baselineAssessment: baselineAssessment,
     stakeholderAnalysis: stakeholderAnalysis,
@@ -113,16 +127,36 @@ export async function process(inputs, ctx) {
     monitoringFramework: monitoringFramework
   });
 
-  // Final Breakpoint: Assessment Approval
-  await ctx.breakpoint('assessment-approval', {
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      finalReport = await ctx.task(finalReportTask, { ...{
+    scopingReport: scopingReport,
+    baselineAssessment: baselineAssessment,
+    stakeholderAnalysis: stakeholderAnalysis,
+    socialImpact: socialImpact,
+    economicImpact: economicImpact,
+    heritageImpact: heritageImpact,
+    cumulativeImpact: cumulativeImpact,
+    mitigationStrategies: mitigationStrategies,
+    monitoringFramework: monitoringFramework
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint('assessment-approval', {
     title: 'Cultural Impact Assessment Final Approval',
     description: 'Review and approve final cultural impact assessment report',
     context: {
       finalReport: finalReport,
       recommendations: mitigationStrategies
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     scopingReport: scopingReport,
     baselineAssessment: baselineAssessment,

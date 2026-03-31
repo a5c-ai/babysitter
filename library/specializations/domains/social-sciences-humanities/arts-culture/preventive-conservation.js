@@ -85,7 +85,7 @@ export async function process(inputs, ctx) {
 
   // Task 6: Light and UV Management
   ctx.log('info', 'Developing light exposure management');
-  const lightManagement = await ctx.task(lightManagementTask, {
+  let lightManagement = await ctx.task(lightManagementTask, {
     collectionType,
     facilityInfo,
     outputDir
@@ -93,8 +93,16 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...lightManagement.artifacts);
 
-  // Breakpoint: Review preservation plan
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      lightManagement = await ctx.task(lightManagementTask, { ...{
+    collectionType,
+    facilityInfo,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Preventive conservation plan for "${collectionName}" complete. Environmental targets and protocols established. Review and approve?`,
     title: 'Preventive Conservation Plan Review',
     context: {
@@ -106,9 +114,15 @@ export async function process(inputs, ctx) {
         environmentalTargets: environmentalMonitoring.targets,
         storageAreas: storageProtocols.areas
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 7: Emergency Preparedness
   ctx.log('info', 'Developing emergency preparedness plan');
   const emergencyPreparedness = await ctx.task(emergencyPreparednessTask, {
@@ -172,8 +186,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Collection Assessment
+  // Task 1: Collection Assessment
 export const collectionAssessmentTask = defineTask('collection-assessment', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Assess collection preservation needs',

@@ -27,15 +27,24 @@ export async function process(inputs, ctx) {
 
   // Phase 1: Reflection Framework Design
   ctx.log('info', 'Phase 1: Designing reflection framework');
-  const frameworkDesign = await ctx.task(frameworkDesignTask, { reflectionScope, participantLevel, existingPractices, outputDir });
-  artifacts.push(...frameworkDesign.artifacts);
-
-  await ctx.breakpoint({
+  let frameworkDesign = await ctx.task(frameworkDesignTask, { reflectionScope, participantLevel, existingPractices, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      frameworkDesign = await ctx.task(frameworkDesignTask, { ...{ reflectionScope, participantLevel, existingPractices, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Reflection framework designed for ${participantLevel} level with ${frameworkDesign.methods.length} methods. Review?`,
     title: 'Framework Design Review',
-    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })), summary: { participantLevel, methods: frameworkDesign.methods.length } }
-  });
-
+    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })), summary: { participantLevel, methods: frameworkDesign.methods.length } },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 2: Reflection Question Development
   ctx.log('info', 'Phase 2: Developing reflection questions');
   const questionDevelopment = await ctx.task(questionDevelopmentTask, { frameworkDesign: frameworkDesign.framework, participantLevel, outputDir });
@@ -83,7 +92,6 @@ export async function process(inputs, ctx) {
     reviewResult = await ctx.task(stakeholderReviewTask, { reflectionFramework: frameworkDesign.framework, qualityScore: qualityAssessment.overallScore, outputDir });
     artifacts.push(...reviewResult.artifacts);
   }
-
   const endTime = ctx.now();
   return {
     success: true,
@@ -105,8 +113,7 @@ export async function process(inputs, ctx) {
     metadata: { processId: 'domains/business/knowledge-management/reflection-retrospective', timestamp: startTime, outputDir }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 export const frameworkDesignTask = defineTask('framework-design', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Design reflection framework',

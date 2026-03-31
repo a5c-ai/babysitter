@@ -300,7 +300,6 @@ export async function process(inputs, ctx) {
       summary: `Audit found ${totalGaps} gaps but user chose not to fix. Feedback: ${reviewResult.feedback || reviewResult.response || ''}`
     };
   }
-
   // ============================================================================
   // PHASE 3: FIX GAPS IN PARALLEL
   // ============================================================================

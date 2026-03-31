@@ -116,7 +116,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 6: Preparing QBR presentation');
 
-  const qbrPresentation = await ctx.task(qbrPresentationTask, {
+  let qbrPresentation = await ctx.task(qbrPresentationTask, {
     supplier,
     quarter,
     performanceCompilation,
@@ -129,8 +129,21 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...qbrPresentation.artifacts);
 
-  // Breakpoint: Review QBR package
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      qbrPresentation = await ctx.task(qbrPresentationTask, { ...{
+    supplier,
+    quarter,
+    performanceCompilation,
+    actionReview,
+    performanceAnalysis,
+    strategicAlignment,
+    innovationOpportunities,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `QBR package prepared for ${supplier}. Performance score: ${performanceAnalysis.overallScore}. ${actionReview.openActions} open actions. Review package before meeting?`,
     title: 'QBR Package Review',
     context: {
@@ -142,9 +155,15 @@ export async function process(inputs, ctx) {
         overallScore: performanceAnalysis.overallScore,
         openActions: actionReview.openActions
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 7: AGENDA AND LOGISTICS
   // ============================================================================
@@ -212,8 +231,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

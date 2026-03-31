@@ -470,23 +470,37 @@ export async function process(inputs, ctx) {
 
   // Phase 3: Analysis Workplan
   ctx.log('Phase 3: Creating analysis workplan');
-  const workplanResult = await ctx.task(analysisWorkplanTask, {
+  let workplanResult = await ctx.task(analysisWorkplanTask, {
     hypotheses: artifacts.hypotheses,
     availableData: inputs.availableData,
     constraints: inputs.constraints
   });
   artifacts.analysisWorkplan = workplanResult;
 
-  // Breakpoint for workplan approval
-  await ctx.breakpoint('workplan-approval', {
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      workplanResult = await ctx.task(analysisWorkplanTask, { ...{
+    hypotheses: artifacts.hypotheses,
+    availableData: inputs.availableData,
+    constraints: inputs.constraints
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint('workplan-approval', {
     question: 'Review the analysis workplan. Are the hypotheses and analytical approaches appropriate?',
     artifacts: {
       problemStructure: artifacts.problemStructure,
       hypotheses: artifacts.hypotheses,
       analysisWorkplan: artifacts.analysisWorkplan
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // Phase 4: Hypothesis Testing
   ctx.log('Phase 4: Executing hypothesis testing analysis');
   const findingsResult = await ctx.task(hypothesisTestingTask, {
@@ -507,7 +521,7 @@ export async function process(inputs, ctx) {
 
   // Phase 6: Recommendation Development
   ctx.log('Phase 6: Developing actionable recommendations');
-  const recommendationsResult = await ctx.task(recommendationDevelopmentTask, {
+  let recommendationsResult = await ctx.task(recommendationDevelopmentTask, {
     insights: artifacts.insights,
     findings: artifacts.findings,
     problemContext: inputs.problemContext,
@@ -515,15 +529,30 @@ export async function process(inputs, ctx) {
   });
   artifacts.recommendations = recommendationsResult;
 
-  // Breakpoint for recommendations review
-  await ctx.breakpoint('recommendations-review', {
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      recommendationsResult = await ctx.task(recommendationDevelopmentTask, { ...{
+    insights: artifacts.insights,
+    findings: artifacts.findings,
+    problemContext: inputs.problemContext,
+    constraints: inputs.constraints
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint('recommendations-review', {
     question: 'Review the insights and recommendations. Are they well-supported and actionable?',
     artifacts: {
       insights: artifacts.insights,
       recommendations: artifacts.recommendations
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 7: Deliverable Packaging
   ctx.log('Phase 7: Packaging final deliverables');
   const deliverablesResult = await ctx.task(deliverablePackagingTask, {

@@ -29,17 +29,26 @@ export async function process(inputs, ctx) {
 
   let certificate = null;
   if (scoring.passed) {
-    const cert = await ctx.task(certificateGenerationTask, { candidateId, topic, scoring, outputDir });
+    let cert = await ctx.task(certificateGenerationTask, { candidateId, topic, scoring, outputDir });
     artifacts.push(...cert.artifacts);
     certificate = cert.certificate;
-  }
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      cert = await ctx.task(certificateGenerationTask, { ...{ candidateId, topic, scoring, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Certification assessment complete for ${topic}. Score: ${scoring.totalScore}/100. Certified: ${scoring.passed}. Review?`,
     title: 'Topic Mastery Certification Complete',
-    context: { runId: ctx.runId, topic, score: scoring.totalScore, certified: scoring.passed }
-  });
-
+    context: { runId: ctx.runId, topic, score: scoring.totalScore, certified: scoring.passed },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     topic,

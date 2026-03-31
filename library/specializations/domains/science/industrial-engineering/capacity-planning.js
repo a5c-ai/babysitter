@@ -56,7 +56,7 @@ export async function process(inputs, ctx) {
 
   // Task 3: Capacity Requirements Calculation
   ctx.log('info', 'Phase 3: Calculating capacity requirements from demand');
-  const capacityRequirements = await ctx.task(capacityRequirementsTask, {
+  let capacityRequirements = await ctx.task(capacityRequirementsTask, {
     demandScenarios,
     resourceCapacity,
     outputDir
@@ -64,8 +64,16 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...capacityRequirements.artifacts);
 
-  // Breakpoint: Review requirements
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      capacityRequirements = await ctx.task(capacityRequirementsTask, { ...{
+    demandScenarios,
+    resourceCapacity,
+    outputDir
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Capacity requirements calculated. Peak demand period: ${capacityRequirements.peakPeriod}. ${capacityRequirements.gapCount} resource gaps identified. Review gap analysis?`,
     title: 'Capacity Requirements Review',
     context: {
@@ -74,9 +82,15 @@ export async function process(inputs, ctx) {
       peakPeriod: capacityRequirements.peakPeriod,
       gaps: capacityRequirements.gapCount,
       files: capacityRequirements.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // Task 4: Gap Analysis
   ctx.log('info', 'Phase 4: Analyzing capacity gaps and constraints');
   const gapAnalysis = await ctx.task(gapAnalysisTask, {
@@ -109,7 +123,7 @@ export async function process(inputs, ctx) {
 
   // Task 7: Financial Analysis
   ctx.log('info', 'Phase 7: Analyzing financial implications');
-  const financialAnalysis = await ctx.task(financialAnalysisTask, {
+  let financialAnalysis = await ctx.task(financialAnalysisTask, {
     capacityPlan,
     optionsEvaluation,
     outputDir
@@ -117,8 +131,16 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...financialAnalysis.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      financialAnalysis = await ctx.task(financialAnalysisTask, { ...{
+    capacityPlan,
+    optionsEvaluation,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Capacity plan developed. Investment required: $${financialAnalysis.totalInvestment}. ROI: ${financialAnalysis.roi}%. Service level impact: ${capacityPlan.serviceLevelImpact}. Review capacity plan?`,
     title: 'Capacity Planning Results',
     context: {
@@ -131,9 +153,15 @@ export async function process(inputs, ctx) {
         serviceLevelImpact: capacityPlan.serviceLevelImpact
       },
       files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -156,8 +184,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task definitions
+  // Task definitions
 export const demandScenariosTask = defineTask('demand-scenarios', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Define demand scenarios',

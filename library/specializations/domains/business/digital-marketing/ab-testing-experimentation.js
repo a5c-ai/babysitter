@@ -66,14 +66,21 @@ export async function process(inputs, ctx) {
 
   // Task 6: QA Test Setup
   ctx.log('info', 'Phase 6: QA testing setup and tracking');
-  const qaSetup = await ctx.task(testQATask, {
+  let qaSetup = await ctx.task(testQATask, {
     testConfiguration,
     outputDir
   });
   artifacts.push(...qaSetup.artifacts);
 
-  // Breakpoint: Review before launch
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      qaSetup = await ctx.task(testQATask, { ...{
+    testConfiguration,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `A/B test ready for launch. ${testConfiguration.variationCount} variations configured. Required sample: ${sampleSizeCalc.requiredSampleSize}. QA passed: ${qaSetup.passed}. Launch test?`,
     title: 'A/B Test Launch Review',
     context: {
@@ -85,9 +92,15 @@ export async function process(inputs, ctx) {
         estimatedDuration: sampleSizeCalc.estimatedDuration,
         qaPassed: qaSetup.passed
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 7: Launch Test and Monitor
   ctx.log('info', 'Phase 7: Creating launch and monitoring plan');
   const launchMonitoring = await ctx.task(launchMonitoringTask, {
@@ -154,8 +167,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task definitions
+  // Task definitions
 export const testOpportunityTask = defineTask('test-opportunity', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Identify testing opportunities and hypotheses',

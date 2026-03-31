@@ -58,24 +58,37 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 2: Auditing Existing Documentation');
 
-  const docAudit = await ctx.task(documentationAuditTask, {
+  let docAudit = await ctx.task(documentationAuditTask, {
     projectName,
     sourceAnalysis,
     outputDir
   });
 
-  artifacts.push(...docAudit.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      docAudit = await ctx.task(documentationAuditTask, { ...{
+    projectName,
+    sourceAnalysis,
+    outputDir
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Documentation audit complete. Coverage: ${docAudit.coverage}%, Missing docs: ${docAudit.undocumented.length}. Proceed with gap filling?`,
     title: 'Documentation Audit Review',
     context: {
       runId: ctx.runId,
       audit: docAudit.summary,
       files: docAudit.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 3: DOCUMENTATION TEMPLATE DESIGN
   // ============================================================================
@@ -122,7 +135,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...exampleGeneration.artifacts);
   }
-
   // ============================================================================
   // PHASE 6: DOCUMENTATION GENERATION
   // ============================================================================
@@ -162,7 +174,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 8: Reviewing Generated Documentation');
 
-  const docReview = await ctx.task(documentationReviewTask, {
+  let docReview = await ctx.task(documentationReviewTask, {
     projectName,
     docGeneration,
     integrationGuide,
@@ -172,8 +184,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...docReview.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      docReview = await ctx.task(documentationReviewTask, { ...{
+    projectName,
+    docGeneration,
+    integrationGuide,
+    docAudit,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Firmware API Documentation Complete for ${projectName}. Coverage: ${docReview.finalCoverage}%, Quality: ${docReview.qualityScore}. Review?`,
     title: 'API Documentation Complete',
     context: {
@@ -188,9 +210,15 @@ export async function process(inputs, ctx) {
         { path: docGeneration.outputPath, format: outputFormat, label: 'API Documentation' },
         { path: integrationGuide.guidePath, format: 'markdown', label: 'Integration Guide' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -222,8 +250,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

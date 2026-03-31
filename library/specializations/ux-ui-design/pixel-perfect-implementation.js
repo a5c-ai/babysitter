@@ -174,7 +174,7 @@ export async function process(inputs, ctx) {
   });
 
   // Score initial implementation
-  const initialScore = await ctx.task(scoreImplementationTask, {
+  let initialScore = await ctx.task(scoreImplementationTask, {
     mockSource,
     mockAnalysis,
     screenshotPath: initialScreenshot.screenshotPath,
@@ -198,8 +198,20 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Initial score: ${currentScore}/${targetQuality}`);
 
-  // Breakpoint: Review initial assessment
-  await ctx.breakpoint({
+    let lastFeedback_reviewApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_reviewApproval) {
+      initialScore = await ctx.task(scoreImplementationTask, { ...{
+    mockSource,
+    mockAnalysis,
+    screenshotPath: initialScreenshot.screenshotPath,
+    scoringWeights,
+    tolerances,
+    iteration: 0,
+    outputDir: `${ctx.runDir}/artifacts`
+  }, feedback: lastFeedback_reviewApproval, attempt: attempt + 1 });
+    }
+  const reviewApproval = await ctx.breakpoint({
     question: `Initial assessment complete. Score: ${currentScore}/100 (target: ${targetQuality}). ` +
               `${initialScore.majorGaps?.length || 0} major gaps identified. ` +
               `Review gap analysis and approve to begin refinement?`,
@@ -212,9 +224,15 @@ export async function process(inputs, ctx) {
       breakdown: initialScore.breakdown,
       majorGaps: initialScore.majorGaps,
       mockElements: mockAnalysis.elementsIdentified
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_reviewApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (reviewApproval.approved) break;
+    lastFeedback_reviewApproval = reviewApproval.response || reviewApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 3: ITERATIVE CONVERGENCE LOOP
   // Plan → Implement → Capture → Score → Review (repeat until converged)
@@ -252,8 +270,7 @@ export async function process(inputs, ctx) {
     if (!implementation.success) {
       ctx.log('warn', `Implementation partially failed: ${implementation.failedChanges?.length || 0} changes could not be applied`);
     }
-
-    // Step 3.3: Capture updated screenshot
+  // Step 3.3: Capture updated screenshot
     const screenshot = await ctx.task(captureImplementationTask, {
       targetUrl,
       viewports,
@@ -269,7 +286,7 @@ export async function process(inputs, ctx) {
     });
 
     // Step 3.4: Score updated implementation
-    const score = await ctx.task(scoreImplementationTask, {
+    let score = await ctx.task(scoreImplementationTask, {
       mockSource,
       mockAnalysis,
       screenshotPath: screenshot.screenshotPath,
@@ -297,8 +314,20 @@ export async function process(inputs, ctx) {
     ctx.log('info', `Iteration ${iteration} complete: ${currentScore}/${targetQuality} (+${improvement})`);
 
     // Step 3.5: Breakpoint for review (based on interval setting)
-    if (!converged && (iteration % breakpointInterval === 0 || improvement < 0)) {
-      await ctx.breakpoint({
+        let lastFeedback_iterationApproval = null;
+      for (let attempt = 0; attempt < 3; attempt++) {
+        if (lastFeedback_iterationApproval) {
+          score = await ctx.task(scoreImplementationTask, { ...{
+      mockSource,
+      mockAnalysis,
+      screenshotPath: screenshot.screenshotPath,
+      scoringWeights,
+      tolerances,
+      iteration,
+      outputDir: `${ctx.runDir}/artifacts`
+    }, feedback: lastFeedback_iterationApproval, attempt: attempt + 1 });
+        }
+  const iterationApproval = await ctx.breakpoint({
         question: `Iteration ${iteration}: Score ${currentScore}/${targetQuality} ` +
                   `(${improvement >= 0 ? '+' : ''}${improvement}). ` +
                   `${score.remainingGaps?.length || 0} gaps remaining. ` +
@@ -314,17 +343,35 @@ export async function process(inputs, ctx) {
           breakdown: score.breakdown,
           remainingGaps: score.remainingGaps,
           changesApplied: implementation.changesApplied?.length || 0
-        }
-      });
-    }
+        },
+        expert: 'owner',
+        tags: ['approval-gate'],
+        previousFeedback: lastFeedback_iterationApproval || undefined,
+        attempt: attempt > 0 ? attempt + 1 : undefined
+        });
+        if (iterationApproval.approved) break;
+        lastFeedback_iterationApproval = iterationApproval.response || iterationApproval.feedback || 'Changes requested';
+      }   }
 
     // Early exit if no improvement for consecutive iterations
     if (improvement <= 0 && iteration > 3) {
       const lastThree = improvements.slice(-3);
       const noProgress = lastThree.every(i => i.improvement <= 0);
       if (noProgress) {
-        ctx.log('warn', 'No progress in last 3 iterations, may need manual intervention');
-        await ctx.breakpoint({
+          let lastFeedback_iterationApproval2 = null;
+        for (let attempt = 0; attempt < 3; attempt++) {
+          if (lastFeedback_iterationApproval2) {
+            score = await ctx.task(scoreImplementationTask, { ...{
+      mockSource,
+      mockAnalysis,
+      screenshotPath: screenshot.screenshotPath,
+      scoringWeights,
+      tolerances,
+      iteration,
+      outputDir: `${ctx.runDir}/artifacts`
+    }, feedback: lastFeedback_iterationApproval2, attempt: attempt + 1 });
+          }
+  const iterationApproval2 = await ctx.breakpoint({
           question: `No improvement in last 3 iterations. Current score: ${currentScore}/${targetQuality}. ` +
                     `Continue with different approach or accept current state?`,
           title: 'Convergence Stalled',
@@ -333,12 +380,17 @@ export async function process(inputs, ctx) {
             runId: ctx.runId,
             currentScore,
             lastThreeIterations: lastThree
-          }
-        });
-      }
+          },
+          expert: 'owner',
+          tags: ['approval-gate'],
+          previousFeedback: lastFeedback_iterationApproval2 || undefined,
+          attempt: attempt > 0 ? attempt + 1 : undefined
+          });
+          if (iterationApproval2.approved) break;
+          lastFeedback_iterationApproval2 = iterationApproval2.response || iterationApproval2.feedback || 'Changes requested';
+        }     }
     }
   }
-
   // ============================================================================
   // PHASE 4: RESPONSIVE VERIFICATION (Optional)
   // Verify implementation across different viewports
@@ -360,7 +412,6 @@ export async function process(inputs, ctx) {
     artifacts.push(...(responsiveResults.artifacts || []));
     ctx.log('info', `Responsive verification: ${responsiveResults.passRate}% pass rate`);
   }
-
   // ============================================================================
   // PHASE 5: ACCESSIBILITY VERIFICATION (Optional)
   // Verify implementation meets accessibility standards
@@ -384,7 +435,6 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Accessibility: ${accessibilityResults.violations?.length || 0} violations found`);
   }
-
   // ============================================================================
   // PHASE 6: FINAL QUALITY GATE
   // ============================================================================
@@ -414,9 +464,20 @@ export async function process(inputs, ctx) {
   };
 
   if (converged) {
-    ctx.log('info', `SUCCESS: Pixel-perfect quality achieved at ${currentScore}% after ${iteration} iterations`);
-
-    await ctx.breakpoint({
+      let lastFeedback_finalApproval = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_finalApproval) {
+        score = await ctx.task(scoreImplementationTask, { ...{
+      mockSource,
+      mockAnalysis,
+      screenshotPath: screenshot.screenshotPath,
+      scoringWeights,
+      tolerances,
+      iteration,
+      outputDir: `${ctx.runDir}/artifacts`
+    }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+      }
+  const finalApproval = await ctx.breakpoint({
       question: `Target quality achieved! Final score: ${currentScore}/${targetQuality}. ` +
                 `${iteration} iterations completed. ` +
                 `Review final implementation and approve for completion?`,
@@ -429,12 +490,29 @@ export async function process(inputs, ctx) {
           iterations: iteration,
           improvements: improvements.map(i => ({ iteration: i.iteration, score: i.score }))
         }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_finalApproval || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (finalApproval.approved) break;
+      lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+    } } else {
+      let lastFeedback_finalApproval2 = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_finalApproval2) {
+        score = await ctx.task(scoreImplementationTask, { ...{
+      mockSource,
+      mockAnalysis,
+      screenshotPath: screenshot.screenshotPath,
+      scoringWeights,
+      tolerances,
+      iteration,
+      outputDir: `${ctx.runDir}/artifacts`
+    }, feedback: lastFeedback_finalApproval2, attempt: attempt + 1 });
       }
-    });
-  } else {
-    ctx.log('warn', `Did not converge: Score ${currentScore}% after ${maxIterations} iterations`);
-
-    await ctx.breakpoint({
+  const finalApproval2 = await ctx.breakpoint({
       question: `Max iterations reached. Final score: ${currentScore}/${targetQuality} (${targetQuality - currentScore} points short). ` +
                 `Accept current state or continue manual refinement?`,
       title: 'Final Quality Gate',
@@ -442,14 +520,19 @@ export async function process(inputs, ctx) {
       context: {
         runId: ctx.runId,
         finalResult
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_finalApproval2 || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (finalApproval2.approved) break;
+      lastFeedback_finalApproval2 = finalApproval2.response || finalApproval2.feedback || 'Changes requested';
+    } }
 
   return finalResult;
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

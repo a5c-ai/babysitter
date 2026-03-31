@@ -61,7 +61,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 3: Forking repository');
 
-  await ctx.breakpoint({
+  const forkApproval = await ctx.breakpoint({
     question: [
       'To submit your harness integration, we need to fork the a5c-ai/babysitter repository to your GitHub account.',
       '',
@@ -74,6 +74,9 @@ export async function process(inputs, ctx) {
     title: 'Fork a5c-ai/babysitter?',
     context: { runId: ctx.runId }
   });
+  if (!forkApproval.approved) {
+    return { success: false, reason: 'User rejected at fork approval gate', feedback: forkApproval.response || forkApproval.feedback };
+  }
 
   const fork = await ctx.task(forkRepoTask, {
     targetRepo: 'a5c-ai/babysitter'
@@ -88,13 +91,15 @@ export async function process(inputs, ctx) {
   const starStatus = await ctx.task(checkStarTask, { targetRepo: 'a5c-ai/babysitter' });
 
   if (!starStatus.isStarred) {
-    await ctx.breakpoint({
+    const starApproval = await ctx.breakpoint({
       question: 'Would you like to star the a5c-ai/babysitter repository to show your support?',
       title: 'Star repository?',
       context: { runId: ctx.runId }
     });
 
-    await ctx.task(starRepoTask, { targetRepo: 'a5c-ai/babysitter' });
+    if (starApproval.approved) {
+      await ctx.task(starRepoTask, { targetRepo: 'a5c-ai/babysitter' });
+    }
   }
 
   // ============================================================================
@@ -157,7 +162,7 @@ export async function process(inputs, ctx) {
   const testStatus = testResult.passed ? 'PASSED' : 'FAILED';
   const lintStatus = lintResult.passed ? 'PASSED' : 'FAILED';
 
-  await ctx.breakpoint({
+  const reviewResult = await ctx.breakpoint({
     question: [
       'Please review the harness integration before submitting the PR.',
       '',
@@ -173,6 +178,9 @@ export async function process(inputs, ctx) {
     title: 'Review harness integration',
     context: { runId: ctx.runId }
   });
+  if (!reviewResult.approved) {
+    return { success: false, reason: 'User rejected at harness integration review gate', feedback: reviewResult.response || reviewResult.feedback };
+  }
 
   // ============================================================================
   // PHASE 9: SUBMIT PR
@@ -180,11 +188,14 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 9: Submitting pull request');
 
-  await ctx.breakpoint({
+  const submitApproval = await ctx.breakpoint({
     question: 'Ready to submit the pull request to a5c-ai/babysitter?',
     title: 'Submit PR?',
     context: { runId: ctx.runId }
   });
+  if (!submitApproval.approved) {
+    return { success: false, reason: 'User rejected at PR submission gate', feedback: submitApproval.response || submitApproval.feedback };
+  }
 
   const pr = await ctx.task(submitPrTask, {
     forkOwner: fork.forkOwner,

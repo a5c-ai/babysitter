@@ -56,7 +56,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 3: Validating OKR alignment');
-  const alignmentValidation = await ctx.task(alignmentValidationTask, {
+  let alignmentValidation = await ctx.task(alignmentValidationTask, {
     companyOkrs: companyOkrs.okrs,
     teamOkrs: teamOkrs.okrs,
     outputDir
@@ -64,8 +64,16 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...alignmentValidation.artifacts);
 
-  // Breakpoint: Review OKR cascade
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      alignmentValidation = await ctx.task(alignmentValidationTask, { ...{
+    companyOkrs: companyOkrs.okrs,
+    teamOkrs: teamOkrs.okrs,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `OKR cascade complete. ${companyOkrs.okrs.length} company OKRs, ${teamOkrs.okrs.length} team OKRs. Alignment score: ${alignmentValidation.alignmentScore}%. Review before finalizing?`,
     title: 'OKR Development Review',
     context: {
@@ -80,9 +88,15 @@ export async function process(inputs, ctx) {
         alignmentScore: alignmentValidation.alignmentScore,
         alignmentGaps: alignmentValidation.gaps.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 4: OKR QUALITY SCORING
   // ============================================================================
@@ -180,8 +194,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

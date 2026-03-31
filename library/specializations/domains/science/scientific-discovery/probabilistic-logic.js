@@ -98,7 +98,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 6: Assessing reasoning quality');
-  const qualityScore = await ctx.task(reasoningQualityTask, {
+  let qualityScore = await ctx.task(reasoningQualityTask, {
     formalization: formalizationResult,
     model: modelConstruction.model,
     inferences: inferenceResult.inferences,
@@ -111,8 +111,19 @@ export async function process(inputs, ctx) {
 
   const qualityMet = qualityScore.overallScore >= 75;
 
-  // Breakpoint: Review probabilistic logic results
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      qualityScore = await ctx.task(reasoningQualityTask, { ...{
+    formalization: formalizationResult,
+    model: modelConstruction.model,
+    inferences: inferenceResult.inferences,
+    posteriors: posteriorComputation.posteriors,
+    uncertaintyAnalysis: uncertaintyAnalysis.analysis,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Probabilistic logic reasoning complete. Quality score: ${qualityScore.overallScore}/100. ${qualityMet ? 'Quality meets standards!' : 'Quality may need improvement.'} Review results?`,
     title: 'Probabilistic Logic Results Review',
     context: {
@@ -130,9 +141,15 @@ export async function process(inputs, ctx) {
         highConfidenceConclusions: uncertaintyAnalysis.highConfidenceCount,
         qualityScore: qualityScore.overallScore
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 7: REPORT GENERATION
   // ============================================================================
@@ -171,8 +188,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

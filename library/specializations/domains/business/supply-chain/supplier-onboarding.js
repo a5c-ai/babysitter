@@ -86,7 +86,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 4: Verifying compliance');
 
-  const complianceVerification = await ctx.task(complianceVerificationTask, {
+  let complianceVerification = await ctx.task(complianceVerificationTask, {
     supplierName,
     category,
     documentCollection,
@@ -96,8 +96,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...complianceVerification.artifacts);
 
-  // Breakpoint: Review verification results
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      complianceVerification = await ctx.task(complianceVerificationTask, { ...{
+    supplierName,
+    category,
+    documentCollection,
+    qualificationRequirements,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Verification complete for ${supplierName}. Financial: ${financialAssessment.rating}, Compliance: ${complianceVerification.status}. Review before capability assessment?`,
     title: 'Supplier Verification Review',
     context: {
@@ -108,9 +118,15 @@ export async function process(inputs, ctx) {
         complianceStatus: complianceVerification.status,
         companyVerified: companyVerification.verified
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 5: CAPABILITY ASSESSMENT
   // ============================================================================
@@ -232,8 +248,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

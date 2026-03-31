@@ -82,7 +82,7 @@ export async function process(inputs, ctx) {
 
   // Task 5: Develop Equipment Specification Sheet
   ctx.log('info', 'Developing equipment specification sheet');
-  const specSheetResult = await ctx.task(specificationSheetTask, {
+  let specSheetResult = await ctx.task(specificationSheetTask, {
     processName,
     equipmentType,
     sizing: sizingResult.sizing,
@@ -94,8 +94,20 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...specSheetResult.artifacts);
 
-  // Breakpoint: Review equipment specifications
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      specSheetResult = await ctx.task(specificationSheetTask, { ...{
+    processName,
+    equipmentType,
+    sizing: sizingResult.sizing,
+    materials: materialSelectionResult.materials,
+    designConditions: marginsResult.finalDesignConditions,
+    applicableCodes,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Equipment sizing complete for ${equipmentType}. Key dimensions: ${JSON.stringify(sizingResult.keyDimensions)}. Material: ${materialSelectionResult.materials.primary}. Review specifications?`,
     title: 'Equipment Sizing Review',
     context: {
@@ -108,9 +120,15 @@ export async function process(inputs, ctx) {
         designTemperature: marginsResult.finalDesignConditions.designTemperature,
         material: materialSelectionResult.materials.primary
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 6: Coordinate with Mechanical Engineering
   ctx.log('info', 'Coordinating with mechanical engineering');
   const mechanicalCoordResult = await ctx.task(mechanicalCoordinationTask, {
@@ -168,8 +186,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Design Conditions Calculation
+  // Task 1: Design Conditions Calculation
 export const designConditionsTask = defineTask('design-conditions', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Calculate design conditions',

@@ -73,7 +73,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 3: Developing randomization protocol');
-  const randomizationProtocol = await ctx.task(randomizationProtocolTask, {
+  let randomizationProtocol = await ctx.task(randomizationProtocolTask, {
     designSelection,
     controlDesign,
     population,
@@ -83,8 +83,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...randomizationProtocol.artifacts);
 
-  // Breakpoint: Review randomization approach
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      randomizationProtocol = await ctx.task(randomizationProtocolTask, { ...{
+    designSelection,
+    controlDesign,
+    population,
+    constraints,
+    outputDir
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Randomization protocol: ${randomizationProtocol.method}. Allocation ratio: ${randomizationProtocol.allocationRatio}. Review and approve?`,
     title: 'Randomization Protocol Review',
     context: {
@@ -101,9 +111,15 @@ export async function process(inputs, ctx) {
         allocationRatio: randomizationProtocol.allocationRatio,
         stratificationFactors: randomizationProtocol.stratificationFactors?.length || 0
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 4: BLINDING PROTOCOL
   // ============================================================================
@@ -175,7 +191,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 8: Scoring experimental design quality');
-  const qualityScore = await ctx.task(designQualityScoringTask, {
+  let qualityScore = await ctx.task(designQualityScoringTask, {
     designSelection,
     controlDesign,
     randomizationProtocol,
@@ -190,8 +206,21 @@ export async function process(inputs, ctx) {
 
   const qualityMet = qualityScore.overallScore >= minimumQualityScore;
 
-  // Final breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      qualityScore = await ctx.task(designQualityScoringTask, { ...{
+    designSelection,
+    controlDesign,
+    randomizationProtocol,
+    blindingProtocol,
+    powerAnalysis,
+    validityAssessment,
+    minimumQualityScore,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Experimental design complete. Quality score: ${qualityScore.overallScore}/100. ${qualityMet ? 'Design meets standards!' : 'Design may need refinement.'} Approve protocol?`,
     title: 'Experimental Design Approval',
     context: {
@@ -209,9 +238,15 @@ export async function process(inputs, ctx) {
         qualityScore: qualityScore.overallScore,
         qualityMet
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -271,8 +306,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

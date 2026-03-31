@@ -24,11 +24,16 @@ export async function process(inputs, ctx) {
   const pageObjectsSetup = await ctx.task(pageObjectsTask, { projectName, outputDir });
   artifacts.push(...pageObjectsSetup.artifacts);
 
-  const ciSetup = await ctx.task(ciIntegrationTask, { projectName, outputDir });
-  artifacts.push(...ciSetup.artifacts);
-
-  await ctx.breakpoint({ question: `E2E testing setup complete for ${projectName}. Approve?`, title: 'E2E Testing Review', context: { runId: ctx.runId, suites: testPatternsSetup.suites } });
-
+  let ciSetup = await ctx.task(ciIntegrationTask, { projectName, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      ciSetup = await ctx.task(ciIntegrationTask, { ...{ projectName, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({ question: `E2E testing setup complete for ${projectName}. Approve?`, title: 'E2E Testing Review', context: { runId: ctx.runId, suites: testPatternsSetup.suites }, expert: 'owner', tags: ['approval-gate'], previousFeedback: lastFeedback || undefined, attempt: attempt > 0 ? attempt + 1 : undefined });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const documentation = await ctx.task(documentationTask, { projectName, outputDir });
   artifacts.push(...documentation.artifacts);
 

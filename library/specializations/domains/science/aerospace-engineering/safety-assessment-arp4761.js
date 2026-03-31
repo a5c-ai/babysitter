@@ -11,38 +11,64 @@ import { defineTask } from '@a5c-ai/babysitter-sdk';
 export async function process(inputs, ctx) {
   const { projectName, systemDefinition, functionalArchitecture, safetyObjectives = {} } = inputs;
 
-  const fha = await ctx.task(fhaTask, { projectName, systemDefinition, functionalArchitecture });
-
-  await ctx.breakpoint({
+  let lastFeedback_analysisApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    // No preceding task identified for re-run with feedback
+    const analysisApproval = await ctx.breakpoint({
     question: `FHA complete for ${projectName}. ${fha.hazards.length} hazards identified, ${fha.catastrophic} catastrophic. Proceed with PSSA?`,
     title: 'FHA Review',
-    context: { runId: ctx.runId, fha }
-  });
-
+    context: { runId: ctx.runId, fha },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_analysisApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (analysisApproval.approved) break;
+    lastFeedback_analysisApproval = analysisApproval.response || analysisApproval.feedback || 'Changes requested';
+  }
   const pssa = await ctx.task(pssaTask, { projectName, fha, systemDefinition });
   const faultTreeAnalysis = await ctx.task(faultTreeTask, { projectName, pssa, systemDefinition });
-  const ccaAnalysis = await ctx.task(ccaTask, { projectName, faultTreeAnalysis, systemDefinition });
+  let ccaAnalysis = await ctx.task(ccaTask, { projectName, faultTreeAnalysis, systemDefinition });
 
-  if (ccaAnalysis.commonCauses.length > 0) {
-    await ctx.breakpoint({
+      let lastFeedback_reviewApproval = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_reviewApproval) {
+        ccaAnalysis = await ctx.task(ccaTask, { ...{ projectName, faultTreeAnalysis, systemDefinition }, feedback: lastFeedback_reviewApproval, attempt: attempt + 1 });
+      }
+  const reviewApproval = await ctx.breakpoint({
       question: `${ccaAnalysis.commonCauses.length} common cause failures identified. Review mitigation strategies?`,
       title: 'CCA Warning',
-      context: { runId: ctx.runId, commonCauses: ccaAnalysis.commonCauses }
-    });
-  }
+      context: { runId: ctx.runId, commonCauses: ccaAnalysis.commonCauses },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_reviewApproval || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (reviewApproval.approved) break;
+      lastFeedback_reviewApproval = reviewApproval.response || reviewApproval.feedback || 'Changes requested';
+    } }
 
   const fmeaAnalysis = await ctx.task(fmeaTask, { projectName, systemDefinition, pssa });
   const ddAnalysis = await ctx.task(ddAnalysisTask, { projectName, faultTreeAnalysis, fmeaAnalysis });
   const ssa = await ctx.task(ssaTask, { projectName, fha, pssa, faultTreeAnalysis, ccaAnalysis, fmeaAnalysis });
-  const safetyCase = await ctx.task(safetyCaseTask, { projectName, fha, pssa, ssa, faultTreeAnalysis, ccaAnalysis });
-  const report = await ctx.task(safetyReportTask, { projectName, fha, pssa, ssa, safetyCase });
-
-  await ctx.breakpoint({
+  let safetyCase = await ctx.task(safetyCaseTask, { projectName, fha, pssa, ssa, faultTreeAnalysis, ccaAnalysis });
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      safetyCase = await ctx.task(safetyCaseTask, { ...{ projectName, fha, pssa, ssa, faultTreeAnalysis, ccaAnalysis }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Safety assessment complete for ${projectName}. All DAL requirements ${ssa.dalCompliant ? 'met' : 'NOT met'}. Approve?`,
     title: 'Safety Assessment Approval',
-    context: { runId: ctx.runId, summary: { hazards: fha.hazards.length, catastrophic: fha.catastrophic, dalCompliant: ssa.dalCompliant } }
-  });
-
+    context: { runId: ctx.runId, summary: { hazards: fha.hazards.length, catastrophic: fha.catastrophic, dalCompliant: ssa.dalCompliant } },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return { success: true, projectName, fha, pssa, ssa, safetyCase, report, metadata: { processId: 'safety-assessment-arp4761', timestamp: ctx.now() } };
 }
 

@@ -42,15 +42,24 @@ export async function process(inputs, ctx) {
   artifacts.push(...agentDeployment.artifacts);
 
   // Phase 3: Configure Auto-Instrumentation
-  const autoInstrumentation = await ctx.task(configureAutoInstrumentationTask, { projectName, apmTool, targetServices, outputDir });
-  artifacts.push(...autoInstrumentation.artifacts);
-
-  await ctx.breakpoint({
+  let autoInstrumentation = await ctx.task(configureAutoInstrumentationTask, { projectName, apmTool, targetServices, outputDir });
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      autoInstrumentation = await ctx.task(configureAutoInstrumentationTask, { ...{ projectName, apmTool, targetServices, outputDir }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `APM agents deployed to ${agentDeployment.deployedServices.length} services. Configure custom instrumentation?`,
     title: 'APM Agent Deployment',
-    context: { runId: ctx.runId, agentDeployment }
-  });
-
+    context: { runId: ctx.runId, agentDeployment },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // Phase 4: Add Custom Instrumentation
   const customInstrumentation = await ctx.task(addCustomInstrumentationTask, { projectName, targetServices, outputDir });
   artifacts.push(...customInstrumentation.artifacts);
@@ -72,15 +81,24 @@ export async function process(inputs, ctx) {
   artifacts.push(...validation.artifacts);
 
   // Phase 9: Document Setup
-  const documentation = await ctx.task(documentAPMSetupTask, { projectName, apmTool, agentDeployment, dashboards, alerts, outputDir });
-  artifacts.push(...documentation.artifacts);
-
-  await ctx.breakpoint({
+  let documentation = await ctx.task(documentAPMSetupTask, { projectName, apmTool, agentDeployment, dashboards, alerts, outputDir });
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      documentation = await ctx.task(documentAPMSetupTask, { ...{ projectName, apmTool, agentDeployment, dashboards, alerts, outputDir }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `APM setup complete. ${dashboards.dashboards.length} dashboards, ${alerts.alerts.length} alerts configured. Accept?`,
     title: 'APM Instrumentation Review',
-    context: { runId: ctx.runId, dashboards, alerts }
-  });
-
+    context: { runId: ctx.runId, dashboards, alerts },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     projectName,

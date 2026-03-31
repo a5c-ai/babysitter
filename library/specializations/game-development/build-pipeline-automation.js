@@ -48,7 +48,6 @@ export async function process(inputs, ctx) {
     const testing = await ctx.task(automatedTestingTask, { projectName, engine, outputDir });
     artifacts.push(...testing.artifacts);
   }
-
   // Phase 6: Artifact Storage and Versioning
   const artifactStorage = await ctx.task(artifactStorageTask, { projectName, platforms, outputDir });
   artifacts.push(...artifactStorage.artifacts);
@@ -58,15 +57,24 @@ export async function process(inputs, ctx) {
   artifacts.push(...releaseBuild.artifacts);
 
   // Phase 8: Pipeline Testing
-  const pipelineTesting = await ctx.task(pipelineTestingTask, { projectName, buildScripts, outputDir });
-  artifacts.push(...pipelineTesting.artifacts);
-
-  await ctx.breakpoint({
+  let pipelineTesting = await ctx.task(pipelineTestingTask, { projectName, buildScripts, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      pipelineTesting = await ctx.task(pipelineTestingTask, { ...{ projectName, buildScripts, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Build pipeline automation complete for ${projectName}. ${platforms.length} platforms. CI Provider: ${ciProvider}. Pipeline test: ${pipelineTesting.passRate}%. Review?`,
     title: 'Build Pipeline Review',
-    context: { runId: ctx.runId, architecture, buildScripts, pipelineTesting }
-  });
-
+    context: { runId: ctx.runId, architecture, buildScripts, pipelineTesting },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     projectName,

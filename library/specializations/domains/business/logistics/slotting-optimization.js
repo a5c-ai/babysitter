@@ -97,7 +97,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 5: Running slotting algorithm');
 
-  const slottingAlgorithm = await ctx.task(slottingAlgorithmTask, {
+  let slottingAlgorithm = await ctx.task(slottingAlgorithmTask, {
     products,
     abcxyzClassification: abcxyzClassification.classifications,
     zoneMapping: zoneMapping.zones,
@@ -108,8 +108,19 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...slottingAlgorithm.artifacts);
 
-  // Quality Gate: Review slotting plan
-  await ctx.breakpoint({
+    let lastFeedback_phase5Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase5Review) {
+      slottingAlgorithm = await ctx.task(slottingAlgorithmTask, { ...{
+    products,
+    abcxyzClassification: abcxyzClassification.classifications,
+    zoneMapping: zoneMapping.zones,
+    ergonomicAnalysis: ergonomicAnalysis.recommendations,
+    slottingStrategy,
+    outputDir
+  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+    }
+  const phase5Review = await ctx.breakpoint({
     question: `Slotting plan generated for ${products.length} products. Expected pick efficiency improvement: ${slottingAlgorithm.expectedImprovement}%. Review plan?`,
     title: 'Slotting Plan Review',
     context: {
@@ -120,9 +131,15 @@ export async function process(inputs, ctx) {
         expectedImprovement: slottingAlgorithm.expectedImprovement
       },
       files: slottingAlgorithm.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase5Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase5Review.approved) break;
+    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 6: FAMILY GROUPING OPTIMIZATION
   // ============================================================================
@@ -191,7 +208,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 10: Calculating ROI and savings');
 
-  const roiCalculation = await ctx.task(roiCalculationTask, {
+  let roiCalculation = await ctx.task(roiCalculationTask, {
     efficiencyMetrics: efficiencyMetrics.metrics,
     implementationPlan: implementationPlan.plan,
     laborCosts: inputs.laborCosts,
@@ -200,8 +217,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...roiCalculation.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      roiCalculation = await ctx.task(roiCalculationTask, { ...{
+    efficiencyMetrics: efficiencyMetrics.metrics,
+    implementationPlan: implementationPlan.plan,
+    laborCosts: inputs.laborCosts,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Slotting optimization complete. ${slottingAlgorithm.relocations.length} products to relocate. Expected annual savings: $${roiCalculation.annualSavings}. Approve implementation plan?`,
     title: 'Slotting Optimization Complete',
     context: {
@@ -218,9 +244,15 @@ export async function process(inputs, ctx) {
         { path: implementationPlan.planPath, format: 'json', label: 'Implementation Plan' },
         { path: roiCalculation.reportPath, format: 'markdown', label: 'ROI Report' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -250,8 +282,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

@@ -94,7 +94,7 @@ export async function process(inputs, ctx) {
 
   // Task 7: Security and Compliance Review
   ctx.log('info', 'Reviewing security and compliance');
-  const securityReview = await ctx.task(securityReviewTask, {
+  let securityReview = await ctx.task(securityReviewTask, {
     companyName,
     techStack,
     architectureReview: architectureReview.assessment,
@@ -103,8 +103,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...securityReview.artifacts);
 
-  // Breakpoint: Review technical DD findings
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      securityReview = await ctx.task(securityReviewTask, { ...{
+    companyName,
+    techStack,
+    architectureReview: architectureReview.assessment,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Technical DD complete for ${companyName}. Tech score: ${stackAssessment.score}/100. Technical debt: ${techDebtAnalysis.debtLevel}. Review findings?`,
     title: 'Technical Due Diligence Results',
     context: {
@@ -119,9 +128,15 @@ export async function process(inputs, ctx) {
         rdCapabilityScore: rdAssessment.score,
         securityScore: securityReview.score
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 8: Generate Technical DD Report
   ctx.log('info', 'Generating technical due diligence report');
   const ddReport = await ctx.task(techDDReportTask, {
@@ -187,8 +202,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Technology Stack Assessment
+  // Task 1: Technology Stack Assessment
 export const techStackAssessmentTask = defineTask('tech-stack-assessment', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Assess technology stack',

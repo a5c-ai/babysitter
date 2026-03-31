@@ -57,7 +57,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 2: Designing target authentication');
-  const targetDesign = await ctx.task(targetAuthDesignTask, {
+  let targetDesign = await ctx.task(targetAuthDesignTask, {
     projectName,
     authAnalysis,
     targetAuth,
@@ -67,8 +67,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...targetDesign.artifacts);
 
-  // Breakpoint: Auth design review
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      targetDesign = await ctx.task(targetAuthDesignTask, { ...{
+    projectName,
+    authAnalysis,
+    targetAuth,
+    securityRequirements,
+    outputDir
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Authentication design complete for ${projectName}. Protocol: ${targetDesign.protocol}. MFA: ${targetDesign.mfaEnabled}. SSO: ${targetDesign.ssoEnabled}. Approve design?`,
     title: 'Authentication Design Review',
     context: {
@@ -76,9 +86,15 @@ export async function process(inputs, ctx) {
       projectName,
       targetDesign,
       recommendation: 'Review security requirements alignment'
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 3: IDENTITY PROVIDER SETUP
   // ============================================================================
@@ -156,7 +172,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 8: Performing security audit');
-  const securityAudit = await ctx.task(securityAuditTask, {
+  let securityAudit = await ctx.task(securityAuditTask, {
     projectName,
     appIntegration,
     securityHardening,
@@ -166,8 +182,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...securityAudit.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      securityAudit = await ctx.task(securityAuditTask, { ...{
+    projectName,
+    appIntegration,
+    securityHardening,
+    authTesting,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Authentication modernization complete for ${projectName}. Users migrated: ${userMigration.migratedCount}. Security score: ${securityAudit.securityScore}. All tests passed: ${authTesting.allPassed}. Approve?`,
     title: 'Authentication Modernization Complete',
     context: {
@@ -179,9 +205,15 @@ export async function process(inputs, ctx) {
         securityScore: securityAudit.securityScore,
         testsPass: authTesting.allPassed
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -213,8 +245,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

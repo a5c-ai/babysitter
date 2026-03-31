@@ -38,7 +38,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 1: Discovering and assessing tacit knowledge landscape');
-  const tacitKnowledgeAssessment = await ctx.task(tacitKnowledgeAssessmentTask, {
+  let tacitKnowledgeAssessment = await ctx.task(tacitKnowledgeAssessmentTask, {
     knowledgeDomain,
     subjectMatterExperts,
     existingDocumentation,
@@ -60,9 +60,18 @@ export async function process(inputs, ctx) {
       }
     };
   }
-
-  // Breakpoint: Review tacit knowledge assessment
-  await ctx.breakpoint({
+  let lastFeedback_reviewApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_reviewApproval) {
+      tacitKnowledgeAssessment = await ctx.task(tacitKnowledgeAssessmentTask, { ...{
+    knowledgeDomain,
+    subjectMatterExperts,
+    existingDocumentation,
+    organizationalContext,
+    outputDir
+  }, feedback: lastFeedback_reviewApproval, attempt: attempt + 1 });
+    }
+  const reviewApproval = await ctx.breakpoint({
     question: `Identified ${tacitKnowledgeAssessment.tacitKnowledgeAreas.length} tacit knowledge areas for conversion. Review assessment?`,
     title: 'Tacit Knowledge Assessment Review',
     context: {
@@ -79,9 +88,15 @@ export async function process(inputs, ctx) {
         tacitKnowledgeAreas: tacitKnowledgeAssessment.tacitKnowledgeAreas.length,
         conversionComplexity: tacitKnowledgeAssessment.conversionComplexity
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_reviewApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (reviewApproval.approved) break;
+    lastFeedback_reviewApproval = reviewApproval.response || reviewApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 2: SOCIALIZATION - TACIT TO TACIT
   // ============================================================================
@@ -103,7 +118,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 3: Externalization - Converting tacit knowledge to explicit form');
-  const externalizationResult = await ctx.task(externalizationTask, {
+  let externalizationResult = await ctx.task(externalizationTask, {
     knowledgeDomain,
     tacitKnowledgeAreas: tacitKnowledgeAssessment.tacitKnowledgeAreas,
     socializationInsights: socializationResult.insights,
@@ -115,8 +130,20 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...externalizationResult.artifacts);
 
-  // Breakpoint: Review externalized knowledge
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      externalizationResult = await ctx.task(externalizationTask, { ...{
+    knowledgeDomain,
+    tacitKnowledgeAreas: tacitKnowledgeAssessment.tacitKnowledgeAreas,
+    socializationInsights: socializationResult.insights,
+    subjectMatterExperts,
+    externalizationMethods: seciPreferences.externalizationMethods,
+    targetAudience,
+    outputDir
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Externalized ${externalizationResult.explicitKnowledgeAssets.length} knowledge assets. Review externalization results?`,
     title: 'Externalization Review',
     context: {
@@ -132,9 +159,15 @@ export async function process(inputs, ctx) {
         methodsUsed: externalizationResult.methodsUsed,
         coveragePercentage: externalizationResult.coveragePercentage
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 4: COMBINATION - EXPLICIT TO EXPLICIT
   // ============================================================================
@@ -188,7 +221,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 7: Validating knowledge assets with subject matter experts');
-  const expertValidation = await ctx.task(expertValidationTask, {
+  let expertValidation = await ctx.task(expertValidationTask, {
     knowledgeDomain,
     knowledgeAssets: knowledgeDocumentation.finalAssets,
     subjectMatterExperts,
@@ -200,8 +233,18 @@ export async function process(inputs, ctx) {
 
   const validationPassed = expertValidation.overallScore >= 80;
 
-  // Breakpoint: Review expert validation
-  await ctx.breakpoint({
+    let lastFeedback_phase7Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase7Review) {
+      expertValidation = await ctx.task(expertValidationTask, { ...{
+    knowledgeDomain,
+    knowledgeAssets: knowledgeDocumentation.finalAssets,
+    subjectMatterExperts,
+    validationRequirements,
+    outputDir
+  }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
+    }
+  const phase7Review = await ctx.breakpoint({
     question: `Expert validation score: ${expertValidation.overallScore}/100. ${validationPassed ? 'Validation passed!' : 'May need revisions.'} Review validation results?`,
     title: 'Expert Validation Review',
     context: {
@@ -218,9 +261,15 @@ export async function process(inputs, ctx) {
         expertsReviewed: expertValidation.expertsReviewed,
         issuesIdentified: expertValidation.issues.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase7Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase7Review.approved) break;
+    lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 8: QUALITY ASSESSMENT
   // ============================================================================
@@ -244,7 +293,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 9: Planning integration into organizational knowledge systems');
-  const integrationPlan = await ctx.task(integrationPlanningTask, {
+  let integrationPlan = await ctx.task(integrationPlanningTask, {
     knowledgeDomain,
     knowledgeAssets: knowledgeDocumentation.finalAssets,
     organizationalContext,
@@ -272,8 +321,18 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...reviewResult.artifacts);
 
-    // Breakpoint: Final approval gate
-    await ctx.breakpoint({
+      let lastFeedback_finalApproval = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_finalApproval) {
+        integrationPlan = await ctx.task(integrationPlanningTask, { ...{
+    knowledgeDomain,
+    knowledgeAssets: knowledgeDocumentation.finalAssets,
+    organizationalContext,
+    existingDocumentation,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+      }
+  const finalApproval = await ctx.breakpoint({
       question: `Stakeholder review complete. ${reviewResult.approved ? 'Approved!' : 'Requires revisions.'} Finalize knowledge conversion?`,
       title: 'Final Approval Gate',
       context: {
@@ -290,9 +349,15 @@ export async function process(inputs, ctx) {
           stakeholdersReviewed: reviewResult.stakeholders.length,
           revisionsNeeded: reviewResult.revisionsNeeded
         }
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_finalApproval || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (finalApproval.approved) break;
+      lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+    } }
 
   const endTime = ctx.now();
   const duration = endTime - startTime;
@@ -347,8 +412,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

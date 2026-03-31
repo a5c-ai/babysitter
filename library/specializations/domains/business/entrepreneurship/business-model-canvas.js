@@ -68,7 +68,7 @@ export async function process(inputs, ctx) {
   artifacts.push(...(customerRelationships.artifacts || []));
 
   // Phase 5: Revenue Streams
-  const revenueStreams = await ctx.task(revenueStreamsTask, {
+  let revenueStreams = await ctx.task(revenueStreamsTask, {
     companyName,
     revenueModel,
     customerSegments,
@@ -77,17 +77,32 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...(revenueStreams.artifacts || []));
 
-  // Breakpoint: Review customer-facing blocks
-  await ctx.breakpoint({
+    let lastFeedback_phase5Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase5Review) {
+      revenueStreams = await ctx.task(revenueStreamsTask, { ...{
+    companyName,
+    revenueModel,
+    customerSegments,
+    valuePropositions
+  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+    }
+  const phase5Review = await ctx.breakpoint({
     question: `Review customer-facing canvas blocks for ${companyName}. Segments, value props, channels, relationships, and revenue defined. Continue with infrastructure?`,
     title: 'Customer Blocks Review',
     context: {
       runId: ctx.runId,
       companyName,
       files: artifacts
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase5Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase5Review.approved) break;
+    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+  }
   // Phase 6: Key Resources
   const keyResources = await ctx.task(keyResourcesTask, {
     companyName,
@@ -152,24 +167,37 @@ export async function process(inputs, ctx) {
   artifacts.push(...(assumptions.artifacts || []));
 
   // Phase 12: Validation Experiments
-  const experiments = await ctx.task(validationExperimentsTask, {
+  let experiments = await ctx.task(validationExperimentsTask, {
     companyName,
     assumptions
   });
 
   artifacts.push(...(experiments.artifacts || []));
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      experiments = await ctx.task(validationExperimentsTask, { ...{
+    companyName,
+    assumptions
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Business Model Canvas complete for ${companyName}. ${assumptions.assumptions?.length || 0} assumptions identified, ${experiments.experiments?.length || 0} experiments planned. Approve?`,
     title: 'Business Model Canvas Complete',
     context: {
       runId: ctx.runId,
       companyName,
       files: artifacts
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -189,8 +217,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions (abbreviated for space, following same pattern)
+  // Task Definitions (abbreviated for space, following same pattern)
 
 export const customerSegmentsTask = defineTask('customer-segments', (args, taskCtx) => ({
   kind: 'agent',

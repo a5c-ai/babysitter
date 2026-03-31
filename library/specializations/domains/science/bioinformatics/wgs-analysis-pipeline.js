@@ -55,7 +55,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: FASTQ Quality Assessment and Preprocessing');
 
-  const qcResult = await ctx.task(fastqQualityControlTask, {
+  let qcResult = await ctx.task(fastqQualityControlTask, {
     projectName,
     sampleIds,
     fastqDir,
@@ -68,8 +68,18 @@ export async function process(inputs, ctx) {
   ctx.log('info', `QC complete - ${qcResult.passedSamples.length}/${sampleIds.length} samples passed quality filters`);
 
   // Quality Gate: Sample quality check
-  if (qcResult.failedSamples.length > 0) {
-    await ctx.breakpoint({
+      let lastFeedback_phase1Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase1Review) {
+        qcResult = await ctx.task(fastqQualityControlTask, { ...{
+    projectName,
+    sampleIds,
+    fastqDir,
+    qualityThreshold,
+    outputDir
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+      }
+  const phase1Review = await ctx.breakpoint({
       question: `${qcResult.failedSamples.length} samples failed QC. Failed samples: ${qcResult.failedSamples.join(', ')}. Continue with passing samples or address issues?`,
       title: 'Sample Quality Gate',
       context: {
@@ -79,9 +89,15 @@ export async function process(inputs, ctx) {
         failedSamples: qcResult.failedSamples,
         qcMetrics: qcResult.metrics,
         files: qcResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase1Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase1Review.approved) break;
+      lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 2: READ ALIGNMENT WITH BWA-MEM2
@@ -89,7 +105,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 2: Read Alignment with BWA-MEM2');
 
-  const alignmentResult = await ctx.task(readAlignmentTask, {
+  let alignmentResult = await ctx.task(readAlignmentTask, {
     projectName,
     sampleIds: qcResult.passedSamples,
     referenceGenome,
@@ -102,8 +118,18 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Alignment complete - ${alignmentResult.alignedSamples.length} samples aligned`);
 
-  // Breakpoint: Review alignment statistics
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      alignmentResult = await ctx.task(readAlignmentTask, { ...{
+    projectName,
+    sampleIds: qcResult.passedSamples,
+    referenceGenome,
+    fastqDir,
+    outputDir
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Read alignment complete for ${alignmentResult.alignedSamples.length} samples. Average mapping rate: ${alignmentResult.averageMappingRate}%. Review alignment statistics?`,
     title: 'Alignment Statistics Review',
     context: {
@@ -111,9 +137,15 @@ export async function process(inputs, ctx) {
       alignmentStats: alignmentResult.statistics,
       coverageMetrics: alignmentResult.coverageMetrics,
       files: alignmentResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 3: DUPLICATE MARKING AND BQSR
   // ============================================================================
@@ -137,7 +169,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Phase 4: Variant Calling (${analysisType} workflow)`);
 
-  const variantCallingResult = await ctx.task(variantCallingTask, {
+  let variantCallingResult = await ctx.task(variantCallingTask, {
     projectName,
     preprocessedBams: preprocessResult.processedBams,
     referenceGenome,
@@ -150,8 +182,18 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Variant calling complete - ${variantCallingResult.totalVariants} variants identified`);
 
-  // Quality Gate: Variant calling metrics
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      variantCallingResult = await ctx.task(variantCallingTask, { ...{
+    projectName,
+    preprocessedBams: preprocessResult.processedBams,
+    referenceGenome,
+    analysisType,
+    outputDir
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: `Variant calling complete. Total variants: ${variantCallingResult.totalVariants}. SNVs: ${variantCallingResult.snvCount}, Indels: ${variantCallingResult.indelCount}. Review variant calling metrics?`,
     title: 'Variant Calling Review',
     context: {
@@ -164,9 +206,15 @@ export async function process(inputs, ctx) {
       },
       qualityMetrics: variantCallingResult.qualityMetrics,
       files: variantCallingResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 5: STRUCTURAL VARIANT DETECTION (OPTIONAL)
   // ============================================================================
@@ -186,7 +234,6 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `SV detection complete - ${svResult.totalSVs} structural variants identified`);
   }
-
   // ============================================================================
   // PHASE 6: JOINT GENOTYPING (FOR MULTI-SAMPLE STUDIES)
   // ============================================================================
@@ -206,14 +253,13 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Joint genotyping complete - ${jointGenotypingResult.jointVariants} variants in cohort VCF`);
   }
-
   // ============================================================================
   // PHASE 7: VARIANT ANNOTATION
   // ============================================================================
 
   ctx.log('info', 'Phase 7: Variant Annotation');
 
-  const annotationResult = await ctx.task(variantAnnotationTask, {
+  let annotationResult = await ctx.task(variantAnnotationTask, {
     projectName,
     vcfFile: jointGenotypingResult?.vcfFile || variantCallingResult.vcfFile,
     referenceGenome,
@@ -225,8 +271,18 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Annotation complete - Annotated with ${annotationDatabases.join(', ')}`);
 
-  // Breakpoint: Review annotated variants
-  await ctx.breakpoint({
+    let lastFeedback_phase7Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase7Review) {
+      annotationResult = await ctx.task(variantAnnotationTask, { ...{
+    projectName,
+    vcfFile: jointGenotypingResult?.vcfFile || variantCallingResult.vcfFile,
+    referenceGenome,
+    annotationDatabases,
+    outputDir
+  }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
+    }
+  const phase7Review = await ctx.breakpoint({
     question: `Variant annotation complete. Pathogenic variants: ${annotationResult.pathogenicCount}, High-impact: ${annotationResult.highImpactCount}. Review annotation results?`,
     title: 'Variant Annotation Review',
     context: {
@@ -240,16 +296,22 @@ export async function process(inputs, ctx) {
       },
       topGenes: annotationResult.topAffectedGenes,
       files: annotationResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase7Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase7Review.approved) break;
+    lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 8: QUALITY CONTROL AND VALIDATION
   // ============================================================================
 
   ctx.log('info', 'Phase 8: Quality Control and Validation');
 
-  const validationResult = await ctx.task(pipelineValidationTask, {
+  let validationResult = await ctx.task(pipelineValidationTask, {
     projectName,
     alignmentResult,
     preprocessResult,
@@ -265,8 +327,21 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Validation complete - QC Score: ${validationResult.qcScore}/100`);
 
   // Quality Gate: Validation results
-  if (validationResult.qcScore < 80) {
-    await ctx.breakpoint({
+      let lastFeedback_phase8Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase8Review) {
+        validationResult = await ctx.task(pipelineValidationTask, { ...{
+    projectName,
+    alignmentResult,
+    preprocessResult,
+    variantCallingResult,
+    annotationResult,
+    svResult,
+    coverageTarget,
+    outputDir
+  }, feedback: lastFeedback_phase8Review, attempt: attempt + 1 });
+      }
+  const phase8Review = await ctx.breakpoint({
       question: `Pipeline QC score ${validationResult.qcScore}/100 is below threshold. Issues: ${validationResult.issues.join(', ')}. Address issues or proceed with caution?`,
       title: 'Quality Control Warning',
       context: {
@@ -275,9 +350,15 @@ export async function process(inputs, ctx) {
         issues: validationResult.issues,
         recommendations: validationResult.recommendations,
         files: validationResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase8Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase8Review.approved) break;
+      lastFeedback_phase8Review = phase8Review.response || phase8Review.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 9: GENERATE ANALYSIS REPORT
@@ -285,7 +366,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 9: Generating Analysis Report');
 
-  const reportResult = await ctx.task(generateWGSReportTask, {
+  let reportResult = await ctx.task(generateWGSReportTask, {
     projectName,
     sampleIds,
     referenceGenome,
@@ -303,8 +384,26 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...reportResult.artifacts);
 
-  // Final Breakpoint: Pipeline complete
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      reportResult = await ctx.task(generateWGSReportTask, { ...{
+    projectName,
+    sampleIds,
+    referenceGenome,
+    analysisType,
+    qcResult,
+    alignmentResult,
+    preprocessResult,
+    variantCallingResult,
+    svResult,
+    jointGenotypingResult,
+    annotationResult,
+    validationResult,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `WGS Analysis Pipeline Complete for ${projectName}. ${alignedSamples.length} samples processed, ${variantCallingResult.totalVariants} variants identified. Approve final results?`,
     title: 'WGS Pipeline Complete',
     context: {
@@ -320,9 +419,15 @@ export async function process(inputs, ctx) {
         { path: reportResult.reportPath, format: 'markdown', label: 'Analysis Report' },
         { path: annotationResult.annotatedVcfPath, format: 'vcf', label: 'Annotated VCF' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -370,8 +475,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

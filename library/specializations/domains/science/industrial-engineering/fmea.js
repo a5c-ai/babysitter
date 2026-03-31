@@ -57,15 +57,22 @@ export async function process(inputs, ctx) {
 
   // Task 3: Failure Mode Identification
   ctx.log('info', 'Phase 3: Identifying potential failure modes');
-  const failureModeId = await ctx.task(failureModeTask, {
+  let failureModeId = await ctx.task(failureModeTask, {
     processAnalysis,
     outputDir
   });
 
   artifacts.push(...failureModeId.artifacts);
 
-  // Breakpoint: Review failure modes
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      failureModeId = await ctx.task(failureModeTask, { ...{
+    processAnalysis,
+    outputDir
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `${failureModeId.failureModeCount} potential failure modes identified across ${processAnalysis.itemCount} items. Review before severity rating?`,
     title: 'Failure Mode Review',
     context: {
@@ -73,9 +80,15 @@ export async function process(inputs, ctx) {
       failureModeCount: failureModeId.failureModeCount,
       itemCount: processAnalysis.itemCount,
       files: failureModeId.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // Task 4: Severity Rating
   ctx.log('info', 'Phase 4: Assessing severity of effects');
   const severityRating = await ctx.task(severityRatingTask, {
@@ -127,7 +140,7 @@ export async function process(inputs, ctx) {
 
   // Task 9: FMEA Documentation
   ctx.log('info', 'Phase 9: Creating FMEA documentation');
-  const fmeaDocumentation = await ctx.task(fmeaDocumentationTask, {
+  let fmeaDocumentation = await ctx.task(fmeaDocumentationTask, {
     scopeDefinition,
     processAnalysis,
     rpnCalculation,
@@ -137,8 +150,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...fmeaDocumentation.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      fmeaDocumentation = await ctx.task(fmeaDocumentationTask, { ...{
+    scopeDefinition,
+    processAnalysis,
+    rpnCalculation,
+    actionPlan,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `FMEA complete. ${rpnCalculation.highRiskCount} high-risk items identified (RPN > ${rpnThreshold}). ${actionPlan.actionCount} actions recommended. Review FMEA worksheet?`,
     title: 'FMEA Results Review',
     context: {
@@ -150,9 +173,15 @@ export async function process(inputs, ctx) {
         actionsRecommended: actionPlan.actionCount
       },
       files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -177,8 +206,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Scope Definition
+  // Task 1: Scope Definition
 export const scopeDefinitionTask = defineTask('scope-definition', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Define FMEA scope and team',

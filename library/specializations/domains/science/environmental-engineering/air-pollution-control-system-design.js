@@ -76,7 +76,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 3: Detailed Control System Design');
 
-  const detailedDesign = await ctx.task(controlSystemDesignTask, {
+  let detailedDesign = await ctx.task(controlSystemDesignTask, {
     projectName,
     emissionCharacterization,
     techScreening,
@@ -86,8 +86,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...detailedDesign.artifacts);
 
-  // Breakpoint: Design Review
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      detailedDesign = await ctx.task(controlSystemDesignTask, { ...{
+    projectName,
+    emissionCharacterization,
+    techScreening,
+    controlObjectives,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Control system design complete for ${projectName}. Selected technology: ${detailedDesign.selectedTechnology}. Review design specifications?`,
     title: 'Control System Design Review',
     context: {
@@ -96,9 +106,15 @@ export async function process(inputs, ctx) {
       designSpecifications: detailedDesign.specifications,
       expectedPerformance: detailedDesign.expectedPerformance,
       files: detailedDesign.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 4: AUXILIARY SYSTEMS DESIGN
   // ============================================================================
@@ -194,8 +210,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

@@ -128,7 +128,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...royaltyImplementation.artifacts);
   }
-
   // ============================================================================
   // PHASE 6: METADATA INFRASTRUCTURE
   // ============================================================================
@@ -168,7 +167,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 8: Preparing marketplace integration');
 
-  const marketplaceIntegration = await ctx.task(marketplaceIntegrationTask, {
+  let marketplaceIntegration = await ctx.task(marketplaceIntegrationTask, {
     projectName,
     collectionDesign,
     metadataDesign,
@@ -177,8 +176,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...marketplaceIntegration.artifacts);
 
-  // Quality Gate: Collection Review
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      marketplaceIntegration = await ctx.task(marketplaceIntegrationTask, { ...{
+    projectName,
+    collectionDesign,
+    metadataDesign,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `NFT Collection ${collectionName} ready for review. Max supply: ${maxSupply}, Tests passing: ${testingSuite.allPassing}. Proceed with deployment preparation?`,
     title: 'Collection Review',
     context: {
@@ -187,9 +195,15 @@ export async function process(inputs, ctx) {
       collectionInfo: collectionDesign,
       testResults: testingSuite,
       files: artifacts.slice(-5).map(a => ({ path: a.path, format: 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 9: DEPLOYMENT PREPARATION
   // ============================================================================
@@ -241,8 +255,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

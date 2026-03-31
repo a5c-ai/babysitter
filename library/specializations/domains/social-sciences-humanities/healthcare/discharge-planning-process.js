@@ -41,7 +41,7 @@ export async function process(inputs, ctx) {
 
   // Phase 1: Initial Assessment
   ctx.log('info', 'Phase 1: Initial Discharge Assessment');
-  const initialAssessment = await ctx.task(initialAssessmentTask, {
+  let initialAssessment = await ctx.task(initialAssessmentTask, {
     patientProfile,
     admissionType,
     anticipatedNeeds,
@@ -49,9 +49,18 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...initialAssessment.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      initialAssessment = await ctx.task(initialAssessmentTask, { ...{
+    patientProfile,
+    admissionType,
+    anticipatedNeeds,
+    caregiverAvailable,
+    outputDir
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Initial assessment complete. Risk level: ${initialAssessment.riskLevel}. Anticipated LOS: ${initialAssessment.anticipatedLOS} days. ${initialAssessment.anticipatedNeeds.length} post-discharge needs identified. Proceed?`,
     title: 'Initial Discharge Assessment Review',
     context: {
@@ -60,9 +69,15 @@ export async function process(inputs, ctx) {
       needs: initialAssessment.anticipatedNeeds,
       barriers: initialAssessment.barriers,
       files: initialAssessment.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // Phase 2: Post-Acute Care Needs Assessment
   ctx.log('info', 'Phase 2: Post-Acute Care Needs Assessment');
   const postAcuteNeeds = await ctx.task(postAcuteNeedsTask, {
@@ -76,7 +91,7 @@ export async function process(inputs, ctx) {
 
   // Phase 3: Discharge Destination Planning
   ctx.log('info', 'Phase 3: Discharge Destination Planning');
-  const destinationPlanning = await ctx.task(destinationPlanningTask, {
+  let destinationPlanning = await ctx.task(destinationPlanningTask, {
     initialAssessment,
     postAcuteNeeds,
     preferredDischargeDestination,
@@ -84,9 +99,18 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...destinationPlanning.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      destinationPlanning = await ctx.task(destinationPlanningTask, { ...{
+    initialAssessment,
+    postAcuteNeeds,
+    preferredDischargeDestination,
+    caregiverAvailable,
+    outputDir
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Recommended discharge destination: ${destinationPlanning.recommendedDestination}. Patient choice available: ${destinationPlanning.choicesProvided}. Proceed with medication reconciliation?`,
     title: 'Discharge Destination Review',
     context: {
@@ -94,9 +118,15 @@ export async function process(inputs, ctx) {
       destination: destinationPlanning.recommendedDestination,
       alternatives: destinationPlanning.alternatives,
       files: destinationPlanning.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // Phase 4: Medication Reconciliation
   ctx.log('info', 'Phase 4: Medication Reconciliation');
   const medicationReconciliation = await ctx.task(medicationReconciliationTask, {
@@ -121,16 +151,24 @@ export async function process(inputs, ctx) {
 
   // Phase 6: Follow-up Appointment Scheduling
   ctx.log('info', 'Phase 6: Follow-up Scheduling');
-  const followUpSchedule = await ctx.task(followUpSchedulingTask, {
+  let followUpSchedule = await ctx.task(followUpSchedulingTask, {
     patientProfile,
     initialAssessment,
     medicationReconciliation,
     outputDir
   });
 
-  artifacts.push(...followUpSchedule.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      followUpSchedule = await ctx.task(followUpSchedulingTask, { ...{
+    patientProfile,
+    initialAssessment,
+    medicationReconciliation,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Education plan includes ${educationPlan.topics.length} topics. ${followUpSchedule.appointments.length} follow-up appointments scheduled. Proceed with care coordination?`,
     title: 'Education and Follow-up Review',
     context: {
@@ -138,9 +176,15 @@ export async function process(inputs, ctx) {
       educationTopics: educationPlan.topics,
       appointments: followUpSchedule.appointments,
       files: [...educationPlan.artifacts, ...followUpSchedule.artifacts].map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 7: Community Resource Coordination
   ctx.log('info', 'Phase 7: Community Resource Coordination');
   const communityResources = await ctx.task(communityResourceTask, {
@@ -223,8 +267,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Initial Assessment
+  // Task 1: Initial Assessment
 export const initialAssessmentTask = defineTask('dp-initial-assessment', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Discharge Planning Initial Assessment',

@@ -92,7 +92,7 @@ export async function process(inputs, ctx) {
 
   // Task 7: Generate Distant Reading Report
   ctx.log('info', 'Generating distant reading report');
-  const distantReadingReport = await ctx.task(distantReadingReportTask, {
+  let distantReadingReport = await ctx.task(distantReadingReportTask, {
     corpus,
     preprocessing,
     topicModeling,
@@ -106,8 +106,22 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...distantReadingReport.artifacts);
 
-  // Breakpoint: Review text mining results
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      distantReadingReport = await ctx.task(distantReadingReportTask, { ...{
+    corpus,
+    preprocessing,
+    topicModeling,
+    sentimentAnalysis,
+    nerAnalysis,
+    networkAnalysis,
+    temporalAnalysis,
+    researchQuestions,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Text mining complete. Topics: ${topicModeling.topics?.length || 0}. Entities: ${nerAnalysis.entities?.length || 0}. Review results?`,
     title: 'Text Mining and Distant Reading Results',
     context: {
@@ -119,9 +133,15 @@ export async function process(inputs, ctx) {
         topicsIdentified: topicModeling.topics?.length || 0,
         entitiesExtracted: nerAnalysis.entities?.length || 0
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -151,8 +171,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Corpus Preprocessing
+  // Task 1: Corpus Preprocessing
 export const preprocessingTask = defineTask('preprocessing', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Preprocess corpus for text mining',

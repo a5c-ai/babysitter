@@ -72,7 +72,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 3: Evaluating and selecting optimal hypothesis');
-  const hypothesisEvaluation = await ctx.task(hypothesisEvaluationTask, {
+  let hypothesisEvaluation = await ctx.task(hypothesisEvaluationTask, {
     researchQuestion,
     candidateHypotheses: hypothesisGeneration.hypotheses,
     observationAnalysis,
@@ -82,8 +82,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...hypothesisEvaluation.artifacts);
 
-  // Breakpoint: Review selected hypothesis
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      hypothesisEvaluation = await ctx.task(hypothesisEvaluationTask, { ...{
+    researchQuestion,
+    candidateHypotheses: hypothesisGeneration.hypotheses,
+    observationAnalysis,
+    domain,
+    outputDir
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Selected hypothesis: "${hypothesisEvaluation.selectedHypothesis.statement}". Falsifiability score: ${hypothesisEvaluation.selectedHypothesis.falsifiabilityScore}/100. Approve for experiment design?`,
     title: 'Hypothesis Selection Review',
     context: {
@@ -100,9 +110,15 @@ export async function process(inputs, ctx) {
         alternativeCount: hypothesisEvaluation.alternativeHypotheses?.length || 0,
         falsifiabilityScore: hypothesisEvaluation.selectedHypothesis.falsifiabilityScore
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 4: VARIABLE OPERATIONALIZATION
   // ============================================================================
@@ -167,7 +183,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 8: Assessing research rigor and validity');
-  const rigorAssessment = await ctx.task(rigorAssessmentTask, {
+  let rigorAssessment = await ctx.task(rigorAssessmentTask, {
     hypothesis: hypothesisEvaluation.selectedHypothesis,
     experimentDesign,
     statisticalPlan,
@@ -180,8 +196,19 @@ export async function process(inputs, ctx) {
 
   const rigorMet = rigorAssessment.overallScore >= minimumRigorScore;
 
-  // Final breakpoint: Approve testing plan
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      rigorAssessment = await ctx.task(rigorAssessmentTask, { ...{
+    hypothesis: hypothesisEvaluation.selectedHypothesis,
+    experimentDesign,
+    statisticalPlan,
+    variables: variableOperationalization,
+    minimumRigorScore,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Hypothesis testing plan complete. Rigor score: ${rigorAssessment.overallScore}/100. ${rigorMet ? 'Plan meets scientific standards!' : 'Plan may need strengthening.'} Approve to proceed?`,
     title: 'Hypothesis Testing Plan Approval',
     context: {
@@ -200,9 +227,15 @@ export async function process(inputs, ctx) {
         statisticalTest: statisticalPlan.primaryTest,
         sampleSize: experimentDesign.sampleSize
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -262,8 +295,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

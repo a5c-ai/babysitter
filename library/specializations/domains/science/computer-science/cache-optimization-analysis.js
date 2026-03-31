@@ -124,7 +124,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 8: Generating cache optimization report');
-  const optimizationReport = await ctx.task(cacheOptimizationReportTask, {
+  let optimizationReport = await ctx.task(cacheOptimizationReportTask, {
     algorithmDescription,
     accessPatternAnalysis,
     cacheBehaviorModel,
@@ -138,8 +138,22 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...optimizationReport.artifacts);
 
-  // Breakpoint: Review cache optimization analysis
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      optimizationReport = await ctx.task(cacheOptimizationReportTask, { ...{
+    algorithmDescription,
+    accessPatternAnalysis,
+    cacheBehaviorModel,
+    dataLayoutOptimization,
+    cacheObliviousDesign,
+    theoreticalAnalysis,
+    benchmarkDesign,
+    comparisonAnalysis,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Cache optimization analysis complete. Cache complexity: ${theoreticalAnalysis.cacheComplexity}. Improvement: ${comparisonAnalysis.improvement}. Review analysis?`,
     title: 'Cache Optimization Analysis Review',
     context: {
@@ -154,9 +168,15 @@ export async function process(inputs, ctx) {
         dataLayoutChanges: dataLayoutOptimization.changes?.length || 0,
         expectedImprovement: comparisonAnalysis.improvement
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -189,8 +209,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

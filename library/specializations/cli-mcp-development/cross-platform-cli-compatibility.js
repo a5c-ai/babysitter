@@ -62,15 +62,24 @@ export async function process(inputs, ctx) {
   const crossPlatformTesting = await ctx.task(crossPlatformTestingTask, { projectName, platforms, outputDir });
   artifacts.push(...crossPlatformTesting.artifacts);
 
-  const compatibilityDocumentation = await ctx.task(compatibilityDocumentationTask, { projectName, platforms, features, outputDir });
-  artifacts.push(...compatibilityDocumentation.artifacts);
-
-  await ctx.breakpoint({
+  let compatibilityDocumentation = await ctx.task(compatibilityDocumentationTask, { projectName, platforms, features, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      compatibilityDocumentation = await ctx.task(compatibilityDocumentationTask, { ...{ projectName, platforms, features, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Cross-Platform CLI Compatibility complete for ${platforms.length} platforms. Review and approve?`,
     title: 'Cross-Platform Compatibility Complete',
-    context: { runId: ctx.runId, summary: { projectName, platforms, features } }
-  });
-
+    context: { runId: ctx.runId, summary: { projectName, platforms, features } },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     projectName,

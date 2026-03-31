@@ -65,7 +65,7 @@ export async function process(inputs, ctx) {
 
   // Task 4: Identify Environmental Hotspots
   ctx.log('info', 'Identifying environmental hotspots');
-  const hotspotsResult = await ctx.task(environmentalHotspotsTask, {
+  let hotspotsResult = await ctx.task(environmentalHotspotsTask, {
     processName,
     lcaResults: lcaResult.results,
     greenChemistryMetrics: greenChemistryResult.metrics,
@@ -74,8 +74,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...hotspotsResult.artifacts);
 
-  // Breakpoint: Review sustainability assessment
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      hotspotsResult = await ctx.task(environmentalHotspotsTask, { ...{
+    processName,
+    lcaResults: lcaResult.results,
+    greenChemistryMetrics: greenChemistryResult.metrics,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Sustainability assessment complete for ${processName}. E-factor: ${greenChemistryResult.metrics.eFactor}. Carbon footprint: ${lcaResult.results.carbonFootprint} kg CO2eq. Hotspots: ${hotspotsResult.hotspots.length}. Review assessment?`,
     title: 'Process Sustainability Assessment Review',
     context: {
@@ -87,9 +96,15 @@ export async function process(inputs, ctx) {
         carbonFootprint: lcaResult.results.carbonFootprint,
         hotspotCount: hotspotsResult.hotspots.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 5: Develop Improvement Options
   ctx.log('info', 'Developing improvement options');
   const improvementOptionsResult = await ctx.task(improvementOptionsTask, {
@@ -153,8 +168,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Boundary Definition
+  // Task 1: Boundary Definition
 export const boundaryDefinitionTask = defineTask('boundary-definition', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Define system boundaries and functional unit',

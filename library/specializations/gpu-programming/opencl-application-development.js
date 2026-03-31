@@ -74,17 +74,28 @@ export async function process(inputs, ctx) {
   artifacts.push(...hostApplication.artifacts);
 
   // Phase 7: Cross-Platform Testing
-  const crossPlatformTesting = await ctx.task(crossPlatformTestingTask, {
+  let crossPlatformTesting = await ctx.task(crossPlatformTestingTask, {
     appName, targetVendors, hostApplication, outputDir
   });
-  artifacts.push(...crossPlatformTesting.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      crossPlatformTesting = await ctx.task(crossPlatformTestingTask, { ...{
+    appName, targetVendors, hostApplication, outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `OpenCL application ${appName} development complete. Platform support: ${crossPlatformTesting.supportedPlatforms.join(', ')}. Review?`,
     title: 'OpenCL Development Complete',
-    context: { runId: ctx.runId, crossPlatformTesting }
-  });
-
+    context: { runId: ctx.runId, crossPlatformTesting },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: crossPlatformTesting.allPlatformsPassed,
     appName,

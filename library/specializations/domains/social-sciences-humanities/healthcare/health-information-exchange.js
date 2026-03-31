@@ -17,22 +17,32 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Starting HIE Integration for: ${organizationName}`);
 
-  const readinessAssessment = await ctx.task(hieReadinessTask, { organizationName, hieNetwork, outputDir });
-  artifacts.push(...readinessAssessment.artifacts);
-
-  await ctx.breakpoint({ question: `HIE readiness: ${readinessAssessment.readinessScore}%. Proceed with governance planning?`, title: 'HIE Readiness Review', context: { runId: ctx.runId, readiness: readinessAssessment.findings } });
-
+  let readinessAssessment = await ctx.task(hieReadinessTask, { organizationName, hieNetwork, outputDir });
+    let lastFeedback_assessmentApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_assessmentApproval) {
+      readinessAssessment = await ctx.task(hieReadinessTask, { ...{ organizationName, hieNetwork, outputDir }, feedback: lastFeedback_assessmentApproval, attempt: attempt + 1 });
+    }
+  const assessmentApproval = await ctx.breakpoint({ question: `HIE readiness: ${readinessAssessment.readinessScore}%. Proceed with governance planning?`, title: 'HIE Readiness Review', context: { runId: ctx.runId, readiness: readinessAssessment.findings }, expert: 'owner', tags: ['approval-gate'], previousFeedback: lastFeedback_assessmentApproval || undefined, attempt: attempt > 0 ? attempt + 1 : undefined });
+    if (assessmentApproval.approved) break;
+    lastFeedback_assessmentApproval = assessmentApproval.response || assessmentApproval.feedback || 'Changes requested';
+  }
   const governanceFramework = await ctx.task(hieGovernanceTask, { readinessAssessment, participatingOrganizations, outputDir });
   artifacts.push(...governanceFramework.artifacts);
 
   const dataGovernance = await ctx.task(hieDataGovernanceTask, { governanceFramework, useCase, outputDir });
   artifacts.push(...dataGovernance.artifacts);
 
-  const technicalArchitecture = await ctx.task(hieTechnicalArchitectureTask, { hieNetwork, useCase, outputDir });
-  artifacts.push(...technicalArchitecture.artifacts);
-
-  await ctx.breakpoint({ question: `Technical architecture designed. ${technicalArchitecture.interfaces.length} interfaces. Proceed with consent management?`, title: 'Technical Architecture Review', context: { runId: ctx.runId, architecture: technicalArchitecture.architecture } });
-
+  let technicalArchitecture = await ctx.task(hieTechnicalArchitectureTask, { hieNetwork, useCase, outputDir });
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      technicalArchitecture = await ctx.task(hieTechnicalArchitectureTask, { ...{ hieNetwork, useCase, outputDir }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({ question: `Technical architecture designed. ${technicalArchitecture.interfaces.length} interfaces. Proceed with consent management?`, title: 'Technical Architecture Review', context: { runId: ctx.runId, architecture: technicalArchitecture.architecture }, expert: 'owner', tags: ['approval-gate'], previousFeedback: lastFeedback_finalApproval || undefined, attempt: attempt > 0 ? attempt + 1 : undefined });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const consentManagement = await ctx.task(hieConsentManagementTask, { dataGovernance, outputDir });
   artifacts.push(...consentManagement.artifacts);
 

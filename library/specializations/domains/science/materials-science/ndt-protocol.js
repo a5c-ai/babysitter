@@ -108,7 +108,7 @@ export async function process(inputs, ctx) {
 
   // Phase 6: Defect Characterization and Sizing
   ctx.log('info', 'Phase 6: Characterizing and sizing detected indications');
-  const defectCharacterization = await ctx.task(characterizeDefects, {
+  let defectCharacterization = await ctx.task(characterizeDefects, {
     inspectionData: inspectionExecution.rawData,
     ndtMethods: methodSelection.selectedMethods,
     defectTypes,
@@ -116,8 +116,17 @@ export async function process(inputs, ctx) {
   });
   artifacts.push(...(defectCharacterization.artifacts || []));
 
-  // Quality Gate: Review inspection results
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      defectCharacterization = await ctx.task(characterizeDefects, { ...{
+    inspectionData: inspectionExecution.rawData,
+    ndtMethods: methodSelection.selectedMethods,
+    defectTypes,
+    sizingTechniques: procedureDevelopment.sizingMethods
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: 'Review NDT inspection results. Are all indications properly characterized and sized?',
     title: 'NDT Results Review',
     context: {
@@ -129,9 +138,15 @@ export async function process(inputs, ctx) {
         criticalIndications: defectCharacterization.criticalIndications
       },
       files: artifacts
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 7: Acceptance Evaluation
   ctx.log('info', 'Phase 7: Evaluating against acceptance criteria');
   const acceptanceEvaluation = await ctx.task(evaluateAcceptance, {

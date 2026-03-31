@@ -54,7 +54,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 2: Assessing content quality');
-  const contentAssessment = await ctx.task(contentAssessmentTask, {
+  let contentAssessment = await ctx.task(contentAssessmentTask, {
     projectName,
     docInventory,
     outputDir
@@ -62,8 +62,16 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...contentAssessment.artifacts);
 
-  // Breakpoint: Assessment review
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      contentAssessment = await ctx.task(contentAssessmentTask, { ...{
+    projectName,
+    docInventory,
+    outputDir
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Documentation assessment complete for ${projectName}. Documents: ${docInventory.totalDocs}. Outdated: ${contentAssessment.outdatedCount}. Proceed with migration?`,
     title: 'Documentation Assessment Review',
     context: {
@@ -72,9 +80,15 @@ export async function process(inputs, ctx) {
       docInventory,
       contentAssessment,
       recommendation: 'Review outdated content before migration'
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 3: PLATFORM SETUP
   // ============================================================================
@@ -121,7 +135,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 6: Validating documentation');
-  const validation = await ctx.task(documentationValidationTask, {
+  let validation = await ctx.task(documentationValidationTask, {
     projectName,
     contentMigration,
     automatedDocs,
@@ -130,8 +144,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...validation.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      validation = await ctx.task(documentationValidationTask, { ...{
+    projectName,
+    contentMigration,
+    automatedDocs,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Documentation migration complete for ${projectName}. Migrated: ${contentMigration.migratedCount}. Automated: ${automatedDocs.generatedCount}. Validation: ${validation.allValid ? 'passed' : 'failed'}. Approve?`,
     title: 'Documentation Migration Complete',
     context: {
@@ -143,9 +166,15 @@ export async function process(inputs, ctx) {
         automated: automatedDocs.generatedCount,
         validationPassed: validation.allValid
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -165,8 +194,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

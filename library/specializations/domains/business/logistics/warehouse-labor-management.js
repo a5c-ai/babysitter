@@ -49,7 +49,7 @@ export async function process(inputs, ctx) {
 
   // PHASE 3: SKILL-BASED TASK ASSIGNMENT
   ctx.log('info', 'Phase 3: Assigning tasks based on skills');
-  const taskAssignment = await ctx.task(skillBasedAssignmentTask, {
+  let taskAssignment = await ctx.task(skillBasedAssignmentTask, {
     staffingRequirements: staffingCalc.requirements,
     workforce,
     workOrders,
@@ -58,17 +58,32 @@ export async function process(inputs, ctx) {
   artifacts.push(...taskAssignment.artifacts);
 
   // Quality Gate: Review staffing gaps
-  if (staffingCalc.gaps.length > 0) {
-    await ctx.breakpoint({
+      let lastFeedback_phase3Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase3Review) {
+        taskAssignment = await ctx.task(skillBasedAssignmentTask, { ...{
+    staffingRequirements: staffingCalc.requirements,
+    workforce,
+    workOrders,
+    outputDir
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+      }
+  const phase3Review = await ctx.breakpoint({
       question: `Staffing gaps identified: ${staffingCalc.gaps.length} areas. Review and adjust?`,
       title: 'Staffing Gap Review',
       context: {
         runId: ctx.runId,
         gaps: staffingCalc.gaps,
         files: staffingCalc.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase3Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase3Review.approved) break;
+      lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+    } }
 
   // PHASE 4: WORKLOAD BALANCING
   ctx.log('info', 'Phase 4: Balancing workloads');
@@ -99,7 +114,7 @@ export async function process(inputs, ctx) {
 
   // PHASE 7: PERFORMANCE REPORTING
   ctx.log('info', 'Phase 7: Generating performance reports');
-  const performanceReport = await ctx.task(laborPerformanceTask, {
+  let performanceReport = await ctx.task(laborPerformanceTask, {
     assignments: workloadBalancing.balancedAssignments,
     productivity: productivityMonitoring.metrics,
     incentives: incentiveCalc.incentives,
@@ -107,8 +122,17 @@ export async function process(inputs, ctx) {
   });
   artifacts.push(...performanceReport.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      performanceReport = await ctx.task(laborPerformanceTask, { ...{
+    assignments: workloadBalancing.balancedAssignments,
+    productivity: productivityMonitoring.metrics,
+    incentives: incentiveCalc.incentives,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Labor management complete. ${taskAssignment.assignments.length} tasks assigned, average productivity: ${productivityMonitoring.metrics.averageProductivity}%. Finalize?`,
     title: 'Labor Management Complete',
     context: {
@@ -120,9 +144,15 @@ export async function process(inputs, ctx) {
         staffingEfficiency: `${staffingCalc.efficiency}%`
       },
       files: [{ path: performanceReport.reportPath, format: 'markdown', label: 'Performance Report' }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   return {
     success: true,
@@ -135,8 +165,7 @@ export async function process(inputs, ctx) {
     metadata: { processId: 'specializations/domains/business/logistics/warehouse-labor-management', timestamp: startTime, outputDir }
   };
 }
-
-// TASK DEFINITIONS
+  // TASK DEFINITIONS
 export const workloadForecastTask = defineTask('workload-forecast', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Forecast workload',

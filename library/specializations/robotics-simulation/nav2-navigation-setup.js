@@ -57,15 +57,24 @@ export async function process(inputs, ctx) {
   const testing = await ctx.task(nav2TestingTask, { robotName, nav2Setup, outputDir });
   artifacts.push(...testing.artifacts);
 
-  const tuning = await ctx.task(nav2ParameterTuningTask, { robotName, testing, outputDir });
-  artifacts.push(...tuning.artifacts);
-
-  await ctx.breakpoint({
+  let tuning = await ctx.task(nav2ParameterTuningTask, { robotName, testing, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      tuning = await ctx.task(nav2ParameterTuningTask, { ...{ robotName, testing, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Nav2 Setup Complete for ${robotName}. Navigation success rate: ${testing.successRate}%. Review?`,
     title: 'Nav2 Setup Complete',
-    context: { runId: ctx.runId, successRate: testing.successRate }
-  });
-
+    context: { runId: ctx.runId, successRate: testing.successRate },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: testing.successRate >= 95,
     robotName,

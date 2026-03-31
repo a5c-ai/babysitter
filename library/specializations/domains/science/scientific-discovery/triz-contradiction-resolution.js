@@ -70,7 +70,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 3: Mapping to TRIZ 39 parameters');
-  const parameterMapping = await ctx.task(parameterMappingTask, {
+  let parameterMapping = await ctx.task(parameterMappingTask, {
     contradictions: contradictionIdentification.contradictions,
     improvingParameter,
     worseningParameter,
@@ -80,8 +80,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...parameterMapping.artifacts);
 
-  // Breakpoint: Review contradiction mapping
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      parameterMapping = await ctx.task(parameterMappingTask, { ...{
+    contradictions: contradictionIdentification.contradictions,
+    improvingParameter,
+    worseningParameter,
+    context,
+    outputDir
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Contradictions mapped: Improving "${parameterMapping.mappedImprovingParameter}" vs Worsening "${parameterMapping.mappedWorseningParameter}". Review mapping?`,
     title: 'TRIZ Parameter Mapping Review',
     context: {
@@ -98,9 +108,15 @@ export async function process(inputs, ctx) {
         worseningParameter: parameterMapping.mappedWorseningParameter,
         contradictionType: contradictionIdentification.contradictionType
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 4: MATRIX LOOKUP
   // ============================================================================
@@ -176,7 +192,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 9: Scoring analysis quality');
-  const qualityScore = await ctx.task(trizQualityScoringTask, {
+  let qualityScore = await ctx.task(trizQualityScoringTask, {
     problemReformulation,
     contradictionIdentification,
     parameterMapping,
@@ -188,8 +204,20 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...qualityScore.artifacts);
 
-  // Final breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      qualityScore = await ctx.task(trizQualityScoringTask, { ...{
+    problemReformulation,
+    contradictionIdentification,
+    parameterMapping,
+    principleApplication,
+    conceptGeneration,
+    conceptEvaluation,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `TRIZ analysis complete. ${conceptGeneration.concepts?.length || 0} concepts generated, ${conceptEvaluation.viableConcepts?.length || 0} viable. Quality score: ${qualityScore.overallScore}/100. Approve?`,
     title: 'TRIZ Analysis Approval',
     context: {
@@ -207,9 +235,15 @@ export async function process(inputs, ctx) {
         topConceptScore: conceptEvaluation.topConceptScore || 0,
         qualityScore: qualityScore.overallScore
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -245,8 +279,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

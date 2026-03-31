@@ -78,7 +78,7 @@ export async function process(inputs, ctx) {
 
   // Task 2: Use Case Identification
   ctx.log('info', 'Identifying optimal use cases for OBT pattern');
-  const useCaseResult = await ctx.task(identifyUseCasesTask, {
+  let useCaseResult = await ctx.task(identifyUseCasesTask, {
     projectName,
     schemaAnalysis: schemaAnalysisResult,
     performanceGoals,
@@ -91,8 +91,19 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Use case identification complete - ${useCaseResult.useCases.length} OBT candidates identified`);
 
-  // Breakpoint: Review use cases
-  await ctx.breakpoint({
+    let lastFeedback_reviewApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_reviewApproval) {
+      useCaseResult = await ctx.task(identifyUseCasesTask, { ...{
+    projectName,
+    schemaAnalysis: schemaAnalysisResult,
+    performanceGoals,
+    dataVolume,
+    optimizeForBI,
+    outputDir
+  }, feedback: lastFeedback_reviewApproval, attempt: attempt + 1 });
+    }
+  const reviewApproval = await ctx.breakpoint({
     question: `OBT use cases identified for ${projectName}. Found ${useCaseResult.useCases.length} candidate tables. Review use cases and recommendations?`,
     title: 'OBT Use Case Review',
     context: {
@@ -104,9 +115,15 @@ export async function process(inputs, ctx) {
         estimatedPerformanceGain: useCaseResult.estimatedGain,
         complexityLevel: useCaseResult.complexity
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_reviewApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (reviewApproval.approved) break;
+    lastFeedback_reviewApproval = reviewApproval.response || reviewApproval.feedback || 'Changes requested';
+  }
   // Task 3: Denormalization Strategy Design
   ctx.log('info', 'Designing denormalization strategy');
   const denormStrategyResult = await ctx.task(designDenormalizationStrategyTask, {
@@ -125,7 +142,7 @@ export async function process(inputs, ctx) {
 
   // Task 4: Join Strategy Optimization
   ctx.log('info', 'Optimizing fact and dimension join strategy');
-  const joinStrategyResult = await ctx.task(optimizeJoinStrategyTask, {
+  let joinStrategyResult = await ctx.task(optimizeJoinStrategyTask, {
     projectName,
     denormStrategy: denormStrategyResult,
     schemaAnalysis: schemaAnalysisResult,
@@ -138,8 +155,19 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Join strategy optimized - ${joinStrategyResult.optimizedJoins.length} optimized join patterns`);
 
-  // Breakpoint: Review denormalization and join strategy
-  await ctx.breakpoint({
+    let lastFeedback_reviewApproval2 = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_reviewApproval2) {
+      joinStrategyResult = await ctx.task(optimizeJoinStrategyTask, { ...{
+    projectName,
+    denormStrategy: denormStrategyResult,
+    schemaAnalysis: schemaAnalysisResult,
+    dataVolume,
+    aggregationLevel,
+    outputDir
+  }, feedback: lastFeedback_reviewApproval2, attempt: attempt + 1 });
+    }
+  const reviewApproval2 = await ctx.breakpoint({
     question: `Denormalization and join strategy designed. ${denormStrategyResult.joinPaths.length} join paths with ${joinStrategyResult.optimizedJoins.length} optimizations. Review strategy?`,
     title: 'Denormalization Strategy Review',
     context: {
@@ -154,9 +182,15 @@ export async function process(inputs, ctx) {
         denormalizationLevel: denormStrategyResult.level,
         estimatedRowExpansion: denormStrategyResult.expansionFactor
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_reviewApproval2 || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (reviewApproval2.approved) break;
+    lastFeedback_reviewApproval2 = reviewApproval2.response || reviewApproval2.feedback || 'Changes requested';
+  }
   // Task 5: OBT Schema Design
   ctx.log('info', 'Designing OBT schema structure');
   const obtSchemaResult = await ctx.task(designOBTSchemaTask, {
@@ -175,7 +209,7 @@ export async function process(inputs, ctx) {
 
   // Task 6: Performance Optimization
   ctx.log('info', 'Implementing performance optimization strategies');
-  const performanceOptResult = await ctx.task(implementPerformanceOptimizationTask, {
+  let performanceOptResult = await ctx.task(implementPerformanceOptimizationTask, {
     projectName,
     obtSchema: obtSchemaResult,
     performanceGoals,
@@ -191,8 +225,22 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Performance optimization complete - Partitioning: ${performanceOptResult.partitioningStrategy}, Clustering: ${performanceOptResult.clusteringStrategy}`);
 
-  // Breakpoint: Review performance optimization
-  await ctx.breakpoint({
+    let lastFeedback_reviewApproval3 = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_reviewApproval3) {
+      performanceOptResult = await ctx.task(implementPerformanceOptimizationTask, { ...{
+    projectName,
+    obtSchema: obtSchemaResult,
+    performanceGoals,
+    enablePartitioning,
+    enableClustering,
+    compressionLevel,
+    storageOptimization,
+    dataVolume,
+    outputDir
+  }, feedback: lastFeedback_reviewApproval3, attempt: attempt + 1 });
+    }
+  const reviewApproval3 = await ctx.breakpoint({
     question: `Performance optimization strategies implemented. Estimated query improvement: ${performanceOptResult.estimatedImprovement}%. Review optimization plan?`,
     title: 'Performance Optimization Review',
     context: {
@@ -205,9 +253,15 @@ export async function process(inputs, ctx) {
         estimatedImprovement: performanceOptResult.estimatedImprovement,
         storageImpact: performanceOptResult.storageImpact
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_reviewApproval3 || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (reviewApproval3.approved) break;
+    lastFeedback_reviewApproval3 = reviewApproval3.response || reviewApproval3.feedback || 'Changes requested';
+  }
   // Task 7: Materialization Strategy
   ctx.log('info', 'Designing OBT materialization and refresh strategy');
   const materializationResult = await ctx.task(designMaterializationStrategyTask, {
@@ -258,7 +312,7 @@ export async function process(inputs, ctx) {
 
   // Task 10: Query Optimization Patterns
   ctx.log('info', 'Generating query optimization patterns and examples');
-  const queryOptResult = await ctx.task(generateQueryPatternsTask, {
+  let queryOptResult = await ctx.task(generateQueryPatternsTask, {
     projectName,
     obtSchema: obtSchemaResult,
     useCases: useCaseResult.useCases,
@@ -271,8 +325,19 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Query patterns generated - ${queryOptResult.patternCount} optimization patterns`);
 
-  // Breakpoint: Review implementation plan
-  await ctx.breakpoint({
+    let lastFeedback_reviewApproval4 = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_reviewApproval4) {
+      queryOptResult = await ctx.task(generateQueryPatternsTask, { ...{
+    projectName,
+    obtSchema: obtSchemaResult,
+    useCases: useCaseResult.useCases,
+    performanceOpt: performanceOptResult,
+    optimizeForBI,
+    outputDir
+  }, feedback: lastFeedback_reviewApproval4, attempt: attempt + 1 });
+    }
+  const reviewApproval4 = await ctx.breakpoint({
     question: `OBT implementation plan complete. ${obtSchemaResult.tables.length} tables, ${pipelineResult.stages.length} pipeline stages, ${queryOptResult.patternCount} query patterns. Review implementation?`,
     title: 'Implementation Plan Review',
     context: {
@@ -289,9 +354,15 @@ export async function process(inputs, ctx) {
         estimatedBuildTime: pipelineResult.estimatedDuration,
         estimatedStorage: performanceOptResult.estimatedStorage
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_reviewApproval4 || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (reviewApproval4.approved) break;
+    lastFeedback_reviewApproval4 = reviewApproval4.response || reviewApproval4.feedback || 'Changes requested';
+  }
   // Task 11: Validation and Testing Strategy
   ctx.log('info', 'Designing validation and testing strategy');
   const validationResult = await ctx.task(designValidationStrategyTask, {
@@ -308,7 +379,7 @@ export async function process(inputs, ctx) {
 
   // Task 12: Documentation Generation
   ctx.log('info', 'Generating comprehensive OBT documentation');
-  const documentationResult = await ctx.task(generateOBTDocumentationTask, {
+  let documentationResult = await ctx.task(generateOBTDocumentationTask, {
     projectName,
     obtSchema: obtSchemaResult,
     denormStrategy: denormStrategyResult,
@@ -325,8 +396,23 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Documentation generated - ${documentationResult.documentCount} documents`);
 
-  // Final Breakpoint: Sign-off
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      documentationResult = await ctx.task(generateOBTDocumentationTask, { ...{
+    projectName,
+    obtSchema: obtSchemaResult,
+    denormStrategy: denormStrategyResult,
+    joinStrategy: joinStrategyResult,
+    performanceOpt: performanceOptResult,
+    materialization: materializationResult,
+    pipeline: pipelineResult,
+    queryPatterns: queryOptResult,
+    validation: validationResult,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `OBT creation complete for ${projectName}. ${obtSchemaResult.tables.length} OBT tables designed with estimated ${performanceOptResult.estimatedImprovement}% query performance improvement. Ready for implementation?`,
     title: 'Final OBT Design Sign-off',
     context: {
@@ -344,9 +430,15 @@ export async function process(inputs, ctx) {
         validationTests: validationResult.testCount,
         artifactCount: artifacts.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -396,8 +488,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Source Schema Analysis
+  // Task 1: Source Schema Analysis
 export const analyzeSourceSchemaTask = defineTask('analyze-source-schema', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Analyze source dimensional model schema',

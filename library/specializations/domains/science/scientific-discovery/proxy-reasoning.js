@@ -125,7 +125,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 8: Validating and synthesizing reconstruction');
-  const synthesis = await ctx.task(proxySynthesisTask, {
+  let synthesis = await ctx.task(proxySynthesisTask, {
     proxyCharacterization,
     mechanisticAnalysis,
     calibrationAssessment,
@@ -141,8 +141,22 @@ export async function process(inputs, ctx) {
 
   const confidenceMet = synthesis.confidenceScore >= targetConfidence;
 
-  // Breakpoint: Review proxy reconstruction
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      synthesis = await ctx.task(proxySynthesisTask, { ...{
+    proxyCharacterization,
+    mechanisticAnalysis,
+    calibrationAssessment,
+    confoundingAnalysis,
+    temporalAssessment,
+    reconstruction,
+    uncertaintyQuantification,
+    targetConfidence,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Proxy reconstruction complete. Confidence: ${synthesis.confidenceScore}/${targetConfidence}. ${confidenceMet ? 'Confidence target met!' : 'Additional validation may be needed.'} Review reconstruction?`,
     title: 'Proxy Reasoning Results',
     context: {
@@ -162,9 +176,15 @@ export async function process(inputs, ctx) {
         confidenceScore: synthesis.confidenceScore,
         confidenceMet
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -198,8 +218,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

@@ -31,15 +31,24 @@ export async function process(inputs, ctx) {
   artifacts.push(...complianceCheck.artifacts);
 
   // Phase 3: Pre-Certification Testing
-  const preCertTesting = await ctx.task(preCertTestingTask, { projectName, targetPlatform, complianceCheck, outputDir });
-  artifacts.push(...preCertTesting.artifacts);
-
-  await ctx.breakpoint({
+  let preCertTesting = await ctx.task(preCertTestingTask, { projectName, targetPlatform, complianceCheck, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      preCertTesting = await ctx.task(preCertTestingTask, { ...{ projectName, targetPlatform, complianceCheck, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Pre-certification testing complete for ${projectName}. Compliance: ${complianceCheck.complianceRate}%. Issues: ${preCertTesting.issues.length}. Ready to submit?`,
     title: 'Pre-Certification Review',
-    context: { runId: ctx.runId, complianceCheck, preCertTesting }
-  });
-
+    context: { runId: ctx.runId, complianceCheck, preCertTesting },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 4: Submission Preparation
   const submissionPrep = await ctx.task(submissionPrepTask, { projectName, targetPlatform, submissionType, outputDir });
   artifacts.push(...submissionPrep.artifacts);

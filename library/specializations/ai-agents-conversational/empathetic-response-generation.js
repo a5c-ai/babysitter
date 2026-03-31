@@ -108,7 +108,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...contextualEmpathy.artifacts);
   }
-
   // ============================================================================
   // PHASE 6: EMOTION TRACKING
   // ============================================================================
@@ -125,14 +124,13 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...emotionTracking.artifacts);
   }
-
   // ============================================================================
   // PHASE 7: EMPATHY EVALUATION
   // ============================================================================
 
   ctx.log('info', 'Phase 7: Evaluating empathy quality');
 
-  const empathyEvaluation = await ctx.task(empathyEvaluationTask, {
+  let empathyEvaluation = await ctx.task(empathyEvaluationTask, {
     systemName,
     empathyEngine: empathyEngine.engine,
     responseStrategies: responseStrategies.strategies,
@@ -141,8 +139,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...empathyEvaluation.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      empathyEvaluation = await ctx.task(empathyEvaluationTask, { ...{
+    systemName,
+    empathyEngine: empathyEngine.engine,
+    responseStrategies: responseStrategies.strategies,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Empathetic response system ${systemName} complete. Empathy score: ${empathyEvaluation.results.empathyScore}. Review implementation?`,
     title: 'Empathetic Response Review',
     context: {
@@ -154,9 +161,15 @@ export async function process(inputs, ctx) {
         empathyScore: empathyEvaluation.results.empathyScore
       },
       files: artifacts.map(a => ({ path: a.path, format: a.format || 'python' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -176,8 +189,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

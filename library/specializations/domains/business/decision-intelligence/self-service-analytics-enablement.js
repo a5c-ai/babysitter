@@ -55,7 +55,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 4: Governance Framework
-  const governanceFramework = await ctx.task(governanceFrameworkTask, {
+  let governanceFramework = await ctx.task(governanceFrameworkTask, {
     projectName,
     governanceRequirements,
     userGroups,
@@ -63,8 +63,18 @@ export async function process(inputs, ctx) {
     semanticLayerDesign
   });
 
-  // Breakpoint: Review governance framework
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      governanceFramework = await ctx.task(governanceFrameworkTask, { ...{
+    projectName,
+    governanceRequirements,
+    userGroups,
+    dataCatalogDesign,
+    semanticLayerDesign
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Review self-service governance framework for ${projectName}. Does it balance enablement with control?`,
     title: 'Governance Framework Review',
     context: {
@@ -72,9 +82,15 @@ export async function process(inputs, ctx) {
       projectName,
       accessPolicies: governanceFramework.accessPolicies,
       dataClassification: governanceFramework.dataClassification
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 5: Tool Selection and Configuration
   const toolConfiguration = await ctx.task(toolConfigurationTask, {
     projectName,
@@ -128,8 +144,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const currentStateAssessmentTask = defineTask('current-state-assessment', (args, taskCtx) => ({
   kind: 'agent',

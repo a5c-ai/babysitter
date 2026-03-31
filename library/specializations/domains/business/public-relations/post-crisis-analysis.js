@@ -19,33 +19,54 @@ export async function process(inputs, ctx) {
     targetQuality = 85
   } = inputs;
 
-  // Phase 1: Crisis Response Timeline Reconstruction
-  await ctx.breakpoint({
+  let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    // No preceding task identified for re-run with feedback
+    const phase1Review = await ctx.breakpoint({
     question: 'Starting post-crisis analysis. Reconstruct crisis response timeline?',
     title: 'Phase 1: Timeline Reconstruction',
     context: {
       runId: ctx.runId,
       phase: 'timeline-reconstruction',
       crisisType: crisis.type
-    }
-  });
-
-  const timelineReconstruction = await ctx.task(reconstructTimelineTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
+  let timelineReconstruction = await ctx.task(reconstructTimelineTask, {
     crisis,
     responseData
   });
 
-  // Phase 2: Response Effectiveness Analysis
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      timelineReconstruction = await ctx.task(reconstructTimelineTask, { ...{
+    crisis,
+    responseData
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: 'Timeline reconstructed. Analyze response effectiveness?',
     title: 'Phase 2: Response Analysis',
     context: {
       runId: ctx.runId,
       phase: 'response-analysis',
       durationHours: timelineReconstruction.durationHours
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   const [responseAnalysis, communicationsAnalysis] = await Promise.all([
     ctx.task(analyzeResponseEffectivenessTask, {
       timelineReconstruction,
@@ -59,117 +80,215 @@ export async function process(inputs, ctx) {
     })
   ]);
 
-  // Phase 3: Media Coverage Analysis
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      timelineReconstruction = await ctx.task(reconstructTimelineTask, { ...{
+    crisis,
+    responseData
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: 'Response analyzed. Analyze media coverage and sentiment?',
     title: 'Phase 3: Coverage Analysis',
     context: {
       runId: ctx.runId,
       phase: 'coverage-analysis'
-    }
-  });
-
-  const coverageAnalysis = await ctx.task(analyzeCoverageTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
+  let coverageAnalysis = await ctx.task(analyzeCoverageTask, {
     coverageData,
     crisis,
     responseData
   });
 
-  // Phase 4: Stakeholder Impact Assessment
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      coverageAnalysis = await ctx.task(analyzeCoverageTask, { ...{
+    coverageData,
+    crisis,
+    responseData
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: 'Coverage analyzed. Assess stakeholder impact?',
     title: 'Phase 4: Stakeholder Impact',
     context: {
       runId: ctx.runId,
       phase: 'stakeholder-impact',
       coverageVolume: coverageAnalysis.totalCoverage
-    }
-  });
-
-  const stakeholderImpact = await ctx.task(assessStakeholderImpactTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
+  let stakeholderImpact = await ctx.task(assessStakeholderImpactTask, {
     stakeholderFeedback,
     coverageAnalysis,
     crisis
   });
 
-  // Phase 5: Reputation Damage Assessment
-  await ctx.breakpoint({
+    let lastFeedback_phase5Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase5Review) {
+      stakeholderImpact = await ctx.task(assessStakeholderImpactTask, { ...{
+    stakeholderFeedback,
+    coverageAnalysis,
+    crisis
+  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+    }
+  const phase5Review = await ctx.breakpoint({
     question: 'Stakeholder impact assessed. Evaluate reputation damage?',
     title: 'Phase 5: Reputation Assessment',
     context: {
       runId: ctx.runId,
       phase: 'reputation-assessment'
-    }
-  });
-
-  const reputationAssessment = await ctx.task(assessReputationDamageTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase5Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase5Review.approved) break;
+    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+  }
+  let reputationAssessment = await ctx.task(assessReputationDamageTask, {
     coverageAnalysis,
     stakeholderImpact,
     crisis
   });
 
-  // Phase 6: Lessons Learned Documentation
-  await ctx.breakpoint({
+    let lastFeedback_phase6Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase6Review) {
+      reputationAssessment = await ctx.task(assessReputationDamageTask, { ...{
+    coverageAnalysis,
+    stakeholderImpact,
+    crisis
+  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
+    }
+  const phase6Review = await ctx.breakpoint({
     question: 'Reputation assessed. Document lessons learned?',
     title: 'Phase 6: Lessons Learned',
     context: {
       runId: ctx.runId,
       phase: 'lessons-learned'
-    }
-  });
-
-  const lessonsLearned = await ctx.task(documentLessonsLearnedTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase6Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase6Review.approved) break;
+    lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
+  }
+  let lessonsLearned = await ctx.task(documentLessonsLearnedTask, {
     responseAnalysis,
     communicationsAnalysis,
     coverageAnalysis,
     stakeholderImpact
   });
 
-  // Phase 7: Crisis Plan Update Recommendations
-  await ctx.breakpoint({
+    let lastFeedback_phase7Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase7Review) {
+      lessonsLearned = await ctx.task(documentLessonsLearnedTask, { ...{
+    responseAnalysis,
+    communicationsAnalysis,
+    coverageAnalysis,
+    stakeholderImpact
+  }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
+    }
+  const phase7Review = await ctx.breakpoint({
     question: 'Lessons documented. Develop plan update recommendations?',
     title: 'Phase 7: Plan Updates',
     context: {
       runId: ctx.runId,
       phase: 'plan-updates',
       lessonsCount: lessonsLearned.lessons.length
-    }
-  });
-
-  const planUpdates = await ctx.task(developPlanUpdatesTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase7Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase7Review.approved) break;
+    lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
+  }
+  let planUpdates = await ctx.task(developPlanUpdatesTask, {
     lessonsLearned,
     crisisPlan,
     responseAnalysis
   });
 
-  // Phase 8: Reputation Recovery Strategy (Image Restoration Theory)
-  await ctx.breakpoint({
+    let lastFeedback_phase8Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase8Review) {
+      planUpdates = await ctx.task(developPlanUpdatesTask, { ...{
+    lessonsLearned,
+    crisisPlan,
+    responseAnalysis
+  }, feedback: lastFeedback_phase8Review, attempt: attempt + 1 });
+    }
+  const phase8Review = await ctx.breakpoint({
     question: 'Plan updates defined. Develop reputation recovery strategy?',
     title: 'Phase 8: Recovery Strategy',
     context: {
       runId: ctx.runId,
       phase: 'recovery-strategy',
       reputationImpact: reputationAssessment.impactLevel
-    }
-  });
-
-  const recoveryStrategy = await ctx.task(developRecoveryStrategyTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase8Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase8Review.approved) break;
+    lastFeedback_phase8Review = phase8Review.response || phase8Review.feedback || 'Changes requested';
+  }
+  let recoveryStrategy = await ctx.task(developRecoveryStrategyTask, {
     reputationAssessment,
     crisis,
     stakeholderImpact
   });
 
-  // Phase 9: After-Action Report
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      recoveryStrategy = await ctx.task(developRecoveryStrategyTask, { ...{
+    reputationAssessment,
+    crisis,
+    stakeholderImpact
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: 'Recovery strategy developed. Compile after-action report?',
     title: 'Phase 9: After-Action Report',
     context: {
       runId: ctx.runId,
       phase: 'after-action-report',
       targetQuality
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const afterActionReport = await ctx.task(compileAfterActionReportTask, {
     timelineReconstruction,
     responseAnalysis,
@@ -229,8 +348,7 @@ export async function process(inputs, ctx) {
     };
   }
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const reconstructTimelineTask = defineTask('reconstruct-timeline', (args, taskCtx) => ({
   kind: 'agent',

@@ -54,7 +54,6 @@ export async function process(inputs, ctx) {
     const delegation = await ctx.task(delegationTask, { projectName, outputDir });
     artifacts.push(...delegation.artifacts);
   }
-
   // Phase 5: Emergency Withdraw
   const emergencyWithdraw = await ctx.task(emergencyWithdrawTask, { projectName, outputDir });
   artifacts.push(...emergencyWithdraw.artifacts);

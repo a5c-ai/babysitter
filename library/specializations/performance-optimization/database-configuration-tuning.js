@@ -37,15 +37,24 @@ export async function process(inputs, ctx) {
   artifacts.push(...currentConfig.artifacts);
 
   // Phase 2: Review Resource Utilization
-  const resourceUtilization = await ctx.task(reviewResourceUtilizationTask, { projectName, database, outputDir });
-  artifacts.push(...resourceUtilization.artifacts);
-
-  await ctx.breakpoint({
+  let resourceUtilization = await ctx.task(reviewResourceUtilizationTask, { projectName, database, outputDir });
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      resourceUtilization = await ctx.task(reviewResourceUtilizationTask, { ...{ projectName, database, outputDir }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Resource utilization: CPU ${resourceUtilization.cpu}%, Memory ${resourceUtilization.memory}%. Optimize configuration?`,
     title: 'Database Resource Analysis',
-    context: { runId: ctx.runId, resourceUtilization }
-  });
-
+    context: { runId: ctx.runId, resourceUtilization },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // Phase 3: Tune Memory Settings
   const memoryTuning = await ctx.task(tuneMemorySettingsTask, { projectName, database, resourceUtilization, workloadType, outputDir });
   artifacts.push(...memoryTuning.artifacts);
@@ -71,15 +80,24 @@ export async function process(inputs, ctx) {
   artifacts.push(...monitoring.artifacts);
 
   // Phase 9: Document Configuration Changes
-  const documentation = await ctx.task(documentConfigurationChangesTask, { projectName, memoryTuning, connectionTuning, queryCache, checkpointTuning, loadTest, outputDir });
-  artifacts.push(...documentation.artifacts);
-
-  await ctx.breakpoint({
+  let documentation = await ctx.task(documentConfigurationChangesTask, { projectName, memoryTuning, connectionTuning, queryCache, checkpointTuning, loadTest, outputDir });
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      documentation = await ctx.task(documentConfigurationChangesTask, { ...{ projectName, memoryTuning, connectionTuning, queryCache, checkpointTuning, loadTest, outputDir }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Configuration tuning complete. Performance improvement: ${loadTest.improvement}%. Accept changes?`,
     title: 'Database Configuration Results',
-    context: { runId: ctx.runId, loadTest }
-  });
-
+    context: { runId: ctx.runId, loadTest },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     projectName,

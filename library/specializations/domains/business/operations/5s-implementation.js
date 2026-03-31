@@ -38,7 +38,7 @@ export async function process(inputs, ctx) {
 
   // Phase 1: Assessment and Planning
   ctx.log('info', 'Phase 1: Current State Assessment and Planning');
-  const assessment = await ctx.task(currentStateAssessmentTask, {
+  let assessment = await ctx.task(currentStateAssessmentTask, {
     workArea,
     teamMembers,
     currentMaturityLevel,
@@ -47,8 +47,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...assessment.artifacts);
 
-  // Quality Gate: Assessment Review
-  await ctx.breakpoint({
+    let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      assessment = await ctx.task(currentStateAssessmentTask, { ...{
+    workArea,
+    teamMembers,
+    currentMaturityLevel,
+    outputDir
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `5S assessment complete for ${workArea}. Current score: ${assessment.currentScore}/100. Major issues: ${assessment.majorIssues.length}. Proceed with 5S implementation?`,
     title: '5S Current State Assessment',
     context: {
@@ -57,9 +66,15 @@ export async function process(inputs, ctx) {
       currentScore: assessment.currentScore,
       majorIssues: assessment.majorIssues,
       files: assessment.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // Phase 2: Sort (Seiri)
   ctx.log('info', 'Phase 2: Sort (Seiri) - Separate needed from unneeded items');
   const sortPhase = await ctx.task(sortImplementationTask, {
@@ -82,7 +97,7 @@ export async function process(inputs, ctx) {
 
   // Phase 4: Shine (Seiso)
   ctx.log('info', 'Phase 4: Shine (Seiso) - Clean and inspect');
-  const shinePhase = await ctx.task(shineImplementationTask, {
+  let shinePhase = await ctx.task(shineImplementationTask, {
     workArea,
     setInOrderPhase,
     outputDir
@@ -90,8 +105,16 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...shinePhase.artifacts);
 
-  // Quality Gate: 3S Implementation Review
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      shinePhase = await ctx.task(shineImplementationTask, { ...{
+    workArea,
+    setInOrderPhase,
+    outputDir
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: `First 3S complete. Sort: ${sortPhase.itemsRemoved} items removed. Set in Order: ${setInOrderPhase.locationsLabeled} locations labeled. Shine: ${shinePhase.cleaningStandards.length} standards established. Proceed with standardization?`,
     title: '3S Implementation Review',
     context: {
@@ -101,9 +124,15 @@ export async function process(inputs, ctx) {
       setInOrderResults: setInOrderPhase.summary,
       shineResults: shinePhase.summary,
       files: [...sortPhase.artifacts, ...setInOrderPhase.artifacts, ...shinePhase.artifacts].map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
   // Phase 5: Standardize (Seiketsu)
   ctx.log('info', 'Phase 5: Standardize (Seiketsu) - Create standards and visual controls');
   const standardizePhase = await ctx.task(standardizeImplementationTask, {
@@ -144,10 +173,9 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...auditResults.artifacts);
   }
-
   // Phase 8: Generate Implementation Report
   ctx.log('info', 'Phase 8: Generating 5S Implementation Report');
-  const report = await ctx.task(reportGenerationTask, {
+  let report = await ctx.task(reportGenerationTask, {
     workArea,
     assessment,
     sortPhase,
@@ -161,8 +189,22 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...report.artifacts);
 
-  // Final Quality Gate
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      report = await ctx.task(reportGenerationTask, { ...{
+    workArea,
+    assessment,
+    sortPhase,
+    setInOrderPhase,
+    shinePhase,
+    standardizePhase,
+    sustainPhase,
+    auditResults,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `5S implementation complete for ${workArea}. ${auditResults ? `Audit score: ${auditResults.totalScore}/${targetScore} target.` : ''} ${auditResults && auditResults.totalScore >= targetScore ? 'Target achieved!' : 'Target not yet achieved.'} Review final results?`,
     title: '5S Implementation Complete',
     context: {
@@ -175,9 +217,15 @@ export async function process(inputs, ctx) {
         auditScore: auditResults?.totalScore
       },
       files: report.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -225,8 +273,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Current State Assessment
+  // Task 1: Current State Assessment
 export const currentStateAssessmentTask = defineTask('5s-current-assessment', (args, taskCtx) => ({
   kind: 'agent',
   title: `5S Current State Assessment - ${args.workArea}`,

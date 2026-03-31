@@ -31,7 +31,7 @@ export async function process(inputs, ctx) {
   } = inputs;
 
   // Phase 1: Identify Uncertain Parameters
-  const uncertaintyIdentification = await ctx.task(uncertaintyIdentificationTask, {
+  let uncertaintyIdentification = await ctx.task(uncertaintyIdentificationTask, {
     model,
     uncertainParameters
   });
@@ -45,9 +45,15 @@ export async function process(inputs, ctx) {
       propagatedUncertainty: null
     };
   }
-
-  // Breakpoint: Review uncertainty identification
-  await ctx.breakpoint({
+  let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      uncertaintyIdentification = await ctx.task(uncertaintyIdentificationTask, { ...{
+    model,
+    uncertainParameters
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Identified ${uncertaintyIdentification.parameters.length} uncertain parameters. Review distributions?`,
     title: 'Uncertainty Identification Review',
     context: {
@@ -59,9 +65,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: uncertaintyIdentification
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // Phase 2: Propagate Uncertainty Through Model
   const uncertaintyPropagation = await ctx.task(uncertaintyPropagationTask, {
     model,
@@ -86,7 +98,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 5: Document Uncertainty Sources
-  const uncertaintyDocumentation = await ctx.task(uncertaintyDocumentationTask, {
+  let uncertaintyDocumentation = await ctx.task(uncertaintyDocumentationTask, {
     uncertaintyIdentification,
     uncertaintyPropagation,
     sensitivityAnalysis,
@@ -94,8 +106,18 @@ export async function process(inputs, ctx) {
     model
   });
 
-  // Final Breakpoint: UQ Complete
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      uncertaintyDocumentation = await ctx.task(uncertaintyDocumentationTask, { ...{
+    uncertaintyIdentification,
+    uncertaintyPropagation,
+    sensitivityAnalysis,
+    confidenceBoundsGeneration,
+    model
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Uncertainty quantification complete. Total output uncertainty: ${confidenceBoundsGeneration.totalUncertainty}. Review results?`,
     title: 'Uncertainty Quantification Complete',
     context: {
@@ -105,9 +127,15 @@ export async function process(inputs, ctx) {
       files: [
         { path: `artifacts/uq-results.json`, format: 'json', content: { uncertaintyPropagation, sensitivityAnalysis } }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     model: model.type,
@@ -140,8 +168,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const uncertaintyIdentificationTask = defineTask('uncertainty-identification', (args, taskCtx) => ({
   kind: 'agent',

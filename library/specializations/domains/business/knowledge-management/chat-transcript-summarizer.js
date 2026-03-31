@@ -382,8 +382,7 @@ function slugify(text) {
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-|-$/g, '');
 }
-
-// ============================================================================
+  // ============================================================================
 // Main Process
 // ============================================================================
 
@@ -435,7 +434,6 @@ export async function process(inputs, ctx) {
   if (previousSummaryPath) {
     previousSummaryContent = `Read format from: ${previousSummaryPath}`;
   }
-
   // Stage 2: Generate primary language summary
   ctx.log(`Generating ${primaryLanguage} summary...`);
   const primaryResult = await ctx.task(generatePrimarySummaryTask, {
@@ -461,7 +459,6 @@ export async function process(inputs, ctx) {
       dateRange,
     });
   }
-
   // Compute date suffix for filenames
   const dateSuffix = dateRange.toLowerCase()
     .replace(/\s+/g, '-')

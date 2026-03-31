@@ -72,7 +72,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Designing feature store architecture');
 
-  const architectureDesign = await ctx.task(featureStoreArchitectureTask, {
+  let architectureDesign = await ctx.task(featureStoreArchitectureTask, {
     projectName,
     platform,
     features,
@@ -97,8 +97,20 @@ export async function process(inputs, ctx) {
   artifacts.push(...architectureDesign.artifacts);
   featureStoreConfig.architecture = architectureDesign;
 
-  // Quality Gate: Review architecture design
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      architectureDesign = await ctx.task(featureStoreArchitectureTask, { ...{
+    projectName,
+    platform,
+    features,
+    requirements,
+    cloudProvider,
+    environment,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Phase 1 Review: Feature store architecture designed for ${architectureDesign.featureCount} features. Platform: ${platform}. Online store: ${architectureDesign.onlineStore}, Offline store: ${architectureDesign.offlineStore}. Approve design?`,
     title: 'Architecture Design Approval',
     context: {
@@ -109,9 +121,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: JSON.stringify(architectureDesign, null, 2)
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 2: FEATURE REGISTRY SETUP
   // ============================================================================
@@ -182,7 +200,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 4: Setting up offline store for training and analytics');
 
-  const offlineStoreSetup = await ctx.task(offlineStoreSetupTask, {
+  let offlineStoreSetup = await ctx.task(offlineStoreSetupTask, {
     projectName,
     platform,
     architectureDesign,
@@ -209,8 +227,20 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Offline store ready: ${offlineStoreSetup.technology}, Storage: ${offlineStoreSetup.storageLocation}`);
 
-  // Quality Gate: Review storage setup
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval2 = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval2) {
+      offlineStoreSetup = await ctx.task(offlineStoreSetupTask, { ...{
+    projectName,
+    platform,
+    architectureDesign,
+    featureRegistry,
+    requirements,
+    cloudProvider,
+    outputDir
+  }, feedback: lastFeedback_finalApproval2, attempt: attempt + 1 });
+    }
+  const finalApproval2 = await ctx.breakpoint({
     question: `Phase 3-4 Review: Online store (${onlineStoreSetup.technology}) and offline store (${offlineStoreSetup.technology}) configured. Cost estimate: $${(onlineStoreSetup.estimatedMonthlyCost + offlineStoreSetup.estimatedMonthlyCost).toFixed(2)}/month. Approve?`,
     title: 'Storage Setup Review',
     context: {
@@ -229,9 +259,15 @@ export async function process(inputs, ctx) {
           content: JSON.stringify(offlineStoreSetup, null, 2)
         }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval2 || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval2.approved) break;
+    lastFeedback_finalApproval2 = finalApproval2.response || finalApproval2.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 5: FEATURE ENGINEERING PIPELINES
   // ============================================================================
@@ -319,7 +355,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 7: Configuring feature versioning and lineage tracking');
 
-  const versioningSetup = await ctx.task(versioningSetupTask, {
+  let versioningSetup = await ctx.task(versioningSetupTask, {
     projectName,
     platform,
     featureRegistry,
@@ -334,9 +370,18 @@ export async function process(inputs, ctx) {
     featureStoreConfig.versioning = versioningSetup;
     ctx.log('info', 'Feature versioning and lineage tracking configured');
   }
-
-  // Quality Gate: Review pipelines and serving
-  await ctx.breakpoint({
+  let lastFeedback_finalApproval3 = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval3) {
+      versioningSetup = await ctx.task(versioningSetupTask, { ...{
+    projectName,
+    platform,
+    featureRegistry,
+    requirements,
+    outputDir
+  }, feedback: lastFeedback_finalApproval3, attempt: attempt + 1 });
+    }
+  const finalApproval3 = await ctx.breakpoint({
     question: `Phase 5-7 Review: ${batchPipeline.pipelineCount + streamingPipeline.pipelineCount} pipelines configured. Serving layer ready with ${servingLayer.apiCount} APIs. Versioning: ${versioningSetup.versioningStrategy}. Proceed?`,
     title: 'Pipelines and Serving Review',
     context: {
@@ -356,9 +401,15 @@ export async function process(inputs, ctx) {
           content: JSON.stringify(servingLayer, null, 2)
         }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval3 || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval3.approved) break;
+    lastFeedback_finalApproval3 = finalApproval3.response || finalApproval3.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 8: TRAINING-SERVING CONSISTENCY VALIDATION
   // ============================================================================
@@ -384,7 +435,6 @@ export async function process(inputs, ctx) {
       ctx.log('info', `Consistency validation: ${consistencyValidation.checksCount} checks, ${consistencyValidation.issuesFound} issues`);
     }
   }
-
   // ============================================================================
   // PHASE 9: FEATURE MONITORING AND OBSERVABILITY
   // ============================================================================
@@ -438,7 +488,6 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', 'Monitoring stack configured with feature, quality, and performance tracking');
   }
-
   // ============================================================================
   // PHASE 10: ALERTING CONFIGURATION
   // ============================================================================
@@ -461,7 +510,6 @@ export async function process(inputs, ctx) {
     featureStoreConfig.alerting = alertingConfig;
     ctx.log('info', `Alerting configured: ${alertingConfig.alertRulesCount} rules`);
   }
-
   // ============================================================================
   // PHASE 11: DATA QUALITY CHECKS
   // ============================================================================
@@ -484,7 +532,6 @@ export async function process(inputs, ctx) {
     featureStoreConfig.qualityChecks = qualityChecks;
     ctx.log('info', `Quality checks configured: ${qualityChecks.checksCount} checks`);
   }
-
   // ============================================================================
   // PHASE 12: BACKFILL AND HISTORICAL MATERIALIZATION
   // ============================================================================
@@ -508,14 +555,13 @@ export async function process(inputs, ctx) {
     featureStoreConfig.backfill = backfillSetup;
     ctx.log('info', 'Backfill and historical materialization configured');
   }
-
   // ============================================================================
   // PHASE 13: INFRASTRUCTURE PROVISIONING
   // ============================================================================
 
   ctx.log('info', 'Phase 13: Generating infrastructure-as-code');
 
-  const infrastructureProvisioning = await ctx.task(infrastructureProvisioningTask, {
+  let infrastructureProvisioning = await ctx.task(infrastructureProvisioningTask, {
     projectName,
     platform,
     architectureDesign,
@@ -582,9 +628,23 @@ export async function process(inputs, ctx) {
   ]);
 
   if (!integrationTests.success || !performanceTests.success || !consistencyTests.success) {
-    ctx.log('error', 'Some tests failed');
-
-    await ctx.breakpoint({
+      let lastFeedback_testApproval = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_testApproval) {
+        infrastructureProvisioning = await ctx.task(infrastructureProvisioningTask, { ...{
+    projectName,
+    platform,
+    architectureDesign,
+    onlineStoreSetup,
+    offlineStoreSetup,
+    featureRegistry,
+    pipelines,
+    cloudProvider,
+    environment,
+    outputDir
+  }, feedback: lastFeedback_testApproval, attempt: attempt + 1 });
+      }
+  const testApproval = await ctx.breakpoint({
       question: `Phase 14 Alert: Testing failed. Integration: ${integrationTests.testsPassed}/${integrationTests.totalTests}, Performance: ${performanceTests.testsPassed}/${performanceTests.totalTests}, Consistency: ${consistencyTests.testsPassed}/${consistencyTests.totalTests}. Review issues before proceeding?`,
       title: 'Testing Failed',
       context: {
@@ -595,9 +655,15 @@ export async function process(inputs, ctx) {
           format: 'json',
           content: JSON.stringify({ integrationTests, performanceTests, consistencyTests }, null, 2)
         }]
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_testApproval || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (testApproval.approved) break;
+      lastFeedback_testApproval = testApproval.response || testApproval.feedback || 'Changes requested';
+    } }
 
   artifacts.push(
     ...integrationTests.artifacts,
@@ -611,7 +677,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 15: Generating documentation and operational runbooks');
 
-  const documentation = await ctx.task(documentationGenerationTask, {
+  let documentation = await ctx.task(documentationGenerationTask, {
     projectName,
     platform,
     architectureDesign,
@@ -628,7 +694,6 @@ export async function process(inputs, ctx) {
   } else {
     artifacts.push(...documentation.artifacts);
   }
-
   // ============================================================================
   // FINAL QUALITY GATE AND HANDOFF
   // ============================================================================
@@ -644,9 +709,22 @@ export async function process(inputs, ctx) {
 
   const qualityThreshold = environment === 'production' ? 85 : 75;
 
-  ctx.log('info', `Overall feature store quality score: ${overallScore.toFixed(1)}/100`);
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval4 = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval4) {
+      documentation = await ctx.task(documentationGenerationTask, { ...{
+    projectName,
+    platform,
+    architectureDesign,
+    featureRegistry,
+    featureStoreConfig,
+    infrastructure,
+    pipelines,
+    cloudProvider,
+    outputDir
+  }, feedback: lastFeedback_finalApproval4, attempt: attempt + 1 });
+    }
+  const finalApproval4 = await ctx.breakpoint({
     question: `Final Review: Feature store ${projectName} is ready. Overall quality score: ${overallScore.toFixed(1)}/100 (threshold: ${qualityThreshold}). Features: ${featureRegistry.featureViewsCount}, Pipelines: ${pipelines.length}. Ready to handoff?`,
     title: 'Final Feature Store Review and Handoff',
     context: {
@@ -677,9 +755,15 @@ export async function process(inputs, ctx) {
           content: documentation.architectureDiagram || 'Architecture diagram pending'
         }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval4 || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval4.approved) break;
+    lastFeedback_finalApproval4 = finalApproval4.response || finalApproval4.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -733,8 +817,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

@@ -33,7 +33,7 @@ export async function process(inputs, ctx) {
   } = inputs;
 
   // Phase 1: Multiscale Framework Design
-  const frameworkDesign = await ctx.task(frameworkDesignTask, {
+  let frameworkDesign = await ctx.task(frameworkDesignTask, {
     material,
     targetPhenomenon,
     scaleRange,
@@ -49,9 +49,17 @@ export async function process(inputs, ctx) {
       recommendations: frameworkDesign.recommendations
     };
   }
-
-  // Breakpoint: Review framework design
-  await ctx.breakpoint({
+  let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      frameworkDesign = await ctx.task(frameworkDesignTask, { ...{
+    material,
+    targetPhenomenon,
+    scaleRange,
+    couplingStrategy
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Review multiscale framework: ${frameworkDesign.scales.length} scales from ${scaleRange.from} to ${scaleRange.to}. Coupling: ${couplingStrategy}. Approve?`,
     title: 'Multiscale Framework Review',
     context: {
@@ -63,9 +71,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: frameworkDesign
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // Phase 2: Scale-Specific Model Setup
   const scaleModels = {};
 
@@ -77,7 +91,6 @@ export async function process(inputs, ctx) {
       targetPhenomenon
     });
   }
-
   // Atomistic Scale
   if (frameworkDesign.scales.includes('atomistic')) {
     scaleModels.atomistic = await ctx.task(atomisticScaleSetupTask, {
@@ -87,7 +100,6 @@ export async function process(inputs, ctx) {
       quantumInputs: scaleModels.quantum
     });
   }
-
   // Mesoscale
   if (frameworkDesign.scales.includes('mesoscale')) {
     scaleModels.mesoscale = await ctx.task(mesoscaleSetupTask, {
@@ -97,7 +109,6 @@ export async function process(inputs, ctx) {
       atomisticInputs: scaleModels.atomistic
     });
   }
-
   // Continuum Scale
   if (frameworkDesign.scales.includes('continuum')) {
     scaleModels.continuum = await ctx.task(continuumScaleSetupTask, {
@@ -107,31 +118,44 @@ export async function process(inputs, ctx) {
       lowerScaleInputs: scaleModels.mesoscale || scaleModels.atomistic
     });
   }
-
   // Phase 3: Scale Bridging Implementation
-  const scaleBridging = await ctx.task(scaleBridgingTask, {
+  let scaleBridging = await ctx.task(scaleBridgingTask, {
     scaleModels,
     frameworkDesign,
     couplingStrategy
   });
 
-  // Breakpoint: Review scale bridging
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      scaleBridging = await ctx.task(scaleBridgingTask, { ...{
+    scaleModels,
+    frameworkDesign,
+    couplingStrategy
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Scale bridging configured. ${Object.keys(scaleBridging.connections).length} scale connections. Parameter transfer validated: ${scaleBridging.validated}. Proceed with calculations?`,
     title: 'Scale Bridging Review',
     context: {
       runId: ctx.runId,
       scaleBridging,
       connections: scaleBridging.connections
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // Phase 4: Sequential Scale Calculations
   const calculationResults = {};
 
   // Execute from smallest to largest scale
   for (const scale of frameworkDesign.scaleOrder) {
-    const scaleCalculation = await ctx.task(scaleCalculationTask, {
+    let scaleCalculation = await ctx.task(scaleCalculationTask, {
       scale,
       scaleModel: scaleModels[scale],
       previousResults: calculationResults,
@@ -142,8 +166,19 @@ export async function process(inputs, ctx) {
 
     calculationResults[scale] = scaleCalculation;
 
-    // Breakpoint: Review scale calculation
-    await ctx.breakpoint({
+      let lastFeedback_iterationApproval = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_iterationApproval) {
+        scaleCalculation = await ctx.task(scaleCalculationTask, { ...{
+      scale,
+      scaleModel: scaleModels[scale],
+      previousResults: calculationResults,
+      scaleBridging,
+      material,
+      targetPhenomenon
+    }, feedback: lastFeedback_iterationApproval, attempt: attempt + 1 });
+      }
+  const iterationApproval = await ctx.breakpoint({
       question: `${scale} scale calculation complete. Key outputs: ${Object.keys(scaleCalculation.outputs).join(', ')}. Continue to next scale?`,
       title: `${scale.charAt(0).toUpperCase() + scale.slice(1)} Scale Review`,
       context: {
@@ -151,9 +186,15 @@ export async function process(inputs, ctx) {
         scale,
         outputs: scaleCalculation.outputs,
         convergence: scaleCalculation.convergence
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_iterationApproval || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (iterationApproval.approved) break;
+      lastFeedback_iterationApproval = iterationApproval.response || iterationApproval.feedback || 'Changes requested';
+    } }
 
   // Phase 5: Parameter Upscaling/Coarse-Graining
   const parameterTransfer = await ctx.task(parameterTransferTask, {
@@ -170,24 +211,38 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 7: Cross-Scale Validation
-  const crossScaleValidation = await ctx.task(crossScaleValidationTask, {
+  let crossScaleValidation = await ctx.task(crossScaleValidationTask, {
     calculationResults,
     parameterTransfer,
     frameworkDesign
   });
 
   // Quality Gate: Cross-scale consistency
-  if (!crossScaleValidation.consistent) {
-    await ctx.breakpoint({
+      let lastFeedback_phase7Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase7Review) {
+        crossScaleValidation = await ctx.task(crossScaleValidationTask, { ...{
+    calculationResults,
+    parameterTransfer,
+    frameworkDesign
+  }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
+      }
+  const phase7Review = await ctx.breakpoint({
       question: `Cross-scale inconsistencies detected: ${crossScaleValidation.inconsistencies.join(', ')}. Review and proceed?`,
       title: 'Cross-Scale Validation Warning',
       context: {
         runId: ctx.runId,
         crossScaleValidation,
         recommendations: crossScaleValidation.recommendations
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase7Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase7Review.approved) break;
+      lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
+    } }
 
   // Phase 8: Experimental Validation (if benchmarks provided)
   let experimentalValidation = null;
@@ -199,7 +254,6 @@ export async function process(inputs, ctx) {
       targetPhenomenon
     });
   }
-
   // Phase 9: Results Integration
   const integratedResults = await ctx.task(resultsIntegrationTask, {
     calculationResults,
@@ -212,7 +266,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 10: Report Generation
-  const multiscaleReport = await ctx.task(reportGenerationTask, {
+  let multiscaleReport = await ctx.task(reportGenerationTask, {
     frameworkDesign,
     scaleModels,
     calculationResults,
@@ -224,8 +278,22 @@ export async function process(inputs, ctx) {
     integratedResults
   });
 
-  // Final Breakpoint: Results approval
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      multiscaleReport = await ctx.task(reportGenerationTask, { ...{
+    frameworkDesign,
+    scaleModels,
+    calculationResults,
+    scaleBridging,
+    parameterTransfer,
+    uncertaintyPropagation,
+    crossScaleValidation,
+    experimentalValidation,
+    integratedResults
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Multiscale modeling complete. ${frameworkDesign.scales.length} scales integrated. Overall uncertainty: ${uncertaintyPropagation.overallUncertainty}. Approve results?`,
     title: 'Multiscale Results Approval',
     context: {
@@ -236,9 +304,15 @@ export async function process(inputs, ctx) {
         { path: 'artifacts/multiscale-report.md', format: 'markdown', content: multiscaleReport.markdown },
         { path: 'artifacts/scale-results.json', format: 'json', content: calculationResults }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     multiscaleResults: calculationResults,
@@ -258,8 +332,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const frameworkDesignTask = defineTask('framework-design', (args, taskCtx) => ({
   kind: 'agent',

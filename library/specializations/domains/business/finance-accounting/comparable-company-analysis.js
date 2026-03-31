@@ -30,19 +30,33 @@ export async function process(inputs, ctx) {
   results.steps.push({ name: 'selection-criteria', result: criteriaResult });
 
   // Step 2: Identify Peer Companies
-  const peerResult = await ctx.task(identifyPeerCompaniesTask, {
+  let peerResult = await ctx.task(identifyPeerCompaniesTask, {
     targetCompany: inputs.targetCompany,
     selectionCriteria: criteriaResult,
     marketData: inputs.marketData
   });
   results.steps.push({ name: 'peer-identification', result: peerResult });
 
-  // Breakpoint for peer review
-  await ctx.breakpoint('peer-review', {
+    let lastFeedback_reviewApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_reviewApproval) {
+      peerResult = await ctx.task(identifyPeerCompaniesTask, { ...{
+    targetCompany: inputs.targetCompany,
+    selectionCriteria: criteriaResult,
+    marketData: inputs.marketData
+  }, feedback: lastFeedback_reviewApproval, attempt: attempt + 1 });
+    }
+  const reviewApproval = await ctx.breakpoint('peer-review', {
     message: 'Review and approve peer company selection before gathering data',
-    data: peerResult
-  });
-
+    data: peerResult,
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_reviewApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (reviewApproval.approved) break;
+    lastFeedback_reviewApproval = reviewApproval.response || reviewApproval.feedback || 'Changes requested';
+  }
   // Step 3: Gather Peer Financial Data
   const peerDataResult = await ctx.task(gatherPeerDataTask, {
     peerCompanies: peerResult,
@@ -58,19 +72,33 @@ export async function process(inputs, ctx) {
   results.steps.push({ name: 'metric-normalization', result: normalizedResult });
 
   // Step 5: Calculate Trading Multiples
-  const multiplesResult = await ctx.task(calculateTradingMultiplesTask, {
+  let multiplesResult = await ctx.task(calculateTradingMultiplesTask, {
     normalizedData: normalizedResult,
     marketData: inputs.marketData,
     valuationDate: inputs.valuationDate
   });
   results.steps.push({ name: 'trading-multiples', result: multiplesResult });
 
-  // Breakpoint for multiple review
-  await ctx.breakpoint('multiples-review', {
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      multiplesResult = await ctx.task(calculateTradingMultiplesTask, { ...{
+    normalizedData: normalizedResult,
+    marketData: inputs.marketData,
+    valuationDate: inputs.valuationDate
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint('multiples-review', {
     message: 'Review trading multiples before applying to target company',
-    data: multiplesResult
-  });
-
+    data: multiplesResult,
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Step 6: Benchmark and Select Multiples
   const benchmarkResult = await ctx.task(benchmarkAndSelectMultiplesTask, {
     tradingMultiples: multiplesResult,
@@ -104,8 +132,7 @@ export async function process(inputs, ctx) {
 
   return results;
 }
-
-// Task definitions
+  // Task definitions
 export const defineSelectionCriteriaTask = defineTask('define-selection-criteria', (args, taskCtx) => ({
   kind: 'agent',
   skill: { name: 'valuation' },

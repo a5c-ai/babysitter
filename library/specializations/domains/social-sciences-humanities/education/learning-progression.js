@@ -132,7 +132,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Scoring learning progression quality');
-  const qualityScore = await ctx.task(progressionQualityScoringTask, {
+  let qualityScore = await ctx.task(progressionQualityScoringTask, {
     domain,
     researchSynthesis,
     anchorConcepts,
@@ -149,8 +149,22 @@ export async function process(inputs, ctx) {
   const overallScore = qualityScore.overallScore;
   const qualityMet = overallScore >= qualityThreshold;
 
-  // Breakpoint: Review progression
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      qualityScore = await ctx.task(progressionQualityScoringTask, { ...{
+    domain,
+    researchSynthesis,
+    anchorConcepts,
+    progressionLevels,
+    learningTrajectories,
+    milestones,
+    assessmentAlignment,
+    qualityThreshold,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Learning progression complete. Quality score: ${overallScore}/${qualityThreshold}. ${qualityMet ? 'Quality standards met!' : 'May need refinement.'} Review and approve?`,
     title: 'Learning Progression Review',
     context: {
@@ -165,9 +179,15 @@ export async function process(inputs, ctx) {
         totalMilestones: milestones.milestones?.length || 0,
         totalArtifacts: artifacts.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -196,8 +216,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Research Synthesis
+  // Task 1: Research Synthesis
 export const researchSynthesisTask = defineTask('research-synthesis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Synthesize research on learning progressions',

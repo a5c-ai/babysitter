@@ -70,7 +70,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 4: Deriving linearized equations (first order)');
-  const linearization = await ctx.task(linearizationTask, {
+  let linearization = await ctx.task(linearizationTask, {
     nonlinearSystem,
     zerothOrderSolution: zerothOrder.solution,
     perturbationParameter,
@@ -79,8 +79,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...linearization.artifacts);
 
-  // Breakpoint: Review linearized system
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      linearization = await ctx.task(linearizationTask, { ...{
+    nonlinearSystem,
+    zerothOrderSolution: zerothOrder.solution,
+    perturbationParameter,
+    outputDir
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: `Linearized system derived with ${linearization.linearTerms.length} linear terms. Proceed with higher-order corrections?`,
     title: 'Linearization Review',
     context: {
@@ -96,9 +105,15 @@ export async function process(inputs, ctx) {
         linearTermCount: linearization.linearTerms.length,
         orderOfExpansion
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 5: HIGHER ORDER CORRECTIONS
   // ============================================================================
@@ -149,7 +164,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 8: Synthesizing perturbative solution');
-  const solutionSynthesis = await ctx.task(solutionSynthesisTask, {
+  let solutionSynthesis = await ctx.task(solutionSynthesisTask, {
     zerothOrderSolution: zerothOrder.solution,
     firstOrderSolution: linearization.firstOrderSolution,
     higherOrderCorrections: higherOrderCorrections.corrections,
@@ -160,8 +175,19 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...solutionSynthesis.artifacts);
 
-  // Final breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      solutionSynthesis = await ctx.task(solutionSynthesisTask, { ...{
+    zerothOrderSolution: zerothOrder.solution,
+    firstOrderSolution: linearization.firstOrderSolution,
+    higherOrderCorrections: higherOrderCorrections.corrections,
+    perturbationParameter,
+    validityRange: validityDetermination.validityRange,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Perturbation analysis complete. Solution valid for ${perturbationParameter} < ${validityDetermination.validityRange.upperBound}. ${secularAnalysis.secularTerms.length} secular terms found. Review final solution?`,
     title: 'Perturbation Analysis Complete',
     context: {
@@ -178,9 +204,15 @@ export async function process(inputs, ctx) {
         secularTermCount: secularAnalysis.secularTerms.length,
         convergent: solutionSynthesis.convergenceAssessment
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -207,8 +239,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

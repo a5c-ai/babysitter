@@ -51,21 +51,29 @@ export async function process(inputs, ctx) {
     const controller = await ctx.task(controllerIntegrationTask, { projectName, platforms, outputDir });
     artifacts.push(...controller.artifacts);
   }
-
   // Phase 7: Platform Compliance Testing
   const compliance = await ctx.task(platformComplianceTask, { projectName, platforms, outputDir });
   artifacts.push(...compliance.artifacts);
 
   // Phase 8: Integration Testing
-  const testing = await ctx.task(integrationTestingTask, { projectName, sdkSetups, outputDir });
-  artifacts.push(...testing.artifacts);
-
-  await ctx.breakpoint({
+  let testing = await ctx.task(integrationTestingTask, { projectName, sdkSetups, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      testing = await ctx.task(integrationTestingTask, { ...{ projectName, sdkSetups, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Platform SDK integration complete for ${projectName}. ${platforms.length} platforms. ${achievements.achievementCount} achievements. Compliance: ${compliance.passRate}%. Review?`,
     title: 'Platform SDK Integration Review',
-    context: { runId: ctx.runId, sdkSetups, achievements, compliance, testing }
-  });
-
+    context: { runId: ctx.runId, sdkSetups, achievements, compliance, testing },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     projectName,

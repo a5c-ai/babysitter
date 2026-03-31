@@ -115,7 +115,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...buildRepro.artifacts);
   }
-
   // ============================================================================
   // PHASE 6: HW-SW VERSION TRACKING
   // ============================================================================
@@ -152,7 +151,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 8: Generating Documentation');
 
-  const documentation = await ctx.task(vcsConfigDocumentationTask, {
+  let documentation = await ctx.task(vcsConfigDocumentationTask, {
     projectName,
     vcsStrategy,
     versioningScheme,
@@ -166,8 +165,22 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...documentation.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      documentation = await ctx.task(vcsConfigDocumentationTask, { ...{
+    projectName,
+    vcsStrategy,
+    versioningScheme,
+    branchingModel,
+    releaseProcess,
+    buildRepro,
+    hwSwTracking,
+    configManagement,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Version Control and Config Management Complete for ${projectName}. Release strategy: ${releaseStrategy}, HW versions: ${hwVersions.length}. Review?`,
     title: 'Version Management Complete',
     context: {
@@ -181,9 +194,15 @@ export async function process(inputs, ctx) {
       files: [
         { path: documentation.docPath, format: 'markdown', label: 'Version Management Documentation' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -218,8 +237,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

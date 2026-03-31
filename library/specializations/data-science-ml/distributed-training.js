@@ -38,7 +38,7 @@ export async function process(inputs, ctx) {
   } = inputs;
 
   // Phase 1: Resource Assessment and Requirements Analysis
-  const resourceAssessment = await ctx.task(resourceAssessmentTask, {
+  let resourceAssessment = await ctx.task(resourceAssessmentTask, {
     projectName,
     modelArchitecture,
     datasetSize,
@@ -57,9 +57,19 @@ export async function process(inputs, ctx) {
       availableResources: availableResources
     };
   }
-
-  // Breakpoint: Review resource allocation
-  await ctx.breakpoint({
+  let lastFeedback_qualityGateApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_qualityGateApproval) {
+      resourceAssessment = await ctx.task(resourceAssessmentTask, { ...{
+    projectName,
+    modelArchitecture,
+    datasetSize,
+    trainingObjective,
+    availableResources,
+    constraints
+  }, feedback: lastFeedback_qualityGateApproval, attempt: attempt + 1 });
+    }
+  const qualityGateApproval = await ctx.breakpoint({
     question: `Resource assessment complete for ${projectName}. Available: ${resourceAssessment.availableGPUs} GPUs across ${resourceAssessment.availableNodes} nodes. Proceed with this configuration?`,
     title: 'Resource Assessment Review',
     context: {
@@ -72,9 +82,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: resourceAssessment
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_qualityGateApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (qualityGateApproval.approved) break;
+    lastFeedback_qualityGateApproval = qualityGateApproval.response || qualityGateApproval.feedback || 'Changes requested';
+  }
   // Phase 2: Model Analysis and Partitioning Strategy
   const modelAnalysis = await ctx.task(modelAnalysisTask, {
     projectName,
@@ -84,7 +100,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 3: Parallelization Strategy Selection
-  const parallelizationStrategy = await ctx.task(parallelizationStrategyTask, {
+  let parallelizationStrategy = await ctx.task(parallelizationStrategyTask, {
     projectName,
     modelArchitecture,
     modelAnalysis,
@@ -94,8 +110,19 @@ export async function process(inputs, ctx) {
   });
 
   // Quality Gate: Parallelization strategy must be viable
-  if (!parallelizationStrategy.viable) {
-    await ctx.breakpoint({
+      let lastFeedback_phase3Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase3Review) {
+        parallelizationStrategy = await ctx.task(parallelizationStrategyTask, { ...{
+    projectName,
+    modelArchitecture,
+    modelAnalysis,
+    resourceAssessment,
+    datasetSize,
+    trainingObjective
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+      }
+  const phase3Review = await ctx.breakpoint({
       question: `Parallelization strategy assessment shows challenges: ${parallelizationStrategy.challenges.join(', ')}. Adjust strategy or proceed with recommendations?`,
       title: 'Parallelization Strategy Warning',
       context: {
@@ -103,9 +130,15 @@ export async function process(inputs, ctx) {
         strategy: parallelizationStrategy.recommendedStrategy,
         challenges: parallelizationStrategy.challenges,
         recommendations: parallelizationStrategy.alternatives
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase3Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase3Review.approved) break;
+      lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+    } }
 
   // Phase 4: Data Distribution and Loading Strategy
   const dataStrategy = await ctx.task(dataDistributionTask, {
@@ -135,7 +168,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 7: Memory Optimization and Management
-  const memoryOptimization = await ctx.task(memoryOptimizationTask, {
+  let memoryOptimization = await ctx.task(memoryOptimizationTask, {
     projectName,
     modelArchitecture,
     modelAnalysis,
@@ -144,8 +177,18 @@ export async function process(inputs, ctx) {
   });
 
   // Quality Gate: Memory requirements must fit available resources
-  if (memoryOptimization.memoryExceeded) {
-    await ctx.breakpoint({
+      let lastFeedback_phase7Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase7Review) {
+        memoryOptimization = await ctx.task(memoryOptimizationTask, { ...{
+    projectName,
+    modelArchitecture,
+    modelAnalysis,
+    resourceAssessment,
+    parallelizationStrategy
+  }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
+      }
+  const phase7Review = await ctx.breakpoint({
       question: `Memory requirements (${memoryOptimization.requiredMemory}) exceed available memory (${memoryOptimization.availableMemory}). Apply aggressive optimizations or reduce model size?`,
       title: 'Memory Constraint Warning',
       context: {
@@ -153,9 +196,15 @@ export async function process(inputs, ctx) {
         memoryGap: memoryOptimization.memoryGap,
         suggestedOptimizations: memoryOptimization.aggressiveOptimizations,
         tradeoffs: memoryOptimization.tradeoffs
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase7Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase7Review.approved) break;
+      lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
+    } }
 
   // Phase 8: Fault Tolerance and Checkpointing
   const faultToleranceConfig = await ctx.task(faultToleranceTask, {
@@ -191,7 +240,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 11: Hyperparameter Tuning for Distributed Setting
-  const hyperparameterConfig = await ctx.task(distributedHyperparametersTask, {
+  let hyperparameterConfig = await ctx.task(distributedHyperparametersTask, {
     projectName,
     trainingObjective,
     parallelizationStrategy,
@@ -200,8 +249,19 @@ export async function process(inputs, ctx) {
     trainingConfig
   });
 
-  // Breakpoint: Review hyperparameters
-  await ctx.breakpoint({
+    let lastFeedback_phase11Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase11Review) {
+      hyperparameterConfig = await ctx.task(distributedHyperparametersTask, { ...{
+    projectName,
+    trainingObjective,
+    parallelizationStrategy,
+    modelAnalysis,
+    resourceAssessment,
+    trainingConfig
+  }, feedback: lastFeedback_phase11Review, attempt: attempt + 1 });
+    }
+  const phase11Review = await ctx.breakpoint({
     question: `Distributed hyperparameters configured for ${projectName}. Learning rate: ${hyperparameterConfig.learningRate}, Batch size: ${hyperparameterConfig.globalBatchSize}. Review and approve?`,
     title: 'Hyperparameter Configuration Review',
     context: {
@@ -213,9 +273,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: hyperparameterConfig
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase11Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase11Review.approved) break;
+    lastFeedback_phase11Review = phase11Review.response || phase11Review.feedback || 'Changes requested';
+  }
   // Phase 12: Performance Optimization and Tuning
   const performanceOptimizations = await ctx.task(performanceOptimizationTask, {
     projectName,
@@ -237,7 +303,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 14: Cost Estimation and Optimization
-  const costAnalysis = await ctx.task(costEstimationTask, {
+  let costAnalysis = await ctx.task(costEstimationTask, {
     projectName,
     resourceAssessment,
     trainingConfig,
@@ -247,8 +313,19 @@ export async function process(inputs, ctx) {
   });
 
   // Quality Gate: Cost must be within budget
-  if (budgetLimit && costAnalysis.estimatedCost > budgetLimit) {
-    await ctx.breakpoint({
+      let lastFeedback_phase14Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase14Review) {
+        costAnalysis = await ctx.task(costEstimationTask, { ...{
+    projectName,
+    resourceAssessment,
+    trainingConfig,
+    targetTrainingTime,
+    budgetLimit,
+    performanceOptimizations
+  }, feedback: lastFeedback_phase14Review, attempt: attempt + 1 });
+      }
+  const phase14Review = await ctx.breakpoint({
       question: `Estimated training cost ($${costAnalysis.estimatedCost}) exceeds budget limit ($${budgetLimit}). Apply cost optimizations or increase budget?`,
       title: 'Budget Constraint Warning',
       context: {
@@ -257,9 +334,15 @@ export async function process(inputs, ctx) {
         budgetLimit,
         costBreakdown: costAnalysis.breakdown,
         costOptimizations: costAnalysis.savingOpportunities
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase14Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase14Review.approved) break;
+      lastFeedback_phase14Review = phase14Review.response || phase14Review.feedback || 'Changes requested';
+    } }
 
   // Phase 15: Testing and Validation Plan
   const validationPlan = await ctx.task(validationPlanTask, {
@@ -272,7 +355,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 16: Final Training Plan Documentation
-  const trainingPlan = await ctx.task(trainingPlanDocumentationTask, {
+  let trainingPlan = await ctx.task(trainingPlanDocumentationTask, {
     projectName,
     modelArchitecture,
     trainingObjective,
@@ -293,8 +376,31 @@ export async function process(inputs, ctx) {
     validationPlan
   });
 
-  // Final Breakpoint: Approval to Launch
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      trainingPlan = await ctx.task(trainingPlanDocumentationTask, { ...{
+    projectName,
+    modelArchitecture,
+    trainingObjective,
+    resourceAssessment,
+    modelAnalysis,
+    parallelizationStrategy,
+    dataStrategy,
+    communicationPlan,
+    gradientSyncStrategy,
+    memoryOptimization,
+    faultToleranceConfig,
+    monitoringPlan,
+    trainingConfig,
+    hyperparameterConfig,
+    performanceOptimizations,
+    launchConfig,
+    costAnalysis,
+    validationPlan
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Distributed training plan complete for ${projectName}. Configuration: ${parallelizationStrategy.recommendedStrategy}, ${resourceAssessment.availableGPUs} GPUs, Est. cost: $${costAnalysis.estimatedCost}. Approve launch?`,
     title: 'Distributed Training Plan Approval',
     context: {
@@ -309,9 +415,15 @@ export async function process(inputs, ctx) {
         { path: 'artifacts/final-training-plan.md', format: 'markdown', content: trainingPlan.markdown },
         { path: 'artifacts/launch-script.sh', format: 'bash', content: launchConfig.launchScript }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     projectName,
@@ -405,8 +517,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const resourceAssessmentTask = defineTask('resource-assessment', (args, taskCtx) => ({
   kind: 'agent',

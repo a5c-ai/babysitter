@@ -115,7 +115,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 6: Creating documentation');
 
-  const documentation = await ctx.task(toolDocumentationTask, {
+  let documentation = await ctx.task(toolDocumentationTask, {
     projectName,
     design,
     coreImpl,
@@ -123,9 +123,18 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...documentation.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      documentation = await ctx.task(toolDocumentationTask, { ...{
+    projectName,
+    design,
+    coreImpl,
+    featureImpl,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Tool development complete. Tests passed: ${testing.passed}/${testing.total}. Security issues: ${securityReview.issues.length}. Review and release?`,
     title: 'Tool Development Complete',
     context: {
@@ -137,9 +146,15 @@ export async function process(inputs, ctx) {
         securityIssues: securityReview.issues.length
       },
       files: documentation.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
 
   return {
@@ -167,8 +182,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

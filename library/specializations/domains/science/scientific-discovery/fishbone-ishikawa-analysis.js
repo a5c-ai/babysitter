@@ -89,7 +89,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 4: Analyzing sub-causes');
-  const subCauseAnalysis = await ctx.task(subCauseAnalysisTask, {
+  let subCauseAnalysis = await ctx.task(subCauseAnalysisTask, {
     effect: effectDefinition.clarifiedEffect,
     categoryAnalyses,
     context,
@@ -98,8 +98,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...subCauseAnalysis.artifacts);
 
-  // Breakpoint: Review fishbone structure
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      subCauseAnalysis = await ctx.task(subCauseAnalysisTask, { ...{
+    effect: effectDefinition.clarifiedEffect,
+    categoryAnalyses,
+    context,
+    outputDir
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: `Fishbone diagram developed with ${categorySelection.selectedCategories.length} categories and ${subCauseAnalysis.totalCauses} total causes. Review structure?`,
     title: 'Fishbone Structure Review',
     context: {
@@ -116,9 +125,15 @@ export async function process(inputs, ctx) {
         totalCauses: subCauseAnalysis.totalCauses,
         totalSubCauses: subCauseAnalysis.totalSubCauses
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 5: CAUSE VERIFICATION
   // ============================================================================
@@ -193,7 +208,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 10: Scoring analysis quality');
-  const qualityScore = await ctx.task(fishboneQualityScoringTask, {
+  let qualityScore = await ctx.task(fishboneQualityScoringTask, {
     effectDefinition,
     categoryAnalyses,
     subCauseAnalysis,
@@ -207,8 +222,20 @@ export async function process(inputs, ctx) {
 
   const qualityMet = qualityScore.overallScore >= minimumCoverageScore;
 
-  // Final breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      qualityScore = await ctx.task(fishboneQualityScoringTask, { ...{
+    effectDefinition,
+    categoryAnalyses,
+    subCauseAnalysis,
+    causeVerification,
+    causePrioritization,
+    minimumCoverageScore,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Fishbone analysis complete. ${rootCauseSelection.selectedRootCauses?.length || 0} root causes selected for action. Quality score: ${qualityScore.overallScore}/100. Approve analysis?`,
     title: 'Fishbone Analysis Approval',
     context: {
@@ -226,9 +253,15 @@ export async function process(inputs, ctx) {
         qualityScore: qualityScore.overallScore,
         qualityMet
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -267,8 +300,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

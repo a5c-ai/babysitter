@@ -118,13 +118,12 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...closedLoopPlan.artifacts);
   }
-
   // ============================================================================
   // PHASE 8: REPORT GENERATION
   // ============================================================================
 
   ctx.log('info', 'Phase 8: Generating NPS report');
-  const npsReport = await ctx.task(npsReportTask, {
+  let npsReport = await ctx.task(npsReportTask, {
     surveyDesign,
     responseAnalysis,
     verbatimAnalysis,
@@ -137,9 +136,20 @@ export async function process(inputs, ctx) {
   artifacts.push(...npsReport.artifacts);
 
   const npsScore = responseAnalysis.npsScore;
-  const targetMet = npsScore >= (surveyConfig.targetNPS || 50);
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      npsReport = await ctx.task(npsReportTask, { ...{
+    surveyDesign,
+    responseAnalysis,
+    verbatimAnalysis,
+    driverAnalysis,
+    closedLoopPlan,
+    previousResults,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `NPS analysis complete. NPS Score: ${npsScore}. Response rate: ${responseAnalysis.responseRate}%. ${targetMet ? 'Target met!' : 'Below target.'} Promoters: ${responseAnalysis.promoterCount}. Detractors: ${responseAnalysis.detractorCount}. Review and distribute?`,
     title: 'NPS Survey Program Review',
     context: {
@@ -160,9 +170,15 @@ export async function process(inputs, ctx) {
         detractors: responseAnalysis.detractorCount,
         closedLoopActions: closedLoopPlan.actions?.length || 0
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -194,8 +210,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

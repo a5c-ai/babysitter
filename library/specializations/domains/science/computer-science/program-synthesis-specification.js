@@ -121,7 +121,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 8: Generating synthesis system documentation');
-  const systemDocumentation = await ctx.task(synthesisDocumentationTask, {
+  let systemDocumentation = await ctx.task(synthesisDocumentationTask, {
     taskDescription,
     specificationLanguage,
     searchSpaceDesign,
@@ -135,8 +135,22 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...systemDocumentation.artifacts);
 
-  // Breakpoint: Review program synthesis specification
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      systemDocumentation = await ctx.task(synthesisDocumentationTask, { ...{
+    taskDescription,
+    specificationLanguage,
+    searchSpaceDesign,
+    synthesisAlgorithm,
+    programVerification,
+    synthesisOptimization,
+    ambiguityHandling,
+    performanceBenchmarks,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Program synthesis specification complete. Approach: ${synthesisApproach}. Search space: ${searchSpaceDesign.searchSpaceSize}. Review specification?`,
     title: 'Program Synthesis Specification Review',
     context: {
@@ -151,9 +165,15 @@ export async function process(inputs, ctx) {
         searchSpaceSize: searchSpaceDesign.searchSpaceSize,
         verificationType: programVerification.verificationType
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -201,8 +221,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

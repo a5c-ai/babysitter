@@ -99,7 +99,7 @@ export async function process(inputs, ctx) {
   if (colorSupport) {
     ctx.log('info', 'Phase 5: Implementing color and styling helpers');
 
-    const colorStyling = await ctx.task(colorStylingTask, {
+    let colorStyling = await ctx.task(colorStylingTask, {
       projectName,
       language,
       outputDir
@@ -107,9 +107,16 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...colorStyling.artifacts);
   }
-
-  // Quality Gate: Output Formatting Review
-  await ctx.breakpoint({
+  let lastFeedback_phase5Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase5Review) {
+      colorStyling = await ctx.task(colorStylingTask, { ...{
+      projectName,
+      language,
+      outputDir
+    }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+    }
+  const phase5Review = await ctx.breakpoint({
     question: `Output formatting system created with ${supportedFormats.length} formats. Proceed with output modes configuration?`,
     title: 'Output Formatting Review',
     context: {
@@ -117,9 +124,15 @@ export async function process(inputs, ctx) {
       projectName,
       supportedFormats,
       files: artifacts.slice(-4).map(a => ({ path: a.path, format: a.format || 'typescript' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase5Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase5Review.approved) break;
+    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 6: QUIET MODE
   // ============================================================================
@@ -197,7 +210,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 11: Documenting output options');
 
-  const documentation = await ctx.task(documentationTask, {
+  let documentation = await ctx.task(documentationTask, {
     projectName,
     supportedFormats,
     colorSupport,
@@ -210,8 +223,21 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...documentation.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      documentation = await ctx.task(documentationTask, { ...{
+    projectName,
+    supportedFormats,
+    colorSupport,
+    formatStrategy,
+    textOutput,
+    jsonOutput,
+    tableFormatting,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `CLI Output Formatting System complete for ${projectName}. Review and approve?`,
     title: 'CLI Output Formatting Complete',
     context: {
@@ -226,9 +252,15 @@ export async function process(inputs, ctx) {
         { path: documentation.outputDocPath, format: 'markdown', label: 'Output Documentation' },
         { path: textOutput.formatterPath, format: 'typescript', label: 'Text Formatter' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -255,8 +287,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

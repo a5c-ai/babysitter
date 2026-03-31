@@ -43,7 +43,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Feature Store Architecture Design');
 
-  const architectureDesign = await ctx.task(featureStoreArchitectureTask, {
+  let architectureDesign = await ctx.task(featureStoreArchitectureTask, {
     projectName,
     featureStoreType,
     dataCharacteristics,
@@ -67,9 +67,18 @@ export async function process(inputs, ctx) {
       architecture: null
     };
   }
-
-  // Breakpoint: Review feature store architecture
-  await ctx.breakpoint({
+  let lastFeedback_qualityGateApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_qualityGateApproval) {
+      architectureDesign = await ctx.task(featureStoreArchitectureTask, { ...{
+    projectName,
+    featureStoreType,
+    dataCharacteristics,
+    servingRequirements,
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval, attempt: attempt + 1 });
+    }
+  const qualityGateApproval = await ctx.breakpoint({
     question: `Review feature store architecture for ${projectName}. Type: ${featureStoreType}. Does the architecture meet scalability, latency, and consistency requirements?`,
     title: 'Feature Store Architecture Review',
     context: {
@@ -81,16 +90,22 @@ export async function process(inputs, ctx) {
         { path: `${outputDir}/architecture-diagram.md`, format: 'markdown' },
         { path: `${outputDir}/architecture-spec.json`, format: 'code', language: 'json' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_qualityGateApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (qualityGateApproval.approved) break;
+    lastFeedback_qualityGateApproval = qualityGateApproval.response || qualityGateApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 2: FEATURE REGISTRY AND SCHEMA DESIGN
   // ============================================================================
 
   ctx.log('info', 'Phase 2: Feature Registry and Schema Design');
 
-  const featureRegistryDesign = await ctx.task(featureRegistryDesignTask, {
+  let featureRegistryDesign = await ctx.task(featureRegistryDesignTask, {
     projectName,
     architectureDesign,
     dataCharacteristics,
@@ -99,8 +114,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...featureRegistryDesign.artifacts);
 
-  // Breakpoint: Review feature registry schema
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      featureRegistryDesign = await ctx.task(featureRegistryDesignTask, { ...{
+    projectName,
+    architectureDesign,
+    dataCharacteristics,
+    outputDir
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Review feature registry schema for ${projectName}. Total features: ${featureRegistryDesign.totalFeatures}. Feature groups: ${featureRegistryDesign.featureGroups.length}. Approve?`,
     title: 'Feature Registry Schema Review',
     context: {
@@ -111,9 +135,15 @@ export async function process(inputs, ctx) {
         { path: `${outputDir}/feature-registry-schema.json`, format: 'code', language: 'json' },
         { path: `${outputDir}/feature-catalog.md`, format: 'markdown' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 3: STORAGE LAYER IMPLEMENTATION WITH ITERATIVE REFINEMENT
   // ============================================================================
@@ -185,7 +215,7 @@ export async function process(inputs, ctx) {
 
     // Step 3: Quality scoring
     ctx.log('info', 'Scoring storage layer quality');
-    const qualityScore = await ctx.task(storageQualityScoringTask, {
+    let qualityScore = await ctx.task(storageQualityScoringTask, {
       projectName,
       architectureDesign,
       storageImplementation,
@@ -226,8 +256,25 @@ export async function process(inputs, ctx) {
       ctx.log('warn', `Quality below target: ${currentQuality}/${targetQuality}`);
 
       // Breakpoint: Review iteration results before continuing
-      if (iteration < maxIterations) {
-        await ctx.breakpoint({
+          let lastFeedback_iterationApproval = null;
+        for (let attempt = 0; attempt < 3; attempt++) {
+          if (lastFeedback_iterationApproval) {
+            qualityScore = await ctx.task(storageQualityScoringTask, { ...{
+      projectName,
+      architectureDesign,
+      storageImplementation,
+      validationChecks: {
+        performance: performanceValidation,
+        consistency: consistencyValidation,
+        scalability: scalabilityValidation,
+        reliability: reliabilityValidation
+      },
+      iteration,
+      targetQuality,
+      outputDir
+    }, feedback: lastFeedback_iterationApproval, attempt: attempt + 1 });
+          }
+  const iterationApproval = await ctx.breakpoint({
           question: `Storage layer iteration ${iteration} complete. Quality: ${currentQuality}/${targetQuality}. Continue to iteration ${iteration + 1} for refinement?`,
           title: `Storage Layer Iteration ${iteration} Review`,
           context: {
@@ -243,12 +290,17 @@ export async function process(inputs, ctx) {
               converged,
               issuesFound: qualityScore.criticalIssues?.length || 0
             }
-          }
-        });
-      }
+          },
+          expert: 'owner',
+          tags: ['approval-gate'],
+          previousFeedback: lastFeedback_iterationApproval || undefined,
+          attempt: attempt > 0 ? attempt + 1 : undefined
+          });
+          if (iterationApproval.approved) break;
+          lastFeedback_iterationApproval = iterationApproval.response || iterationApproval.feedback || 'Changes requested';
+        }     }
     }
   }
-
   const finalStorageIteration = iterationResults[iteration - 1];
 
   // ============================================================================
@@ -257,7 +309,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 4: Feature Ingestion Pipeline Design');
 
-  const ingestionPipelineDesign = await ctx.task(ingestionPipelineDesignTask, {
+  let ingestionPipelineDesign = await ctx.task(ingestionPipelineDesignTask, {
     projectName,
     architectureDesign,
     featureRegistryDesign,
@@ -268,8 +320,19 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...ingestionPipelineDesign.artifacts);
 
-  // Breakpoint: Review ingestion pipeline
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      ingestionPipelineDesign = await ctx.task(ingestionPipelineDesignTask, { ...{
+    projectName,
+    architectureDesign,
+    featureRegistryDesign,
+    storageImplementation: finalStorageIteration.storageImplementation,
+    dataCharacteristics,
+    outputDir
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: `Review feature ingestion pipeline for ${projectName}. Supports: ${ingestionPipelineDesign.ingestionModes.join(', ')}. Approve?`,
     title: 'Ingestion Pipeline Review',
     context: {
@@ -280,16 +343,22 @@ export async function process(inputs, ctx) {
         { path: `${outputDir}/ingestion-pipeline-design.md`, format: 'markdown' },
         { path: `${outputDir}/ingestion-pipeline-spec.json`, format: 'code', language: 'json' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 5: FEATURE SERVING LAYER IMPLEMENTATION
   // ============================================================================
 
   ctx.log('info', 'Phase 5: Feature Serving Layer Implementation');
 
-  const servingLayerImplementation = await ctx.task(servingLayerImplementationTask, {
+  let servingLayerImplementation = await ctx.task(servingLayerImplementationTask, {
     projectName,
     architectureDesign,
     featureRegistryDesign,
@@ -334,8 +403,19 @@ export async function process(inputs, ctx) {
     ...servingScalabilityValidation.artifacts
   );
 
-  // Breakpoint: Review serving layer
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      servingLayerImplementation = await ctx.task(servingLayerImplementationTask, { ...{
+    projectName,
+    architectureDesign,
+    featureRegistryDesign,
+    storageImplementation: finalStorageIteration.storageImplementation,
+    servingRequirements,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Review feature serving layer for ${projectName}. Latency: ${servingLatencyValidation.measuredLatency}. Target: ${servingRequirements.latencyMs}ms. Approve?`,
     title: 'Serving Layer Review',
     context: {
@@ -351,9 +431,15 @@ export async function process(inputs, ctx) {
         { path: `${outputDir}/serving-layer-implementation.md`, format: 'markdown' },
         { path: `${outputDir}/serving-validation-report.json`, format: 'code', language: 'json' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 6: TRAINING-SERVING SKEW PREVENTION
   // ============================================================================
@@ -492,7 +578,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 12: Final Review and Production Readiness Assessment');
 
-  const finalReview = await ctx.task(featureStoreFinalReviewTask, {
+  let finalReview = await ctx.task(featureStoreFinalReviewTask, {
     projectName,
     architectureDesign,
     featureRegistryDesign,
@@ -522,8 +608,31 @@ export async function process(inputs, ctx) {
     failoverTesting.passed === false
   ].filter(Boolean).length;
 
-  if (criticalTestsFailed > 0) {
-    await ctx.breakpoint({
+      let lastFeedback_qualityGateApproval2 = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_qualityGateApproval2) {
+        finalReview = await ctx.task(featureStoreFinalReviewTask, { ...{
+    projectName,
+    architectureDesign,
+    featureRegistryDesign,
+    storageQuality: currentQuality,
+    targetQuality,
+    converged,
+    storageIterations: iteration,
+    servingLayerImplementation,
+    ingestionPipelineDesign,
+    monitoringDesign,
+    versioningDesign,
+    operationalProcedures,
+    testingResults: {
+      integration: integrationTesting,
+      performance: performanceTesting,
+      failover: failoverTesting
+    },
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval2, attempt: attempt + 1 });
+      }
+  const qualityGateApproval2 = await ctx.breakpoint({
       question: `${criticalTestsFailed} critical test suite(s) failed. Should we address failures before production deployment?`,
       title: 'Critical Test Failures',
       context: {
@@ -535,12 +644,41 @@ export async function process(inputs, ctx) {
           failover: !failoverTesting.passed
         },
         recommendation: 'Address all critical test failures before production deployment'
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_qualityGateApproval2 || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (qualityGateApproval2.approved) break;
+      lastFeedback_qualityGateApproval2 = qualityGateApproval2.response || qualityGateApproval2.feedback || 'Changes requested';
+    } }
 
-  // Final breakpoint for approval
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval2 = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval2) {
+      finalReview = await ctx.task(featureStoreFinalReviewTask, { ...{
+    projectName,
+    architectureDesign,
+    featureRegistryDesign,
+    storageQuality: currentQuality,
+    targetQuality,
+    converged,
+    storageIterations: iteration,
+    servingLayerImplementation,
+    ingestionPipelineDesign,
+    monitoringDesign,
+    versioningDesign,
+    operationalProcedures,
+    testingResults: {
+      integration: integrationTesting,
+      performance: performanceTesting,
+      failover: failoverTesting
+    },
+    outputDir
+  }, feedback: lastFeedback_finalApproval2, attempt: attempt + 1 });
+    }
+  const finalApproval2 = await ctx.breakpoint({
     question: `Feature Store implementation complete for ${projectName}. Storage quality: ${currentQuality}/${targetQuality}. Production readiness: ${finalReview.productionReadiness}. ${finalReview.verdict}. Approve for production deployment?`,
     title: 'Feature Store Final Review',
     context: {
@@ -563,9 +701,15 @@ export async function process(inputs, ctx) {
         productionReadiness: finalReview.productionReadiness,
         approved: finalReview.approved
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval2 || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval2.approved) break;
+    lastFeedback_finalApproval2 = finalApproval2.response || finalApproval2.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -621,8 +765,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

@@ -92,7 +92,7 @@ export async function process(inputs, ctx) {
 
   // Task 6: Comparable Deal Analysis
   ctx.log('info', 'Analyzing comparable portfolio deals');
-  const comparableDeals = await ctx.task(comparableDealTask, {
+  let comparableDeals = await ctx.task(comparableDealTask, {
     companyName,
     dealData,
     fundStrategy,
@@ -101,8 +101,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...comparableDeals.artifacts);
 
-  // Breakpoint: Review IC materials
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      comparableDeals = await ctx.task(comparableDealTask, { ...{
+    companyName,
+    dealData,
+    fundStrategy,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `IC materials complete for ${companyName}. Deal score: ${dealScoring.overallScore}/100. Risk level: ${riskAssessment.overallRisk}. Review materials?`,
     title: 'Investment Committee Materials',
     context: {
@@ -114,9 +123,15 @@ export async function process(inputs, ctx) {
         recommendation: investmentThesis.recommendation,
         proposedCheck: dealData.proposedInvestment
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 7: Decision Documentation
   ctx.log('info', 'Preparing decision documentation');
   const decisionDoc = await ctx.task(decisionDocumentationTask, {
@@ -183,8 +198,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Investment Thesis Development
+  // Task 1: Investment Thesis Development
 export const investmentThesisTask = defineTask('investment-thesis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Develop investment thesis',

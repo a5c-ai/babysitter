@@ -24,11 +24,16 @@ export async function process(inputs, ctx) {
   const componentLibrary = await ctx.task(componentLibraryTask, { projectName, outputDir });
   artifacts.push(...componentLibrary.artifacts);
 
-  const darkMode = await ctx.task(darkModeTask, { projectName, outputDir });
-  artifacts.push(...darkMode.artifacts);
-
-  await ctx.breakpoint({ question: `Tailwind design system complete for ${projectName}. Approve?`, title: 'Design System Review', context: { runId: ctx.runId, tokens: designTokens.tokens } });
-
+  let darkMode = await ctx.task(darkModeTask, { projectName, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      darkMode = await ctx.task(darkModeTask, { ...{ projectName, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({ question: `Tailwind design system complete for ${projectName}. Approve?`, title: 'Design System Review', context: { runId: ctx.runId, tokens: designTokens.tokens }, expert: 'owner', tags: ['approval-gate'], previousFeedback: lastFeedback || undefined, attempt: attempt > 0 ? attempt + 1 : undefined });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const documentation = await ctx.task(documentationTask, { projectName, outputDir });
   artifacts.push(...documentation.artifacts);
 

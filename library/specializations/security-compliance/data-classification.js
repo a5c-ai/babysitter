@@ -87,7 +87,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Discovering and inventorying data assets');
 
-  const discoveryResult = await ctx.task(dataDiscoveryTask, {
+  let discoveryResult = await ctx.task(dataDiscoveryTask, {
     projectName,
     systems,
     environment,
@@ -104,8 +104,21 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Discovery complete - ${dataAssets} data assets identified across ${discoveryResult.dataStores.length} data stores`);
 
-  // Quality Gate: Data inventory review
-  await ctx.breakpoint({
+    let lastFeedback_qualityGateApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_qualityGateApproval) {
+      discoveryResult = await ctx.task(dataDiscoveryTask, { ...{
+    projectName,
+    systems,
+    environment,
+    dataTypes,
+    geographicRegions,
+    enableAutomatedClassification,
+    scanFrequency,
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval, attempt: attempt + 1 });
+    }
+  const qualityGateApproval = await ctx.breakpoint({
     question: `Data discovery complete for ${projectName}. Identified ${dataAssets} data assets across ${discoveryResult.dataStores.length} data stores. Sensitive data found: ${discoveryResult.sensitiveDataAssets}. Review inventory before classification?`,
     title: 'Data Discovery Review',
     context: {
@@ -118,16 +131,22 @@ export async function process(inputs, ctx) {
         geographicDistribution: discoveryResult.geographicDistribution
       },
       files: discoveryResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_qualityGateApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (qualityGateApproval.approved) break;
+    lastFeedback_qualityGateApproval = qualityGateApproval.response || qualityGateApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 2: CLASSIFICATION POLICY DEFINITION
   // ============================================================================
 
   ctx.log('info', 'Phase 2: Defining data classification policies and levels');
 
-  const policyResult = await ctx.task(classificationPolicyTask, {
+  let policyResult = await ctx.task(classificationPolicyTask, {
     projectName,
     classificationLevels,
     dataTypes,
@@ -144,8 +163,21 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Classification policies defined - ${classificationPolicies} policies across ${classificationLevels.length} classification levels`);
 
-  // Quality Gate: Policy review
-  await ctx.breakpoint({
+    let lastFeedback_qualityGateApproval2 = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_qualityGateApproval2) {
+      policyResult = await ctx.task(classificationPolicyTask, { ...{
+    projectName,
+    classificationLevels,
+    dataTypes,
+    complianceFrameworks,
+    accessControlModel,
+    enableEncryption,
+    retentionPolicies,
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval2, attempt: attempt + 1 });
+    }
+  const qualityGateApproval2 = await ctx.breakpoint({
     question: `Classification policies created for ${projectName}. Defined ${classificationPolicies} policies across ${classificationLevels.length} levels. Each level has handling procedures, access controls, and retention rules. Review policies before applying?`,
     title: 'Classification Policy Review',
     context: {
@@ -158,9 +190,15 @@ export async function process(inputs, ctx) {
         retentionRules: policyResult.retentionRules.length
       },
       files: policyResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_qualityGateApproval2 || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (qualityGateApproval2.approved) break;
+    lastFeedback_qualityGateApproval2 = qualityGateApproval2.response || qualityGateApproval2.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 3: AUTOMATED DATA CLASSIFICATION
   // ============================================================================
@@ -168,7 +206,7 @@ export async function process(inputs, ctx) {
   if (enableAutomatedClassification) {
     ctx.log('info', 'Phase 3: Executing automated data classification');
 
-    const classificationResult = await ctx.task(automatedClassificationTask, {
+    let classificationResult = await ctx.task(automatedClassificationTask, {
       projectName,
       dataAssets: discoveryResult.dataAssetsList,
       classificationLevels,
@@ -183,8 +221,20 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Automated classification complete - ${classificationResult.classifiedAssets} assets classified, ${classificationResult.restrictedAssets} restricted, ${classificationResult.publicAssets} public`);
 
-    // Quality Gate: Classification results review
-    await ctx.breakpoint({
+      let lastFeedback_qualityGateApproval3 = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_qualityGateApproval3) {
+        classificationResult = await ctx.task(automatedClassificationTask, { ...{
+      projectName,
+      dataAssets: discoveryResult.dataAssetsList,
+      classificationLevels,
+      policies: policyResult.policiesList,
+      mlClassification,
+      automaticLabeling,
+      outputDir
+    }, feedback: lastFeedback_qualityGateApproval3, attempt: attempt + 1 });
+      }
+  const qualityGateApproval3 = await ctx.breakpoint({
       question: `Automated classification complete for ${projectName}. Classified ${classificationResult.classifiedAssets} assets: Public (${classificationResult.publicAssets}), Internal (${classificationResult.internalAssets}), Confidential (${classificationResult.confidentialAssets}), Restricted (${classificationResult.restrictedAssets}). Accuracy: ${classificationResult.confidenceScore}%. Review classifications?`,
       title: 'Automated Classification Review',
       context: {
@@ -199,9 +249,15 @@ export async function process(inputs, ctx) {
           manualReviewRequired: classificationResult.manualReviewRequired
         },
         files: classificationResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_qualityGateApproval3 || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (qualityGateApproval3.approved) break;
+      lastFeedback_qualityGateApproval3 = qualityGateApproval3.response || qualityGateApproval3.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 4: LABELING AND TAGGING
@@ -210,7 +266,7 @@ export async function process(inputs, ctx) {
   if (automaticLabeling) {
     ctx.log('info', 'Phase 4: Applying labels and tags to classified data');
 
-    const labelingResult = await ctx.task(labelingTaggingTask, {
+    let labelingResult = await ctx.task(labelingTaggingTask, {
       projectName,
       classifiedAssets: discoveryResult.dataAssetsList,
       classificationLevels,
@@ -224,8 +280,19 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Labeling complete - ${labelingResult.assetsLabeled} assets labeled, ${labelingResult.labelsApplied} labels applied`);
 
-    // Quality Gate: Labeling review
-    await ctx.breakpoint({
+      let lastFeedback_phase4Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase4Review) {
+        labelingResult = await ctx.task(labelingTaggingTask, { ...{
+      projectName,
+      classifiedAssets: discoveryResult.dataAssetsList,
+      classificationLevels,
+      systems,
+      integrations,
+      outputDir
+    }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+      }
+  const phase4Review = await ctx.breakpoint({
       question: `Labeling complete for ${projectName}. Applied ${labelingResult.labelsApplied} labels to ${labelingResult.assetsLabeled} assets across ${systems.length} systems. Label consistency: ${labelingResult.consistencyScore}%. Review labeling implementation?`,
       title: 'Labeling and Tagging Review',
       context: {
@@ -238,9 +305,15 @@ export async function process(inputs, ctx) {
           labelingMechanisms: labelingResult.labelingMechanisms
         },
         files: labelingResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase4Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase4Review.approved) break;
+      lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 5: ACCESS CONTROL IMPLEMENTATION
@@ -248,7 +321,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 5: Implementing classification-based access controls');
 
-  const accessControlResult = await ctx.task(accessControlImplementationTask, {
+  let accessControlResult = await ctx.task(accessControlImplementationTask, {
     projectName,
     classificationLevels,
     dataAssets: discoveryResult.dataAssetsList,
@@ -263,8 +336,20 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Access controls implemented - ${accessControlResult.policiesCreated} policies, ${accessControlResult.rolesCreated} roles, ${accessControlResult.permissionsConfigured} permissions`);
 
-  // Quality Gate: Access control review
-  await ctx.breakpoint({
+    let lastFeedback_qualityGateApproval4 = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_qualityGateApproval4) {
+      accessControlResult = await ctx.task(accessControlImplementationTask, { ...{
+    projectName,
+    classificationLevels,
+    dataAssets: discoveryResult.dataAssetsList,
+    accessControlModel,
+    systems,
+    complianceFrameworks,
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval4, attempt: attempt + 1 });
+    }
+  const qualityGateApproval4 = await ctx.breakpoint({
     question: `Access control implementation complete for ${projectName}. Created ${accessControlResult.policiesCreated} policies and ${accessControlResult.rolesCreated} roles using ${accessControlModel}. Least-privilege compliance: ${accessControlResult.leastPrivilegeScore}%. Review access controls?`,
     title: 'Access Control Review',
     context: {
@@ -278,9 +363,15 @@ export async function process(inputs, ctx) {
         separationOfDuties: accessControlResult.separationOfDutiesImplemented
       },
       files: accessControlResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_qualityGateApproval4 || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (qualityGateApproval4.approved) break;
+    lastFeedback_qualityGateApproval4 = qualityGateApproval4.response || qualityGateApproval4.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 6: ENCRYPTION IMPLEMENTATION
   // ============================================================================
@@ -288,7 +379,7 @@ export async function process(inputs, ctx) {
   if (enableEncryption) {
     ctx.log('info', 'Phase 6: Implementing encryption based on classification levels');
 
-    const encryptionResult = await ctx.task(encryptionImplementationTask, {
+    let encryptionResult = await ctx.task(encryptionImplementationTask, {
       projectName,
       classificationLevels,
       dataAssets: discoveryResult.dataAssetsList,
@@ -304,8 +395,21 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Encryption implemented - ${encryptionResult.encryptedAssets} assets encrypted, ${encryptionResult.keyManagementConfigured} key management systems configured`);
 
-    // Quality Gate: Encryption review
-    await ctx.breakpoint({
+      let lastFeedback_qualityGateApproval5 = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_qualityGateApproval5) {
+        encryptionResult = await ctx.task(encryptionImplementationTask, { ...{
+      projectName,
+      classificationLevels,
+      dataAssets: discoveryResult.dataAssetsList,
+      systems,
+      complianceFrameworks,
+      enableMasking,
+      enableTokenization,
+      outputDir
+    }, feedback: lastFeedback_qualityGateApproval5, attempt: attempt + 1 });
+      }
+  const qualityGateApproval5 = await ctx.breakpoint({
       question: `Encryption implementation complete for ${projectName}. Encrypted ${encryptionResult.encryptedAssets} assets using ${encryptionResult.encryptionAlgorithms.join(', ')}. At-rest: ${encryptionResult.atRestEncrypted}, In-transit: ${encryptionResult.inTransitEncrypted}, Masking: ${encryptionResult.maskedFields}. Review encryption strategy?`,
       title: 'Encryption Implementation Review',
       context: {
@@ -320,9 +424,15 @@ export async function process(inputs, ctx) {
           encryptionAlgorithms: encryptionResult.encryptionAlgorithms
         },
         files: encryptionResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_qualityGateApproval5 || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (qualityGateApproval5.approved) break;
+      lastFeedback_qualityGateApproval5 = qualityGateApproval5.response || qualityGateApproval5.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 7: DATA LOSS PREVENTION (DLP)
@@ -331,7 +441,7 @@ export async function process(inputs, ctx) {
   if (enableDLP) {
     ctx.log('info', 'Phase 7: Implementing Data Loss Prevention controls');
 
-    const dlpResult = await ctx.task(dlpImplementationTask, {
+    let dlpResult = await ctx.task(dlpImplementationTask, {
       projectName,
       classificationLevels,
       dataTypes,
@@ -346,8 +456,20 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `DLP implementation complete - ${dlpResult.dlpPolicies} policies, ${dlpResult.monitoringChannels} monitoring channels, ${dlpResult.preventionRules} prevention rules`);
 
-    // Quality Gate: DLP configuration review
-    await ctx.breakpoint({
+      let lastFeedback_qualityGateApproval6 = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_qualityGateApproval6) {
+        dlpResult = await ctx.task(dlpImplementationTask, { ...{
+      projectName,
+      classificationLevels,
+      dataTypes,
+      systems,
+      integrations,
+      complianceFrameworks,
+      outputDir
+    }, feedback: lastFeedback_qualityGateApproval6, attempt: attempt + 1 });
+      }
+  const qualityGateApproval6 = await ctx.breakpoint({
       question: `DLP implementation complete for ${projectName}. Configured ${dlpResult.dlpPolicies} policies across ${dlpResult.monitoringChannels} channels. Prevention rules: ${dlpResult.preventionRules}, Detection rules: ${dlpResult.detectionRules}. Incidents detected: ${dlpResult.incidentsDetected}. Review DLP configuration?`,
       title: 'Data Loss Prevention Review',
       context: {
@@ -361,9 +483,15 @@ export async function process(inputs, ctx) {
           dlpTools: dlpResult.dlpToolsConfigured
         },
         files: dlpResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_qualityGateApproval6 || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (qualityGateApproval6.approved) break;
+      lastFeedback_qualityGateApproval6 = qualityGateApproval6.response || qualityGateApproval6.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 8: RETENTION AND DISPOSAL POLICIES
@@ -372,7 +500,7 @@ export async function process(inputs, ctx) {
   if (retentionPolicies) {
     ctx.log('info', 'Phase 8: Implementing data retention and disposal policies');
 
-    const retentionResult = await ctx.task(retentionDisposalTask, {
+    let retentionResult = await ctx.task(retentionDisposalTask, {
       projectName,
       classificationLevels,
       dataTypes,
@@ -386,8 +514,19 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Retention policies implemented - ${retentionResult.retentionPolicies} policies, ${retentionResult.scheduledDisposals} scheduled disposals`);
 
-    // Quality Gate: Retention policy review
-    await ctx.breakpoint({
+      let lastFeedback_qualityGateApproval7 = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_qualityGateApproval7) {
+        retentionResult = await ctx.task(retentionDisposalTask, { ...{
+      projectName,
+      classificationLevels,
+      dataTypes,
+      complianceFrameworks,
+      dataAssets: discoveryResult.dataAssetsList,
+      outputDir
+    }, feedback: lastFeedback_qualityGateApproval7, attempt: attempt + 1 });
+      }
+  const qualityGateApproval7 = await ctx.breakpoint({
       question: `Retention policies configured for ${projectName}. Created ${retentionResult.retentionPolicies} policies covering ${retentionResult.assetsWithRetention} assets. Scheduled disposals: ${retentionResult.scheduledDisposals}, Compliance-driven: ${retentionResult.complianceDrivenPolicies}. Review retention strategy?`,
       title: 'Retention and Disposal Review',
       context: {
@@ -400,9 +539,15 @@ export async function process(inputs, ctx) {
           secureDisposalMethods: retentionResult.secureDisposalMethods
         },
         files: retentionResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_qualityGateApproval7 || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (qualityGateApproval7.approved) break;
+      lastFeedback_qualityGateApproval7 = qualityGateApproval7.response || qualityGateApproval7.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 9: DATA LINEAGE AND TRACKING
@@ -411,7 +556,7 @@ export async function process(inputs, ctx) {
   if (enableDataLineage) {
     ctx.log('info', 'Phase 9: Implementing data lineage and tracking');
 
-    const lineageResult = await ctx.task(dataLineageTask, {
+    let lineageResult = await ctx.task(dataLineageTask, {
       projectName,
       dataAssets: discoveryResult.dataAssetsList,
       systems,
@@ -424,8 +569,18 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Data lineage implemented - ${lineageResult.lineageMapped} assets tracked, ${lineageResult.dataFlows} data flows documented`);
 
-    // Quality Gate: Data lineage review
-    await ctx.breakpoint({
+      let lastFeedback_phase9Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase9Review) {
+        lineageResult = await ctx.task(dataLineageTask, { ...{
+      projectName,
+      dataAssets: discoveryResult.dataAssetsList,
+      systems,
+      classificationLevels,
+      outputDir
+    }, feedback: lastFeedback_phase9Review, attempt: attempt + 1 });
+      }
+  const phase9Review = await ctx.breakpoint({
       question: `Data lineage tracking configured for ${projectName}. Mapped ${lineageResult.lineageMapped} assets with ${lineageResult.dataFlows} data flows. Upstream dependencies: ${lineageResult.upstreamDependencies}, Downstream consumers: ${lineageResult.downstreamConsumers}. Review lineage mapping?`,
       title: 'Data Lineage Review',
       context: {
@@ -438,9 +593,15 @@ export async function process(inputs, ctx) {
           lineageVisualization: lineageResult.visualizationCreated
         },
         files: lineageResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase9Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase9Review.approved) break;
+      lastFeedback_phase9Review = phase9Review.response || phase9Review.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 10: AUDIT LOGGING AND MONITORING
@@ -449,7 +610,7 @@ export async function process(inputs, ctx) {
   if (auditLogging) {
     ctx.log('info', 'Phase 10: Implementing audit logging and monitoring');
 
-    const auditResult = await ctx.task(auditLoggingTask, {
+    let auditResult = await ctx.task(auditLoggingTask, {
       projectName,
       classificationLevels,
       dataAssets: discoveryResult.dataAssetsList,
@@ -464,8 +625,20 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Audit logging configured - ${auditResult.auditPolicies} policies, ${auditResult.monitoringRules} monitoring rules, ${auditResult.alertsConfigured} alerts`);
 
-    // Quality Gate: Audit configuration review
-    await ctx.breakpoint({
+      let lastFeedback_qualityGateApproval8 = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_qualityGateApproval8) {
+        auditResult = await ctx.task(auditLoggingTask, { ...{
+      projectName,
+      classificationLevels,
+      dataAssets: discoveryResult.dataAssetsList,
+      systems,
+      complianceFrameworks,
+      integrations,
+      outputDir
+    }, feedback: lastFeedback_qualityGateApproval8, attempt: attempt + 1 });
+      }
+  const qualityGateApproval8 = await ctx.breakpoint({
       question: `Audit logging configured for ${projectName}. Implemented ${auditResult.auditPolicies} policies with ${auditResult.monitoringRules} monitoring rules and ${auditResult.alertsConfigured} alerts. Retention: ${auditResult.retentionDays} days. Review audit strategy?`,
       title: 'Audit Logging Review',
       context: {
@@ -479,9 +652,15 @@ export async function process(inputs, ctx) {
           complianceCompliant: auditResult.complianceCompliant
         },
         files: auditResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_qualityGateApproval8 || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (qualityGateApproval8.approved) break;
+      lastFeedback_qualityGateApproval8 = qualityGateApproval8.response || qualityGateApproval8.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 11: COMPLIANCE VALIDATION
@@ -489,7 +668,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 11: Validating compliance with regulatory frameworks');
 
-  const complianceResult = await ctx.task(complianceValidationTask, {
+  let complianceResult = await ctx.task(complianceValidationTask, {
     projectName,
     complianceFrameworks,
     classificationLevels,
@@ -508,8 +687,23 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Compliance validation complete - ${complianceResult.frameworksCompliant}/${complianceFrameworks.length} frameworks compliant`);
 
-  // Quality Gate: Compliance review
-  await ctx.breakpoint({
+    let lastFeedback_qualityGateApproval9 = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_qualityGateApproval9) {
+      complianceResult = await ctx.task(complianceValidationTask, { ...{
+    projectName,
+    complianceFrameworks,
+    classificationLevels,
+    dataTypes,
+    dataAssets,
+    classificationPolicies,
+    encryptionEnabled: enableEncryption,
+    dlpEnabled: enableDLP,
+    auditingEnabled: auditLogging,
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval9, attempt: attempt + 1 });
+    }
+  const qualityGateApproval9 = await ctx.breakpoint({
     question: `Compliance validation complete for ${projectName}. ${complianceResult.frameworksCompliant}/${complianceFrameworks.length} frameworks compliant. Gaps: ${complianceResult.complianceGaps.length}. ${complianceResult.complianceGaps.length > 0 ? 'Review compliance gaps and remediation plan?' : 'All compliance requirements met!'}`,
     title: 'Compliance Validation Review',
     context: {
@@ -523,9 +717,15 @@ export async function process(inputs, ctx) {
         auditReady: complianceResult.auditReady
       },
       files: complianceResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_qualityGateApproval9 || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (qualityGateApproval9.approved) break;
+    lastFeedback_qualityGateApproval9 = qualityGateApproval9.response || qualityGateApproval9.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 12: BREACH NOTIFICATION PLANNING
   // ============================================================================
@@ -533,7 +733,7 @@ export async function process(inputs, ctx) {
   if (breachNotificationPlan) {
     ctx.log('info', 'Phase 12: Creating breach notification and incident response plan');
 
-    const breachResult = await ctx.task(breachNotificationTask, {
+    let breachResult = await ctx.task(breachNotificationTask, {
       projectName,
       classificationLevels,
       dataTypes,
@@ -547,8 +747,19 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Breach notification plan created - ${breachResult.notificationProcedures} procedures, ${breachResult.stakeholdersIdentified} stakeholders identified`);
 
-    // Quality Gate: Breach plan review
-    await ctx.breakpoint({
+      let lastFeedback_qualityGateApproval10 = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_qualityGateApproval10) {
+        breachResult = await ctx.task(breachNotificationTask, { ...{
+      projectName,
+      classificationLevels,
+      dataTypes,
+      complianceFrameworks,
+      geographicRegions,
+      outputDir
+    }, feedback: lastFeedback_qualityGateApproval10, attempt: attempt + 1 });
+      }
+  const qualityGateApproval10 = await ctx.breakpoint({
       question: `Breach notification plan created for ${projectName}. Defined ${breachResult.notificationProcedures} procedures for ${geographicRegions.length} regions. Response time requirements: ${breachResult.responseTimeRequirements}. Stakeholders: ${breachResult.stakeholdersIdentified}. Review breach response plan?`,
       title: 'Breach Notification Plan Review',
       context: {
@@ -561,9 +772,15 @@ export async function process(inputs, ctx) {
           testingSchedule: breachResult.testingSchedule
         },
         files: breachResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_qualityGateApproval10 || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (qualityGateApproval10.approved) break;
+      lastFeedback_qualityGateApproval10 = qualityGateApproval10.response || qualityGateApproval10.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 13: TRAINING AND DOCUMENTATION
@@ -590,7 +807,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 14: Setting up continuous monitoring and compliance tracking');
 
-  const monitoringResult = await ctx.task(continuousMonitoringTask, {
+  let monitoringResult = await ctx.task(continuousMonitoringTask, {
     projectName,
     classificationLevels,
     dataAssets,
@@ -627,8 +844,21 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Duration: ${Math.round(duration / 1000)}s`);
   ctx.log('info', '='.repeat(80));
 
-  // Final Quality Gate
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      monitoringResult = await ctx.task(continuousMonitoringTask, { ...{
+    projectName,
+    classificationLevels,
+    dataAssets,
+    systems,
+    complianceFrameworks,
+    scanFrequency,
+    integrations,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Data Classification and Handling Framework complete for ${projectName}! Classification Score: ${finalClassificationScore}/100. Classified ${dataAssets} data assets with ${classificationPolicies} policies. Compliance: ${complianceResult.frameworksCompliant}/${complianceFrameworks.length} frameworks. Review final summary and approve for production?`,
     title: 'Data Classification Framework Complete',
     context: {
@@ -672,9 +902,15 @@ export async function process(inputs, ctx) {
         ]
       },
       files: artifacts.slice(0, 20).map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     classificationScore: finalClassificationScore,
@@ -703,8 +939,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

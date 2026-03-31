@@ -63,7 +63,6 @@ export async function process(inputs, ctx) {
       plan: null
     };
   }
-
   // Phase 4: Forward Search Planning
   const forwardSearch = await ctx.task(forwardSearchPlanningTask, {
     problemFormalization,
@@ -85,15 +84,24 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 7: Plan Selection and Optimization
-  const planOptimization = await ctx.task(planOptimizationTask, {
+  let planOptimization = await ctx.task(planOptimizationTask, {
     forwardSearch,
     backwardSearch,
     graphPlanning,
     constraints
   });
 
-  // Breakpoint: Review generated plan
-  await ctx.breakpoint({
+    let lastFeedback_phase7Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase7Review) {
+      planOptimization = await ctx.task(planOptimizationTask, { ...{
+    forwardSearch,
+    backwardSearch,
+    graphPlanning,
+    constraints
+  }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
+    }
+  const phase7Review = await ctx.breakpoint({
     question: `Plan generated with ${planOptimization.optimalPlan.length} steps. Plan cost: ${planOptimization.cost}. Review plan?`,
     title: 'Plan Review',
     context: {
@@ -101,9 +109,15 @@ export async function process(inputs, ctx) {
       domain,
       planLength: planOptimization.optimalPlan.length,
       planSummary: planOptimization.optimalPlan.slice(0, 5).map(s => s.action)
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase7Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase7Review.approved) break;
+    lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
+  }
   // Phase 8: Temporal Planning (if time constraints)
   const temporalPlanning = await ctx.task(temporalPlanningTask, {
     planOptimization,
@@ -127,14 +141,22 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 11: Plan Robustness Analysis
-  const robustnessAnalysis = await ctx.task(planRobustnessTask, {
+  let robustnessAnalysis = await ctx.task(planRobustnessTask, {
     plan: planValidation.validatedPlan,
     problemFormalization,
     constraints
   });
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      robustnessAnalysis = await ctx.task(planRobustnessTask, { ...{
+    plan: planValidation.validatedPlan,
+    problemFormalization,
+    constraints
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Planning complete. Valid plan: ${planValidation.isValid}. Robustness: ${robustnessAnalysis.robustnessScore}%. Accept plan?`,
     title: 'Final Plan Review',
     context: {
@@ -144,9 +166,15 @@ export async function process(inputs, ctx) {
         { path: 'artifacts/plan.json', format: 'json', content: planValidation.validatedPlan },
         { path: 'artifacts/policy.json', format: 'json', content: policySynthesis }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     domain,
@@ -171,8 +199,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const planningProblemFormalizationTask = defineTask('planning-problem-formalization', (args, taskCtx) => ({
   kind: 'agent',

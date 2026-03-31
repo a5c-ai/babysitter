@@ -69,7 +69,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Discovering and analyzing cloud costs');
 
-  const costDiscovery = await ctx.task(costDiscoveryTask, {
+  let costDiscovery = await ctx.task(costDiscoveryTask, {
     projectName,
     cloudProvider,
     scope,
@@ -86,8 +86,21 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Cost Discovery Complete - Current Monthly Cost: $${totalCurrentCost.toFixed(2)}`);
   ctx.log('info', `Top Cost Categories: ${costDiscovery.topCostCategories.slice(0, 3).map(c => `${c.category}: $${c.cost.toFixed(2)}`).join(', ')}`);
 
-  // Quality Gate: Cost visibility review
-  await ctx.breakpoint({
+    let lastFeedback_qualityGateApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_qualityGateApproval) {
+      costDiscovery = await ctx.task(costDiscoveryTask, { ...{
+    projectName,
+    cloudProvider,
+    scope,
+    environment,
+    analysisPeriod,
+    costAllocationTags,
+    departments,
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval, attempt: attempt + 1 });
+    }
+  const qualityGateApproval = await ctx.breakpoint({
     question: `Cost discovery complete for ${projectName}. Current monthly cost: $${totalCurrentCost.toFixed(2)}. Top cost drivers: ${costDiscovery.topCostCategories.slice(0, 5).map(c => c.category).join(', ')}. Review cost breakdown?`,
     title: 'Cost Discovery Review',
     context: {
@@ -100,9 +113,15 @@ export async function process(inputs, ctx) {
         trend: costDiscovery.costTrend
       },
       files: costDiscovery.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_qualityGateApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (qualityGateApproval.approved) break;
+    lastFeedback_qualityGateApproval = qualityGateApproval.response || qualityGateApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 2: WASTE IDENTIFICATION AND ANALYSIS
   // ============================================================================
@@ -131,7 +150,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 3: Analyzing resource utilization for rightsizing');
 
-  const rightsizingAnalysis = await ctx.task(resourceRightsizingTask, {
+  let rightsizingAnalysis = await ctx.task(resourceRightsizingTask, {
     projectName,
     cloudProvider,
     scope,
@@ -146,8 +165,20 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Rightsizing Analysis Complete - ${rightsizingAnalysis.recommendations.length} recommendations, potential savings: $${rightsizingAnalysis.potentialSavings.toFixed(2)}/month`);
 
-  // Quality Gate: Rightsizing recommendations review
-  await ctx.breakpoint({
+    let lastFeedback_qualityGateApproval2 = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_qualityGateApproval2) {
+      rightsizingAnalysis = await ctx.task(resourceRightsizingTask, { ...{
+    projectName,
+    cloudProvider,
+    scope,
+    environment,
+    analysisPeriod,
+    optimizationAreas,
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval2, attempt: attempt + 1 });
+    }
+  const qualityGateApproval2 = await ctx.breakpoint({
     question: `Resource rightsizing analysis complete. ${rightsizingAnalysis.recommendations.length} recommendations identified with potential savings of $${rightsizingAnalysis.potentialSavings.toFixed(2)}/month. Review and approve recommendations?`,
     title: 'Rightsizing Recommendations Review',
     context: {
@@ -161,9 +192,15 @@ export async function process(inputs, ctx) {
           .slice(0, 10)
       },
       files: rightsizingAnalysis.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_qualityGateApproval2 || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (qualityGateApproval2.approved) break;
+    lastFeedback_qualityGateApproval2 = qualityGateApproval2.response || qualityGateApproval2.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 4: RESERVATION AND SAVINGS PLANS ANALYSIS
   // ============================================================================
@@ -171,7 +208,7 @@ export async function process(inputs, ctx) {
   if (includeReservations || includeSavingsPlans) {
     ctx.log('info', 'Phase 4: Analyzing reservation and savings plan opportunities');
 
-    const reservationAnalysis = await ctx.task(reservationAnalysisTask, {
+    let reservationAnalysis = await ctx.task(reservationAnalysisTask, {
       projectName,
       cloudProvider,
       environment,
@@ -187,8 +224,21 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Reservation Analysis Complete - Potential savings: $${reservationAnalysis.potentialSavings.toFixed(2)}/month`);
 
-    // Quality Gate: Reservation recommendations review
-    await ctx.breakpoint({
+      let lastFeedback_qualityGateApproval3 = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_qualityGateApproval3) {
+        reservationAnalysis = await ctx.task(reservationAnalysisTask, { ...{
+      projectName,
+      cloudProvider,
+      environment,
+      costDiscovery,
+      includeReservations,
+      includeSavingsPlans,
+      analysisPeriod,
+      outputDir
+    }, feedback: lastFeedback_qualityGateApproval3, attempt: attempt + 1 });
+      }
+  const qualityGateApproval3 = await ctx.breakpoint({
       question: `Reservation and savings plan analysis complete. ${reservationAnalysis.recommendations.length} recommendations with potential savings of $${reservationAnalysis.potentialSavings.toFixed(2)}/month. Review commitment recommendations?`,
       title: 'Reservation Recommendations Review',
       context: {
@@ -201,9 +251,15 @@ export async function process(inputs, ctx) {
           riskAssessment: reservationAnalysis.riskAssessment
         },
         files: reservationAnalysis.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_qualityGateApproval3 || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (qualityGateApproval3.approved) break;
+      lastFeedback_qualityGateApproval3 = qualityGateApproval3.response || qualityGateApproval3.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 5: STORAGE OPTIMIZATION
@@ -229,7 +285,6 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Storage Optimization Complete - Potential savings: $${storageOptimization.potentialSavings.toFixed(2)}/month`);
   }
-
   // ============================================================================
   // PHASE 6: NETWORKING COST OPTIMIZATION
   // ============================================================================
@@ -254,7 +309,6 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Networking Optimization Complete - Potential savings: $${networkingOptimization.potentialSavings.toFixed(2)}/month`);
   }
-
   // ============================================================================
   // PHASE 7: DATABASE COST OPTIMIZATION
   // ============================================================================
@@ -279,7 +333,6 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Database Optimization Complete - Potential savings: $${databaseOptimization.potentialSavings.toFixed(2)}/month`);
   }
-
   // ============================================================================
   // PHASE 8: SERVERLESS OPTIMIZATION
   // ============================================================================
@@ -304,14 +357,13 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Serverless Optimization Complete - Potential savings: $${serverlessOptimization.potentialSavings.toFixed(2)}/month`);
   }
-
   // ============================================================================
   // PHASE 9: COST ALLOCATION AND TAGGING
   // ============================================================================
 
   ctx.log('info', 'Phase 9: Implementing cost allocation and tagging strategy');
 
-  const costAllocation = await ctx.task(costAllocationTask, {
+  let costAllocation = await ctx.task(costAllocationTask, {
     projectName,
     cloudProvider,
     environment,
@@ -325,8 +377,20 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Cost Allocation Complete - ${costAllocation.taggedResources} resources tagged, ${costAllocation.tagCoverage}% coverage`);
 
-  // Quality Gate: Cost allocation review
-  await ctx.breakpoint({
+    let lastFeedback_phase9Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase9Review) {
+      costAllocation = await ctx.task(costAllocationTask, { ...{
+    projectName,
+    cloudProvider,
+    environment,
+    costAllocationTags,
+    departments,
+    costDiscovery,
+    outputDir
+  }, feedback: lastFeedback_phase9Review, attempt: attempt + 1 });
+    }
+  const phase9Review = await ctx.breakpoint({
     question: `Cost allocation tagging strategy implemented. Tag coverage: ${costAllocation.tagCoverage}%. Untagged resources: ${costAllocation.untaggedResources}. Review showback/chargeback reports?`,
     title: 'Cost Allocation Review',
     context: {
@@ -340,9 +404,15 @@ export async function process(inputs, ctx) {
         costByEnvironment: costAllocation.costByEnvironment
       },
       files: costAllocation.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase9Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase9Review.approved) break;
+    lastFeedback_phase9Review = phase9Review.response || phase9Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 10: BUDGET AND ALERT SETUP
   // ============================================================================
@@ -369,7 +439,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 11: Creating optimization priority and implementation roadmap');
 
-  const optimizationRoadmap = await ctx.task(optimizationRoadmapTask, {
+  let optimizationRoadmap = await ctx.task(optimizationRoadmapTask, {
     projectName,
     totalCurrentCost,
     targetSavings,
@@ -385,8 +455,22 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Optimization Roadmap Created - ${optimizationRoadmap.phases.length} implementation phases, ${optimizationRoadmap.quickWins.length} quick wins`);
 
-  // Quality Gate: Roadmap approval
-  await ctx.breakpoint({
+    let lastFeedback_phase11Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase11Review) {
+      optimizationRoadmap = await ctx.task(optimizationRoadmapTask, { ...{
+    projectName,
+    totalCurrentCost,
+    targetSavings,
+    wasteAnalysis,
+    rightsizingAnalysis,
+    recommendations,
+    optimizations,
+    budgetLimit,
+    outputDir
+  }, feedback: lastFeedback_phase11Review, attempt: attempt + 1 });
+    }
+  const phase11Review = await ctx.breakpoint({
     question: `Optimization roadmap created with ${optimizationRoadmap.phases.length} phases and projected savings of $${optimizationRoadmap.totalProjectedSavings.toFixed(2)}/month. Quick wins: ${optimizationRoadmap.quickWins.length}. Approve implementation plan?`,
     title: 'Optimization Roadmap Approval',
     context: {
@@ -399,9 +483,15 @@ export async function process(inputs, ctx) {
         priorityRecommendations: optimizationRoadmap.priorityRecommendations.slice(0, 10)
       },
       files: optimizationRoadmap.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase11Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase11Review.approved) break;
+    lastFeedback_phase11Review = phase11Review.response || phase11Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 12: IMPLEMENT QUICK WINS (Optional)
   // ============================================================================
@@ -409,7 +499,7 @@ export async function process(inputs, ctx) {
   if (enableAutomatedRemediation && optimizationRoadmap.quickWins.length > 0) {
     ctx.log('info', 'Phase 12: Implementing quick win optimizations');
 
-    const quickWinImplementation = await ctx.task(implementQuickWinsTask, {
+    let quickWinImplementation = await ctx.task(implementQuickWinsTask, {
       projectName,
       cloudProvider,
       quickWins: optimizationRoadmap.quickWins,
@@ -424,8 +514,17 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Quick Wins Implemented - ${quickWinImplementation.implementedCount} optimizations, $${quickWinImplementation.actualSavings.toFixed(2)}/month saved`);
 
-    // Quality Gate: Quick wins verification
-    await ctx.breakpoint({
+      let lastFeedback_qualityGateApproval4 = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_qualityGateApproval4) {
+        quickWinImplementation = await ctx.task(implementQuickWinsTask, { ...{
+      projectName,
+      cloudProvider,
+      quickWins: optimizationRoadmap.quickWins,
+      outputDir
+    }, feedback: lastFeedback_qualityGateApproval4, attempt: attempt + 1 });
+      }
+  const qualityGateApproval4 = await ctx.breakpoint({
       question: `Quick win optimizations implemented. ${quickWinImplementation.implementedCount} of ${quickWinImplementation.attemptedCount} successful. Actual savings: $${quickWinImplementation.actualSavings.toFixed(2)}/month. Verify changes?`,
       title: 'Quick Wins Verification',
       context: {
@@ -437,9 +536,15 @@ export async function process(inputs, ctx) {
           implementedOptimizations: quickWinImplementation.implementations
         },
         files: quickWinImplementation.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_qualityGateApproval4 || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (qualityGateApproval4.approved) break;
+      lastFeedback_qualityGateApproval4 = qualityGateApproval4.response || qualityGateApproval4.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 13: FINOPS GOVERNANCE AND POLICIES
@@ -487,7 +592,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 15: Calculating final savings and generating recommendations');
 
-  const finalAssessment = await ctx.task(finalAssessmentTask, {
+  let finalAssessment = await ctx.task(finalAssessmentTask, {
     projectName,
     totalCurrentCost,
     targetSavings,
@@ -508,8 +613,23 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Final Assessment Complete - Total Projected Savings: $${totalSavings.toFixed(2)}/month (${savingsPercentage.toFixed(1)}%)`);
 
-  // Final Breakpoint: Cost optimization complete
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      finalAssessment = await ctx.task(finalAssessmentTask, { ...{
+    projectName,
+    totalCurrentCost,
+    targetSavings,
+    wasteAnalysis,
+    rightsizingAnalysis,
+    optimizations,
+    optimizationRoadmap,
+    costAllocation,
+    budgetSetup,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Cost Optimization and FinOps Process Complete for ${projectName}. Current cost: $${totalCurrentCost.toFixed(2)}/month. Projected optimized cost: $${totalOptimizedCost.toFixed(2)}/month. Savings: $${totalSavings.toFixed(2)}/month (${savingsPercentage.toFixed(1)}%). Target achieved: ${savingsPercentage >= targetSavings ? 'Yes' : 'No'}. Review and proceed with implementation?`,
     title: 'Final Cost Optimization Review',
     context: {
@@ -541,9 +661,15 @@ export async function process(inputs, ctx) {
         { path: optimizationRoadmap.roadmapPath, format: 'markdown', label: 'Implementation Roadmap' },
         { path: costMonitoring.dashboardsConfigPath, format: 'json', label: 'Cost Dashboards Configuration' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -644,8 +770,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

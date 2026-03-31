@@ -91,7 +91,7 @@ export async function process(inputs, ctx) {
 
   // Task 6: Technical Rehearsal Planning
   ctx.log('info', 'Planning technical rehearsals');
-  const techRehearsals = await ctx.task(techRehearsalTask, {
+  let techRehearsals = await ctx.task(techRehearsalTask, {
     productionTitle,
     openingDate,
     crewSize,
@@ -100,8 +100,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...techRehearsals.artifacts);
 
-  // Breakpoint: Review stage management documentation
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      techRehearsals = await ctx.task(techRehearsalTask, { ...{
+    productionTitle,
+    openingDate,
+    crewSize,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Stage management documentation for "${productionTitle}" complete. Rehearsal period: ${rehearsalStart} to ${openingDate}. Review and approve?`,
     title: 'Stage Management Documentation Review',
     context: {
@@ -114,9 +123,15 @@ export async function process(inputs, ctx) {
         castSize,
         crewSize
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 7: Show Calling Documentation
   ctx.log('info', 'Developing show calling documentation');
   const showCalling = await ctx.task(showCallingTask, {
@@ -183,8 +198,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Pre-Production Preparation
+  // Task 1: Pre-Production Preparation
 export const smPreProductionTask = defineTask('sm-pre-production', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Prepare stage management materials',

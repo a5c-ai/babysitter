@@ -43,16 +43,24 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Designing IR Instruction Set');
 
-  const instructionSetDesign = await ctx.task(irInstructionSetTask, {
+  let instructionSetDesign = await ctx.task(irInstructionSetTask, {
     languageName,
     irStyle,
     implementationLanguage,
     outputDir
   });
 
-  artifacts.push(...instructionSetDesign.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      instructionSetDesign = await ctx.task(irInstructionSetTask, { ...{
+    languageName,
+    irStyle,
+    implementationLanguage,
+    outputDir
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `IR instruction set designed with ${instructionSetDesign.instructionCount} instructions. Categories: ${instructionSetDesign.categories.join(', ')}. Proceed with builder?`,
     title: 'IR Design Review',
     context: {
@@ -60,9 +68,15 @@ export async function process(inputs, ctx) {
       instructionCount: instructionSetDesign.instructionCount,
       categories: instructionSetDesign.categories,
       files: instructionSetDesign.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 2: IR BUILDER
   // ============================================================================
@@ -96,7 +110,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...ssaConstruction.artifacts);
   }
-
   // ============================================================================
   // PHASE 4: BASIC OPTIMIZATIONS
   // ============================================================================
@@ -170,7 +183,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 8: Generating Documentation');
 
-  const documentation = await ctx.task(irDocumentationTask, {
+  let documentation = await ctx.task(irDocumentationTask, {
     languageName,
     instructionSetDesign,
     irBuilder,
@@ -180,9 +193,20 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...documentation.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      documentation = await ctx.task(irDocumentationTask, { ...{
+    languageName,
+    instructionSetDesign,
+    irBuilder,
+    ssaConstruction,
+    optimizationPipeline,
+    testSuite,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `IR Design Complete for ${languageName}! ${instructionSetDesign.instructionCount} instructions, ${optimizationPipeline.passCount} optimization passes. Review deliverables?`,
     title: 'IR Design Complete',
     context: {
@@ -199,9 +223,15 @@ export async function process(inputs, ctx) {
         { path: documentation.specPath, format: 'markdown', label: 'IR Specification' },
         { path: documentation.apiDocPath, format: 'markdown', label: 'API Documentation' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -245,8 +275,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

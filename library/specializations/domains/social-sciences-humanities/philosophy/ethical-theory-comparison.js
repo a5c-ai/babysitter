@@ -51,7 +51,6 @@ export async function process(inputs, ctx) {
     theoryResults.push(theoryApplication);
     artifacts.push(...theoryApplication.artifacts);
   }
-
   // Task 3: Metaethical Analysis (if requested)
   let metaethicalAnalysis = null;
   if (includeMetaethics) {
@@ -63,7 +62,6 @@ export async function process(inputs, ctx) {
     });
     artifacts.push(...metaethicalAnalysis.artifacts);
   }
-
   // Task 4: Comparative Evaluation
   ctx.log('info', 'Comparing ethical theories');
   const comparativeEvaluation = await ctx.task(comparativeEvaluationTask, {
@@ -76,7 +74,7 @@ export async function process(inputs, ctx) {
 
   // Task 5: Practical Implications
   ctx.log('info', 'Analyzing practical implications');
-  const practicalImplications = await ctx.task(practicalImplicationsTask, {
+  let practicalImplications = await ctx.task(practicalImplicationsTask, {
     theoryResults,
     comparison: comparativeEvaluation.comparison,
     moralQuestion,
@@ -85,8 +83,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...practicalImplications.artifacts);
 
-  // Breakpoint: Review comparison results
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      practicalImplications = await ctx.task(practicalImplicationsTask, { ...{
+    theoryResults,
+    comparison: comparativeEvaluation.comparison,
+    moralQuestion,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Theory comparison complete. Analyzed ${theories.length} theories. ${comparativeEvaluation.comparison.convergence ? 'Theories converge.' : 'Theories diverge.'} Review the analysis?`,
     title: 'Ethical Theory Comparison Results',
     context: {
@@ -97,9 +104,15 @@ export async function process(inputs, ctx) {
         convergence: comparativeEvaluation.comparison.convergence,
         dominantTheory: comparativeEvaluation.comparison.strongest
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 6: Generate Comparison Report
   ctx.log('info', 'Generating theory comparison report');
   const comparisonReport = await ctx.task(comparisonReportTask, {
@@ -145,8 +158,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Question Analysis
+  // Task 1: Question Analysis
 export const questionAnalysisTask = defineTask('question-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Analyze the moral question for theory comparison',

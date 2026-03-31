@@ -60,7 +60,7 @@ export async function process(inputs, ctx) {
 
   // Task 4: Validity Assessment
   ctx.log('info', 'Assessing argument validity');
-  const validityAssessment = await ctx.task(validityAssessmentTask, {
+  let validityAssessment = await ctx.task(validityAssessmentTask, {
     structure: structureMapping.structure,
     components: componentIdentification.components,
     outputDir
@@ -79,9 +79,16 @@ export async function process(inputs, ctx) {
     });
     artifacts.push(...soundnessAssessment.artifacts);
   }
-
-  // Breakpoint: Review reconstruction results
-  await ctx.breakpoint({
+  let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      validityAssessment = await ctx.task(validityAssessmentTask, { ...{
+    structure: structureMapping.structure,
+    components: componentIdentification.components,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Argument reconstruction complete. Found ${componentIdentification.components.premises.length} premises. Argument is ${validityAssessment.validity.isValid ? 'valid' : 'invalid'}. Review the reconstruction?`,
     title: 'Argument Reconstruction Results',
     context: {
@@ -93,9 +100,15 @@ export async function process(inputs, ctx) {
         isValid: validityAssessment.validity.isValid,
         isSound: soundnessAssessment?.soundness?.isSound
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 6: Generate Reconstruction Report
   ctx.log('info', 'Generating argument reconstruction report');
   const reconstructionReport = await ctx.task(reconstructionReportTask, {
@@ -141,8 +154,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Text Analysis
+  // Task 1: Text Analysis
 export const textAnalysisTask = defineTask('text-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Analyze source text for argumentative content',

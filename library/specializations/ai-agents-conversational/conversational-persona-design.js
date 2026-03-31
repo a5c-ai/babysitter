@@ -81,7 +81,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...emotionalRange.artifacts);
   }
-
   // ============================================================================
   // PHASE 4: PROMPT TEMPLATES
   // ============================================================================
@@ -115,14 +114,13 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...audienceAdaptation.artifacts);
   }
-
   // ============================================================================
   // PHASE 6: PERSONA TESTING
   // ============================================================================
 
   ctx.log('info', 'Phase 6: Testing persona consistency');
 
-  const personaTesting = await ctx.task(personaTestingTask, {
+  let personaTesting = await ctx.task(personaTestingTask, {
     personaName,
     promptTemplates: promptTemplates.templates,
     personaDefinition: personaDefinition.persona,
@@ -131,8 +129,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...personaTesting.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      personaTesting = await ctx.task(personaTestingTask, { ...{
+    personaName,
+    promptTemplates: promptTemplates.templates,
+    personaDefinition: personaDefinition.persona,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Persona ${personaName} designed. Consistency score: ${personaTesting.consistencyScore}. Review persona design?`,
     title: 'Persona Design Review',
     context: {
@@ -144,9 +151,15 @@ export async function process(inputs, ctx) {
         consistencyScore: personaTesting.consistencyScore
       },
       files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -166,8 +179,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

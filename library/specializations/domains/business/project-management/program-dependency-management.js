@@ -38,15 +38,23 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 2: Dependency Mapping
-  const dependencyMapping = await ctx.task(dependencyMappingTask, {
+  let dependencyMapping = await ctx.task(dependencyMappingTask, {
     programName,
     projects,
     dependencies: dependencyIdentification.allDependencies
   });
 
   // Breakpoint: Review dependency map
-  const criticalDependencies = dependencyMapping.criticalPath || [];
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      dependencyMapping = await ctx.task(dependencyMappingTask, { ...{
+    programName,
+    projects,
+    dependencies: dependencyIdentification.allDependencies
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Dependency map created for ${programName}. ${criticalDependencies.length} dependencies on critical path. Review and validate?`,
     title: 'Dependency Map Review',
     context: {
@@ -57,9 +65,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: dependencyMapping
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // Phase 3: Dependency Analysis
   const dependencyAnalysis = await ctx.task(dependencyAnalysisTask, {
     programName,
@@ -106,7 +120,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 9: Program Documentation
-  const programDocumentation = await ctx.task(programDocumentationTask, {
+  let programDocumentation = await ctx.task(programDocumentationTask, {
     programName,
     dependencyMapping,
     dependencyAnalysis,
@@ -117,8 +131,21 @@ export async function process(inputs, ctx) {
     monitoringFramework
   });
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      programDocumentation = await ctx.task(programDocumentationTask, { ...{
+    programName,
+    dependencyMapping,
+    dependencyAnalysis,
+    riskAssessment,
+    coordinationPlan,
+    integrationPoints,
+    mitigationStrategies,
+    monitoringFramework
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Program dependency management complete for ${programName}. ${dependencyMapping.dependencies?.length || 0} dependencies tracked, ${riskAssessment.risks?.length || 0} risks identified. Approve management plan?`,
     title: 'Program Dependency Approval',
     context: {
@@ -128,9 +155,15 @@ export async function process(inputs, ctx) {
         { path: `artifacts/program-dependencies.json`, format: 'json', content: programDocumentation },
         { path: `artifacts/program-dependencies.md`, format: 'markdown', content: programDocumentation.markdown }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     programName,
@@ -147,8 +180,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const dependencyIdentificationTask = defineTask('dependency-identification', (args, taskCtx) => ({
   kind: 'agent',

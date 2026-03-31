@@ -24,11 +24,16 @@ export async function process(inputs, ctx) {
   const rotationSetup = await ctx.task(rotationSetupTask, { projectName, outputDir });
   artifacts.push(...rotationSetup.artifacts);
 
-  const accessControl = await ctx.task(accessControlTask, { projectName, outputDir });
-  artifacts.push(...accessControl.artifacts);
-
-  await ctx.breakpoint({ question: `Secrets management complete for ${projectName}. Approve?`, title: 'Secrets Review', context: { runId: ctx.runId, config: vaultSetup.config } });
-
+  let accessControl = await ctx.task(accessControlTask, { projectName, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      accessControl = await ctx.task(accessControlTask, { ...{ projectName, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({ question: `Secrets management complete for ${projectName}. Approve?`, title: 'Secrets Review', context: { runId: ctx.runId, config: vaultSetup.config }, expert: 'owner', tags: ['approval-gate'], previousFeedback: lastFeedback || undefined, attempt: attempt > 0 ? attempt + 1 : undefined });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const documentation = await ctx.task(documentationTask, { projectName, outputDir });
   artifacts.push(...documentation.artifacts);
 

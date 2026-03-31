@@ -41,15 +41,24 @@ export async function process(inputs, ctx) {
   const ipConfiguration = await ctx.task(ipConfigurationTask, { designName, ipSelection, targetDevice, outputDir });
   artifacts.push(...ipConfiguration.artifacts);
 
-  const interfaceConnection = await ctx.task(interfaceConnectionTask, { designName, ipConfiguration, interfaceProtocols, outputDir });
-  artifacts.push(...interfaceConnection.artifacts);
-
-  await ctx.breakpoint({
+  let interfaceConnection = await ctx.task(interfaceConnectionTask, { designName, ipConfiguration, interfaceProtocols, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      interfaceConnection = await ctx.task(interfaceConnectionTask, { ...{ designName, ipConfiguration, interfaceProtocols, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `IP cores configured for ${designName}. ${ipConfiguration.configuredIps} IPs, ${interfaceConnection.connectionCount} connections. Review integration?`,
     title: 'IP Integration Review',
-    context: { runId: ctx.runId, designName, configuredIps: ipConfiguration.configuredIps, connections: interfaceConnection.connectionCount }
-  });
-
+    context: { runId: ctx.runId, designName, configuredIps: ipConfiguration.configuredIps, connections: interfaceConnection.connectionCount },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const clockResetConnection = await ctx.task(clockResetConnectionTask, { designName, ipConfiguration, interfaceConnection, outputDir });
   artifacts.push(...clockResetConnection.artifacts);
 

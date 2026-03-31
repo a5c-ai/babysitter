@@ -96,7 +96,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 4: Creating tool execution handler');
 
-  const executionHandler = await ctx.task(executionHandlerTask, {
+  let executionHandler = await ctx.task(executionHandlerTask, {
     projectName,
     toolName,
     toolDescription,
@@ -107,8 +107,19 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...executionHandler.artifacts);
 
-  // Quality Gate: Tool Implementation Review
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      executionHandler = await ctx.task(executionHandlerTask, { ...{
+    projectName,
+    toolName,
+    toolDescription,
+    inputSchema,
+    language,
+    outputDir
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: `Tool ${toolName} implementation created with ${Object.keys(inputSchema.properties || {}).length} parameters. Proceed with error handling and testing?`,
     title: 'Tool Implementation Review',
     context: {
@@ -117,9 +128,15 @@ export async function process(inputs, ctx) {
       toolName,
       parameters: Object.keys(inputSchema.properties || {}),
       files: artifacts.slice(-3).map(a => ({ path: a.path, format: a.format || 'typescript' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 5: ERROR HANDLING
   // ============================================================================
@@ -166,7 +183,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...rateLimitingConfig.artifacts);
   }
-
   // ============================================================================
   // PHASE 8: COMPREHENSIVE TESTS
   // ============================================================================
@@ -210,7 +226,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 10: Testing with MCP client');
 
-  const clientTesting = await ctx.task(clientTestingTask, {
+  let clientTesting = await ctx.task(clientTestingTask, {
     projectName,
     toolName,
     inputSchema,
@@ -220,8 +236,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...clientTesting.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      clientTesting = await ctx.task(clientTestingTask, { ...{
+    projectName,
+    toolName,
+    inputSchema,
+    language,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `MCP Tool Implementation complete for ${toolName}. Tool ready for integration. Review and approve?`,
     title: 'MCP Tool Implementation Complete',
     context: {
@@ -238,9 +264,15 @@ export async function process(inputs, ctx) {
         { path: executionHandler.handlerPath, format: 'typescript', label: 'Tool Handler' },
         { path: schemaDesign.schemaPath, format: 'typescript', label: 'Input Schema' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -271,8 +303,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

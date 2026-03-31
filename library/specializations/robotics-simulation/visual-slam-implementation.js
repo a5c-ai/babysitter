@@ -134,7 +134,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...viFusion.artifacts);
   }
-
   // ============================================================================
   // PHASE 7: ENVIRONMENT TESTING
   // ============================================================================
@@ -158,15 +157,22 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 8: Accuracy Evaluation (Trajectory Error, Map Quality)');
 
-  const accuracyEvaluation = await ctx.task(accuracyEvaluationTask, {
+  let accuracyEvaluation = await ctx.task(accuracyEvaluationTask, {
     robotName,
     environmentTesting,
     outputDir
   });
 
-  artifacts.push(...accuracyEvaluation.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase8Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase8Review) {
+      accuracyEvaluation = await ctx.task(accuracyEvaluationTask, { ...{
+    robotName,
+    environmentTesting,
+    outputDir
+  }, feedback: lastFeedback_phase8Review, attempt: attempt + 1 });
+    }
+  const phase8Review = await ctx.breakpoint({
     question: `SLAM accuracy evaluation for ${robotName}: ATE=${accuracyEvaluation.ate}m, RPE=${accuracyEvaluation.rpe}m/s. Meets requirements: ${accuracyEvaluation.meetsRequirements}. Continue with optimization?`,
     title: 'SLAM Accuracy Review',
     context: {
@@ -175,16 +181,22 @@ export async function process(inputs, ctx) {
       rpe: accuracyEvaluation.rpe,
       mapQuality: accuracyEvaluation.mapQuality,
       files: accuracyEvaluation.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase8Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase8Review.approved) break;
+    lastFeedback_phase8Review = phase8Review.response || phase8Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 9: REAL-TIME OPTIMIZATION
   // ============================================================================
 
   ctx.log('info', 'Phase 9: Real-Time Performance Optimization');
 
-  const realTimeOptimization = await ctx.task(realTimeOptimizationTask, {
+  let realTimeOptimization = await ctx.task(realTimeOptimizationTask, {
     robotName,
     slamAlgorithm,
     parameterTuning,
@@ -194,8 +206,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...realTimeOptimization.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      realTimeOptimization = await ctx.task(realTimeOptimizationTask, { ...{
+    robotName,
+    slamAlgorithm,
+    parameterTuning,
+    accuracyEvaluation,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Visual SLAM Implementation Complete for ${robotName}. ATE: ${accuracyEvaluation.ate}m, Processing: ${realTimeOptimization.processingTime}ms. Review SLAM package?`,
     title: 'Visual SLAM Complete',
     context: {
@@ -210,9 +232,15 @@ export async function process(inputs, ctx) {
       files: [
         { path: parameterTuning.configPath, format: 'yaml', label: 'SLAM Config' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -240,8 +268,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

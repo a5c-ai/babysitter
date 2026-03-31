@@ -53,7 +53,6 @@ export async function process(inputs, ctx) {
       evmMetrics: null
     };
   }
-
   // Phase 2: Planned Value (PV) Calculation
   const plannedValue = await ctx.task(plannedValueCalculationTask, {
     projectName,
@@ -79,7 +78,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 5: Variance Analysis
-  const varianceAnalysis = await ctx.task(varianceAnalysisTask, {
+  let varianceAnalysis = await ctx.task(varianceAnalysisTask, {
     projectName,
     plannedValue,
     earnedValue,
@@ -88,8 +87,18 @@ export async function process(inputs, ctx) {
   });
 
   // Quality Gate: Alert on significant variances
-  if (varianceAnalysis.alertLevel === 'critical') {
-    await ctx.breakpoint({
+      let lastFeedback_phase5Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase5Review) {
+        varianceAnalysis = await ctx.task(varianceAnalysisTask, { ...{
+    projectName,
+    plannedValue,
+    earnedValue,
+    actualCost,
+    varianceThresholds
+  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+      }
+  const phase5Review = await ctx.breakpoint({
       question: `Critical variance detected for ${projectName}. SV: ${varianceAnalysis.scheduleVariance}, CV: ${varianceAnalysis.costVariance}. Review root causes and corrective actions?`,
       title: 'Critical EVM Variance Alert',
       context: {
@@ -100,9 +109,15 @@ export async function process(inputs, ctx) {
         scheduleVariance: varianceAnalysis.scheduleVariance,
         costVariance: varianceAnalysis.costVariance,
         recommendation: 'Immediate management attention required'
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase5Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase5Review.approved) break;
+      lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+    } }
 
   // Phase 6: Performance Index Calculation
   const performanceIndices = await ctx.task(performanceIndexCalculationTask, {
@@ -159,7 +174,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 12: EVM Report Generation
-  const evmReport = await ctx.task(evmReportGenerationTask, {
+  let evmReport = await ctx.task(evmReportGenerationTask, {
     projectName,
     reportingPeriod,
     costBaseline,
@@ -177,8 +192,28 @@ export async function process(inputs, ctx) {
     currency
   });
 
-  // Final Breakpoint: EVM Report Review
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      evmReport = await ctx.task(evmReportGenerationTask, { ...{
+    projectName,
+    reportingPeriod,
+    costBaseline,
+    scheduleBaseline,
+    plannedValue,
+    earnedValue,
+    actualCost,
+    varianceAnalysis,
+    performanceIndices,
+    eacForecasting,
+    scheduleForecasting,
+    trendAnalysis,
+    rootCauseAnalysis,
+    correctiveActions,
+    currency
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `EVM analysis complete for ${projectName}. SPI: ${performanceIndices.spi.toFixed(2)}, CPI: ${performanceIndices.cpi.toFixed(2)}, EAC: ${currency} ${eacForecasting.eac?.toLocaleString()}. Approve report for distribution?`,
     title: 'EVM Report Review',
     context: {
@@ -190,9 +225,15 @@ export async function process(inputs, ctx) {
         { path: `artifacts/evm-report.json`, format: 'json', content: evmReport },
         { path: `artifacts/evm-report.md`, format: 'markdown', content: evmReport.markdown }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     projectName,
@@ -233,8 +274,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const baselineValidationTask = defineTask('baseline-validation', (args, taskCtx) => ({
   kind: 'agent',

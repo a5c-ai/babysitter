@@ -38,7 +38,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 1: Assessing current taxonomy and metadata state');
-  const currentStateAssessment = await ctx.task(currentStateAssessmentTask, {
+  let currentStateAssessment = await ctx.task(currentStateAssessmentTask, {
     organizationName,
     existingTaxonomy,
     contentDomains,
@@ -48,8 +48,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...currentStateAssessment.artifacts);
 
-  // Breakpoint: Review current state assessment
-  await ctx.breakpoint({
+    let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      currentStateAssessment = await ctx.task(currentStateAssessmentTask, { ...{
+    organizationName,
+    existingTaxonomy,
+    contentDomains,
+    metadataScope,
+    outputDir
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Current state assessment complete. Maturity level: ${currentStateAssessment.maturityLevel}. Found ${currentStateAssessment.issues.length} issues. Review assessment?`,
     title: 'Current State Assessment Review',
     context: {
@@ -66,9 +76,15 @@ export async function process(inputs, ctx) {
         metadataFieldsCount: currentStateAssessment.metadataFieldsCount,
         issuesFound: currentStateAssessment.issues.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 2: GOVERNANCE FRAMEWORK DESIGN
   // ============================================================================
@@ -120,7 +136,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 5: Developing metadata standards and schema');
-  const metadataStandards = await ctx.task(metadataStandardsTask, {
+  let metadataStandards = await ctx.task(metadataStandardsTask, {
     organizationName,
     metadataScope,
     existingTaxonomy,
@@ -131,8 +147,19 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...metadataStandards.artifacts);
 
-  // Breakpoint: Review standards
-  await ctx.breakpoint({
+    let lastFeedback_phase5Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase5Review) {
+      metadataStandards = await ctx.task(metadataStandardsTask, { ...{
+    organizationName,
+    metadataScope,
+    existingTaxonomy,
+    integrationSystems,
+    qualityObjectives,
+    outputDir
+  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+    }
+  const phase5Review = await ctx.breakpoint({
     question: `Standards developed: ${taxonomyStandards.standardCount} taxonomy standards, ${metadataStandards.schemaCount} metadata schemas. Review standards?`,
     title: 'Standards Review',
     context: {
@@ -148,9 +175,15 @@ export async function process(inputs, ctx) {
         metadataSchemas: metadataStandards.schemaCount,
         controlledVocabularies: taxonomyStandards.vocabularyCount
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase5Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase5Review.approved) break;
+    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 6: CHANGE MANAGEMENT PROCESS
   // ============================================================================
@@ -266,7 +299,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 13: Assessing governance design quality');
-  const qualityAssessment = await ctx.task(qualityAssessmentTask, {
+  let qualityAssessment = await ctx.task(qualityAssessmentTask, {
     organizationName,
     governanceFramework,
     taxonomyStandards,
@@ -281,8 +314,21 @@ export async function process(inputs, ctx) {
 
   const qualityMet = qualityAssessment.overallScore >= 80;
 
-  // Breakpoint: Review quality assessment
-  await ctx.breakpoint({
+    let lastFeedback_phase13Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase13Review) {
+      qualityAssessment = await ctx.task(qualityAssessmentTask, { ...{
+    organizationName,
+    governanceFramework,
+    taxonomyStandards,
+    metadataStandards,
+    changeManagement,
+    qualityAssurance,
+    qualityObjectives,
+    outputDir
+  }, feedback: lastFeedback_phase13Review, attempt: attempt + 1 });
+    }
+  const phase13Review = await ctx.breakpoint({
     question: `Governance quality score: ${qualityAssessment.overallScore}/100. ${qualityMet ? 'Quality standards met!' : 'May need improvements.'} Review results?`,
     title: 'Quality Assessment Review',
     context: {
@@ -300,15 +346,21 @@ export async function process(inputs, ctx) {
         standardsScore: qualityAssessment.componentScores.standards,
         issues: qualityAssessment.issues.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase13Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase13Review.approved) break;
+    lastFeedback_phase13Review = phase13Review.response || phase13Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 14: IMPLEMENTATION ROADMAP
   // ============================================================================
 
   ctx.log('info', 'Phase 14: Creating implementation roadmap');
-  const implementationRoadmap = await ctx.task(implementationRoadmapTask, {
+  let implementationRoadmap = await ctx.task(implementationRoadmapTask, {
     organizationName,
     governanceFramework,
     taxonomyStandards,
@@ -339,8 +391,20 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...reviewResult.artifacts);
 
-    // Breakpoint: Final approval gate
-    await ctx.breakpoint({
+      let lastFeedback_finalApproval = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_finalApproval) {
+        implementationRoadmap = await ctx.task(implementationRoadmapTask, { ...{
+    organizationName,
+    governanceFramework,
+    taxonomyStandards,
+    metadataStandards,
+    toolsAndTechnology,
+    trainingPlan,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+      }
+  const finalApproval = await ctx.breakpoint({
       question: `Stakeholder review complete. ${reviewResult.approved ? 'Approved!' : 'Requires revisions.'} Proceed with implementation?`,
       title: 'Final Approval Gate',
       context: {
@@ -357,9 +421,15 @@ export async function process(inputs, ctx) {
           stakeholdersReviewed: reviewResult.stakeholders.length,
           revisionsNeeded: reviewResult.revisionsNeeded
         }
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_finalApproval || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (finalApproval.approved) break;
+      lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+    } }
 
   const endTime = ctx.now();
   const duration = endTime - startTime;
@@ -414,8 +484,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

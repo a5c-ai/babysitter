@@ -50,20 +50,30 @@ export async function process(inputs, ctx) {
 
   // PHASE 4: ROUTE SEQUENCING
   ctx.log('info', 'Phase 4: Sequencing routes');
-  const routeSequencing = await ctx.task(routeSequencingTask, { assignments: driverAssignment.assignments, timeWindowOptimization, outputDir });
+  let routeSequencing = await ctx.task(routeSequencingTask, { assignments: driverAssignment.assignments, timeWindowOptimization, outputDir });
   artifacts.push(...routeSequencing.artifacts);
 
-  // Quality Gate: Review delivery plan
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      routeSequencing = await ctx.task(routeSequencingTask, { ...{ assignments: driverAssignment.assignments, timeWindowOptimization, outputDir }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: `Delivery plan generated. ${routeSequencing.routes.length} routes, ${routeSequencing.deliveriesScheduled} deliveries scheduled. On-time expectation: ${routeSequencing.onTimeRate}%. Review?`,
     title: 'Delivery Plan Review',
     context: {
       runId: ctx.runId,
       summary: { routes: routeSequencing.routes.length, deliveries: routeSequencing.deliveriesScheduled, onTimeRate: routeSequencing.onTimeRate },
       files: routeSequencing.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
   // PHASE 5: CUSTOMER NOTIFICATION
   ctx.log('info', 'Phase 5: Sending customer notifications');
   const customerNotification = await ctx.task(deliveryNotificationTask, { deliverySchedule: routeSequencing.routes, outputDir });
@@ -86,11 +96,15 @@ export async function process(inputs, ctx) {
 
   // PHASE 9: PERFORMANCE REPORTING
   ctx.log('info', 'Phase 9: Generating performance report');
-  const performanceReport = await ctx.task(lastMilePerformanceTask, { routeSequencing, driverAssignment, outputDir });
+  let performanceReport = await ctx.task(lastMilePerformanceTask, { routeSequencing, driverAssignment, outputDir });
   artifacts.push(...performanceReport.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      performanceReport = await ctx.task(lastMilePerformanceTask, { ...{ routeSequencing, driverAssignment, outputDir }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Last-mile delivery planning complete. ${deliveries.length} deliveries scheduled across ${routeSequencing.routes.length} routes. Expected on-time: ${routeSequencing.onTimeRate}%. Approve?`,
     title: 'Last-Mile Delivery Complete',
     context: {
@@ -102,9 +116,15 @@ export async function process(inputs, ctx) {
         expectedOnTime: `${routeSequencing.onTimeRate}%`
       },
       files: [{ path: performanceReport.reportPath, format: 'markdown', label: 'Performance Report' }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   return {
     success: true,
@@ -117,8 +137,7 @@ export async function process(inputs, ctx) {
     metadata: { processId: 'specializations/domains/business/logistics/last-mile-delivery', timestamp: startTime, outputDir }
   };
 }
-
-// TASK DEFINITIONS
+  // TASK DEFINITIONS
 export const deliveryClusteringTask = defineTask('delivery-clustering', (args, taskCtx) => ({
   kind: 'agent', title: 'Cluster deliveries', agent: { name: 'delivery-clustering-specialist', prompt: { role: 'Delivery Clustering Specialist', task: 'Cluster deliveries by geography and service area', context: args, instructions: ['Geocode addresses', 'Apply clustering algorithm', 'Respect service areas', 'Balance cluster sizes', 'Optimize for density', 'Generate cluster map'] }, outputSchema: { type: 'object', required: ['clusters', 'artifacts'], properties: { clusters: { type: 'array' }, clusterMap: { type: 'object' }, artifacts: { type: 'array' } } } }, io: { inputJsonPath: `tasks/${taskCtx.effectId}/input.json`, outputJsonPath: `tasks/${taskCtx.effectId}/result.json` }, labels: ['agent', 'logistics', 'last-mile', 'clustering']
 }));

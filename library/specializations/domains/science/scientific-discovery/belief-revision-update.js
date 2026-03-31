@@ -78,7 +78,6 @@ export async function process(inputs, ctx) {
     });
     artifacts.push(...contractionResult.artifacts);
   }
-
   // ============================================================================
   // PHASE 5: EXPANSION
   // ============================================================================
@@ -124,7 +123,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 8: Assessing revision quality');
-  const qualityScore = await ctx.task(beliefRevisionQualityTask, {
+  let qualityScore = await ctx.task(beliefRevisionQualityTask, {
     beliefAnalysis,
     consistencyCheck,
     contractionResult,
@@ -137,8 +136,19 @@ export async function process(inputs, ctx) {
 
   const qualityMet = qualityScore.overallScore >= 75;
 
-  // Breakpoint: Review belief revision results
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      qualityScore = await ctx.task(beliefRevisionQualityTask, { ...{
+    beliefAnalysis,
+    consistencyCheck,
+    contractionResult,
+    expansionResult,
+    postulateVerification,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Belief revision complete. Quality score: ${qualityScore.overallScore}/100. Retracted ${contractionResult.removed?.length || 0} beliefs, added ${expansionResult.added?.length || 0}. ${qualityMet ? 'Quality meets standards!' : 'Review entrenchment and revision strategy.'} Review results?`,
     title: 'Belief Revision Results Review',
     context: {
@@ -157,9 +167,15 @@ export async function process(inputs, ctx) {
         agmPostulatesSatisfied: postulateVerification.satisfied,
         qualityScore: qualityScore.overallScore
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 9: REPORT GENERATION
   // ============================================================================
@@ -206,8 +222,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

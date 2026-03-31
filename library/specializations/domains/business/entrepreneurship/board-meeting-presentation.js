@@ -72,7 +72,7 @@ export async function process(inputs, ctx) {
   artifacts.push(...(strategicMaterials.artifacts || []));
 
   // Phase 5: Decision Items Preparation
-  const decisionItems = await ctx.task(decisionItemsTask, {
+  let decisionItems = await ctx.task(decisionItemsTask, {
     companyName,
     decisions,
     strategicTopics
@@ -80,8 +80,16 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...(decisionItems.artifacts || []));
 
-  // Breakpoint: Review board materials
-  await ctx.breakpoint({
+    let lastFeedback_phase5Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase5Review) {
+      decisionItems = await ctx.task(decisionItemsTask, { ...{
+    companyName,
+    decisions,
+    strategicTopics
+  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+    }
+  const phase5Review = await ctx.breakpoint({
     question: `Review board materials for ${companyName} ${periodCovered}. ${strategicTopics.length} strategic topics, ${decisions.length} decision items. Ready for assembly?`,
     title: 'Board Materials Review',
     context: {
@@ -89,9 +97,15 @@ export async function process(inputs, ctx) {
       companyName,
       period: periodCovered,
       files: artifacts
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase5Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase5Review.approved) break;
+    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+  }
   // Phase 6: Agenda Development
   const agenda = await ctx.task(agendaTask, {
     companyName,
@@ -127,7 +141,7 @@ export async function process(inputs, ctx) {
   artifacts.push(...(boardDeck.artifacts || []));
 
   // Phase 9: Action Item Tracker Setup
-  const actionItemTracker = await ctx.task(actionItemTrackerTask, {
+  let actionItemTracker = await ctx.task(actionItemTrackerTask, {
     companyName,
     decisionItems,
     strategicTopics
@@ -135,8 +149,16 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...(actionItemTracker.artifacts || []));
 
-  // Final Breakpoint: Board meeting ready
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      actionItemTracker = await ctx.task(actionItemTrackerTask, { ...{
+    companyName,
+    decisionItems,
+    strategicTopics
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Board meeting materials complete for ${companyName}. Deck: ${boardDeck.slideCount} slides. Pre-read sent? Ready for meeting?`,
     title: 'Board Meeting Preparation Complete',
     context: {
@@ -145,9 +167,15 @@ export async function process(inputs, ctx) {
       slideCount: boardDeck.slideCount,
       agendaDuration: agenda.totalDuration,
       files: artifacts
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -169,8 +197,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const metricsDashboardTask = defineTask('metrics-dashboard', (args, taskCtx) => ({
   kind: 'agent',

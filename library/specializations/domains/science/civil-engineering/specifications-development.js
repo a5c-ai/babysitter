@@ -78,7 +78,7 @@ export async function process(inputs, ctx) {
 
   // Task 5: Execution Procedures
   ctx.log('info', 'Developing execution procedures');
-  const executionProcedures = await ctx.task(executionProceduresTask, {
+  let executionProcedures = await ctx.task(executionProceduresTask, {
     projectId,
     designDocuments,
     projectRequirements,
@@ -87,8 +87,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...executionProcedures.artifacts);
 
-  // Breakpoint: Review specifications
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      executionProcedures = await ctx.task(executionProceduresTask, { ...{
+    projectId,
+    designDocuments,
+    projectRequirements,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Specifications development complete for ${projectId}. Total sections: ${technicalSpecs.sectionCount}. Review specifications?`,
     title: 'Specifications Review',
     context: {
@@ -99,9 +108,15 @@ export async function process(inputs, ctx) {
         divisions: scopeDefinition.divisions,
         referenceStandardsCount: referenceStandards?.length || 0
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 6: Quality Assurance Specifications
   ctx.log('info', 'Developing QA specifications');
   const qaSpecs = await ctx.task(qaSpecsTask, {
@@ -160,8 +175,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Scope Definition
+  // Task 1: Scope Definition
 export const specScopeDefinitionTask = defineTask('spec-scope-definition', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Define specifications scope',

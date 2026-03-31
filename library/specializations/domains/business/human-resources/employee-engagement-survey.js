@@ -73,8 +73,10 @@ export async function process(inputs, ctx) {
     ]
   });
 
-  // Phase 4: Survey Approval
-  await ctx.breakpoint('survey-approval', {
+  let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    // No preceding task identified for re-run with feedback
+    const phase4Review = await ctx.breakpoint('survey-approval', {
     title: 'Survey Instrument Approval',
     description: 'Review and approve survey instrument and administration plan',
     artifacts: {
@@ -86,9 +88,15 @@ export async function process(inputs, ctx) {
       'Are the survey questions appropriate and unbiased?',
       'Is the survey length acceptable?',
       'Is the administration plan realistic?'
-    ]
-  });
-
+    ],
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
   // Phase 5: Communication Planning
   const communicationPlan = await ctx.task('plan-communications', {
     surveyStrategy,
@@ -169,8 +177,10 @@ export async function process(inputs, ctx) {
     ]
   });
 
-  // Phase 11: Results Review
-  await ctx.breakpoint('results-review', {
+  let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    // No preceding task identified for re-run with feedback
+    const finalApproval = await ctx.breakpoint('results-review', {
     title: 'Survey Results Review',
     description: 'Review survey findings before broader communication',
     artifacts: {
@@ -182,9 +192,15 @@ export async function process(inputs, ctx) {
       'Are the findings accurately interpreted?',
       'Are there any sensitive findings requiring special handling?',
       'What is the communication approach for results?'
-    ]
-  });
-
+    ],
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 12: Report Development
   const reportDevelopment = await ctx.task('develop-reports', {
     insightsDevelopment,

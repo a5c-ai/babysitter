@@ -116,7 +116,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 7: Validating routing decision');
-  const routingValidation = await ctx.task(routingValidationTask, {
+  let routingValidation = await ctx.task(routingValidationTask, {
     ticket,
     categorization,
     severityAssessment,
@@ -129,9 +129,20 @@ export async function process(inputs, ctx) {
   artifacts.push(...routingValidation.artifacts);
 
   const validationScore = routingValidation.confidenceScore;
-  const routingApproved = validationScore >= 80;
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      routingValidation = await ctx.task(routingValidationTask, { ...{
+    ticket,
+    categorization,
+    severityAssessment,
+    priorityCalculation,
+    agentSelection,
+    slaAssignment,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Ticket triage complete. Priority: ${priorityCalculation.priority}. Assigned to: ${agentSelection.selectedAgent?.name || 'Queue'}. Confidence: ${validationScore}%. ${routingApproved ? 'Routing approved!' : 'Manual review recommended.'} Proceed?`,
     title: 'Ticket Triage Review',
     context: {
@@ -152,9 +163,15 @@ export async function process(inputs, ctx) {
         assignedAgent: agentSelection.selectedAgent?.name,
         slaTarget: slaAssignment.responseTarget
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -199,8 +216,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

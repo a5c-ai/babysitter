@@ -38,14 +38,22 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 2: Security Architecture
-  const securityArchitecture = await ctx.task(securityArchitectureTask, {
+  let securityArchitecture = await ctx.task(securityArchitectureTask, {
     projectName,
     otaArchitecture,
     securityRequirements
   });
 
-  // Breakpoint: Security architecture review
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      securityArchitecture = await ctx.task(securityArchitectureTask, { ...{
+    projectName,
+    otaArchitecture,
+    securityRequirements
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Review OTA security architecture for ${projectName}. Approve security design?`,
     title: 'OTA Security Review',
     context: {
@@ -57,9 +65,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: securityArchitecture
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // Phase 3: Update Client Implementation
   const updateClient = await ctx.task(updateClientTask, {
     projectName,
@@ -83,7 +97,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 6: OTA Validation
-  const otaValidation = await ctx.task(otaValidationTask, {
+  let otaValidation = await ctx.task(otaValidationTask, {
     projectName,
     otaArchitecture,
     securityArchitecture,
@@ -91,8 +105,18 @@ export async function process(inputs, ctx) {
     rollbackRecovery
   });
 
-  // Final Breakpoint: OTA implementation approval
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      otaValidation = await ctx.task(otaValidationTask, { ...{
+    projectName,
+    otaArchitecture,
+    securityArchitecture,
+    updateClient,
+    rollbackRecovery
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `OTA Update Implementation complete for ${projectName}. UN R156 compliance: ${otaValidation.r156Compliance}. Approve?`,
     title: 'OTA Implementation Approval',
     context: {
@@ -103,9 +127,15 @@ export async function process(inputs, ctx) {
         { path: `artifacts/ota-system-design.json`, format: 'json', content: otaArchitecture },
         { path: `artifacts/deployment-procedures.json`, format: 'json', content: campaignManagement }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     projectName,

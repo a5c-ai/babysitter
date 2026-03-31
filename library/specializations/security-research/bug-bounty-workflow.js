@@ -135,16 +135,24 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 7: Managing follow-up and communication');
 
-  const followUp = await ctx.task(followUpTask, {
+  let followUp = await ctx.task(followUpTask, {
     projectName,
     submissions: submission.submissions,
     program,
     outputDir
   });
 
-  artifacts.push(...followUp.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      followUp = await ctx.task(followUpTask, { ...{
+    projectName,
+    submissions: submission.submissions,
+    program,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Bug bounty workflow complete. ${submission.submissions.length} reports submitted. Track status and rewards?`,
     title: 'Bug Bounty Workflow Complete',
     context: {
@@ -156,9 +164,15 @@ export async function process(inputs, ctx) {
         submitted: submission.submissions.length
       },
       files: artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
 
   return {
@@ -180,8 +194,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

@@ -74,7 +74,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 6: Structure Integration
-  const integratedStructure = await ctx.task(structureIntegrationTask, {
+  let integratedStructure = await ctx.task(structureIntegrationTask, {
     constraintBasedResults,
     scoreBasedResults,
     fcmResults,
@@ -83,17 +83,33 @@ export async function process(inputs, ctx) {
   });
 
   // Quality Gate: Check structure consistency
-  if (!integratedStructure.isConsistent) {
-    await ctx.breakpoint({
+      let lastFeedback_phase6Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase6Review) {
+        integratedStructure = await ctx.task(structureIntegrationTask, { ...{
+    constraintBasedResults,
+    scoreBasedResults,
+    fcmResults,
+    priorKnowledge,
+    domain
+  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
+      }
+  const phase6Review = await ctx.breakpoint({
       question: `Discovered causal structures show inconsistencies. Conflict rate: ${integratedStructure.conflictRate}%. Review and resolve?`,
       title: 'Causal Structure Inconsistency',
       context: {
         runId: ctx.runId,
         conflicts: integratedStructure.conflicts,
         recommendation: 'Review conflicting edges and consider additional domain knowledge'
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase6Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase6Review.approved) break;
+      lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
+    }  }
 
   // Phase 7: Edge Orientation
   const orientedGraph = await ctx.task(edgeOrientationTask, {
@@ -120,7 +136,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 10: Validation
-  const validationResults = await ctx.task(structureValidationTask, {
+  let validationResults = await ctx.task(structureValidationTask, {
     orientedGraph,
     confidenceAssessment,
     latentVariableAnalysis,
@@ -128,8 +144,18 @@ export async function process(inputs, ctx) {
     priorKnowledge
   });
 
-  // Final Breakpoint: Expert Review
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      validationResults = await ctx.task(structureValidationTask, { ...{
+    orientedGraph,
+    confidenceAssessment,
+    latentVariableAnalysis,
+    domain,
+    priorKnowledge
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Causal discovery complete for ${domain}. ${orientedGraph.edges.length} edges discovered with ${confidenceAssessment.averageConfidence}% average confidence. Review discovered structure?`,
     title: 'Causal Discovery Review',
     context: {
@@ -140,9 +166,15 @@ export async function process(inputs, ctx) {
         { path: 'artifacts/discovered-graph.json', format: 'json', content: orientedGraph },
         { path: 'artifacts/confidence-scores.json', format: 'json', content: confidenceAssessment }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     domain,
@@ -173,8 +205,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const dataCharacterizationTask = defineTask('data-characterization', (args, taskCtx) => ({
   kind: 'agent',

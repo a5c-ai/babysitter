@@ -24,11 +24,16 @@ export async function process(inputs, ctx) {
   const sitemapSetup = await ctx.task(sitemapSetupTask, { projectName, outputDir });
   artifacts.push(...sitemapSetup.artifacts);
 
-  const coreWebVitals = await ctx.task(coreWebVitalsTask, { projectName, outputDir });
-  artifacts.push(...coreWebVitals.artifacts);
-
-  await ctx.breakpoint({ question: `Technical SEO complete for ${projectName}. Approve?`, title: 'SEO Review', context: { runId: ctx.runId, optimizations: metaTagsSetup.optimizations } });
-
+  let coreWebVitals = await ctx.task(coreWebVitalsTask, { projectName, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      coreWebVitals = await ctx.task(coreWebVitalsTask, { ...{ projectName, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({ question: `Technical SEO complete for ${projectName}. Approve?`, title: 'SEO Review', context: { runId: ctx.runId, optimizations: metaTagsSetup.optimizations }, expert: 'owner', tags: ['approval-gate'], previousFeedback: lastFeedback || undefined, attempt: attempt > 0 ? attempt + 1 : undefined });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const documentation = await ctx.task(documentationTask, { projectName, outputDir });
   artifacts.push(...documentation.artifacts);
 

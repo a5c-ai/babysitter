@@ -91,7 +91,7 @@ export async function process(inputs, ctx) {
 
   // Task 6: Inclusive Practices Framework
   ctx.log('info', 'Developing inclusive practices framework');
-  const inclusivePractices = await ctx.task(inclusivePracticesTask, {
+  let inclusivePractices = await ctx.task(inclusivePracticesTask, {
     organizationName,
     targetCommunities,
     communityAssessment: communityAssessment.assessment,
@@ -100,8 +100,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...inclusivePractices.artifacts);
 
-  // Breakpoint: Review engagement strategy
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      inclusivePractices = await ctx.task(inclusivePracticesTask, { ...{
+    organizationName,
+    targetCommunities,
+    communityAssessment: communityAssessment.assessment,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Community engagement strategy for ${organizationName} complete. ${targetCommunities.length} communities targeted. ${participatoryPrograms.programs.length} programs designed. Review and approve?`,
     title: 'Community Engagement Strategy Review',
     context: {
@@ -114,9 +123,15 @@ export async function process(inputs, ctx) {
         programs: participatoryPrograms.programs.length,
         initiatives: outreachInitiatives.initiatives.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 7: Partnership Development
   ctx.log('info', 'Developing community partnerships');
   const partnershipDevelopment = await ctx.task(partnershipDevelopmentTask, {
@@ -184,8 +199,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Community Assessment
+  // Task 1: Community Assessment
 export const communityAssessmentTask = defineTask('community-assessment', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Conduct community assessment',

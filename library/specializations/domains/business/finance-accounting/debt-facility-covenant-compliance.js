@@ -36,19 +36,33 @@ export async function process(inputs, ctx) {
   results.steps.push({ name: 'covenant-identification', result: covenantResult });
 
   // Step 3: Covenant Calculations
-  const calculationResult = await ctx.task(calculateCovenantsTask, {
+  let calculationResult = await ctx.task(calculateCovenantsTask, {
     covenants: covenantResult,
     financialStatements: inputs.financialStatements,
     debtAgreements: inputs.debtAgreements
   });
   results.steps.push({ name: 'covenant-calculations', result: calculationResult });
 
-  // Breakpoint for calculation review
-  await ctx.breakpoint('calculation-review', {
+    let lastFeedback_reviewApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_reviewApproval) {
+      calculationResult = await ctx.task(calculateCovenantsTask, { ...{
+    covenants: covenantResult,
+    financialStatements: inputs.financialStatements,
+    debtAgreements: inputs.debtAgreements
+  }, feedback: lastFeedback_reviewApproval, attempt: attempt + 1 });
+    }
+  const reviewApproval = await ctx.breakpoint('calculation-review', {
     message: 'Review covenant calculations before compliance testing',
-    data: calculationResult
-  });
-
+    data: calculationResult,
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_reviewApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (reviewApproval.approved) break;
+    lastFeedback_reviewApproval = reviewApproval.response || reviewApproval.feedback || 'Changes requested';
+  }
   // Step 4: Compliance Testing
   const complianceResult = await ctx.task(testComplianceTask, {
     calculations: calculationResult,
@@ -57,19 +71,32 @@ export async function process(inputs, ctx) {
   results.steps.push({ name: 'compliance-testing', result: complianceResult });
 
   // Step 5: Trend Analysis and Forecasting
-  const trendResult = await ctx.task(analyzeCovenantTrendsTask, {
+  let trendResult = await ctx.task(analyzeCovenantTrendsTask, {
     currentCompliance: complianceResult,
     priorPeriodCovenants: inputs.priorPeriodCovenants
   });
   results.steps.push({ name: 'trend-analysis', result: trendResult });
 
   // Breakpoint if any covenant at risk
-  if (complianceResult.atRiskCovenants?.length > 0) {
-    await ctx.breakpoint('covenant-alert', {
+      let lastFeedback_analysisApproval = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_analysisApproval) {
+        trendResult = await ctx.task(analyzeCovenantTrendsTask, { ...{
+    currentCompliance: complianceResult,
+    priorPeriodCovenants: inputs.priorPeriodCovenants
+  }, feedback: lastFeedback_analysisApproval, attempt: attempt + 1 });
+      }
+  const analysisApproval = await ctx.breakpoint('covenant-alert', {
       message: 'ALERT: Covenants at risk of breach - review and develop mitigation plan',
-      data: { compliance: complianceResult, trends: trendResult }
-    });
-  }
+      data: { compliance: complianceResult, trends: trendResult },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_analysisApproval || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (analysisApproval.approved) break;
+      lastFeedback_analysisApproval = analysisApproval.response || analysisApproval.feedback || 'Changes requested';
+    } }
 
   // Step 6: Compliance Certificate Preparation
   const certificateResult = await ctx.task(prepareComplianceCertificateTask, {
@@ -96,8 +123,7 @@ export async function process(inputs, ctx) {
 
   return results;
 }
-
-// Task definitions
+  // Task definitions
 export const reviewDebtPortfolioTask = defineTask('review-debt-portfolio', (args, taskCtx) => ({
   kind: 'agent',
   skill: { name: 'debt-management' },

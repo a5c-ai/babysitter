@@ -41,16 +41,24 @@ export async function process(inputs, ctx) {
 
   // Phase 1: Readiness Assessment
   ctx.log('info', 'Phase 1: Organizational Readiness Assessment');
-  const readinessAssessment = await ctx.task(readinessAssessmentTask, {
+  let readinessAssessment = await ctx.task(readinessAssessmentTask, {
     organizationName,
     ehrVendor,
     currentSystems,
     outputDir
   });
 
-  artifacts.push(...readinessAssessment.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      readinessAssessment = await ctx.task(readinessAssessmentTask, { ...{
+    organizationName,
+    ehrVendor,
+    currentSystems,
+    outputDir
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Readiness assessment complete. Score: ${readinessAssessment.readinessScore}%. ${readinessAssessment.gaps.length} gaps identified. Proceed with workflow analysis?`,
     title: 'Readiness Assessment Review',
     context: {
@@ -58,9 +66,15 @@ export async function process(inputs, ctx) {
       readinessScore: readinessAssessment.readinessScore,
       gaps: readinessAssessment.gaps,
       files: readinessAssessment.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // Phase 2: Workflow Analysis
   ctx.log('info', 'Phase 2: Current State Workflow Analysis');
   const workflowAnalysis = await ctx.task(workflowAnalysisTask, {
@@ -74,15 +88,22 @@ export async function process(inputs, ctx) {
 
   // Phase 3: Future State Design
   ctx.log('info', 'Phase 3: Future State Workflow Design');
-  const futureStateDesign = await ctx.task(futureStateWorkflowTask, {
+  let futureStateDesign = await ctx.task(futureStateWorkflowTask, {
     workflowAnalysis,
     ehrVendor,
     outputDir
   });
 
-  artifacts.push(...futureStateDesign.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      futureStateDesign = await ctx.task(futureStateWorkflowTask, { ...{
+    workflowAnalysis,
+    ehrVendor,
+    outputDir
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `${workflowAnalysis.workflows.length} workflows analyzed. ${futureStateDesign.redesignedWorkflows.length} workflows redesigned. Proceed with system configuration planning?`,
     title: 'Workflow Design Review',
     context: {
@@ -90,9 +111,15 @@ export async function process(inputs, ctx) {
       currentWorkflows: workflowAnalysis.workflows,
       futureWorkflows: futureStateDesign.redesignedWorkflows,
       files: [...workflowAnalysis.artifacts, ...futureStateDesign.artifacts].map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // Phase 4: System Configuration
   ctx.log('info', 'Phase 4: System Configuration Planning');
   const systemConfiguration = await ctx.task(systemConfigurationTask, {
@@ -116,16 +143,24 @@ export async function process(inputs, ctx) {
 
   // Phase 6: Integration Design
   ctx.log('info', 'Phase 6: Integration Design');
-  const integrationDesign = await ctx.task(integrationDesignTask, {
+  let integrationDesign = await ctx.task(integrationDesignTask, {
     currentSystems,
     ehrVendor,
     systemConfiguration,
     outputDir
   });
 
-  artifacts.push(...integrationDesign.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      integrationDesign = await ctx.task(integrationDesignTask, { ...{
+    currentSystems,
+    ehrVendor,
+    systemConfiguration,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `${integrationDesign.interfaces.length} interfaces designed. Data migration plan covers ${dataMigration.dataElements.length} data elements. Proceed with training planning?`,
     title: 'Technical Design Review',
     context: {
@@ -134,9 +169,15 @@ export async function process(inputs, ctx) {
       integrations: integrationDesign.interfaces,
       migration: dataMigration.migrationPlan,
       files: [...systemConfiguration.artifacts, ...dataMigration.artifacts, ...integrationDesign.artifacts].map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 7: Training Program Design
   ctx.log('info', 'Phase 7: Training Program Design');
   const trainingProgram = await ctx.task(ehrTrainingProgramTask, {
@@ -216,8 +257,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task definitions follow the same pattern as previous processes
+  // Task definitions follow the same pattern as previous processes
 export const readinessAssessmentTask = defineTask('ehr-readiness', (args, taskCtx) => ({
   kind: 'agent',
   title: `EHR Readiness Assessment - ${args.organizationName}`,

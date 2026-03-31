@@ -56,7 +56,6 @@ export async function process(inputs, ctx) {
   } else {
     ctx.log('info', `Using specified platform: ${selectedPlatform}`);
   }
-
   // Task 3: Architecture Design
   ctx.log('info', 'Designing data warehouse architecture');
   const architectureDesign = await ctx.task(architectureDesignTask, {
@@ -117,7 +116,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...optimizationPlan.artifacts);
   }
-
   // Task 8: Cost Management and Monitoring
   let costManagementPlan = null;
   if (enableCostManagement) {
@@ -132,7 +130,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...costManagementPlan.artifacts);
   }
-
   // Task 9: Infrastructure as Code (IaC) Generation
   ctx.log('info', 'Generating Infrastructure as Code');
   const iacGeneration = await ctx.task(iacGenerationTask, {
@@ -160,7 +157,7 @@ export async function process(inputs, ctx) {
 
   // Task 11: Documentation and Runbooks
   ctx.log('info', 'Generating comprehensive documentation');
-  const documentation = await ctx.task(documentationGenerationTask, {
+  let documentation = await ctx.task(documentationGenerationTask, {
     platform: selectedPlatform,
     platformEvaluation,
     requirements: requirementsResult.analyzedRequirements,
@@ -177,8 +174,25 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...documentation.artifacts);
 
-  // Breakpoint: Review complete data warehouse setup
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      documentation = await ctx.task(documentationGenerationTask, { ...{
+    platform: selectedPlatform,
+    platformEvaluation,
+    requirements: requirementsResult.analyzedRequirements,
+    architectureDesign,
+    securityConfig,
+    dataModelDesign,
+    pipelineArchitecture,
+    optimizationPlan,
+    costManagementPlan,
+    iacGeneration,
+    monitoringSetup,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Data warehouse setup complete for ${selectedPlatform}. Review the architecture, security configuration, and implementation plan?`,
     title: 'Data Warehouse Setup Complete',
     context: {
@@ -192,9 +206,15 @@ export async function process(inputs, ctx) {
         estimatedMonthlyCost: costManagementPlan?.estimatedCosts?.monthly || 'N/A',
         implementationPhases: documentation.implementationPlan?.phases?.length || 0
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 12: Implementation Checklist
   ctx.log('info', 'Generating implementation checklist');
   const implementationChecklist = await ctx.task(implementationChecklistTask, {
@@ -237,8 +257,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Requirements Analysis
+  // Task 1: Requirements Analysis
 export const requirementsAnalysisTask = defineTask('requirements-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Analyze data warehouse requirements',

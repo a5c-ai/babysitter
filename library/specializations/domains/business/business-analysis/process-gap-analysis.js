@@ -115,7 +115,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 7: Creating prioritized improvement backlog');
-  const improvementBacklog = await ctx.task(improvementBacklogTask, {
+  let improvementBacklog = await ctx.task(improvementBacklogTask, {
     projectName,
     prioritizedGaps: gapPrioritization.prioritizedGaps,
     rootCauseAnalysis,
@@ -125,8 +125,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...improvementBacklog.artifacts);
 
-  // Breakpoint: Review gap analysis
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      improvementBacklog = await ctx.task(improvementBacklogTask, { ...{
+    projectName,
+    prioritizedGaps: gapPrioritization.prioritizedGaps,
+    rootCauseAnalysis,
+    futureStateDefinition,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Gap analysis complete for ${projectName}. ${gapIdentification.gaps?.length || 0} gaps identified. Review and approve improvement backlog?`,
     title: 'Gap Analysis Review',
     context: {
@@ -143,9 +153,15 @@ export async function process(inputs, ctx) {
         criticalGaps: impactAssessment.criticalGaps?.length || 0,
         improvementItems: improvementBacklog.backlogItems?.length || 0
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 8: GAP ANALYSIS REPORT
   // ============================================================================
@@ -200,8 +216,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

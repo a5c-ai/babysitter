@@ -107,7 +107,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 7: Scoring pre-registration quality');
-  const qualityScore = await ctx.task(preregistrationQualityScoringTask, {
+  let qualityScore = await ctx.task(preregistrationQualityScoringTask, {
     studyInformation,
     hypothesesSpec,
     designPlan,
@@ -122,8 +122,20 @@ export async function process(inputs, ctx) {
   const preregScore = qualityScore.overallScore;
   const qualityMet = preregScore >= 80;
 
-  // Breakpoint: Review pre-registration
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      qualityScore = await ctx.task(preregistrationQualityScoringTask, { ...{
+    studyInformation,
+    hypothesesSpec,
+    designPlan,
+    samplingPlan,
+    analysisSpecification,
+    registrationDocument,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Pre-registration complete. Quality score: ${preregScore}/100. ${qualityMet ? 'Pre-registration meets quality standards!' : 'Pre-registration may need refinement.'} Review and approve?`,
     title: 'Pre-Registration Review',
     context: {
@@ -138,9 +150,15 @@ export async function process(inputs, ctx) {
         registry,
         hypothesesCount: hypothesesSpec.hypotheses.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 

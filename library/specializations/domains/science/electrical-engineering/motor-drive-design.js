@@ -38,14 +38,22 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 2: Select Drive Topology
-  const topologySelection = await ctx.task(topologySelectionTask, {
+  let topologySelection = await ctx.task(topologySelectionTask, {
     driveName,
     motorType,
     requirements: requirementsDefinition.specs
   });
 
-  // Breakpoint: Review topology selection
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      topologySelection = await ctx.task(topologySelectionTask, { ...{
+    driveName,
+    motorType,
+    requirements: requirementsDefinition.specs
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Review drive topology for ${driveName}. Selected: ${topologySelection.topology}. Proceed with power stage design?`,
     title: 'Topology Review',
     context: {
@@ -57,9 +65,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: topologySelection
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // Phase 3: Design Power Stage (Inverter, Gate Drivers)
   const powerStageDesign = await ctx.task(powerStageDesignTask, {
     driveName,
@@ -76,15 +90,24 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 5: Implement Current and Speed Control Loops
-  const controlLoopImplementation = await ctx.task(controlLoopImplementationTask, {
+  let controlLoopImplementation = await ctx.task(controlLoopImplementationTask, {
     driveName,
     controlMethod: controlMethodSelection.method,
     powerStage: powerStageDesign,
     requirements: requirementsDefinition.specs
   });
 
-  // Breakpoint: Review control loops
-  await ctx.breakpoint({
+    let lastFeedback_phase5Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase5Review) {
+      controlLoopImplementation = await ctx.task(controlLoopImplementationTask, { ...{
+    driveName,
+    controlMethod: controlMethodSelection.method,
+    powerStage: powerStageDesign,
+    requirements: requirementsDefinition.specs
+  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+    }
+  const phase5Review = await ctx.breakpoint({
     question: `Review control loop design for ${driveName}. Current loop BW: ${controlLoopImplementation.currentBW}, Speed loop BW: ${controlLoopImplementation.speedBW}. Proceed with protection design?`,
     title: 'Control Loop Review',
     context: {
@@ -95,9 +118,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: controlLoopImplementation
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase5Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase5Review.approved) break;
+    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+  }
   // Phase 6: Design Protection Features
   const protectionDesign = await ctx.task(protectionDesignTask, {
     driveName,
@@ -106,7 +135,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 7: Test Drive Performance and Efficiency
-  const performanceTesting = await ctx.task(performanceTestingTask, {
+  let performanceTesting = await ctx.task(performanceTestingTask, {
     driveName,
     powerStage: powerStageDesign,
     controlLoops: controlLoopImplementation,
@@ -115,28 +144,53 @@ export async function process(inputs, ctx) {
   });
 
   // Quality Gate: Performance must meet requirements
-  if (!performanceTesting.meetsSpecs) {
-    await ctx.breakpoint({
+      let lastFeedback_phase7Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase7Review) {
+        performanceTesting = await ctx.task(performanceTestingTask, { ...{
+    driveName,
+    powerStage: powerStageDesign,
+    controlLoops: controlLoopImplementation,
+    protection: protectionDesign,
+    requirements: requirementsDefinition.specs
+  }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
+      }
+  const phase7Review = await ctx.breakpoint({
       question: `Performance testing shows ${performanceTesting.failures.length} specifications not met. Iterate design?`,
       title: 'Performance Issues',
       context: {
         runId: ctx.runId,
         failures: performanceTesting.failures,
         recommendations: performanceTesting.recommendations
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase7Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase7Review.approved) break;
+      lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
+    }  }
 
   // Phase 8: Validate with Motor and Load Testing
-  const loadValidation = await ctx.task(loadValidationTask, {
+  let loadValidation = await ctx.task(loadValidationTask, {
     driveName,
     performanceResults: performanceTesting.results,
     motorType,
     requirements: requirementsDefinition.specs
   });
 
-  // Final Breakpoint: Design Approval
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      loadValidation = await ctx.task(loadValidationTask, { ...{
+    driveName,
+    performanceResults: performanceTesting.results,
+    motorType,
+    requirements: requirementsDefinition.specs
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Motor drive design complete for ${driveName}. Efficiency: ${loadValidation.efficiency}. Approve for production?`,
     title: 'Design Approval',
     context: {
@@ -147,9 +201,15 @@ export async function process(inputs, ctx) {
         { path: `artifacts/motor-drive-design.json`, format: 'json', content: { powerStage: powerStageDesign, control: controlLoopImplementation } },
         { path: `artifacts/motor-drive-report.md`, format: 'markdown', content: loadValidation.markdown }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     driveName,
@@ -170,8 +230,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions (abbreviated for brevity)
+  // Task Definitions (abbreviated for brevity)
 
 export const requirementsDefinitionTask = defineTask('requirements-definition', (args, taskCtx) => ({
   kind: 'agent',

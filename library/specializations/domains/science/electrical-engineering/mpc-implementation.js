@@ -46,17 +46,25 @@ export async function process(inputs, ctx) {
       issues: modelDevelopment.issues
     };
   }
-
   // Phase 2: Define Control Objectives and Constraints
-  const objectivesConstraints = await ctx.task(objectivesConstraintsTask, {
+  let objectivesConstraints = await ctx.task(objectivesConstraintsTask, {
     systemName,
     model: modelDevelopment.model,
     controlObjectives,
     constraints
   });
 
-  // Breakpoint: Review objectives and constraints
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      objectivesConstraints = await ctx.task(objectivesConstraintsTask, { ...{
+    systemName,
+    model: modelDevelopment.model,
+    controlObjectives,
+    constraints
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Review MPC objectives and constraints for ${systemName}. ${objectivesConstraints.constraintCount} constraints defined. Proceed with controller design?`,
     title: 'Objectives Review',
     context: {
@@ -69,9 +77,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: objectivesConstraints
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // Phase 3: Design MPC Controller
   const mpcDesign = await ctx.task(mpcDesignTask, {
     systemName,
@@ -81,15 +95,24 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 4: Simulate MPC Performance
-  const mpcSimulation = await ctx.task(mpcSimulationTask, {
+  let mpcSimulation = await ctx.task(mpcSimulationTask, {
     systemName,
     mpcController: mpcDesign.controller,
     model: modelDevelopment.model,
     objectives: objectivesConstraints.objectives
   });
 
-  // Breakpoint: Review simulation results
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      mpcSimulation = await ctx.task(mpcSimulationTask, { ...{
+    systemName,
+    mpcController: mpcDesign.controller,
+    model: modelDevelopment.model,
+    objectives: objectivesConstraints.objectives
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: `MPC simulation complete for ${systemName}. Tracking error: ${mpcSimulation.trackingError}. Review results before constraint testing?`,
     title: 'Simulation Review',
     context: {
@@ -100,11 +123,17 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: mpcSimulation
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
   // Phase 5: Test Constraint Handling and Feasibility
-  const constraintTesting = await ctx.task(constraintTestingTask, {
+  let constraintTesting = await ctx.task(constraintTestingTask, {
     systemName,
     mpcController: mpcDesign.controller,
     model: modelDevelopment.model,
@@ -112,17 +141,32 @@ export async function process(inputs, ctx) {
   });
 
   // Quality Gate: Constraints must be handled properly
-  if (constraintTesting.infeasibilityIssues && constraintTesting.infeasibilityIssues.length > 0) {
-    await ctx.breakpoint({
+      let lastFeedback_phase5Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase5Review) {
+        constraintTesting = await ctx.task(constraintTestingTask, { ...{
+    systemName,
+    mpcController: mpcDesign.controller,
+    model: modelDevelopment.model,
+    constraints: objectivesConstraints.formattedConstraints
+  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+      }
+  const phase5Review = await ctx.breakpoint({
       question: `Constraint testing found ${constraintTesting.infeasibilityIssues.length} infeasibility scenarios. Review and implement soft constraints?`,
       title: 'Constraint Issues',
       context: {
         runId: ctx.runId,
         issues: constraintTesting.infeasibilityIssues,
         recommendations: constraintTesting.recommendations
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase5Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase5Review.approved) break;
+      lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+    }  }
 
   // Phase 6: Implement on Target Controller Platform
   const platformImplementation = await ctx.task(platformImplementationTask, {
@@ -141,15 +185,24 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 8: Monitor and Maintain Controller Performance
-  const performanceMonitoring = await ctx.task(performanceMonitoringTask, {
+  let performanceMonitoring = await ctx.task(performanceMonitoringTask, {
     systemName,
     commissionedSystem: commissioning.system,
     objectives: objectivesConstraints.objectives,
     constraints: objectivesConstraints.formattedConstraints
   });
 
-  // Final Breakpoint: Implementation Approval
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      performanceMonitoring = await ctx.task(performanceMonitoringTask, { ...{
+    systemName,
+    commissionedSystem: commissioning.system,
+    objectives: objectivesConstraints.objectives,
+    constraints: objectivesConstraints.formattedConstraints
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `MPC implementation complete for ${systemName}. Commissioning: ${commissioning.successful ? 'SUCCESSFUL' : 'NEEDS ATTENTION'}. Approve for production?`,
     title: 'Implementation Approval',
     context: {
@@ -160,9 +213,15 @@ export async function process(inputs, ctx) {
         { path: `artifacts/mpc-controller.json`, format: 'json', content: mpcDesign.controller },
         { path: `artifacts/mpc-report.md`, format: 'markdown', content: performanceMonitoring.markdown }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     systemName,
@@ -185,8 +244,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const modelDevelopmentTask = defineTask('model-development', (args, taskCtx) => ({
   kind: 'agent',

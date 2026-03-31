@@ -67,24 +67,37 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 3: Implementing Execution Control');
 
-  const executionControl = await ctx.task(executionControlTask, {
+  let executionControl = await ctx.task(executionControlTask, {
     languageName,
     implementationLanguage,
     outputDir
   });
 
-  artifacts.push(...executionControl.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      executionControl = await ctx.task(executionControlTask, { ...{
+    languageName,
+    implementationLanguage,
+    outputDir
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Execution control implemented: ${executionControl.commands.join(', ')}. Proceed with variable inspection?`,
     title: 'Execution Control Review',
     context: {
       runId: ctx.runId,
       commands: executionControl.commands,
       files: executionControl.artifacts.map(a => ({ path: a.path, format: a.format || 'typescript' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 4: VARIABLE INSPECTION
   // ============================================================================
@@ -153,7 +166,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 8: Generating Documentation');
 
-  const documentation = await ctx.task(dapDocumentationTask, {
+  let documentation = await ctx.task(dapDocumentationTask, {
     languageName,
     features,
     integration,
@@ -161,9 +174,18 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...documentation.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      documentation = await ctx.task(dapDocumentationTask, { ...{
+    languageName,
+    features,
+    integration,
+    testSuite,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Debug Adapter Complete for ${languageName}! ${integration.capabilityCount} capabilities, Test coverage: ${testSuite.coverage}%. Review deliverables?`,
     title: 'Debug Adapter Complete',
     context: {
@@ -178,9 +200,15 @@ export async function process(inputs, ctx) {
         { path: integration.mainFilePath, format: implementationLanguage.toLowerCase(), label: 'Debug Adapter' },
         { path: documentation.setupGuidePath, format: 'markdown', label: 'Setup Guide' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -211,8 +239,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

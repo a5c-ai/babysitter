@@ -59,7 +59,6 @@ export async function process(inputs, ctx) {
     });
     artifacts.push(...result.artifacts);
   }
-
   const endTime = ctx.now();
   return {
     success: true,

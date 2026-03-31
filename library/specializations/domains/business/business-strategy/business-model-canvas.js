@@ -79,7 +79,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 5: Identifying revenue streams');
-  const revenueStreams = await ctx.task(revenueStreamsTask, {
+  let revenueStreams = await ctx.task(revenueStreamsTask, {
     customerSegments: customerSegments.segments,
     valuePropositions: valuePropositions.propositions,
     outputDir
@@ -87,8 +87,16 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...revenueStreams.artifacts);
 
-  // Breakpoint: Review customer-facing elements
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      revenueStreams = await ctx.task(revenueStreamsTask, { ...{
+    customerSegments: customerSegments.segments,
+    valuePropositions: valuePropositions.propositions,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Customer-facing canvas elements complete. ${customerSegments.segments.length} segments, ${valuePropositions.propositions.length} value propositions identified. Review before infrastructure elements?`,
     title: 'Business Model Canvas - Customer Side Review',
     context: {
@@ -103,9 +111,15 @@ export async function process(inputs, ctx) {
         channels: channels.channels.length,
         revenueStreams: revenueStreams.streams.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 6: KEY RESOURCES
   // ============================================================================
@@ -231,8 +245,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

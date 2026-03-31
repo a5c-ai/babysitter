@@ -127,7 +127,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 8: Generating optimization specification document');
-  const specificationDocument = await ctx.task(optimizationSpecificationTask, {
+  let specificationDocument = await ctx.task(optimizationSpecificationTask, {
     optimizationDescription,
     transformationDefinition,
     correctnessCriteria,
@@ -141,8 +141,22 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...specificationDocument.artifacts);
 
-  // Breakpoint: Review compiler optimization design
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      specificationDocument = await ctx.task(optimizationSpecificationTask, { ...{
+    optimizationDescription,
+    transformationDefinition,
+    correctnessCriteria,
+    dataFlowAnalysis,
+    ssaTransformation,
+    correctnessProof,
+    performanceMeasurement,
+    pipelineIntegration,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Compiler optimization design complete. Correct: ${correctnessProof.isCorrect}. Speedup: ${performanceMeasurement.expectedSpeedup}. Review specification?`,
     title: 'Compiler Optimization Design Review',
     context: {
@@ -157,9 +171,15 @@ export async function process(inputs, ctx) {
         expectedSpeedup: performanceMeasurement.expectedSpeedup,
         pipelinePhase: pipelineIntegration.recommendedPhase
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -202,8 +222,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

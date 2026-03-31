@@ -49,22 +49,30 @@ export async function process(inputs, ctx) {
   ctx.log('info', `QC complete. ${qcResult.readsRetained}% reads retained after host removal`);
 
   // Phase 2: Taxonomic Profiling
-  const taxonomyResult = await ctx.task(taxonomicProfilingTask, { projectName, cleanReads: qcResult.cleanReads, taxonomyTool, outputDir });
-  artifacts.push(...taxonomyResult.artifacts);
-
-  await ctx.breakpoint({
+  let taxonomyResult = await ctx.task(taxonomicProfilingTask, { projectName, cleanReads: qcResult.cleanReads, taxonomyTool, outputDir });
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      taxonomyResult = await ctx.task(taxonomicProfilingTask, { ...{ projectName, cleanReads: qcResult.cleanReads, taxonomyTool, outputDir }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Taxonomic profiling complete. ${taxonomyResult.speciesIdentified} species identified. Review taxonomy profiles?`,
     title: 'Taxonomic Profiling Review',
-    context: { runId: ctx.runId, topSpecies: taxonomyResult.topSpecies, diversityStats: taxonomyResult.diversityStats, files: taxonomyResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label })) }
-  });
-
+    context: { runId: ctx.runId, topSpecies: taxonomyResult.topSpecies, diversityStats: taxonomyResult.diversityStats, files: taxonomyResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label })) },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // Phase 3: Metagenomic Assembly
   let assemblyResult = null;
   if (performAssembly) {
     assemblyResult = await ctx.task(metagenomeAssemblyTask, { projectName, cleanReads: qcResult.cleanReads, outputDir });
     artifacts.push(...assemblyResult.artifacts);
   }
-
   // Phase 4: Gene Prediction and Annotation
   const geneResult = await ctx.task(genePredictionTask, { projectName, contigs: assemblyResult?.contigs, cleanReads: qcResult.cleanReads, outputDir });
   artifacts.push(...geneResult.artifacts);
@@ -74,36 +82,53 @@ export async function process(inputs, ctx) {
   artifacts.push(...functionalResult.artifacts);
 
   // Phase 6: AMR Gene Detection
-  const amrResult = await ctx.task(amrDetectionTask, { projectName, cleanReads: qcResult.cleanReads, contigs: assemblyResult?.contigs, outputDir });
-  artifacts.push(...amrResult.artifacts);
-
-  await ctx.breakpoint({
+  let amrResult = await ctx.task(amrDetectionTask, { projectName, cleanReads: qcResult.cleanReads, contigs: assemblyResult?.contigs, outputDir });
+    let lastFeedback_phase6Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase6Review) {
+      amrResult = await ctx.task(amrDetectionTask, { ...{ projectName, cleanReads: qcResult.cleanReads, contigs: assemblyResult?.contigs, outputDir }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
+    }
+  const phase6Review = await ctx.breakpoint({
     question: `AMR detection complete. ${amrResult.amrGenes.length} AMR genes identified. Review AMR results?`,
     title: 'AMR Detection Review',
-    context: { runId: ctx.runId, amrGenes: amrResult.amrGenes, drugClasses: amrResult.drugClasses, files: amrResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label })) }
-  });
-
+    context: { runId: ctx.runId, amrGenes: amrResult.amrGenes, drugClasses: amrResult.drugClasses, files: amrResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label })) },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase6Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase6Review.approved) break;
+    lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
+  }
   // Phase 7: Strain-Level Analysis
   let strainResult = null;
   if (performStrainProfiling) {
     strainResult = await ctx.task(strainProfilingTask, { projectName, cleanReads: qcResult.cleanReads, taxonomyResult, outputDir });
     artifacts.push(...strainResult.artifacts);
   }
-
   // Phase 8: Metabolic Pathway Reconstruction
   const pathwayResult = await ctx.task(pathwayReconstructionTask, { projectName, functionalProfiles: functionalResult.profiles, outputDir });
   artifacts.push(...pathwayResult.artifacts);
 
   // Phase 9: Report Generation
-  const reportResult = await ctx.task(generateMetagenomicsReportTask, { projectName, qcResult, taxonomyResult, assemblyResult, geneResult, functionalResult, amrResult, strainResult, pathwayResult, outputDir });
-  artifacts.push(...reportResult.artifacts);
-
-  await ctx.breakpoint({
+  let reportResult = await ctx.task(generateMetagenomicsReportTask, { projectName, qcResult, taxonomyResult, assemblyResult, geneResult, functionalResult, amrResult, strainResult, pathwayResult, outputDir });
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      reportResult = await ctx.task(generateMetagenomicsReportTask, { ...{ projectName, qcResult, taxonomyResult, assemblyResult, geneResult, functionalResult, amrResult, strainResult, pathwayResult, outputDir }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Metagenomics Analysis Complete. ${taxonomyResult.speciesIdentified} species, ${functionalResult.pathwaysIdentified} pathways, ${amrResult.amrGenes.length} AMR genes. Approve results?`,
     title: 'Metagenomics Analysis Complete',
-    context: { runId: ctx.runId, summary: { species: taxonomyResult.speciesIdentified, pathways: functionalResult.pathwaysIdentified, amrGenes: amrResult.amrGenes.length }, files: [{ path: reportResult.reportPath, format: 'markdown', label: 'Report' }] }
-  });
-
+    context: { runId: ctx.runId, summary: { species: taxonomyResult.speciesIdentified, pathways: functionalResult.pathwaysIdentified, amrGenes: amrResult.amrGenes.length }, files: [{ path: reportResult.reportPath, format: 'markdown', label: 'Report' }] },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
 
   return {
@@ -120,8 +145,7 @@ export async function process(inputs, ctx) {
     metadata: { processId: 'specializations/domains/science/bioinformatics/shotgun-metagenomics', timestamp: startTime, taxonomyTool, functionalTool }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 export const metagenomicsQcTask = defineTask('metagenomics-qc', (args, taskCtx) => ({
   kind: 'agent',
   title: `Metagenomics QC - ${args.projectName}`,

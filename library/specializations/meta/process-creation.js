@@ -48,7 +48,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 2: Designing task structure');
 
-  const taskDesign = await ctx.task(taskStructureDesignTask, {
+  let taskDesign = await ctx.task(taskStructureDesignTask, {
     processName,
     requirements: requirements.analysis,
     includeBreakpoints,
@@ -57,8 +57,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...taskDesign.artifacts);
 
-  // Breakpoint: Review task design
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      taskDesign = await ctx.task(taskStructureDesignTask, { ...{
+    processName,
+    requirements: requirements.analysis,
+    includeBreakpoints,
+    includeQualityGates
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Task structure designed with ${taskDesign.taskCount} tasks. Review before implementation?`,
     title: 'Task Structure Review',
     context: {
@@ -74,9 +83,15 @@ export async function process(inputs, ctx) {
         breakpoints: taskDesign.breakpointCount,
         qualityGates: taskDesign.qualityGateCount
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 3: GENERATE PROCESS FILE
   // ============================================================================
@@ -128,8 +143,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

@@ -20,50 +20,86 @@ export async function process(inputs, ctx) {
     targetQuality = 90
   } = inputs;
 
-  // Phase 1: Crisis Risk Assessment
-  await ctx.breakpoint({
+  let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    // No preceding task identified for re-run with feedback
+    const phase1Review = await ctx.breakpoint({
     question: 'Starting crisis communications plan development. Conduct crisis risk assessment?',
     title: 'Phase 1: Risk Assessment',
     context: {
       runId: ctx.runId,
       phase: 'risk-assessment',
       organization: organization.name
-    }
-  });
-
-  const riskAssessment = await ctx.task(assessCrisisRisksTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
+  let riskAssessment = await ctx.task(assessCrisisRisksTask, {
     organization,
     riskProfile,
     industryVertical,
     regulatoryRequirements
   });
 
-  // Phase 2: Severity Matrix Development
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      riskAssessment = await ctx.task(assessCrisisRisksTask, { ...{
+    organization,
+    riskProfile,
+    industryVertical,
+    regulatoryRequirements
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: 'Risks assessed. Develop severity assessment matrix?',
     title: 'Phase 2: Severity Matrix',
     context: {
       runId: ctx.runId,
       phase: 'severity-matrix',
       riskCount: riskAssessment.risks.length
-    }
-  });
-
-  const severityMatrix = await ctx.task(developSeverityMatrixTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
+  let severityMatrix = await ctx.task(developSeverityMatrixTask, {
     riskAssessment,
     organization
   });
 
-  // Phase 3: Team Structure and RACI
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      severityMatrix = await ctx.task(developSeverityMatrixTask, { ...{
+    riskAssessment,
+    organization
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: 'Severity matrix defined. Establish crisis team and RACI?',
     title: 'Phase 3: Team Structure',
     context: {
       runId: ctx.runId,
       phase: 'team-structure'
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   const [teamStructure, raciMatrix] = await Promise.all([
     ctx.task(defineTeamStructureTask, {
       organization,
@@ -75,49 +111,90 @@ export async function process(inputs, ctx) {
     })
   ]);
 
-  // Phase 4: Escalation Protocols
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      severityMatrix = await ctx.task(developSeverityMatrixTask, { ...{
+    riskAssessment,
+    organization
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: 'Team defined. Develop escalation protocols?',
     title: 'Phase 4: Escalation Protocols',
     context: {
       runId: ctx.runId,
       phase: 'escalation-protocols'
-    }
-  });
-
-  const escalationProtocols = await ctx.task(developEscalationProtocolsTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
+  let escalationProtocols = await ctx.task(developEscalationProtocolsTask, {
     severityMatrix,
     teamStructure,
     raciMatrix
   });
 
-  // Phase 5: Stakeholder Notification Procedures
-  await ctx.breakpoint({
+    let lastFeedback_phase5Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase5Review) {
+      escalationProtocols = await ctx.task(developEscalationProtocolsTask, { ...{
+    severityMatrix,
+    teamStructure,
+    raciMatrix
+  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+    }
+  const phase5Review = await ctx.breakpoint({
     question: 'Escalation defined. Develop stakeholder notification procedures?',
     title: 'Phase 5: Stakeholder Notifications',
     context: {
       runId: ctx.runId,
       phase: 'stakeholder-notifications',
       stakeholderCount: stakeholders.length
-    }
-  });
-
-  const notificationProcedures = await ctx.task(developNotificationProceduresTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase5Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase5Review.approved) break;
+    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+  }
+  let notificationProcedures = await ctx.task(developNotificationProceduresTask, {
     stakeholders,
     severityMatrix,
     regulatoryRequirements
   });
 
-  // Phase 6: Holding Statements and Templates
-  await ctx.breakpoint({
+    let lastFeedback_phase6Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase6Review) {
+      notificationProcedures = await ctx.task(developNotificationProceduresTask, { ...{
+    stakeholders,
+    severityMatrix,
+    regulatoryRequirements
+  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
+    }
+  const phase6Review = await ctx.breakpoint({
     question: 'Notifications planned. Develop holding statements and templates?',
     title: 'Phase 6: Holding Statements',
     context: {
       runId: ctx.runId,
       phase: 'holding-statements'
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase6Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase6Review.approved) break;
+    lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
+  }
   const [holdingStatements, messageTemplates] = await Promise.all([
     ctx.task(developHoldingStatementsTask, {
       riskAssessment,
@@ -131,34 +208,62 @@ export async function process(inputs, ctx) {
     })
   ]);
 
-  // Phase 7: SCCT Framework Integration
-  await ctx.breakpoint({
+    let lastFeedback_phase7Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase7Review) {
+      notificationProcedures = await ctx.task(developNotificationProceduresTask, { ...{
+    stakeholders,
+    severityMatrix,
+    regulatoryRequirements
+  }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
+    }
+  const phase7Review = await ctx.breakpoint({
     question: 'Templates created. Integrate SCCT framework for response strategies?',
     title: 'Phase 7: SCCT Integration',
     context: {
       runId: ctx.runId,
       phase: 'scct-integration'
-    }
-  });
-
-  const scctStrategies = await ctx.task(integrateSCCTFrameworkTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase7Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase7Review.approved) break;
+    lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
+  }
+  let scctStrategies = await ctx.task(integrateSCCTFrameworkTask, {
     riskAssessment,
     severityMatrix,
     organization
   });
 
-  // Phase 8: Scenario Playbooks
-  await ctx.breakpoint({
+    let lastFeedback_phase8Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase8Review) {
+      scctStrategies = await ctx.task(integrateSCCTFrameworkTask, { ...{
+    riskAssessment,
+    severityMatrix,
+    organization
+  }, feedback: lastFeedback_phase8Review, attempt: attempt + 1 });
+    }
+  const phase8Review = await ctx.breakpoint({
     question: 'SCCT integrated. Develop scenario-specific playbooks?',
     title: 'Phase 8: Scenario Playbooks',
     context: {
       runId: ctx.runId,
       phase: 'scenario-playbooks',
       topRisks: riskAssessment.topRisks.length
-    }
-  });
-
-  const scenarioPlaybooks = await ctx.task(developScenarioPlaybooksTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase8Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase8Review.approved) break;
+    lastFeedback_phase8Review = phase8Review.response || phase8Review.feedback || 'Changes requested';
+  }
+  let scenarioPlaybooks = await ctx.task(developScenarioPlaybooksTask, {
     riskAssessment,
     severityMatrix,
     teamStructure,
@@ -167,17 +272,34 @@ export async function process(inputs, ctx) {
     scctStrategies
   });
 
-  // Phase 9: Plan Assembly and Validation
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      scenarioPlaybooks = await ctx.task(developScenarioPlaybooksTask, { ...{
+    riskAssessment,
+    severityMatrix,
+    teamStructure,
+    escalationProtocols,
+    holdingStatements,
+    scctStrategies
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: 'Playbooks complete. Assemble and validate crisis plan?',
     title: 'Phase 9: Plan Assembly',
     context: {
       runId: ctx.runId,
       phase: 'plan-assembly',
       targetQuality
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const qualityResult = await ctx.task(validateCrisisPlanTask, {
     riskAssessment,
     severityMatrix,
@@ -235,8 +357,7 @@ export async function process(inputs, ctx) {
     };
   }
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const assessCrisisRisksTask = defineTask('assess-crisis-risks', (args, taskCtx) => ({
   kind: 'agent',

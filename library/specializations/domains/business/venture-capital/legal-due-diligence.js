@@ -91,7 +91,7 @@ export async function process(inputs, ctx) {
 
   // Task 7: Employment and HR Review
   ctx.log('info', 'Reviewing employment matters');
-  const employmentReview = await ctx.task(employmentReviewTask, {
+  let employmentReview = await ctx.task(employmentReviewTask, {
     companyName,
     corporateDocuments,
     outputDir
@@ -99,8 +99,16 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...employmentReview.artifacts);
 
-  // Breakpoint: Review legal DD findings
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      employmentReview = await ctx.task(employmentReviewTask, { ...{
+    companyName,
+    corporateDocuments,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Legal DD complete for ${companyName}. Cap table clean: ${capTableAnalysis.isClean}. Material issues: ${corporateReview.materialIssues.length}. Review findings?`,
     title: 'Legal Due Diligence Results',
     context: {
@@ -114,9 +122,15 @@ export async function process(inputs, ctx) {
         pendingLitigation: litigationReview.pendingMatters.length,
         complianceStatus: complianceAssessment.status
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 8: Generate Legal DD Report
   ctx.log('info', 'Generating legal due diligence report');
   const ddReport = await ctx.task(legalDDReportTask, {
@@ -181,8 +195,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Corporate Structure Review
+  // Task 1: Corporate Structure Review
 export const corporateStructureTask = defineTask('corporate-structure', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Review corporate structure',

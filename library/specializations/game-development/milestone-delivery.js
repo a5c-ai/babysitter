@@ -41,18 +41,30 @@ export async function process(inputs, ctx) {
   artifacts.push(...requirementsReview.artifacts);
 
   // Phase 2: Pre-Milestone Bug Triage
-  const bugTriage = await ctx.task(bugTriageTask, {
+  let bugTriage = await ctx.task(bugTriageTask, {
     projectName, milestoneType, bugTriageThreshold, outputDir
   });
   artifacts.push(...bugTriage.artifacts);
 
-  if (bugTriage.criticalBugs > bugTriageThreshold.critical) {
-    await ctx.breakpoint({
+      let lastFeedback_phase2Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase2Review) {
+        bugTriage = await ctx.task(bugTriageTask, { ...{
+    projectName, milestoneType, bugTriageThreshold, outputDir
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+      }
+  const phase2Review = await ctx.breakpoint({
       question: `${bugTriage.criticalBugs} critical bugs found for ${milestoneType}. Must fix before milestone. Continue with bug fixing?`,
       title: 'Critical Bugs Found',
-      context: { runId: ctx.runId, criticalBugs: bugTriage.criticalBugs, bugList: bugTriage.criticalBugList }
-    });
-  }
+      context: { runId: ctx.runId, criticalBugs: bugTriage.criticalBugs, bugList: bugTriage.criticalBugList },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase2Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase2Review.approved) break;
+      lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+    } }
 
   // Phase 3: Release Branch and Build
   const releaseBuild = await ctx.task(releaseBuildTask, {
@@ -73,17 +85,28 @@ export async function process(inputs, ctx) {
   artifacts.push(...milestoneDoc.artifacts);
 
   // Phase 6: Stakeholder Approval
-  const stakeholderApproval = await ctx.task(milestoneApprovalTask, {
+  let stakeholderApproval = await ctx.task(milestoneApprovalTask, {
     projectName, milestoneType, acceptanceTesting, milestoneDoc, outputDir
   });
-  artifacts.push(...stakeholderApproval.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      stakeholderApproval = await ctx.task(milestoneApprovalTask, { ...{
+    projectName, milestoneType, acceptanceTesting, milestoneDoc, outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `${milestoneType.toUpperCase()} milestone for ${projectName}. Acceptance: ${acceptanceTesting.passRate}% criteria met. Approved: ${stakeholderApproval.approved}. Proceed?`,
     title: `${milestoneType.toUpperCase()} Milestone Review`,
-    context: { runId: ctx.runId, acceptanceTesting, stakeholderApproval }
-  });
-
+    context: { runId: ctx.runId, acceptanceTesting, stakeholderApproval },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 7: Retrospective
   const retrospective = await ctx.task(milestoneRetrospectiveTask, {
     projectName, milestoneType, bugTriage, acceptanceTesting, stakeholderApproval, outputDir

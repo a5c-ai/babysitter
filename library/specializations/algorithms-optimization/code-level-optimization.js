@@ -25,15 +25,24 @@ export async function process(inputs, ctx) {
   const optimization = await ctx.task(microOptimizationTask, { code, language, profiling, targetMetric, outputDir });
   artifacts.push(...optimization.artifacts);
 
-  const benchmarking = await ctx.task(benchmarkingTask, { code, optimizedCode: optimization.code, language, outputDir });
-  artifacts.push(...benchmarking.artifacts);
-
-  await ctx.breakpoint({
+  let benchmarking = await ctx.task(benchmarkingTask, { code, optimizedCode: optimization.code, language, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      benchmarking = await ctx.task(benchmarkingTask, { ...{ code, optimizedCode: optimization.code, language, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Code optimization complete. Improvement: ${benchmarking.improvement}%. Review optimized code?`,
     title: 'Code Optimization Complete',
-    context: { runId: ctx.runId, improvement: benchmarking.improvement, techniques: optimization.techniques }
-  });
-
+    context: { runId: ctx.runId, improvement: benchmarking.improvement, techniques: optimization.techniques },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     optimizedCode: optimization.code,

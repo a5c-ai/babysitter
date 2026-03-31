@@ -28,15 +28,24 @@ export async function process(inputs, ctx) {
   const practice = await ctx.task(practiceSessionTask, { plan, outputDir });
   artifacts.push(...practice.artifacts);
 
-  const mockInterview = await ctx.task(mockInterviewTask, { company, role, plan, outputDir });
-  artifacts.push(...mockInterview.artifacts);
-
-  await ctx.breakpoint({
+  let mockInterview = await ctx.task(mockInterviewTask, { company, role, plan, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      mockInterview = await ctx.task(mockInterviewTask, { ...{ company, role, plan, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Interview preparation session complete. Mock interview score: ${mockInterview.score}/100. Review plan?`,
     title: 'FAANG Interview Prep Complete',
-    context: { runId: ctx.runId, company, role, mockScore: mockInterview.score, weakAreas: assessment.weakAreas }
-  });
-
+    context: { runId: ctx.runId, company, role, mockScore: mockInterview.score, weakAreas: assessment.weakAreas },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     company,

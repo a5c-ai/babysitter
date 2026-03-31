@@ -67,15 +67,24 @@ export async function process(inputs, ctx) {
   artifacts.push(...pickPlaceTest.artifacts);
 
   // Phase 9: Parameter Tuning
-  const tuning = await ctx.task(moveitParameterTuningTask, { robotName, pickPlaceTest, outputDir });
-  artifacts.push(...tuning.artifacts);
-
-  await ctx.breakpoint({
+  let tuning = await ctx.task(moveitParameterTuningTask, { robotName, pickPlaceTest, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      tuning = await ctx.task(moveitParameterTuningTask, { ...{ robotName, pickPlaceTest, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `MoveIt Configuration Complete for ${robotName}. Pick success rate: ${pickPlaceTest.successRate}%. Review?`,
     title: 'MoveIt Configuration Complete',
-    context: { runId: ctx.runId, successRate: pickPlaceTest.successRate }
-  });
-
+    context: { runId: ctx.runId, successRate: pickPlaceTest.successRate },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: pickPlaceTest.successRate >= 90,
     robotName,

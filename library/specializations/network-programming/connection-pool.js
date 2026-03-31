@@ -59,7 +59,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Analyzing requirements and designing pool');
 
-  const poolDesign = await ctx.task(poolDesignTask, {
+  let poolDesign = await ctx.task(poolDesignTask, {
     projectName,
     language,
     poolConfig,
@@ -67,18 +67,33 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...poolDesign.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      poolDesign = await ctx.task(poolDesignTask, { ...{
+    projectName,
+    language,
+    poolConfig,
+    healthCheckConfig,
+    outputDir
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Phase 1 Complete: Pool design created for ${poolConfig.maxConnections} max connections. Proceed with implementation?`,
     title: 'Pool Design Review',
     context: {
       runId: ctx.runId,
       poolDesign: poolDesign.design,
       files: poolDesign.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 2: CONNECTION LIFECYCLE
   // ============================================================================
@@ -164,7 +179,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 7: Creating comprehensive tests');
 
-  const testSuite = await ctx.task(testSuiteTask, {
+  let testSuite = await ctx.task(testSuiteTask, {
     projectName,
     language,
     poolConfig,
@@ -203,9 +218,21 @@ export async function process(inputs, ctx) {
   ]);
 
   artifacts.push(...documentation.artifacts);
-  artifacts.push(...validation.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      testSuite = await ctx.task(testSuiteTask, { ...{
+    projectName,
+    language,
+    poolConfig,
+    connectionLifecycle,
+    checkoutCheckin,
+    healthChecking,
+    automaticRecovery,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Connection Pool Implementation Complete for ${projectName}! Validation score: ${validation.overallScore}/100. Tests: ${testSuite.passedTests}/${testSuite.totalTests} passed. Review deliverables?`,
     title: 'Connection Pool Complete - Final Review',
     context: {
@@ -221,9 +248,15 @@ export async function process(inputs, ctx) {
         { path: documentation.readmePath, format: 'markdown', label: 'README' },
         { path: documentation.apiDocPath, format: 'markdown', label: 'API Documentation' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -255,8 +288,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

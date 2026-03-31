@@ -17,22 +17,32 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Starting Joint Commission Survey Readiness for: ${organizationName}`);
 
-  const standardsAssessment = await ctx.task(jcStandardsAssessmentTask, { organizationName, accreditationType, focusAreas, outputDir });
-  artifacts.push(...standardsAssessment.artifacts);
-
-  await ctx.breakpoint({ question: `Standards assessment complete. Compliance score: ${standardsAssessment.complianceScore}%. ${standardsAssessment.criticalFindings.length} critical findings. Proceed?`, title: 'Standards Assessment Review', context: { runId: ctx.runId, score: standardsAssessment.complianceScore, critical: standardsAssessment.criticalFindings } });
-
+  let standardsAssessment = await ctx.task(jcStandardsAssessmentTask, { organizationName, accreditationType, focusAreas, outputDir });
+    let lastFeedback_assessmentApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_assessmentApproval) {
+      standardsAssessment = await ctx.task(jcStandardsAssessmentTask, { ...{ organizationName, accreditationType, focusAreas, outputDir }, feedback: lastFeedback_assessmentApproval, attempt: attempt + 1 });
+    }
+  const assessmentApproval = await ctx.breakpoint({ question: `Standards assessment complete. Compliance score: ${standardsAssessment.complianceScore}%. ${standardsAssessment.criticalFindings.length} critical findings. Proceed?`, title: 'Standards Assessment Review', context: { runId: ctx.runId, score: standardsAssessment.complianceScore, critical: standardsAssessment.criticalFindings }, expert: 'owner', tags: ['approval-gate'], previousFeedback: lastFeedback_assessmentApproval || undefined, attempt: attempt > 0 ? attempt + 1 : undefined });
+    if (assessmentApproval.approved) break;
+    lastFeedback_assessmentApproval = assessmentApproval.response || assessmentApproval.feedback || 'Changes requested';
+  }
   const npsgsCompliance = await ctx.task(jcNPSGsTask, { accreditationType, outputDir });
   artifacts.push(...npsgsCompliance.artifacts);
 
   const tracerProgram = await ctx.task(jcTracerTask, { standardsAssessment, accreditationType, outputDir });
   artifacts.push(...tracerProgram.artifacts);
 
-  const documentCompliance = await ctx.task(jcDocumentationTask, { standardsAssessment, outputDir });
-  artifacts.push(...documentCompliance.artifacts);
-
-  await ctx.breakpoint({ question: `Tracer program designed with ${tracerProgram.tracerTypes.length} tracer types. ${documentCompliance.documentsReviewed} documents reviewed. Proceed with staff preparation?`, title: 'Tracer Program Review', context: { runId: ctx.runId, tracers: tracerProgram.tracerTypes, documents: documentCompliance.gaps } });
-
+  let documentCompliance = await ctx.task(jcDocumentationTask, { standardsAssessment, outputDir });
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      documentCompliance = await ctx.task(jcDocumentationTask, { ...{ standardsAssessment, outputDir }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({ question: `Tracer program designed with ${tracerProgram.tracerTypes.length} tracer types. ${documentCompliance.documentsReviewed} documents reviewed. Proceed with staff preparation?`, title: 'Tracer Program Review', context: { runId: ctx.runId, tracers: tracerProgram.tracerTypes, documents: documentCompliance.gaps }, expert: 'owner', tags: ['approval-gate'], previousFeedback: lastFeedback_finalApproval || undefined, attempt: attempt > 0 ? attempt + 1 : undefined });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const staffPreparation = await ctx.task(jcStaffPrepTask, { standardsAssessment, tracerProgram, outputDir });
   artifacts.push(...staffPreparation.artifacts);
 

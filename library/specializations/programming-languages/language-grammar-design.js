@@ -46,7 +46,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Defining Language Goals');
 
-  const languageGoals = await ctx.task(languageGoalsTask, {
+  let languageGoals = await ctx.task(languageGoalsTask, {
     languageName,
     paradigm,
     targetDomain,
@@ -56,9 +56,20 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...languageGoals.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      languageGoals = await ctx.task(languageGoalsTask, { ...{
+    languageName,
+    paradigm,
+    targetDomain,
+    referenceLanguages,
+    syntaxStyle,
+    expressionOriented,
+    outputDir
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Language goals defined for ${languageName}. Target domain: ${targetDomain}, paradigm: ${paradigm}. Key features: ${languageGoals.keyFeatures.join(', ')}. Proceed with syntax design?`,
     title: 'Language Goals Review',
     context: {
@@ -68,9 +79,15 @@ export async function process(inputs, ctx) {
       keyFeatures: languageGoals.keyFeatures,
       designPrinciples: languageGoals.designPrinciples,
       files: languageGoals.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 2: CORE SYNTAX DESIGN
   // ============================================================================
@@ -140,7 +157,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 6: Analyzing Grammar Ambiguity');
 
-  const ambiguityAnalysis = await ctx.task(ambiguityAnalysisTask, {
+  let ambiguityAnalysis = await ctx.task(ambiguityAnalysisTask, {
     languageName,
     parsingStrategy,
     syntacticGrammar,
@@ -148,9 +165,18 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...ambiguityAnalysis.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase6Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase6Review) {
+      ambiguityAnalysis = await ctx.task(ambiguityAnalysisTask, { ...{
+    languageName,
+    parsingStrategy,
+    syntacticGrammar,
+    operatorPrecedence,
+    outputDir
+  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
+    }
+  const phase6Review = await ctx.breakpoint({
     question: `Ambiguity analysis complete. Found ${ambiguityAnalysis.conflicts.length} potential conflicts. ${ambiguityAnalysis.resolved ? 'All resolved.' : 'Requires attention.'} Continue with validation?`,
     title: 'Ambiguity Analysis Review',
     context: {
@@ -158,9 +184,15 @@ export async function process(inputs, ctx) {
       conflicts: ambiguityAnalysis.conflicts,
       resolutions: ambiguityAnalysis.resolutions,
       files: ambiguityAnalysis.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase6Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase6Review.approved) break;
+    lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 7: GRAMMAR VALIDATION
   // ============================================================================
@@ -218,7 +250,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 10: Final Grammar Review');
 
-  const finalReview = await ctx.task(grammarFinalReviewTask, {
+  let finalReview = await ctx.task(grammarFinalReviewTask, {
     languageName,
     languageGoals,
     syntacticGrammar,
@@ -228,9 +260,20 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...finalReview.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      finalReview = await ctx.task(grammarFinalReviewTask, { ...{
+    languageName,
+    languageGoals,
+    syntacticGrammar,
+    lexicalGrammar,
+    grammarValidation,
+    documentation,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Grammar Design Complete for ${languageName}! Validation score: ${grammarValidation.score}/100. ${syntacticGrammar.productionCount} productions, ${lexicalGrammar.tokenCount} token types. Review deliverables?`,
     title: 'Grammar Design Complete',
     context: {
@@ -248,9 +291,15 @@ export async function process(inputs, ctx) {
         { path: documentation.specificationPath, format: 'markdown', label: 'Grammar Specification' },
         { path: documentation.ebnfPath, format: 'ebnf', label: 'EBNF Grammar' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -297,8 +346,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

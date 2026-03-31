@@ -43,15 +43,24 @@ export async function process(inputs, ctx) {
   const crashReporting = await ctx.task(setupCrashReportingTask, { projectName, framework, analyticsProviders, outputDir });
   artifacts.push(...crashReporting.artifacts);
 
-  const usageAnalytics = await ctx.task(setupUsageAnalyticsTask, { projectName, framework, analyticsProviders, privacyConfig, outputDir });
-  artifacts.push(...usageAnalytics.artifacts);
-
-  await ctx.breakpoint({
+  let usageAnalytics = await ctx.task(setupUsageAnalyticsTask, { projectName, framework, analyticsProviders, privacyConfig, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      usageAnalytics = await ctx.task(setupUsageAnalyticsTask, { ...{ projectName, framework, analyticsProviders, privacyConfig, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Analytics configured. Providers: ${analyticsProviders.join(', ')}. Privacy mode: ${privacyMode}. Review?`,
     title: 'Analytics Setup Review',
-    context: { runId: ctx.runId, analyticsProviders, privacyMode }
-  });
-
+    context: { runId: ctx.runId, analyticsProviders, privacyMode },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const eventTracking = await ctx.task(implementEventTrackingTask, { projectName, framework, outputDir });
   artifacts.push(...eventTracking.artifacts);
 

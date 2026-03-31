@@ -59,7 +59,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 3: Defining quality attribute scenarios');
-  const scenarioDefinition = await ctx.task(qualityAttributeScenarioDefinitionTask, {
+  let scenarioDefinition = await ctx.task(qualityAttributeScenarioDefinitionTask, {
     systemName,
     qualityAttributes,
     architectureAnalysis,
@@ -69,8 +69,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...scenarioDefinition.artifacts);
 
-  // Breakpoint: Review scenarios before evaluation
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      scenarioDefinition = await ctx.task(qualityAttributeScenarioDefinitionTask, { ...{
+    systemName,
+    qualityAttributes,
+    architectureAnalysis,
+    scenarioCount,
+    outputDir
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Quality attribute scenarios defined for ${systemName}. Review ${scenarioDefinition.scenarios.length} scenarios before evaluation?`,
     title: 'Quality Attribute Scenarios Review',
     context: {
@@ -87,9 +97,15 @@ export async function process(inputs, ctx) {
         highPriorityScenarios: scenarioDefinition.highPriorityScenarios || 0,
         qualityAttributes: qualityAttributes.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 4: ARCHITECTURE EVALUATION AGAINST SCENARIOS
   // ============================================================================
@@ -193,7 +209,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 9: Scoring overall review quality and completeness');
-  const qualityScore = await ctx.task(reviewQualityScoringTask, {
+  let qualityScore = await ctx.task(reviewQualityScoringTask, {
     systemName,
     architectureAnalysis,
     scenarioDefinition,
@@ -210,8 +226,22 @@ export async function process(inputs, ctx) {
   const reviewScore = qualityScore.overallScore;
   const qualityMet = reviewScore >= minimumQualityScore;
 
-  // Final breakpoint: Review complete report and approve
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      qualityScore = await ctx.task(reviewQualityScoringTask, { ...{
+    systemName,
+    architectureAnalysis,
+    scenarioDefinition,
+    evaluationResults,
+    riskAnalysis,
+    recommendationsResult,
+    actionPlan,
+    minimumQualityScore,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `System design review complete for ${systemName}. Review score: ${reviewScore}/100. ${qualityMet ? 'Review meets quality standards!' : 'Review may need additional work.'} Approve and communicate results?`,
     title: 'Final Review Approval',
     context: {
@@ -233,9 +263,15 @@ export async function process(inputs, ctx) {
         actionItems: actionPlan.actionItems?.length || 0,
         reviewDuration: ctx.now() - startTime
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -304,8 +340,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

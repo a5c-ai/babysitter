@@ -126,7 +126,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 8: Assessing safety case quality');
-  const qualityScore = await ctx.task(safetyCaseQualityTask, {
+  let qualityScore = await ctx.task(safetyCaseQualityTask, {
     goalDecomposition,
     argumentStructure: argumentStructure.structure,
     evidenceAssessment: evidenceAssessment.assessment,
@@ -141,8 +141,20 @@ export async function process(inputs, ctx) {
   const qualityMet = qualityScore.overallScore >= 75;
   const confidenceMet = confidencePropagation.overallConfidence >= confidenceThreshold;
 
-  // Breakpoint: Review safety case results
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      qualityScore = await ctx.task(safetyCaseQualityTask, { ...{
+    goalDecomposition,
+    argumentStructure: argumentStructure.structure,
+    evidenceAssessment: evidenceAssessment.assessment,
+    gapAnalysis,
+    confidencePropagation,
+    confidenceThreshold,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Safety case analysis complete. Quality score: ${qualityScore.overallScore}/100. Overall confidence: ${(confidencePropagation.overallConfidence * 100).toFixed(1)}%. ${gapAnalysis.gaps.length} gaps identified. ${qualityMet && confidenceMet ? 'Meets thresholds!' : 'Review gaps and evidence.'} Review results?`,
     title: 'Safety Case Results Review',
     context: {
@@ -161,9 +173,15 @@ export async function process(inputs, ctx) {
         overallConfidence: confidencePropagation.overallConfidence,
         qualityScore: qualityScore.overallScore
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 9: REPORT GENERATION
   // ============================================================================
@@ -205,8 +223,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

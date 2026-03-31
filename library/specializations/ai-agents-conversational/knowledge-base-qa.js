@@ -108,7 +108,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...citationSystem.artifacts);
   }
-
   // ============================================================================
   // PHASE 6: FEEDBACK LOOP
   // ============================================================================
@@ -125,14 +124,13 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...feedbackLoop.artifacts);
   }
-
   // ============================================================================
   // PHASE 7: QA EVALUATION
   // ============================================================================
 
   ctx.log('info', 'Phase 7: Evaluating QA quality');
 
-  const qaEvaluation = await ctx.task(qaEvaluationTask, {
+  let qaEvaluation = await ctx.task(qaEvaluationTask, {
     agentName,
     qaEngine: qaEngine.engine,
     retrievalEngine: retrievalEngine.engine,
@@ -141,8 +139,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...qaEvaluation.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      qaEvaluation = await ctx.task(qaEvaluationTask, { ...{
+    agentName,
+    qaEngine: qaEngine.engine,
+    retrievalEngine: retrievalEngine.engine,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Knowledge QA agent ${agentName} complete. Answer accuracy: ${qaEvaluation.results.answerAccuracy}. Review implementation?`,
     title: 'Knowledge QA Review',
     context: {
@@ -154,9 +161,15 @@ export async function process(inputs, ctx) {
         answerAccuracy: qaEvaluation.results.answerAccuracy
       },
       files: artifacts.map(a => ({ path: a.path, format: a.format || 'python' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -176,8 +189,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

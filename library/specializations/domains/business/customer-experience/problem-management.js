@@ -122,7 +122,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 8: Preparing problem closure');
-  const problemClosure = await ctx.task(problemClosureTask, {
+  let problemClosure = await ctx.task(problemClosureTask, {
     problemLogging,
     rootCauseAnalysis,
     permanentFixPlanning,
@@ -134,9 +134,19 @@ export async function process(inputs, ctx) {
   artifacts.push(...problemClosure.artifacts);
 
   const rootCauseIdentified = rootCauseAnalysis.rootCauseIdentified;
-  const permanentFixPlanned = permanentFixPlanning.fixPlanned;
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      problemClosure = await ctx.task(problemClosureTask, { ...{
+    problemLogging,
+    rootCauseAnalysis,
+    permanentFixPlanning,
+    workaroundDocumentation,
+    changeRequestPreparation,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Problem management complete for ${problemData.id || 'problem'}. Root cause identified: ${rootCauseIdentified ? 'Yes' : 'No'}. Permanent fix planned: ${permanentFixPlanned ? 'Yes' : 'No'}. Related incidents: ${incidents.length}. Review and close?`,
     title: 'Problem Management Review',
     context: {
@@ -156,9 +166,15 @@ export async function process(inputs, ctx) {
         workaroundAvailable: workaroundDocumentation.workaroundAvailable,
         changeRequestCreated: changeRequestPreparation.changeRequestCreated
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -203,8 +219,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

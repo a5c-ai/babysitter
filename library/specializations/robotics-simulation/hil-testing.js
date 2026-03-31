@@ -58,15 +58,24 @@ export async function process(inputs, ctx) {
   const dataLogging = await ctx.task(hilDataLoggingTask, { robotName, automatedExecution, outputDir });
   artifacts.push(...dataLogging.artifacts);
 
-  const regressionTesting = await ctx.task(regressionTestingTask, { robotName, automatedExecution, outputDir });
-  artifacts.push(...regressionTesting.artifacts);
-
-  await ctx.breakpoint({
+  let regressionTesting = await ctx.task(regressionTestingTask, { robotName, automatedExecution, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      regressionTesting = await ctx.task(regressionTestingTask, { ...{ robotName, automatedExecution, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `HIL Testing Complete for ${robotName}. Pass rate: ${automatedExecution.passRate}%, Coverage: ${testCases.coverage}%. Review?`,
     title: 'HIL Testing Complete',
-    context: { runId: ctx.runId, passRate: automatedExecution.passRate, coverage: testCases.coverage }
-  });
-
+    context: { runId: ctx.runId, passRate: automatedExecution.passRate, coverage: testCases.coverage },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: automatedExecution.passRate >= 95,
     robotName,

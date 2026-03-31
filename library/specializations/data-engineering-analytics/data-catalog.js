@@ -109,7 +109,6 @@ export async function process(inputs, ctx) {
   } else {
     ctx.log('info', `Using specified platform: ${selectedPlatform}`);
   }
-
   // ============================================================================
   // PHASE 3: ARCHITECTURE DESIGN
   // ============================================================================
@@ -176,7 +175,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...lineageSetup.artifacts);
   }
-
   // ============================================================================
   // PHASE 7: BUSINESS GLOSSARY SETUP (if enabled)
   // ============================================================================
@@ -195,7 +193,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...glossarySetup.artifacts);
   }
-
   // ============================================================================
   // PHASE 8: SEARCH AND DISCOVERY CONFIGURATION
   // ============================================================================
@@ -230,7 +227,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...accessControlSetup.artifacts);
   }
-
   // ============================================================================
   // PHASE 10: DATA QUALITY INTEGRATION (if enabled)
   // ============================================================================
@@ -248,7 +244,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...dataQualityIntegration.artifacts);
   }
-
   // ============================================================================
   // PHASE 11: DEPLOYMENT CONFIGURATION
   // ============================================================================
@@ -302,7 +297,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 14: Generating comprehensive documentation');
 
-  const documentation = await ctx.task(documentationGenerationTask, {
+  let documentation = await ctx.task(documentationGenerationTask, {
     platform: selectedPlatform,
     platformEvaluation,
     requirements: requirementsAnalysis.analyzedRequirements,
@@ -324,9 +319,28 @@ export async function process(inputs, ctx) {
 
   // ============================================================================
   // BREAKPOINT: REVIEW COMPLETE SETUP
-  // ============================================================================
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      documentation = await ctx.task(documentationGenerationTask, { ...{
+    platform: selectedPlatform,
+    platformEvaluation,
+    requirements: requirementsAnalysis.analyzedRequirements,
+    architectureDesign,
+    connectorsSetup,
+    metadataManagement,
+    lineageSetup,
+    glossarySetup,
+    searchDiscovery,
+    accessControlSetup,
+    dataQualityIntegration,
+    deploymentConfig,
+    toolIntegrations,
+    monitoringSetup,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Data Catalog setup complete for ${selectedPlatform}. Review the architecture, configuration, and deployment plan?`,
     title: 'Data Catalog Setup Complete',
     context: {
@@ -341,9 +355,15 @@ export async function process(inputs, ctx) {
         glossaryEnabled: enableGlossary,
         estimatedSetupTime: documentation.implementationPlan?.estimatedTimeline || 'N/A'
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 15: IMPLEMENTATION CHECKLIST
   // ============================================================================
@@ -417,8 +437,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

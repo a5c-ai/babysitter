@@ -122,7 +122,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 7: Validating BRD quality and completeness');
-  const qualityValidation = await ctx.task(brdQualityValidationTask, {
+  let qualityValidation = await ctx.task(brdQualityValidationTask, {
     projectName,
     brdDocument,
     requirements: requirementsStructuring.structuredRequirements,
@@ -135,8 +135,19 @@ export async function process(inputs, ctx) {
 
   const qualityMet = qualityValidation.overallScore >= 85;
 
-  // Breakpoint: Review BRD
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      qualityValidation = await ctx.task(brdQualityValidationTask, { ...{
+    projectName,
+    brdDocument,
+    requirements: requirementsStructuring.structuredRequirements,
+    traceabilityMatrix,
+    template,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `BRD creation complete for ${projectName}. Quality score: ${qualityValidation.overallScore}/100. ${qualityMet ? 'BRD meets quality standards!' : 'BRD may need refinement.'} Review and approve?`,
     title: 'BRD Quality Review',
     context: {
@@ -154,9 +165,15 @@ export async function process(inputs, ctx) {
         totalRequirements: requirementsStructuring.structuredRequirements?.length || 0,
         traceabilityComplete: traceabilityMatrix.completeness
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 8: APPROVAL WORKFLOW SETUP
   // ============================================================================
@@ -214,8 +231,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

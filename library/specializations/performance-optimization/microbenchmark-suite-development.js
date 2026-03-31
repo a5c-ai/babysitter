@@ -41,15 +41,24 @@ export async function process(inputs, ctx) {
   artifacts.push(...componentAnalysis.artifacts);
 
   // Phase 3: Design Benchmark Tests
-  const benchmarkDesign = await ctx.task(designBenchmarkTestsTask, { projectName, componentAnalysis, outputDir });
-  artifacts.push(...benchmarkDesign.artifacts);
-
-  await ctx.breakpoint({
+  let benchmarkDesign = await ctx.task(designBenchmarkTestsTask, { projectName, componentAnalysis, outputDir });
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      benchmarkDesign = await ctx.task(designBenchmarkTestsTask, { ...{ projectName, componentAnalysis, outputDir }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Designed ${benchmarkDesign.benchmarks.length} benchmarks for ${componentAnalysis.components.length} components. Implement?`,
     title: 'Benchmark Design Review',
-    context: { runId: ctx.runId, benchmarkDesign }
-  });
-
+    context: { runId: ctx.runId, benchmarkDesign },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // Phase 4: Implement Benchmark Code
   const implementation = await ctx.task(implementBenchmarkCodeTask, { projectName, benchmarkFramework, benchmarkDesign, outputDir });
   artifacts.push(...implementation.artifacts);
@@ -71,15 +80,24 @@ export async function process(inputs, ctx) {
   artifacts.push(...ciIntegration.artifacts);
 
   // Phase 9: Document Benchmarks
-  const documentation = await ctx.task(documentBenchmarkSuiteTask, { projectName, implementation, baseline, statistics, outputDir });
-  artifacts.push(...documentation.artifacts);
-
-  await ctx.breakpoint({
+  let documentation = await ctx.task(documentBenchmarkSuiteTask, { projectName, implementation, baseline, statistics, outputDir });
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      documentation = await ctx.task(documentBenchmarkSuiteTask, { ...{ projectName, implementation, baseline, statistics, outputDir }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Benchmark suite complete. ${implementation.benchmarkCount} benchmarks implemented. CI integrated: ${ciIntegration.integrated}. Accept?`,
     title: 'Microbenchmark Suite Review',
-    context: { runId: ctx.runId, implementation, baseline }
-  });
-
+    context: { runId: ctx.runId, implementation, baseline },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     projectName,

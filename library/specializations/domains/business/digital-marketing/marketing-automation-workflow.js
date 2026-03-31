@@ -96,7 +96,7 @@ export async function process(inputs, ctx) {
 
   // Task 9: Test Workflow End-to-End
   ctx.log('info', 'Phase 9: Testing workflow end-to-end');
-  const workflowTesting = await ctx.task(workflowTestingTask, {
+  let workflowTesting = await ctx.task(workflowTestingTask, {
     workflowBuild,
     branchingConfig,
     goalTracking,
@@ -104,8 +104,17 @@ export async function process(inputs, ctx) {
   });
   artifacts.push(...workflowTesting.artifacts);
 
-  // Breakpoint: Review before launch
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      workflowTesting = await ctx.task(workflowTestingTask, { ...{
+    workflowBuild,
+    branchingConfig,
+    goalTracking,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Workflow testing complete. ${workflowTesting.passedTests}/${workflowTesting.totalTests} tests passed. Ready to launch?`,
     title: 'Marketing Automation Workflow Review',
     context: {
@@ -117,9 +126,15 @@ export async function process(inputs, ctx) {
         totalTests: workflowTesting.totalTests,
         branchingPoints: branchingConfig.branchCount
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 10: Launch and Monitor
   ctx.log('info', 'Phase 10: Creating launch and monitoring plan');
   const launchMonitoring = await ctx.task(launchMonitoringTask, {
@@ -160,8 +175,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task definitions
+  // Task definitions
 export const journeyMappingTask = defineTask('journey-mapping', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Map customer journey and touchpoints',

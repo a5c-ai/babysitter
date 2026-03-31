@@ -59,7 +59,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Evaluating and selecting testing tools');
 
-  const toolSelectionResult = await ctx.task(toolSelectionTask, {
+  let toolSelectionResult = await ctx.task(toolSelectionTask, {
     projectName,
     techStack,
     testTypes,
@@ -70,8 +70,19 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...toolSelectionResult.artifacts);
 
-  // Quality Gate: Tool selection must be approved
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      toolSelectionResult = await ctx.task(toolSelectionTask, { ...{
+    projectName,
+    techStack,
+    testTypes,
+    cicdPlatform,
+    reportingTools,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Phase 1 Complete: Tool selection recommendations ready. Framework: ${toolSelectionResult.recommendations.testFramework}, E2E: ${toolSelectionResult.recommendations.e2eFramework}, API: ${toolSelectionResult.recommendations.apiFramework}. Review and approve tool selection?`,
     title: 'Tool Selection Review',
     context: {
@@ -79,9 +90,15 @@ export async function process(inputs, ctx) {
       recommendations: toolSelectionResult.recommendations,
       rationale: toolSelectionResult.rationale,
       files: toolSelectionResult.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 2: PROJECT STRUCTURE CREATION
   // ============================================================================
@@ -106,14 +123,13 @@ export async function process(inputs, ctx) {
       metadata: { processId: 'specializations/qa-testing-automation/automation-framework', timestamp: startTime }
     };
   }
-
   // ============================================================================
   // PHASE 3: FRAMEWORK ARCHITECTURE IMPLEMENTATION
   // ============================================================================
 
   ctx.log('info', 'Phase 3: Implementing framework architecture patterns');
 
-  const architectureResult = await ctx.task(frameworkArchitectureTask, {
+  let architectureResult = await ctx.task(frameworkArchitectureTask, {
     projectName,
     techStack,
     testTypes,
@@ -124,8 +140,19 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...architectureResult.artifacts);
 
-  // Quality Gate: Architecture must support extensibility and maintainability
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      architectureResult = await ctx.task(frameworkArchitectureTask, { ...{
+    projectName,
+    techStack,
+    testTypes,
+    selectedTools: toolSelectionResult.recommendations,
+    projectStructure: projectStructureResult.structure,
+    outputDir
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Phase 3 Complete: Framework architecture implemented with ${architectureResult.patterns.join(', ')} patterns. Architecture supports parallel execution: ${architectureResult.supportsParallel}. Review architecture and approve?`,
     title: 'Framework Architecture Review',
     context: {
@@ -134,9 +161,15 @@ export async function process(inputs, ctx) {
       layers: architectureResult.layers,
       supportsParallel: architectureResult.supportsParallel,
       files: architectureResult.artifacts.map(a => ({ path: a.path, format: a.format || 'code' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 4: CONFIGURATION MANAGEMENT SETUP
   // ============================================================================
@@ -190,7 +223,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 7: Integrating test reporting capabilities');
 
-  const reportingResult = await ctx.task(reportingSetupTask, {
+  let reportingResult = await ctx.task(reportingSetupTask, {
     projectName,
     reportingTools,
     selectedTools: toolSelectionResult.recommendations,
@@ -201,8 +234,19 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...reportingResult.artifacts);
 
-  // Quality Gate: Reporting must provide actionable insights
-  await ctx.breakpoint({
+    let lastFeedback_phase7Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase7Review) {
+      reportingResult = await ctx.task(reportingSetupTask, { ...{
+    projectName,
+    reportingTools,
+    selectedTools: toolSelectionResult.recommendations,
+    testTypes,
+    cicdPlatform,
+    outputDir
+  }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
+    }
+  const phase7Review = await ctx.breakpoint({
     question: `Phase 7 Complete: Test reporting configured with ${reportingTools.join(', ')}. Reports include: ${reportingResult.reportTypes.join(', ')}. Verify reporting provides sufficient insights?`,
     title: 'Test Reporting Review',
     context: {
@@ -211,9 +255,15 @@ export async function process(inputs, ctx) {
       reportTypes: reportingResult.reportTypes,
       sampleReportPath: reportingResult.sampleReportPath,
       files: reportingResult.artifacts.map(a => ({ path: a.path, format: a.format || 'code' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase7Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase7Review.approved) break;
+    lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 8: CI/CD INTEGRATION
   // ============================================================================
@@ -257,7 +307,7 @@ export async function process(inputs, ctx) {
   // Execute sample tests to verify framework works
   ctx.log('info', 'Executing sample tests to verify framework');
 
-  const sampleTestExecutionResult = await ctx.task(executeSampleTestsTask, {
+  let sampleTestExecutionResult = await ctx.task(executeSampleTestsTask, {
     projectName,
     sampleTests: sampleTestResults,
     selectedTools: toolSelectionResult.recommendations,
@@ -267,8 +317,17 @@ export async function process(inputs, ctx) {
   artifacts.push(...sampleTestExecutionResult.artifacts);
 
   // Quality Gate: Sample tests must pass
-  if (!sampleTestExecutionResult.allPassed) {
-    await ctx.breakpoint({
+      let lastFeedback_qualityGateApproval = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_qualityGateApproval) {
+        sampleTestExecutionResult = await ctx.task(executeSampleTestsTask, { ...{
+    projectName,
+    sampleTests: sampleTestResults,
+    selectedTools: toolSelectionResult.recommendations,
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval, attempt: attempt + 1 });
+      }
+  const qualityGateApproval = await ctx.breakpoint({
       question: `Phase 9 Warning: ${sampleTestExecutionResult.failedTests.length} sample test(s) failed. This indicates potential framework issues. Review failures and fix before proceeding?`,
       title: 'Sample Test Execution Failures',
       context: {
@@ -276,9 +335,15 @@ export async function process(inputs, ctx) {
         failedTests: sampleTestExecutionResult.failedTests,
         passedTests: sampleTestExecutionResult.passedTests,
         files: sampleTestExecutionResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_qualityGateApproval || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (qualityGateApproval.approved) break;
+      lastFeedback_qualityGateApproval = qualityGateApproval.response || qualityGateApproval.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 10: DOCUMENTATION GENERATION
@@ -324,7 +389,7 @@ export async function process(inputs, ctx) {
   if (parallelExecution) {
     ctx.log('info', 'Phase 12: Configuring parallel test execution');
 
-    const parallelConfigResult = await ctx.task(parallelExecutionConfigTask, {
+    let parallelConfigResult = await ctx.task(parallelExecutionConfigTask, {
       projectName,
       testTypes,
       selectedTools: toolSelectionResult.recommendations,
@@ -334,8 +399,18 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...parallelConfigResult.artifacts);
 
-    // Quality Gate: Parallel execution must work correctly
-    await ctx.breakpoint({
+      let lastFeedback_phase12Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase12Review) {
+        parallelConfigResult = await ctx.task(parallelExecutionConfigTask, { ...{
+      projectName,
+      testTypes,
+      selectedTools: toolSelectionResult.recommendations,
+      cicdPlatform,
+      outputDir
+    }, feedback: lastFeedback_phase12Review, attempt: attempt + 1 });
+      }
+  const phase12Review = await ctx.breakpoint({
       question: `Phase 12 Complete: Parallel execution configured. Max workers: ${parallelConfigResult.maxWorkers}. Estimated speedup: ${parallelConfigResult.estimatedSpeedup}x. Test parallel execution?`,
       title: 'Parallel Execution Review',
       context: {
@@ -344,9 +419,15 @@ export async function process(inputs, ctx) {
         estimatedSpeedup: parallelConfigResult.estimatedSpeedup,
         shardingStrategy: parallelConfigResult.shardingStrategy,
         files: parallelConfigResult.artifacts.map(a => ({ path: a.path, format: a.format || 'code' }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase12Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase12Review.approved) break;
+      lastFeedback_phase12Review = phase12Review.response || phase12Review.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 13: FRAMEWORK VALIDATION
@@ -354,7 +435,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 13: Validating framework against quality criteria');
 
-  const validationResult = await ctx.task(frameworkValidationTask, {
+  let validationResult = await ctx.task(frameworkValidationTask, {
     projectName,
     toolSelectionResult,
     projectStructureResult,
@@ -374,8 +455,24 @@ export async function process(inputs, ctx) {
   const qualityGatesMet = validationResult.qualityGatesMet;
 
   // Quality Gate: Framework must meet quality criteria
-  if (!qualityGatesMet) {
-    await ctx.breakpoint({
+      let lastFeedback_qualityGateApproval2 = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_qualityGateApproval2) {
+        validationResult = await ctx.task(frameworkValidationTask, { ...{
+    projectName,
+    toolSelectionResult,
+    projectStructureResult,
+    architectureResult,
+    configResult,
+    reportingResult,
+    cicdResult,
+    sampleTestExecutionResult,
+    documentationResult,
+    codeQualityResult,
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval2, attempt: attempt + 1 });
+      }
+  const qualityGateApproval2 = await ctx.breakpoint({
       question: `Phase 13 Warning: Framework validation score: ${validationScore}/100. ${validationResult.failedCriteria.length} quality gate(s) not met: ${validationResult.failedCriteria.join(', ')}. Address issues before finalizing?`,
       title: 'Framework Validation Issues',
       context: {
@@ -385,9 +482,15 @@ export async function process(inputs, ctx) {
         failedCriteria: validationResult.failedCriteria,
         recommendations: validationResult.recommendations,
         files: validationResult.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_qualityGateApproval2 || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (qualityGateApproval2.approved) break;
+      lastFeedback_qualityGateApproval2 = qualityGateApproval2.response || qualityGateApproval2.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 14: FINAL REVIEW AND HANDOFF
@@ -395,7 +498,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 14: Final framework review and team handoff');
 
-  const finalReviewResult = await ctx.task(finalReviewTask, {
+  let finalReviewResult = await ctx.task(finalReviewTask, {
     projectName,
     toolSelectionResult,
     projectStructureResult,
@@ -410,8 +513,23 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...finalReviewResult.artifacts);
 
-  // Final Breakpoint: Framework approval and handoff
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval2 = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval2) {
+      finalReviewResult = await ctx.task(finalReviewTask, { ...{
+    projectName,
+    toolSelectionResult,
+    projectStructureResult,
+    architectureResult,
+    reportingResult,
+    cicdResult,
+    sampleTestResults,
+    documentationResult,
+    validationResult,
+    outputDir
+  }, feedback: lastFeedback_finalApproval2, attempt: attempt + 1 });
+    }
+  const finalApproval2 = await ctx.breakpoint({
     question: `Test Automation Framework Setup Complete! Validation score: ${validationScore}/100. All quality gates met: ${qualityGatesMet}. ${sampleTestResults.length} test type(s) with sample tests. Framework ready for team adoption. Review deliverables and approve for production use?`,
     title: 'Framework Setup Complete - Final Approval',
     context: {
@@ -435,9 +553,15 @@ export async function process(inputs, ctx) {
         { path: validationResult.reportPath, format: 'markdown', label: 'Validation Report' },
         { path: finalReviewResult.handoffPath, format: 'markdown', label: 'Team Handoff Document' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval2 || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval2.approved) break;
+    lastFeedback_finalApproval2 = finalApproval2.response || finalApproval2.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -495,8 +619,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

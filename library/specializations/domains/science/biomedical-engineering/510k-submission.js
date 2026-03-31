@@ -45,14 +45,22 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 3: Substantial Equivalence Comparison
-  const seComparison = await ctx.task(seComparisonTask, {
+  let seComparison = await ctx.task(seComparisonTask, {
     deviceName,
     deviceDescription,
     predicateSelection
   });
 
-  // Breakpoint: Review SE comparison
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      seComparison = await ctx.task(seComparisonTask, { ...{
+    deviceName,
+    deviceDescription,
+    predicateSelection
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Review substantial equivalence comparison for ${deviceName}. Is the SE argument sound?`,
     title: 'SE Comparison Review',
     context: {
@@ -64,9 +72,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: seComparison
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // Phase 4: Performance Testing Specification
   const performanceTesting = await ctx.task(performanceTestingTask, {
     deviceName,
@@ -91,7 +105,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 7: eCopy Submission Package Assembly
-  const submissionPackage = await ctx.task(submissionPackageTask, {
+  let submissionPackage = await ctx.task(submissionPackageTask, {
     deviceName,
     deviceClass,
     productCode,
@@ -103,8 +117,22 @@ export async function process(inputs, ctx) {
     labelingReview
   });
 
-  // Final Breakpoint: Submission Approval
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      submissionPackage = await ctx.task(submissionPackageTask, { ...{
+    deviceName,
+    deviceClass,
+    productCode,
+    predicateSelection,
+    deviceDescription,
+    seComparison,
+    performanceTesting,
+    standardsCompliance,
+    labelingReview
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `510(k) submission package complete for ${deviceName}. Approve for submission to FDA?`,
     title: '510(k) Submission Approval',
     context: {
@@ -114,9 +142,15 @@ export async function process(inputs, ctx) {
       files: [
         { path: `artifacts/510k-submission-package.json`, format: 'json', content: submissionPackage }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     deviceName,
@@ -130,8 +164,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const predicateSelectionTask = defineTask('predicate-selection', (args, taskCtx) => ({
   kind: 'agent',

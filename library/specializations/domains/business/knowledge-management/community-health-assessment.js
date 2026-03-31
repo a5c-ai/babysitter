@@ -27,15 +27,24 @@ export async function process(inputs, ctx) {
   const activityAnalysis = await ctx.task(activityAnalysisTask, { community, assessmentPeriod, historicalData, outputDir });
   artifacts.push(...activityAnalysis.artifacts);
 
-  const engagementAnalysis = await ctx.task(engagementAnalysisTask, { community, assessmentPeriod, outputDir });
-  artifacts.push(...engagementAnalysis.artifacts);
-
-  await ctx.breakpoint({
+  let engagementAnalysis = await ctx.task(engagementAnalysisTask, { community, assessmentPeriod, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      engagementAnalysis = await ctx.task(engagementAnalysisTask, { ...{ community, assessmentPeriod, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Engagement analysis shows ${engagementAnalysis.engagementRate}% active engagement. Review?`,
     title: 'Engagement Analysis Review',
-    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })), summary: { engagementRate: engagementAnalysis.engagementRate } }
-  });
-
+    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })), summary: { engagementRate: engagementAnalysis.engagementRate } },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const valueDeliveryAssessment = await ctx.task(valueDeliveryTask, { community, activityAnalysis, engagementAnalysis, outputDir });
   artifacts.push(...valueDeliveryAssessment.artifacts);
 
@@ -62,7 +71,6 @@ export async function process(inputs, ctx) {
     reviewResult = await ctx.task(stakeholderReviewTask, { healthAssessment: vitalityScoring.assessment, recommendations: recommendationDevelopment.recommendations, qualityScore: qualityAssessment.overallScore, outputDir });
     artifacts.push(...reviewResult.artifacts);
   }
-
   const endTime = ctx.now();
   return {
     success: true,

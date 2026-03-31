@@ -68,7 +68,7 @@ export async function process(inputs, ctx) {
 
   // Task 5: Reasoning Failure Explanation
   ctx.log('info', 'Generating explanations for reasoning failures');
-  const failureExplanation = await ctx.task(failureExplanationTask, {
+  let failureExplanation = await ctx.task(failureExplanationTask, {
     allFallacies: [...formalFallacies.fallacies, ...informalFallacies.fallacies],
     argumentText,
     outputDir
@@ -77,8 +77,16 @@ export async function process(inputs, ctx) {
   artifacts.push(...failureExplanation.artifacts);
 
   // Breakpoint: Review fallacy analysis
-  const totalFallacies = formalFallacies.fallacies.length + informalFallacies.fallacies.length;
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      failureExplanation = await ctx.task(failureExplanationTask, { ...{
+    allFallacies: [...formalFallacies.fallacies, ...informalFallacies.fallacies],
+    argumentText,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Fallacy analysis complete. Found ${totalFallacies} fallacies (${formalFallacies.fallacies.length} formal, ${informalFallacies.fallacies.length} informal). Review the analysis?`,
     title: 'Fallacy Identification Results',
     context: {
@@ -90,9 +98,15 @@ export async function process(inputs, ctx) {
         informalCount: informalFallacies.fallacies.length,
         categories: fallacyClassification.categories
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 6: Generate Fallacy Analysis Report
   ctx.log('info', 'Generating fallacy analysis report');
   const analysisReport = await ctx.task(fallacyReportTask, {
@@ -130,8 +144,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Argument Parsing
+  // Task 1: Argument Parsing
 export const argumentParsingTask = defineTask('argument-parsing', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Parse argument for fallacy analysis',

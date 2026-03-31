@@ -114,7 +114,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Scoring action mapping quality');
-  const qualityScore = await ctx.task(actionMappingQualityScoringTask, {
+  let qualityScore = await ctx.task(actionMappingQualityScoringTask, {
     goalAnalysis,
     behaviorIdentification,
     practiceActivities,
@@ -129,8 +129,20 @@ export async function process(inputs, ctx) {
   const overallScore = qualityScore.overallScore;
   const qualityMet = overallScore >= qualityThreshold;
 
-  // Breakpoint: Review action mapping
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      qualityScore = await ctx.task(actionMappingQualityScoringTask, { ...{
+    goalAnalysis,
+    behaviorIdentification,
+    practiceActivities,
+    informationMapping,
+    nonTrainingSolutions,
+    qualityThreshold,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Action mapping complete. Quality score: ${overallScore}/${qualityThreshold}. ${qualityMet ? 'Quality standards met!' : 'May need refinement.'} Review and approve?`,
     title: 'Action Mapping Review',
     context: {
@@ -144,9 +156,15 @@ export async function process(inputs, ctx) {
         totalActivities: practiceActivities.activities?.length || 0,
         totalArtifacts: artifacts.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -182,8 +200,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Business Goal Analysis
+  // Task 1: Business Goal Analysis
 export const businessGoalAnalysisTask = defineTask('business-goal-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Analyze and clarify business goal',

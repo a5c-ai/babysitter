@@ -110,7 +110,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 7: Assessing reasoning quality');
-  const qualityScore = await ctx.task(dsQualityTask, {
+  let qualityScore = await ctx.task(dsQualityTask, {
     frameDefinition,
     massSpecification,
     beliefPlausibility,
@@ -123,8 +123,19 @@ export async function process(inputs, ctx) {
 
   const qualityMet = qualityScore.overallScore >= 75;
 
-  // Breakpoint: Review Dempster-Shafer results
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      qualityScore = await ctx.task(dsQualityTask, { ...{
+    frameDefinition,
+    massSpecification,
+    beliefPlausibility,
+    combination,
+    conflictAnalysis: conflictAnalysis.analysis,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Dempster-Shafer analysis complete. Quality score: ${qualityScore.overallScore}/100. Conflict level: ${conflictAnalysis.analysis.conflictLevel}. ${qualityMet ? 'Quality meets standards!' : 'Review conflict and mass assignments.'} Review results?`,
     title: 'Dempster-Shafer Results Review',
     context: {
@@ -142,9 +153,15 @@ export async function process(inputs, ctx) {
         mostBelievedHypothesis: decisionSupport.topHypothesis,
         qualityScore: qualityScore.overallScore
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 8: REPORT GENERATION
   // ============================================================================
@@ -185,8 +202,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

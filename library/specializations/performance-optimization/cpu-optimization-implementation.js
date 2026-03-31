@@ -40,17 +40,28 @@ export async function process(inputs, ctx) {
   artifacts.push(...review.artifacts);
 
   // Phase 2: Design Optimization Approach
-  const design = await ctx.task(designOptimizationApproachTask, {
+  let design = await ctx.task(designOptimizationApproachTask, {
     projectName, review, optimizationGoal, outputDir
   });
-  artifacts.push(...design.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      design = await ctx.task(designOptimizationApproachTask, { ...{
+    projectName, review, optimizationGoal, outputDir
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Optimization approach designed for ${design.optimizations.length} hotspots. Proceed with implementation?`,
     title: 'Optimization Design Review',
-    context: { runId: ctx.runId, optimizations: design.optimizations }
-  });
-
+    context: { runId: ctx.runId, optimizations: design.optimizations },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // Phase 3: Implement Algorithmic Improvements
   const algorithmic = await ctx.task(implementAlgorithmicImprovementsTask, {
     projectName, design, outputDir
@@ -82,17 +93,28 @@ export async function process(inputs, ctx) {
   artifacts.push(...benchmarks.artifacts);
 
   // Phase 8: Validate Improvements
-  const validation = await ctx.task(validateImprovementsTask, {
+  let validation = await ctx.task(validateImprovementsTask, {
     projectName, benchmarks, optimizationGoal, outputDir
   });
-  artifacts.push(...validation.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      validation = await ctx.task(validateImprovementsTask, { ...{
+    projectName, benchmarks, optimizationGoal, outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Optimization complete. Improvement: ${validation.improvementPercent}% (Goal: ${optimizationGoal}%). Accept changes?`,
     title: 'Optimization Validation',
-    context: { runId: ctx.runId, validation }
-  });
-
+    context: { runId: ctx.runId, validation },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     projectName,

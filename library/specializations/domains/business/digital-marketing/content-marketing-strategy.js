@@ -96,15 +96,23 @@ export async function process(inputs, ctx) {
 
   // Task 9: Set Up Content Performance Measurement
   ctx.log('info', 'Phase 9: Setting up content performance measurement');
-  const measurement = await ctx.task(contentMeasurementTask, {
+  let measurement = await ctx.task(contentMeasurementTask, {
     businessObjectives,
     topicClusters,
     outputDir
   });
   artifacts.push(...measurement.artifacts);
 
-  // Breakpoint: Review strategy
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      measurement = await ctx.task(contentMeasurementTask, { ...{
+    businessObjectives,
+    topicClusters,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Content marketing strategy complete. ${topicClusters.clusterCount} topic clusters with ${editorialCalendar.contentPieces} planned content pieces. Review and approve?`,
     title: 'Content Strategy Review',
     context: {
@@ -116,9 +124,15 @@ export async function process(inputs, ctx) {
         contentFormats: contentFormats.formatCount,
         distributionChannels: distributionPlan.channelCount
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 10: Generate Strategy Document
   ctx.log('info', 'Phase 10: Generating comprehensive strategy document');
   const strategyDoc = await ctx.task(strategyDocumentGenerationTask, {
@@ -156,8 +170,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task definitions
+  // Task definitions
 export const contentAuditTask = defineTask('content-audit', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Audit existing content assets and performance',

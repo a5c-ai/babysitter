@@ -34,7 +34,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 1: Identifying and mapping stakeholders');
-  const stakeholderMapping = await ctx.task(stakeholderMappingTask, {
+  let stakeholderMapping = await ctx.task(stakeholderMappingTask, {
     projectName,
     projectDescription,
     initialStakeholders,
@@ -45,8 +45,19 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...stakeholderMapping.artifacts);
 
-  // Breakpoint: Review stakeholder map
-  await ctx.breakpoint({
+    let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      stakeholderMapping = await ctx.task(stakeholderMappingTask, { ...{
+    projectName,
+    projectDescription,
+    initialStakeholders,
+    organizationContext,
+    decisionScope,
+    outputDir
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Identified ${stakeholderMapping.totalStakeholders} stakeholders across ${stakeholderMapping.categories.length} categories. Review stakeholder mapping?`,
     title: 'Stakeholder Mapping Review',
     context: {
@@ -63,9 +74,15 @@ export async function process(inputs, ctx) {
         influenceLevels: stakeholderMapping.influenceLevels,
         categories: stakeholderMapping.categories
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 2: INTERVIEW GUIDE CREATION
   // ============================================================================
@@ -86,7 +103,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 3: Conducting stakeholder interviews');
-  const interviewResults = await ctx.task(stakeholderInterviewsTask, {
+  let interviewResults = await ctx.task(stakeholderInterviewsTask, {
     stakeholderMap: stakeholderMapping.stakeholderMap,
     interviewGuides: interviewGuides.guides,
     projectName,
@@ -96,8 +113,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...interviewResults.artifacts);
 
-  // Breakpoint: Review interview insights
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      interviewResults = await ctx.task(stakeholderInterviewsTask, { ...{
+    stakeholderMap: stakeholderMapping.stakeholderMap,
+    interviewGuides: interviewGuides.guides,
+    projectName,
+    projectDescription,
+    outputDir
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Completed ${interviewResults.totalInterviews} stakeholder interviews. Identified ${interviewResults.insights.length} key insights and ${interviewResults.concerns.length} concerns. Review interview results?`,
     title: 'Interview Results Review',
     context: {
@@ -115,9 +142,15 @@ export async function process(inputs, ctx) {
         alignmentGaps: interviewResults.alignmentGaps.length,
         commonThemes: interviewResults.commonThemes
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 4: EXPECTATION ALIGNMENT DOCUMENT
   // ============================================================================
@@ -140,7 +173,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 5: Establishing decision-making framework');
-  const decisionFramework = await ctx.task(decisionFrameworkTask, {
+  let decisionFramework = await ctx.task(decisionFrameworkTask, {
     stakeholderMap: stakeholderMapping.stakeholderMap,
     decisionScope,
     organizationContext,
@@ -151,8 +184,19 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...decisionFramework.artifacts);
 
-  // Breakpoint: Review decision framework
-  await ctx.breakpoint({
+    let lastFeedback_phase5Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase5Review) {
+      decisionFramework = await ctx.task(decisionFrameworkTask, { ...{
+    stakeholderMap: stakeholderMapping.stakeholderMap,
+    decisionScope,
+    organizationContext,
+    existingFrameworks,
+    includeRACIMatrix,
+    outputDir
+  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+    }
+  const phase5Review = await ctx.breakpoint({
     question: `Decision-making framework established with ${decisionFramework.decisionTypes.length} decision types and ${decisionFramework.escalationLevels.length} escalation levels. ${includeRACIMatrix ? 'RACI matrix included.' : ''} Review framework?`,
     title: 'Decision Framework Review',
     context: {
@@ -169,9 +213,15 @@ export async function process(inputs, ctx) {
         approvers: decisionFramework.approvers.length,
         hasRACIMatrix: includeRACIMatrix && decisionFramework.raciMatrix !== undefined
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase5Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase5Review.approved) break;
+    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 6: COMMUNICATION PLAN
   // ============================================================================
@@ -193,7 +243,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 7: Validating stakeholder alignment');
-  const alignmentValidation = await ctx.task(alignmentValidationTask, {
+  let alignmentValidation = await ctx.task(alignmentValidationTask, {
     stakeholderMap: stakeholderMapping.stakeholderMap,
     expectationDocument: expectationAlignment.document,
     decisionFramework: decisionFramework.framework,
@@ -207,8 +257,19 @@ export async function process(inputs, ctx) {
   const alignmentScore = alignmentValidation.alignmentScore;
   const alignmentMet = alignmentScore >= 80;
 
-  // Breakpoint: Alignment validation results
-  await ctx.breakpoint({
+    let lastFeedback_phase7Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase7Review) {
+      alignmentValidation = await ctx.task(alignmentValidationTask, { ...{
+    stakeholderMap: stakeholderMapping.stakeholderMap,
+    expectationDocument: expectationAlignment.document,
+    decisionFramework: decisionFramework.framework,
+    communicationPlan: communicationPlan.plan,
+    alignmentGoals,
+    outputDir
+  }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
+    }
+  const phase7Review = await ctx.breakpoint({
     question: `Stakeholder alignment validation complete. Alignment score: ${alignmentScore}/100. ${alignmentMet ? 'Strong alignment achieved!' : 'Alignment gaps identified - may need additional work.'} Review validation results?`,
     title: 'Alignment Validation Results',
     context: {
@@ -227,9 +288,15 @@ export async function process(inputs, ctx) {
         remainingGaps: alignmentValidation.remainingGaps.length,
         riskLevel: alignmentValidation.riskLevel
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase7Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase7Review.approved) break;
+    lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 8: STAKEHOLDER SIGN-OFF (if required)
   // ============================================================================
@@ -249,8 +316,19 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...signoffResult.artifacts);
 
-    // Breakpoint: Sign-off gate
-    await ctx.breakpoint({
+      let lastFeedback_finalApproval = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_finalApproval) {
+        alignmentValidation = await ctx.task(alignmentValidationTask, { ...{
+    stakeholderMap: stakeholderMapping.stakeholderMap,
+    expectationDocument: expectationAlignment.document,
+    decisionFramework: decisionFramework.framework,
+    communicationPlan: communicationPlan.plan,
+    alignmentGoals,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+      }
+  const finalApproval = await ctx.breakpoint({
       question: `Sign-off process complete. ${signoffResult.allApproved ? `All ${signoffResult.totalSignoffs} key stakeholders approved!` : `${signoffResult.approvedCount}/${signoffResult.totalSignoffs} approved. ${signoffResult.pendingCount} pending, ${signoffResult.rejectedCount} rejected.`} Proceed with finalization?`,
       title: 'Stakeholder Sign-off Gate',
       context: {
@@ -269,9 +347,15 @@ export async function process(inputs, ctx) {
           conditionalApprovals: signoffResult.conditionalApprovals.length,
           blockers: signoffResult.blockers.length
         }
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_finalApproval || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (finalApproval.approved) break;
+      lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 9: FINALIZE ALIGNMENT PACKAGE
@@ -348,8 +432,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

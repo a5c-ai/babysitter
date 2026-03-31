@@ -81,7 +81,7 @@ export async function process(inputs, ctx) {
 
   // Task 5: Groundwater Sensitivity Analysis
   ctx.log('info', 'Performing groundwater sensitivity analysis');
-  const groundwaterSensitivity = await ctx.task(groundwaterSensitivityTask, {
+  let groundwaterSensitivity = await ctx.task(groundwaterSensitivityTask, {
     projectId,
     geometryDefinition,
     soilCharacterization,
@@ -92,8 +92,18 @@ export async function process(inputs, ctx) {
   artifacts.push(...groundwaterSensitivity.artifacts);
 
   // Breakpoint: Review stability analysis results
-  const minFOS = Math.min(staticAnalysis.factorOfSafety, seismicAnalysis.factorOfSafety);
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      groundwaterSensitivity = await ctx.task(groundwaterSensitivityTask, { ...{
+    projectId,
+    geometryDefinition,
+    soilCharacterization,
+    groundwaterConditions,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Slope stability analysis complete. Static FOS: ${staticAnalysis.factorOfSafety}, Seismic FOS: ${seismicAnalysis.factorOfSafety}. Review results?`,
     title: 'Slope Stability Analysis Review',
     context: {
@@ -106,9 +116,15 @@ export async function process(inputs, ctx) {
         minimumFOS: minFOS,
         remediationRequired: minFOS < 1.5
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 6: Remediation Design (if needed)
   let remediationDesign = null;
   if (minFOS < 1.5) {
@@ -124,7 +140,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...remediationDesign.artifacts);
   }
-
   // Task 7: Monitoring Recommendations
   ctx.log('info', 'Developing monitoring recommendations');
   const monitoringPlan = await ctx.task(monitoringPlanTask, {
@@ -184,8 +199,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Geometry Definition
+  // Task 1: Geometry Definition
 export const geometryDefinitionTask = defineTask('geometry-definition', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Define slope geometry',

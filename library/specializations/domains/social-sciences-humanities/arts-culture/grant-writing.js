@@ -93,7 +93,7 @@ export async function process(inputs, ctx) {
 
   // Task 6: Proposal Assembly
   ctx.log('info', 'Assembling proposal package');
-  const proposalAssembly = await ctx.task(proposalAssemblyTask, {
+  let proposalAssembly = await ctx.task(proposalAssemblyTask, {
     projectTitle,
     funderResearch,
     narrativeDevelopment,
@@ -106,8 +106,21 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...proposalAssembly.artifacts);
 
-  // Breakpoint: Review proposal
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      proposalAssembly = await ctx.task(proposalAssemblyTask, { ...{
+    projectTitle,
+    funderResearch,
+    narrativeDevelopment,
+    budgetDevelopment,
+    evaluationPlan,
+    supportingDocs,
+    deadline,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Grant proposal for "${projectTitle}" complete. Requesting $${fundingAmount}. Deadline: ${deadline}. Review and finalize?`,
     title: 'Grant Proposal Review',
     context: {
@@ -120,9 +133,15 @@ export async function process(inputs, ctx) {
         deadline,
         matchingFunders: funderResearch.matchingFunders.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 7: Submission Preparation
   ctx.log('info', 'Preparing for submission');
   const submissionPrep = await ctx.task(submissionPrepTask, {
@@ -153,8 +172,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Funder Research
+  // Task 1: Funder Research
 export const funderResearchTask = defineTask('funder-research', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Research potential funders',

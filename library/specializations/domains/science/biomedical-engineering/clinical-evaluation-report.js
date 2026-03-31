@@ -50,14 +50,22 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 4: Equivalent Device Analysis
-  const equivalenceAnalysis = await ctx.task(equivalenceAnalysisTask, {
+  let equivalenceAnalysis = await ctx.task(equivalenceAnalysisTask, {
     deviceName,
     equivalentDevices,
     intendedPurpose
   });
 
-  // Breakpoint: Review equivalence analysis
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      equivalenceAnalysis = await ctx.task(equivalenceAnalysisTask, { ...{
+    deviceName,
+    equivalentDevices,
+    intendedPurpose
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: `Review equivalence analysis for ${deviceName}. Is equivalence adequately demonstrated?`,
     title: 'Equivalence Analysis Review',
     context: {
@@ -69,9 +77,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: equivalenceAnalysis
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
   // Phase 5: Clinical Data Synthesis
   const dataSynthesis = await ctx.task(dataSynthesisTask, {
     deviceName,
@@ -100,15 +114,24 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 8: PMCF Plan Development
-  const pmcfPlan = await ctx.task(pmcfPlanTask, {
+  let pmcfPlan = await ctx.task(pmcfPlanTask, {
     deviceName,
     riskClass,
     cerWriting,
     benefitRiskAnalysis
   });
 
-  // Final Breakpoint: CER Approval
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      pmcfPlan = await ctx.task(pmcfPlanTask, { ...{
+    deviceName,
+    riskClass,
+    cerWriting,
+    benefitRiskAnalysis
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Clinical Evaluation Report complete for ${deviceName}. Approve CER for regulatory submission?`,
     title: 'CER Approval',
     context: {
@@ -117,9 +140,15 @@ export async function process(inputs, ctx) {
       files: [
         { path: `artifacts/clinical-evaluation-report.json`, format: 'json', content: cerWriting }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     deviceName,
@@ -133,8 +162,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const cepDevelopmentTask = defineTask('cep-development', (args, taskCtx) => ({
   kind: 'agent',

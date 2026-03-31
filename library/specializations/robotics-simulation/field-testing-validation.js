@@ -57,15 +57,24 @@ export async function process(inputs, ctx) {
   const dataCollection = await ctx.task(fieldDataCollectionTask, { robotName, longDurationRuns, outputDir });
   artifacts.push(...dataCollection.artifacts);
 
-  const validationReport = await ctx.task(validationReportGenerationTask, { robotName, longDurationRuns, dataCollection, outputDir });
-  artifacts.push(...validationReport.artifacts);
-
-  await ctx.breakpoint({
+  let validationReport = await ctx.task(validationReportGenerationTask, { robotName, longDurationRuns, dataCollection, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      validationReport = await ctx.task(validationReportGenerationTask, { ...{ robotName, longDurationRuns, dataCollection, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Field Testing Complete for ${robotName}. Success rate: ${longDurationRuns.successRate}%, Uptime: ${longDurationRuns.uptime}%. Review validation report?`,
     title: 'Field Testing Complete',
-    context: { runId: ctx.runId, successRate: longDurationRuns.successRate, uptime: longDurationRuns.uptime }
-  });
-
+    context: { runId: ctx.runId, successRate: longDurationRuns.successRate, uptime: longDurationRuns.uptime },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: longDurationRuns.successRate >= 95 && longDurationRuns.uptime >= 98,
     robotName,

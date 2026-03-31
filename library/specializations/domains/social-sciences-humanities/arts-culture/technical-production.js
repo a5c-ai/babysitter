@@ -98,7 +98,7 @@ export async function process(inputs, ctx) {
 
   // Task 6: Equipment Procurement
   ctx.log('info', 'Planning equipment procurement and rentals');
-  const equipmentProcurement = await ctx.task(equipmentProcurementTask, {
+  let equipmentProcurement = await ctx.task(equipmentProcurementTask, {
     projectTitle,
     lightingDesign,
     soundDesign,
@@ -109,8 +109,19 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...equipmentProcurement.artifacts);
 
-  // Breakpoint: Review technical design
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      equipmentProcurement = await ctx.task(equipmentProcurementTask, { ...{
+    projectTitle,
+    lightingDesign,
+    soundDesign,
+    multimediaDesign,
+    budget,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Technical design for "${projectTitle}" complete. Total equipment budget: $${budget.toLocaleString()}. Review and approve technical plans?`,
     title: 'Technical Production Review',
     context: {
@@ -124,9 +135,15 @@ export async function process(inputs, ctx) {
         scenicPieces: scenicConstruction.pieceCount,
         totalBudget: equipmentProcurement.totalCost
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 7: Load-In and Installation Planning
   ctx.log('info', 'Planning load-in and installation');
   const installationPlan = await ctx.task(installationPlanTask, {
@@ -199,8 +216,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Requirements Analysis
+  // Task 1: Requirements Analysis
 export const requirementsAnalysisTask = defineTask('requirements-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Analyze technical requirements',

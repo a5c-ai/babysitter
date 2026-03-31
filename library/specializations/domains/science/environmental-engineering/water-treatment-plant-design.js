@@ -80,7 +80,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 3: Treatment Process Selection');
 
-  const processSelection = await ctx.task(processSelectionTask, {
+  let processSelection = await ctx.task(processSelectionTask, {
     projectName,
     sourceWaterType,
     designCapacity,
@@ -92,8 +92,20 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...processSelection.artifacts);
 
-  // Breakpoint: Process Selection Review
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      processSelection = await ctx.task(processSelectionTask, { ...{
+    projectName,
+    sourceWaterType,
+    designCapacity,
+    sourceCharacterization,
+    regulatoryAnalysis,
+    siteConstraints,
+    outputDir
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Process train selected for ${projectName}. Primary processes: ${processSelection.recommendedProcessTrain.join(' -> ')}. Review and approve process selection?`,
     title: 'Treatment Process Selection Review',
     context: {
@@ -102,9 +114,15 @@ export async function process(inputs, ctx) {
       recommendedTrain: processSelection.recommendedProcessTrain,
       selectionRationale: processSelection.selectionRationale,
       files: processSelection.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 4: PILOT TESTING PLAN
   // ============================================================================
@@ -163,7 +181,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 7: Detailed Engineering Design');
 
-  const detailedDesign = await ctx.task(detailedDesignTask, {
+  let detailedDesign = await ctx.task(detailedDesignTask, {
     projectName,
     designCapacity,
     processSelection,
@@ -175,8 +193,20 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...detailedDesign.artifacts);
 
-  // Breakpoint: Detailed Design Review
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      detailedDesign = await ctx.task(detailedDesignTask, { ...{
+    projectName,
+    designCapacity,
+    processSelection,
+    preliminaryDesign,
+    hydraulicAnalysis,
+    effluentRequirements,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Detailed design complete for ${projectName}. Total estimated cost: ${detailedDesign.costEstimate}. Review design package?`,
     title: 'Detailed Design Review',
     context: {
@@ -185,9 +215,15 @@ export async function process(inputs, ctx) {
       costEstimate: detailedDesign.costEstimate,
       constructionSchedule: detailedDesign.constructionSchedule,
       files: detailedDesign.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 8: O&M PLAN DEVELOPMENT
   // ============================================================================
@@ -251,8 +287,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

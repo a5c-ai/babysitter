@@ -46,16 +46,24 @@ export async function process(inputs, ctx) {
     const subscriptionsSetup = await ctx.task(subscriptionsSetupTask, { projectName, outputDir });
     artifacts.push(...subscriptionsSetup.artifacts);
   }
-
-  const authSetup = await ctx.task(authSetupTask, { projectName, outputDir });
-  artifacts.push(...authSetup.artifacts);
-
-  await ctx.breakpoint({
+  let authSetup = await ctx.task(authSetupTask, { projectName, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      authSetup = await ctx.task(authSetupTask, { ...{ projectName, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `GraphQL API setup complete for ${projectName}. Schema with ${schemaDesign.types.length} types, ${resolversSetup.resolvers.length} resolvers. Approve?`,
     title: 'GraphQL API Review',
-    context: { runId: ctx.runId, types: schemaDesign.types, resolvers: resolversSetup.resolvers }
-  });
-
+    context: { runId: ctx.runId, types: schemaDesign.types, resolvers: resolversSetup.resolvers },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const testingSetup = await ctx.task(testingSetupTask, { projectName, outputDir });
   artifacts.push(...testingSetup.artifacts);
 

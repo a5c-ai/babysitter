@@ -51,7 +51,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Analyzing code signing requirements');
 
-  const requirementsAnalysis = await ctx.task(signingRequirementsTask, {
+  let requirementsAnalysis = await ctx.task(signingRequirementsTask, {
     projectName,
     targetPlatforms,
     signingProviders,
@@ -59,9 +59,18 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...requirementsAnalysis.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      requirementsAnalysis = await ctx.task(signingRequirementsTask, { ...{
+    projectName,
+    targetPlatforms,
+    signingProviders,
+    framework,
+    outputDir
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Phase 1 Complete: Signing requirements analyzed. ${requirementsAnalysis.certificatesNeeded.length} certificates needed. Estimated cost: ${requirementsAnalysis.estimatedCost}. Proceed with certificate setup?`,
     title: 'Signing Requirements Review',
     context: {
@@ -69,9 +78,15 @@ export async function process(inputs, ctx) {
       certificatesNeeded: requirementsAnalysis.certificatesNeeded,
       estimatedCost: requirementsAnalysis.estimatedCost,
       files: requirementsAnalysis.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 2: WINDOWS CODE SIGNING SETUP
   // ============================================================================
@@ -90,7 +105,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...windowsSigningConfig.artifacts);
   }
-
   // ============================================================================
   // PHASE 3: MACOS CODE SIGNING AND NOTARIZATION
   // ============================================================================
@@ -119,7 +133,6 @@ export async function process(inputs, ctx) {
     artifacts.push(...notarizationConfig.artifacts);
     macosSigningConfig.notarization = notarizationConfig;
   }
-
   // ============================================================================
   // PHASE 4: LINUX SIGNING SETUP
   // ============================================================================
@@ -137,14 +150,13 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...linuxSigningConfig.artifacts);
   }
-
   // ============================================================================
   // PHASE 5: CERTIFICATE MANAGEMENT SETUP
   // ============================================================================
 
   ctx.log('info', 'Phase 5: Setting up certificate management and storage');
 
-  const certificateManagement = await ctx.task(setupCertificateManagementTask, {
+  let certificateManagement = await ctx.task(setupCertificateManagementTask, {
     projectName,
     targetPlatforms,
     cicdPlatform,
@@ -154,9 +166,20 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...certificateManagement.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase5Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase5Review) {
+      certificateManagement = await ctx.task(setupCertificateManagementTask, { ...{
+    projectName,
+    targetPlatforms,
+    cicdPlatform,
+    windowsSigningConfig,
+    macosSigningConfig,
+    linuxSigningConfig,
+    outputDir
+  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+    }
+  const phase5Review = await ctx.breakpoint({
     question: `Phase 5 Complete: Certificate management configured. Secrets to configure: ${certificateManagement.secretsRequired.length}. Review security setup?`,
     title: 'Certificate Management Review',
     context: {
@@ -164,9 +187,15 @@ export async function process(inputs, ctx) {
       secretsRequired: certificateManagement.secretsRequired,
       storageMethod: certificateManagement.storageMethod,
       files: certificateManagement.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase5Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase5Review.approved) break;
+    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 6: CI/CD INTEGRATION
   // ============================================================================
@@ -206,7 +235,7 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...documentation.artifacts);
 
-  const validation = await ctx.task(validateSigningSetupTask, {
+  let validation = await ctx.task(validateSigningSetupTask, {
     projectName,
     targetPlatforms,
     windowsSigningConfig,
@@ -219,9 +248,21 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...validation.artifacts);
 
-  const validationPassed = validation.validationScore >= 75;
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      validation = await ctx.task(validateSigningSetupTask, { ...{
+    projectName,
+    targetPlatforms,
+    windowsSigningConfig,
+    macosSigningConfig,
+    linuxSigningConfig,
+    certificateManagement,
+    cicdIntegration,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Code Signing Setup Complete for ${projectName}! Validation score: ${validation.validationScore}/100. ${validationPassed ? 'Setup is ready!' : 'Some issues need attention.'} Approve signing configuration?`,
     title: 'Code Signing Setup Complete',
     context: {
@@ -240,9 +281,15 @@ export async function process(inputs, ctx) {
         { path: documentation.readmePath, format: 'markdown', label: 'Signing Documentation' },
         { path: documentation.securityGuidePath, format: 'markdown', label: 'Security Guide' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -297,8 +344,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

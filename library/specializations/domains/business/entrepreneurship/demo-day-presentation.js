@@ -76,7 +76,7 @@ export async function process(inputs, ctx) {
   artifacts.push(...(slideDesign.artifacts || []));
 
   // Phase 5: Script Development
-  const scriptDevelopment = await ctx.task(scriptDevelopmentTask, {
+  let scriptDevelopment = await ctx.task(scriptDevelopmentTask, {
     companyName,
     presentationNarrative,
     hookDevelopment,
@@ -86,8 +86,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...(scriptDevelopment.artifacts || []));
 
-  // Breakpoint: Review presentation structure
-  await ctx.breakpoint({
+    let lastFeedback_phase5Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase5Review) {
+      scriptDevelopment = await ctx.task(scriptDevelopmentTask, { ...{
+    companyName,
+    presentationNarrative,
+    hookDevelopment,
+    slideDesign,
+    timeLimit
+  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+    }
+  const phase5Review = await ctx.breakpoint({
     question: `Review demo day presentation for ${companyName}. Time: ${timeLimit}s, Hook: "${hookDevelopment.primaryHook}". Ready for rehearsal prep?`,
     title: 'Demo Day Presentation Review',
     context: {
@@ -96,9 +106,15 @@ export async function process(inputs, ctx) {
       timeLimit,
       slideCount: slideDesign.slideCount,
       files: artifacts
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase5Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase5Review.approved) break;
+    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+  }
   // Phase 6: Closing and CTA
   const closingCTA = await ctx.task(closingCTATask, {
     companyName,
@@ -119,7 +135,7 @@ export async function process(inputs, ctx) {
   artifacts.push(...(rehearsalPlan.artifacts || []));
 
   // Phase 8: Q&A Preparation
-  const qaPreparation = await ctx.task(qaPreparationTask, {
+  let qaPreparation = await ctx.task(qaPreparationTask, {
     companyName,
     product,
     keyMetrics,
@@ -128,8 +144,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...(qaPreparation.artifacts || []));
 
-  // Final Breakpoint: Complete preparation
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      qaPreparation = await ctx.task(qaPreparationTask, { ...{
+    companyName,
+    product,
+    keyMetrics,
+    eventContext
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Demo day preparation complete for ${companyName}. Script ready, ${qaPreparation.questionCount} Q&A responses prepared. Ready for rehearsals?`,
     title: 'Demo Day Preparation Complete',
     context: {
@@ -139,9 +164,15 @@ export async function process(inputs, ctx) {
       estimatedTime: scriptDevelopment.estimatedTime,
       qaCount: qaPreparation.questionCount,
       files: artifacts
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -167,8 +198,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const presentationNarrativeTask = defineTask('presentation-narrative', (args, taskCtx) => ({
   kind: 'agent',

@@ -99,7 +99,7 @@ export async function process(inputs, ctx) {
 
   // Task 7: Generate Submission Package
   ctx.log('info', 'Generating submission package');
-  const submissionPackage = await ctx.task(submissionPackageTask, {
+  let submissionPackage = await ctx.task(submissionPackageTask, {
     revisionRefinement,
     citationFormatting,
     abstractPreparation,
@@ -109,8 +109,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...submissionPackage.artifacts);
 
-  // Breakpoint: Review manuscript
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      submissionPackage = await ctx.task(submissionPackageTask, { ...{
+    revisionRefinement,
+    citationFormatting,
+    abstractPreparation,
+    targetJournal,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Manuscript development complete for ${researchTopic}. Target journal: ${targetJournal.name || 'TBD'}. Word count: ${revisionRefinement.wordCount || 0}. Review manuscript?`,
     title: 'Scholarly Article Development Results',
     context: {
@@ -122,9 +132,15 @@ export async function process(inputs, ctx) {
         citationStyle,
         wordCount: revisionRefinement.wordCount
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -148,8 +164,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Argument Development and Outlining
+  // Task 1: Argument Development and Outlining
 export const argumentDevelopmentTask = defineTask('argument-development', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Develop argument and outline',

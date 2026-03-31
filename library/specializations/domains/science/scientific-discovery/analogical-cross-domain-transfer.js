@@ -38,15 +38,24 @@ export async function process(inputs, ctx) {
   const problemAbstraction = await ctx.task(problemAbstractionTask, { problem, targetDomain, outputDir });
   artifacts.push(...problemAbstraction.artifacts);
 
-  const analogySearch = await ctx.task(analogySearchTask, { abstractedProblem: problemAbstraction.abstractedProblem, sourceDomains, outputDir });
-  artifacts.push(...analogySearch.artifacts);
-
-  await ctx.breakpoint({
+  let analogySearch = await ctx.task(analogySearchTask, { abstractedProblem: problemAbstraction.abstractedProblem, sourceDomains, outputDir });
+    let lastFeedback_stepApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_stepApproval) {
+      analogySearch = await ctx.task(analogySearchTask, { ...{ abstractedProblem: problemAbstraction.abstractedProblem, sourceDomains, outputDir }, feedback: lastFeedback_stepApproval, attempt: attempt + 1 });
+    }
+  const stepApproval = await ctx.breakpoint({
     question: `Found ${analogySearch.analogies?.length || 0} analogies across ${sourceDomains.length} domains. Review before structural mapping?`,
     title: 'Analogy Search Review',
-    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })), summary: { analogiesFound: analogySearch.analogies?.length || 0, sourceDomains: sourceDomains.length }}
-  });
-
+    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })), summary: { analogiesFound: analogySearch.analogies?.length || 0, sourceDomains: sourceDomains.length }},
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_stepApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (stepApproval.approved) break;
+    lastFeedback_stepApproval = stepApproval.response || stepApproval.feedback || 'Changes requested';
+  }
   const structuralMapping = await ctx.task(structuralMappingTask, { analogies: analogySearch.analogies, problem, targetDomain, outputDir });
   artifacts.push(...structuralMapping.artifacts);
 
@@ -59,15 +68,24 @@ export async function process(inputs, ctx) {
   const transferEvaluation = await ctx.task(transferEvaluationTask, { adaptedConcepts: solutionAdaptation.adaptedConcepts, problem, minimumTransferScore, outputDir });
   artifacts.push(...transferEvaluation.artifacts);
 
-  const qualityScore = await ctx.task(analogyQualityScoringTask, { problemAbstraction, analogySearch, structuralMapping, solutionAdaptation, transferEvaluation, outputDir });
-  artifacts.push(...qualityScore.artifacts);
-
-  await ctx.breakpoint({
+  let qualityScore = await ctx.task(analogyQualityScoringTask, { problemAbstraction, analogySearch, structuralMapping, solutionAdaptation, transferEvaluation, outputDir });
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      qualityScore = await ctx.task(analogyQualityScoringTask, { ...{ problemAbstraction, analogySearch, structuralMapping, solutionAdaptation, transferEvaluation, outputDir }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Analogical transfer complete. ${solutionAdaptation.adaptedConcepts?.length || 0} concepts adapted. Quality: ${qualityScore.overallScore}/100. Approve?`,
     title: 'Analogical Transfer Approval',
-    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })), summary: { adaptedConcepts: solutionAdaptation.adaptedConcepts?.length || 0, qualityScore: qualityScore.overallScore }}
-  });
-
+    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })), summary: { adaptedConcepts: solutionAdaptation.adaptedConcepts?.length || 0, qualityScore: qualityScore.overallScore }},
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true, problem, analogies: analogySearch.analogies, transferredSolutions: solutionExtraction.solutions,
     adaptedConcepts: solutionAdaptation.adaptedConcepts, evaluation: transferEvaluation,

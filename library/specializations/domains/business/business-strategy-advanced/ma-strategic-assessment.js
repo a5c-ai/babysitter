@@ -80,18 +80,30 @@ export async function process(inputs, ctx) {
 
   // Phase 9: Generate Report
   ctx.log('info', 'Phase 9: Generating comprehensive M&A assessment report');
-  const maReport = await ctx.task(maAssessmentReportTask, {
+  let maReport = await ctx.task(maAssessmentReportTask, {
     organizationName, dealType, strategicRationale, targetEvaluation, strategicDueDiligence,
     synergyAnalysis, culturalAssessment, integrationRisks, integrationFramework, valueCaptureRoadmap, outputDir
   });
-  artifacts.push(...maReport.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      maReport = await ctx.task(maAssessmentReportTask, { ...{
+    organizationName, dealType, strategicRationale, targetEvaluation, strategicDueDiligence,
+    synergyAnalysis, culturalAssessment, integrationRisks, integrationFramework, valueCaptureRoadmap, outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `M&A strategic assessment complete. Total synergy value: ${synergyAnalysis.totalSynergyValue}. Review recommendations?`,
     title: 'M&A Strategic Assessment Review',
-    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })) }
-  });
-
+    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })) },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true, organizationName, dealType,
     strategicRationale: strategicRationale.rationale,

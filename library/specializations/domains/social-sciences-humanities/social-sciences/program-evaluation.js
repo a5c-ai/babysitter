@@ -110,7 +110,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 7: Scoring evaluation quality');
-  const qualityScore = await ctx.task(evaluationQualityScoringTask, {
+  let qualityScore = await ctx.task(evaluationQualityScoringTask, {
     evaluationPlan,
     programTheory,
     implementationAssessment,
@@ -125,8 +125,20 @@ export async function process(inputs, ctx) {
   const evalScore = qualityScore.overallScore;
   const qualityMet = evalScore >= 80;
 
-  // Breakpoint: Review program evaluation
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      qualityScore = await ctx.task(evaluationQualityScoringTask, { ...{
+    evaluationPlan,
+    programTheory,
+    implementationAssessment,
+    outcomeMeasurement,
+    dataAnalysis,
+    findingsRecommendations,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Program evaluation complete. Quality score: ${evalScore}/100. ${qualityMet ? 'Evaluation meets quality standards!' : 'Evaluation may need refinement.'} Review and approve?`,
     title: 'Program Evaluation Review',
     context: {
@@ -142,9 +154,15 @@ export async function process(inputs, ctx) {
         implementationFidelity: implementationAssessment.fidelityScore,
         outcomesAchieved: outcomeMeasurement.outcomesAchieved
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -168,8 +186,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task definitions follow similar pattern - abbreviated for space
+  // Task definitions follow similar pattern - abbreviated for space
 export const evaluationPlanningTask = defineTask('evaluation-planning', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Plan evaluation',

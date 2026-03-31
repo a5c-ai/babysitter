@@ -75,17 +75,28 @@ export async function process(inputs, ctx) {
   artifacts.push(...(planningCalendar.artifacts || []));
 
   // Phase 9: Forecast Report Compilation
-  const forecastReport = await ctx.task(forecastReportCompilationTask, {
+  let forecastReport = await ctx.task(forecastReportCompilationTask, {
     forecastReconciliation, scenarioModeling, riskAnalysis, planningCalendar, outputDir
   });
-  artifacts.push(...(forecastReport.artifacts || []));
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      forecastReport = await ctx.task(forecastReportCompilationTask, { ...{
+    forecastReconciliation, scenarioModeling, riskAnalysis, planningCalendar, outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Revenue forecast complete for ${planningPeriod}. ${scenarios.length} scenarios modeled. Review forecast?`,
     title: 'Revenue Forecast Review',
-    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })) }
-  });
-
+    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })) },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     planningPeriod,

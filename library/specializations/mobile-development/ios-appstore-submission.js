@@ -56,14 +56,21 @@ export async function process(inputs, ctx) {
       appName, appVersion, bundleId, teamId, outputDir
     });
     artifacts.push(...result.artifacts);
-  }
-
-  await ctx.breakpoint({
+  let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    // No preceding task identified for re-run with feedback
+    const finalApproval = await ctx.breakpoint({
     question: `App Store submission prepared for ${appName} v${appVersion}. Ready to submit?`,
     title: 'Submission Review',
-    context: { runId: ctx.runId, appName, appVersion, bundleId, phases: phases.map(p => p.title) }
-  });
-
+    context: { runId: ctx.runId, appName, appVersion, bundleId, phases: phases.map(p => p.title) },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   return {
     success: true,

@@ -91,7 +91,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 5: Prioritizing scenarios and identifying trade-offs');
-  const scenarioPrioritization = await ctx.task(scenarioPrioritizationTask, {
+  let scenarioPrioritization = await ctx.task(scenarioPrioritizationTask, {
     systemName,
     scenarios: scenarioDefinition.scenarios,
     stakeholders,
@@ -102,8 +102,19 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...scenarioPrioritization.artifacts);
 
-  // Breakpoint: Review prioritized scenarios
-  await ctx.breakpoint({
+    let lastFeedback_phase5Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase5Review) {
+      scenarioPrioritization = await ctx.task(scenarioPrioritizationTask, { ...{
+    systemName,
+    scenarios: scenarioDefinition.scenarios,
+    stakeholders,
+    businessContext,
+    constraints,
+    outputDir
+  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+    }
+  const phase5Review = await ctx.breakpoint({
     question: `Quality attribute scenarios defined and prioritized. Total scenarios: ${scenarioDefinition.scenarios.length}, High priority: ${scenarioPrioritization.highPriorityScenarios?.length || 0}. Review and approve prioritization?`,
     title: 'Scenario Prioritization Review',
     context: {
@@ -122,9 +133,15 @@ export async function process(inputs, ctx) {
         identifiedTradeoffs: scenarioPrioritization.tradeoffs?.length || 0,
         qualityAttributesCount: qualityAttributesBrainstorm.qualityAttributes.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase5Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase5Review.approved) break;
+    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 6: SCENARIO REFINEMENT
   // ============================================================================
@@ -199,7 +216,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 10: Assessing workshop quality and completeness');
-  const workshopQualityAssessment = await ctx.task(workshopQualityAssessmentTask, {
+  let workshopQualityAssessment = await ctx.task(workshopQualityAssessmentTask, {
     systemName,
     workshopPreparation,
     qualityAttributesBrainstorm,
@@ -217,8 +234,23 @@ export async function process(inputs, ctx) {
   const workshopScore = workshopQualityAssessment.overallScore;
   const qualityMet = workshopScore >= 85;
 
-  // Breakpoint: Review workshop outcomes
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      workshopQualityAssessment = await ctx.task(workshopQualityAssessmentTask, { ...{
+    systemName,
+    workshopPreparation,
+    qualityAttributesBrainstorm,
+    scenarioDefinition,
+    scenarioPrioritization,
+    scenarioRefinement,
+    architectureMapping,
+    requirementsDocumentGeneration,
+    validationApproach,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Quality Attributes Workshop complete. Quality score: ${workshopScore}/100. ${qualityMet ? 'Workshop outcomes meet quality standards!' : 'Workshop may need additional refinement.'} Review final outputs and approve?`,
     title: 'Workshop Outcomes Review & Approval',
     context: {
@@ -241,9 +273,15 @@ export async function process(inputs, ctx) {
         tradeoffsIdentified: scenarioPrioritization.tradeoffs?.length || 0,
         validationApproachesDefined: validationApproach.validationApproaches?.length || 0
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -276,8 +314,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

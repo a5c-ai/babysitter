@@ -78,7 +78,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 3: Public Health Risk Assessment');
 
-  const riskAssessment = await ctx.task(reuseRiskAssessmentTask, {
+  let riskAssessment = await ctx.task(reuseRiskAssessmentTask, {
     projectName,
     reuseType,
     sourceWater,
@@ -89,8 +89,19 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...riskAssessment.artifacts);
 
-  // Breakpoint: Risk Assessment Review
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      riskAssessment = await ctx.task(reuseRiskAssessmentTask, { ...{
+    projectName,
+    reuseType,
+    sourceWater,
+    endUseApplications,
+    regulatoryAnalysis,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Risk assessment complete for ${projectName}. Overall risk level: ${riskAssessment.overallRiskLevel}. Review and approve?`,
     title: 'Water Reuse Risk Assessment Review',
     context: {
@@ -100,9 +111,15 @@ export async function process(inputs, ctx) {
       chemicalRisk: riskAssessment.chemicalRisk,
       mitigationMeasures: riskAssessment.mitigationMeasures,
       files: riskAssessment.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 4: TREATMENT SYSTEM DESIGN
   // ============================================================================
@@ -224,8 +241,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

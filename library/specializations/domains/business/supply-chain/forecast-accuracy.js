@@ -84,7 +84,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 4: Analyzing error patterns');
 
-  const errorPatternAnalysis = await ctx.task(errorPatternTask, {
+  let errorPatternAnalysis = await ctx.task(errorPatternTask, {
     dataPreparation,
     accuracyCalculation,
     biasAnalysis,
@@ -94,8 +94,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...errorPatternAnalysis.artifacts);
 
-  // Breakpoint: Review accuracy analysis
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      errorPatternAnalysis = await ctx.task(errorPatternTask, { ...{
+    dataPreparation,
+    accuracyCalculation,
+    biasAnalysis,
+    productSegments,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Forecast accuracy analysis complete. Overall MAPE: ${accuracyCalculation.overallMape}%. Bias: ${biasAnalysis.overallBias}%. Review analysis before recommendations?`,
     title: 'Forecast Accuracy Review',
     context: {
@@ -106,9 +116,15 @@ export async function process(inputs, ctx) {
         overallBias: biasAnalysis.overallBias,
         targetMet: accuracyCalculation.targetMet
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 5: ROOT CAUSE ANALYSIS
   // ============================================================================
@@ -204,8 +220,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

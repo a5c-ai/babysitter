@@ -30,18 +30,31 @@ export async function process(inputs, ctx) {
   results.steps.push({ name: 'contract-identification', result: contractResult });
 
   // Step 2: Performance Obligation Identification (ASC 606 Step 2)
-  const obligationsResult = await ctx.task(identifyPerformanceObligationsTask, {
+  let obligationsResult = await ctx.task(identifyPerformanceObligationsTask, {
     contract: contractResult,
     transactionData: inputs.transactionData
   });
   results.steps.push({ name: 'performance-obligations', result: obligationsResult });
 
-  // Breakpoint for obligation review
-  await ctx.breakpoint('obligation-review', {
+    let lastFeedback_reviewApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_reviewApproval) {
+      obligationsResult = await ctx.task(identifyPerformanceObligationsTask, { ...{
+    contract: contractResult,
+    transactionData: inputs.transactionData
+  }, feedback: lastFeedback_reviewApproval, attempt: attempt + 1 });
+    }
+  const reviewApproval = await ctx.breakpoint('obligation-review', {
     message: 'Review identified performance obligations before determining transaction price',
-    data: obligationsResult
-  });
-
+    data: obligationsResult,
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_reviewApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (reviewApproval.approved) break;
+    lastFeedback_reviewApproval = reviewApproval.response || reviewApproval.feedback || 'Changes requested';
+  }
   // Step 3: Transaction Price Determination (ASC 606 Step 3)
   const transactionPriceResult = await ctx.task(determineTransactionPriceTask, {
     contract: contractResult,
@@ -50,18 +63,31 @@ export async function process(inputs, ctx) {
   results.steps.push({ name: 'transaction-price', result: transactionPriceResult });
 
   // Step 4: Allocate Transaction Price (ASC 606 Step 4)
-  const allocationResult = await ctx.task(allocateTransactionPriceTask, {
+  let allocationResult = await ctx.task(allocateTransactionPriceTask, {
     transactionPrice: transactionPriceResult,
     obligations: obligationsResult
   });
   results.steps.push({ name: 'price-allocation', result: allocationResult });
 
-  // Breakpoint for allocation review
-  await ctx.breakpoint('allocation-review', {
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      allocationResult = await ctx.task(allocateTransactionPriceTask, { ...{
+    transactionPrice: transactionPriceResult,
+    obligations: obligationsResult
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint('allocation-review', {
     message: 'Review transaction price allocation before recognizing revenue',
-    data: allocationResult
-  });
-
+    data: allocationResult,
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Step 5: Revenue Recognition (ASC 606 Step 5)
   const recognitionResult = await ctx.task(recognizeRevenueTask, {
     allocation: allocationResult,
@@ -94,8 +120,7 @@ export async function process(inputs, ctx) {
 
   return results;
 }
-
-// Task definitions
+  // Task definitions
 export const identifyContractTask = defineTask('identify-contract', (args, taskCtx) => ({
   kind: 'agent',
   skill: { name: 'revenue-accounting' },

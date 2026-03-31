@@ -37,14 +37,22 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 2: EPS Control Algorithm Development
-  const epsControl = await ctx.task(epsControlTask, {
+  let epsControl = await ctx.task(epsControlTask, {
     vehicleProgram,
     steeringTargets,
     steeringType
   });
 
-  // Breakpoint: EPS control review
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      epsControl = await ctx.task(epsControlTask, { ...{
+    vehicleProgram,
+    steeringTargets,
+    steeringType
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Review EPS control algorithms for ${vehicleProgram}. Approve control architecture?`,
     title: 'EPS Control Review',
     context: {
@@ -56,9 +64,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: epsControl
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // Phase 3: Steering Feel Calibration
   const feelCalibration = await ctx.task(feelCalibrationTask, {
     vehicleProgram,
@@ -74,14 +88,22 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 5: Durability and Safety Validation
-  const durabilityValidation = await ctx.task(durabilityValidationTask, {
+  let durabilityValidation = await ctx.task(durabilityValidationTask, {
     vehicleProgram,
     epsControl,
     adasSteering
   });
 
-  // Final Breakpoint: Steering system approval
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      durabilityValidation = await ctx.task(durabilityValidationTask, { ...{
+    vehicleProgram,
+    epsControl,
+    adasSteering
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Steering System Development complete for ${vehicleProgram}. Steering feel rating: ${feelCalibration.feelRating}. Approve?`,
     title: 'Steering System Approval',
     context: {
@@ -92,9 +114,15 @@ export async function process(inputs, ctx) {
         { path: `artifacts/steering-specifications.json`, format: 'json', content: steeringTargets },
         { path: `artifacts/feel-tuning.json`, format: 'json', content: feelCalibration }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     vehicleProgram,

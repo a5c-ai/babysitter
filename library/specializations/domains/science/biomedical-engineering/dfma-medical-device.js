@@ -44,14 +44,22 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 3: Tolerance Analysis
-  const toleranceAnalysis = await ctx.task(toleranceAnalysisTask, {
+  let toleranceAnalysis = await ctx.task(toleranceAnalysisTask, {
     deviceName,
     designOutputs,
     qualityRequirements
   });
 
-  // Breakpoint: Review tolerance stack-up
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      toleranceAnalysis = await ctx.task(toleranceAnalysisTask, { ...{
+    deviceName,
+    designOutputs,
+    qualityRequirements
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Review tolerance analysis for ${deviceName}. Are tolerance stack-ups acceptable?`,
     title: 'Tolerance Analysis Review',
     context: {
@@ -63,9 +71,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: toleranceAnalysis
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // Phase 4: Assembly Sequence Optimization
   const assemblyOptimization = await ctx.task(assemblyOptimizationTask, {
     deviceName,
@@ -97,7 +111,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 8: DFMA Report Compilation
-  const dfmaReport = await ctx.task(dfmaReportTask, {
+  let dfmaReport = await ctx.task(dfmaReportTask, {
     deviceName,
     manufacturabilityAssessment,
     partCountAnalysis,
@@ -108,8 +122,21 @@ export async function process(inputs, ctx) {
     supplierAssessment
   });
 
-  // Final Breakpoint: DFMA Approval
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      dfmaReport = await ctx.task(dfmaReportTask, { ...{
+    deviceName,
+    manufacturabilityAssessment,
+    partCountAnalysis,
+    toleranceAnalysis,
+    assemblyOptimization,
+    processCapability,
+    cleaningSterilization,
+    supplierAssessment
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `DFMA analysis complete for ${deviceName}. Approve design for manufacturing transfer?`,
     title: 'DFMA Approval',
     context: {
@@ -119,9 +146,15 @@ export async function process(inputs, ctx) {
       files: [
         { path: `artifacts/dfma-report.json`, format: 'json', content: dfmaReport }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     deviceName,
@@ -136,8 +169,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const manufacturabilityAssessmentTask = defineTask('manufacturability-assessment', (args, taskCtx) => ({
   kind: 'agent',

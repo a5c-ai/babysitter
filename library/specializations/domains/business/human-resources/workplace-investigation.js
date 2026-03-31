@@ -60,8 +60,10 @@ export async function process(inputs, ctx) {
     ]
   });
 
-  // Phase 3: Investigation Authorization
-  await ctx.breakpoint('investigation-authorization', {
+  let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    // No preceding task identified for re-run with feedback
+    const phase3Review = await ctx.breakpoint('investigation-authorization', {
     title: 'Investigation Authorization',
     description: 'Authorize investigation scope and approach',
     artifacts: {
@@ -72,9 +74,15 @@ export async function process(inputs, ctx) {
       'Is the investigation scope appropriately defined?',
       'Is the investigator assignment appropriate?',
       'Are interim measures adequate?'
-    ]
-  });
-
+    ],
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // Phase 4: Investigation Planning
   const investigationPlan = await ctx.task('develop-investigation-plan', {
     investigatorAssignment,
@@ -183,8 +191,10 @@ export async function process(inputs, ctx) {
     ]
   });
 
-  // Phase 12: Findings Review
-  await ctx.breakpoint('findings-review', {
+  let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    // No preceding task identified for re-run with feedback
+    const finalApproval = await ctx.breakpoint('findings-review', {
     title: 'Investigation Findings Review',
     description: 'Review investigation findings before report finalization',
     artifacts: {
@@ -195,9 +205,15 @@ export async function process(inputs, ctx) {
       'Are findings supported by the evidence?',
       'Is the credibility analysis sound?',
       'Are there any gaps requiring additional investigation?'
-    ]
-  });
-
+    ],
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 13: Report Writing
   const reportWriting = await ctx.task('write-investigation-report', {
     findingsDevelopment,

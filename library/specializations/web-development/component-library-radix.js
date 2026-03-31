@@ -24,11 +24,16 @@ export async function process(inputs, ctx) {
   const componentComposition = await ctx.task(componentCompositionTask, { projectName, outputDir });
   artifacts.push(...componentComposition.artifacts);
 
-  const accessibilityValidation = await ctx.task(accessibilityValidationTask, { projectName, outputDir });
-  artifacts.push(...accessibilityValidation.artifacts);
-
-  await ctx.breakpoint({ question: `Radix component library complete for ${projectName}. Approve?`, title: 'Radix Review', context: { runId: ctx.runId, components: componentComposition.components } });
-
+  let accessibilityValidation = await ctx.task(accessibilityValidationTask, { projectName, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      accessibilityValidation = await ctx.task(accessibilityValidationTask, { ...{ projectName, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({ question: `Radix component library complete for ${projectName}. Approve?`, title: 'Radix Review', context: { runId: ctx.runId, components: componentComposition.components }, expert: 'owner', tags: ['approval-gate'], previousFeedback: lastFeedback || undefined, attempt: attempt > 0 ? attempt + 1 : undefined });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const documentation = await ctx.task(documentationTask, { projectName, outputDir });
   artifacts.push(...documentation.artifacts);
 

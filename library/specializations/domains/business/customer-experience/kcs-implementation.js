@@ -133,7 +133,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 9: Creating implementation roadmap');
-  const implementationRoadmap = await ctx.task(implementationRoadmapTask, {
+  let implementationRoadmap = await ctx.task(implementationRoadmapTask, {
     stateAssessment,
     frameworkDesign,
     roleDefinition,
@@ -144,9 +144,18 @@ export async function process(inputs, ctx) {
   artifacts.push(...implementationRoadmap.artifacts);
 
   const qualityScore = stateAssessment.readinessScore + 20; // Adjusted for planning
-  const qualityMet = qualityScore >= 85;
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      implementationRoadmap = await ctx.task(implementationRoadmapTask, { ...{
+    stateAssessment,
+    frameworkDesign,
+    roleDefinition,
+    trainingProgram,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `KCS implementation plan complete. Readiness score: ${stateAssessment.readinessScore}/100. Framework designed with ${roleDefinition.licenses?.length || 0} license levels. Training modules: ${trainingProgram.modules?.length || 0}. Review and execute?`,
     title: 'KCS Implementation Review',
     context: {
@@ -164,9 +173,15 @@ export async function process(inputs, ctx) {
         metricsCount: metricsDesign.metrics?.length || 0,
         implementationPhases: implementationRoadmap.phases?.length || 0
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -198,8 +213,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

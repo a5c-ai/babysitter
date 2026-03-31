@@ -83,7 +83,7 @@ export async function process(inputs, ctx) {
 
   // Task 6: Scoring Rubric Development
   ctx.log('info', 'Developing scoring rubrics');
-  const scoringRubrics = await ctx.task(scoringRubricsTask, {
+  let scoringRubrics = await ctx.task(scoringRubricsTask, {
     framework: frameworkDevelopment.framework,
     questions: sampleQuestions.questions,
     outputDir
@@ -91,8 +91,16 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...scoringRubrics.artifacts);
 
-  // Breakpoint: Review assessment design
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      scoringRubrics = await ctx.task(scoringRubricsTask, { ...{
+    framework: frameworkDevelopment.framework,
+    questions: sampleQuestions.questions,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Critical thinking assessment design complete. ${sampleQuestions.questions.length} sample questions developed. Review the assessment?`,
     title: 'Critical Thinking Assessment Results',
     context: {
@@ -104,9 +112,15 @@ export async function process(inputs, ctx) {
         questionCount: sampleQuestions.questions.length,
         skillsCovered: frameworkDevelopment.framework.skills.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 7: Generate Assessment Package
   ctx.log('info', 'Generating assessment package');
   const assessmentPackage = await ctx.task(assessmentPackageTask, {
@@ -150,8 +164,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task definitions
+  // Task definitions
 export const frameworkDevelopmentTask = defineTask('framework-development', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Develop assessment framework',

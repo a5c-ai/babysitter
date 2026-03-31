@@ -220,11 +220,17 @@ export async function process(inputs, ctx) {
   const plan = await ctx.task(planningTask, { feature: inputs.feature });
 
   // BREAKPOINT: Before committing to implementation approach
-  await ctx.breakpoint({
+  // ctx.breakpoint() returns BreakpointResult: { approved, response?, feedback?, option?, respondedBy?, allResponses? }
+  // Supports routing: expert, tags, strategy, previousFeedback, attempt
+  const planReview = await ctx.breakpoint({
     question: 'Review the implementation plan. Approve to proceed?',
     title: 'Plan Approval',
     context: { runId: ctx.runId, files: [{ path: 'artifacts/plan.md', format: 'markdown' }] }
   });
+
+  if (!planReview.approved) {
+    return { success: false, reason: planReview.feedback };
+  }
 
   // Phase 2: Implementation (moderate risk)
   const impl = await ctx.task(implementTask, { plan });
@@ -233,11 +239,15 @@ export async function process(inputs, ctx) {
   // No breakpoint needed - automated quality gates handle this
 
   // BREAKPOINT: Before deployment (high risk)
-  await ctx.breakpoint({
+  const deployReview = await ctx.breakpoint({
     question: `Quality: ${quality}. Deploy to production?`,
     title: 'Production Deployment Approval',
     context: { runId: ctx.runId, files: [{ path: 'artifacts/final-report.md', format: 'markdown' }] }
   });
+
+  if (!deployReview.approved) {
+    return { success: false, reason: 'Deployment rejected', feedback: deployReview.feedback };
+  }
 
   return await ctx.task(deployTask, { impl });
 }
@@ -868,7 +878,7 @@ await ctx.breakpoint({
 
 ### Communication via Breakpoints
 
-Use breakpoints for asynchronous team communication.
+Use breakpoints for asynchronous team communication. Route them to the right people with `expert` and `tags`.
 
 **Status update pattern:**
 
@@ -877,6 +887,8 @@ Use breakpoints for asynchronous team communication.
 await ctx.breakpoint({
   question: 'Phase 1 complete. 3 of 5 modules implemented. Continue to Phase 2?',
   title: 'Progress Update',
+  expert: 'owner',
+  tags: ['status-update'],
   context: {
     runId: ctx.runId,
     files: [
@@ -890,10 +902,12 @@ await ctx.breakpoint({
 **Decision request pattern:**
 
 ```javascript
-// Request strategic decision
+// Request strategic decision from the architect
 await ctx.breakpoint({
   question: 'Two implementation approaches possible. A: Faster but limited. B: Comprehensive but slower. Which approach?',
   title: 'Architecture Decision Required',
+  expert: 'architect',
+  tags: ['architecture', 'decision'],
   context: {
     runId: ctx.runId,
     files: [
@@ -901,6 +915,24 @@ await ctx.breakpoint({
     ]
   }
 });
+```
+
+**Multi-reviewer approval pattern:**
+
+```javascript
+// Require approval from multiple stakeholders before proceeding
+const result = await ctx.breakpoint({
+  question: 'Approve production deployment?',
+  title: 'Production Deployment',
+  expert: ['tech-lead', 'ops-lead', 'security-lead'],
+  strategy: 'quorum',
+  tags: ['deployment', 'production'],
+  context: {
+    runId: ctx.runId,
+    files: [{ path: 'artifacts/deploy-checklist.md', format: 'markdown' }]
+  }
+});
+// result.allResponses contains each reviewer's response
 ```
 
 ---

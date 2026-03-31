@@ -50,14 +50,22 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 4: IHE Profile Implementation
-  const iheImplementation = await ctx.task(iheImplementationTask, {
+  let iheImplementation = await ctx.task(iheImplementationTask, {
     systemName,
     iheProfiles,
     serviceClassImplementation
   });
 
-  // Breakpoint: Review integration testing
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      iheImplementation = await ctx.task(iheImplementationTask, { ...{
+    systemName,
+    iheProfiles,
+    serviceClassImplementation
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: `Review DICOM integration testing for ${systemName}. Are all service classes functioning correctly?`,
     title: 'Integration Testing Review',
     context: {
@@ -69,9 +77,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: pacsIntegration
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
   // Phase 5: HL7/FHIR Integration
   const hl7FhirIntegration = await ctx.task(hl7FhirTask, {
     systemName,
@@ -94,7 +108,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 8: Integration Documentation
-  const integrationDocumentation = await ctx.task(integrationDocumentationTask, {
+  let integrationDocumentation = await ctx.task(integrationDocumentationTask, {
     systemName,
     serviceClasses,
     iheProfiles,
@@ -107,8 +121,23 @@ export async function process(inputs, ctx) {
     cybersecurityAssessment
   });
 
-  // Final Breakpoint: Integration Approval
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      integrationDocumentation = await ctx.task(integrationDocumentationTask, { ...{
+    systemName,
+    serviceClasses,
+    iheProfiles,
+    conformanceStatement,
+    serviceClassImplementation,
+    pacsIntegration,
+    iheImplementation,
+    hl7FhirIntegration,
+    interoperabilityTesting,
+    cybersecurityAssessment
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `DICOM integration complete for ${systemName}. Interoperability: ${interoperabilityTesting.overallResult}. Approve for deployment?`,
     title: 'Integration Approval',
     context: {
@@ -118,9 +147,15 @@ export async function process(inputs, ctx) {
       files: [
         { path: `artifacts/integration-documentation.json`, format: 'json', content: integrationDocumentation }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     systemName,
@@ -139,8 +174,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const conformanceStatementTask = defineTask('conformance-statement', (args, taskCtx) => ({
   kind: 'agent',

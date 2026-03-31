@@ -70,7 +70,6 @@ export async function process(inputs, ctx) {
     });
     artifacts.push(...certification.artifacts);
   }
-
   // Phase 5: Tracking and Metrics
   const trackingPlan = await ctx.task(trainingTrackingTask, {
     courses: courseDevelopment.courses,
@@ -80,16 +79,25 @@ export async function process(inputs, ctx) {
   artifacts.push(...trackingPlan.artifacts);
 
   // Phase 6: Implementation Plan
-  const implementationPlan = await ctx.task(trainingImplementationTask, {
+  let implementationPlan = await ctx.task(trainingImplementationTask, {
     organizationProfile,
     curriculum: curriculumDesign.curriculum,
     courses: courseDevelopment.courses,
     trackingPlan: trackingPlan.plan,
     outputDir
   });
-  artifacts.push(...implementationPlan.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      implementationPlan = await ctx.task(trainingImplementationTask, { ...{
+    organizationProfile,
+    curriculum: curriculumDesign.curriculum,
+    courses: courseDevelopment.courses,
+    trackingPlan: trackingPlan.plan,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Training program for ${organizationProfile.name} complete. ${courseDevelopment.courses.length} courses created. Approve program?`,
     title: 'Training Program Review',
     context: {
@@ -97,9 +105,15 @@ export async function process(inputs, ctx) {
       coursesCount: courseDevelopment.courses.length,
       rolesCount: roles.length,
       files: artifacts.slice(-2).map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     organization: organizationProfile.name,

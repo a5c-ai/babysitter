@@ -83,7 +83,7 @@ export async function process(inputs, ctx) {
   });
 
   // Task 1.3: Environment Architecture Design
-  const architectureDesign = await ctx.task(architectureDesignTask, {
+  let architectureDesign = await ctx.task(architectureDesignTask, {
     projectName,
     platformAssessment,
     environmentRequirements: environmentRequirements.requirements,
@@ -91,8 +91,18 @@ export async function process(inputs, ctx) {
     securityRequirements
   });
 
-  // Breakpoint: Review environment architecture
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      architectureDesign = await ctx.task(architectureDesignTask, { ...{
+    projectName,
+    platformAssessment,
+    environmentRequirements: environmentRequirements.requirements,
+    applicationArchitecture,
+    securityRequirements
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Environment architecture designed for ${projectName}. ${environments.length} environments planned on ${infrastructurePlatform}. Review and approve architecture?`,
     title: 'Environment Architecture Review',
     context: {
@@ -105,9 +115,15 @@ export async function process(inputs, ctx) {
         { path: `artifacts/architecture-design.json`, format: 'json' },
         { path: `artifacts/architecture-diagram.md`, format: 'markdown' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 2: INFRASTRUCTURE AS CODE IMPLEMENTATION
   // ============================================================================
@@ -142,7 +158,7 @@ export async function process(inputs, ctx) {
   });
 
   // Task 2.4: IaC Validation and Testing
-  const iacValidation = await ctx.task(iacValidationTask, {
+  let iacValidation = await ctx.task(iacValidationTask, {
     projectName,
     iacTemplates,
     networkConfig,
@@ -164,9 +180,18 @@ export async function process(inputs, ctx) {
       }
     };
   }
-
-  // Breakpoint: Review IaC templates before provisioning
-  await ctx.breakpoint({
+  let lastFeedback_reviewApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_reviewApproval) {
+      iacValidation = await ctx.task(iacValidationTask, { ...{
+    projectName,
+    iacTemplates,
+    networkConfig,
+    securityConfig,
+    infrastructurePlatform
+  }, feedback: lastFeedback_reviewApproval, attempt: attempt + 1 });
+    }
+  const reviewApproval = await ctx.breakpoint({
     question: `Infrastructure as Code templates created and validated for ${projectName}. Review templates before environment provisioning?`,
     title: 'IaC Templates Review',
     context: {
@@ -180,9 +205,15 @@ export async function process(inputs, ctx) {
         { path: `artifacts/security-config.json`, format: 'json' },
         { path: `artifacts/iac-validation-report.md`, format: 'markdown' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_reviewApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (reviewApproval.approved) break;
+    lastFeedback_reviewApproval = reviewApproval.response || reviewApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 3: CONTAINERIZATION
   // ============================================================================
@@ -235,7 +266,7 @@ export async function process(inputs, ctx) {
     const provisionStartTime = ctx.now();
 
     // Task 4.1: Environment Provisioning
-    const provisionResult = await ctx.task(environmentProvisioningTask, {
+    let provisionResult = await ctx.task(environmentProvisioningTask, {
       projectName,
       environmentName,
       iacTemplates,
@@ -248,8 +279,20 @@ export async function process(inputs, ctx) {
     if (!provisionResult.success) {
       ctx.log('error', `Failed to provision ${environmentName} environment`);
 
-      // Breakpoint: Provisioning failure
-      await ctx.breakpoint({
+        let lastFeedback_iterationApproval = null;
+      for (let attempt = 0; attempt < 3; attempt++) {
+        if (lastFeedback_iterationApproval) {
+          provisionResult = await ctx.task(environmentProvisioningTask, { ...{
+      projectName,
+      environmentName,
+      iacTemplates,
+      networkConfig,
+      securityConfig,
+      containerImages,
+      infrastructurePlatform
+    }, feedback: lastFeedback_iterationApproval, attempt: attempt + 1 });
+        }
+  const iterationApproval = await ctx.breakpoint({
         question: `Failed to provision ${environmentName} environment. Review errors and retry or skip?`,
         title: `Environment Provisioning Failed - ${environmentName}`,
         context: {
@@ -259,16 +302,20 @@ export async function process(inputs, ctx) {
           files: [
             { path: `artifacts/${environmentName}-provisioning-error.json`, format: 'json' }
           ]
-        }
-      });
-
-      continue;
+        },
+        expert: 'owner',
+        tags: ['approval-gate'],
+        previousFeedback: lastFeedback_iterationApproval || undefined,
+        attempt: attempt > 0 ? attempt + 1 : undefined
+        });
+        if (iterationApproval.approved) break;
+        lastFeedback_iterationApproval = iterationApproval.response || iterationApproval.feedback || 'Changes requested';
+      }      continue;
     }
-
-    const provisionDuration = ctx.now() - provisionStartTime;
+  const provisionDuration = ctx.now() - provisionStartTime;
 
     // Task 4.2: Environment Health Check
-    const healthCheck = await ctx.task(environmentHealthCheckTask, {
+    let healthCheck = await ctx.task(environmentHealthCheckTask, {
       projectName,
       environmentName,
       provisionResult,
@@ -290,9 +337,17 @@ export async function process(inputs, ctx) {
       ctx.log('warn', `Provisioning time ${provisionDuration}ms exceeds target ${targetProvisioningTime * 1000}ms`);
     }
   }
-
-  // Breakpoint: Review provisioned environments
-  await ctx.breakpoint({
+  let lastFeedback_reviewApproval2 = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_reviewApproval2) {
+      healthCheck = await ctx.task(environmentHealthCheckTask, { ...{
+      projectName,
+      environmentName,
+      provisionResult,
+      applicationArchitecture
+    }, feedback: lastFeedback_reviewApproval2, attempt: attempt + 1 });
+    }
+  const reviewApproval2 = await ctx.breakpoint({
     question: `${provisionedEnvironments.length}/${environments.length} environments provisioned successfully. Review environment details and proceed?`,
     title: 'Environment Provisioning Complete',
     context: {
@@ -305,9 +360,15 @@ export async function process(inputs, ctx) {
         { path: `artifacts/provisioned-environments.json`, format: 'json' },
         { path: `artifacts/provisioning-summary.md`, format: 'markdown' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_reviewApproval2 || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (reviewApproval2.approved) break;
+    lastFeedback_reviewApproval2 = reviewApproval2.response || reviewApproval2.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 5: TEST DATA MANAGEMENT
   // ============================================================================
@@ -432,7 +493,7 @@ export async function process(inputs, ctx) {
   });
 
   // Task 8.3: Security Audit
-  const securityAudit = await ctx.task(securityAuditTask, {
+  let securityAudit = await ctx.task(securityAuditTask, {
     projectName,
     environments: provisionedEnvironments,
     securityRequirements,
@@ -440,8 +501,18 @@ export async function process(inputs, ctx) {
     accessControl
   });
 
-  if (securityAudit.criticalIssues > 0) {
-    await ctx.breakpoint({
+      let lastFeedback_securityApproval = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_securityApproval) {
+        securityAudit = await ctx.task(securityAuditTask, { ...{
+    projectName,
+    environments: provisionedEnvironments,
+    securityRequirements,
+    securityHardening,
+    accessControl
+  }, feedback: lastFeedback_securityApproval, attempt: attempt + 1 });
+      }
+  const securityApproval = await ctx.breakpoint({
       question: `Security audit found ${securityAudit.criticalIssues} critical issues. Review and remediate before proceeding?`,
       title: 'Security Audit - Critical Issues Found',
       context: {
@@ -453,9 +524,15 @@ export async function process(inputs, ctx) {
           { path: `artifacts/security-audit-report.json`, format: 'json' },
           { path: `artifacts/security-audit-report.md`, format: 'markdown' }
         ]
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_securityApproval || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (securityApproval.approved) break;
+      lastFeedback_securityApproval = securityApproval.response || securityApproval.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 9: ENVIRONMENT PARITY VALIDATION
@@ -472,7 +549,7 @@ export async function process(inputs, ctx) {
   });
 
   // Task 9.2: Configuration Drift Detection
-  const driftDetection = await ctx.task(configurationDriftDetectionTask, {
+  let driftDetection = await ctx.task(configurationDriftDetectionTask, {
     projectName,
     environments: provisionedEnvironments,
     iacTemplates,
@@ -480,9 +557,17 @@ export async function process(inputs, ctx) {
   });
 
   if (driftDetection.driftDetected) {
-    ctx.log('warn', `Configuration drift detected in ${driftDetection.driftedEnvironments.length} environments`);
-
-    await ctx.breakpoint({
+      let lastFeedback_configApproval = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_configApproval) {
+        driftDetection = await ctx.task(configurationDriftDetectionTask, { ...{
+    projectName,
+    environments: provisionedEnvironments,
+    iacTemplates,
+    parityCheck
+  }, feedback: lastFeedback_configApproval, attempt: attempt + 1 });
+      }
+  const configApproval = await ctx.breakpoint({
       question: `Configuration drift detected. Review drift and remediate?`,
       title: 'Configuration Drift Detected',
       context: {
@@ -492,9 +577,15 @@ export async function process(inputs, ctx) {
         files: [
           { path: `artifacts/drift-report.json`, format: 'json' }
         ]
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_configApproval || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (configApproval.approved) break;
+      lastFeedback_configApproval = configApproval.response || configApproval.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 10: AUTOMATION AND DOCUMENTATION
@@ -561,15 +652,24 @@ export async function process(inputs, ctx) {
   });
 
   // Task 11.3: Cost Analysis
-  const costAnalysis = await ctx.task(costAnalysisTask, {
+  let costAnalysis = await ctx.task(costAnalysisTask, {
     projectName,
     environments: provisionedEnvironments,
     infrastructurePlatform,
     costConstraints
   });
 
-  if (costAnalysis.projectedMonthlyCost > costConstraints.maxMonthlyCost) {
-    await ctx.breakpoint({
+      let lastFeedback_analysisApproval = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_analysisApproval) {
+        costAnalysis = await ctx.task(costAnalysisTask, { ...{
+    projectName,
+    environments: provisionedEnvironments,
+    infrastructurePlatform,
+    costConstraints
+  }, feedback: lastFeedback_analysisApproval, attempt: attempt + 1 });
+      }
+  const analysisApproval = await ctx.breakpoint({
       question: `Projected monthly cost (${costAnalysis.projectedMonthlyCost}) exceeds budget (${costConstraints.maxMonthlyCost}). Review and optimize?`,
       title: 'Cost Budget Exceeded',
       context: {
@@ -581,12 +681,18 @@ export async function process(inputs, ctx) {
         files: [
           { path: `artifacts/cost-analysis.json`, format: 'json' }
         ]
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_analysisApproval || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (analysisApproval.approved) break;
+      lastFeedback_analysisApproval = analysisApproval.response || analysisApproval.feedback || 'Changes requested';
+    } }
 
   // Task 11.4: Final Report Generation
-  const finalReport = await ctx.task(finalReportGenerationTask, {
+  let finalReport = await ctx.task(finalReportGenerationTask, {
     projectName,
     environments: provisionedEnvironments,
     e2eTest,
@@ -599,8 +705,23 @@ export async function process(inputs, ctx) {
     runbook
   });
 
-  // Final Breakpoint: Environment management complete
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval2 = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval2) {
+      finalReport = await ctx.task(finalReportGenerationTask, { ...{
+    projectName,
+    environments: provisionedEnvironments,
+    e2eTest,
+    performanceBaseline,
+    costAnalysis,
+    monitoringValidation,
+    securityAudit,
+    parityCheck,
+    documentation,
+    runbook
+  }, feedback: lastFeedback_finalApproval2, attempt: attempt + 1 });
+    }
+  const finalApproval2 = await ctx.breakpoint({
     question: `Test environment management complete for ${projectName}. ${provisionedEnvironments.length} environments provisioned and validated. Review final report and approve for team handoff?`,
     title: 'Environment Management Complete',
     context: {
@@ -617,9 +738,15 @@ export async function process(inputs, ctx) {
         { path: `artifacts/environment-runbook.md`, format: 'markdown' },
         { path: `artifacts/cost-analysis.json`, format: 'json' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval2 || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval2.approved) break;
+    lastFeedback_finalApproval2 = finalApproval2.response || finalApproval2.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const totalDuration = endTime - startTime;
 
@@ -666,8 +793,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

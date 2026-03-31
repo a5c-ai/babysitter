@@ -69,7 +69,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 2: Specimen Preparation');
 
-  const specimenResult = await ctx.task(specimenPreparationTask, {
+  let specimenResult = await ctx.task(specimenPreparationTask, {
     projectName,
     material,
     testTypes,
@@ -83,8 +83,20 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Specimens prepared - ${specimenResult.specimensPrepared} total`);
 
-  // Breakpoint: Specimen verification
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      specimenResult = await ctx.task(specimenPreparationTask, { ...{
+    projectName,
+    material,
+    testTypes,
+    specimens,
+    heatTreatment,
+    planningResult,
+    outputDir
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Specimens prepared. ${specimenResult.specimensPrepared} specimens ready for testing. Dimensional verification complete. Proceed with testing?`,
     title: 'Specimen Preparation Review',
     context: {
@@ -92,9 +104,15 @@ export async function process(inputs, ctx) {
       specimens: specimenResult.specimenList,
       dimensions: specimenResult.dimensions,
       files: specimenResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 3: TENSILE TESTING
   // ============================================================================
@@ -102,7 +120,7 @@ export async function process(inputs, ctx) {
   if (testTypes.includes('tensile')) {
     ctx.log('info', 'Phase 3: Tensile Testing (ASTM E8)');
 
-    const tensileResult = await ctx.task(tensileTestingTask, {
+    let tensileResult = await ctx.task(tensileTestingTask, {
       projectName,
       material,
       specimens,
@@ -118,8 +136,20 @@ export async function process(inputs, ctx) {
     ctx.log('info', `Tensile testing complete - Yield: ${tensileResult.averageYield} MPa, UTS: ${tensileResult.averageUTS} MPa`);
 
     // Quality Gate: Specification compliance
-    if (specifications.minYield && tensileResult.averageYield < specifications.minYield) {
-      await ctx.breakpoint({
+        let lastFeedback_qualityGateApproval = null;
+      for (let attempt = 0; attempt < 3; attempt++) {
+        if (lastFeedback_qualityGateApproval) {
+          tensileResult = await ctx.task(tensileTestingTask, { ...{
+      projectName,
+      material,
+      specimens,
+      specimenResult,
+      testTemperature,
+      specifications,
+      outputDir
+    }, feedback: lastFeedback_qualityGateApproval, attempt: attempt + 1 });
+        }
+  const qualityGateApproval = await ctx.breakpoint({
         question: `Yield strength ${tensileResult.averageYield} MPa below specification ${specifications.minYield} MPa. Material fails to meet requirements. Review test data?`,
         title: 'Tensile Test Failure',
         context: {
@@ -127,11 +157,16 @@ export async function process(inputs, ctx) {
           testResults: tensileResult.individualResults,
           statistics: tensileResult.statistics,
           files: tensileResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-        }
-      });
-    }
+        },
+        expert: 'owner',
+        tags: ['approval-gate'],
+        previousFeedback: lastFeedback_qualityGateApproval || undefined,
+        attempt: attempt > 0 ? attempt + 1 : undefined
+        });
+        if (qualityGateApproval.approved) break;
+        lastFeedback_qualityGateApproval = qualityGateApproval.response || qualityGateApproval.feedback || 'Changes requested';
+      }   }
   }
-
   // ============================================================================
   // PHASE 4: HARDNESS TESTING
   // ============================================================================
@@ -153,7 +188,6 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Hardness testing complete - Average: ${hardnessResult.averageHardness} ${hardnessResult.scale}`);
   }
-
   // ============================================================================
   // PHASE 5: IMPACT TESTING
   // ============================================================================
@@ -176,7 +210,6 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Impact testing complete - Average: ${impactResult.averageEnergy} J`);
   }
-
   // ============================================================================
   // PHASE 6: FATIGUE TESTING (IF REQUESTED)
   // ============================================================================
@@ -198,7 +231,6 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Fatigue testing complete - Endurance limit: ${fatigueResult.enduranceLimit} MPa`);
   }
-
   // ============================================================================
   // PHASE 7: METALLOGRAPHIC EXAMINATION
   // ============================================================================
@@ -219,7 +251,6 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Metallography complete - Grain size: ASTM ${metalloResult.grainSize}`);
   }
-
   // ============================================================================
   // PHASE 8: DATA ANALYSIS AND STATISTICS
   // ============================================================================
@@ -244,7 +275,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 9: Generating Test Report');
 
-  const reportResult = await ctx.task(generateTestReportTask, {
+  let reportResult = await ctx.task(generateTestReportTask, {
     projectName,
     material,
     testTypes,
@@ -258,8 +289,22 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...reportResult.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      reportResult = await ctx.task(generateTestReportTask, { ...{
+    projectName,
+    material,
+    testTypes,
+    planningResult,
+    specimenResult,
+    allResults,
+    analysisResult,
+    specifications,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Material Testing Complete for ${projectName}. Compliance: ${analysisResult.overallCompliance}. ${analysisResult.passCount}/${analysisResult.totalTests} tests passed. Approve test report?`,
     title: 'Material Testing Complete',
     context: {
@@ -274,9 +319,15 @@ export async function process(inputs, ctx) {
       files: [
         { path: reportResult.reportPath, format: 'markdown', label: 'Test Report' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -304,8 +355,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

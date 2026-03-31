@@ -42,15 +42,24 @@ export async function process(inputs, ctx) {
   const placementOptimization = await ctx.task(placementOptimizationTask, { designName, targetDevice, floorplanning, targetFrequency, outputDir });
   artifacts.push(...placementOptimization.artifacts);
 
-  const routingOptimization = await ctx.task(routingOptimizationTask, { designName, placementOptimization, congestionOptimization, outputDir });
-  artifacts.push(...routingOptimization.artifacts);
-
-  await ctx.breakpoint({
+  let routingOptimization = await ctx.task(routingOptimizationTask, { designName, placementOptimization, congestionOptimization, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      routingOptimization = await ctx.task(routingOptimizationTask, { ...{ designName, placementOptimization, congestionOptimization, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Place and route complete for ${designName}. Utilization: ${placementOptimization.utilization}%, Timing: ${routingOptimization.timingMet ? 'MET' : 'FAILED'}. Review results?`,
     title: 'Place and Route Review',
-    context: { runId: ctx.runId, designName, utilization: placementOptimization.utilization, timingMet: routingOptimization.timingMet }
-  });
-
+    context: { runId: ctx.runId, designName, utilization: placementOptimization.utilization, timingMet: routingOptimization.timingMet },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const postRouteOptimization = await ctx.task(postRouteOptimizationTask, { designName, routingOptimization, targetFrequency, outputDir });
   artifacts.push(...postRouteOptimization.artifacts);
 

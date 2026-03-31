@@ -126,7 +126,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 8: Assessing optimization plan quality');
-  const qualityAssessment = await ctx.task(qualityAssessmentTask, {
+  let qualityAssessment = await ctx.task(qualityAssessmentTask, {
     baselineAnalysis,
     rootCauseAnalysis,
     knowledgeGapAssessment,
@@ -139,9 +139,20 @@ export async function process(inputs, ctx) {
   artifacts.push(...qualityAssessment.artifacts);
 
   const qualityScore = qualityAssessment.overallScore;
-  const qualityMet = qualityScore >= 85;
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      qualityAssessment = await ctx.task(qualityAssessmentTask, { ...{
+    baselineAnalysis,
+    rootCauseAnalysis,
+    knowledgeGapAssessment,
+    empowermentAnalysis,
+    trainingRecommendations,
+    improvementPlan,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `FCR optimization analysis complete. Current FCR: ${baselineAnalysis.currentFCR}%. Target: ${targetFCR}%. Quality score: ${qualityScore}/100. ${qualityMet ? 'Plan meets standards!' : 'May need refinement.'} Review and approve?`,
     title: 'FCR Optimization Review',
     context: {
@@ -162,9 +173,15 @@ export async function process(inputs, ctx) {
         trainingModules: trainingRecommendations.modules?.length || 0,
         improvementActions: improvementPlan.actions?.length || 0
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -197,8 +214,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

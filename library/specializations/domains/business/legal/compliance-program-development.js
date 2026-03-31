@@ -85,7 +85,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 3: Conducting compliance risk assessment');
 
-  const riskAssessment = await ctx.task(complianceRiskAssessmentTask, {
+  let riskAssessment = await ctx.task(complianceRiskAssessmentTask, {
     organizationProfile,
     regulatoryMapping,
     orgAssessment,
@@ -97,8 +97,17 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Identified ${riskAssessment.riskCount} compliance risks`);
 
   // Quality Gate: High risk areas
-  if (riskAssessment.highRiskCount > 5) {
-    await ctx.breakpoint({
+      let lastFeedback_phase3Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase3Review) {
+        riskAssessment = await ctx.task(complianceRiskAssessmentTask, { ...{
+    organizationProfile,
+    regulatoryMapping,
+    orgAssessment,
+    outputDir
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+      }
+  const phase3Review = await ctx.breakpoint({
       question: `${riskAssessment.highRiskCount} high-risk compliance areas identified. Review risk assessment before proceeding with program design?`,
       title: 'Compliance Risk Assessment Review',
       context: {
@@ -106,9 +115,15 @@ export async function process(inputs, ctx) {
         highRiskAreas: riskAssessment.highRiskAreas,
         riskScore: riskAssessment.overallRiskScore,
         files: riskAssessment.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase3Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase3Review.approved) break;
+      lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 4: PROGRAM FRAMEWORK DESIGN
@@ -194,7 +209,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...trainingPlan.artifacts);
   }
-
   // ============================================================================
   // PHASE 9: MONITORING AND TESTING PLAN (Optional)
   // ============================================================================
@@ -212,7 +226,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...monitoringPlan.artifacts);
   }
-
   // ============================================================================
   // PHASE 10: PROGRAM DOCUMENTATION
   // ============================================================================
@@ -242,7 +255,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 11: Creating implementation roadmap');
 
-  const implementationRoadmap = await ctx.task(implementationRoadmapTask, {
+  let implementationRoadmap = await ctx.task(implementationRoadmapTask, {
     organizationProfile,
     orgAssessment,
     policies: policyDevelopment.policies,
@@ -254,8 +267,20 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...implementationRoadmap.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      implementationRoadmap = await ctx.task(implementationRoadmapTask, { ...{
+    organizationProfile,
+    orgAssessment,
+    policies: policyDevelopment.policies,
+    controls: controlDesign.controls,
+    trainingPlan,
+    monitoringPlan,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Compliance program for ${organizationProfile.name} complete. ${policyDevelopment.policies.length} policies, ${controlDesign.controls.length} controls. Approve program?`,
     title: 'Compliance Program Review',
     context: {
@@ -272,9 +297,15 @@ export async function process(inputs, ctx) {
         { path: programDocumentation.programPath, format: 'markdown', label: 'Compliance Program' },
         { path: implementationRoadmap.roadmapPath, format: 'markdown', label: 'Implementation Roadmap' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -316,8 +347,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

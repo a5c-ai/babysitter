@@ -34,7 +34,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Gathering bug and fix details');
 
-  const details = await ctx.task(gatherBugFixDetailsTask, {
+  let details = await ctx.task(gatherBugFixDetailsTask, {
     bugDescription,
     fixDescription,
     component,
@@ -48,19 +48,40 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 2: Forking repository');
 
-  await ctx.breakpoint({
-    question: [
-      'To submit your bugfix, we need to fork the a5c-ai/babysitter repository to your GitHub account.',
-      '',
-      `**Bug:** ${details.bugSummary}`,
-      `**Fix:** ${details.fixSummary}`,
-      `**Files:** ${details.affectedFiles.join(', ')}`,
-      '',
-      'Approve to fork the repository, or reject to cancel.'
-    ].join('\n'),
-    title: 'Confirm Repository Fork',
-    context: { runId: ctx.runId }
-  });
+  let forkLastFeedback = null;
+  for (let forkAttempt = 0; forkAttempt < 3; forkAttempt++) {
+    if (forkLastFeedback) {
+      details = await ctx.task(gatherBugFixDetailsTask, {
+        bugDescription,
+        fixDescription,
+        component,
+        filesToChange,
+        additionalContext,
+        feedback: forkLastFeedback,
+        attempt: forkAttempt + 1
+      });
+    }
+    const forkApproval = await ctx.breakpoint({
+      question: [
+          'To submit your bugfix, we need to fork the a5c-ai/babysitter repository to your GitHub account.',
+          '',
+          `**Bug:** ${details.bugSummary}`,
+          `**Fix:** ${details.fixSummary}`,
+          `**Files:** ${details.affectedFiles.join(', ')}`,
+          '',
+          'Approve to fork the repository, or request changes.'
+        ].join('\n'),
+      previousFeedback: forkLastFeedback || undefined,
+      attempt: forkAttempt > 0 ? forkAttempt + 1 : undefined,
+      title: 'Confirm Repository Fork',
+      options: ['Approve', 'Request changes'],
+      expert: 'owner',
+      tags: ['approval-gate', 'fork'],
+      context: { runId: ctx.runId }
+    });
+    if (forkApproval.approved) break;
+    forkLastFeedback = forkApproval.response || forkApproval.feedback || 'Changes requested';
+  }
 
   const forkResult = await ctx.task(forkRepoTask, {});
 
@@ -73,13 +94,15 @@ export async function process(inputs, ctx) {
   const starCheck = await ctx.task(checkStarTask, {});
 
   if (!starCheck.starred) {
-    await ctx.breakpoint({
+    const starApproval = await ctx.breakpoint({
       question: 'Would you like to star the a5c-ai/babysitter repository? This helps the project gain visibility.',
       title: 'Star Repository',
       context: { runId: ctx.runId }
     });
 
-    await ctx.task(starRepoTask, {});
+    if (starApproval.approved) {
+      await ctx.task(starRepoTask, {});
+    }
   }
 
   // ============================================================================
@@ -132,24 +155,60 @@ export async function process(inputs, ctx) {
   // PHASE 7: REVIEW BREAKPOINT
   // ============================================================================
 
-  await ctx.breakpoint({
-    question: [
-      'Please review your bugfix before submitting the PR:',
-      '',
-      `**Bug:** ${details.bugSummary}`,
-      `**Fix:** ${details.fixSummary}`,
-      `**Branch:** ${branchResult.branchName}`,
-      `**Files changed:** ${applyResult.filesChanged.join(', ')}`,
-      `**Tests:** ${testResult.passed ? 'PASSING' : 'FAILING'}`,
-      `**Lint:** ${lintResult.passed ? 'PASSING' : 'FAILING'}`,
-      '',
-      testResult.passed && lintResult.passed
-        ? 'All checks pass. Approve to submit the PR, or reject to cancel.'
-        : 'Some checks are failing. You may want to fix them before submitting. Approve to submit anyway, or reject to cancel.'
-    ].join('\n'),
-    title: 'Review Bugfix Before PR Submission',
-    context: { runId: ctx.runId }
-  });
+  let reviewLastFeedback = null;
+  let currentApplyResult = applyResult;
+  let currentTestResult = testResult;
+  let currentLintResult = lintResult;
+  for (let reviewAttempt = 0; reviewAttempt < 3; reviewAttempt++) {
+    if (reviewLastFeedback) {
+      currentApplyResult = await ctx.task(applyFixTask, {
+        forkUrl: forkResult.forkUrl,
+        forkOwner: forkResult.forkOwner,
+        branchName: branchResult.branchName,
+        details,
+        additionalContext,
+        feedback: reviewLastFeedback,
+        attempt: reviewAttempt + 1
+      });
+      [currentTestResult, currentLintResult] = await ctx.parallel.all([
+        () => ctx.task(runTestsTask, {
+          forkOwner: forkResult.forkOwner,
+          branchName: branchResult.branchName,
+          component: details.component
+        }),
+        () => ctx.task(runLintTask, {
+          forkOwner: forkResult.forkOwner,
+          branchName: branchResult.branchName,
+          component: details.component
+        })
+      ]);
+    }
+    const reviewApproval = await ctx.breakpoint({
+      question: [
+          'Please review your bugfix before submitting the PR:',
+          '',
+          `**Bug:** ${details.bugSummary}`,
+          `**Fix:** ${details.fixSummary}`,
+          `**Branch:** ${branchResult.branchName}`,
+          `**Files changed:** ${currentApplyResult.filesChanged.join(', ')}`,
+          `**Tests:** ${currentTestResult.passed ? 'PASSING' : 'FAILING'}`,
+          `**Lint:** ${currentLintResult.passed ? 'PASSING' : 'FAILING'}`,
+          '',
+          currentTestResult.passed && currentLintResult.passed
+            ? 'All checks pass. Approve to submit the PR, or request changes.'
+            : 'Some checks are failing. You may want to fix them before submitting. Approve to submit anyway, or request changes.'
+        ].join('\n'),
+      previousFeedback: reviewLastFeedback || undefined,
+      attempt: reviewAttempt > 0 ? reviewAttempt + 1 : undefined,
+      title: 'Review Bugfix Before PR Submission',
+      options: ['Approve', 'Request changes'],
+      expert: 'owner',
+      tags: ['approval-gate', 'review'],
+      context: { runId: ctx.runId }
+    });
+    if (reviewApproval.approved) break;
+    reviewLastFeedback = reviewApproval.response || reviewApproval.feedback || 'Changes requested';
+  }
 
   // ============================================================================
   // PHASE 8: SUBMIT PR
@@ -157,11 +216,21 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 8: Submitting pull request');
 
-  await ctx.breakpoint({
-    question: 'Confirm: Submit this bugfix as a pull request to a5c-ai/babysitter?',
-    title: 'Confirm PR Submission',
-    context: { runId: ctx.runId }
-  });
+  let submitLastFeedback = null;
+  for (let submitAttempt = 0; submitAttempt < 3; submitAttempt++) {
+    const submitApproval = await ctx.breakpoint({
+      question: 'Confirm: Submit this bugfix as a pull request to a5c-ai/babysitter?',
+      previousFeedback: submitLastFeedback || undefined,
+      attempt: submitAttempt > 0 ? submitAttempt + 1 : undefined,
+      title: 'Confirm PR Submission',
+      options: ['Approve', 'Request changes'],
+      expert: 'owner',
+      tags: ['approval-gate', 'submit'],
+      context: { runId: ctx.runId }
+    });
+    if (submitApproval.approved) break;
+    submitLastFeedback = submitApproval.response || submitApproval.feedback || 'Changes requested';
+  }
 
   const prResult = await ctx.task(submitPrTask, {
     forkOwner: forkResult.forkOwner,

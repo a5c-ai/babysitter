@@ -99,7 +99,7 @@ export async function process(inputs, ctx) {
 
   // Task 9: Establish KPIs and Measurement Approach
   ctx.log('info', 'Phase 9: Establishing KPIs and measurement approach');
-  const measurementPlan = await ctx.task(measurementPlanTask, {
+  let measurementPlan = await ctx.task(measurementPlanTask, {
     businessObjectives,
     platformSelection,
     contentPillars,
@@ -107,8 +107,17 @@ export async function process(inputs, ctx) {
   });
   artifacts.push(...measurementPlan.artifacts);
 
-  // Breakpoint: Review strategy
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      measurementPlan = await ctx.task(measurementPlanTask, { ...{
+    businessObjectives,
+    platformSelection,
+    contentPillars,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Social media strategy complete. ${platformSelection.priorityPlatforms.length} priority platforms identified with ${contentPillars.pillarCount} content pillars. Review and approve?`,
     title: 'Social Media Strategy Review',
     context: {
@@ -120,9 +129,15 @@ export async function process(inputs, ctx) {
         personaCount: audiencePersonas.personaCount,
         kpiCount: measurementPlan.kpiCount
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 10: Generate Strategy Document
   ctx.log('info', 'Phase 10: Generating comprehensive strategy document');
   const strategyDoc = await ctx.task(strategyDocumentTask, {
@@ -161,8 +176,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task definitions
+  // Task definitions
 export const socialMediaAuditTask = defineTask('social-media-audit', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Conduct social media audit',

@@ -79,7 +79,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('Phase 1: Deep analysis of oh-my-pi internals');
 
-  const analysis = await ctx.task(analyzeOmpDeepTask, { projectDir });
+  let analysis = await ctx.task(analyzeOmpDeepTask, { projectDir });
 
   ctx.log('Analysis complete', {
     ompInstalled: analysis.ompInstalled,
@@ -88,14 +88,23 @@ export async function process(inputs, ctx) {
     pluginSystem: analysis.hasPluginSystem,
     tuiWidgets: analysis.hasTuiWidgets,
     askTool: analysis.hasAskTool
-  });
-
-  await ctx.breakpoint({
+    let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      analysis = await ctx.task(analyzeOmpDeepTask, { ...{ projectDir }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Deep analysis of oh-my-pi complete. Task system: ${analysis.hasTaskSystem}. Todo tool: ${analysis.hasTodoTool}. Plugin system: ${analysis.hasPluginSystem}. TUI widgets: ${analysis.hasTuiWidgets}. Proceed with deep integration?`,
     title: 'Review oh-my-pi Deep Analysis',
-    context: { runId: ctx.runId }
-  });
-
+    context: { runId: ctx.runId },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 2: SCAFFOLD
   // ============================================================================
@@ -362,15 +371,35 @@ export async function process(inputs, ctx) {
 
   while (finalQuality < targetQuality && iteration < maxIterations) {
     iteration++;
-    ctx.log(`Convergence iteration ${iteration}`, { quality: finalQuality, target: targetQuality });
-
-    await ctx.breakpoint({
+    let lastFeedback_iterationApproval = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_iterationApproval) {
+        verifyResult = await ctx.task(verifyHarnessAssimilationTask, { ...{
+    projectDir,
+    harnessName: 'oh-my-pi',
+    research: researchResult,
+    assimilation: assimilationResult,
+    docs: docsResult,
+    analysis,
+    integrationFiles,
+    localTestResult: testResult,
+    runtimeValidation: runtimeValidationResult,
+    targetQuality
+  }, feedback: lastFeedback_iterationApproval, attempt: attempt + 1 });
+      }
+  const iterationApproval = await ctx.breakpoint({
       question: `Quality: ${finalQuality}/${targetQuality} after iteration ${iteration - 1}. Issues: ${verifyResult.issues?.slice(0, 3).join('; ') || 'none'}. Continue?`,
       title: `Convergence ${iteration}`,
-      context: { runId: ctx.runId }
-    });
-
-    const fix = await ctx.task(refineHarnessAssimilationTask, {
+      context: { runId: ctx.runId },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_iterationApproval || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (iterationApproval.approved) break;
+      lastFeedback_iterationApproval = iterationApproval.response || iterationApproval.feedback || 'Changes requested';
+    }
+  const fix = await ctx.task(refineHarnessAssimilationTask, {
       projectDir, integrationFiles,
       harnessName: 'oh-my-pi',
       issues: verifyResult.issues,
@@ -406,7 +435,6 @@ export async function process(inputs, ctx) {
     finalQuality = verifyResult.qualityScore;
     ctx.log(`Iteration ${iteration} complete`, { quality: finalQuality });
   }
-
   // ============================================================================
   // RESULT
   // ============================================================================
@@ -425,8 +453,7 @@ export async function process(inputs, ctx) {
     metadata: { processId: 'assimilation/harness/pi', timestamp: ctx.now() }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

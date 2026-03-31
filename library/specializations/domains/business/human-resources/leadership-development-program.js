@@ -30,15 +30,24 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Starting Leadership Development Program for ${organizationName}`);
 
   // Phase 1: Program Design
-  const programDesign = await ctx.task(programDesignTask, { organizationName, targetAudience, programDuration, cohortSize, leadershipCompetencies, includeCoaching, includeActionLearning, outputDir });
-  artifacts.push(...programDesign.artifacts);
-
-  await ctx.breakpoint({
+  let programDesign = await ctx.task(programDesignTask, { organizationName, targetAudience, programDuration, cohortSize, leadershipCompetencies, includeCoaching, includeActionLearning, outputDir });
+    let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      programDesign = await ctx.task(programDesignTask, { ...{ organizationName, targetAudience, programDuration, cohortSize, leadershipCompetencies, includeCoaching, includeActionLearning, outputDir }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Leadership development program designed for ${targetAudience}. ${programDesign.modules.length} modules planned. Review program design?`,
     title: 'Program Design Review',
-    context: { runId: ctx.runId, modules: programDesign.modules, competencies: programDesign.competencies, files: programDesign.artifacts.map(a => ({ path: a.path, format: a.format || 'json' })) }
-  });
-
+    context: { runId: ctx.runId, modules: programDesign.modules, competencies: programDesign.competencies, files: programDesign.artifacts.map(a => ({ path: a.path, format: a.format || 'json' })) },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // Phase 2: Participant Selection
   const participantSelection = await ctx.task(participantSelectionTask, { organizationName, targetAudience, cohortSize, outputDir });
   artifacts.push(...participantSelection.artifacts);
@@ -57,24 +66,31 @@ export async function process(inputs, ctx) {
     coachingSetup = await ctx.task(coachingSetupTask, { organizationName, participants: participantSelection.participants, programDuration, outputDir });
     artifacts.push(...coachingSetup.artifacts);
   }
-
   // Phase 6: Action Learning Projects
   let actionLearning = null;
   if (includeActionLearning) {
     actionLearning = await ctx.task(actionLearningTask, { organizationName, participants: participantSelection.participants, outputDir });
     artifacts.push(...actionLearning.artifacts);
   }
-
   // Phase 7: Program Delivery
-  const programDelivery = await ctx.task(programDeliveryTask, { organizationName, curriculumDevelopment, participants: participantSelection.participants, coachingSetup, actionLearning, outputDir });
-  artifacts.push(...programDelivery.artifacts);
-
-  await ctx.breakpoint({
+  let programDelivery = await ctx.task(programDeliveryTask, { organizationName, curriculumDevelopment, participants: participantSelection.participants, coachingSetup, actionLearning, outputDir });
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      programDelivery = await ctx.task(programDeliveryTask, { ...{ organizationName, curriculumDevelopment, participants: participantSelection.participants, coachingSetup, actionLearning, outputDir }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Program delivery in progress. ${programDelivery.modulesCompleted} modules completed. Review progress?`,
     title: 'Program Delivery Progress',
-    context: { runId: ctx.runId, modulesCompleted: programDelivery.modulesCompleted, participationRate: programDelivery.participationRate, files: programDelivery.artifacts.map(a => ({ path: a.path, format: a.format || 'json' })) }
-  });
-
+    context: { runId: ctx.runId, modulesCompleted: programDelivery.modulesCompleted, participationRate: programDelivery.participationRate, files: programDelivery.artifacts.map(a => ({ path: a.path, format: a.format || 'json' })) },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 8: Mid-Program Review
   const midProgramReview = await ctx.task(midProgramReviewTask, { organizationName, programDelivery, participants: participantSelection.participants, outputDir });
   artifacts.push(...midProgramReview.artifacts);

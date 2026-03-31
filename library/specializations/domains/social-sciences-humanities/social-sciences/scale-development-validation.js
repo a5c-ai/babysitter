@@ -115,7 +115,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 8: Scoring scale development quality');
-  const qualityScore = await ctx.task(scaleQualityScoringTask, {
+  let qualityScore = await ctx.task(scaleQualityScoringTask, {
     conceptualization,
     itemGeneration,
     expertReview,
@@ -131,8 +131,21 @@ export async function process(inputs, ctx) {
   const scaleScore = qualityScore.overallScore;
   const qualityMet = scaleScore >= 80;
 
-  // Breakpoint: Review scale development
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      qualityScore = await ctx.task(scaleQualityScoringTask, { ...{
+    conceptualization,
+    itemGeneration,
+    expertReview,
+    pilotTesting,
+    efaAnalysis,
+    cfaAnalysis,
+    reliabilityValidity,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Scale development complete. Quality score: ${scaleScore}/100. ${qualityMet ? 'Scale meets quality standards!' : 'Scale may need refinement.'} Review and approve?`,
     title: 'Scale Development Review',
     context: {
@@ -148,9 +161,15 @@ export async function process(inputs, ctx) {
         finalItems: cfaAnalysis.finalItems,
         reliability: reliabilityValidity.reliability
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 

@@ -20,17 +20,25 @@ export async function process(inputs, ctx) {
     targetQuality = 90
   } = inputs;
 
-  // Phase 1: Report Planning and Strategy
-  await ctx.breakpoint({
+  let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    // No preceding task identified for re-run with feedback
+    const phase1Review = await ctx.breakpoint({
     question: 'Starting annual report production. Define report strategy and objectives?',
     title: 'Phase 1: Report Strategy',
     context: {
       runId: ctx.runId,
       phase: 'report-strategy',
       organization: organization.name
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   const [reportStrategy, competitorAnalysis] = await Promise.all([
     ctx.task(defineReportStrategyTask, {
       organization,
@@ -44,32 +52,54 @@ export async function process(inputs, ctx) {
     })
   ]);
 
-  // Phase 2: Content Architecture
-  await ctx.breakpoint({
+  let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    // No preceding task identified for re-run with feedback
+    const phase2Review = await ctx.breakpoint({
     question: 'Strategy defined. Develop content architecture?',
     title: 'Phase 2: Content Architecture',
     context: {
       runId: ctx.runId,
       phase: 'content-architecture'
-    }
-  });
-
-  const contentArchitecture = await ctx.task(developContentArchitectureTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
+  let contentArchitecture = await ctx.task(developContentArchitectureTask, {
     reportStrategy,
     fiscalYearData,
     regulatoryRequirements
   });
 
-  // Phase 3: Narrative Development
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      contentArchitecture = await ctx.task(developContentArchitectureTask, { ...{
+    reportStrategy,
+    fiscalYearData,
+    regulatoryRequirements
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: 'Architecture defined. Develop report narrative?',
     title: 'Phase 3: Narrative Development',
     context: {
       runId: ctx.runId,
       phase: 'narrative-development'
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   const [corporateNarrative, executiveMessages] = await Promise.all([
     ctx.task(developCorporateNarrativeTask, {
       fiscalYearData,
@@ -83,32 +113,60 @@ export async function process(inputs, ctx) {
     })
   ]);
 
-  // Phase 4: Financial Content Planning
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      contentArchitecture = await ctx.task(developContentArchitectureTask, { ...{
+    reportStrategy,
+    fiscalYearData,
+    regulatoryRequirements
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: 'Narrative developed. Plan financial content presentation?',
     title: 'Phase 4: Financial Content',
     context: {
       runId: ctx.runId,
       phase: 'financial-content'
-    }
-  });
-
-  const financialContent = await ctx.task(planFinancialContentTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
+  let financialContent = await ctx.task(planFinancialContentTask, {
     fiscalYearData,
     regulatoryRequirements,
     brandGuidelines
   });
 
-  // Phase 5: Visual Design Planning
-  await ctx.breakpoint({
+    let lastFeedback_phase5Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase5Review) {
+      financialContent = await ctx.task(planFinancialContentTask, { ...{
+    fiscalYearData,
+    regulatoryRequirements,
+    brandGuidelines
+  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+    }
+  const phase5Review = await ctx.breakpoint({
     question: 'Financial content planned. Plan visual design?',
     title: 'Phase 5: Visual Design',
     context: {
       runId: ctx.runId,
       phase: 'visual-design'
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase5Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase5Review.approved) break;
+    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+  }
   const [visualDesignPlan, infographicsStrategy] = await Promise.all([
     ctx.task(planVisualDesignTask, {
       brandGuidelines,
@@ -121,64 +179,119 @@ export async function process(inputs, ctx) {
     })
   ]);
 
-  // Phase 6: Production Timeline
-  await ctx.breakpoint({
+    let lastFeedback_phase6Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase6Review) {
+      financialContent = await ctx.task(planFinancialContentTask, { ...{
+    fiscalYearData,
+    regulatoryRequirements,
+    brandGuidelines
+  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
+    }
+  const phase6Review = await ctx.breakpoint({
     question: 'Design planned. Create production timeline?',
     title: 'Phase 6: Production Timeline',
     context: {
       runId: ctx.runId,
       phase: 'production-timeline'
-    }
-  });
-
-  const productionTimeline = await ctx.task(createProductionTimelineTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase6Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase6Review.approved) break;
+    lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
+  }
+  let productionTimeline = await ctx.task(createProductionTimelineTask, {
     contentArchitecture,
     regulatoryRequirements,
     reportStrategy
   });
 
-  // Phase 7: Review and Approval Process
-  await ctx.breakpoint({
+    let lastFeedback_phase7Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase7Review) {
+      productionTimeline = await ctx.task(createProductionTimelineTask, { ...{
+    contentArchitecture,
+    regulatoryRequirements,
+    reportStrategy
+  }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
+    }
+  const phase7Review = await ctx.breakpoint({
     question: 'Timeline created. Define review and approval process?',
     title: 'Phase 7: Review Process',
     context: {
       runId: ctx.runId,
       phase: 'review-process'
-    }
-  });
-
-  const reviewProcess = await ctx.task(defineReviewProcessTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase7Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase7Review.approved) break;
+    lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
+  }
+  let reviewProcess = await ctx.task(defineReviewProcessTask, {
     organization,
     regulatoryRequirements,
     productionTimeline
   });
 
-  // Phase 8: Distribution Planning
-  await ctx.breakpoint({
+    let lastFeedback_phase8Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase8Review) {
+      reviewProcess = await ctx.task(defineReviewProcessTask, { ...{
+    organization,
+    regulatoryRequirements,
+    productionTimeline
+  }, feedback: lastFeedback_phase8Review, attempt: attempt + 1 });
+    }
+  const phase8Review = await ctx.breakpoint({
     question: 'Review process defined. Plan distribution?',
     title: 'Phase 8: Distribution Planning',
     context: {
       runId: ctx.runId,
       phase: 'distribution-planning'
-    }
-  });
-
-  const distributionPlan = await ctx.task(planDistributionTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase8Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase8Review.approved) break;
+    lastFeedback_phase8Review = phase8Review.response || phase8Review.feedback || 'Changes requested';
+  }
+  let distributionPlan = await ctx.task(planDistributionTask, {
     reportStrategy,
     organization
   });
 
-  // Phase 9: Quality Validation
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      distributionPlan = await ctx.task(planDistributionTask, { ...{
+    reportStrategy,
+    organization
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: 'Validate annual report production plan quality?',
     title: 'Phase 9: Quality Validation',
     context: {
       runId: ctx.runId,
       phase: 'quality-validation',
       targetQuality
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const qualityResult = await ctx.task(validateProductionPlanTask, {
     reportStrategy,
     contentArchitecture,
@@ -233,8 +346,7 @@ export async function process(inputs, ctx) {
     };
   }
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const defineReportStrategyTask = defineTask('define-report-strategy', (args, taskCtx) => ({
   kind: 'agent',

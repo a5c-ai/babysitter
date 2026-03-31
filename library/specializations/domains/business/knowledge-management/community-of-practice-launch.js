@@ -32,7 +32,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 1: Defining domain and scope');
-  const domainDefinition = await ctx.task(domainDefinitionTask, {
+  let domainDefinition = await ctx.task(domainDefinitionTask, {
     domain,
     communityGoals,
     existingCommunities,
@@ -42,8 +42,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...domainDefinition.artifacts);
 
-  // Breakpoint: Review domain definition
-  await ctx.breakpoint({
+    let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      domainDefinition = await ctx.task(domainDefinitionTask, { ...{
+    domain,
+    communityGoals,
+    existingCommunities,
+    organizationalContext,
+    outputDir
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Domain "${domain}" defined with ${domainDefinition.topicAreas.length} topic areas. Review definition?`,
     title: 'Domain Definition Review',
     context: {
@@ -59,9 +69,15 @@ export async function process(inputs, ctx) {
         topicAreas: domainDefinition.topicAreas.length,
         boundaries: domainDefinition.boundaries
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 2: VALUE PROPOSITION DEVELOPMENT
   // ============================================================================
@@ -97,7 +113,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 4: Designing governance structure');
-  const governanceDesign = await ctx.task(governanceDesignTask, {
+  let governanceDesign = await ctx.task(governanceDesignTask, {
     domain,
     sponsorship,
     membershipDefinition: membershipDefinition.membership,
@@ -107,8 +123,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...governanceDesign.artifacts);
 
-  // Breakpoint: Review governance
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      governanceDesign = await ctx.task(governanceDesignTask, { ...{
+    domain,
+    sponsorship,
+    membershipDefinition: membershipDefinition.membership,
+    organizationalContext,
+    outputDir
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: `Governance structure designed with ${governanceDesign.roles.length} roles. Review?`,
     title: 'Governance Structure Review',
     context: {
@@ -123,9 +149,15 @@ export async function process(inputs, ctx) {
         governanceRoles: governanceDesign.roles.length,
         decisionProcesses: governanceDesign.decisionProcesses.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 5: CHARTER DEVELOPMENT
   // ============================================================================
@@ -194,7 +226,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 9: Assessing community design quality');
-  const qualityAssessment = await ctx.task(qualityAssessmentTask, {
+  let qualityAssessment = await ctx.task(qualityAssessmentTask, {
     domainDefinition,
     charterDevelopment,
     governanceDesign,
@@ -223,8 +255,19 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...reviewResult.artifacts);
 
-    // Breakpoint: Final approval gate
-    await ctx.breakpoint({
+      let lastFeedback_finalApproval = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_finalApproval) {
+        qualityAssessment = await ctx.task(qualityAssessmentTask, { ...{
+    domainDefinition,
+    charterDevelopment,
+    governanceDesign,
+    activityPlanning,
+    launchPlan,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+      }
+  const finalApproval = await ctx.breakpoint({
       question: `Stakeholder review complete. ${reviewResult.approved ? 'Approved!' : 'Requires revisions.'} Launch community?`,
       title: 'Final Approval Gate',
       context: {
@@ -240,9 +283,15 @@ export async function process(inputs, ctx) {
           qualityScore: qualityAssessment.overallScore,
           proposedMembers: proposedMembers.length
         }
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_finalApproval || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (finalApproval.approved) break;
+      lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+    } }
 
   const endTime = ctx.now();
   const duration = endTime - startTime;
@@ -273,8 +322,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

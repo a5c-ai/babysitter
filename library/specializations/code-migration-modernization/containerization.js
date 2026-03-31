@@ -53,7 +53,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 2: Creating Dockerfiles');
-  const dockerfiles = await ctx.task(dockerfileCreationTask, {
+  let dockerfiles = await ctx.task(dockerfileCreationTask, {
     projectName,
     assessment,
     applicationStack,
@@ -62,8 +62,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...dockerfiles.artifacts);
 
-  // Breakpoint: Dockerfile review
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      dockerfiles = await ctx.task(dockerfileCreationTask, { ...{
+    projectName,
+    assessment,
+    applicationStack,
+    outputDir
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Dockerfiles created for ${projectName}. Image count: ${dockerfiles.imageCount}. Base images: ${dockerfiles.baseImages.join(', ')}. Review before build?`,
     title: 'Dockerfile Review',
     context: {
@@ -71,9 +80,15 @@ export async function process(inputs, ctx) {
       projectName,
       dockerfiles,
       recommendation: 'Review Dockerfiles for security and optimization'
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 3: IMAGE BUILD AND OPTIMIZATION
   // ============================================================================
@@ -132,7 +147,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 7: Testing deployment');
-  const deploymentTesting = await ctx.task(deploymentTestingTask, {
+  let deploymentTesting = await ctx.task(deploymentTestingTask, {
     projectName,
     k8sManifests,
     healthChecks,
@@ -141,8 +156,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...deploymentTesting.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      deploymentTesting = await ctx.task(deploymentTestingTask, { ...{
+    projectName,
+    k8sManifests,
+    healthChecks,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Containerization complete for ${projectName}. Images: ${imageBuild.imageCount}. Manifests: ${k8sManifests.manifestCount}. Deployment tests: ${deploymentTesting.allPassed ? 'passed' : 'failed'}. Approve?`,
     title: 'Containerization Complete',
     context: {
@@ -153,9 +177,15 @@ export async function process(inputs, ctx) {
         manifests: k8sManifests.manifestCount,
         testsPass: deploymentTesting.allPassed
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -178,8 +208,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

@@ -96,7 +96,7 @@ export async function process(inputs, ctx) {
 
   // Task 7: Generate Proposal Package
   ctx.log('info', 'Generating proposal package');
-  const proposalPackage = await ctx.task(proposalPackageTask, {
+  let proposalPackage = await ctx.task(proposalPackageTask, {
     funderAnalysis,
     narrativeDevelopment,
     methodologyPlan,
@@ -108,8 +108,20 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...proposalPackage.artifacts);
 
-  // Breakpoint: Review grant proposal
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      proposalPackage = await ctx.task(proposalPackageTask, { ...{
+    funderAnalysis,
+    narrativeDevelopment,
+    methodologyPlan,
+    budgetDevelopment,
+    supportingPrep,
+    impactPlan,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Grant proposal complete for "${projectDescription.title || 'project'}". Funder: ${fundingSource.name}. Budget: $${budgetDevelopment.totalBudget || 0}. Review proposal?`,
     title: 'Grant Proposal Development Results',
     context: {
@@ -121,9 +133,15 @@ export async function process(inputs, ctx) {
         totalBudget: budgetDevelopment.totalBudget,
         duration: timeline.duration
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -154,8 +172,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Funder Requirements Analysis
+  // Task 1: Funder Requirements Analysis
 export const funderAnalysisTask = defineTask('funder-analysis', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Analyze funder requirements',

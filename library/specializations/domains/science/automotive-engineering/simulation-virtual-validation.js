@@ -31,34 +31,56 @@ export async function process(inputs, ctx) {
   } = inputs;
 
   // Phase 1: Digital Twin Development
-  const digitalTwin = await ctx.task(digitalTwinTask, {
+  let digitalTwin = await ctx.task(digitalTwinTask, {
     projectName,
     systemUnderTest,
     simulationType
   });
 
   // Quality Gate: Digital twin must be validated
-  if (!digitalTwin.validationStatus || digitalTwin.validationStatus !== 'validated') {
-    await ctx.breakpoint({
+      let lastFeedback_phase1Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase1Review) {
+        digitalTwin = await ctx.task(digitalTwinTask, { ...{
+    projectName,
+    systemUnderTest,
+    simulationType
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+      }
+  const phase1Review = await ctx.breakpoint({
       question: `Digital twin validation status: ${digitalTwin.validationStatus}. Review and approve before proceeding?`,
       title: 'Digital Twin Validation',
       context: {
         runId: ctx.runId,
         digitalTwin,
         recommendation: 'Validate digital twin fidelity against real-world data'
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase1Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase1Review.approved) break;
+      lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+    } }
 
   // Phase 2: Sensor Model Development
-  const sensorModels = await ctx.task(sensorModelsTask, {
+  let sensorModels = await ctx.task(sensorModelsTask, {
     projectName,
     systemUnderTest,
     digitalTwin
   });
 
-  // Breakpoint: Sensor models review
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      sensorModels = await ctx.task(sensorModelsTask, { ...{
+    projectName,
+    systemUnderTest,
+    digitalTwin
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Review sensor models for ${projectName}. ${sensorModels.models?.length || 0} sensor models developed. Approve models?`,
     title: 'Sensor Models Review',
     context: {
@@ -70,9 +92,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: sensorModels
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // Phase 3: Scenario Library Development
   const scenarioLibrary = await ctx.task(scenarioLibraryTask, {
     projectName,
@@ -98,7 +126,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 6: Scenario-Based Testing
-  const scenarioTesting = await ctx.task(scenarioTestingTask, {
+  let scenarioTesting = await ctx.task(scenarioTestingTask, {
     projectName,
     silEnvironment,
     hilIntegration,
@@ -107,17 +135,33 @@ export async function process(inputs, ctx) {
   });
 
   // Quality Gate: Coverage targets
-  if (scenarioTesting.coverage < (coverageTargets.scenarioCoverage || 90)) {
-    await ctx.breakpoint({
+      let lastFeedback_phase6Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase6Review) {
+        scenarioTesting = await ctx.task(scenarioTestingTask, { ...{
+    projectName,
+    silEnvironment,
+    hilIntegration,
+    scenarioLibrary,
+    coverageTargets
+  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
+      }
+  const phase6Review = await ctx.breakpoint({
       question: `Scenario coverage is ${scenarioTesting.coverage}%. Below target of ${coverageTargets.scenarioCoverage || 90}%. Approve additional scenarios?`,
       title: 'Coverage Target Warning',
       context: {
         runId: ctx.runId,
         scenarioTesting,
         recommendation: 'Expand scenario library to improve coverage'
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase6Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase6Review.approved) break;
+      lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
+    } }
 
   // Phase 7: Coverage Analysis
   const coverageAnalysis = await ctx.task(coverageAnalysisTask, {
@@ -128,7 +172,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 8: Validation Report Generation
-  const validationReport = await ctx.task(validationReportTask, {
+  let validationReport = await ctx.task(validationReportTask, {
     projectName,
     digitalTwin,
     sensorModels,
@@ -137,8 +181,19 @@ export async function process(inputs, ctx) {
     coverageAnalysis
   });
 
-  // Final Breakpoint: Virtual validation approval
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      validationReport = await ctx.task(validationReportTask, { ...{
+    projectName,
+    digitalTwin,
+    sensorModels,
+    scenarioLibrary,
+    scenarioTesting,
+    coverageAnalysis
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Simulation and Virtual Validation complete for ${projectName}. Coverage: ${coverageAnalysis.overallCoverage}%. Approve virtual validation?`,
     title: 'Virtual Validation Approval',
     context: {
@@ -149,9 +204,15 @@ export async function process(inputs, ctx) {
         { path: `artifacts/validation-reports.json`, format: 'json', content: validationReport },
         { path: `artifacts/coverage-analysis.json`, format: 'json', content: coverageAnalysis }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     projectName,
@@ -172,8 +233,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const digitalTwinTask = defineTask('digital-twin', (args, taskCtx) => ({
   kind: 'agent',

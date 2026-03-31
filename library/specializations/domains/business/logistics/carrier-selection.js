@@ -75,7 +75,6 @@ export async function process(inputs, ctx) {
       metadata: { processId: 'specializations/domains/business/logistics/carrier-selection', timestamp: startTime }
     };
   }
-
   // ============================================================================
   // PHASE 3: RATE COLLECTION AND COMPARISON
   // ============================================================================
@@ -142,7 +141,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 7: Scoring and ranking carriers');
 
-  const carrierRanking = await ctx.task(carrierRankingTask, {
+  let carrierRanking = await ctx.task(carrierRankingTask, {
     qualifiedCarriers,
     rateComparison,
     performanceAnalysis,
@@ -154,8 +153,20 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...carrierRanking.artifacts);
 
-  // Quality Gate: Review carrier rankings
-  await ctx.breakpoint({
+    let lastFeedback_phase7Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase7Review) {
+      carrierRanking = await ctx.task(carrierRankingTask, { ...{
+    qualifiedCarriers,
+    rateComparison,
+    performanceAnalysis,
+    serviceLevelEval,
+    capacityCheck,
+    weightFactors,
+    outputDir
+  }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
+    }
+  const phase7Review = await ctx.breakpoint({
     question: `Carrier ranking complete. Top carrier: ${carrierRanking.rankedCarriers[0]?.name} (Score: ${carrierRanking.rankedCarriers[0]?.totalScore}). Review rankings before final selection?`,
     title: 'Carrier Ranking Review',
     context: {
@@ -163,9 +174,15 @@ export async function process(inputs, ctx) {
       rankedCarriers: carrierRanking.rankedCarriers.slice(0, 5),
       weightFactors,
       files: carrierRanking.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase7Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase7Review.approved) break;
+    lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 8: FINAL SELECTION AND RECOMMENDATION
   // ============================================================================
@@ -188,7 +205,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 9: Preparing contract and rate confirmation');
 
-  const contractPreparation = await ctx.task(contractPreparationTask, {
+  let contractPreparation = await ctx.task(contractPreparationTask, {
     selectedCarrier: finalSelection.selectedCarrier,
     shipmentDetails,
     requirements,
@@ -198,8 +215,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...contractPreparation.artifacts);
 
-  // Final Breakpoint: Confirm selection
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      contractPreparation = await ctx.task(contractPreparationTask, { ...{
+    selectedCarrier: finalSelection.selectedCarrier,
+    shipmentDetails,
+    requirements,
+    negotiatedRate: finalSelection.negotiatedRate,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Carrier selection complete. Selected: ${finalSelection.selectedCarrier.name}. Rate: $${finalSelection.negotiatedRate}. Confirm selection and proceed with booking?`,
     title: 'Final Carrier Selection Confirmation',
     context: {
@@ -212,9 +239,15 @@ export async function process(inputs, ctx) {
         { path: contractPreparation.contractPath, format: 'json', label: 'Contract Details' },
         { path: carrierRanking.reportPath, format: 'markdown', label: 'Carrier Comparison Report' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -245,8 +278,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

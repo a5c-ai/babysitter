@@ -44,7 +44,6 @@ export async function process(inputs, ctx) {
       duration: ctx.now() - startTime
     };
   }
-
   // PHASE 2: Subproblem Identification
   const subproblems = await ctx.task(subproblemIdentificationTask, { problemStatement, recognition, outputDir });
   artifacts.push(...subproblems.artifacts);
@@ -58,10 +57,13 @@ export async function process(inputs, ctx) {
   artifacts.push(...stateDesign.artifacts);
 
   // PHASE 5: Transition Formula
-  const transition = await ctx.task(transitionFormulaTask, { stateDesign, pattern, outputDir });
-  artifacts.push(...transition.artifacts);
-
-  await ctx.breakpoint({
+  let transition = await ctx.task(transitionFormulaTask, { stateDesign, pattern, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      transition = await ctx.task(transitionFormulaTask, { ...{ stateDesign, pattern, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `DP analysis complete. Pattern: ${pattern.dpPattern}. State: ${stateDesign.stateDescription}. Review?`,
     title: 'DP Pattern Analysis Complete',
     context: {
@@ -70,9 +72,15 @@ export async function process(inputs, ctx) {
       stateDesign: stateDesign.state,
       transition: transition.formula,
       files: transition.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     isDPProblem: true,

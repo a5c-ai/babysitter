@@ -55,7 +55,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 2: Identifying secrets');
-  const secretIdentification = await ctx.task(secretIdentificationTask, {
+  let secretIdentification = await ctx.task(secretIdentificationTask, {
     projectName,
     configInventory,
     outputDir
@@ -64,8 +64,16 @@ export async function process(inputs, ctx) {
   artifacts.push(...secretIdentification.artifacts);
 
   // Breakpoint: Secret review
-  if (secretIdentification.secretCount > 0) {
-    await ctx.breakpoint({
+      let lastFeedback_phase2Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase2Review) {
+        secretIdentification = await ctx.task(secretIdentificationTask, { ...{
+    projectName,
+    configInventory,
+    outputDir
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+      }
+  const phase2Review = await ctx.breakpoint({
       question: `Found ${secretIdentification.secretCount} secrets in configuration for ${projectName}. Review secret handling plan?`,
       title: 'Secret Identification Review',
       context: {
@@ -73,9 +81,15 @@ export async function process(inputs, ctx) {
         projectName,
         secretIdentification,
         recommendation: 'Plan secure handling for all identified secrets'
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase2Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase2Review.approved) break;
+      lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 3: TARGET DESIGN
@@ -126,7 +140,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 6: Validating configuration');
-  const validation = await ctx.task(configValidationTask, {
+  let validation = await ctx.task(configValidationTask, {
     projectName,
     configMigration,
     secretMigration,
@@ -136,8 +150,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...validation.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      validation = await ctx.task(configValidationTask, { ...{
+    projectName,
+    configMigration,
+    secretMigration,
+    environments,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Configuration migration complete for ${projectName}. Configs migrated: ${configMigration.migratedCount}. Secrets migrated: ${secretMigration.migratedCount}. Validation: ${validation.allValid ? 'passed' : 'failed'}. Approve?`,
     title: 'Configuration Migration Complete',
     context: {
@@ -148,9 +172,15 @@ export async function process(inputs, ctx) {
         secrets: secretMigration.migratedCount,
         validationPassed: validation.allValid
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -171,8 +201,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

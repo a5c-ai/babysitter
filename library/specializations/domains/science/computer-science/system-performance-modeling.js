@@ -141,7 +141,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 9: Generating performance model documentation');
-  const modelDocumentation = await ctx.task(performanceModelDocumentationTask, {
+  let modelDocumentation = await ctx.task(performanceModelDocumentationTask, {
     systemDescription,
     systemDefinition,
     workloadModel,
@@ -155,8 +155,22 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...modelDocumentation.artifacts);
 
-  // Breakpoint: Review performance model
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      modelDocumentation = await ctx.task(performanceModelDocumentationTask, { ...{
+    systemDescription,
+    systemDefinition,
+    workloadModel,
+    queuingModel,
+    markovModel,
+    bottleneckAnalysis,
+    performancePrediction,
+    capacityPlanning,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Performance model complete. Primary bottleneck: ${bottleneckAnalysis.primaryBottleneck}. Review model and recommendations?`,
     title: 'System Performance Model Review',
     context: {
@@ -171,9 +185,15 @@ export async function process(inputs, ctx) {
         predictedThroughput: performancePrediction.predictedThroughput,
         recommendations: capacityPlanning.recommendations?.length || 0
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -213,8 +233,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

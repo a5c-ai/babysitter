@@ -121,7 +121,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 6: Running performance benchmarks');
 
-  const benchmarks = await ctx.task(performanceBenchmarksTask, {
+  let benchmarks = await ctx.task(performanceBenchmarksTask, {
     projectName,
     vectorDb,
     indexConfig: indexConfig.config,
@@ -131,8 +131,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...benchmarks.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      benchmarks = await ctx.task(performanceBenchmarksTask, { ...{
+    projectName,
+    vectorDb,
+    indexConfig: indexConfig.config,
+    queryPatterns,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Vector DB ${projectName} setup complete. Query latency p95: ${benchmarks.results.queryLatencyP95}ms. Review configuration?`,
     title: 'Vector Database Review',
     context: {
@@ -146,9 +156,15 @@ export async function process(inputs, ctx) {
         indexingThroughput: benchmarks.results.indexingThroughput
       },
       files: artifacts.map(a => ({ path: a.path, format: a.format || 'yaml' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -168,8 +184,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

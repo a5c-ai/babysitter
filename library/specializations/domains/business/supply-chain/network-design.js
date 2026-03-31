@@ -107,7 +107,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 5: Developing network scenarios');
 
-  const scenarioDevelopment = await ctx.task(scenarioDevelopmentTask, {
+  let scenarioDevelopment = await ctx.task(scenarioDevelopmentTask, {
     networkOptimization,
     baselineAnalysis,
     scenarioCount,
@@ -117,8 +117,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...scenarioDevelopment.artifacts);
 
-  // Breakpoint: Review scenarios
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      scenarioDevelopment = await ctx.task(scenarioDevelopmentTask, { ...{
+    networkOptimization,
+    baselineAnalysis,
+    scenarioCount,
+    constraints,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `${scenarioDevelopment.scenarios.length} network scenarios developed. Best scenario shows ${scenarioDevelopment.bestScenario.savingsPercentage}% cost savings. Review scenarios?`,
     title: 'Network Design Scenarios Review',
     context: {
@@ -129,9 +139,15 @@ export async function process(inputs, ctx) {
         bestScenario: scenarioDevelopment.bestScenario,
         baselineCost: baselineAnalysis.totalCost
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 6: SERVICE LEVEL VALIDATION
   // ============================================================================
@@ -194,8 +210,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

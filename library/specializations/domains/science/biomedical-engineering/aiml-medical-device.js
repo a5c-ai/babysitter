@@ -44,15 +44,24 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 3: Algorithm Development
-  const algorithmDevelopment = await ctx.task(algorithmDevelopmentTask, {
+  let algorithmDevelopment = await ctx.task(algorithmDevelopmentTask, {
     deviceName,
     mlProblemType,
     dataCollection,
     problemFormulation
   });
 
-  // Breakpoint: Review algorithm design
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      algorithmDevelopment = await ctx.task(algorithmDevelopmentTask, { ...{
+    deviceName,
+    mlProblemType,
+    dataCollection,
+    problemFormulation
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Review algorithm design for ${deviceName}. Is the ML architecture appropriate for the problem?`,
     title: 'Algorithm Design Review',
     context: {
@@ -64,9 +73,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: algorithmDevelopment
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // Phase 4: Model Performance Evaluation
   const performanceEvaluation = await ctx.task(performanceEvaluationTask, {
     deviceName,
@@ -97,7 +112,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 8: AI/ML Documentation
-  const aimlDocumentation = await ctx.task(aimlDocumentationTask, {
+  let aimlDocumentation = await ctx.task(aimlDocumentationTask, {
     deviceName,
     mlProblemType,
     intendedUse,
@@ -110,8 +125,23 @@ export async function process(inputs, ctx) {
     pccpDevelopment
   });
 
-  // Final Breakpoint: AI/ML Device Approval
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      aimlDocumentation = await ctx.task(aimlDocumentationTask, { ...{
+    deviceName,
+    mlProblemType,
+    intendedUse,
+    problemFormulation,
+    dataCollection,
+    algorithmDevelopment,
+    performanceEvaluation,
+    biasFairnessAssessment,
+    clinicalValidation,
+    pccpDevelopment
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `AI/ML development complete for ${deviceName}. Performance: ${performanceEvaluation.overallPerformance}. Approve for regulatory submission?`,
     title: 'AI/ML Device Approval',
     context: {
@@ -121,9 +151,15 @@ export async function process(inputs, ctx) {
       files: [
         { path: `artifacts/aiml-documentation.json`, format: 'json', content: aimlDocumentation }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     deviceName,
@@ -137,8 +173,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const problemFormulationTask = defineTask('problem-formulation', (args, taskCtx) => ({
   kind: 'agent',

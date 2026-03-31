@@ -81,7 +81,7 @@ export async function process(inputs, ctx) {
 
   // Task 7: Create Monitoring and Optimization Plan
   ctx.log('info', 'Phase 7: Creating monitoring and optimization plan');
-  const optimizationPlan = await ctx.task(monitoringOptimizationTask, {
+  let optimizationPlan = await ctx.task(monitoringOptimizationTask, {
     campaignConfig,
     objectives: objectivesResult,
     abTestSetup,
@@ -89,8 +89,17 @@ export async function process(inputs, ctx) {
   });
   artifacts.push(...optimizationPlan.artifacts);
 
-  // Breakpoint: Review campaign setup
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      optimizationPlan = await ctx.task(monitoringOptimizationTask, { ...{
+    campaignConfig,
+    objectives: objectivesResult,
+    abTestSetup,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Meta Ads campaign setup complete. ${campaignConfig.campaignCount} campaigns configured with ${audienceBuilding.totalAudiences} audience segments. Ready to launch?`,
     title: 'Meta Ads Campaign Review',
     context: {
@@ -103,9 +112,15 @@ export async function process(inputs, ctx) {
         creativeCount: creativeDevResult.totalCreatives,
         capiConfigured: capiSetup.configured
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 8: Generate Performance Analysis Framework
   ctx.log('info', 'Phase 8: Generating performance analysis framework');
   const analysisFramework = await ctx.task(performanceAnalysisTask, {
@@ -137,8 +152,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Meta Campaign Objectives
+  // Task 1: Meta Campaign Objectives
 export const metaCampaignObjectivesTask = defineTask('meta-campaign-objectives', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Define Meta campaign objectives and strategy',

@@ -57,15 +57,24 @@ export async function process(inputs, ctx) {
   const latencyBenchmark = await ctx.task(latencyBenchmarkTask, { modelName, targetDevice, runtimeOptimization, outputDir });
   artifacts.push(...latencyBenchmark.artifacts);
 
-  const deploymentPackage = await ctx.task(deploymentPackageTask, { modelName, targetDevice, runtimeOptimization, outputDir });
-  artifacts.push(...deploymentPackage.artifacts);
-
-  await ctx.breakpoint({
+  let deploymentPackage = await ctx.task(deploymentPackageTask, { modelName, targetDevice, runtimeOptimization, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      deploymentPackage = await ctx.task(deploymentPackageTask, { ...{ modelName, targetDevice, runtimeOptimization, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Edge Optimization Complete for ${modelName}. Accuracy retention: ${accuracyValidation.accuracyRetention}%, Speedup: ${latencyBenchmark.speedup}x. Review?`,
     title: 'Edge Optimization Complete',
-    context: { runId: ctx.runId, accuracyRetention: accuracyValidation.accuracyRetention, speedup: latencyBenchmark.speedup }
-  });
-
+    context: { runId: ctx.runId, accuracyRetention: accuracyValidation.accuracyRetention, speedup: latencyBenchmark.speedup },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: accuracyValidation.accuracyRetention >= 95,
     modelName,

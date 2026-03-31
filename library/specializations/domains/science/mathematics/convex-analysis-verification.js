@@ -29,7 +29,7 @@ export async function process(inputs, ctx) {
   } = inputs;
 
   // Phase 1: Check Objective Convexity (Hessian Analysis)
-  const objectiveConvexity = await ctx.task(objectiveConvexityTask, {
+  let objectiveConvexity = await ctx.task(objectiveConvexityTask, {
     problemFormulation,
     objectiveFunction
   });
@@ -43,9 +43,15 @@ export async function process(inputs, ctx) {
       convexityAnalysis: null
     };
   }
-
-  // Breakpoint: Review objective convexity
-  await ctx.breakpoint({
+  let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      objectiveConvexity = await ctx.task(objectiveConvexityTask, { ...{
+    problemFormulation,
+    objectiveFunction
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Objective function is ${objectiveConvexity.convex ? 'convex' : 'not convex'}. Review analysis?`,
     title: 'Objective Convexity Review',
     context: {
@@ -58,9 +64,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: objectiveConvexity
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // Phase 2: Verify Constraint Set Convexity
   const constraintConvexity = await ctx.task(constraintConvexityTask, {
     problemFormulation,
@@ -82,7 +94,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 5: Document Convexity Analysis
-  const convexityDocumentation = await ctx.task(convexityDocumentationTask, {
+  let convexityDocumentation = await ctx.task(convexityDocumentationTask, {
     objectiveConvexity,
     constraintConvexity,
     convexReformulation,
@@ -90,8 +102,17 @@ export async function process(inputs, ctx) {
   });
 
   // Final Breakpoint: Analysis Complete
-  const isConvex = objectiveConvexity.convex && constraintConvexity.allConvex;
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      convexityDocumentation = await ctx.task(convexityDocumentationTask, { ...{
+    objectiveConvexity,
+    constraintConvexity,
+    convexReformulation,
+    solverRecommendation
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Convexity analysis complete. Problem is ${isConvex ? 'convex' : 'non-convex'}. ${convexReformulation.reformulationPossible ? 'Convex reformulation available.' : ''} Review?`,
     title: 'Convexity Analysis Complete',
     context: {
@@ -102,9 +123,15 @@ export async function process(inputs, ctx) {
       files: [
         { path: `artifacts/convexity-analysis.json`, format: 'json', content: convexityDocumentation }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     convexityAnalysis: {
@@ -129,8 +156,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const objectiveConvexityTask = defineTask('objective-convexity', (args, taskCtx) => ({
   kind: 'agent',

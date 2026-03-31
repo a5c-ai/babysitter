@@ -44,25 +44,39 @@ export async function process(inputs, ctx) {
   // Phase 1: Identify Critical User Journeys
   ctx.log('info', 'Phase 1: Identifying critical user journeys and transactions');
 
-  const journeyAnalysis = await ctx.task(identifyUserJourneysTask, {
+  let journeyAnalysis = await ctx.task(identifyUserJourneysTask, {
     projectName,
     applicationScope,
     userJourneys,
     outputDir
   });
 
-  artifacts.push(...journeyAnalysis.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      journeyAnalysis = await ctx.task(identifyUserJourneysTask, { ...{
+    projectName,
+    applicationScope,
+    userJourneys,
+    outputDir
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Identified ${journeyAnalysis.criticalJourneys.length} critical user journeys. Review and confirm?`,
     title: 'User Journey Review',
     context: {
       runId: ctx.runId,
       journeys: journeyAnalysis.criticalJourneys,
       files: journeyAnalysis.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // Phase 2: Define Key Performance Indicators
   ctx.log('info', 'Phase 2: Defining key performance indicators (KPIs)');
 
@@ -78,25 +92,39 @@ export async function process(inputs, ctx) {
   // Phase 3: Setup Performance Monitoring Infrastructure
   ctx.log('info', 'Phase 3: Setting up performance monitoring infrastructure');
 
-  const monitoringSetup = await ctx.task(setupMonitoringInfrastructureTask, {
+  let monitoringSetup = await ctx.task(setupMonitoringInfrastructureTask, {
     projectName,
     kpis: kpiDefinition.kpis,
     targetEnvironment,
     outputDir
   });
 
-  artifacts.push(...monitoringSetup.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      monitoringSetup = await ctx.task(setupMonitoringInfrastructureTask, { ...{
+    projectName,
+    kpis: kpiDefinition.kpis,
+    targetEnvironment,
+    outputDir
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Monitoring infrastructure configured with ${monitoringSetup.metricsEndpoints} endpoints. Verify setup?`,
     title: 'Monitoring Setup Review',
     context: {
       runId: ctx.runId,
       monitoring: monitoringSetup,
       files: monitoringSetup.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // Phase 4: Execute Baseline Measurements
   ctx.log('info', 'Phase 4: Executing baseline measurement tests');
 
@@ -139,7 +167,7 @@ export async function process(inputs, ctx) {
   // Phase 7: Establish Performance Budgets
   ctx.log('info', 'Phase 7: Establishing performance budgets');
 
-  const performanceBudgets = await ctx.task(establishPerformanceBudgetsTask, {
+  let performanceBudgets = await ctx.task(establishPerformanceBudgetsTask, {
     projectName,
     baselineResults: baselineMeasurement.results,
     kpis: kpiDefinition.kpis,
@@ -147,22 +175,37 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...performanceBudgets.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase7Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase7Review) {
+      performanceBudgets = await ctx.task(establishPerformanceBudgetsTask, { ...{
+    projectName,
+    baselineResults: baselineMeasurement.results,
+    kpis: kpiDefinition.kpis,
+    criticalJourneys: journeyAnalysis.criticalJourneys,
+    outputDir
+  }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
+    }
+  const phase7Review = await ctx.breakpoint({
     question: `Performance budgets established. Review budgets for ${performanceBudgets.budgets.length} metrics?`,
     title: 'Performance Budget Review',
     context: {
       runId: ctx.runId,
       budgets: performanceBudgets.budgets,
       files: performanceBudgets.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase7Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase7Review.approved) break;
+    lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
+  }
   // Phase 8: Calculate Baseline Score
   ctx.log('info', 'Phase 8: Calculating baseline score and final assessment');
 
-  const scoring = await ctx.task(calculateBaselineScoreTask, {
+  let scoring = await ctx.task(calculateBaselineScoreTask, {
     projectName,
     baselineResults: baselineMeasurement.results,
     kpis: kpiDefinition.kpis,
@@ -171,9 +214,18 @@ export async function process(inputs, ctx) {
   });
 
   baselineScore = scoring.baselineScore;
-  artifacts.push(...scoring.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      scoring = await ctx.task(calculateBaselineScoreTask, { ...{
+    projectName,
+    baselineResults: baselineMeasurement.results,
+    kpis: kpiDefinition.kpis,
+    performanceBudgets: performanceBudgets.budgets,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Baseline assessment complete. Score: ${baselineScore}/100. Approve baseline?`,
     title: 'Final Baseline Review',
     context: {
@@ -185,9 +237,15 @@ export async function process(inputs, ctx) {
         budgetCount: performanceBudgets.budgets.length
       },
       files: artifacts.slice(-5).map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     projectName,
@@ -206,8 +264,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const identifyUserJourneysTask = defineTask('identify-user-journeys', (args, taskCtx) => ({
   kind: 'agent',

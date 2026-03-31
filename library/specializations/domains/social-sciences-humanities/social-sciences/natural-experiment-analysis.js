@@ -111,7 +111,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 7: Scoring analysis quality');
-  const qualityScore = await ctx.task(neQualityScoringTask, {
+  let qualityScore = await ctx.task(neQualityScoringTask, {
     experimentIdentification,
     designSelection,
     identificationStrategy,
@@ -126,8 +126,20 @@ export async function process(inputs, ctx) {
   const neScore = qualityScore.overallScore;
   const qualityMet = neScore >= 75;
 
-  // Breakpoint: Review natural experiment analysis
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      qualityScore = await ctx.task(neQualityScoringTask, { ...{
+    experimentIdentification,
+    designSelection,
+    identificationStrategy,
+    mainEstimation,
+    assumptionTesting,
+    robustnessChecks,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Natural experiment analysis complete. Quality score: ${neScore}/100. ${qualityMet ? 'Analysis meets quality standards!' : 'Analysis may need refinement.'} Review and approve?`,
     title: 'Natural Experiment Analysis Review',
     context: {
@@ -143,9 +155,15 @@ export async function process(inputs, ctx) {
         causalEstimate: mainEstimation.estimate,
         robustnessConfirmed: robustnessChecks.confirmed
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -178,8 +196,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Natural Experiment Identification
+  // Task 1: Natural Experiment Identification
 export const naturalExperimentIdentificationTask = defineTask('ne-identification', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Identify natural experiment',

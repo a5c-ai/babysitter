@@ -40,15 +40,23 @@ export async function process(inputs, ctx) {
 
   // Phase 3: ANALYZE
   ctx.log('info', 'Phase 3: ANALYZE - Analyzing root causes');
-  const analyzePhase = await ctx.task(analyzePhaseTask, {
+  let analyzePhase = await ctx.task(analyzePhaseTask, {
     definePhase,
     measurePhase,
     outputDir
   });
   artifacts.push(...analyzePhase.artifacts);
 
-  // Breakpoint: Review analysis
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      analyzePhase = await ctx.task(analyzePhaseTask, { ...{
+    definePhase,
+    measurePhase,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `DMAIC analysis complete. ${analyzePhase.rootCauses.length} root causes identified. Proceed to improvement phase?`,
     title: 'DMAIC Analysis Review',
     context: {
@@ -58,9 +66,15 @@ export async function process(inputs, ctx) {
         baselineSigma: measurePhase.sigmaLevel,
         rootCauses: analyzePhase.rootCauses.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 4: IMPROVE
   ctx.log('info', 'Phase 4: IMPROVE - Developing and implementing solutions');
   const improvePhase = await ctx.task(improvePhaseTask, {
@@ -117,8 +131,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 export const definePhaseTask = defineTask('define-phase', (args, taskCtx) => ({
   kind: 'agent',
   title: 'DEFINE phase',

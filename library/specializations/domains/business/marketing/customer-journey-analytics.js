@@ -48,17 +48,26 @@ export async function process(inputs, ctx) {
   const journeyVisualization = await ctx.task(journeyVisualizationTask, { journeyPathAnalysis, funnelAnalysis, dropOffAnalysis, outputDir });
   artifacts.push(...journeyVisualization.artifacts);
 
-  const qualityAssessment = await ctx.task(journeyAnalyticsQualityTask, { touchpointMapping, funnelAnalysis, dropOffAnalysis, optimizationRecommendations, outputDir });
+  let qualityAssessment = await ctx.task(journeyAnalyticsQualityTask, { touchpointMapping, funnelAnalysis, dropOffAnalysis, optimizationRecommendations, outputDir });
   artifacts.push(...qualityAssessment.artifacts);
 
-  const analyticsScore = qualityAssessment.overallScore;
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      qualityAssessment = await ctx.task(journeyAnalyticsQualityTask, { ...{ touchpointMapping, funnelAnalysis, dropOffAnalysis, optimizationRecommendations, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Journey analytics complete. Quality score: ${analyticsScore}/100. Review and approve?`,
     title: 'Journey Analytics Review',
-    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })) }
-  });
-
+    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })) },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     analyticsScore,

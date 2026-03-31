@@ -37,15 +37,24 @@ export async function process(inputs, ctx) {
   const accountLinking = await ctx.task(accountLinkingTask, { projectName, outputDir });
   artifacts.push(...accountLinking.artifacts);
 
-  const sessionSetup = await ctx.task(sessionSetupTask, { projectName, outputDir });
-  artifacts.push(...sessionSetup.artifacts);
-
-  await ctx.breakpoint({
+  let sessionSetup = await ctx.task(sessionSetupTask, { projectName, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      sessionSetup = await ctx.task(sessionSetupTask, { ...{ projectName, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `OAuth Social Login setup complete for ${projectName}. ${providers.length} providers configured. Approve?`,
     title: 'OAuth Setup Review',
-    context: { runId: ctx.runId, providers: providersSetup.configuredProviders }
-  });
-
+    context: { runId: ctx.runId, providers: providersSetup.configuredProviders },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const documentation = await ctx.task(documentationTask, { projectName, providersSetup, outputDir });
   artifacts.push(...documentation.artifacts);
 

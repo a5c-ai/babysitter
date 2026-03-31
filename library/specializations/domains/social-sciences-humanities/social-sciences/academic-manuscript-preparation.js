@@ -110,7 +110,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 7: Scoring manuscript quality');
-  const qualityScore = await ctx.task(manuscriptQualityScoringTask, {
+  let qualityScore = await ctx.task(manuscriptQualityScoringTask, {
     manuscriptPlanning,
     introduction,
     methodSection,
@@ -125,8 +125,20 @@ export async function process(inputs, ctx) {
   const manuscriptScore = qualityScore.overallScore;
   const qualityMet = manuscriptScore >= 80;
 
-  // Breakpoint: Review manuscript
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      qualityScore = await ctx.task(manuscriptQualityScoringTask, { ...{
+    manuscriptPlanning,
+    introduction,
+    methodSection,
+    resultsSection,
+    discussionSection,
+    formatting,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Manuscript preparation complete. Quality score: ${manuscriptScore}/100. ${qualityMet ? 'Manuscript meets quality standards!' : 'Manuscript may need refinement.'} Review and approve?`,
     title: 'Academic Manuscript Review',
     context: {
@@ -142,9 +154,15 @@ export async function process(inputs, ctx) {
         wordCount: formatting.wordCount,
         styleGuide
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 

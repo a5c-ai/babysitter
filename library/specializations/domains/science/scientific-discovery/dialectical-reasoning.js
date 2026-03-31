@@ -48,7 +48,6 @@ export async function process(inputs, ctx) {
       synthesis: null
     };
   }
-
   // Phase 2: Antithesis Generation
   const antithesisGeneration = await ctx.task(antithesisGenerationTask, {
     thesis: thesisAnalysis.clarifiedThesis,
@@ -65,15 +64,24 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 4: Socratic Examination
-  const socraticExamination = await ctx.task(socraticExaminationTask, {
+  let socraticExamination = await ctx.task(socraticExaminationTask, {
     thesis: thesisAnalysis,
     antitheses: antithesisGeneration.antitheses,
     contradictions: contradictionMapping.contradictions,
     domain
   });
 
-  // Breakpoint: Review dialectical tensions
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      socraticExamination = await ctx.task(socraticExaminationTask, { ...{
+    thesis: thesisAnalysis,
+    antitheses: antithesisGeneration.antitheses,
+    contradictions: contradictionMapping.contradictions,
+    domain
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: `Review dialectical tensions for thesis: "${thesis}". ${contradictionMapping.contradictions.length} contradictions identified. Proceed with synthesis?`,
     title: 'Dialectical Analysis Review',
     context: {
@@ -86,9 +94,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: { thesisAnalysis, antithesisGeneration, contradictionMapping, socraticExamination }
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
   // Phase 5: Mediation and Sublation Analysis
   const mediationAnalysis = await ctx.task(mediationSublationTask, {
     thesis: thesisAnalysis,
@@ -130,7 +144,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 10: Resolution and Recommendations
-  const resolutionSynthesis = await ctx.task(resolutionSynthesisTask, {
+  let resolutionSynthesis = await ctx.task(resolutionSynthesisTask, {
     thesis: thesisAnalysis,
     antitheses: antithesisGeneration.antitheses,
     synthesis: synthesisConstruction.synthesis,
@@ -141,8 +155,21 @@ export async function process(inputs, ctx) {
     context
   });
 
-  // Final Breakpoint: Dialectical Analysis Approval
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      resolutionSynthesis = await ctx.task(resolutionSynthesisTask, { ...{
+    thesis: thesisAnalysis,
+    antitheses: antithesisGeneration.antitheses,
+    synthesis: synthesisConstruction.synthesis,
+    validation: synthesisValidation,
+    progress: progressAssessment,
+    higherOrder: higherOrderAnalysis,
+    domain,
+    context
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Dialectical reasoning complete. Synthesis achieved: "${synthesisConstruction.synthesis?.statement}". Approve analysis?`,
     title: 'Dialectical Analysis Approval',
     context: {
@@ -154,9 +181,15 @@ export async function process(inputs, ctx) {
         { path: 'artifacts/dialectical-report.json', format: 'json', content: resolutionSynthesis },
         { path: 'artifacts/dialectical-report.md', format: 'markdown', content: resolutionSynthesis.markdown }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     thesis: thesisAnalysis.clarifiedThesis,
@@ -177,8 +210,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const thesisAnalysisTask = defineTask('thesis-analysis', (args, taskCtx) => ({
   kind: 'agent',

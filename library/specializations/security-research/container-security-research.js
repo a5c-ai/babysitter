@@ -134,7 +134,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 7: Generating container security report');
 
-  const report = await ctx.task(containerSecurityReportTask, {
+  let report = await ctx.task(containerSecurityReportTask, {
     projectName,
     vulnerabilities,
     imageScanning,
@@ -142,9 +142,18 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...report.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      report = await ctx.task(containerSecurityReportTask, { ...{
+    projectName,
+    vulnerabilities,
+    imageScanning,
+    k8sConfig,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Container security research complete for ${projectName}. Found ${vulnerabilities.length} issues. Review findings?`,
     title: 'Container Security Research Complete',
     context: {
@@ -156,9 +165,15 @@ export async function process(inputs, ctx) {
         totalVulnerabilities: vulnerabilities.length
       },
       files: report.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
 
   return {
@@ -180,8 +195,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

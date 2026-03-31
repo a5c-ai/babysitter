@@ -58,7 +58,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 2: Designing Node Hierarchy');
 
-  const nodeHierarchy = await ctx.task(nodeHierarchyTask, {
+  let nodeHierarchy = await ctx.task(nodeHierarchyTask, {
     languageName,
     grammarAnalysis,
     implementationLanguage,
@@ -67,9 +67,19 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...nodeHierarchy.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      nodeHierarchy = await ctx.task(nodeHierarchyTask, { ...{
+    languageName,
+    grammarAnalysis,
+    implementationLanguage,
+    immutable,
+    typeSafe,
+    outputDir
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: `Node hierarchy designed with ${nodeHierarchy.nodeCount} node types. Categories: ${nodeHierarchy.categories.join(', ')}. Proceed with span tracking?`,
     title: 'Node Hierarchy Review',
     context: {
@@ -77,9 +87,15 @@ export async function process(inputs, ctx) {
       nodeCount: nodeHierarchy.nodeCount,
       categories: nodeHierarchy.categories,
       files: nodeHierarchy.artifacts.map(a => ({ path: a.path, format: a.format || 'typescript' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 3: SPAN TRACKING IMPLEMENTATION
   // ============================================================================
@@ -167,7 +183,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 8: Generating Documentation');
 
-  const documentation = await ctx.task(astDocumentationTask, {
+  let documentation = await ctx.task(astDocumentationTask, {
     languageName,
     nodeHierarchy,
     visitorPattern,
@@ -176,9 +192,19 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...documentation.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      documentation = await ctx.task(astDocumentationTask, { ...{
+    languageName,
+    nodeHierarchy,
+    visitorPattern,
+    transformations,
+    serialization,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `AST Design Complete for ${languageName}! ${nodeHierarchy.nodeCount} node types, ${visitorPattern.visitorCount} visitor types. Review deliverables?`,
     title: 'AST Design Complete',
     context: {
@@ -193,9 +219,15 @@ export async function process(inputs, ctx) {
         { path: nodeHierarchy.filePath, format: implementationLanguage.toLowerCase(), label: 'AST Definitions' },
         { path: documentation.apiDocPath, format: 'markdown', label: 'API Documentation' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -242,8 +274,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

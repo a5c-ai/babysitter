@@ -67,19 +67,29 @@ export async function process(inputs, ctx) {
     });
     artifacts.push(...cudaGraphs.artifacts);
   }
-
   // Phase 6: Concurrency Profiling
-  const concurrencyProfiling = await ctx.task(concurrencyProfilingTask, {
+  let concurrencyProfiling = await ctx.task(concurrencyProfilingTask, {
     projectName, streamArchitecture, kernelOverlap, cudaGraphs, outputDir
   });
-  artifacts.push(...concurrencyProfiling.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      concurrencyProfiling = await ctx.task(concurrencyProfilingTask, { ...{
+    projectName, streamArchitecture, kernelOverlap, cudaGraphs, outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Stream concurrency implementation complete for ${projectName}. GPU utilization: ${concurrencyProfiling.gpuUtilization}%. Review?`,
     title: 'Stream Concurrency Complete',
-    context: { runId: ctx.runId, concurrencyProfiling }
-  });
-
+    context: { runId: ctx.runId, concurrencyProfiling },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: concurrencyProfiling.gpuUtilization >= 70,
     projectName,

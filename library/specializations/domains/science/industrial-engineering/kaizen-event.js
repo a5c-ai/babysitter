@@ -61,7 +61,7 @@ export async function process(inputs, ctx) {
 
   // Task 3: Current State Analysis
   ctx.log('info', 'Phase 3: Analyzing current state and baseline metrics');
-  const currentStateAnalysis = await ctx.task(currentStateAnalysisTask, {
+  let currentStateAnalysis = await ctx.task(currentStateAnalysisTask, {
     eventCharter,
     targetArea,
     outputDir
@@ -69,8 +69,16 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...currentStateAnalysis.artifacts);
 
-  // Breakpoint: Review baseline
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      currentStateAnalysis = await ctx.task(currentStateAnalysisTask, { ...{
+    eventCharter,
+    targetArea,
+    outputDir
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Current state documented. Baseline metric: ${currentStateAnalysis.baselineMetric}. ${currentStateAnalysis.wasteIdentified.length} waste items identified. Ready to begin improvement phase?`,
     title: 'Kaizen Current State Review',
     context: {
@@ -78,9 +86,15 @@ export async function process(inputs, ctx) {
       baseline: currentStateAnalysis.baselineMetric,
       wasteIdentified: currentStateAnalysis.wasteIdentified,
       files: currentStateAnalysis.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // Task 4: Root Cause Analysis
   ctx.log('info', 'Phase 4: Conducting root cause analysis');
   const rootCauseAnalysis = await ctx.task(rootCauseAnalysisTask, {
@@ -133,7 +147,7 @@ export async function process(inputs, ctx) {
 
   // Task 9: Sustainment Plan
   ctx.log('info', 'Phase 9: Creating sustainment plan and audit schedule');
-  const sustainmentPlan = await ctx.task(sustainmentPlanTask, {
+  let sustainmentPlan = await ctx.task(sustainmentPlanTask, {
     implementation,
     standardWorkDoc,
     outputDir
@@ -141,8 +155,16 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...sustainmentPlan.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      sustainmentPlan = await ctx.task(sustainmentPlanTask, { ...{
+    implementation,
+    standardWorkDoc,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Kaizen event complete. Improvement achieved: ${resultsVerification.improvementPercentage}%. Objective met: ${resultsVerification.objectiveMet}. Review sustainment plan?`,
     title: 'Kaizen Event Results',
     context: {
@@ -155,9 +177,15 @@ export async function process(inputs, ctx) {
         implementedChanges: implementation.changesImplemented.length
       },
       files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -186,8 +214,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Event Charter
+  // Task 1: Event Charter
 export const eventCharterTask = defineTask('event-charter', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Create kaizen event charter',

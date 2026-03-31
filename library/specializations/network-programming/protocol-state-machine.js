@@ -46,7 +46,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Defining states and transitions');
 
-  const stateDefinition = await ctx.task(stateDefinitionTask, {
+  let stateDefinition = await ctx.task(stateDefinitionTask, {
     projectName,
     protocolName,
     states,
@@ -55,9 +55,19 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...stateDefinition.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      stateDefinition = await ctx.task(stateDefinitionTask, { ...{
+    projectName,
+    protocolName,
+    states,
+    transitions,
+    timeouts,
+    outputDir
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Phase 1 Complete: Defined ${stateDefinition.states.length} states and ${stateDefinition.transitions.length} transitions. Proceed with architecture design?`,
     title: 'State Definition Review',
     context: {
@@ -65,9 +75,15 @@ export async function process(inputs, ctx) {
       states: stateDefinition.states,
       transitions: stateDefinition.transitions,
       files: stateDefinition.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 2: STATE MACHINE ARCHITECTURE
   // ============================================================================
@@ -183,7 +199,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 9: Creating comprehensive tests');
 
-  const testSuite = await ctx.task(testSuiteTask, {
+  let testSuite = await ctx.task(testSuiteTask, {
     projectName,
     language,
     stateDefinition,
@@ -221,9 +237,18 @@ export async function process(inputs, ctx) {
   ]);
 
   artifacts.push(...documentation.artifacts);
-  artifacts.push(...validation.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      testSuite = await ctx.task(testSuiteTask, { ...{
+    projectName,
+    language,
+    stateDefinition,
+    transitionImplementation,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Protocol State Machine Complete for ${projectName}! Validation score: ${validation.overallScore}/100. States: ${stateDefinition.states.length}, Transitions: ${stateDefinition.transitions.length}. Review deliverables?`,
     title: 'Protocol State Machine Complete - Final Review',
     context: {
@@ -239,9 +264,15 @@ export async function process(inputs, ctx) {
         { path: documentation.readmePath, format: 'markdown', label: 'README' },
         { path: visualization.diagramPath, format: 'svg', label: 'State Diagram' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -278,8 +309,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

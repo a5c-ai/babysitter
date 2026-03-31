@@ -37,21 +37,30 @@ export async function process(inputs, ctx) {
   const requirements = await ctx.task(crossPlatformRequirementsTask, { projectName, framework, targetPlatforms, ciPlatform, outputDir });
   artifacts.push(...requirements.artifacts);
 
-  const testMatrix = await ctx.task(configureTestMatrixTask, { projectName, framework, targetPlatforms, ciPlatform, outputDir });
+  let testMatrix = await ctx.task(configureTestMatrixTask, { projectName, framework, targetPlatforms, ciPlatform, outputDir });
   artifacts.push(...testMatrix.artifacts);
 
   const platformTasks = targetPlatforms.map(platform =>
     () => ctx.task(createPlatformTestSuiteTask, { projectName, framework, platform, outputDir })
   );
   const platformTests = await ctx.parallel.all(platformTasks);
-  artifacts.push(...platformTests.flatMap(t => t.artifacts));
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      testMatrix = await ctx.task(configureTestMatrixTask, { ...{ projectName, framework, targetPlatforms, ciPlatform, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Cross-platform test matrix configured. Platforms: ${targetPlatforms.join(', ')}. CI: ${ciPlatform}. Review?`,
     title: 'Cross-Platform Testing Review',
-    context: { runId: ctx.runId, targetPlatforms, ciPlatform }
-  });
-
+    context: { runId: ctx.runId, targetPlatforms, ciPlatform },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const ciConfig = await ctx.task(configureCiMatrixTask, { projectName, framework, targetPlatforms, ciPlatform, testMatrix, outputDir });
   artifacts.push(...ciConfig.artifacts);
 

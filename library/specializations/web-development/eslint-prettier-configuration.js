@@ -24,11 +24,16 @@ export async function process(inputs, ctx) {
   const pluginsSetup = await ctx.task(pluginsSetupTask, { projectName, framework, outputDir });
   artifacts.push(...pluginsSetup.artifacts);
 
-  const integrationSetup = await ctx.task(integrationSetupTask, { projectName, outputDir });
-  artifacts.push(...integrationSetup.artifacts);
-
-  await ctx.breakpoint({ question: `ESLint and Prettier configuration complete for ${projectName}. Approve?`, title: 'Linting Review', context: { runId: ctx.runId, rules: eslintSetup.rules } });
-
+  let integrationSetup = await ctx.task(integrationSetupTask, { projectName, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      integrationSetup = await ctx.task(integrationSetupTask, { ...{ projectName, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({ question: `ESLint and Prettier configuration complete for ${projectName}. Approve?`, title: 'Linting Review', context: { runId: ctx.runId, rules: eslintSetup.rules }, expert: 'owner', tags: ['approval-gate'], previousFeedback: lastFeedback || undefined, attempt: attempt > 0 ? attempt + 1 : undefined });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const documentation = await ctx.task(documentationTask, { projectName, outputDir });
   artifacts.push(...documentation.artifacts);
 

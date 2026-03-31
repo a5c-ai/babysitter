@@ -142,7 +142,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 9: Generating comprehensive competitor intelligence report');
-  const competitorReport = await ctx.task(competitorReportTask, {
+  let competitorReport = await ctx.task(competitorReportTask, {
     organizationName,
     competitorIdentification,
     competitorProfiles,
@@ -157,8 +157,23 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...competitorReport.artifacts);
 
-  // Breakpoint: Review competitor intelligence
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      competitorReport = await ctx.task(competitorReportTask, { ...{
+    organizationName,
+    competitorIdentification,
+    competitorProfiles,
+    strengthWeaknessAnalysis,
+    strategicIntentAnalysis,
+    competitiveDynamics,
+    responseScenarios,
+    earlyWarningSystem,
+    responsePlaybook,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Competitor intelligence analysis complete for ${organizationName}. ${competitorIdentification.totalCompetitors} competitors profiled. Review findings?`,
     title: 'Competitor Intelligence Analysis Review',
     context: {
@@ -179,9 +194,15 @@ export async function process(inputs, ctx) {
         topThreats: strengthWeaknessAnalysis.topThreats?.slice(0, 3),
         responseScenarios: responseScenarios.scenarios?.length || 0
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -209,8 +230,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

@@ -53,15 +53,22 @@ export async function process(inputs, ctx) {
 
   // Task 3: Takt Time Calculation
   ctx.log('info', 'Phase 3: Calculating takt time from requirements');
-  const taktTimeCalc = await ctx.task(taktTimeTask, {
+  let taktTimeCalc = await ctx.task(taktTimeTask, {
     targetRate,
     outputDir
   });
 
   artifacts.push(...taktTimeCalc.artifacts);
 
-  // Breakpoint: Review work content
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      taktTimeCalc = await ctx.task(taktTimeTask, { ...{
+    targetRate,
+    outputDir
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Work content: ${timeStudy.totalWorkContent} sec. Takt time: ${taktTimeCalc.taktTime} sec. ${workElementDoc.elementCount} elements with ${workElementDoc.precedenceCount} precedence constraints. Proceed with balancing?`,
     title: 'Line Balance Data Review',
     context: {
@@ -73,9 +80,15 @@ export async function process(inputs, ctx) {
         precedenceConstraints: workElementDoc.precedenceCount
       },
       files: timeStudy.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // Task 4: Minimum Stations Calculation
   ctx.log('info', 'Phase 4: Calculating theoretical minimum stations');
   const minStations = await ctx.task(minStationsTask, {
@@ -121,15 +134,22 @@ export async function process(inputs, ctx) {
 
   // Task 8: Standard Work for Balanced Line
   ctx.log('info', 'Phase 8: Creating standard work for balanced line');
-  const standardWork = await ctx.task(standardWorkTask, {
+  let standardWork = await ctx.task(standardWorkTask, {
     lineBalancing,
     outputDir
   });
 
   artifacts.push(...standardWork.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      standardWork = await ctx.task(standardWorkTask, { ...{
+    lineBalancing,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Line balanced. ${lineBalancing.stationCount} stations. Efficiency: ${efficiencyEvaluation.efficiency.toFixed(1)}%. Idle time: ${efficiencyEvaluation.totalIdleTime} sec. Review balance?`,
     title: 'Line Balancing Results',
     context: {
@@ -141,9 +161,15 @@ export async function process(inputs, ctx) {
         bottleneckStation: efficiencyEvaluation.bottleneckStation
       },
       files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -167,8 +193,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task definitions
+  // Task definitions
 export const workElementTask = defineTask('work-element-documentation', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Document work elements and precedence',

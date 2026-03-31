@@ -39,16 +39,26 @@ export async function process(inputs, ctx) {
   artifacts.push(...(cofounderCriteria.artifacts || []));
 
   // Phase 4: Search Strategy
-  const searchStrategy = await ctx.task(searchStrategyTask, { ventureDescription, cofounderCriteria });
+  let searchStrategy = await ctx.task(searchStrategyTask, { ventureDescription, cofounderCriteria });
   artifacts.push(...(searchStrategy.artifacts || []));
 
-  // Breakpoint: Review cofounder criteria
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      searchStrategy = await ctx.task(searchStrategyTask, { ...{ ventureDescription, cofounderCriteria }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Review cofounder criteria for ${ventureDescription}. Roles needed: ${roleDefinition.roles?.join(', ')}. Proceed with evaluation framework?`,
     title: 'Cofounder Criteria Review',
-    context: { runId: ctx.runId, ventureDescription, roles: roleDefinition.roles, files: artifacts }
-  });
-
+    context: { runId: ctx.runId, ventureDescription, roles: roleDefinition.roles, files: artifacts },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 5: Evaluation Framework
   const evaluationFramework = await ctx.task(evaluationFrameworkTask, { ventureDescription, cofounderCriteria });
   artifacts.push(...(evaluationFramework.artifacts || []));

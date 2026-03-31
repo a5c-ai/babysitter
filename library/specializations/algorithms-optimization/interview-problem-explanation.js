@@ -27,15 +27,24 @@ export async function process(inputs, ctx) {
   const implementation = await ctx.task(implementationExplanationTask, { problem, approach, language, outputDir });
   artifacts.push(...implementation.artifacts);
 
-  const evaluation = await ctx.task(communicationEvaluationTask, { clarification, approach, implementation, outputDir });
-  artifacts.push(...evaluation.artifacts);
-
-  await ctx.breakpoint({
+  let evaluation = await ctx.task(communicationEvaluationTask, { clarification, approach, implementation, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      evaluation = await ctx.task(communicationEvaluationTask, { ...{ clarification, approach, implementation, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Explanation practice complete. Communication score: ${evaluation.score}/100. Review feedback?`,
     title: 'Explanation Practice Complete',
-    context: { runId: ctx.runId, score: evaluation.score, feedback: evaluation.feedback }
-  });
-
+    context: { runId: ctx.runId, score: evaluation.score, feedback: evaluation.feedback },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     problem,

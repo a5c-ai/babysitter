@@ -77,7 +77,7 @@ export async function process(inputs, ctx) {
 
   // Task 7: Write SEO Metadata
   ctx.log('info', 'Phase 7: Writing titles, descriptions, and tags');
-  const seoMetadata = await ctx.task(videoSeoTask, {
+  let seoMetadata = await ctx.task(videoSeoTask, {
     conceptScript,
     videoBrief,
     distributionPlan,
@@ -85,8 +85,17 @@ export async function process(inputs, ctx) {
   });
   artifacts.push(...seoMetadata.artifacts);
 
-  // Breakpoint: Review video before publishing
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      seoMetadata = await ctx.task(videoSeoTask, { ...{
+    conceptScript,
+    videoBrief,
+    distributionPlan,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Video production complete. Duration: ${postProduction.duration}. ${thumbnails.thumbnailCount} thumbnails created. Ready to publish?`,
     title: 'Video Production Review',
     context: {
@@ -98,9 +107,15 @@ export async function process(inputs, ctx) {
         platforms: distributionPlan.platforms?.length || 0,
         seoScore: seoMetadata.seoScore
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 8: Schedule and Publish
   ctx.log('info', 'Phase 8: Scheduling and publishing across platforms');
   const publishing = await ctx.task(videoPublishingTask, {
@@ -150,8 +165,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task definitions
+  // Task definitions
 export const videoConceptScriptTask = defineTask('video-concept-script', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Develop video concept and script',

@@ -48,7 +48,6 @@ export async function process(inputs, ctx) {
       agreements: null
     };
   }
-
   // Phase 2: Issue Analysis and Structuring
   const issueAnalysis = await ctx.task(issueAnalysisTask, {
     issues,
@@ -66,15 +65,24 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 4: Zone of Possible Agreement (ZOPA) Identification
-  const zopaAnalysis = await ctx.task(zopaIdentificationTask, {
+  let zopaAnalysis = await ctx.task(zopaIdentificationTask, {
     parties: partyAnalysis.parties,
     issues: issueAnalysis.issues,
     batnaAnalysis,
     constraints
   });
 
-  // Breakpoint: Review negotiation structure
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      zopaAnalysis = await ctx.task(zopaIdentificationTask, { ...{
+    parties: partyAnalysis.parties,
+    issues: issueAnalysis.issues,
+    batnaAnalysis,
+    constraints
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: `Review negotiation structure for "${context}". ZOPA exists: ${zopaAnalysis.zopaExists}. Proceed with strategy development?`,
     title: 'Negotiation Structure Review',
     context: {
@@ -88,9 +96,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: { partyAnalysis, issueAnalysis, batnaAnalysis, zopaAnalysis }
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
   // Phase 5: Coalition Structure Analysis
   const coalitionAnalysis = await ctx.task(coalitionStructureAnalysisTask, {
     parties: partyAnalysis.parties,
@@ -134,7 +148,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 10: Synthesis and Recommendations
-  const synthesis = await ctx.task(negotiationSynthesisTask, {
+  let synthesis = await ctx.task(negotiationSynthesisTask, {
     partyAnalysis: partyAnalysis.parties,
     issueAnalysis: issueAnalysis.issues,
     batnaAnalysis,
@@ -148,8 +162,24 @@ export async function process(inputs, ctx) {
     context
   });
 
-  // Final Breakpoint: Negotiation Analysis Approval
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      synthesis = await ctx.task(negotiationSynthesisTask, { ...{
+    partyAnalysis: partyAnalysis.parties,
+    issueAnalysis: issueAnalysis.issues,
+    batnaAnalysis,
+    zopaAnalysis,
+    coalitionAnalysis,
+    valueCreation,
+    bargainingStrategies,
+    agreementDesign,
+    implementationAnalysis,
+    objectives,
+    context
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Negotiation analysis complete for "${context}". Review proposed agreements and strategies?`,
     title: 'Negotiation Analysis Approval',
     context: {
@@ -161,9 +191,15 @@ export async function process(inputs, ctx) {
         { path: 'artifacts/negotiation-report.json', format: 'json', content: synthesis },
         { path: 'artifacts/negotiation-report.md', format: 'markdown', content: synthesis.markdown }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     context,
@@ -186,8 +222,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const partyInterestAnalysisTask = defineTask('party-interest-analysis', (args, taskCtx) => ({
   kind: 'agent',

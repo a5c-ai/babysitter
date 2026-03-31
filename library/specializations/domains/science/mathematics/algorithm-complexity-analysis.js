@@ -30,7 +30,7 @@ export async function process(inputs, ctx) {
   } = inputs;
 
   // Phase 1: Derive Big-O Time Complexity
-  const timeComplexityAnalysis = await ctx.task(timeComplexityTask, {
+  let timeComplexityAnalysis = await ctx.task(timeComplexityTask, {
     algorithm,
     algorithmCode,
     inputCharacteristics,
@@ -46,9 +46,17 @@ export async function process(inputs, ctx) {
       timeComplexity: null
     };
   }
-
-  // Breakpoint: Review time complexity
-  await ctx.breakpoint({
+  let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      timeComplexityAnalysis = await ctx.task(timeComplexityTask, { ...{
+    algorithm,
+    algorithmCode,
+    inputCharacteristics,
+    analysisDepth
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Time complexity analysis: O(${timeComplexityAnalysis.bigO}). Review derivation?`,
     title: 'Time Complexity Review',
     context: {
@@ -56,9 +64,15 @@ export async function process(inputs, ctx) {
       algorithm,
       bigO: timeComplexityAnalysis.bigO,
       derivation: timeComplexityAnalysis.derivation
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // Phase 2: Analyze Space Requirements
   const spaceComplexityAnalysis = await ctx.task(spaceComplexityTask, {
     algorithm,
@@ -85,7 +99,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 5: Identify Optimization Opportunities
-  const optimizationAnalysis = await ctx.task(optimizationAnalysisTask, {
+  let optimizationAnalysis = await ctx.task(optimizationAnalysisTask, {
     algorithm,
     algorithmCode,
     timeComplexity: timeComplexityAnalysis,
@@ -94,8 +108,19 @@ export async function process(inputs, ctx) {
     inputCharacteristics
   });
 
-  // Final Breakpoint: Analysis Complete
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      optimizationAnalysis = await ctx.task(optimizationAnalysisTask, { ...{
+    algorithm,
+    algorithmCode,
+    timeComplexity: timeComplexityAnalysis,
+    spaceComplexity: spaceComplexityAnalysis,
+    comparisons: algorithmComparison,
+    inputCharacteristics
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Complexity analysis complete for "${algorithm}". Review comprehensive results?`,
     title: 'Complexity Analysis Complete',
     context: {
@@ -107,9 +132,15 @@ export async function process(inputs, ctx) {
       files: [
         { path: `artifacts/complexity-analysis.json`, format: 'json', content: { timeComplexityAnalysis, spaceComplexityAnalysis, averageCaseAnalysis } }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     algorithm,
@@ -143,8 +174,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const timeComplexityTask = defineTask('time-complexity', (args, taskCtx) => ({
   kind: 'agent',

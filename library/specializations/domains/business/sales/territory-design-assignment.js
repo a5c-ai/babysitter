@@ -61,17 +61,28 @@ export async function process(inputs, ctx) {
   artifacts.push(...(repAssignment.artifacts || []));
 
   // Phase 6: Coverage Analysis
-  const coverageAnalysis = await ctx.task(coverageAnalysisTask, {
+  let coverageAnalysis = await ctx.task(coverageAnalysisTask, {
     repAssignment, accountList, salesTeam, outputDir
   });
-  artifacts.push(...(coverageAnalysis.artifacts || []));
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      coverageAnalysis = await ctx.task(coverageAnalysisTask, { ...{
+    repAssignment, accountList, salesTeam, outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Territory design complete for ${salesTeam.length} reps. Balance score: ${balanceOptimization.balanceScore}. Review?`,
     title: 'Territory Design Review',
-    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })) }
-  });
-
+    context: { runId: ctx.runId, files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' })) },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     territoryPlan: territoryCarving.territories,

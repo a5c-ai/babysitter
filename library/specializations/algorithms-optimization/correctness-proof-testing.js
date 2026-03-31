@@ -45,10 +45,13 @@ export async function process(inputs, ctx) {
   artifacts.push(...testGen.artifacts);
 
   // PHASE 4: Comprehensive Testing
-  const testing = await ctx.task(comprehensiveTestingTask, { algorithmName, implementation, testGen, language, outputDir });
-  artifacts.push(...testing.artifacts);
-
-  await ctx.breakpoint({
+  let testing = await ctx.task(comprehensiveTestingTask, { algorithmName, implementation, testGen, language, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      testing = await ctx.task(comprehensiveTestingTask, { ...{ algorithmName, implementation, testGen, language, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Correctness analysis for ${algorithmName} complete. Proof valid: ${proof.isValid}. Tests passed: ${testing.passedCount}/${testing.totalCount}. Review?`,
     title: 'Correctness Proof Complete',
     context: {
@@ -60,9 +63,15 @@ export async function process(inputs, ctx) {
         { path: proof.proofPath, format: 'markdown', label: 'Correctness Proof' },
         { path: testing.reportPath, format: 'json', label: 'Test Results' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     algorithmName,

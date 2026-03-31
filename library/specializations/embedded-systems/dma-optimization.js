@@ -152,7 +152,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 8: Generating DMA Documentation');
 
-  const documentation = await ctx.task(dmaDocumentationTask, {
+  let documentation = await ctx.task(dmaDocumentationTask, {
     projectName,
     controllerMapping,
     channelConfig,
@@ -165,8 +165,21 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...documentation.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      documentation = await ctx.task(dmaDocumentationTask, { ...{
+    projectName,
+    controllerMapping,
+    channelConfig,
+    bufferDesign,
+    circularSetup,
+    interruptOptimization,
+    performanceVerification,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `DMA Optimization Complete for ${projectName}. CPU offload: ${performanceVerification.cpuOffload}. Throughput met: ${performanceVerification.throughputMet}. Review?`,
     title: 'DMA Optimization Complete',
     context: {
@@ -180,9 +193,15 @@ export async function process(inputs, ctx) {
       files: [
         { path: documentation.docPath, format: 'markdown', label: 'DMA Documentation' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -210,8 +229,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

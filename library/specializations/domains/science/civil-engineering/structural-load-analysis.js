@@ -124,7 +124,7 @@ export async function process(inputs, ctx) {
 
   // Task 8: Load Path Analysis
   ctx.log('info', 'Analyzing load paths');
-  const loadPathAnalysis = await ctx.task(loadPathAnalysisTask, {
+  let loadPathAnalysis = await ctx.task(loadPathAnalysisTask, {
     projectId,
     buildingGeometry,
     loadCombinations,
@@ -133,8 +133,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...loadPathAnalysis.artifacts);
 
-  // Breakpoint: Review load analysis results
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      loadPathAnalysis = await ctx.task(loadPathAnalysisTask, { ...{
+    projectId,
+    buildingGeometry,
+    loadCombinations,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Structural load analysis complete for ${projectId}. Review load summary and combinations?`,
     title: 'Structural Load Analysis Results',
     context: {
@@ -147,9 +156,15 @@ export async function process(inputs, ctx) {
         seismicCategory: seismicLoadAnalysis.seismicDesignCategory,
         governingLoadCombination: loadCombinations.governingCombination
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 9: Generate Load Summary Report
   ctx.log('info', 'Generating comprehensive load summary report');
   const loadReport = await ctx.task(loadReportTask, {
@@ -194,8 +209,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Project Setup and Code Requirements
+  // Task 1: Project Setup and Code Requirements
 export const projectSetupTask = defineTask('project-setup', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Setup project and determine code requirements',

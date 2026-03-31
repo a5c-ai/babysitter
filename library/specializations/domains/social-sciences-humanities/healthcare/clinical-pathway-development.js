@@ -41,16 +41,24 @@ export async function process(inputs, ctx) {
 
   // Phase 1: Literature Review and Evidence Synthesis
   ctx.log('info', 'Phase 1: Evidence Review and Synthesis');
-  const evidenceReview = await ctx.task(evidenceReviewTask, {
+  let evidenceReview = await ctx.task(evidenceReviewTask, {
     condition,
     patientPopulation,
     evidenceBase,
     outputDir
   });
 
-  artifacts.push(...evidenceReview.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      evidenceReview = await ctx.task(evidenceReviewTask, { ...{
+    condition,
+    patientPopulation,
+    evidenceBase,
+    outputDir
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Evidence review complete. ${evidenceReview.guidelines.length} guidelines reviewed. Evidence grade: ${evidenceReview.overallEvidenceGrade}. Proceed with current practice analysis?`,
     title: 'Evidence Review Gate',
     context: {
@@ -59,9 +67,15 @@ export async function process(inputs, ctx) {
       guidelines: evidenceReview.guidelines,
       recommendations: evidenceReview.recommendations,
       files: evidenceReview.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // Phase 2: Current Practice Analysis
   ctx.log('info', 'Phase 2: Current Practice Analysis');
   const practiceAnalysis = await ctx.task(currentPracticeAnalysisTask, {
@@ -75,7 +89,7 @@ export async function process(inputs, ctx) {
 
   // Phase 3: Stakeholder Engagement
   ctx.log('info', 'Phase 3: Stakeholder Engagement');
-  const stakeholderInput = await ctx.task(stakeholderEngagementTask, {
+  let stakeholderInput = await ctx.task(stakeholderEngagementTask, {
     condition,
     evidenceReview,
     practiceAnalysis,
@@ -83,9 +97,18 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...stakeholderInput.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      stakeholderInput = await ctx.task(stakeholderEngagementTask, { ...{
+    condition,
+    evidenceReview,
+    practiceAnalysis,
+    stakeholders,
+    outputDir
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Stakeholder input gathered. ${stakeholderInput.consensusAreas.length} consensus areas. ${stakeholderInput.controversies.length} areas needing resolution. Proceed with pathway design?`,
     title: 'Stakeholder Input Review',
     context: {
@@ -93,9 +116,15 @@ export async function process(inputs, ctx) {
       consensusAreas: stakeholderInput.consensusAreas,
       controversies: stakeholderInput.controversies,
       files: stakeholderInput.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // Phase 4: Pathway Structure Design
   ctx.log('info', 'Phase 4: Pathway Structure Design');
   const pathwayStructure = await ctx.task(pathwayStructureDesignTask, {
@@ -120,15 +149,22 @@ export async function process(inputs, ctx) {
 
   // Phase 6: Order Set Development
   ctx.log('info', 'Phase 6: Order Set Development');
-  const orderSets = await ctx.task(orderSetDevelopmentTask, {
+  let orderSets = await ctx.task(orderSetDevelopmentTask, {
     pathwayStructure,
     interventionSequence,
     outputDir
   });
 
-  artifacts.push(...orderSets.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      orderSets = await ctx.task(orderSetDevelopmentTask, { ...{
+    pathwayStructure,
+    interventionSequence,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Pathway designed with ${interventionSequence.phases.length} phases and ${orderSets.sets.length} order sets. Proceed with variance tracking design?`,
     title: 'Pathway Design Review',
     context: {
@@ -136,9 +172,15 @@ export async function process(inputs, ctx) {
       phases: interventionSequence.phases,
       orderSets: orderSets.sets,
       files: [...interventionSequence.artifacts, ...orderSets.artifacts].map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 7: Variance Tracking Design
   ctx.log('info', 'Phase 7: Variance Tracking Design');
   const varianceTracking = await ctx.task(varianceTrackingTask, {
@@ -223,8 +265,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Evidence Review
+  // Task 1: Evidence Review
 export const evidenceReviewTask = defineTask('cpd-evidence-review', (args, taskCtx) => ({
   kind: 'agent',
   title: `Evidence Review - ${args.condition}`,

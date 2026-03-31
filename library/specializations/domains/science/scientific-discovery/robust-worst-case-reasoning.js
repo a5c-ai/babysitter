@@ -61,14 +61,22 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 5: Maximin Analysis
-  const maximinAnalysis = await ctx.task(maximinAnalysisTask, {
+  let maximinAnalysis = await ctx.task(maximinAnalysisTask, {
     worstCaseIdentification,
     alternatives,
     acceptabilityThreshold
   });
 
-  // Breakpoint: Review worst-case scenarios
-  await ctx.breakpoint({
+    let lastFeedback_phase5Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase5Review) {
+      maximinAnalysis = await ctx.task(maximinAnalysisTask, { ...{
+    worstCaseIdentification,
+    alternatives,
+    acceptabilityThreshold
+  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+    }
+  const phase5Review = await ctx.breakpoint({
     question: `Worst-case analysis complete. Maximin choice: ${maximinAnalysis.maximinChoice}. Review scenarios?`,
     title: 'Worst-Case Review',
     context: {
@@ -76,9 +84,15 @@ export async function process(inputs, ctx) {
       domain,
       maximinChoice: maximinAnalysis.maximinChoice,
       worstPerformance: maximinAnalysis.maximinValue
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase5Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase5Review.approved) break;
+    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+  }
   // Phase 6: Robust Optimization
   const robustOptimization = await ctx.task(robustOptimizationTask, {
     performanceEvaluation,
@@ -109,7 +123,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 10: Recommendation Synthesis
-  const recommendation = await ctx.task(robustRecommendationTask, {
+  let recommendation = await ctx.task(robustRecommendationTask, {
     maximinAnalysis,
     robustOptimization,
     adversarialAnalysis,
@@ -118,8 +132,19 @@ export async function process(inputs, ctx) {
     domain
   });
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      recommendation = await ctx.task(robustRecommendationTask, { ...{
+    maximinAnalysis,
+    robustOptimization,
+    adversarialAnalysis,
+    acceptabilityAnalysis,
+    robustnessMetrics,
+    domain
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Robust analysis complete. Recommended: ${recommendation.recommendedAlternative}. Robustness: ${robustnessMetrics.overallRobustness}. Accept?`,
     title: 'Final Robust Analysis Review',
     context: {
@@ -129,9 +154,15 @@ export async function process(inputs, ctx) {
         { path: 'artifacts/worst-case.json', format: 'json', content: worstCaseIdentification },
         { path: 'artifacts/recommendation.json', format: 'json', content: recommendation }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     domain,
@@ -155,8 +186,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const robustProblemStructuringTask = defineTask('robust-problem-structuring', (args, taskCtx) => ({
   kind: 'agent',

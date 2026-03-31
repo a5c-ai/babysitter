@@ -67,17 +67,28 @@ export async function process(inputs, ctx) {
   artifacts.push(...dispatchLogic.artifacts);
 
   // Phase 6: Validation
-  const validation = await ctx.task(computeShaderValidationTask, {
+  let validation = await ctx.task(computeShaderValidationTask, {
     shaderName, graphicsApi, shaderImpl, dispatchLogic, outputDir
   });
-  artifacts.push(...validation.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      validation = await ctx.task(computeShaderValidationTask, { ...{
+    shaderName, graphicsApi, shaderImpl, dispatchLogic, outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Compute shader ${shaderName} development complete for ${graphicsApi}. Validation: ${validation.passed ? 'PASSED' : 'FAILED'}. Review?`,
     title: 'Compute Shader Development Complete',
-    context: { runId: ctx.runId, validation }
-  });
-
+    context: { runId: ctx.runId, validation },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: validation.passed,
     shaderName,

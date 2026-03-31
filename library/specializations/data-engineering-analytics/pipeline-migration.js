@@ -86,7 +86,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Assessing existing pipeline infrastructure');
 
-  const pipelineAssessment = await ctx.task(pipelineAssessmentTask, {
+  let pipelineAssessment = await ctx.task(pipelineAssessmentTask, {
     projectName,
     sourceSystem,
     targetSystem,
@@ -113,8 +113,18 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Complexity score: ${pipelineAssessment.complexityScore}/100`);
   ctx.log('info', `Estimated migration effort: ${pipelineAssessment.estimatedEffort}`);
 
-  // Quality Gate: Review assessment results
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      pipelineAssessment = await ctx.task(pipelineAssessmentTask, { ...{
+    projectName,
+    sourceSystem,
+    targetSystem,
+    requirements,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Phase 1 Review: Identified ${pipelineAssessment.pipelinesIdentified} pipelines with complexity score ${pipelineAssessment.complexityScore}/100. Estimated effort: ${pipelineAssessment.estimatedEffort}. Proceed with migration planning?`,
     title: 'Pipeline Assessment Review',
     context: {
@@ -125,9 +135,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: JSON.stringify(pipelineAssessment, null, 2)
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 2: DEPENDENCY ANALYSIS AND IMPACT ASSESSMENT
   // ============================================================================
@@ -149,14 +165,13 @@ export async function process(inputs, ctx) {
     migrationPlan.dependencies = dependencyAnalysis;
     ctx.log('info', `Dependencies mapped: ${dependencyAnalysis.dependencyCount} relationships identified`);
   }
-
   // ============================================================================
   // PHASE 3: MIGRATION STRATEGY DESIGN
   // ============================================================================
 
   ctx.log('info', 'Phase 3: Designing migration strategy');
 
-  const migrationStrategy = await ctx.task(migrationStrategyTask, {
+  let migrationStrategy = await ctx.task(migrationStrategyTask, {
     projectName,
     pipelineAssessment,
     dependencyAnalysis,
@@ -185,8 +200,20 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Migration waves: ${migrationStrategy.waveCount}`);
   ctx.log('info', `Estimated duration: ${migrationStrategy.estimatedDuration}`);
 
-  // Quality Gate: Review migration strategy
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval2 = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval2) {
+      migrationStrategy = await ctx.task(migrationStrategyTask, { ...{
+    projectName,
+    pipelineAssessment,
+    dependencyAnalysis,
+    sourceSystem,
+    targetSystem,
+    requirements,
+    outputDir
+  }, feedback: lastFeedback_finalApproval2, attempt: attempt + 1 });
+    }
+  const finalApproval2 = await ctx.breakpoint({
     question: `Phase 3 Review: Migration will use ${migrationStrategy.approach} approach with ${migrationStrategy.waveCount} waves over ${migrationStrategy.estimatedDuration}. Risk level: ${migrationStrategy.riskLevel}. Approve strategy?`,
     title: 'Migration Strategy Approval',
     context: {
@@ -197,9 +224,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: JSON.stringify(migrationStrategy, null, 2)
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval2 || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval2.approved) break;
+    lastFeedback_finalApproval2 = finalApproval2.response || finalApproval2.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 4: TARGET PIPELINE DESIGN AND DEVELOPMENT
   // ============================================================================
@@ -257,14 +290,13 @@ export async function process(inputs, ctx) {
       ctx.log('info', `Validation rules created: ${dataQualityFramework.rulesCount}`);
     }
   }
-
   // ============================================================================
   // PHASE 6: DUAL-RUN SETUP AND CONFIGURATION
   // ============================================================================
 
   ctx.log('info', 'Phase 6: Setting up dual-run environment');
 
-  const dualRunSetup = await ctx.task(dualRunSetupTask, {
+  let dualRunSetup = await ctx.task(dualRunSetupTask, {
     projectName,
     pipelineAssessment,
     targetPipelineDesign,
@@ -292,8 +324,20 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Dual-run configured for ${dualRunSetup.pipelinesInDualRun} pipelines`);
   ctx.log('info', `Dual-run duration: ${requirements.dualRunDuration}`);
 
-  // Quality Gate: Review dual-run setup
-  await ctx.breakpoint({
+    let lastFeedback_qualityGateApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_qualityGateApproval) {
+      dualRunSetup = await ctx.task(dualRunSetupTask, { ...{
+    projectName,
+    pipelineAssessment,
+    targetPipelineDesign,
+    sourceSystem,
+    targetSystem,
+    requirements,
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval, attempt: attempt + 1 });
+    }
+  const qualityGateApproval = await ctx.breakpoint({
     question: `Phase 6 Review: Dual-run environment ready for ${dualRunSetup.pipelinesInDualRun} pipelines. Duration: ${requirements.dualRunDuration}. Data comparison: ${dualRunSetup.comparisonEnabled}. Start dual-run?`,
     title: 'Dual-Run Setup Review',
     context: {
@@ -304,16 +348,22 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: JSON.stringify(dualRunSetup, null, 2)
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_qualityGateApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (qualityGateApproval.approved) break;
+    lastFeedback_qualityGateApproval = qualityGateApproval.response || qualityGateApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 7: DUAL-RUN VALIDATION AND MONITORING
   // ============================================================================
 
   ctx.log('info', 'Phase 7: Running dual-run validation');
 
-  const dualRunValidation = await ctx.task(dualRunValidationTask, {
+  let dualRunValidation = await ctx.task(dualRunValidationTask, {
     projectName,
     dualRunSetup,
     migrationPlan,
@@ -322,9 +372,18 @@ export async function process(inputs, ctx) {
   });
 
   if (!dualRunValidation.success) {
-    ctx.log('error', 'Dual-run validation failed');
-
-    await ctx.breakpoint({
+      let lastFeedback_phase7Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase7Review) {
+        dualRunValidation = await ctx.task(dualRunValidationTask, { ...{
+    projectName,
+    dualRunSetup,
+    migrationPlan,
+    requirements,
+    outputDir
+  }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
+      }
+  const phase7Review = await ctx.breakpoint({
       question: `Phase 7 Alert: Dual-run validation failed with ${dualRunValidation.issuesFound} issues. Review validation report and decide next steps?`,
       title: 'Dual-Run Validation Failed',
       context: {
@@ -335,9 +394,15 @@ export async function process(inputs, ctx) {
           format: 'json',
           content: JSON.stringify(dualRunValidation, null, 2)
         }]
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase7Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase7Review.approved) break;
+      lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
+    } }
 
   artifacts.push(...dualRunValidation.artifacts);
   validationResults = dualRunValidation;
@@ -368,14 +433,13 @@ export async function process(inputs, ctx) {
       ctx.log('info', `Performance comparison: ${performanceComparison.performanceImprovement}`);
     }
   }
-
   // ============================================================================
   // PHASE 9: CUTOVER PLANNING AND PREPARATION
   // ============================================================================
 
   ctx.log('info', 'Phase 9: Planning cutover procedure');
 
-  const cutoverPlanning = await ctx.task(cutoverPlanningTask, {
+  let cutoverPlanning = await ctx.task(cutoverPlanningTask, {
     projectName,
     pipelineAssessment,
     migrationStrategy,
@@ -405,8 +469,21 @@ export async function process(inputs, ctx) {
   ctx.log('info', `Estimated cutover window: ${cutoverPlanning.estimatedDowntime}`);
   ctx.log('info', `Go-live date: ${cutoverPlanning.plannedGoLiveDate}`);
 
-  // Quality Gate: Review cutover plan
-  await ctx.breakpoint({
+    let lastFeedback_qualityGateApproval2 = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_qualityGateApproval2) {
+      cutoverPlanning = await ctx.task(cutoverPlanningTask, { ...{
+    projectName,
+    pipelineAssessment,
+    migrationStrategy,
+    dualRunValidation,
+    sourceSystem,
+    targetSystem,
+    requirements,
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval2, attempt: attempt + 1 });
+    }
+  const qualityGateApproval2 = await ctx.breakpoint({
     question: `Phase 9 Review: Cutover plan ready with ${cutoverPlanning.steps.length} steps. Downtime: ${cutoverPlanning.estimatedDowntime}. Go-live: ${cutoverPlanning.plannedGoLiveDate}. Approve cutover plan?`,
     title: 'Cutover Plan Approval',
     context: {
@@ -417,9 +494,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: JSON.stringify(cutoverPlanning, null, 2)
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_qualityGateApproval2 || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (qualityGateApproval2.approved) break;
+    lastFeedback_qualityGateApproval2 = qualityGateApproval2.response || qualityGateApproval2.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 10: ROLLBACK STRATEGY AND PROCEDURES
   // ============================================================================
@@ -445,7 +528,6 @@ export async function process(inputs, ctx) {
       ctx.log('info', `Rollback time estimate: ${rollbackStrategy.estimatedRollbackTime}`);
     }
   }
-
   // ============================================================================
   // PHASE 11: TRAINING AND KNOWLEDGE TRANSFER
   // ============================================================================
@@ -469,7 +551,6 @@ export async function process(inputs, ctx) {
       ctx.log('info', `Training sessions planned: ${trainingPlan.sessionCount}`);
     }
   }
-
   // ============================================================================
   // PHASE 12: DOCUMENTATION AND RUNBOOKS
   // ============================================================================
@@ -491,7 +572,6 @@ export async function process(inputs, ctx) {
   } else {
     artifacts.push(...documentation.artifacts);
   }
-
   // ============================================================================
   // PHASE 13: POST-MIGRATION MONITORING SETUP
   // ============================================================================
@@ -513,7 +593,6 @@ export async function process(inputs, ctx) {
     migrationPlan.monitoring = postMigrationMonitoring;
     ctx.log('info', 'Post-migration monitoring configured');
   }
-
   // ============================================================================
   // PHASE 14: COST OPTIMIZATION ANALYSIS
   // ============================================================================
@@ -521,7 +600,7 @@ export async function process(inputs, ctx) {
   if (requirements.costOptimization) {
     ctx.log('info', 'Phase 14: Analyzing cost optimization opportunities');
 
-    const costAnalysis = await ctx.task(costOptimizationTask, {
+    let costAnalysis = await ctx.task(costOptimizationTask, {
       projectName,
       sourceSystem,
       targetSystem,
@@ -538,7 +617,6 @@ export async function process(inputs, ctx) {
       ctx.log('info', `Cost impact: ${costAnalysis.costChange} (${costAnalysis.costChangePercent}%)`);
     }
   }
-
   // ============================================================================
   // FINAL QUALITY GATE AND READINESS ASSESSMENT
   // ============================================================================
@@ -552,9 +630,19 @@ export async function process(inputs, ctx) {
 
   const readinessThreshold = environment === 'production' ? 90 : 75;
 
-  ctx.log('info', `Migration readiness score: ${readinessScore.toFixed(1)}/100`);
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval3 = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval3) {
+      costAnalysis = await ctx.task(costOptimizationTask, { ...{
+      projectName,
+      sourceSystem,
+      targetSystem,
+      targetPipelineDesign,
+      requirements,
+      outputDir
+    }, feedback: lastFeedback_finalApproval3, attempt: attempt + 1 });
+    }
+  const finalApproval3 = await ctx.breakpoint({
     question: `Final Review: Pipeline migration ${projectName} is ready. Readiness score: ${readinessScore.toFixed(1)}/100 (threshold: ${readinessThreshold}). Validation: ${validationResults.validationScore}% match. Ready to proceed with cutover?`,
     title: 'Final Migration Readiness Review',
     context: {
@@ -582,9 +670,15 @@ export async function process(inputs, ctx) {
           content: documentation.cutoverRunbook || 'Cutover runbook generation pending'
         }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval3 || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval3.approved) break;
+    lastFeedback_finalApproval3 = finalApproval3.response || finalApproval3.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -632,8 +726,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // HELPER FUNCTIONS
 // ============================================================================
 
@@ -681,8 +774,7 @@ function calculateReadinessScore(data) {
 
   return (score / maxScore) * 100;
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

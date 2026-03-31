@@ -46,7 +46,7 @@ export async function process(inputs, ctx) {
   artifacts.push(...coreModule.artifacts);
 
   // Phase 3: Update Server Configuration
-  const serverConfig = await ctx.task(configureUpdateServerTask, { projectName, updateServer, targetPlatforms, outputDir });
+  let serverConfig = await ctx.task(configureUpdateServerTask, { projectName, updateServer, targetPlatforms, outputDir });
   artifacts.push(...serverConfig.artifacts);
 
   // Phase 4: Platform-specific Update Handlers
@@ -54,21 +54,29 @@ export async function process(inputs, ctx) {
     () => ctx.task(implementPlatformUpdateTask, { projectName, framework, updateStrategy, platform, outputDir })
   );
   const platformConfigs = await ctx.parallel.all(platformTasks);
-  artifacts.push(...platformConfigs.flatMap(c => c.artifacts));
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      serverConfig = await ctx.task(configureUpdateServerTask, { ...{ projectName, updateServer, targetPlatforms, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Update system configured. Server: ${updateServer}. Delta updates: ${deltaUpdates}. Review configuration?`,
     title: 'Update System Review',
-    context: { runId: ctx.runId, updateServer, deltaUpdates, platforms: targetPlatforms }
-  });
-
+    context: { runId: ctx.runId, updateServer, deltaUpdates, platforms: targetPlatforms },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 5: Delta Updates (if enabled)
   let deltaConfig = null;
   if (deltaUpdates) {
     deltaConfig = await ctx.task(configureDeltaUpdatesTask, { projectName, framework, updateStrategy, outputDir });
     artifacts.push(...deltaConfig.artifacts);
   }
-
   // Phase 6: Update UI Components
   const updateUi = await ctx.task(implementUpdateUiTask, { projectName, framework, outputDir });
   artifacts.push(...updateUi.artifacts);

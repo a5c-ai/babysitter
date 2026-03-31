@@ -18,112 +18,201 @@ export async function process(inputs, ctx) {
     targetQuality = 85
   } = inputs;
 
-  // Phase 1: Coverage Quantification
-  await ctx.breakpoint({
+  let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    // No preceding task identified for re-run with feedback
+    const phase1Review = await ctx.breakpoint({
     question: 'Starting media coverage analysis. Quantify coverage volume?',
     title: 'Phase 1: Coverage Quantification',
     context: {
       runId: ctx.runId,
       phase: 'coverage-quantification',
       analysisScope
-    }
-  });
-
-  const coverageQuantification = await ctx.task(quantifyCoverageTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
+  let coverageQuantification = await ctx.task(quantifyCoverageTask, {
     coverageData,
     analysisScope
   });
 
-  // Phase 2: Message Pull-Through Analysis
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      coverageQuantification = await ctx.task(quantifyCoverageTask, { ...{
+    coverageData,
+    analysisScope
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: 'Coverage quantified. Analyze message pull-through?',
     title: 'Phase 2: Message Pull-Through',
     context: {
       runId: ctx.runId,
       phase: 'message-pull-through',
       coverageVolume: coverageQuantification.totalItems
-    }
-  });
-
-  const messagePullThrough = await ctx.task(analyzeMessagePullThroughTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
+  let messagePullThrough = await ctx.task(analyzeMessagePullThroughTask, {
     coverageData,
     messagingFramework
   });
 
-  // Phase 3: Sentiment Analysis
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      messagePullThrough = await ctx.task(analyzeMessagePullThroughTask, { ...{
+    coverageData,
+    messagingFramework
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: 'Messages analyzed. Conduct sentiment analysis?',
     title: 'Phase 3: Sentiment Analysis',
     context: {
       runId: ctx.runId,
       phase: 'sentiment-analysis'
-    }
-  });
-
-  const sentimentAnalysis = await ctx.task(analyzeSentimentTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
+  let sentimentAnalysis = await ctx.task(analyzeSentimentTask, {
     coverageData,
     analysisScope
   });
 
-  // Phase 4: Share of Voice Analysis
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      sentimentAnalysis = await ctx.task(analyzeSentimentTask, { ...{
+    coverageData,
+    analysisScope
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: 'Sentiment analyzed. Calculate share of voice?',
     title: 'Phase 4: Share of Voice',
     context: {
       runId: ctx.runId,
       phase: 'share-of-voice',
       competitorCount: competitors.length
-    }
-  });
-
-  const shareOfVoice = await ctx.task(analyzeShareOfVoiceTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
+  let shareOfVoice = await ctx.task(analyzeShareOfVoiceTask, {
     coverageData,
     competitors,
     analysisScope
   });
 
-  // Phase 5: Quality Assessment
-  await ctx.breakpoint({
+    let lastFeedback_phase5Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase5Review) {
+      shareOfVoice = await ctx.task(analyzeShareOfVoiceTask, { ...{
+    coverageData,
+    competitors,
+    analysisScope
+  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+    }
+  const phase5Review = await ctx.breakpoint({
     question: 'SOV calculated. Assess coverage quality?',
     title: 'Phase 5: Quality Assessment',
     context: {
       runId: ctx.runId,
       phase: 'quality-assessment'
-    }
-  });
-
-  const qualityAssessment = await ctx.task(assessCoverageQualityTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase5Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase5Review.approved) break;
+    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+  }
+  let qualityAssessment = await ctx.task(assessCoverageQualityTask, {
     coverageData,
     analysisScope
   });
 
-  // Phase 6: Trend Analysis
-  await ctx.breakpoint({
+    let lastFeedback_phase6Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase6Review) {
+      qualityAssessment = await ctx.task(assessCoverageQualityTask, { ...{
+    coverageData,
+    analysisScope
+  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
+    }
+  const phase6Review = await ctx.breakpoint({
     question: 'Quality assessed. Analyze coverage trends?',
     title: 'Phase 6: Trend Analysis',
     context: {
       runId: ctx.runId,
       phase: 'trend-analysis'
-    }
-  });
-
-  const trendAnalysis = await ctx.task(analyzeTrendsTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase6Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase6Review.approved) break;
+    lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
+  }
+  let trendAnalysis = await ctx.task(analyzeTrendsTask, {
     coverageQuantification,
     sentimentAnalysis,
     shareOfVoice,
     analysisScope
   });
 
-  // Phase 7: Insights Generation
-  await ctx.breakpoint({
+    let lastFeedback_phase7Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase7Review) {
+      trendAnalysis = await ctx.task(analyzeTrendsTask, { ...{
+    coverageQuantification,
+    sentimentAnalysis,
+    shareOfVoice,
+    analysisScope
+  }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
+    }
+  const phase7Review = await ctx.breakpoint({
     question: 'Trends analyzed. Generate insights and recommendations?',
     title: 'Phase 7: Insights Generation',
     context: {
       runId: ctx.runId,
       phase: 'insights-generation'
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase7Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase7Review.approved) break;
+    lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
+  }
   const [insights, recommendations] = await Promise.all([
     ctx.task(generateInsightsTask, {
       coverageQuantification,
@@ -142,17 +231,32 @@ export async function process(inputs, ctx) {
     })
   ]);
 
-  // Phase 8: Report Compilation
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      trendAnalysis = await ctx.task(analyzeTrendsTask, { ...{
+    coverageQuantification,
+    sentimentAnalysis,
+    shareOfVoice,
+    analysisScope
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: 'Insights generated. Compile analysis report?',
     title: 'Phase 8: Report Compilation',
     context: {
       runId: ctx.runId,
       phase: 'report-compilation',
       targetQuality
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const analysisReport = await ctx.task(compileAnalysisReportTask, {
     coverageQuantification,
     messagePullThrough,
@@ -205,8 +309,7 @@ export async function process(inputs, ctx) {
     };
   }
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const quantifyCoverageTask = defineTask('quantify-coverage', (args, taskCtx) => ({
   kind: 'agent',

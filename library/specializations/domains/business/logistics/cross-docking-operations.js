@@ -49,20 +49,30 @@ export async function process(inputs, ctx) {
 
   // PHASE 4: FLOW-THROUGH OPTIMIZATION
   ctx.log('info', 'Phase 4: Optimizing flow-through');
-  const flowOptimization = await ctx.task(flowThroughOptimizationTask, { dockSchedule: dockScheduling.schedule, orderMatching, outputDir });
+  let flowOptimization = await ctx.task(flowThroughOptimizationTask, { dockSchedule: dockScheduling.schedule, orderMatching, outputDir });
   artifacts.push(...flowOptimization.artifacts);
 
-  // Quality Gate: Review cross-dock plan
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      flowOptimization = await ctx.task(flowThroughOptimizationTask, { ...{ dockSchedule: dockScheduling.schedule, orderMatching, outputDir }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: `Cross-dock plan generated. ${flowOptimization.flowThroughRate}% flow-through rate. Dock utilization: ${dockScheduling.utilization}%. Review plan?`,
     title: 'Cross-Dock Plan Review',
     context: {
       runId: ctx.runId,
       summary: { flowThroughRate: flowOptimization.flowThroughRate, dockUtilization: dockScheduling.utilization },
       files: flowOptimization.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
   // PHASE 5: STAGING AND SORTING PLAN
   ctx.log('info', 'Phase 5: Creating staging and sorting plan');
   const stagingPlan = await ctx.task(stagingSortingTask, { flowPlan: flowOptimization.plan, dockConfig, outputDir });
@@ -80,11 +90,15 @@ export async function process(inputs, ctx) {
 
   // PHASE 8: PERFORMANCE REPORTING
   ctx.log('info', 'Phase 8: Generating performance report');
-  const performanceReport = await ctx.task(crossDockPerformanceTask, { flowOptimization, dockScheduling, laborAssignment, outputDir });
+  let performanceReport = await ctx.task(crossDockPerformanceTask, { flowOptimization, dockScheduling, laborAssignment, outputDir });
   artifacts.push(...performanceReport.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      performanceReport = await ctx.task(crossDockPerformanceTask, { ...{ flowOptimization, dockScheduling, laborAssignment, outputDir }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Cross-docking operations planned. Throughput: ${flowOptimization.throughput} pallets/hour. Flow-through: ${flowOptimization.flowThroughRate}%. Approve plan?`,
     title: 'Cross-Docking Operations Complete',
     context: {
@@ -96,9 +110,15 @@ export async function process(inputs, ctx) {
         throughput: `${flowOptimization.throughput} pallets/hour`
       },
       files: [{ path: performanceReport.reportPath, format: 'markdown', label: 'Performance Report' }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   return {
     success: true,
@@ -111,8 +131,7 @@ export async function process(inputs, ctx) {
     metadata: { processId: 'specializations/domains/business/logistics/cross-docking-operations', timestamp: startTime, outputDir }
   };
 }
-
-// TASK DEFINITIONS
+  // TASK DEFINITIONS
 export const inboundAnalysisTask = defineTask('inbound-analysis', (args, taskCtx) => ({
   kind: 'agent', title: 'Analyze inbound shipments', agent: { name: 'inbound-analyst', prompt: { role: 'Inbound Analysis Specialist', task: 'Analyze inbound shipments for cross-docking', context: args, instructions: ['Parse shipment details', 'Identify cross-dock eligible items', 'Calculate arrival windows', 'Assess handling requirements', 'Flag pre-sorted shipments', 'Generate inbound analysis'] }, outputSchema: { type: 'object', required: ['analysis', 'artifacts'], properties: { analysis: { type: 'array' }, crossDockEligible: { type: 'array' }, artifacts: { type: 'array' } } } }, io: { inputJsonPath: `tasks/${taskCtx.effectId}/input.json`, outputJsonPath: `tasks/${taskCtx.effectId}/result.json` }, labels: ['agent', 'logistics', 'cross-docking', 'inbound']
 }));

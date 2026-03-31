@@ -11,36 +11,64 @@ import { defineTask } from '@a5c-ai/babysitter-sdk';
 export async function process(inputs, ctx) {
   const { projectName, requirementsSource, systemArchitecture = {} } = inputs;
 
-  const requirements = await ctx.task(requirementsImportTask, { projectName, requirementsSource });
-  const decomposition = await ctx.task(requirementsDecompositionTask, { projectName, requirements, systemArchitecture });
-
-  await ctx.breakpoint({
+  let requirements = await ctx.task(requirementsImportTask, { projectName, requirementsSource });
+    let lastFeedback_stepApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_stepApproval) {
+      requirements = await ctx.task(requirementsImportTask, { ...{ projectName, requirementsSource }, feedback: lastFeedback_stepApproval, attempt: attempt + 1 });
+    }
+  const stepApproval = await ctx.breakpoint({
     question: `${decomposition.totalRequirements} requirements decomposed for ${projectName}. Proceed with verification planning?`,
     title: 'Requirements Decomposition Review',
-    context: { runId: ctx.runId, decomposition }
-  });
-
+    context: { runId: ctx.runId, decomposition },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_stepApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (stepApproval.approved) break;
+    lastFeedback_stepApproval = stepApproval.response || stepApproval.feedback || 'Changes requested';
+  }
   const verificationMethods = await ctx.task(verificationMethodsTask, { projectName, requirements: decomposition });
   const traceabilityMatrix = await ctx.task(traceabilityMatrixTask, { projectName, decomposition, verificationMethods });
-  const verificationPlan = await ctx.task(verificationPlanTask, { projectName, traceabilityMatrix, verificationMethods });
+  let verificationPlan = await ctx.task(verificationPlanTask, { projectName, traceabilityMatrix, verificationMethods });
 
-  if (traceabilityMatrix.unverifiedCount > 0) {
-    await ctx.breakpoint({
+      let lastFeedback_reviewApproval = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_reviewApproval) {
+        verificationPlan = await ctx.task(verificationPlanTask, { ...{ projectName, traceabilityMatrix, verificationMethods }, feedback: lastFeedback_reviewApproval, attempt: attempt + 1 });
+      }
+  const reviewApproval = await ctx.breakpoint({
       question: `${traceabilityMatrix.unverifiedCount} requirements lack verification method. Review and resolve?`,
       title: 'Verification Gap Warning',
-      context: { runId: ctx.runId, gaps: traceabilityMatrix.gaps }
-    });
-  }
+      context: { runId: ctx.runId, gaps: traceabilityMatrix.gaps },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_reviewApproval || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (reviewApproval.approved) break;
+      lastFeedback_reviewApproval = reviewApproval.response || reviewApproval.feedback || 'Changes requested';
+    } }
 
-  const rvmMatrix = await ctx.task(rvmGenerationTask, { projectName, traceabilityMatrix, verificationPlan });
-  const report = await ctx.task(rvmReportTask, { projectName, requirements, rvmMatrix, traceabilityMatrix, verificationPlan });
-
-  await ctx.breakpoint({
+  let rvmMatrix = await ctx.task(rvmGenerationTask, { projectName, traceabilityMatrix, verificationPlan });
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      rvmMatrix = await ctx.task(rvmGenerationTask, { ...{ projectName, traceabilityMatrix, verificationPlan }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `RVM complete for ${projectName}. Coverage: ${traceabilityMatrix.coverage}%. Approve?`,
     title: 'RVM Approval',
-    context: { runId: ctx.runId, summary: { totalRequirements: decomposition.totalRequirements, coverage: traceabilityMatrix.coverage } }
-  });
-
+    context: { runId: ctx.runId, summary: { totalRequirements: decomposition.totalRequirements, coverage: traceabilityMatrix.coverage } },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return { success: true, projectName, rvmMatrix, traceability: traceabilityMatrix, verificationPlan, report, metadata: { processId: 'requirements-verification-matrix', timestamp: ctx.now() } };
 }
 

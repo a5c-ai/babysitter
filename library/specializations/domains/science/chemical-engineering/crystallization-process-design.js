@@ -78,7 +78,7 @@ export async function process(inputs, ctx) {
 
   // Task 5: Design Solid-Liquid Separation
   ctx.log('info', 'Designing solid-liquid separation');
-  const separationResult = await ctx.task(solidLiquidSeparationTask, {
+  let separationResult = await ctx.task(solidLiquidSeparationTask, {
     processName,
     crystalProperties: csdControlResult.expectedCSD,
     productRequirements,
@@ -87,8 +87,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...separationResult.artifacts);
 
-  // Breakpoint: Review crystallization design
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      separationResult = await ctx.task(solidLiquidSeparationTask, { ...{
+    processName,
+    crystalProperties: csdControlResult.expectedCSD,
+    productRequirements,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Crystallization design complete for ${processName}. Method: ${methodSelectionResult.method.type}. Yield: ${crystallizerDesignResult.design.expectedYield}%. Mean crystal size: ${csdControlResult.expectedCSD.meanSize} um. Review design?`,
     title: 'Crystallization Process Design Review',
     context: {
@@ -101,9 +110,15 @@ export async function process(inputs, ctx) {
         meanCrystalSize: csdControlResult.expectedCSD.meanSize,
         separationMethod: separationResult.design.method
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 6: Address Polymorphism and Purity
   ctx.log('info', 'Addressing polymorphism and purity requirements');
   const polymorphismResult = await ctx.task(polymorphismPurityTask, {
@@ -160,8 +175,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Solubility Characterization
+  // Task 1: Solubility Characterization
 export const solubilityCharacterizationTask = defineTask('solubility-characterization', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Characterize solubility and metastable zone',

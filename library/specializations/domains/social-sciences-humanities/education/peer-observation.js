@@ -104,7 +104,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Scoring peer observation protocol quality');
-  const qualityScore = await ctx.task(peerObservationQualityScoringTask, {
+  let qualityScore = await ctx.task(peerObservationQualityScoringTask, {
     observationType,
     preObservationProtocol,
     observationTools,
@@ -119,8 +119,20 @@ export async function process(inputs, ctx) {
   const overallScore = qualityScore.overallScore;
   const qualityMet = overallScore >= qualityThreshold;
 
-  // Breakpoint: Review protocol
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      qualityScore = await ctx.task(peerObservationQualityScoringTask, { ...{
+    observationType,
+    preObservationProtocol,
+    observationTools,
+    postObservationProtocol,
+    feedbackFramework,
+    qualityThreshold,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Peer observation protocol complete. Quality score: ${overallScore}/${qualityThreshold}. ${qualityMet ? 'Quality standards met!' : 'May need refinement.'} Review and approve?`,
     title: 'Peer Observation Protocol Review',
     context: {
@@ -134,9 +146,15 @@ export async function process(inputs, ctx) {
         totalTools: observationTools.tools?.length || 0,
         totalArtifacts: artifacts.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -163,8 +181,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task definitions
+  // Task definitions
 export const preObservationProtocolTask = defineTask('pre-observation-protocol', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Develop pre-observation protocol',

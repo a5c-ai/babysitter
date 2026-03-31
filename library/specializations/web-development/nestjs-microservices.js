@@ -45,16 +45,24 @@ export async function process(inputs, ctx) {
     const gatewaySetup = await ctx.task(gatewaySetupTask, { projectName, outputDir });
     artifacts.push(...gatewaySetup.artifacts);
   }
-
-  const eventBusSetup = await ctx.task(eventBusSetupTask, { projectName, features, outputDir });
-  artifacts.push(...eventBusSetup.artifacts);
-
-  await ctx.breakpoint({
+  let eventBusSetup = await ctx.task(eventBusSetupTask, { projectName, features, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      eventBusSetup = await ctx.task(eventBusSetupTask, { ...{ projectName, features, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `NestJS Microservices setup complete for ${projectName}. ${moduleArchitecture.modules.length} modules, ${serviceLayer.services.length} services. Approve?`,
     title: 'NestJS Microservices Review',
-    context: { runId: ctx.runId, modules: moduleArchitecture.modules, services: serviceLayer.services }
-  });
-
+    context: { runId: ctx.runId, modules: moduleArchitecture.modules, services: serviceLayer.services },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const testingSetup = await ctx.task(testingSetupTask, { projectName, outputDir });
   artifacts.push(...testingSetup.artifacts);
 

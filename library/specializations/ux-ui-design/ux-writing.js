@@ -67,7 +67,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 3: Defining brand voice and tone guidelines');
-  const voiceAndTone = await ctx.task(voiceAndToneDefinitionTask, {
+  let voiceAndTone = await ctx.task(voiceAndToneDefinitionTask, {
     projectName,
     brandGuidelines,
     brandAudienceAnalysis,
@@ -79,8 +79,20 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...voiceAndTone.artifacts);
 
-  // Breakpoint: Review voice and tone before microcopy creation
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      voiceAndTone = await ctx.task(voiceAndToneDefinitionTask, { ...{
+    projectName,
+    brandGuidelines,
+    brandAudienceAnalysis,
+    toneAttributes,
+    contentStrategy,
+    productType,
+    outputDir
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Voice and tone defined: ${voiceAndTone.voiceAttributes.join(', ')}. ${voiceAndTone.toneModulations} tone modulations created. Review before creating microcopy patterns?`,
     title: 'Voice and Tone Review',
     context: {
@@ -101,9 +113,15 @@ export async function process(inputs, ctx) {
         examplesProvided: voiceAndTone.examplesCount,
         dosAndDonts: voiceAndTone.dosAndDontsCount
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 4: MICROCOPY PATTERNS DEVELOPMENT (PARALLEL)
   // ============================================================================
@@ -178,7 +196,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 7: Creating confirmation and success message patterns');
-  const confirmationMessages = await ctx.task(confirmationMessagePatternsTask, {
+  let confirmationMessages = await ctx.task(confirmationMessagePatternsTask, {
     projectName,
     voiceAndTone,
     contentStrategy,
@@ -189,8 +207,19 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...confirmationMessages.artifacts);
 
-  // Breakpoint: Review microcopy patterns
-  await ctx.breakpoint({
+    let lastFeedback_phase7Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase7Review) {
+      confirmationMessages = await ctx.task(confirmationMessagePatternsTask, { ...{
+    projectName,
+    voiceAndTone,
+    contentStrategy,
+    productType,
+    generateExamples,
+    outputDir
+  }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
+    }
+  const phase7Review = await ctx.breakpoint({
     question: `Microcopy patterns complete: ${errorMessages.patternCount} error patterns, ${emptyStates.patternCount} empty states, ${buttonLabels.patternCount} button labels, ${onboardingCopy.patternCount} onboarding patterns, ${formMicrocopy.patternCount} form patterns, ${confirmationMessages.patternCount} confirmation patterns. Review patterns?`,
     title: 'Microcopy Patterns Review',
     context: {
@@ -221,9 +250,15 @@ export async function process(inputs, ctx) {
         confirmationPatterns: confirmationMessages.patternCount,
         examplesGenerated: generateExamples
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase7Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase7Review.approved) break;
+    lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 8: MICROCOPY CATALOG CONSOLIDATION
   // ============================================================================
@@ -261,7 +296,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...contentAudit.artifacts);
   }
-
   // ============================================================================
   // PHASE 10: WRITING PROCESS AND BEST PRACTICES
   // ============================================================================
@@ -332,7 +366,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 14: Assessing guidelines quality and completeness');
-  const qualityAssessment = await ctx.task(guidelinesQualityAssessmentTask, {
+  let qualityAssessment = await ctx.task(guidelinesQualityAssessmentTask, {
     projectName,
     voiceAndTone,
     microcopyCatalog,
@@ -347,8 +381,20 @@ export async function process(inputs, ctx) {
   const qualityScore = qualityAssessment.overallScore;
   const qualityMet = qualityScore >= targetQualityScore;
 
-  // Final Breakpoint: Review complete UX writing guidelines
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      qualityAssessment = await ctx.task(guidelinesQualityAssessmentTask, { ...{
+    projectName,
+    voiceAndTone,
+    microcopyCatalog,
+    writingGuidelines,
+    contentAudit,
+    targetQualityScore,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `UX Writing Guidelines complete! Quality score: ${qualityScore}/100. ${qualityMet ? 'Guidelines meet quality standards!' : 'Guidelines may benefit from refinement.'} Review and approve final deliverables?`,
     title: 'UX Writing Guidelines Final Review',
     context: {
@@ -381,9 +427,15 @@ export async function process(inputs, ctx) {
           implementabilityScore: qualityAssessment.implementabilityScore
         }
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -431,8 +483,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

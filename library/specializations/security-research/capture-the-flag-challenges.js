@@ -122,16 +122,24 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 6: Deploying CTF');
 
-  const deployment = await ctx.task(ctfDeploymentTask, {
+  let deployment = await ctx.task(ctfDeploymentTask, {
     projectName,
     infrastructure,
     challenges: challengeCreation.challenges,
     outputDir
   });
 
-  artifacts.push(...deployment.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      deployment = await ctx.task(ctfDeploymentTask, { ...{
+    projectName,
+    infrastructure,
+    challenges: challengeCreation.challenges,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `CTF creation complete. ${challenges.length} challenges created across ${categories.length} categories. All tested: ${testing.allPassed}. Ready to deploy?`,
     title: 'CTF Creation Complete',
     context: {
@@ -143,9 +151,15 @@ export async function process(inputs, ctx) {
         allTested: testing.allPassed
       },
       files: deployment.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
 
   return {
@@ -167,8 +181,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

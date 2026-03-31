@@ -72,17 +72,28 @@ export async function process(inputs, ctx) {
   artifacts.push(...specialMemOpt.artifacts);
 
   // Phase 7: Bandwidth Measurement
-  const bandwidthMeasurement = await ctx.task(bandwidthMeasurementTask, {
+  let bandwidthMeasurement = await ctx.task(bandwidthMeasurementTask, {
     projectName, targetKernels, targetBandwidth, outputDir
   });
-  artifacts.push(...bandwidthMeasurement.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      bandwidthMeasurement = await ctx.task(bandwidthMeasurementTask, { ...{
+    projectName, targetKernels, targetBandwidth, outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Memory optimization complete for ${projectName}. Bandwidth utilization: ${bandwidthMeasurement.achievedBandwidth}% (target: ${targetBandwidth}%). Review optimizations?`,
     title: 'Memory Optimization Complete',
-    context: { runId: ctx.runId, bandwidthMeasurement }
-  });
-
+    context: { runId: ctx.runId, bandwidthMeasurement },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: bandwidthMeasurement.achievedBandwidth >= targetBandwidth,
     projectName,

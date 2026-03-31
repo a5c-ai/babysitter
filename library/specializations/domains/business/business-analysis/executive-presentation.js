@@ -518,23 +518,37 @@ export async function process(inputs, ctx) {
 
   // Phase 6: Backup Slides
   ctx.log('Phase 6: Creating backup slides');
-  const backupResult = await ctx.task(backupSlidesTask, {
+  let backupResult = await ctx.task(backupSlidesTask, {
     slideDesign: artifacts.slideDesign,
     contentInputs: inputs.contentInputs,
     audienceAnalysis: artifacts.audienceAnalysis
   });
   artifacts.backupSlides = backupResult;
 
-  // Breakpoint for presentation review
-  await ctx.breakpoint('presentation-review', {
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      backupResult = await ctx.task(backupSlidesTask, { ...{
+    slideDesign: artifacts.slideDesign,
+    contentInputs: inputs.contentInputs,
+    audienceAnalysis: artifacts.audienceAnalysis
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint('presentation-review', {
     question: 'Review the presentation deck structure and content. Is the messaging clear and compelling?',
     artifacts: {
       slideDesign: artifacts.slideDesign,
       executiveSummary: artifacts.executiveSummary,
       storyStructure: artifacts.storyStructure
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 7: Q&A Preparation
   ctx.log('Phase 7: Preparing Q&A responses');
   const qaResult = await ctx.task(qaPreparationTask, {

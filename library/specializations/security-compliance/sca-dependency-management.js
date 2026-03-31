@@ -131,7 +131,7 @@ export async function process(inputs, ctx) {
   artifacts.push(...vulnScanResults.flatMap(r => r.artifacts));
 
   // Aggregate and deduplicate vulnerabilities across tools
-  const aggregatedVulnerabilities = await ctx.task(vulnerabilityAggregationTask, {
+  let aggregatedVulnerabilities = await ctx.task(vulnerabilityAggregationTask, {
     projectName,
     scanResults: vulnScanResults,
     severityThreshold,
@@ -150,8 +150,17 @@ export async function process(inputs, ctx) {
   artifacts.push(...aggregatedVulnerabilities.artifacts);
 
   // Quality Gate: Check vulnerability thresholds
-  if (criticalCount > qualityCriteria.maxCriticalVulnerabilities || highCount > qualityCriteria.maxHighVulnerabilities) {
-    await ctx.breakpoint({
+      let lastFeedback_qualityGateApproval = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_qualityGateApproval) {
+        aggregatedVulnerabilities = await ctx.task(vulnerabilityAggregationTask, { ...{
+    projectName,
+    scanResults: vulnScanResults,
+    severityThreshold,
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval, attempt: attempt + 1 });
+      }
+  const qualityGateApproval = await ctx.breakpoint({
       question: `Vulnerability threshold exceeded: ${criticalCount} critical (max: ${qualityCriteria.maxCriticalVulnerabilities}), ${highCount} high (max: ${qualityCriteria.maxHighVulnerabilities}). Review vulnerabilities?`,
       title: 'Vulnerability Threshold Alert',
       context: {
@@ -166,9 +175,15 @@ export async function process(inputs, ctx) {
           format: 'json',
           label: 'Vulnerability Report'
         }]
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_qualityGateApproval || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (qualityGateApproval.approved) break;
+      lastFeedback_qualityGateApproval = qualityGateApproval.response || qualityGateApproval.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 3: SBOM GENERATION
@@ -176,7 +191,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 3: Generating Software Bill of Materials (SBOM)');
 
-  const sbomGeneration = await ctx.task(sbomGenerationTask, {
+  let sbomGeneration = await ctx.task(sbomGenerationTask, {
     projectName,
     dependencyInventory: dependencyInventory.dependencies,
     packageManagers,
@@ -191,8 +206,20 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `SBOM generated in ${sbomFormat} format with ${sbom.componentCount} components`);
 
-  // Breakpoint: Review SBOM
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      sbomGeneration = await ctx.task(sbomGenerationTask, { ...{
+    projectName,
+    dependencyInventory: dependencyInventory.dependencies,
+    packageManagers,
+    format: sbomFormat,
+    includeVulnerabilities: true,
+    vulnerabilities: vulnerabilities,
+    outputDir
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `SBOM generated with ${sbom.componentCount} components in ${sbomFormat} format. Review SBOM?`,
     title: 'SBOM Review',
     context: {
@@ -204,16 +231,22 @@ export async function process(inputs, ctx) {
         format: a.format || 'json',
         label: a.label || 'SBOM'
       }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 4: LICENSE COMPLIANCE ANALYSIS
   // ============================================================================
 
   ctx.log('info', 'Phase 4: Analyzing license compliance');
 
-  const licenseAnalysis = await ctx.task(licenseComplianceTask, {
+  let licenseAnalysis = await ctx.task(licenseComplianceTask, {
     projectName,
     dependencyInventory: dependencyInventory.dependencies,
     packageManagers,
@@ -230,8 +263,18 @@ export async function process(inputs, ctx) {
   ctx.log('info', `License analysis complete: ${licenseViolations.length} violations, ${licenseReviews.length} requiring review`);
 
   // Quality Gate: License compliance
-  if (licenseViolations.length > 0 && qualityCriteria.licenseComplianceRequired) {
-    await ctx.breakpoint({
+      let lastFeedback_qualityGateApproval2 = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_qualityGateApproval2) {
+        licenseAnalysis = await ctx.task(licenseComplianceTask, { ...{
+    projectName,
+    dependencyInventory: dependencyInventory.dependencies,
+    packageManagers,
+    licensePolicies,
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval2, attempt: attempt + 1 });
+      }
+  const qualityGateApproval2 = await ctx.breakpoint({
       question: `Found ${licenseViolations.length} license policy violations. Review and approve?`,
       title: 'License Compliance Review',
       context: {
@@ -243,9 +286,15 @@ export async function process(inputs, ctx) {
           format: 'json',
           label: 'License Report'
         }]
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_qualityGateApproval2 || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (qualityGateApproval2.approved) break;
+      lastFeedback_qualityGateApproval2 = qualityGateApproval2.response || qualityGateApproval2.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 5: SUPPLY CHAIN SECURITY ASSESSMENT (IF ENABLED)
@@ -268,7 +317,6 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Supply chain assessment: ${supplyChainAssessment.riskScore}/100 risk score`);
   }
-
   // ============================================================================
   // PHASE 6: SCA TOOL SETUP AND CONFIGURATION (PARALLEL)
   // ============================================================================
@@ -317,14 +365,13 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Update strategy created with ${updateStrategy.updateRules.length} rules`);
   }
-
   // ============================================================================
   // PHASE 8: REMEDIATION PLANNING
   // ============================================================================
 
   ctx.log('info', 'Phase 8: Creating vulnerability remediation plan');
 
-  const remediationPlan = await ctx.task(remediationPlanningTask, {
+  let remediationPlan = await ctx.task(remediationPlanningTask, {
     projectName,
     vulnerabilities,
     dependencyInventory: dependencyInventory.dependencies,
@@ -338,8 +385,20 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Remediation plan created with ${remediationPlan.actions.length} actions (${remediationPlan.automatable} automatable)`);
 
-  // Breakpoint: Review remediation plan
-  await ctx.breakpoint({
+    let lastFeedback_phase8Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase8Review) {
+      remediationPlan = await ctx.task(remediationPlanningTask, { ...{
+    projectName,
+    vulnerabilities,
+    dependencyInventory: dependencyInventory.dependencies,
+    licenseViolations,
+    supplyChainAssessment,
+    automatedUpdates,
+    outputDir
+  }, feedback: lastFeedback_phase8Review, attempt: attempt + 1 });
+    }
+  const phase8Review = await ctx.breakpoint({
     question: `Remediation plan created with ${remediationPlan.actions.length} actions. ${remediationPlan.criticalActions} critical actions require immediate attention. Review plan?`,
     title: 'Remediation Plan Review',
     context: {
@@ -353,9 +412,15 @@ export async function process(inputs, ctx) {
         format: 'markdown',
         label: 'Remediation Plan'
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase8Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase8Review.approved) break;
+    lastFeedback_phase8Review = phase8Review.response || phase8Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 9: CI/CD PIPELINE INTEGRATION (IF ENABLED)
   // ============================================================================
@@ -379,14 +444,13 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `CI/CD integration configured for ${cicdSetup.platforms.length} platforms`);
   }
-
   // ============================================================================
   // PHASE 10: COMPLIANCE REPORTING AND DOCUMENTATION
   // ============================================================================
 
   ctx.log('info', 'Phase 10: Generating compliance reports and documentation');
 
-  const complianceReporting = await ctx.task(complianceReportingTask, {
+  let complianceReporting = await ctx.task(complianceReportingTask, {
     projectName,
     sbom,
     vulnerabilities,
@@ -404,8 +468,23 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Compliance status: ${complianceStatus.overall} (${complianceStatus.score}/100)`);
 
-  // Final breakpoint for approval
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      complianceReporting = await ctx.task(complianceReportingTask, { ...{
+    projectName,
+    sbom,
+    vulnerabilities,
+    licenses,
+    licenseViolations,
+    licenseReviews,
+    supplyChainAssessment,
+    remediationPlan,
+    qualityCriteria,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `SCA analysis complete. Compliance score: ${complianceStatus.score}/100. ${criticalCount} critical vulnerabilities, ${licenseViolations.length} license violations. Review final report and approve?`,
     title: 'Final SCA Report Review',
     context: {
@@ -426,9 +505,15 @@ export async function process(inputs, ctx) {
           label: 'Technical Report'
         }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -500,8 +585,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

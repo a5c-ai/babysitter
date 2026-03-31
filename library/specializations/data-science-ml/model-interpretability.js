@@ -61,7 +61,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Model and Data Validation');
 
-  const validationResult = await ctx.task(modelDataValidationTask, {
+  let validationResult = await ctx.task(modelDataValidationTask, {
     modelPath,
     modelType,
     dataPath,
@@ -80,17 +80,33 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...validationResult.artifacts);
 
-  // Breakpoint: Review validation results
-  await ctx.breakpoint({
+    let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      validationResult = await ctx.task(modelDataValidationTask, { ...{
+    modelPath,
+    modelType,
+    dataPath,
+    targetColumn,
+    outputDir
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Model and data validated. Model type: ${validationResult.detectedModelType}, Features: ${validationResult.featureCount}, Samples: ${validationResult.sampleCount}. Proceed with interpretability analysis?`,
     title: 'Model/Data Validation Review',
     context: {
       runId: ctx.runId,
       validation: validationResult.summary,
       files: validationResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 2: GLOBAL INTERPRETABILITY ANALYSIS
   // ============================================================================
@@ -128,7 +144,6 @@ export async function process(inputs, ctx) {
     globalExplanations.partialDependence = partialDependenceResult.partialDependence;
     artifacts.push(...partialDependenceResult.artifacts);
   }
-
   // Task 2.3: Global SHAP Analysis (if requested)
   let globalShapResult = null;
   if (explainabilityMethods.includes('shap')) {
@@ -147,9 +162,8 @@ export async function process(inputs, ctx) {
     globalExplanations.shap = globalShapResult.globalExplanations;
     artifacts.push(...globalShapResult.artifacts);
   }
-
   // Task 2.4: Model Behavior Summary
-  const modelBehaviorResult = await ctx.task(modelBehaviorSummaryTask, {
+  let modelBehaviorResult = await ctx.task(modelBehaviorSummaryTask, {
     modelPath,
     modelType,
     dataPath,
@@ -164,8 +178,22 @@ export async function process(inputs, ctx) {
   globalExplanations.behaviorSummary = modelBehaviorResult.summary;
   artifacts.push(...modelBehaviorResult.artifacts);
 
-  // Breakpoint: Review global interpretability results
-  await ctx.breakpoint({
+    let lastFeedback_reviewApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_reviewApproval) {
+      modelBehaviorResult = await ctx.task(modelBehaviorSummaryTask, { ...{
+    modelPath,
+    modelType,
+    dataPath,
+    targetColumn,
+    featureImportance: featureImportanceResult,
+    partialDependence: partialDependenceResult,
+    globalShap: globalShapResult,
+    validationResult,
+    outputDir
+  }, feedback: lastFeedback_reviewApproval, attempt: attempt + 1 });
+    }
+  const reviewApproval = await ctx.breakpoint({
     question: `Global interpretability analysis complete. Top features identified: ${featureImportanceResult.topFeatures.slice(0, 5).join(', ')}. Review results and approve to continue with local explanations?`,
     title: 'Global Interpretability Review',
     context: {
@@ -175,9 +203,15 @@ export async function process(inputs, ctx) {
         { path: `${outputDir}/feature-importance.json`, format: 'json' },
         { path: `${outputDir}/global-explanations-report.md`, format: 'markdown' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_reviewApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (reviewApproval.approved) break;
+    lastFeedback_reviewApproval = reviewApproval.response || reviewApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 3: LOCAL INTERPRETABILITY ANALYSIS
   // ============================================================================
@@ -215,7 +249,6 @@ export async function process(inputs, ctx) {
     localExplanations.lime = limeResult.explanations;
     artifacts.push(...limeResult.artifacts);
   }
-
   // Task 3.3: Local SHAP Analysis (if requested)
   let localShapResult = null;
   if (explainabilityMethods.includes('shap')) {
@@ -234,9 +267,8 @@ export async function process(inputs, ctx) {
     localExplanations.shap = localShapResult.explanations;
     artifacts.push(...localShapResult.artifacts);
   }
-
   // Task 3.4: Decision Path Analysis
-  const decisionPathResult = await ctx.task(decisionPathAnalysisTask, {
+  let decisionPathResult = await ctx.task(decisionPathAnalysisTask, {
     modelPath,
     modelType,
     samples: sampleSelectionResult.selectedSamples,
@@ -271,7 +303,6 @@ export async function process(inputs, ctx) {
     localExplanations.counterfactuals = counterfactualResult.counterfactuals;
     artifacts.push(...counterfactualResult.artifacts);
   }
-
   // ============================================================================
   // PHASE 5: BIAS AND FAIRNESS ANALYSIS (if requested)
   // ============================================================================
@@ -294,8 +325,19 @@ export async function process(inputs, ctx) {
     artifacts.push(...biasAnalysisResult.artifacts);
 
     // Quality Gate: Check for bias concerns
-    if (biasAnalysisResult.hasCriticalBias) {
-      await ctx.breakpoint({
+        let lastFeedback_phase5Review = null;
+      for (let attempt = 0; attempt < 3; attempt++) {
+        if (lastFeedback_phase5Review) {
+          decisionPathResult = await ctx.task(decisionPathAnalysisTask, { ...{
+    modelPath,
+    modelType,
+    samples: sampleSelectionResult.selectedSamples,
+    validationResult,
+    generateVisualizations,
+    outputDir
+  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+        }
+  const phase5Review = await ctx.breakpoint({
         question: `Critical bias detected: ${biasAnalysisResult.criticalBiases.join(', ')}. Review bias analysis and decide whether to proceed or address bias issues?`,
         title: 'Bias Detection Alert',
         context: {
@@ -304,11 +346,16 @@ export async function process(inputs, ctx) {
           criticalBiases: biasAnalysisResult.criticalBiases,
           recommendations: biasAnalysisResult.recommendations,
           files: biasAnalysisResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-        }
-      });
-    }
+        },
+        expert: 'owner',
+        tags: ['approval-gate'],
+        previousFeedback: lastFeedback_phase5Review || undefined,
+        attempt: attempt > 0 ? attempt + 1 : undefined
+        });
+        if (phase5Review.approved) break;
+        lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+      }   }
   }
-
   // ============================================================================
   // PHASE 6: INTERPRETABILITY QUALITY ASSESSMENT WITH CONVERGENCE
   // ============================================================================
@@ -363,7 +410,7 @@ export async function process(inputs, ctx) {
       ctx.log('warn', `Quality below target: ${currentQuality}/${targetQuality}`);
 
       // Task 6.2: Generate improvement recommendations
-      const improvementPlan = await ctx.task(interpretabilityImprovementTask, {
+      let improvementPlan = await ctx.task(interpretabilityImprovementTask, {
         modelPath,
         modelType,
         currentQuality,
@@ -377,8 +424,22 @@ export async function process(inputs, ctx) {
 
       artifacts.push(...improvementPlan.artifacts);
 
-      // Breakpoint: Review quality assessment and improvement plan
-      await ctx.breakpoint({
+        let lastFeedback_iterationApproval = null;
+      for (let attempt = 0; attempt < 3; attempt++) {
+        if (lastFeedback_iterationApproval) {
+          improvementPlan = await ctx.task(interpretabilityImprovementTask, { ...{
+        modelPath,
+        modelType,
+        currentQuality,
+        targetQuality,
+        qualityAssessment,
+        globalExplanations,
+        localExplanations,
+        iteration,
+        outputDir
+      }, feedback: lastFeedback_iterationApproval, attempt: attempt + 1 });
+        }
+  const iterationApproval = await ctx.breakpoint({
         question: `Iteration ${iteration} complete. Quality: ${currentQuality}/${targetQuality}. ${improvementPlan.summary}. Continue to iteration ${iteration + 1} for refinement?`,
         title: `Interpretability Quality Review - Iteration ${iteration}`,
         context: {
@@ -391,15 +452,20 @@ export async function process(inputs, ctx) {
             { path: `${outputDir}/iteration-${iteration}-quality-assessment.json`, format: 'json' },
             { path: `${outputDir}/iteration-${iteration}-improvement-plan.md`, format: 'markdown' }
           ]
-        }
-      });
-
-      // Apply improvements based on recommendations
+        },
+        expert: 'owner',
+        tags: ['approval-gate'],
+        previousFeedback: lastFeedback_iterationApproval || undefined,
+        attempt: attempt > 0 ? attempt + 1 : undefined
+        });
+        if (iterationApproval.approved) break;
+        lastFeedback_iterationApproval = iterationApproval.response || iterationApproval.feedback || 'Changes requested';
+      }
+  // Apply improvements based on recommendations
       // This could involve re-running analyses with different parameters
       // For now, we'll continue to next iteration
     }
   }
-
   // ============================================================================
   // PHASE 7: COMPREHENSIVE INTERPRETABILITY REPORT
   // ============================================================================
@@ -468,14 +534,13 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...dashboardResult.artifacts);
   }
-
   // ============================================================================
   // PHASE 10: FINAL REVIEW AND VALIDATION
   // ============================================================================
 
   ctx.log('info', 'Phase 10: Final Review and Validation');
 
-  const finalReview = await ctx.task(finalInterpretabilityReviewTask, {
+  let finalReview = await ctx.task(finalInterpretabilityReviewTask, {
     modelPath,
     modelType,
     globalExplanations,
@@ -492,8 +557,25 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...finalReview.artifacts);
 
-  // Final Breakpoint: Approval for interpretability analysis
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      finalReview = await ctx.task(finalInterpretabilityReviewTask, { ...{
+    modelPath,
+    modelType,
+    globalExplanations,
+    localExplanations,
+    comprehensiveReport,
+    stakeholderReports,
+    dashboard: dashboardResult,
+    qualityIterations: iterationResults,
+    finalQuality: currentQuality,
+    targetQuality,
+    converged,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Model interpretability analysis complete. Quality: ${currentQuality}/${targetQuality}. ${finalReview.verdict}. Approve interpretability analysis results?`,
     title: 'Final Interpretability Analysis Approval',
     context: {
@@ -516,9 +598,15 @@ export async function process(inputs, ctx) {
         { path: `${outputDir}/technical-report.md`, format: 'markdown', label: 'Technical Report' },
         ...(dashboardResult ? [{ path: dashboardResult.dashboardPath, format: 'html', label: 'Interactive Dashboard' }] : [])
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -565,8 +653,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

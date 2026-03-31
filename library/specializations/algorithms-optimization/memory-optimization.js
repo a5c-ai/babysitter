@@ -25,15 +25,24 @@ export async function process(inputs, ctx) {
   const optimization = await ctx.task(spaceReductionTask, { algorithm, analysis, outputDir });
   artifacts.push(...optimization.artifacts);
 
-  const implementation = await ctx.task(memoryOptimizedImplementationTask, { optimization, language, outputDir });
-  artifacts.push(...implementation.artifacts);
-
-  await ctx.breakpoint({
+  let implementation = await ctx.task(memoryOptimizedImplementationTask, { optimization, language, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      implementation = await ctx.task(memoryOptimizedImplementationTask, { ...{ optimization, language, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Memory optimization complete. ${currentSpaceComplexity} -> ${optimization.newComplexity}. Review?`,
     title: 'Memory Optimization Complete',
-    context: { runId: ctx.runId, original: currentSpaceComplexity, optimized: optimization.newComplexity }
-  });
-
+    context: { runId: ctx.runId, original: currentSpaceComplexity, optimized: optimization.newComplexity },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     optimizedAlgorithm: implementation.code,

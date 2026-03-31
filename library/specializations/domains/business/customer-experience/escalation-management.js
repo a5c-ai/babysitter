@@ -120,7 +120,7 @@ export async function process(inputs, ctx) {
   // ============================================================================
 
   ctx.log('info', 'Phase 7: Performing escalation quality check');
-  const qualityCheck = await ctx.task(qualityCheckTask, {
+  let qualityCheck = await ctx.task(qualityCheckTask, {
     escalationValidation,
     caseDocumentation,
     teamSelection,
@@ -133,9 +133,20 @@ export async function process(inputs, ctx) {
   artifacts.push(...qualityCheck.artifacts);
 
   const qualityScore = qualityCheck.qualityScore;
-  const escalationReady = qualityScore >= 85;
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      qualityCheck = await ctx.task(qualityCheckTask, { ...{
+    escalationValidation,
+    caseDocumentation,
+    teamSelection,
+    handoffPackage,
+    customerCommunication,
+    internalNotification,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Escalation prepared for ticket ${ticket.id}. Target: Tier ${targetTier}. Quality score: ${qualityScore}/100. ${escalationReady ? 'Ready to escalate!' : 'May need additional documentation.'} Proceed?`,
     title: 'Escalation Review',
     context: {
@@ -155,9 +166,15 @@ export async function process(inputs, ctx) {
         receivingAgent: teamSelection.selectedAgent?.name,
         escalationReason
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -199,8 +216,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

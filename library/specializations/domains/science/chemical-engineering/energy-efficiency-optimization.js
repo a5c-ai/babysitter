@@ -76,7 +76,7 @@ export async function process(inputs, ctx) {
 
   // Task 5: Assess Renewable Energy Integration
   ctx.log('info', 'Assessing renewable energy integration');
-  const renewableResult = await ctx.task(renewableIntegrationTask, {
+  let renewableResult = await ctx.task(renewableIntegrationTask, {
     processName,
     energyConsumption: consumptionResult.consumption,
     renewableOptions,
@@ -86,8 +86,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...renewableResult.artifacts);
 
-  // Breakpoint: Review energy optimization analysis
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      renewableResult = await ctx.task(renewableIntegrationTask, { ...{
+    processName,
+    energyConsumption: consumptionResult.consumption,
+    renewableOptions,
+    utilityData,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Energy optimization analysis complete for ${processName}. Current consumption: ${consumptionResult.totalEnergy} GJ/year. Potential savings: ${efficiencyResult.totalSavings}%. Renewable potential: ${renewableResult.renewablePotential}%. Review analysis?`,
     title: 'Energy Efficiency Optimization Review',
     context: {
@@ -99,9 +109,15 @@ export async function process(inputs, ctx) {
         efficiencySavings: efficiencyResult.totalSavings,
         renewablePotential: renewableResult.renewablePotential
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 6: Develop Energy Management Plan
   ctx.log('info', 'Developing energy management plan');
   const managementPlanResult = await ctx.task(energyManagementPlanTask, {
@@ -148,8 +164,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Energy Audit
+  // Task 1: Energy Audit
 export const energyAuditTask = defineTask('energy-audit', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Conduct energy audit',

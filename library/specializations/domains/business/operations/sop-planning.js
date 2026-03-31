@@ -52,20 +52,34 @@ export async function process(inputs, ctx) {
   artifacts.push({ phase: 'statistical-forecast', output: statisticalForecast });
 
   // Phase 3: Demand Review and Consensus
-  const demandConsensus = await ctx.task(buildDemandConsensus, {
+  let demandConsensus = await ctx.task(buildDemandConsensus, {
     statisticalForecast,
     demandData,
     processScope
   });
   artifacts.push({ phase: 'demand-consensus', output: demandConsensus });
 
-  // Quality Gate: Demand Plan Review
-  await ctx.breakpoint('demand-plan-review', {
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      demandConsensus = await ctx.task(buildDemandConsensus, { ...{
+    statisticalForecast,
+    demandData,
+    processScope
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint('demand-plan-review', {
     title: 'Demand Plan Review',
     description: 'Review and approve consensus demand plan before supply planning',
-    artifacts: [demandConsensus, statisticalForecast]
-  });
-
+    artifacts: [demandConsensus, statisticalForecast],
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // Phase 4: Supply Capacity Analysis
   const capacityAnalysis = await ctx.task(analyzeCapacity, {
     demandConsensus,
@@ -109,7 +123,7 @@ export async function process(inputs, ctx) {
   artifacts.push({ phase: 'scenario-analysis', output: scenarioAnalysis });
 
   // Phase 9: Financial Integration
-  const financialIntegration = await ctx.task(integrateFinancials, {
+  let financialIntegration = await ctx.task(integrateFinancials, {
     demandConsensus,
     supplyPlan,
     financialTargets,
@@ -117,13 +131,28 @@ export async function process(inputs, ctx) {
   });
   artifacts.push({ phase: 'financial-integration', output: financialIntegration });
 
-  // Quality Gate: Pre-S&OP Review
-  await ctx.breakpoint('pre-sop-review', {
+    let lastFeedback_phase9Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase9Review) {
+      financialIntegration = await ctx.task(integrateFinancials, { ...{
+    demandConsensus,
+    supplyPlan,
+    financialTargets,
+    scenarioAnalysis
+  }, feedback: lastFeedback_phase9Review, attempt: attempt + 1 });
+    }
+  const phase9Review = await ctx.breakpoint('pre-sop-review', {
     title: 'Pre-S&OP Meeting Review',
     description: 'Review integrated plan before executive S&OP meeting',
-    artifacts: [gapAnalysis, scenarioAnalysis, financialIntegration]
-  });
-
+    artifacts: [gapAnalysis, scenarioAnalysis, financialIntegration],
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase9Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase9Review.approved) break;
+    lastFeedback_phase9Review = phase9Review.response || phase9Review.feedback || 'Changes requested';
+  }
   // Phase 10: Executive S&OP Package Preparation
   const executivePackage = await ctx.task(prepareExecutivePackage, {
     demandConsensus,
@@ -143,20 +172,34 @@ export async function process(inputs, ctx) {
   artifacts.push({ phase: 'decision-documentation', output: decisionDocumentation });
 
   // Phase 12: Plan Communication
-  const communicationPlan = await ctx.task(developCommunicationPlan, {
+  let communicationPlan = await ctx.task(developCommunicationPlan, {
     decisionDocumentation,
     processScope,
     organizationContext
   });
   artifacts.push({ phase: 'communication-plan', output: communicationPlan });
 
-  // Final Quality Gate: S&OP Cycle Approval
-  await ctx.breakpoint('sop-cycle-approval', {
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      communicationPlan = await ctx.task(developCommunicationPlan, { ...{
+    decisionDocumentation,
+    processScope,
+    organizationContext
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint('sop-cycle-approval', {
     title: 'S&OP Cycle Approval',
     description: 'Final approval of S&OP decisions and communication plan',
-    artifacts: [executivePackage, decisionDocumentation, communicationPlan]
-  });
-
+    artifacts: [executivePackage, decisionDocumentation, communicationPlan],
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     demandPlan: {

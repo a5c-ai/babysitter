@@ -31,7 +31,7 @@ export async function process(inputs, ctx) {
   } = inputs;
 
   // Phase 1: Define Notation Conventions
-  const conventionDefinition = await ctx.task(conventionDefinitionTask, {
+  let conventionDefinition = await ctx.task(conventionDefinitionTask, {
     documents,
     existingNotation,
     domain,
@@ -47,9 +47,17 @@ export async function process(inputs, ctx) {
       standardizedNotation: null
     };
   }
-
-  // Breakpoint: Review notation conventions
-  await ctx.breakpoint({
+  let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      conventionDefinition = await ctx.task(conventionDefinitionTask, { ...{
+    documents,
+    existingNotation,
+    domain,
+    enforceStandard
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Defined ${conventionDefinition.conventions.length} notation conventions for ${domain}. Review?`,
     title: 'Notation Convention Review',
     context: {
@@ -61,9 +69,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: conventionDefinition
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // Phase 2: Check Notation Consistency
   const consistencyCheck = await ctx.task(consistencyCheckTask, {
     documents,
@@ -85,15 +99,24 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 5: Document Notation Choices
-  const notationDocumentation = await ctx.task(notationDocumentationTask, {
+  let notationDocumentation = await ctx.task(notationDocumentationTask, {
     conventions: conventionDefinition.conventions,
     glossary: glossaryGeneration.glossary,
     standardizationSuggestions,
     domain
   });
 
-  // Final Breakpoint: Standardization Complete
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      notationDocumentation = await ctx.task(notationDocumentationTask, { ...{
+    conventions: conventionDefinition.conventions,
+    glossary: glossaryGeneration.glossary,
+    standardizationSuggestions,
+    domain
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Notation standardization complete. Found ${consistencyCheck.inconsistencies.length} inconsistencies. Review results?`,
     title: 'Notation Standardization Complete',
     context: {
@@ -104,9 +127,15 @@ export async function process(inputs, ctx) {
         { path: `artifacts/notation-glossary.json`, format: 'json', content: glossaryGeneration },
         { path: `artifacts/standardization-report.json`, format: 'json', content: { consistencyCheck, standardizationSuggestions } }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     documents: documents.map(d => d.name),
@@ -126,8 +155,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const conventionDefinitionTask = defineTask('convention-definition', (args, taskCtx) => ({
   kind: 'agent',

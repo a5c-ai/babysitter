@@ -30,7 +30,7 @@ export async function process(inputs, ctx) {
   } = inputs;
 
   // Phase 1: Extract Decision Variables
-  const variableExtraction = await ctx.task(variableExtractionTask, {
+  let variableExtraction = await ctx.task(variableExtractionTask, {
     problemDescription,
     decisionVariableHints
   });
@@ -44,9 +44,15 @@ export async function process(inputs, ctx) {
       formulation: null
     };
   }
-
-  // Breakpoint: Review decision variables
-  await ctx.breakpoint({
+  let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      variableExtraction = await ctx.task(variableExtractionTask, { ...{
+    problemDescription,
+    decisionVariableHints
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Identified ${variableExtraction.decisionVariables.length} decision variables. Are these correct?`,
     title: 'Decision Variables Review',
     context: {
@@ -58,9 +64,15 @@ export async function process(inputs, ctx) {
         format: 'json',
         content: variableExtraction
       }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // Phase 2: Formulate Objective Function
   const objectiveFormulation = await ctx.task(objectiveFormulationTask, {
     problemDescription,
@@ -84,7 +96,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase 5: Generate Model in Standard Form
-  const standardFormGeneration = await ctx.task(standardFormGenerationTask, {
+  let standardFormGeneration = await ctx.task(standardFormGenerationTask, {
     problemDescription,
     variableExtraction,
     objectiveFormulation,
@@ -92,8 +104,18 @@ export async function process(inputs, ctx) {
     problemClassification
   });
 
-  // Final Breakpoint: Formulation Complete
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      standardFormGeneration = await ctx.task(standardFormGenerationTask, { ...{
+    problemDescription,
+    variableExtraction,
+    objectiveFormulation,
+    constraintEncoding,
+    problemClassification
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Optimization problem formulated as ${problemClassification.problemClass}. Review formulation?`,
     title: 'Formulation Complete',
     context: {
@@ -106,9 +128,15 @@ export async function process(inputs, ctx) {
         { path: `artifacts/formulation.json`, format: 'json', content: standardFormGeneration },
         { path: `artifacts/formulation.mod`, format: 'text', content: standardFormGeneration.amplModel }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   return {
     success: true,
     problemDescription,
@@ -138,8 +166,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const variableExtractionTask = defineTask('variable-extraction', (args, taskCtx) => ({
   kind: 'agent',

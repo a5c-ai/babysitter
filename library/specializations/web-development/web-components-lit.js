@@ -24,11 +24,16 @@ export async function process(inputs, ctx) {
   const stylingSetup = await ctx.task(stylingSetupTask, { projectName, outputDir });
   artifacts.push(...stylingSetup.artifacts);
 
-  const publishingSetup = await ctx.task(publishingSetupTask, { projectName, outputDir });
-  artifacts.push(...publishingSetup.artifacts);
-
-  await ctx.breakpoint({ question: `Web Components complete for ${projectName}. Approve?`, title: 'Lit Review', context: { runId: ctx.runId, components: componentsCreation.components } });
-
+  let publishingSetup = await ctx.task(publishingSetupTask, { projectName, outputDir });
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      publishingSetup = await ctx.task(publishingSetupTask, { ...{ projectName, outputDir }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({ question: `Web Components complete for ${projectName}. Approve?`, title: 'Lit Review', context: { runId: ctx.runId, components: componentsCreation.components }, expert: 'owner', tags: ['approval-gate'], previousFeedback: lastFeedback || undefined, attempt: attempt > 0 ? attempt + 1 : undefined });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const documentation = await ctx.task(documentationTask, { projectName, outputDir });
   artifacts.push(...documentation.artifacts);
 

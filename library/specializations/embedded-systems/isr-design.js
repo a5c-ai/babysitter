@@ -107,7 +107,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...deferredDesign.artifacts);
   }
-
   // ============================================================================
   // PHASE 5: CRITICAL SECTION DESIGN
   // ============================================================================
@@ -145,7 +144,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 7: Generating ISR Documentation');
 
-  const documentation = await ctx.task(isrDocumentationTask, {
+  let documentation = await ctx.task(isrDocumentationTask, {
     projectName,
     priorityScheme,
     isrImplementation,
@@ -157,8 +156,20 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...documentation.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      documentation = await ctx.task(isrDocumentationTask, { ...{
+    projectName,
+    priorityScheme,
+    isrImplementation,
+    deferredDesign,
+    criticalSections,
+    latencyAnalysis,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `ISR Design Complete for ${projectName}. ${isrImplementation.isrCount} ISRs designed. Latency OK: ${latencyAnalysis.meetsRequirement}. Review?`,
     title: 'ISR Design Complete',
     context: {
@@ -172,9 +183,15 @@ export async function process(inputs, ctx) {
       files: [
         { path: documentation.docPath, format: 'markdown', label: 'ISR Documentation' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -208,8 +225,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

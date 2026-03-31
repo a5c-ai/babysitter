@@ -66,7 +66,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Discovering and inventorying infrastructure code');
 
-  const codeInventory = await ctx.task(codeInventoryTask, {
+  let codeInventory = await ctx.task(codeInventoryTask, {
     projectName,
     iacTool,
     iacPath,
@@ -143,9 +143,19 @@ export async function process(inputs, ctx) {
   const criticalMisconfigs = findings.filter(f => f.severity === 'critical');
 
   if (criticalMisconfigs.length > 0) {
-    ctx.log('error', `Found ${criticalMisconfigs.length} CRITICAL security misconfigurations`);
-
-    await ctx.breakpoint({
+      let lastFeedback_qualityGateApproval = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_qualityGateApproval) {
+        codeInventory = await ctx.task(codeInventoryTask, { ...{
+    projectName,
+    iacTool,
+    iacPath,
+    cloudProvider,
+    excludePaths,
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval, attempt: attempt + 1 });
+      }
+  const qualityGateApproval = await ctx.breakpoint({
       question: `Phase 2 Quality Gate: Found ${criticalMisconfigs.length} CRITICAL security misconfigurations. These MUST be fixed immediately. Review findings?`,
       title: 'Critical Misconfigurations Gate',
       context: {
@@ -157,9 +167,15 @@ export async function process(inputs, ctx) {
           format: 'json',
           content: JSON.stringify(criticalMisconfigs, null, 2)
         }]
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_qualityGateApproval || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (qualityGateApproval.approved) break;
+      lastFeedback_qualityGateApproval = qualityGateApproval.response || qualityGateApproval.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 3: SECRETS AND SENSITIVE DATA DETECTION
@@ -201,9 +217,19 @@ export async function process(inputs, ctx) {
   const exposedSecrets = findings.filter(f => f.type === 'exposed-secret');
 
   if (exposedSecrets.length > 0) {
-    ctx.log('error', `Found ${exposedSecrets.length} EXPOSED SECRETS in IaC code`);
-
-    await ctx.breakpoint({
+      let lastFeedback_qualityGateApproval2 = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_qualityGateApproval2) {
+        codeInventory = await ctx.task(codeInventoryTask, { ...{
+    projectName,
+    iacTool,
+    iacPath,
+    cloudProvider,
+    excludePaths,
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval2, attempt: attempt + 1 });
+      }
+  const qualityGateApproval2 = await ctx.breakpoint({
       question: `Phase 3 Quality Gate: Found ${exposedSecrets.length} EXPOSED SECRETS. These are critical security risks. Immediate action required!`,
       title: 'Exposed Secrets Gate',
       context: {
@@ -218,9 +244,15 @@ export async function process(inputs, ctx) {
             value: '[REDACTED]' // Redact actual secret values
           })), null, 2)
         }]
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_qualityGateApproval2 || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (qualityGateApproval2.approved) break;
+      lastFeedback_qualityGateApproval2 = qualityGateApproval2.response || qualityGateApproval2.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 4: POLICY AS CODE VALIDATION
@@ -228,7 +260,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Phase 4: Validating policies using ${policyFramework.toUpperCase()}`);
 
-  const policyValidation = await ctx.task(policyValidationTask, {
+  let policyValidation = await ctx.task(policyValidationTask, {
     projectName,
     iacTool,
     iacPath,
@@ -259,9 +291,22 @@ export async function process(inputs, ctx) {
   const criticalPolicyViolations = policyViolations.filter(v => v.severity === 'critical' || v.severity === 'high');
 
   if (criticalPolicyViolations.length > 0) {
-    ctx.log('warn', `Found ${criticalPolicyViolations.length} critical/high policy violations`);
-
-    await ctx.breakpoint({
+      let lastFeedback_qualityGateApproval3 = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_qualityGateApproval3) {
+        policyValidation = await ctx.task(policyValidationTask, { ...{
+    projectName,
+    iacTool,
+    iacPath,
+    cloudProvider,
+    policyFramework,
+    customPolicies,
+    codeInventory,
+    complianceStandards,
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval3, attempt: attempt + 1 });
+      }
+  const qualityGateApproval3 = await ctx.breakpoint({
       question: `Phase 4 Quality Gate: Found ${criticalPolicyViolations.length} critical/high policy violations. Review and address?`,
       title: 'Policy Violations Gate',
       context: {
@@ -274,9 +319,15 @@ export async function process(inputs, ctx) {
           format: 'json',
           content: JSON.stringify(criticalPolicyViolations, null, 2)
         }]
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_qualityGateApproval3 || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (qualityGateApproval3.approved) break;
+      lastFeedback_qualityGateApproval3 = qualityGateApproval3.response || qualityGateApproval3.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 5: COMPLIANCE STANDARDS ASSESSMENT
@@ -284,7 +335,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 5: Assessing compliance with security standards');
 
-  const complianceAssessment = await ctx.task(complianceAssessmentTask, {
+  let complianceAssessment = await ctx.task(complianceAssessmentTask, {
     projectName,
     iacPath,
     cloudProvider,
@@ -316,9 +367,21 @@ export async function process(inputs, ctx) {
   );
 
   if (failedCompliance.length > 0) {
-    ctx.log('warn', `Non-compliant with ${failedCompliance.length} standards`);
-
-    await ctx.breakpoint({
+      let lastFeedback_qualityGateApproval4 = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_qualityGateApproval4) {
+        complianceAssessment = await ctx.task(complianceAssessmentTask, { ...{
+    projectName,
+    iacPath,
+    cloudProvider,
+    complianceStandards,
+    findings,
+    policyViolations,
+    codeInventory,
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval4, attempt: attempt + 1 });
+      }
+  const qualityGateApproval4 = await ctx.breakpoint({
       question: `Phase 5 Quality Gate: Non-compliant with ${failedCompliance.length} standards. Review compliance gaps?`,
       title: 'Compliance Assessment Gate',
       context: {
@@ -330,9 +393,15 @@ export async function process(inputs, ctx) {
           format: 'json',
           content: JSON.stringify(complianceStatus, null, 2)
         }]
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_qualityGateApproval4 || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (qualityGateApproval4.approved) break;
+      lastFeedback_qualityGateApproval4 = qualityGateApproval4.response || qualityGateApproval4.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 6: ENCRYPTION AND DATA PROTECTION REVIEW
@@ -379,9 +448,21 @@ export async function process(inputs, ctx) {
   );
 
   if (unencryptedResources.length > 0) {
-    ctx.log('warn', `Found ${unencryptedResources.length} unencrypted sensitive resources`);
-
-    await ctx.breakpoint({
+      let lastFeedback_qualityGateApproval5 = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_qualityGateApproval5) {
+        complianceAssessment = await ctx.task(complianceAssessmentTask, { ...{
+    projectName,
+    iacPath,
+    cloudProvider,
+    complianceStandards,
+    findings,
+    policyViolations,
+    codeInventory,
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval5, attempt: attempt + 1 });
+      }
+  const qualityGateApproval5 = await ctx.breakpoint({
       question: `Phase 6 Quality Gate: Found ${unencryptedResources.length} unencrypted sensitive resources. These may violate compliance requirements. Review?`,
       title: 'Encryption Review Gate',
       context: {
@@ -394,9 +475,15 @@ export async function process(inputs, ctx) {
           format: 'json',
           content: JSON.stringify(unencryptedResources, null, 2)
         }]
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_qualityGateApproval5 || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (qualityGateApproval5.approved) break;
+      lastFeedback_qualityGateApproval5 = qualityGateApproval5.response || qualityGateApproval5.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 7: CONTAINER AND RUNTIME SECURITY VALIDATION
@@ -433,7 +520,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 8: Generating automated remediation recommendations');
 
-  const remediationPlan = await ctx.task(remediationPlanTask, {
+  let remediationPlan = await ctx.task(remediationPlanTask, {
     projectName,
     iacTool,
     iacPath,
@@ -461,9 +548,22 @@ export async function process(inputs, ctx) {
 
   // If auto-remediation is enabled, apply fixes
   if (autoRemediation && remediationPlan.autoFixableCount > 0) {
-    ctx.log('info', `Auto-remediation enabled. Applying ${remediationPlan.autoFixableCount} automated fixes`);
-
-    await ctx.breakpoint({
+      let lastFeedback_reviewApproval = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_reviewApproval) {
+        remediationPlan = await ctx.task(remediationPlanTask, { ...{
+    projectName,
+    iacTool,
+    iacPath,
+    findings,
+    policyViolations,
+    complianceStatus,
+    autoRemediation,
+    severityThreshold,
+    outputDir
+  }, feedback: lastFeedback_reviewApproval, attempt: attempt + 1 });
+      }
+  const reviewApproval = await ctx.breakpoint({
       question: `Auto-remediation is enabled. Apply ${remediationPlan.autoFixableCount} automated fixes? This will modify IaC files.`,
       title: 'Auto-Remediation Confirmation',
       context: {
@@ -475,10 +575,16 @@ export async function process(inputs, ctx) {
           format: 'json',
           content: JSON.stringify(remediationPlan.autoFixableIssues, null, 2)
         }]
-      }
-    });
-
-    const autoRemediation = await ctx.task(autoRemediationTask, {
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_reviewApproval || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (reviewApproval.approved) break;
+      lastFeedback_reviewApproval = reviewApproval.response || reviewApproval.feedback || 'Changes requested';
+    }
+  const autoRemediation = await ctx.task(autoRemediationTask, {
       projectName,
       iacPath,
       remediationPlan: remediationPlan.autoFixableIssues,
@@ -489,14 +595,13 @@ export async function process(inputs, ctx) {
 
     ctx.log('info', `Applied ${autoRemediation.fixesApplied} automated fixes`);
   }
-
   // ============================================================================
   // PHASE 9: COMPREHENSIVE SECURITY REPORT GENERATION
   // ============================================================================
 
   ctx.log('info', 'Phase 9: Generating comprehensive security report');
 
-  const securityReport = await ctx.task(securityReportGenerationTask, {
+  let securityReport = await ctx.task(securityReportGenerationTask, {
     projectName,
     iacTool,
     cloudProvider,
@@ -544,9 +649,25 @@ export async function process(inputs, ctx) {
                            scanDepth === 'standard' ? 75 : 65;
 
   if (securityScore < securityThreshold || summaryStats.criticalFindings > 0) {
-    ctx.log('warn', `Security score (${securityScore}) below threshold (${securityThreshold}) or critical findings present`);
-
-    await ctx.breakpoint({
+      let lastFeedback_qualityGateApproval6 = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_qualityGateApproval6) {
+        securityReport = await ctx.task(securityReportGenerationTask, { ...{
+    projectName,
+    iacTool,
+    cloudProvider,
+    complianceStandards,
+    policyFramework,
+    codeInventory,
+    findings,
+    policyViolations,
+    complianceStatus,
+    remediationPlan,
+    scanDepth,
+    outputDir
+  }, feedback: lastFeedback_qualityGateApproval6, attempt: attempt + 1 });
+      }
+  const qualityGateApproval6 = await ctx.breakpoint({
       question: `Final Security Gate: Security score is ${securityScore}/100 (threshold: ${securityThreshold}), with ${summaryStats.criticalFindings} critical findings. Review complete report?`,
       title: 'Final Security Assessment Gate',
       context: {
@@ -564,9 +685,15 @@ export async function process(inputs, ctx) {
           format: 'markdown',
           content: securityReport.executiveSummary
         }]
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_qualityGateApproval6 || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (qualityGateApproval6.approved) break;
+      lastFeedback_qualityGateApproval6 = qualityGateApproval6.response || qualityGateApproval6.feedback || 'Changes requested';
+    } }
 
   const endTime = ctx.now();
   const duration = endTime - startTime;
@@ -606,8 +733,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

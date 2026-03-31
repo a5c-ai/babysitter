@@ -150,7 +150,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...actionsSetup.artifacts);
   }
-
   // ============================================================================
   // PHASE 9: RICH NOTIFICATIONS
   // ============================================================================
@@ -166,7 +165,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...richNotificationSetup.artifacts);
   }
-
   // ============================================================================
   // PHASE 10: NOTIFICATION GROUPING
   // ============================================================================
@@ -174,16 +172,22 @@ export async function process(inputs, ctx) {
   if (grouping) {
     ctx.log('info', 'Phase 10: Implementing notification grouping');
 
-    const groupingSetup = await ctx.task(groupingSetupTask, {
+    let groupingSetup = await ctx.task(groupingSetupTask, {
       appName,
       outputDir
     });
 
     artifacts.push(...groupingSetup.artifacts);
   }
-
-  // Quality Gate: Configuration Review
-  await ctx.breakpoint({
+  let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      groupingSetup = await ctx.task(groupingSetupTask, { ...{
+      appName,
+      outputDir
+    }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Push notification setup configured for ${appName}. Types: ${notificationTypes.join(', ')}, Rich: ${richNotifications}. Review configuration?`,
     title: 'Push Notification Configuration Review',
     context: {
@@ -193,9 +197,15 @@ export async function process(inputs, ctx) {
       richNotifications,
       actionCategories,
       files: artifacts.slice(-5).map(a => ({ path: a.path, format: 'swift' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 11: SILENT NOTIFICATIONS
   // ============================================================================
@@ -210,7 +220,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...silentNotifications.artifacts);
   }
-
   // ============================================================================
   // PHASE 12: LOCAL NOTIFICATIONS
   // ============================================================================
@@ -298,8 +307,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

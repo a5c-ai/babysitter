@@ -53,15 +53,22 @@ export async function process(inputs, ctx) {
 
   ctx.log('phase:analyze', `Analyzing project at ${projectDir} for harness type: ${harnessType}`);
 
-  const analysis = await ctx.task(analyzeProjectTask, {
+  let analysis = await ctx.task(analyzeProjectTask, {
     projectDir,
     harnessType
   });
 
   ctx.log('phase:analyze:complete', `Detected capabilities: ${JSON.stringify(analysis.capabilities)}`);
 
-  // Breakpoint: let the user review the analysis before proceeding
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      analysis = await ctx.task(analyzeProjectTask, { ...{
+    projectDir,
+    harnessType
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Analysis complete for "${harnessType}" harness. Detected capabilities: ${Object.entries(analysis.capabilities).filter(([_, v]) => v).map(([k]) => k).join(', ')}. Proceed with scaffolding?`,
     title: 'Harness Analysis Review',
     context: {
@@ -69,9 +76,15 @@ export async function process(inputs, ctx) {
       files: [
         { path: `artifacts/analysis-report.md`, format: 'markdown', label: 'Analysis Report' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ==========================================================================
   // PHASE 2: SCAFFOLD
   // ==========================================================================
@@ -273,8 +286,7 @@ export async function process(inputs, ctx) {
         integrationFiles.push(f);
       }
     }
-
-    // Re-run smoke tests
+  // Re-run smoke tests
     const retestResults = await ctx.task(smokeTestTask, {
       projectDir,
       harnessType,
@@ -310,7 +322,6 @@ export async function process(inputs, ctx) {
 
     ctx.log('phase:converge:score', `Iteration ${iterations}: quality now ${finalQuality}/${targetQuality}`);
   }
-
   // ==========================================================================
   // RESULT
   // ==========================================================================
@@ -334,8 +345,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

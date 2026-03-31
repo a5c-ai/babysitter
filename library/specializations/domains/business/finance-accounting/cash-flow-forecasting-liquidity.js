@@ -47,19 +47,33 @@ export async function process(inputs, ctx) {
   results.steps.push({ name: 'disbursements-forecast', result: disbursementsResult });
 
   // Step 4: Consolidated Cash Forecast
-  const forecastResult = await ctx.task(consolidateCashForecastTask, {
+  let forecastResult = await ctx.task(consolidateCashForecastTask, {
     currentPosition: positionResult,
     receipts: receiptsResult,
     disbursements: disbursementsResult
   });
   results.steps.push({ name: 'consolidated-forecast', result: forecastResult });
 
-  // Breakpoint for forecast review
-  await ctx.breakpoint('forecast-review', {
+    let lastFeedback_reviewApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_reviewApproval) {
+      forecastResult = await ctx.task(consolidateCashForecastTask, { ...{
+    currentPosition: positionResult,
+    receipts: receiptsResult,
+    disbursements: disbursementsResult
+  }, feedback: lastFeedback_reviewApproval, attempt: attempt + 1 });
+    }
+  const reviewApproval = await ctx.breakpoint('forecast-review', {
     message: 'Review cash forecast before working capital analysis',
-    data: forecastResult
-  });
-
+    data: forecastResult,
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_reviewApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (reviewApproval.approved) break;
+    lastFeedback_reviewApproval = reviewApproval.response || reviewApproval.feedback || 'Changes requested';
+  }
   // Step 5: Working Capital Optimization
   const workingCapitalResult = await ctx.task(optimizeWorkingCapitalTask, {
     cashForecast: forecastResult,
@@ -68,18 +82,31 @@ export async function process(inputs, ctx) {
   results.steps.push({ name: 'working-capital-optimization', result: workingCapitalResult });
 
   // Step 6: Liquidity Stress Testing
-  const stressTestResult = await ctx.task(performLiquidityStressTestTask, {
+  let stressTestResult = await ctx.task(performLiquidityStressTestTask, {
     cashForecast: forecastResult,
     debtFacilities: inputs.debtFacilities
   });
   results.steps.push({ name: 'stress-testing', result: stressTestResult });
 
-  // Breakpoint for stress test review
-  await ctx.breakpoint('stress-test-review', {
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      stressTestResult = await ctx.task(performLiquidityStressTestTask, { ...{
+    cashForecast: forecastResult,
+    debtFacilities: inputs.debtFacilities
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint('stress-test-review', {
     message: 'Review liquidity stress test results and mitigation strategies',
-    data: stressTestResult
-  });
-
+    data: stressTestResult,
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Step 7: Cash Management Recommendations
   const recommendationsResult = await ctx.task(developCashRecommendationsTask, {
     forecast: forecastResult,
@@ -97,8 +124,7 @@ export async function process(inputs, ctx) {
 
   return results;
 }
-
-// Task definitions
+  // Task definitions
 export const analyzeCashPositionTask = defineTask('analyze-cash-position', (args, taskCtx) => ({
   kind: 'agent',
   skill: { name: 'treasury-management' },

@@ -84,7 +84,7 @@ export async function process(inputs, ctx) {
 
   // Task 6: Recommendation Formulation
   ctx.log('info', 'Formulating ethical recommendations');
-  const recommendations = await ctx.task(recommendationFormulationTask, {
+  let recommendations = await ctx.task(recommendationFormulationTask, {
     deliberationOutcome: committeeDeliberation.outcome,
     principleAnalysis: principleAnalysis.analysis,
     caseFacts: casePresentation.facts,
@@ -93,8 +93,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...recommendations.artifacts);
 
-  // Breakpoint: Review deliberation results
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      recommendations = await ctx.task(recommendationFormulationTask, { ...{
+    deliberationOutcome: committeeDeliberation.outcome,
+    principleAnalysis: principleAnalysis.analysis,
+    caseFacts: casePresentation.facts,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Bioethics deliberation complete. ${committeeDeliberation.outcome.consensus ? 'Committee reached consensus.' : 'Committee has dissenting views.'} Review the deliberation?`,
     title: 'Bioethics Deliberation Results',
     context: {
@@ -106,9 +115,15 @@ export async function process(inputs, ctx) {
         primaryRecommendation: recommendations.primary,
         stakeholderCount: stakeholderValues.stakeholders.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 7: Generate Deliberation Report
   ctx.log('info', 'Generating bioethics deliberation report');
   const deliberationReport = await ctx.task(deliberationReportTask, {
@@ -154,8 +169,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task 1: Case Presentation
+  // Task 1: Case Presentation
 export const casePresentationTask = defineTask('case-presentation', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Present case and gather facts',

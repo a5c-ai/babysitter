@@ -77,7 +77,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 3: Designing Key Management');
 
-  const keyMgmt = await ctx.task(keyManagementDesignTask, {
+  let keyMgmt = await ctx.task(keyManagementDesignTask, {
     projectName,
     targetMcu,
     cryptoAlgorithm,
@@ -86,18 +86,34 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...keyMgmt.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      keyMgmt = await ctx.task(keyManagementDesignTask, { ...{
+    projectName,
+    targetMcu,
+    cryptoAlgorithm,
+    keyManagement,
+    rootOfTrust,
+    outputDir
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Key management design complete. Key storage: ${keyMgmt.storageMethod}. Key hierarchy levels: ${keyMgmt.hierarchyLevels}. Review before proceeding?`,
     title: 'Key Management Review',
     context: {
       runId: ctx.runId,
       keyHierarchy: keyMgmt.hierarchy,
       files: keyMgmt.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 4: BOOT CHAIN DESIGN
   // ============================================================================
@@ -146,7 +162,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...rollbackProtection.artifacts);
   }
-
   // ============================================================================
   // PHASE 7: DEBUG PROTECTION
   // ============================================================================
@@ -164,7 +179,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...debugProt.artifacts);
   }
-
   // ============================================================================
   // PHASE 8: VERIFICATION AND TESTING
   // ============================================================================
@@ -188,7 +202,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 9: Generating Secure Boot Documentation');
 
-  const documentation = await ctx.task(secureBootDocumentationTask, {
+  let documentation = await ctx.task(secureBootDocumentationTask, {
     projectName,
     rootOfTrust,
     keyMgmt,
@@ -202,8 +216,22 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...documentation.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      documentation = await ctx.task(secureBootDocumentationTask, { ...{
+    projectName,
+    rootOfTrust,
+    keyMgmt,
+    bootChain,
+    signatureVerification,
+    rollbackProtection,
+    debugProt,
+    verification,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Secure Boot Implementation Complete for ${projectName}. Verification passed: ${verification.allTestsPassed}. Review?`,
     title: 'Secure Boot Complete',
     context: {
@@ -218,9 +246,15 @@ export async function process(inputs, ctx) {
       files: [
         { path: documentation.docPath, format: 'markdown', label: 'Secure Boot Documentation' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -253,8 +287,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

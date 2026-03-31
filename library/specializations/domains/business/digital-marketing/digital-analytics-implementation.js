@@ -96,7 +96,7 @@ export async function process(inputs, ctx) {
 
   // Task 9: Validate Data Collection
   ctx.log('info', 'Phase 9: Validating data collection accuracy');
-  const dataValidation = await ctx.task(dataValidationTask, {
+  let dataValidation = await ctx.task(dataValidationTask, {
     analyticsConfig,
     tagManagement,
     conversionTracking,
@@ -104,8 +104,17 @@ export async function process(inputs, ctx) {
   });
   artifacts.push(...dataValidation.artifacts);
 
-  // Breakpoint: Review implementation
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      dataValidation = await ctx.task(dataValidationTask, { ...{
+    analyticsConfig,
+    tagManagement,
+    conversionTracking,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Analytics implementation complete. ${dataValidation.passedTests}/${dataValidation.totalTests} validation tests passed. Approve implementation?`,
     title: 'Analytics Implementation Review',
     context: {
@@ -117,9 +126,15 @@ export async function process(inputs, ctx) {
         validationPassed: dataValidation.passedTests,
         totalValidationTests: dataValidation.totalTests
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Task 10: Document Tracking Implementation
   ctx.log('info', 'Phase 10: Documenting tracking implementation');
   const documentation = await ctx.task(trackingDocumentationTask, {
@@ -161,8 +176,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task definitions
+  // Task definitions
 export const measurementRequirementsTask = defineTask('measurement-requirements', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Define measurement requirements',

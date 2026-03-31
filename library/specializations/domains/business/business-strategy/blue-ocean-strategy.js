@@ -62,13 +62,12 @@ export async function process(inputs, ctx) {
     });
     artifacts.push(...nonCustomerAnalysis.artifacts);
   }
-
   // ============================================================================
   // PHASE 4: SIX PATHS FRAMEWORK ANALYSIS
   // ============================================================================
 
   ctx.log('info', 'Phase 4: Applying Six Paths Framework');
-  const sixPaths = await ctx.task(sixPathsFrameworkTask, {
+  let sixPaths = await ctx.task(sixPathsFrameworkTask, {
     industry,
     competingFactors: competingFactors.factors,
     nonCustomers: nonCustomerAnalysis ? nonCustomerAnalysis.tiers : null,
@@ -77,8 +76,17 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...sixPaths.artifacts);
 
-  // Breakpoint: Review strategic analysis
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      sixPaths = await ctx.task(sixPathsFrameworkTask, { ...{
+    industry,
+    competingFactors: competingFactors.factors,
+    nonCustomers: nonCustomerAnalysis ? nonCustomerAnalysis.tiers : null,
+    outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Strategic analysis complete. ${competingFactors.factors.length} competing factors identified, ${sixPaths.opportunities.length} blue ocean opportunities found. Review before strategy formulation?`,
     title: 'Blue Ocean Analysis Review',
     context: {
@@ -92,9 +100,15 @@ export async function process(inputs, ctx) {
         nonCustomerTiers: nonCustomerAnalysis ? 3 : 0,
         sixPathsOpportunities: sixPaths.opportunities.length
       }
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 5: FOUR ACTIONS FRAMEWORK
   // ============================================================================
@@ -222,8 +236,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

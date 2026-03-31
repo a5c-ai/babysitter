@@ -52,7 +52,7 @@ export async function process(inputs, ctx) {
 
   // PHASE 4: NETWORK OPTIMIZATION MODEL
   ctx.log('info', 'Phase 4: Running network optimization model');
-  const optimizationModel = await ctx.task(networkOptimizationTask, {
+  let optimizationModel = await ctx.task(networkOptimizationTask, {
     demandAnalysis,
     facilityAnalysis,
     costData,
@@ -61,17 +61,33 @@ export async function process(inputs, ctx) {
   });
   artifacts.push(...optimizationModel.artifacts);
 
-  // Quality Gate: Review optimization results
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      optimizationModel = await ctx.task(networkOptimizationTask, { ...{
+    demandAnalysis,
+    facilityAnalysis,
+    costData,
+    constraints,
+    outputDir
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: `Network optimization complete. Recommended facilities: ${optimizationModel.recommendedFacilities.length}. Estimated cost savings: ${optimizationModel.costSavings}%. Review design?`,
     title: 'Network Optimization Review',
     context: {
       runId: ctx.runId,
       summary: { recommendedFacilities: optimizationModel.recommendedFacilities.length, costSavings: optimizationModel.costSavings },
       files: optimizationModel.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
   // PHASE 5: INVENTORY POSITIONING
   ctx.log('info', 'Phase 5: Optimizing inventory positioning');
   const inventoryPositioning = await ctx.task(inventoryPositioningTask, { networkDesign: optimizationModel.design, products, outputDir });
@@ -94,11 +110,15 @@ export async function process(inputs, ctx) {
 
   // PHASE 9: GENERATE EXECUTIVE REPORT
   ctx.log('info', 'Phase 9: Generating executive report');
-  const executiveReport = await ctx.task(networkExecutiveReportTask, { optimizationModel, costBenefitAnalysis, serviceLevelAnalysis, implementationRoadmap, outputDir });
+  let executiveReport = await ctx.task(networkExecutiveReportTask, { optimizationModel, costBenefitAnalysis, serviceLevelAnalysis, implementationRoadmap, outputDir });
   artifacts.push(...executiveReport.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      executiveReport = await ctx.task(networkExecutiveReportTask, { ...{ optimizationModel, costBenefitAnalysis, serviceLevelAnalysis, implementationRoadmap, outputDir }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Network optimization complete. Total cost savings: $${costBenefitAnalysis.annualSavings}. Service level improvement: ${serviceLevelAnalysis.improvement}%. Approve implementation plan?`,
     title: 'Network Optimization Complete',
     context: {
@@ -110,9 +130,15 @@ export async function process(inputs, ctx) {
         serviceLevelImprovement: `${serviceLevelAnalysis.improvement}%`
       },
       files: [{ path: executiveReport.reportPath, format: 'markdown', label: 'Executive Report' }]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   return {
     success: true,
@@ -126,8 +152,7 @@ export async function process(inputs, ctx) {
     metadata: { processId: 'specializations/domains/business/logistics/distribution-network-optimization', timestamp: startTime, outputDir }
   };
 }
-
-// TASK DEFINITIONS
+  // TASK DEFINITIONS
 export const networkDemandAnalysisTask = defineTask('network-demand-analysis', (args, taskCtx) => ({
   kind: 'agent', title: 'Analyze and map demand', agent: { name: 'network-demand-analyst', prompt: { role: 'Network Demand Analyst', task: 'Analyze and map demand for network design', context: args, instructions: ['Aggregate demand by region', 'Identify demand patterns', 'Project future demand', 'Map geographic distribution', 'Calculate demand density', 'Generate demand heat map'] }, outputSchema: { type: 'object', required: ['demandMap', 'artifacts'], properties: { demandMap: { type: 'object' }, demandProjections: { type: 'array' }, artifacts: { type: 'array' } } } }, io: { inputJsonPath: `tasks/${taskCtx.effectId}/input.json`, outputJsonPath: `tasks/${taskCtx.effectId}/result.json` }, labels: ['agent', 'logistics', 'network-optimization', 'demand']
 }));

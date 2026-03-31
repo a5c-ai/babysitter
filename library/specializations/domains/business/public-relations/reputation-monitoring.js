@@ -19,33 +19,55 @@ export async function process(inputs, ctx) {
     targetQuality = 85
   } = inputs;
 
-  // Phase 1: Monitoring Requirements Analysis
-  await ctx.breakpoint({
+  let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    // No preceding task identified for re-run with feedback
+    const phase1Review = await ctx.breakpoint({
     question: 'Starting reputation monitoring setup. Analyze monitoring requirements?',
     title: 'Phase 1: Requirements Analysis',
     context: {
       runId: ctx.runId,
       phase: 'requirements-analysis',
       organization: organization.name
-    }
-  });
-
-  const requirementsAnalysis = await ctx.task(analyzeMonitoringRequirementsTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
+  let requirementsAnalysis = await ctx.task(analyzeMonitoringRequirementsTask, {
     organization,
     monitoringScope,
     competitors
   });
 
-  // Phase 2: Monitoring Framework Design
-  await ctx.breakpoint({
+    let lastFeedback_phase2Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase2Review) {
+      requirementsAnalysis = await ctx.task(analyzeMonitoringRequirementsTask, { ...{
+    organization,
+    monitoringScope,
+    competitors
+  }, feedback: lastFeedback_phase2Review, attempt: attempt + 1 });
+    }
+  const phase2Review = await ctx.breakpoint({
     question: 'Requirements analyzed. Design monitoring framework?',
     title: 'Phase 2: Framework Design',
     context: {
       runId: ctx.runId,
       phase: 'framework-design'
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase2Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase2Review.approved) break;
+    lastFeedback_phase2Review = phase2Review.response || phase2Review.feedback || 'Changes requested';
+  }
   const [mediaMonitoring, socialMonitoring] = await Promise.all([
     ctx.task(designMediaMonitoringTask, {
       requirementsAnalysis,
@@ -57,64 +79,120 @@ export async function process(inputs, ctx) {
     })
   ]);
 
-  // Phase 3: Sentiment Analysis Setup
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      requirementsAnalysis = await ctx.task(analyzeMonitoringRequirementsTask, { ...{
+    organization,
+    monitoringScope,
+    competitors
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: 'Monitoring designed. Configure sentiment analysis?',
     title: 'Phase 3: Sentiment Analysis',
     context: {
       runId: ctx.runId,
       phase: 'sentiment-analysis'
-    }
-  });
-
-  const sentimentFramework = await ctx.task(configureSentimentAnalysisTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
+  let sentimentFramework = await ctx.task(configureSentimentAnalysisTask, {
     mediaMonitoring,
     socialMonitoring,
     organization
   });
 
-  // Phase 4: Metrics and KPI Definition
-  await ctx.breakpoint({
+    let lastFeedback_phase4Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase4Review) {
+      sentimentFramework = await ctx.task(configureSentimentAnalysisTask, { ...{
+    mediaMonitoring,
+    socialMonitoring,
+    organization
+  }, feedback: lastFeedback_phase4Review, attempt: attempt + 1 });
+    }
+  const phase4Review = await ctx.breakpoint({
     question: 'Sentiment configured. Define reputation metrics and KPIs?',
     title: 'Phase 4: Metrics Definition',
     context: {
       runId: ctx.runId,
       phase: 'metrics-definition'
-    }
-  });
-
-  const metricsFramework = await ctx.task(defineReputationMetricsTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase4Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase4Review.approved) break;
+    lastFeedback_phase4Review = phase4Review.response || phase4Review.feedback || 'Changes requested';
+  }
+  let metricsFramework = await ctx.task(defineReputationMetricsTask, {
     baselineMetrics,
     requirementsAnalysis,
     sentimentFramework
   });
 
-  // Phase 5: Alert System Configuration
-  await ctx.breakpoint({
+    let lastFeedback_phase5Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase5Review) {
+      metricsFramework = await ctx.task(defineReputationMetricsTask, { ...{
+    baselineMetrics,
+    requirementsAnalysis,
+    sentimentFramework
+  }, feedback: lastFeedback_phase5Review, attempt: attempt + 1 });
+    }
+  const phase5Review = await ctx.breakpoint({
     question: 'Metrics defined. Configure alert and escalation system?',
     title: 'Phase 5: Alert System',
     context: {
       runId: ctx.runId,
       phase: 'alert-system'
-    }
-  });
-
-  const alertSystem = await ctx.task(configureAlertSystemTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase5Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase5Review.approved) break;
+    lastFeedback_phase5Review = phase5Review.response || phase5Review.feedback || 'Changes requested';
+  }
+  let alertSystem = await ctx.task(configureAlertSystemTask, {
     alertThresholds,
     metricsFramework,
     organization
   });
 
-  // Phase 6: Dashboard and Reporting
-  await ctx.breakpoint({
+    let lastFeedback_phase6Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase6Review) {
+      alertSystem = await ctx.task(configureAlertSystemTask, { ...{
+    alertThresholds,
+    metricsFramework,
+    organization
+  }, feedback: lastFeedback_phase6Review, attempt: attempt + 1 });
+    }
+  const phase6Review = await ctx.breakpoint({
     question: 'Alerts configured. Design dashboards and reporting?',
     title: 'Phase 6: Dashboards',
     context: {
       runId: ctx.runId,
       phase: 'dashboards'
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase6Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase6Review.approved) break;
+    lastFeedback_phase6Review = phase6Review.response || phase6Review.feedback || 'Changes requested';
+  }
   const [dashboards, reportingCadence] = await Promise.all([
     ctx.task(designDashboardsTask, {
       metricsFramework,
@@ -127,50 +205,92 @@ export async function process(inputs, ctx) {
     })
   ]);
 
-  // Phase 7: Reputation Audit Framework
-  await ctx.breakpoint({
+    let lastFeedback_phase7Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase7Review) {
+      alertSystem = await ctx.task(configureAlertSystemTask, { ...{
+    alertThresholds,
+    metricsFramework,
+    organization
+  }, feedback: lastFeedback_phase7Review, attempt: attempt + 1 });
+    }
+  const phase7Review = await ctx.breakpoint({
     question: 'Dashboards designed. Define periodic audit framework?',
     title: 'Phase 7: Audit Framework',
     context: {
       runId: ctx.runId,
       phase: 'audit-framework'
-    }
-  });
-
-  const auditFramework = await ctx.task(defineAuditFrameworkTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase7Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase7Review.approved) break;
+    lastFeedback_phase7Review = phase7Review.response || phase7Review.feedback || 'Changes requested';
+  }
+  let auditFramework = await ctx.task(defineAuditFrameworkTask, {
     metricsFramework,
     organization,
     baselineMetrics
   });
 
-  // Phase 8: Competitive Benchmarking
-  await ctx.breakpoint({
+    let lastFeedback_phase8Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase8Review) {
+      auditFramework = await ctx.task(defineAuditFrameworkTask, { ...{
+    metricsFramework,
+    organization,
+    baselineMetrics
+  }, feedback: lastFeedback_phase8Review, attempt: attempt + 1 });
+    }
+  const phase8Review = await ctx.breakpoint({
     question: 'Audit framework defined. Configure competitive benchmarking?',
     title: 'Phase 8: Competitive Benchmarking',
     context: {
       runId: ctx.runId,
       phase: 'competitive-benchmarking',
       competitorCount: competitors.length
-    }
-  });
-
-  const competitiveBenchmarking = await ctx.task(configureCompetitiveBenchmarkingTask, {
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase8Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase8Review.approved) break;
+    lastFeedback_phase8Review = phase8Review.response || phase8Review.feedback || 'Changes requested';
+  }
+  let competitiveBenchmarking = await ctx.task(configureCompetitiveBenchmarkingTask, {
     competitors,
     metricsFramework,
     organization
   });
 
-  // Phase 9: Quality Validation
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      competitiveBenchmarking = await ctx.task(configureCompetitiveBenchmarkingTask, { ...{
+    competitors,
+    metricsFramework,
+    organization
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: 'Validate reputation monitoring framework quality?',
     title: 'Phase 9: Quality Validation',
     context: {
       runId: ctx.runId,
       phase: 'quality-validation',
       targetQuality
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const qualityResult = await ctx.task(validateMonitoringQualityTask, {
     mediaMonitoring,
     socialMonitoring,
@@ -222,8 +342,7 @@ export async function process(inputs, ctx) {
     };
   }
 }
-
-// Task Definitions
+  // Task Definitions
 
 export const analyzeMonitoringRequirementsTask = defineTask('analyze-monitoring-requirements', (args, taskCtx) => ({
   kind: 'agent',

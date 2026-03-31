@@ -59,7 +59,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Analyzing protocol specification');
 
-  const specAnalysis = await ctx.task(specAnalysisTask, {
+  let specAnalysis = await ctx.task(specAnalysisTask, {
     projectName,
     language,
     protocolSpec,
@@ -67,9 +67,18 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...specAnalysis.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase1Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase1Review) {
+      specAnalysis = await ctx.task(specAnalysisTask, { ...{
+    projectName,
+    language,
+    protocolSpec,
+    features,
+    outputDir
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+    }
+  const phase1Review = await ctx.breakpoint({
     question: `Phase 1 Complete: Protocol specification analyzed. Message format: ${specAnalysis.messageFormat}. Proceed with parser design?`,
     title: 'Protocol Specification Review',
     context: {
@@ -77,9 +86,15 @@ export async function process(inputs, ctx) {
       messageFormat: specAnalysis.messageFormat,
       headerFields: specAnalysis.headerFields,
       files: specAnalysis.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase1Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase1Review.approved) break;
+    lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 2: STATE MACHINE DESIGN
   // ============================================================================
@@ -179,7 +194,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 8: Creating fuzz testing suite');
 
-  const fuzzTesting = await ctx.task(fuzzTestingTask, {
+  let fuzzTesting = await ctx.task(fuzzTestingTask, {
     projectName,
     language,
     features,
@@ -188,9 +203,19 @@ export async function process(inputs, ctx) {
     outputDir
   });
 
-  artifacts.push(...fuzzTesting.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_phase8Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase8Review) {
+      fuzzTesting = await ctx.task(fuzzTestingTask, { ...{
+    projectName,
+    language,
+    features,
+    headerParsing,
+    payloadDeserialization,
+    outputDir
+  }, feedback: lastFeedback_phase8Review, attempt: attempt + 1 });
+    }
+  const phase8Review = await ctx.breakpoint({
     question: `Phase 8 Complete: Fuzz testing configured. ${fuzzTesting.testCasesGenerated} test cases generated. Proceed with validation?`,
     title: 'Fuzz Testing Review',
     context: {
@@ -198,9 +223,15 @@ export async function process(inputs, ctx) {
       fuzzResults: fuzzTesting.results,
       coverageAchieved: fuzzTesting.coverage,
       files: fuzzTesting.artifacts.map(a => ({ path: a.path, format: a.format || 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase8Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase8Review.approved) break;
+    lastFeedback_phase8Review = phase8Review.response || phase8Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 9: DOCUMENTATION AND VALIDATION
   // ============================================================================
@@ -227,9 +258,19 @@ export async function process(inputs, ctx) {
   ]);
 
   artifacts.push(...documentation.artifacts);
-  artifacts.push(...validation.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      fuzzTesting = await ctx.task(fuzzTestingTask, { ...{
+    projectName,
+    language,
+    features,
+    headerParsing,
+    payloadDeserialization,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Binary Protocol Parser Complete for ${projectName}! Validation score: ${validation.overallScore}/100. Fuzz tests: ${fuzzTesting.testsPassed}/${fuzzTesting.totalTests} passed. Review deliverables?`,
     title: 'Binary Protocol Parser Complete - Final Review',
     context: {
@@ -245,9 +286,15 @@ export async function process(inputs, ctx) {
         { path: documentation.readmePath, format: 'markdown', label: 'README' },
         { path: documentation.protocolSpecPath, format: 'markdown', label: 'Protocol Spec' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -281,8 +328,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

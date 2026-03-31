@@ -85,7 +85,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 3: Performance Index Derivation');
 
-  const indexResult = await ctx.task(performanceIndexTask, {
+  let indexResult = await ctx.task(performanceIndexTask, {
     projectName,
     functionResult,
     requirementsResult,
@@ -96,8 +96,17 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Performance indices derived: ${indexResult.indices.join(', ')}`);
 
-  // Breakpoint: Review performance indices
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      indexResult = await ctx.task(performanceIndexTask, { ...{
+    projectName,
+    functionResult,
+    requirementsResult,
+    outputDir
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Performance indices derived. Primary: ${indexResult.primaryIndex}. ${indexResult.indices.length} indices identified. Review material selection criteria?`,
     title: 'Performance Index Review',
     context: {
@@ -105,9 +114,15 @@ export async function process(inputs, ctx) {
       indices: indexResult.indices,
       indexDerivations: indexResult.derivations,
       files: indexResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 4: MATERIAL SCREENING
   // ============================================================================
@@ -184,7 +199,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 8: Final Selection and Recommendation');
 
-  const selectionResult = await ctx.task(finalSelectionTask, {
+  let selectionResult = await ctx.task(finalSelectionTask, {
     projectName,
     evaluationResult,
     costResult,
@@ -196,8 +211,18 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', `Final selection: ${selectionResult.recommendedMaterial}`);
 
-  // Breakpoint: Review recommendation
-  await ctx.breakpoint({
+    let lastFeedback_phase8Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase8Review) {
+      selectionResult = await ctx.task(finalSelectionTask, { ...{
+    projectName,
+    evaluationResult,
+    costResult,
+    requirementsResult,
+    outputDir
+  }, feedback: lastFeedback_phase8Review, attempt: attempt + 1 });
+    }
+  const phase8Review = await ctx.breakpoint({
     question: `Material selection complete. Recommended: ${selectionResult.recommendedMaterial}. ${selectionResult.alternativeMaterials.length} alternatives identified. Review selection rationale?`,
     title: 'Material Selection Review',
     context: {
@@ -206,16 +231,22 @@ export async function process(inputs, ctx) {
       alternatives: selectionResult.alternativeMaterials,
       selectionRationale: selectionResult.rationale,
       files: selectionResult.artifacts.map(a => ({ path: a.path, format: a.format || 'json', label: a.label }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase8Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase8Review.approved) break;
+    lastFeedback_phase8Review = phase8Review.response || phase8Review.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 9: GENERATE SELECTION REPORT
   // ============================================================================
 
   ctx.log('info', 'Phase 9: Generating Material Selection Report');
 
-  const reportResult = await ctx.task(generateMaterialReportTask, {
+  let reportResult = await ctx.task(generateMaterialReportTask, {
     projectName,
     application,
     requirementsResult,
@@ -231,8 +262,24 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...reportResult.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      reportResult = await ctx.task(generateMaterialReportTask, { ...{
+    projectName,
+    application,
+    requirementsResult,
+    functionResult,
+    indexResult,
+    screeningResult,
+    rankingResult,
+    evaluationResult,
+    costResult,
+    selectionResult,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Material Selection Complete for ${projectName}. Recommended: ${selectionResult.recommendedMaterial}. Approve selection?`,
     title: 'Material Selection Complete',
     context: {
@@ -246,9 +293,15 @@ export async function process(inputs, ctx) {
       files: [
         { path: reportResult.reportPath, format: 'markdown', label: 'Material Selection Report' }
       ]
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -272,8 +325,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

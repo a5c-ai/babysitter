@@ -45,17 +45,28 @@ export async function process(inputs, ctx) {
   artifacts.push(...requirementsAnalysis.artifacts);
 
   // Phase 2: Engine Evaluation
-  const engineEvaluation = await ctx.task(engineEvaluationTask, {
+  let engineEvaluation = await ctx.task(engineEvaluationTask, {
     projectName, requirementsAnalysis, teamExperience, budgetConstraints, outputDir
   });
-  artifacts.push(...engineEvaluation.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      engineEvaluation = await ctx.task(engineEvaluationTask, { ...{
+    projectName, requirementsAnalysis, teamExperience, budgetConstraints, outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Engine evaluation complete for ${projectName}. Recommended: ${engineEvaluation.recommendedEngine}. Score: ${engineEvaluation.scores[engineEvaluation.recommendedEngine]}/100. Approve engine selection?`,
     title: 'Engine Selection Review',
-    context: { runId: ctx.runId, scores: engineEvaluation.scores, recommendation: engineEvaluation.recommendedEngine }
-  });
-
+    context: { runId: ctx.runId, scores: engineEvaluation.scores, recommendation: engineEvaluation.recommendedEngine },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 3: Engine Selection Decision
   const engineSelection = await ctx.task(engineSelectionTask, {
     projectName, engineEvaluation, outputDir

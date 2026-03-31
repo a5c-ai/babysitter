@@ -68,17 +68,28 @@ export async function process(inputs, ctx) {
   artifacts.push(...dependencyPlanning.artifacts);
 
   // Phase 6: Task Assignment
-  const taskAssignment = await ctx.task(taskAssignmentTask, {
+  let taskAssignment = await ctx.task(taskAssignmentTask, {
     projectName, taskBreakdown, capacityPlanning, dependencyPlanning, outputDir
   });
-  artifacts.push(...taskAssignment.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      taskAssignment = await ctx.task(taskAssignmentTask, { ...{
+    projectName, taskBreakdown, capacityPlanning, dependencyPlanning, outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Sprint ${sprintNumber} planning complete for ${projectName}. ${taskAssignment.totalTasks} tasks, ${taskAssignment.totalPoints} story points. Capacity utilization: ${capacityPlanning.utilizationPercent}%. Confirm sprint plan?`,
     title: 'Sprint Planning Review',
-    context: { runId: ctx.runId, sprintGoal: goalDefinition.sprintGoal, taskAssignment }
-  });
-
+    context: { runId: ctx.runId, sprintGoal: goalDefinition.sprintGoal, taskAssignment },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 7: Sprint Documentation
   const sprintDoc = await ctx.task(sprintDocumentationTask, {
     projectName, sprintNumber, goalDefinition, taskAssignment, dependencyPlanning, outputDir

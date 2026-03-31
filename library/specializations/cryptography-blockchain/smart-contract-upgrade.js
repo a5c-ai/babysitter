@@ -46,7 +46,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 1: Verifying storage layout compatibility');
 
-  const storageVerification = await ctx.task(storageVerificationTask, {
+  let storageVerification = await ctx.task(storageVerificationTask, {
     projectName,
     proxyAddress,
     newImplementation,
@@ -56,8 +56,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...storageVerification.artifacts);
 
-  if (!storageVerification.compatible) {
-    await ctx.breakpoint({
+      let lastFeedback_phase1Review = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (lastFeedback_phase1Review) {
+        storageVerification = await ctx.task(storageVerificationTask, { ...{
+    projectName,
+    proxyAddress,
+    newImplementation,
+    upgradeType,
+    outputDir
+  }, feedback: lastFeedback_phase1Review, attempt: attempt + 1 });
+      }
+  const phase1Review = await ctx.breakpoint({
       question: `Storage layout incompatibility detected! ${storageVerification.incompatibilities.length} issues found. Review and resolve before proceeding?`,
       title: 'Storage Layout Incompatibility',
       context: {
@@ -66,9 +76,15 @@ export async function process(inputs, ctx) {
         incompatibilities: storageVerification.incompatibilities,
         recommendation: 'Fix storage layout issues before upgrade',
         files: storageVerification.artifacts.map(a => ({ path: a.path, format: 'json' }))
-      }
-    });
-  }
+      },
+      expert: 'owner',
+      tags: ['approval-gate'],
+      previousFeedback: lastFeedback_phase1Review || undefined,
+      attempt: attempt > 0 ? attempt + 1 : undefined
+      });
+      if (phase1Review.approved) break;
+      lastFeedback_phase1Review = phase1Review.response || phase1Review.feedback || 'Changes requested';
+    } }
 
   // ============================================================================
   // PHASE 2: NEW IMPLEMENTATION AUDIT
@@ -91,7 +107,7 @@ export async function process(inputs, ctx) {
 
   ctx.log('info', 'Phase 3: Simulating upgrade on testnet');
 
-  const testnetSimulation = await ctx.task(testnetSimulationTask, {
+  let testnetSimulation = await ctx.task(testnetSimulationTask, {
     projectName,
     proxyAddress,
     newImplementation,
@@ -101,8 +117,18 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...testnetSimulation.artifacts);
 
-  // Quality Gate: Simulation Review
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      testnetSimulation = await ctx.task(testnetSimulationTask, { ...{
+    projectName,
+    proxyAddress,
+    newImplementation,
+    testnet,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Testnet simulation complete. Success: ${testnetSimulation.success}. All functions working: ${testnetSimulation.functionalityVerified}. Proceed with governance proposal?`,
     title: 'Testnet Simulation Review',
     context: {
@@ -110,9 +136,15 @@ export async function process(inputs, ctx) {
       projectName,
       simulationResult: testnetSimulation,
       files: testnetSimulation.artifacts.map(a => ({ path: a.path, format: 'json' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // ============================================================================
   // PHASE 4: GOVERNANCE PROPOSAL
   // ============================================================================
@@ -145,7 +177,6 @@ export async function process(inputs, ctx) {
 
     artifacts.push(...multisigCoordination.artifacts);
   }
-
   // ============================================================================
   // PHASE 6: POST-UPGRADE VERIFICATION
   // ============================================================================
@@ -200,8 +231,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// ============================================================================
+  // ============================================================================
 // TASK DEFINITIONS
 // ============================================================================
 

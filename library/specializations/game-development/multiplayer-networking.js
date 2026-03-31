@@ -69,17 +69,28 @@ export async function process(inputs, ctx) {
   artifacts.push(...edgeCaseHandling.artifacts);
 
   // Phase 6: Network Testing
-  const networkTesting = await ctx.task(networkTestingTask, {
+  let networkTesting = await ctx.task(networkTestingTask, {
     projectName, latencyTarget, playerCount, outputDir
   });
-  artifacts.push(...networkTesting.artifacts);
-
-  await ctx.breakpoint({
+    let lastFeedback = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback) {
+      networkTesting = await ctx.task(networkTestingTask, { ...{
+    projectName, latencyTarget, playerCount, outputDir
+  }, feedback: lastFeedback, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Network testing complete for ${projectName}. Pass rate: ${networkTesting.passRate}%. Latency under ${latencyTarget}ms: ${networkTesting.latencyTestPassed}. Review results?`,
     title: 'Network Testing Review',
-    context: { runId: ctx.runId, networkTesting }
-  });
-
+    context: { runId: ctx.runId, networkTesting },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   // Phase 7: Optimization
   const optimization = await ctx.task(networkOptimizationTask, {
     projectName, networkTesting, latencyTarget, outputDir

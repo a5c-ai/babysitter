@@ -55,7 +55,7 @@ export async function process(inputs, ctx) {
 
   // Task 3: Job Data Collection
   ctx.log('info', 'Phase 3: Collecting job and resource data');
-  const jobDataCollection = await ctx.task(jobDataTask, {
+  let jobDataCollection = await ctx.task(jobDataTask, {
     productionOrders,
     systemModeling,
     outputDir
@@ -63,8 +63,16 @@ export async function process(inputs, ctx) {
 
   artifacts.push(...jobDataCollection.artifacts);
 
-  // Breakpoint: Review data
-  await ctx.breakpoint({
+    let lastFeedback_phase3Review = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_phase3Review) {
+      jobDataCollection = await ctx.task(jobDataTask, { ...{
+    productionOrders,
+    systemModeling,
+    outputDir
+  }, feedback: lastFeedback_phase3Review, attempt: attempt + 1 });
+    }
+  const phase3Review = await ctx.breakpoint({
     question: `Scheduling data collected. ${jobDataCollection.jobCount} jobs, ${systemModeling.resourceCount} resources. Proceed with schedule generation?`,
     title: 'Scheduling Data Review',
     context: {
@@ -75,9 +83,15 @@ export async function process(inputs, ctx) {
         objectives: schedulingObjectives.objectives
       },
       files: jobDataCollection.artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_phase3Review || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (phase3Review.approved) break;
+    lastFeedback_phase3Review = phase3Review.response || phase3Review.feedback || 'Changes requested';
+  }
   // Task 4: Scheduling Algorithm Selection
   ctx.log('info', 'Phase 4: Selecting scheduling approach');
   const algorithmSelection = await ctx.task(algorithmSelectionTask, {
@@ -121,15 +135,22 @@ export async function process(inputs, ctx) {
 
   // Task 8: Schedule Tracking System
   ctx.log('info', 'Phase 8: Setting up schedule tracking');
-  const trackingSystem = await ctx.task(trackingSystemTask, {
+  let trackingSystem = await ctx.task(trackingSystemTask, {
     scheduleGeneration,
     outputDir
   });
 
   artifacts.push(...trackingSystem.artifacts);
 
-  // Final Breakpoint
-  await ctx.breakpoint({
+    let lastFeedback_finalApproval = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (lastFeedback_finalApproval) {
+      trackingSystem = await ctx.task(trackingSystemTask, { ...{
+    scheduleGeneration,
+    outputDir
+  }, feedback: lastFeedback_finalApproval, attempt: attempt + 1 });
+    }
+  const finalApproval = await ctx.breakpoint({
     question: `Schedule generated. On-time: ${performanceAnalysis.onTimePercentage}%. Utilization: ${performanceAnalysis.utilization}%. Makespan: ${performanceAnalysis.makespan}. Review schedule?`,
     title: 'Production Schedule Results',
     context: {
@@ -141,9 +162,15 @@ export async function process(inputs, ctx) {
         makespan: performanceAnalysis.makespan
       },
       files: artifacts.map(a => ({ path: a.path, format: a.format || 'markdown' }))
-    }
-  });
-
+    },
+    expert: 'owner',
+    tags: ['approval-gate'],
+    previousFeedback: lastFeedback_finalApproval || undefined,
+    attempt: attempt > 0 ? attempt + 1 : undefined
+    });
+    if (finalApproval.approved) break;
+    lastFeedback_finalApproval = finalApproval.response || finalApproval.feedback || 'Changes requested';
+  }
   const endTime = ctx.now();
   const duration = endTime - startTime;
 
@@ -167,8 +194,7 @@ export async function process(inputs, ctx) {
     }
   };
 }
-
-// Task definitions
+  // Task definitions
 export const schedulingObjectivesTask = defineTask('scheduling-objectives', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Define scheduling objectives',
