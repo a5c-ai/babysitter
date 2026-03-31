@@ -48,6 +48,8 @@ import type {
   HarnessInstallOptions,
   HarnessInstallResult,
 } from "./types";
+import type { PromptContext } from "../prompts/types";
+import { createClaudeCodeContext } from "../prompts/context";
 import { loadCompressionConfig } from "../compression/config-loader";
 import { densityFilterText, estimateTokens } from "../compression/density-filter";
 import { getOrCompressFile, findLibraryFiles } from "../compression/library-cache";
@@ -1195,6 +1197,10 @@ export function createClaudeCodeAdapter(): HarnessAdapter {
 
     installPlugin(options: HarnessInstallOptions): Promise<HarnessInstallResult> {
       return installClaudeCodePlugin(options);
+    },
+
+    getPromptContext(opts?: { interactive?: boolean | undefined }): PromptContext {
+      return createClaudeCodeContext(opts);
     },
   };
 }

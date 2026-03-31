@@ -8,6 +8,7 @@
  */
 
 import type { AskUserQuestionUiContext } from "../interaction";
+import type { PromptContext } from "../prompts/types";
 
 // ---------------------------------------------------------------------------
 // Harness capability enum
@@ -276,4 +277,10 @@ export interface HarnessAdapter {
 
   /** Install or materialize the Babysitter plugin/extension integration for this harness. */
   installPlugin?(options: HarnessInstallOptions): Promise<HarnessInstallResult>;
+
+  /**
+   * Return a PromptContext pre-configured for this harness.
+   * Centralizes harness-specific prompt configuration in the adapter itself.
+   */
+  getPromptContext?(opts?: { interactive?: boolean | undefined }): PromptContext;
 }

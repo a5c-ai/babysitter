@@ -1,4 +1,10 @@
 import type { HarnessDiscoveryResult } from "../../harness/types";
+import { createPiContext } from "../../prompts/context";
+import { composeProcessCreatePrompt, composeOrchestrationPrompt } from "../../prompts/compose";
+import {
+  resolveActiveProcessLibrary,
+  getDefaultProcessLibrarySpec,
+} from "../../processLibrary/active";
 
 export interface HarnessPromptContext {
   platform: string;
@@ -103,10 +109,31 @@ function formatSharedContext(context: HarnessPromptContext): string[] {
   ];
 }
 
-export function buildProcessDefinitionSystemPrompt(
+export async function buildProcessDefinitionSystemPrompt(
   outputPath: string,
   context: HarnessPromptContext,
-): string {
+  interactive?: boolean | undefined,
+): Promise<string> {
+  // Resolve the active process-library root for the PI context
+  let processLibraryRoot: string | undefined;
+  let processLibraryReferenceRoot: string | undefined;
+  try {
+    const resolved = await resolveActiveProcessLibrary();
+    if (resolved.binding?.dir) {
+      processLibraryRoot = resolved.binding.dir;
+      processLibraryReferenceRoot = getDefaultProcessLibrarySpec().referenceRoot;
+    }
+  } catch {
+    // No binding — templates will fall back to manual instructions
+  }
+
+  const piCtx = createPiContext({
+    interactive,
+    processLibraryRoot,
+    processLibraryReferenceRoot,
+  });
+  const composedInstructions = composeProcessCreatePrompt(piCtx);
+
   return [
     "You are the babysitter harness:create-run phase 1 agent.",
     "Your job is to turn the user's intent into a concrete babysitter process definition before any run is created or bound.",
@@ -117,33 +144,21 @@ export function buildProcessDefinitionSystemPrompt(
     "- Use the AskUserQuestion tool when clarification is useful. Ask focused, high-signal questions in batches when possible.",
     "- Before authoring the process in any mode, resolve the active shared process-library and conduct a real search against it. In this built-in PI path, use `babysitter_resolve_process_library`, `babysitter_search_process_library`, and `babysitter_read_process_library_file`; those tools are the internal `harness:create-run` harness surface for process-library work. Outside this built-in path, use `babysitter process-library:active --json`, then search the returned `binding.dir`. Do not skip this process-library search step.",
     "- Treat `binding.dir` as the active process-library root that must be searched first. If you need the cloned repo root itself for adjacent material, use `defaultSpec.cloneDir`. Treat `reference/` under the active root or `defaultSpec.referenceRoot` as the canonical reference area.",
-    "- In interactive mode, follow a real interview phase: inspect the repo/workspace state first, inspect the most relevant process-library references through the active binding, then ask only the next highest-signal AskUserQuestion when material ambiguity remains. Do not plan more than one interview step ahead.",
-    "- In non-interactive mode, skip user questions but still parse the request, inspect the repo/workspace structure, resolve the active process-library root, and search that active library for the most relevant specialization or methodology before authoring the process.",
     "- Research the workspace before finalizing the process. Use your available read/search/bash/write tools as needed.",
     "- Treat the provided workspace as the only relevant filesystem root unless the user explicitly points you somewhere else.",
     "- You may inspect local babysitter process references when they materially improve the process design. Prefer project `.a5c/processes/`, the active process-library root returned in `binding.dir`, the cloned repo root returned in `defaultSpec.cloneDir` when you need adjacent reference material, local plugin paths such as `plugins/babysitter/skills/babysit/process/`, repository `library/` materials, and local babysitter discover/profile CLI commands when available.",
-    "- If you use user profile context, read it through the babysitter CLI only, for example `babysitter profile:read --user --json`. Never import or call SDK profile helpers directly from generated processes or task instructions.",
     "- Use babysitter_write_process_definition to write the final JavaScript process file to the exact output path provided below.",
     "- The module must export a named `async function process(inputs, ctx)`.",
     "- The process must orchestrate the work through babysitter tasks instead of doing the main implementation directly in `process(inputs, ctx)`.",
     "- Define at least one task with `defineTask(...)`, and invoke tasks from `process(inputs, ctx)` via `await ctx.task(...)`.",
-    "- Default every task to the internal PI worker. Prefer `task.execution.harness` to override the default harness for a task. The legacy `task.metadata.harness` field is still supported but `execution.harness` takes precedence when both are present.",
-    "- If you define tasks with `defineTask(...)`, every returned TaskDef must include a top-level `kind` field.",
-    "- Agent tasks must use `kind: \"agent\"` with `agent: { name, prompt, outputSchema }`; shell tasks must use `kind: \"shell\"` with `shell: { command: \"...\" }`; node tasks must use `kind: \"node\"` with `node: { entry, args? }`.",
-    "- Call defined tasks with `await ctx.task(definedTask, args)`; do not invent alternate task runners.",
-    "- At least one defined task must be an `agent` task for the main work. Shell tasks are for concrete runnable commands only.",
     "- Any task passed to `ctx.task(...)` must be a DefinedTask created via `defineTask(...)`; never pass plain object task definitions or ad-hoc task objects.",
     "- Inside that named `process(inputs, ctx)` export, do not reference Node's global process object as `process.*`; use `globalThis.process` or an imported alias like `nodeProcess` instead.",
     "- If the process needs the workspace root, do not assume `ctx.workspaceDir` or `ctx.cwd` exists in runtime context. Resolve it from the module location using `import.meta.url`, for example with `path.dirname(fileURLToPath(import.meta.url))`.",
     "- Keep the generated module syntactically valid ESM. If you embed HTML/CSS/JS asset contents inside the process source, do not use raw nested template literals; prefer arrays joined with \"\\n\", String.raw, or escaped inner backticks and \\${...} sequences.",
     "- The generated process must directly execute the user's requested work. Do not generate a meta-process that writes another babysitter process unless the user explicitly asked for process authoring.",
-    "- Prefer modular, reusable process composition when possible. Reference relevant methodologies, skills, agents, or prior processes before inventing a process structure from scratch.",
-    "- Prefer processes with explicit milestones, quality gates, verification loops, and convergence on the actual user request.",
     "- After the file is written through babysitter_write_process_definition, call babysitter_report_process_definition exactly once with the final path and a concise summary.",
     "- Do not claim completion in plain text without calling babysitter_report_process_definition.",
     "- If different tasks should run on different harnesses, encode that in the process definition rather than leaving it implicit.",
-    "- Do not set `task.metadata.bashSandbox`, `task.metadata.isolated`, or `task.metadata.enableCompaction` for ordinary internal PI tasks. Leave them unset unless the task truly requires stronger guardrails or long-running compaction.",
-    "- If a task truly needs stronger internal guardrails, encode them explicitly in task metadata instead of assuming every internal task is secure or isolated by default.",
     "",
     "Process Library Activation:",
     "- You MUST call `babysitter_resolve_process_library` to bootstrap and resolve the active process-library root before authoring the process. This is non-optional.",
@@ -151,22 +166,9 @@ export function buildProcessDefinitionSystemPrompt(
     "- If the cloned repo root is needed for adjacent reference material, use `defaultSpec.cloneDir`.",
     "- Use `babysitter_search_process_library` and `babysitter_read_process_library_file` to search the library. Do not skip the search step.",
     "",
-    "Interview Phase Enhancement (interactive mode):",
-    "- In interactive mode, follow a structured multi-step interview: first inspect the repo/workspace state, then search the process library for relevant specializations, methodologies, skills, and agents. Use babysitter discover commands at various stages.",
-    "- After each interview step, decide what the next highest-signal step is. Do not plan more than one step ahead. The same step type can repeat.",
-    "- Interview steps can include: research the repo, search the process library, ask the user a question via AskUserQuestion, research online, inspect local processes.",
+    "--- Shared Process Creation Instructions ---",
     "",
-    "Process Creation Guidelines:",
-    "- Before writing the process, scan methodologies and processes in the active process library to find relevant patterns to use as reference. Also scan `.a5c/processes/` for project-level reusable processes.",
-    "- Search for process files (.js), skills (SKILL.md), and agents (AGENT.md) during the process building phase. Search paths: `.a5c/processes/` (project level), `specializations/` under active root, `methodologies/` under active root.",
-    "- When creating the process file, include `@skill` and `@agent` JSDoc markers in the file header listing skills and agents relevant to this process. The SDK reads these markers to provide targeted discovery results instead of scanning all available skills.",
-    "- JSDoc marker format: `@skill <name> <path-relative-to-binding.dir>`, `@agent <name> <path-relative-to-binding.dir>`.",
-    "- Prefer modular, reusable process composition. If a generic reusable part is identified, build it modularly in `.a5c/processes/` for future composition.",
-    "- Processes should include: explicit milestones, quality gates with executable verification, iterative convergence loops, integration phases with integration tests.",
-    "- Test-driven approach where quality gate agents can use executable tools, scripts, and tests to verify accuracy and completeness.",
-    "",
-    "Non-interactive Mode Enhancement:",
-    "- In non-interactive mode, still parse the request, inspect the workspace, resolve the active process-library root, and search for the most relevant specialization or methodology before authoring. Do not skip the search step just because it is non-interactive.",
+    composedInstructions,
     "",
     `Required output path: ${outputPath}`,
     ...formatSharedContext(context),
@@ -239,7 +241,11 @@ export function buildProcessDefinitionUserPrompt(
 export function buildOrchestrationSystemPrompt(
   selectedHarnessName: string,
   context: HarnessPromptContext,
+  interactive?: boolean | undefined,
 ): string {
+  const piCtx = createPiContext({ interactive });
+  const composedInstructions = composeOrchestrationPrompt(piCtx);
+
   return [
     "You are the babysitter harness:create-run phase 2 orchestration agent.",
     "Your job is to run the babysitter orchestration loop through tools, not by narrating what should happen.",
@@ -252,17 +258,15 @@ export function buildOrchestrationSystemPrompt(
     "- Call babysitter_run_create to create the run if it does not already exist.",
     "- Immediately call babysitter_bind_session after run creation and before the first orchestration iteration.",
     "- Work in bounded turns. In each turn, call babysitter_run_iterate at most once unless the prompt explicitly tells you otherwise.",
-    "- When babysitter_run_iterate reports pending effects, resolve each effect through tools.",
-    "- For breakpoint effects, use AskUserQuestion in interactive mode with explicit approval options, then call babysitter_task_post_result. Never auto-approve or fabricate an approval response. In non-interactive mode, select the best option according to the user intent and current context, then call babysitter_task_post_result.",
-    "- For `shell` effects, prefer `babysitter_run_shell_effect` so the command executes on an internal PI worker that respects task metadata. Use raw bash/coding tools only when the effect payload clearly requires manual inspection or direct intervention before posting the explicit outcome with babysitter_task_post_result.",
-    "- For `agent`, `node`, and `orchestrator_task` effects, prefer babysitter_dispatch_effect_harness so the pending effect is fulfilled through the intended harness wrapper. These babysitter effect tools are the built-in internal `harness:create-run` harness surface for phase 2. If you fulfill an effect directly with your own coding tools, you must still call babysitter_task_post_result with the explicit outcome.",
     "- Do not rely on a hidden host-side effect executor. Perform or dispatch each effect intentionally based on the effect payload you received from babysitter_run_iterate.",
     "- Shell effects are first-class pending effects. Do not skip them, narrate them, or assume the host will run them for you.",
     "- When choosing how to execute pending work, respect task-level harness metadata and the installed harness catalog provided below.",
-    "- Shell effects execute on internal PI worker sessions. Respect `task.metadata.bashSandbox`, `task.metadata.isolated`, and `task.metadata.enableCompaction` when the process encoded stronger guardrails for that worker.",
-    "- Internal secure execution is available through opt-in PI worker sessions; prefer that path for shell or security-sensitive work instead of assuming an external CLI harness is guarded.",
     "- Stay in the orchestration loop until the run completes, fails, or reaches a hard limit reported by the tools.",
     "- When the run reaches a terminal state, call babysitter_finish_orchestration exactly once.",
+    "",
+    "--- Shared Orchestration Instructions ---",
+    "",
+    composedInstructions,
     "",
     "This phase is the bound orchestration phase. Preserve the hook-style loop semantics by always continuing through the babysitter tools.",
     ...formatSharedContext(context),

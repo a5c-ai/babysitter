@@ -1921,9 +1921,10 @@ export async function runProcessDefinitionPhase(args: {
   const workspaceAssessment = await assessWorkspaceForExternalAuthoring(args.workspace);
   writeVerboseData("phase1 workspace assessment", workspaceAssessment);
 
-  const processDefinitionSystemPrompt = buildProcessDefinitionSystemPrompt(
+  const processDefinitionSystemPrompt = await buildProcessDefinitionSystemPrompt(
     args.outputPath,
     args.promptContext,
+    args.interactive,
   );
   const initialMetaPrompt = buildProcessDefinitionUserPrompt(
     args.prompt,

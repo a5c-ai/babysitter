@@ -1776,7 +1776,7 @@ export async function runOrchestrationPhase(args: {
     uiContext: args.interactive && args.rl
       ? createReadlineAskUserQuestionUiContext(args.rl)
       : undefined,
-    appendSystemPrompt: [buildOrchestrationSystemPrompt(args.selectedHarnessName, args.promptContext)],
+    appendSystemPrompt: [buildOrchestrationSystemPrompt(args.selectedHarnessName, args.promptContext, args.interactive)],
     ephemeral: true,
   });
 
@@ -1792,7 +1792,7 @@ export async function runOrchestrationPhase(args: {
   );
   writeVerboseData(
     "phase2 system prompt",
-    buildOrchestrationSystemPrompt(args.selectedHarnessName, args.promptContext),
+    buildOrchestrationSystemPrompt(args.selectedHarnessName, args.promptContext, args.interactive),
   );
 
   emitProgress(

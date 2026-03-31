@@ -44,8 +44,8 @@ const context: HarnessPromptContext = {
 };
 
 describe("harnessPrompts", () => {
-  test("phase 1 prompt includes runtime and harness guidance", () => {
-    const prompt = buildProcessDefinitionSystemPrompt("/tmp/out.js", context);
+  test("phase 1 prompt includes runtime and harness guidance", async () => {
+    const prompt = await buildProcessDefinitionSystemPrompt("/tmp/out.js", context);
     expect(prompt).toContain("Runtime environment:");
     expect(prompt).toContain("platform=linux");
     expect(prompt).toContain("secure_pi_sandbox_image=node:22-bookworm");
@@ -54,11 +54,11 @@ describe("harnessPrompts", () => {
     expect(prompt).toContain("Discovered harnesses:");
     expect(prompt).toContain("pi | installed=yes");
     expect(prompt).toContain("metadata.harness");
-    expect(prompt).toContain("Default every task to the internal PI worker");
+    expect(prompt).toContain("Default `agent`, `node`, and `orchestrator_task` work to the internal PI worker");
     expect(prompt).toContain("native/local PI execution");
     expect(prompt).toContain("Do not set `task.metadata.bashSandbox`, `task.metadata.isolated`, or `task.metadata.enableCompaction`");
     expect(prompt).toContain("bashSandbox: \"secure\"");
-    expect(prompt).toContain("follow a real interview phase");
+    expect(prompt).toContain("Interview the user");
     expect(prompt).toContain("AskUserQuestion is the only in-loop way to ask the user");
     expect(prompt).toContain("resolve the active shared process-library");
     expect(prompt).toContain("babysitter_resolve_process_library");
@@ -73,11 +73,10 @@ describe("harnessPrompts", () => {
     expect(prompt).toContain("babysitter_write_process_definition");
     expect(prompt).toContain("orchestrate the work through babysitter tasks");
     expect(prompt).toContain("Define at least one task with `defineTask(...)`");
-    expect(prompt).toContain("every returned TaskDef must include a top-level `kind` field");
-    expect(prompt).toContain('kind: "agent"');
-    expect(prompt).toContain('kind: "shell"');
-    expect(prompt).toContain("At least one defined task must be an `agent` task");
-    expect(prompt).toContain('await ctx.task(definedTask, args)');
+    expect(prompt).toContain("NEVER use `node` kind");
+    expect(prompt).toContain("kind: 'agent'");
+    expect(prompt).toContain("Default for all tasks");
+    expect(prompt).toContain("await ctx.task(");
     expect(prompt).toContain("DefinedTask created via `defineTask(...)`");
     expect(prompt).toContain("do not reference Node's global process object as `process.*`");
     expect(prompt).toContain("do not assume `ctx.workspaceDir` or `ctx.cwd` exists");
@@ -93,12 +92,8 @@ describe("harnessPrompts", () => {
     expect(prompt).toContain("AskUserQuestion is the in-loop user interaction tool");
     expect(prompt).toContain("built-in coding tools");
     expect(prompt).toContain("respect task-level harness metadata");
-    expect(prompt).toContain("babysitter_run_shell_effect");
-    expect(prompt).toContain("babysitter_dispatch_effect_harness");
-    expect(prompt).toContain("prefer `babysitter_run_shell_effect`");
     expect(prompt).toContain("Shell effects are first-class pending effects");
-    expect(prompt).toContain("Shell effects execute on internal PI worker sessions");
-    expect(prompt).toContain("opt-in PI worker sessions");
+    expect(prompt).toContain("Shell effects run through the internal PI worker");
     expect(prompt).toContain("env.CI=true");
   });
 

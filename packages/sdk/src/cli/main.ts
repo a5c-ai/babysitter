@@ -64,6 +64,8 @@ import {
   handleHarnessInstallPlugin,
   formatHarnessInstallError,
 } from "./commands/harnessInstall";
+import { handleInstructionsCommand } from "./commands/instructions";
+import type { InstructionsCommandArgs } from "./commands/instructions";
 import { resolveCompletionProof } from "./completionProof";
 import { getAdapter, getAdapterByName } from "../harness";
 import type { SessionBindResult } from "../harness";
@@ -145,6 +147,10 @@ const USAGE = `Usage:
   babysitter harness:install <name> [--workspace <dir>] [--json] [--dry-run] [--verbose]
   babysitter harness:install-plugin <name> [--workspace <dir>] [--json] [--dry-run] [--verbose]
   babysitter harness:invoke <name> --prompt <text> [--workspace <dir>] [--model <model>] [--timeout <ms>] [--json]
+  babysitter instructions:babysit-skill --harness <name> [--interactive|--no-interactive] [--json]
+  babysitter instructions:process-create --harness <name> [--interactive|--no-interactive] [--json]
+  babysitter instructions:orchestrate --harness <name> [--interactive|--no-interactive] [--json]
+  babysitter instructions:breakpoint-handling --harness <name> [--interactive|--no-interactive] [--json]
   babysitter mcp:serve [--json]
   babysitter health [--json] [--verbose]
   babysitter configure [show|validate|paths] [--json] [--defaults-only]
@@ -2231,6 +2237,10 @@ const VALID_COMMANDS = [
   "harness:install",
   "harness:install-plugin",
   "harness:invoke",
+  "instructions:babysit-skill",
+  "instructions:process-create",
+  "instructions:orchestrate",
+  "instructions:breakpoint-handling",
   "mcp:serve",
   "health",
   "configure",
@@ -2727,6 +2737,26 @@ export function createBabysitterCli() {
             json: parsed.json,
           };
           return await handleProcessLibraryCommand(processLibraryArgs);
+        }
+        // Instructions commands
+        if (parsed.command?.startsWith("instructions:")) {
+          const subcommand = parsed.command.split(":")[1];
+          if (!parsed.harness) {
+            const msg = "instructions commands require --harness <name>";
+            if (parsed.json) {
+              console.log(JSON.stringify({ error: "missing_flag", message: msg }));
+            } else {
+              console.error(`[instructions] ${msg}`);
+            }
+            return 1;
+          }
+          const instructionsArgs: InstructionsCommandArgs = {
+            subcommand: subcommand as InstructionsCommandArgs["subcommand"],
+            harness: parsed.harness,
+            interactive: parsed.interactive,
+            json: parsed.json,
+          };
+          return await handleInstructionsCommand(instructionsArgs);
         }
         // Profile commands
         if (
