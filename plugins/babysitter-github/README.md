@@ -19,6 +19,33 @@ directly.
 
 ## Installation
 
+### From GitHub repository (recommended)
+
+Install directly from the Git repository using Copilot CLI:
+
+```bash
+copilot plugin install a5c-ai/babysitter:plugins/babysitter-github
+```
+
+### From marketplace
+
+If the a5c.ai marketplace has been registered, install by plugin name:
+
+```bash
+copilot plugin install babysitter@a5c.ai
+```
+
+To register the marketplace first:
+
+```bash
+copilot plugin marketplace add a5c-ai/babysitter
+```
+
+### Alternative Installation (npm / development)
+
+For development or environments where the Copilot CLI plugin system is not
+available, install via npm:
+
 Install the SDK CLI first:
 
 ```bash
@@ -53,6 +80,14 @@ babysitter process-library:active --json
 ```
 
 ## Uninstallation
+
+Via Copilot CLI:
+
+```bash
+copilot plugin uninstall babysitter
+```
+
+Via npm:
 
 ```bash
 babysitter-github uninstall
@@ -139,9 +174,8 @@ preserving semantic content.
 ### AGENTS.md
 
 The plugin uses `AGENTS.md` (the Copilot CLI equivalent of `CLAUDE.md`) for
-custom agent instructions. This file is set via the `contextFileName` field
-in `plugin.json` and is read by Copilot CLI to configure agent behavior
-within sessions.
+custom agent instructions. This file is read by Copilot CLI to configure
+agent behavior within sessions.
 
 ### Environment Variables
 
@@ -187,7 +221,7 @@ The manifest declares metadata, skills, hooks, and optional integrations:
 | `license` | No | `string` | SPDX license identifier |
 | `keywords` | No | `string[]` | Searchable tags for marketplace discovery |
 | `agents` | No | `string` | Path to agents directory |
-| `skills` | No | `array` | Array of skill directory paths (see below) |
+| `skills` | No | `string` | Path to skills directory (auto-discovers SKILL.md files in subdirectories) |
 | `hooks` | No | `string` | Path to `hooks.json` |
 | `mcpServers` | No | `string` | Path to `.mcp.json` for MCP server configuration |
 
@@ -200,15 +234,9 @@ Example from this plugin:
   "description": "Orchestrate complex, multi-step workflows ...",
   "author": "a5c.ai",
   "license": "MIT",
-  "hooks": {
-    "sessionStart": "hooks/session-start.sh",
-    "sessionEnd": "hooks/session-end.sh",
-    "userPromptSubmitted": "hooks/user-prompt-submitted.sh"
-  },
-  "skills": [
-    { "name": "babysit", "file": "skills/babysit/SKILL.md" },
-    { "name": "call", "file": "skills/call/SKILL.md" }
-  ],
+  "skills": "skills/",
+  "hooks": "hooks.json",
+  "commands": [],
   "keywords": ["orchestration", "workflow", "automation"]
 }
 ```
@@ -387,6 +415,7 @@ These registries are available without running `marketplace add`.
 ```
 plugins/babysitter-github/
   plugin.json              # Plugin manifest (skills, hooks, metadata)
+  .github/plugin.json      # Marketplace manifest (copy of plugin.json)
   hooks.json               # Hook configuration (sessionStart, sessionEnd, userPromptSubmitted)
   hooks/
     session-start.sh       # SessionStart lifecycle hook

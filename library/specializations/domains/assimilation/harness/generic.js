@@ -43,8 +43,9 @@ export async function process(inputs, ctx) {
   // verification including: exact hook type names (do NOT assume from other
   // harnesses), which hooks can control flow vs fire-and-forget, hooks
   // config format (version field, entry schema, platform-specific scripts),
-  // plugin manifest format and location, plugin install/distribution CLI
-  // commands and marketplace system, official documentation URL reading,
+  // plugin manifest format and location (skills/hooks as path strings,
+  // no contextFileName, no inline objects), plugin install/distribution
+  // CLI commands and marketplace system, official documentation URL reading,
   // and critically — whether a stop-hook or equivalent exists that can
   // block agent completion and trigger re-entry (determines the entire
   // orchestration model: hook-driven vs in-turn).
@@ -73,8 +74,12 @@ export async function process(inputs, ctx) {
   integrationFiles.push(...adapter.filesCreated, ...adapter.filesModified);
 
   // ==========================================================================
-  // PHASE 2: PLUGIN STRUCTURE
-  // Hooks and plugin manifest can be created in parallel with skill porting
+  // PHASE 2: PLUGIN STRUCTURE + SKILLS + COMMANDS
+  // Hooks and plugin manifest can be created in parallel with skill porting.
+  // Plugin manifest: skills/hooks as path strings, no contextFileName field,
+  // no inline objects for hooks.
+  // Commands: ALL 15 command files from plugins/babysitter/commands/ must be
+  // ported identically (harness-agnostic, invoke skills via Skill tool).
   // ==========================================================================
 
   ctx.log('phase:plugin', `Creating ${harnessName} plugin structure and porting skills`);
@@ -98,7 +103,9 @@ export async function process(inputs, ctx) {
 
   // ==========================================================================
   // PHASE 3: INSTALL/DIST + HARNESS WRAPPER
-  // These are independent and can run in parallel
+  // PRIMARY install: marketplace/plugin-system (marketplace-first).
+  // SECONDARY install: npm/bin-based for development/testing convenience.
+  // These are independent and can run in parallel.
   // ==========================================================================
 
   ctx.log('phase:install', `Creating install/dist method and harness wrapper for ${harnessName}`);

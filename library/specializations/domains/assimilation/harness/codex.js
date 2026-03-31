@@ -49,6 +49,8 @@ export async function process(inputs, ctx) {
   // config.toml, CODEX_THREAD_ID/CODEX_SESSION_ID env vars, codex CLI flags.
   // Research must verify exact hook type names (SessionStart, UserPromptSubmit,
   // Stop) and which hooks support flow control from Codex official docs.
+  // Research must also verify plugin manifest format (skills/hooks as path
+  // strings vs arrays/objects, no contextFileName field).
   // ==========================================================================
 
   ctx.log('phase:research', 'Researching Codex CLI hook model, skill format, and distribution');
@@ -79,9 +81,12 @@ export async function process(inputs, ctx) {
   integrationFiles.push(...adapter.filesCreated, ...adapter.filesModified);
 
   // ==========================================================================
-  // PHASE 2: PLUGIN + SKILLS
-  // Codex plugin uses .codex-plugin/plugin.json, hooks.json with
+  // PHASE 2: PLUGIN + SKILLS + COMMANDS
+  // Codex plugin uses .codex-plugin/plugin.json (skills/hooks as path
+  // strings, no contextFileName field), hooks.json with
   // SessionStart/UserPromptSubmit/Stop matchers, and skills/ directory.
+  // Commands: ALL 15 command files from plugins/babysitter/commands/ must be
+  // ported identically (harness-agnostic, invoke skills via Skill tool).
   // ==========================================================================
 
   ctx.log('phase:plugin', 'Creating Codex plugin structure and porting skills');
@@ -105,6 +110,8 @@ export async function process(inputs, ctx) {
 
   // ==========================================================================
   // PHASE 3: INSTALL/DIST + HARNESS WRAPPER
+  // PRIMARY install: marketplace-based (babysitter plugin:install).
+  // SECONDARY install: npm/bin-based for development/testing convenience.
   // Codex distribution: npm package with .codex-plugin/ structure.
   // Harness wrapper: codex exec --dangerously-bypass-approvals-and-sandbox
   // ==========================================================================

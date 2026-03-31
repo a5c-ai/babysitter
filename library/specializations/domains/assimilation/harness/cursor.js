@@ -88,9 +88,10 @@ export async function process(inputs, ctx) {
   //      (agent ls), session resume (--resume/--continue). No auto-set env var
   //      for session ID detection — unlike CLAUDE_SESSION_ID.
   //   8. Plugin manifest and marketplace — verify from official docs:
-  //      .cursor-plugin/plugin.json manifest format, Cursor Marketplace
-  //      submission process, ~/.cursor/plugins/local/ for local testing,
-  //      /add-plugin command, and plugin install/uninstall CLI commands.
+  //      .cursor-plugin/plugin.json manifest format (skills/hooks as path
+  //      strings not arrays/objects, no contextFileName field), Cursor
+  //      Marketplace submission process, ~/.cursor/plugins/local/ for local
+  //      testing, /add-plugin command, and plugin install/uninstall CLI commands.
   //   9. Known headless bugs: terminal not fully released, agent hangs
   //      indefinitely without exiting in some versions. Must verify current state.
   //  10. Existing SDK support: cursor entry in KNOWN_HARNESSES (HeadlessPrompt
@@ -136,15 +137,20 @@ export async function process(inputs, ctx) {
   integrationFiles.push(...adapter.filesCreated, ...adapter.filesModified);
 
   // ==========================================================================
-  // PHASE 2: PLUGIN + SKILLS
+  // PHASE 2: PLUGIN + SKILLS + COMMANDS
   // Cursor plugin uses the Cursor Plugin Marketplace model:
-  //   - Manifest: .cursor-plugin/plugin.json
+  //   - Manifest: .cursor-plugin/plugin.json (skills/hooks as path strings,
+  //     no contextFileName field, no inline objects for hooks)
   //   - Can package: rules, skills, agents, commands, MCP servers, hooks
   //   - Local testing: ~/.cursor/plugins/local/
   //   - Distribution: Cursor Marketplace (manually reviewed) or direct install
-  //   - Installation: /add-plugin command in Cursor
+  //   - Installation: /add-plugin command in Cursor (marketplace-first)
   // Skills may be embedded as .cursorrules, .cursor/rules/ entries, or as
   // MCP tool descriptions accessible via the plugin's MCP server.
+  // Commands: ALL 15 command files from plugins/babysitter/commands/ must be
+  // ported identically (assimilate, call, cleanup, contrib, doctor, forever,
+  // help, observe, plan, plugins, project-install, resume, retrospect,
+  // user-install, yolo). Commands are harness-agnostic.
   // ==========================================================================
 
   ctx.log('phase:plugin', 'Creating Cursor plugin structure and porting skills');
@@ -168,6 +174,8 @@ export async function process(inputs, ctx) {
 
   // ==========================================================================
   // PHASE 3: INSTALL/DIST + HARNESS WRAPPER
+  // PRIMARY install: Cursor Plugin Marketplace (marketplace-first).
+  // SECONDARY install: npm/bin-based for development/testing convenience.
   // Cursor distribution: Cursor Plugin Marketplace or ~/.cursor/plugins/local/.
   // Harness wrapper: cursor -p "prompt" --force --output-format json
   //   (headless mode with structured output).

@@ -63,8 +63,10 @@ export const KNOWN_HARNESSES: readonly HarnessSpec[] = [
   {
     name: "cursor",
     cli: "cursor",
-    callerEnvVars: [],
-    capabilities: [Cap.HeadlessPrompt],
+    // CURSOR_PROJECT_DIR and CURSOR_VERSION are set by Cursor in hook execution
+    // contexts only (not in child processes spawned by hooks).
+    callerEnvVars: ["CURSOR_PROJECT_DIR", "CURSOR_VERSION"],
+    capabilities: [Cap.HeadlessPrompt, Cap.StopHook, Cap.SessionBinding, Cap.Mcp],
   },
   {
     name: "gemini-cli",

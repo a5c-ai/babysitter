@@ -52,6 +52,8 @@ export async function process(inputs, ctx) {
   // agent_end event. Shares adapter code with oh-my-pi but distinct plugin,
   // distribution, and CLI surface. Research must verify the loop-driver
   // mechanism and skill format (SKILL.md) from official Pi documentation.
+  // Research must also verify plugin manifest format (skills/hooks as path
+  // strings vs arrays/objects, no contextFileName field).
   // ==========================================================================
 
   ctx.log('phase:research', 'Researching Pi Coding Agent extension model, loop-driver, and distribution');
@@ -82,9 +84,12 @@ export async function process(inputs, ctx) {
   integrationFiles.push(...adapter.filesCreated, ...adapter.filesModified);
 
   // ==========================================================================
-  // PHASE 2: PLUGIN + SKILLS
-  // Pi plugin uses package.json with pi-specific fields, extensions/ for
-  // lifecycle hooks, skills/ for SKILL.md files, bin/ for CLI entry points.
+  // PHASE 2: PLUGIN + SKILLS + COMMANDS
+  // Pi plugin uses package.json with pi-specific fields (skills/hooks as path
+  // strings, no contextFileName field), extensions/ for lifecycle hooks,
+  // skills/ for SKILL.md files, bin/ for CLI entry points.
+  // Commands: ALL 15 command files from plugins/babysitter/commands/ must be
+  // ported identically (harness-agnostic, invoke skills via Skill tool).
   // ==========================================================================
 
   ctx.log('phase:plugin', 'Creating Pi plugin structure and porting skills');
@@ -108,6 +113,8 @@ export async function process(inputs, ctx) {
 
   // ==========================================================================
   // PHASE 3: INSTALL/DIST + HARNESS WRAPPER
+  // PRIMARY install: pi plugin manager (marketplace-first).
+  // SECONDARY install: npm/bin-based for development/testing convenience.
   // Pi distribution: npm package with bin scripts.
   // Harness wrapper: pi --workspace <dir> --prompt <text>
   // ==========================================================================

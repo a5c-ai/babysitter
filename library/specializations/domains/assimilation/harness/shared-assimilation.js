@@ -218,6 +218,9 @@ export const researchHarnessTask = defineTask('research-harness', (args, taskCtx
         // ── F. Read official documentation URLs ──
         `The research agent MUST find and read the harness's official plugin/extension/hook documentation URLs. Do not infer behavior from code patterns or from other harnesses. If official documentation is sparse or missing, document that as a risk — the integration may need to be based on reverse engineering, which carries higher risk of breaking on updates.`,
 
+        // ── H. Plugin manifest format verification ──
+        `Verify the exact schema for plugin.json (or equivalent manifest) for ${args.harnessName} — specifically: which fields use directory paths vs arrays vs inline objects. In particular: how are skills referenced (path string like "skills/" vs array of {name, file} objects)? How are hooks referenced (path string like "hooks.json" vs inline object mapping event names to script paths)? How are commands referenced (path string like "commands/" vs array)? This determines the correct manifest format the createPluginTask must produce.`,
+
         // ── G. Verify stop-hook or equivalent mechanism ──
         `Verify whether ${args.harnessName} has a stop-hook-like mechanism that can BLOCK agent completion and trigger re-entry. This is the single most important determination for the orchestration model. Specifically determine: (1) Can any hook/event prevent the agent from completing its turn? (2) If a hook blocks, does the agent re-enter with the hook's output as context? (3) Or does the harness use a different continuation model (loop-driver events, programmatic session API, or none at all)? Document the EXACT mechanism with references to official docs.`,
 
@@ -466,6 +469,11 @@ export const createPluginTask = defineTask('create-plugin', (args, taskCtx) => (
         'Create any harness-specific config files (hooks.json, .app.json, config.toml, etc.).',
         'Do NOT create orchestration scripts, loop drivers, effect adapters, or result adapters - the SDK handles all of that.',
         'Do NOT create custom tools for run:create, run:iterate, task:post - the babysitter CLI is the tool.',
+
+        // ── PLUGIN MANIFEST FORMAT RULES (CRITICAL) ──
+        'The `skills` field in plugin.json must be a directory path string like `"skills/"` (NOT an array of {name, file} objects). The harness auto-discovers SKILL.md files in subdirectories.',
+        'The `hooks` field in plugin.json must be a path string like `"hooks.json"` (NOT an inline object mapping event names to script paths).',
+        'Do NOT include a `contextFileName` field — context files (.cursorrules, AGENTS.md, GEMINI.md) are discovered by convention, not configured in the manifest.',
       ],
       outputFormat: 'JSON with pluginDir, filesCreated, manifest, hookScripts, summary',
     },
@@ -518,6 +526,13 @@ export const portSkillsTask = defineTask('port-skills', (args, taskCtx) => ({
         'Each skill should use the SDK CLI instructions command to generate its content dynamically, not embed static instructions.',
         'Ensure the skill frontmatter has correct allowed-tools for the target harness.',
         'If the harness uses AGENTS.md or GEMINI.md instead of individual SKILL.md files, create the appropriate format.',
+
+        // ── COMMANDS DIRECTORY PORTING (CRITICAL) ──
+        'IMPORTANT: In addition to skills, you MUST also create a commands/ directory in the plugin with ALL 15 command files from the reference plugin. Read plugins/babysitter/commands/ and copy ALL files identically.',
+        'The 15 commands to port are: assimilate, call, cleanup, contrib, doctor, forever, help, observe, plan, plugins, project-install, resume, retrospect, user-install, yolo.',
+        'Commands are harness-agnostic — they invoke skills via the Skill tool and do NOT contain harness-specific logic. Copy them identically from the reference plugin.',
+        'The commands/ directory structure must mirror plugins/babysitter/commands/ exactly. Each command file defines a slash command that users invoke (e.g. /babysit, /call, /doctor).',
+        'Verify that the plugin manifest references the commands/ directory so the harness can discover and register all commands.',
       ],
       outputFormat: 'JSON with skillsPorted, filesCreated, format, summary',
     },
@@ -571,6 +586,11 @@ export const createInstallDistTask = defineTask('create-install-dist', (args, ta
         'If the harness uses npm distribution, set up package.json with correct bin, files, and omp/pi fields.',
         'Ensure the install flow uses babysitter plugin:install or equivalent for registration.',
         'The install script should be idempotent - safe to run multiple times.',
+
+        // ── MARKETPLACE-FIRST INSTALLATION (CRITICAL) ──
+        'The PRIMARY installation method must be marketplace-based (e.g. `copilot plugin install OWNER/REPO:path`, Cursor Marketplace, `babysitter plugin:install`). Document this as the recommended approach.',
+        'npm/bin-based installation (npm install -g, npx) is a SECONDARY or development method, not the primary recommendation.',
+        'The install scripts (bin/install.js) are for development/testing convenience, not the primary distribution mechanism.',
       ],
       outputFormat: 'JSON with method, filesCreated, installCommand, uninstallCommand, summary',
     },
@@ -712,6 +732,11 @@ export const writeReadmeTask = defineTask('write-readme', (args, taskCtx) => ({
         'Document common issues: missing CLI, hook registration failures, stale state, permission errors.',
         'Include a section on upgrading and uninstalling.',
         'Reference the canonical babysit contract without weakening it.',
+
+        // ── MARKETPLACE-FIRST README (CRITICAL) ──
+        'Installation section must list marketplace/plugin-system installation as the PRIMARY method. npm/bin-based installation should be under "Alternative Installation" or "Development" section.',
+        'Include a plugin structure section (directory tree showing skills/, commands/, hooks/, plugin.json, etc.).',
+        'Include a marketplace distribution section explaining how to publish and discover the plugin through the harness marketplace.',
       ],
       outputFormat: 'JSON with readmePath, filesCreated, sections, summary',
     },

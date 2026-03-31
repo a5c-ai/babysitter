@@ -50,6 +50,8 @@ export async function process(inputs, ctx) {
   // MCP helpers. Claimed to have no shell hooks - uses event-based plugin
   // model. Research MUST verify this from official OpenCode documentation
   // and determine whether events can control flow or are fire-and-forget.
+  // Research must also verify plugin manifest format (skills/hooks as path
+  // strings vs arrays/objects, no contextFileName field).
   // ==========================================================================
 
   ctx.log('phase:research', 'Researching OpenCode plugin model, event system, and distribution');
@@ -79,7 +81,10 @@ export async function process(inputs, ctx) {
   integrationFiles.push(...adapter.filesCreated, ...adapter.filesModified);
 
   // ==========================================================================
-  // PHASE 2: PLUGIN + SKILLS
+  // PHASE 2: PLUGIN + SKILLS + COMMANDS
+  // Plugin manifest: skills/hooks as path strings, no contextFileName field.
+  // Commands: ALL 15 command files from plugins/babysitter/commands/ must be
+  // ported identically (harness-agnostic, invoke skills via Skill tool).
   // ==========================================================================
 
   ctx.log('phase:plugin', 'Creating OpenCode plugin and porting skills');
@@ -103,6 +108,8 @@ export async function process(inputs, ctx) {
 
   // ==========================================================================
   // PHASE 3: INSTALL/DIST + HARNESS WRAPPER
+  // PRIMARY install: marketplace/plugin-system (marketplace-first).
+  // SECONDARY install: npm/bin-based for development/testing convenience.
   // ==========================================================================
 
   ctx.log('phase:install', 'Creating install/dist method and verifying harness wrapper');

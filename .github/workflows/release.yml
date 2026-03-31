@@ -72,6 +72,11 @@ jobs:
           set -euo pipefail
           bash plugins/babysitter-github/test/plugin-validate.sh 2>&1 | tee artifacts/logs/babysitter-github-validate.log
 
+      - name: babysitter-cursor plugin validation
+        run: |
+          set -euo pipefail
+          bash plugins/babysitter-cursor/test/plugin-validate.sh 2>&1 | tee artifacts/logs/babysitter-cursor-validate.log
+
       - name: Upload build logs
         uses: actions/upload-artifact@v4
         with:
@@ -136,7 +141,7 @@ jobs:
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add package.json packages/sdk/package.json packages/babysitter/package.json package-lock.json CHANGELOG.md plugins/babysitter/.claude-plugin/plugin.json plugins/babysitter/plugin.json plugins/babysitter/versions.json plugins/babysitter-codex/package.json plugins/babysitter-codex/package-lock.json plugins/babysitter-codex/versions.json plugins/babysitter-gemini/versions.json plugins/babysitter-pi/versions.json plugins/babysitter-github/versions.json plugins/babysitter-github/package.json .claude-plugin/marketplace.json
+          git add package.json packages/sdk/package.json packages/babysitter/package.json package-lock.json CHANGELOG.md plugins/babysitter/.claude-plugin/plugin.json plugins/babysitter/plugin.json plugins/babysitter/versions.json plugins/babysitter-codex/package.json plugins/babysitter-codex/package-lock.json plugins/babysitter-codex/versions.json plugins/babysitter-gemini/versions.json plugins/babysitter-pi/versions.json plugins/babysitter-github/versions.json plugins/babysitter-github/package.json plugins/babysitter-cursor/versions.json plugins/babysitter-cursor/package.json .claude-plugin/marketplace.json
           if git diff --cached --quiet; then
             echo "No version changes detected."
           else
@@ -157,6 +162,7 @@ jobs:
           (cd packages/babysitter && npm pack --pack-destination ../../artifacts/release)
           (cd plugins/babysitter-codex && npm pack --pack-destination ../../artifacts/release)
           (cd plugins/babysitter-github && npm pack --pack-destination ../../artifacts/release)
+          (cd plugins/babysitter-cursor && npm pack --pack-destination ../../artifacts/release)
 
       - name: Generate artifact checksums
         run: |
@@ -215,6 +221,26 @@ jobs:
           set -euo pipefail
           npm run deploy
         working-directory: plugins/babysitter-github
+
+      - name: Inject SDK dependency into cursor package for publish
+        run: |
+          set -euo pipefail
+          node -e "
+            const fs = require('fs');
+            const pkgPath = 'plugins/babysitter-cursor/package.json';
+            const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
+            pkg.dependencies = pkg.dependencies || {};
+            pkg.dependencies['@a5c-ai/babysitter-sdk'] = '${{ steps.bump.outputs.version }}';
+            fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2) + '\n');
+          "
+
+      - name: Publish babysitter-cursor package to npm
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          set -euo pipefail
+          npm run deploy
+        working-directory: plugins/babysitter-cursor
 
       - name: Inject SDK dependency into metapackage for publish
         run: |

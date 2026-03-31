@@ -33,6 +33,7 @@ const pluginManifests = [
 const codexPackageManifestPath = "plugins/babysitter-codex/package.json";
 const codexPackageLockPath = "plugins/babysitter-codex/package-lock.json";
 const githubPackageManifestPath = "plugins/babysitter-github/package.json";
+const cursorPackageManifestPath = "plugins/babysitter-cursor/package.json";
 
 const manifests = packageManifests.map(({ path }) => ({
   path,
@@ -53,6 +54,12 @@ const githubPackageManifest = existsSync(githubPackageManifestPath)
   ? {
       path: githubPackageManifestPath,
       data: JSON.parse(readFileSync(githubPackageManifestPath, "utf8")),
+    }
+  : null;
+const cursorPackageManifest = existsSync(cursorPackageManifestPath)
+  ? {
+      path: cursorPackageManifestPath,
+      data: JSON.parse(readFileSync(cursorPackageManifestPath, "utf8")),
     }
   : null;
 
@@ -119,6 +126,17 @@ if (githubPackageManifest) {
   );
 }
 
+// Update Cursor package manifest - keep its own version stream, bumped by policy.
+if (cursorPackageManifest) {
+  const currentCursorVersion = cursorPackageManifest.data.version;
+  const newCursorVersion = bumpVersion(currentCursorVersion, bumpTarget);
+  cursorPackageManifest.data.version = newCursorVersion;
+  writeFileSync(
+    cursorPackageManifest.path,
+    `${JSON.stringify(cursorPackageManifest.data, null, 2)}\n`,
+  );
+}
+
 // Write sdkVersion to versions.json (separate from plugin.json to avoid
 // Claude Code's plugin validator rejecting unrecognized keys)
 for (const versionsPath of [
@@ -127,6 +145,7 @@ for (const versionsPath of [
   "plugins/babysitter-gemini/versions.json",
   "plugins/babysitter-pi/versions.json",
   "plugins/babysitter-github/versions.json",
+  "plugins/babysitter-cursor/versions.json",
 ]) {
   const versionsData = existsSync(versionsPath)
     ? JSON.parse(readFileSync(versionsPath, "utf8"))

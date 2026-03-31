@@ -89,9 +89,9 @@ describe("buildHarnessArgs", () => {
     expect(args).toEqual(["--prompt", "Hello world"]);
   });
 
-  it("builds args for cursor (--prompt only)", () => {
+  it("builds args for cursor (agent base args + positional prompt)", () => {
     const args = buildHarnessArgs("cursor", baseOptions);
-    expect(args).toEqual(["--prompt", "Hello world"]);
+    expect(args).toEqual(["agent", "Hello world"]);
   });
 
   it("builds args for opencode (--prompt only)", () => {
@@ -122,9 +122,9 @@ describe("buildHarnessArgs", () => {
     ]);
   });
 
-  it("does not include --model for cursor (unsupported)", () => {
+  it("includes --model for cursor (now supported)", () => {
     const args = buildHarnessArgs("cursor", { ...baseOptions, model: "some-model" });
-    expect(args).toEqual(["--prompt", "Hello world"]);
+    expect(args).toEqual(["agent", "Hello world", "--model", "some-model"]);
   });
 
   it("does not include --model for opencode (unsupported)", () => {

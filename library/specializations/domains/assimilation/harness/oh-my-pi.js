@@ -55,6 +55,8 @@ export async function process(inputs, ctx) {
   // edits, LSP integration. Loop-driver via agent_end event — research must
   // verify this mechanism from official docs and confirm whether agent_end
   // can block completion (like a stop-hook) or only triggers continuation.
+  // Research must also verify plugin manifest format (skills/hooks as path
+  // strings vs arrays/objects, no contextFileName field).
   // ==========================================================================
 
   ctx.log('phase:research', 'Researching oh-my-pi extension API, plugin manager, and distribution');
@@ -86,11 +88,14 @@ export async function process(inputs, ctx) {
   integrationFiles.push(...adapter.filesCreated, ...adapter.filesModified);
 
   // ==========================================================================
-  // PHASE 2: PLUGIN + SKILLS
-  // Oh-my-pi plugin uses package.json with omp field, extensions/ for lifecycle
-  // and custom tool registration, skills/ for SKILL.md files, bin/ for CLI
-  // entry points. Can also leverage TUI widget registration and status line
-  // integration for babysitter run status display.
+  // PHASE 2: PLUGIN + SKILLS + COMMANDS
+  // Oh-my-pi plugin uses package.json with omp field (skills/hooks as path
+  // strings, no contextFileName field), extensions/ for lifecycle and custom
+  // tool registration, skills/ for SKILL.md files, bin/ for CLI entry points.
+  // Can also leverage TUI widget registration and status line integration
+  // for babysitter run status display.
+  // Commands: ALL 15 command files from plugins/babysitter/commands/ must be
+  // ported identically (harness-agnostic, invoke skills via Skill tool).
   // ==========================================================================
 
   ctx.log('phase:plugin', 'Creating oh-my-pi plugin structure and porting skills');
@@ -114,6 +119,8 @@ export async function process(inputs, ctx) {
 
   // ==========================================================================
   // PHASE 3: INSTALL/DIST + HARNESS WRAPPER
+  // PRIMARY install: omp plugin manager (marketplace-first).
+  // SECONDARY install: npm/bin-based for development/testing convenience.
   // Oh-my-pi distribution: npm package, installable via omp plugin manager
   // (omp plugin install) or npm directly.
   // Harness wrapper: omp --workspace <dir> --prompt <text>

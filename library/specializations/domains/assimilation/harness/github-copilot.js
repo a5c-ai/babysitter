@@ -103,7 +103,8 @@ export async function process(inputs, ctx) {
   //      powershell, cwd, timeoutSec fields.
   //  15. Verify plugin manifest locations (.plugin/, .github/plugin/,
   //      .claude-plugin/, or repo root) and install via CLI commands
-  //      (copilot plugin install OWNER/REPO).
+  //      (copilot plugin install OWNER/REPO). Verify manifest format:
+  //      skills/hooks as path strings, no contextFileName field.
   //  16. Verify marketplace system: marketplace.json, copilot plugin
   //      marketplace add/browse/list commands, storage at
   //      ~/.copilot/installed-plugins/.
@@ -146,12 +147,17 @@ export async function process(inputs, ctx) {
   integrationFiles.push(...adapter.filesCreated, ...adapter.filesModified);
 
   // ==========================================================================
-  // PHASE 2: PLUGIN + SKILLS
+  // PHASE 2: PLUGIN + SKILLS + COMMANDS
   // GitHub plugin may use the `gh extension` model:
   //   - Extension is a Git repo with gh-babysitter as the binary/script name
   //   - Installed via: gh extension install a5c-ai/gh-babysitter
   //   - Skills adapted to work within gh extension invocation model
+  //   - Plugin manifest: skills/hooks as path strings, no contextFileName
   // Or it may use config-based integration if Copilot supports it.
+  // Commands: ALL 15 command files from plugins/babysitter/commands/ must be
+  // ported identically (assimilate, call, cleanup, contrib, doctor, forever,
+  // help, observe, plan, plugins, project-install, resume, retrospect,
+  // user-install, yolo). Commands are harness-agnostic.
   // ==========================================================================
 
   ctx.log('phase:plugin', 'Creating GitHub CLI plugin/extension and porting skills');
@@ -175,6 +181,8 @@ export async function process(inputs, ctx) {
 
   // ==========================================================================
   // PHASE 3: INSTALL/DIST + HARNESS WRAPPER
+  // PRIMARY install: marketplace-based (copilot plugin install OWNER/REPO).
+  // SECONDARY install: npm/bin-based for development/testing convenience.
   // GitHub distribution: gh extension install owner/repo
   // Harness wrapper: gh copilot suggest "prompt" or equivalent
   // ==========================================================================

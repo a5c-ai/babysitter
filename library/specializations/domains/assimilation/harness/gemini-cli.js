@@ -50,6 +50,8 @@ export async function process(inputs, ctx) {
   // GEMINI_SESSION_ID/GEMINI_PROJECT_DIR/GEMINI_CWD env vars.
   // Research must verify exact hook type names and whether AfterAgent (not
   // Stop) is the correct continuation hook from Gemini CLI official docs.
+  // Research must also verify plugin manifest format (skills/hooks as path
+  // strings vs arrays/objects, no contextFileName field).
   // ==========================================================================
 
   ctx.log('phase:research', 'Researching Gemini CLI extension model, hook chain, and distribution');
@@ -79,9 +81,12 @@ export async function process(inputs, ctx) {
   integrationFiles.push(...adapter.filesCreated, ...adapter.filesModified);
 
   // ==========================================================================
-  // PHASE 2: PLUGIN + SKILLS
-  // Gemini plugin uses extension manifest, GEMINI.md for instructions,
+  // PHASE 2: PLUGIN + SKILLS + COMMANDS
+  // Gemini plugin uses extension manifest (skills/hooks as path strings,
+  // no contextFileName field), GEMINI.md for instructions,
   // skills activated via activate_skill tool.
+  // Commands: ALL 15 command files from plugins/babysitter/commands/ must be
+  // ported identically (harness-agnostic, invoke skills via Skill tool).
   // ==========================================================================
 
   ctx.log('phase:plugin', 'Creating Gemini CLI plugin and porting skills');
@@ -105,6 +110,8 @@ export async function process(inputs, ctx) {
 
   // ==========================================================================
   // PHASE 3: INSTALL/DIST + HARNESS WRAPPER
+  // PRIMARY install: marketplace/extension-system (marketplace-first).
+  // SECONDARY install: npm/bin-based for development/testing convenience.
   // ==========================================================================
 
   ctx.log('phase:install', 'Creating install/dist method and verifying harness wrapper');

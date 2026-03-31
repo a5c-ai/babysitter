@@ -134,6 +134,46 @@ export function createGithubCopilotContext(
 }
 
 /**
+ * Create a PromptContext pre-configured for Cursor IDE/CLI.
+ */
+export function createCursorContext(
+  overrides?: Partial<PromptContext>,
+): PromptContext {
+  return {
+    ...COMMON_DEFAULTS,
+    harness: 'cursor',
+    harnessLabel: 'Cursor',
+    capabilities: ['hooks', 'stop-hook', 'mcp', 'task-tool', 'breakpoint-routing'],
+    pluginRootVar: '${CURSOR_PLUGIN_ROOT}',
+    // Stop-hook model: Cursor's stop hook returns {followup_message: "..."}
+    // to auto-continue (controlled by loop_limit in hooks.json).
+    loopControlTerm: 'stop-hook',
+    sessionBindingFlags: '--state-dir .a5c/state',
+    hookDriven: true,
+    interactiveToolName: 'AskUserQuestion tool',
+    sessionEnvVars: 'conversation_id (via hook stdin JSON)',
+    resumeFlags: '--state-dir .a5c/state',
+    cliSetupSnippet: [
+      'Use the installed CLI alias:',
+      '',
+      '```bash',
+      'CLI="babysitter"',
+      '```',
+      '',
+      'If it is not available on the path, use:',
+      '',
+      '```bash',
+      'CLI="npx -y @a5c-ai/babysitter-sdk"',
+      '```',
+    ].join('\n'),
+    iterateFlags: '',
+    hasIntentFidelityChecks: false,
+    hasNonNegotiables: false,
+    ...overrides,
+  } as PromptContext;
+}
+
+/**
  * Create a PromptContext pre-configured for PI.
  */
 export function createPiContext(

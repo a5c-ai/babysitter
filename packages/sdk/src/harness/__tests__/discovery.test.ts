@@ -103,6 +103,8 @@ const CALLER_ENV_KEYS = [
   "GEMINI_SESSION_ID",
   "GEMINI_PROJECT_DIR",
   "GEMINI_CWD",
+  "CURSOR_PROJECT_DIR",
+  "CURSOR_VERSION",
 ];
 
 let savedEnv: Record<string, string | undefined>;
@@ -474,8 +476,29 @@ describe("detectCallerHarness", () => {
     expect(caller!.capabilities).toContain("headless-prompt");
   });
 
-  it("cursor is never detected as caller (no env vars)", () => {
-    // Set unrelated env var to confirm it doesn't accidentally match
+  it("detects cursor via CURSOR_PROJECT_DIR", () => {
+    process.env.CURSOR_PROJECT_DIR = "/home/user/project";
+
+    const caller = detectCallerHarness();
+
+    expect(caller).not.toBeNull();
+    expect(caller!.name).toBe("cursor");
+    expect(caller!.matchedEnvVars).toContain("CURSOR_PROJECT_DIR");
+  });
+
+  it("detects cursor via CURSOR_VERSION", () => {
+    process.env.CURSOR_VERSION = "1.7.0";
+
+    const caller = detectCallerHarness();
+
+    expect(caller).not.toBeNull();
+    expect(caller!.name).toBe("cursor");
+    expect(caller!.matchedEnvVars).toContain("CURSOR_VERSION");
+  });
+
+  it("does not detect cursor from unrelated CURSOR_SESSION_ID env var", () => {
+    // CURSOR_SESSION_ID is not in callerEnvVars — only CURSOR_PROJECT_DIR
+    // and CURSOR_VERSION are used for detection
     process.env.CURSOR_SESSION_ID = "cursor-123";
 
     const caller = detectCallerHarness();
