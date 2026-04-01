@@ -88,7 +88,20 @@ echo "=== Test 4: Hook scripts ==="
 
 HOOK_SCRIPTS=$(node -e "
   const p = JSON.parse(require('fs').readFileSync(process.argv[1],'utf8'));
-  Object.values(p.hooks || {}).forEach(h => console.log(h));
+  if (typeof p.hooks === 'string') {
+    // New format: hooks is a path to hooks.json — extract bash scripts from there
+    const path = require('path');
+    const hooksPath = path.resolve(path.dirname(process.argv[1]), p.hooks);
+    const h = JSON.parse(require('fs').readFileSync(hooksPath,'utf8'));
+    for (const matchers of Object.values(h.hooks || {})) {
+      for (const m of matchers) {
+        if (m.bash) console.log(m.bash.replace(/^\\.\\//,''));
+      }
+    }
+  } else {
+    // Old format: hooks is an object mapping types to script paths
+    Object.values(p.hooks || {}).forEach(h => console.log(h));
+  }
 " "$PLUGIN_DIR/plugin.json" 2>/dev/null)
 
 while IFS= read -r hook_path; do
@@ -139,8 +152,25 @@ echo ""
 echo "=== Test 6: SKILL.md files ==="
 
 SKILL_FILES=$(node -e "
-  const p = JSON.parse(require('fs').readFileSync(process.argv[1],'utf8'));
-  (p.skills || []).forEach(s => console.log(s.name + '|' + s.file));
+  const fs = require('fs');
+  const path = require('path');
+  const p = JSON.parse(fs.readFileSync(process.argv[1],'utf8'));
+  if (typeof p.skills === 'string') {
+    // New format: skills is a directory path — scan for SKILL.md files
+    const skillsDir = path.resolve(path.dirname(process.argv[1]), p.skills);
+    if (fs.existsSync(skillsDir)) {
+      for (const entry of fs.readdirSync(skillsDir)) {
+        const skillMd = path.join(skillsDir, entry, 'SKILL.md');
+        if (fs.existsSync(skillMd)) {
+          const rel = path.relative(path.dirname(process.argv[1]), skillMd).replace(/\\\\/g,'/');
+          console.log(entry + '|' + rel);
+        }
+      }
+    }
+  } else {
+    // Old format: skills is an array of {name, file}
+    (p.skills || []).forEach(s => console.log(s.name + '|' + s.file));
+  }
 " "$PLUGIN_DIR/plugin.json" 2>/dev/null)
 
 while IFS='|' read -r skill_name skill_file; do
@@ -218,8 +248,17 @@ echo ""
 echo "=== Test 10: Hook type consistency ==="
 
 PLUGIN_HOOK_TYPES=$(node -e "
-  const p = JSON.parse(require('fs').readFileSync(process.argv[1],'utf8'));
-  console.log(Object.keys(p.hooks || {}).sort().join(','));
+  const fs = require('fs');
+  const path = require('path');
+  const p = JSON.parse(fs.readFileSync(process.argv[1],'utf8'));
+  if (typeof p.hooks === 'string') {
+    // New format: hooks is a file reference — read types from that file
+    const hooksPath = path.resolve(path.dirname(process.argv[1]), p.hooks);
+    const h = JSON.parse(fs.readFileSync(hooksPath,'utf8'));
+    console.log(Object.keys(h.hooks || {}).sort().join(','));
+  } else {
+    console.log(Object.keys(p.hooks || {}).sort().join(','));
+  }
 " "$PLUGIN_DIR/plugin.json" 2>/dev/null)
 
 HOOKS_JSON_TYPES=$(node -e "
