@@ -128,6 +128,82 @@ describe("CLI main entry", () => {
     expect(payload.dryRun).toBe(true);
   });
 
+  it("accepts inline JSON values for task:post", async () => {
+    buildEffectIndexMock.mockResolvedValue(mockEffectIndex([nodeEffectRecord("ef-inline")]));
+
+    const cli = createBabysitterCli();
+    const exitCode = await cli.run([
+      "task:post",
+      "runs/demo",
+      "ef-inline",
+      "--status",
+      "ok",
+      "--value-inline",
+      '{"approved":true,"response":"Proceed"}',
+      "--runs-dir",
+      ".",
+    ]);
+
+    expect(exitCode).toBe(0);
+    expect(commitEffectResultMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        runDir: path.resolve("runs/demo"),
+        effectId: "ef-inline",
+        result: expect.objectContaining({
+          status: "ok",
+          value: {
+            approved: true,
+            response: "Proceed",
+          },
+        }),
+      })
+    );
+  });
+
+  it("rejects task:post when --value and --value-inline are combined", async () => {
+    buildEffectIndexMock.mockResolvedValue(mockEffectIndex([nodeEffectRecord("ef-inline")]));
+
+    const cli = createBabysitterCli();
+    const exitCode = await cli.run([
+      "task:post",
+      "runs/demo",
+      "ef-inline",
+      "--status",
+      "ok",
+      "--value",
+      "tasks/ef-inline/output.json",
+      "--value-inline",
+      '{"approved":true}',
+      "--runs-dir",
+      ".",
+    ]);
+
+    expect(exitCode).toBe(1);
+    expect(commitEffectResultMock).not.toHaveBeenCalled();
+    expect(errorSpy).toHaveBeenCalledWith("[task:post] cannot combine --value with --value-inline");
+  });
+
+  it("rejects task:post --value-inline when posting an error result", async () => {
+    buildEffectIndexMock.mockResolvedValue(mockEffectIndex([nodeEffectRecord("ef-inline")]));
+
+    const cli = createBabysitterCli();
+    const exitCode = await cli.run([
+      "task:post",
+      "runs/demo",
+      "ef-inline",
+      "--status",
+      "error",
+      "--value-inline",
+      '{"message":"nope"}',
+      "--runs-dir",
+      ".",
+    ]);
+
+    expect(exitCode).toBe(1);
+    expect(commitEffectResultMock).not.toHaveBeenCalled();
+    expect(errorSpy).toHaveBeenCalledWith("[task:post] --value-inline is only supported with --status ok");
+  });
+
   it("errors when the effect id is missing from the index", async () => {
     buildEffectIndexMock.mockResolvedValue(mockEffectIndex([]));
 

@@ -555,6 +555,7 @@ Posts a result for an executed task. This is how you commit external execution r
 babysitter task:post <runId> <effectId> \
   --status <ok|error> \
   [--value <file>] \
+  [--value-inline <json>] \
   [--error <file>] \
   [--stdout-ref <ref>] \
   [--stderr-ref <ref>] \
@@ -574,6 +575,7 @@ babysitter task:post <runId> <effectId> \
 |--------|----------|-------------|
 | `--status <ok\|error>` | Yes | Task completion status |
 | `--value <file>` | No | Path to result value JSON (for status=ok) |
+| `--value-inline <json>` | No | Inline JSON result value (for status=ok, cannot be combined with `--value`) |
 | `--error <file>` | No | Path to error payload JSON (for status=error) |
 | `--stdout-ref <ref>` | No | Reference to stdout file |
 | `--stderr-ref <ref>` | No | Reference to stderr file |
@@ -604,8 +606,8 @@ babysitter task:post <runId> <effectId> \
 #### Important Notes
 
 1. **Do NOT write `result.json` directly** - The SDK owns this file
-2. Write your result value to a separate file (e.g., `output.json`)
-3. Pass the value file via `--value` flag
+2. Provide your result value either as a separate file (for example `output.json`) or inline JSON
+3. Pass the value via `--value <file>` or `--value-inline '<json>'`
 4. The CLI will create the proper `result.json` with metadata
 
 #### Examples
@@ -616,6 +618,12 @@ echo '{"score": 85}' > tasks/ef-build-001/output.json
 babysitter task:post run-20260125-143012 ef-build-001 \
   --status ok \
   --value tasks/ef-build-001/output.json \
+  --json
+
+# Post successful result inline
+babysitter task:post run-20260125-143012 ef-build-001 \
+  --status ok \
+  --value-inline '{"approved": true}' \
   --json
 
 # Post with stdout/stderr

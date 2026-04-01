@@ -88,7 +88,7 @@ const USAGE = `Usage:
   babysitter run:repair-journal <runDir> [--runs-dir <dir>] [--json] [--dry-run]
   babysitter run:iterate <runDir> [--runs-dir <dir>] [--json] [--verbose] [--iteration <n>]
   babysitter run:execute-tasks <runDir> [--runs-dir <dir>] [--json] [--verbose] [--dry-run] [--max-tasks <n>] [--kind <kind>] [--timeout <ms>]
-  babysitter task:post <runDir> <effectId> --status <ok|error> [--runs-dir <dir>] [--json] [--dry-run] [--value <file>] [--error <file>] [--stdout-ref <ref>] [--stderr-ref <ref>] [--stdout-file <file>] [--stderr-file <file>] [--started-at <iso8601>] [--finished-at <iso8601>] [--metadata <file>] [--invocation-key <key>]
+  babysitter task:post <runDir> <effectId> --status <ok|error> [--runs-dir <dir>] [--json] [--dry-run] [--value <file>] [--value-inline <json>] [--error <file>] [--stdout-ref <ref>] [--stderr-ref <ref>] [--stdout-file <file>] [--stderr-file <file>] [--started-at <iso8601>] [--finished-at <iso8601>] [--metadata <file>] [--invocation-key <key>]
   babysitter task:list <runDir> [--runs-dir <dir>] [--pending] [--kind <kind>] [--json]
   babysitter task:show <runDir> <effectId> [--runs-dir <dir>] [--json]
   babysitter session:init --session-id <id> --state-dir <dir> [--max-iterations <n>] [--run-id <id>] [--prompt <text>] [--json]
@@ -190,6 +190,7 @@ interface ParsedArgs {
   effectId?: string;
   taskStatus?: "ok" | "error";
   valuePath?: string;
+  valueInline?: string;
   errorPath?: string;
   stdoutRef?: string;
   stderrRef?: string;
@@ -388,6 +389,10 @@ function parseArgs(argv: string[]): ParsedArgs {
     }
     if (arg === "--value") {
       parsed.valuePath = expectFlagValue(rest, ++i, "--value");
+      continue;
+    }
+    if (arg === "--value-inline") {
+      parsed.valueInline = expectFlagValue(rest, ++i, "--value-inline");
       continue;
     }
     if (arg === "--error") {
@@ -1661,6 +1666,14 @@ async function handleTaskPost(parsed: ParsedArgs): Promise<number> {
     console.error(`[task:post] cannot combine --stderr-ref with --stderr-file`);
     return 1;
   }
+  if (parsed.valuePath && parsed.valueInline) {
+    console.error(`[task:post] cannot combine --value with --value-inline`);
+    return 1;
+  }
+  if (parsed.taskStatus === "error" && parsed.valueInline) {
+    console.error(`[task:post] --value-inline is only supported with --status ok`);
+    return 1;
+  }
 
   const runDir = resolveRunDir(parsed.runsDir, parsed.runDirArg);
   const secretLogsAllowed = allowSecretLogs(parsed);
@@ -1711,6 +1724,12 @@ async function handleTaskPost(parsed: ParsedArgs): Promise<number> {
     return trimmed.length ? (JSON.parse(trimmed) as unknown) : undefined;
   };
 
+  const readInlineJson = (raw?: string): unknown => {
+    if (!raw) return undefined;
+    const trimmed = raw.trim();
+    return trimmed.length ? (JSON.parse(trimmed) as unknown) : undefined;
+  };
+
   const readTextFile = async (_label: string, filename?: string): Promise<string | undefined> => {
     if (!filename) return undefined;
     if (filename === "-") {
@@ -1728,7 +1747,7 @@ async function handleTaskPost(parsed: ParsedArgs): Promise<number> {
   let value: unknown = undefined;
   let errorPayload: unknown = undefined;
   if (parsed.taskStatus === "ok") {
-    value = await readJsonFile("value", parsed.valuePath);
+    value = parsed.valueInline ? readInlineJson(parsed.valueInline) : await readJsonFile("value", parsed.valuePath);
   } else {
     errorPayload =
       (await readJsonFile("error", parsed.errorPath)) ??
@@ -1744,7 +1763,7 @@ async function handleTaskPost(parsed: ParsedArgs): Promise<number> {
     runDir: toRunRelativePosix(runDir, runDir) ?? runDir,
     effectId: parsed.effectId,
     status: parsed.taskStatus,
-    valueProvided: parsed.valuePath ? true : false,
+    valueProvided: parsed.valuePath || parsed.valueInline ? true : false,
     errorProvided: parsed.errorPath ? true : false,
     stdoutRef: parsed.stdoutRef ?? null,
     stderrRef: parsed.stderrRef ?? null,
