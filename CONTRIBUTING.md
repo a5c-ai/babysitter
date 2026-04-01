@@ -51,7 +51,7 @@ npm install
 
 ```bash
 claude plugin marketplace add a5c-ai/babysitter
-claude plugin install --scope user babysitter@a5c.ai
+claude plugin install --scope user babysitter@a5c-ai
 ```
 
 Then restart Claude Code. Verify installation by typing `/skills` — "babysit" should appear.

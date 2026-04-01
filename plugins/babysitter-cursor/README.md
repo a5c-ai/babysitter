@@ -27,22 +27,27 @@ npm install -g @a5c-ai/babysitter-sdk
 
 ### Via Cursor Marketplace (recommended)
 
-Install directly from the Cursor Marketplace:
+Install through Cursor's marketplace UI using the repo-root
+`/.cursor-plugin/marketplace.json` manifest:
 
-1. Open **Cursor IDE** and navigate to **Settings > Plugins**
-2. Search for **babysitter-cursor**
-3. Click **Install**
+1. Add this repository as a Cursor marketplace source
+2. Open the marketplace entry named **a5c-ai**
+3. Install the plugin named **babysitter**
 
 ### Via Babysitter plugin manager
 
+This path installs the Babysitter plugin package named
+`babysitter-cursor` from the SDK marketplace, not the Cursor UI plugin
+entry:
+
 ```bash
-babysitter plugin:install babysitter-cursor --marketplace-name a5c.ai --global
+babysitter plugin:install babysitter-cursor --marketplace-name a5c-ai --global
 ```
 
 ### Workspace installation
 
 ```bash
-babysitter plugin:install babysitter-cursor --marketplace-name a5c.ai --project
+babysitter plugin:install babysitter-cursor --marketplace-name a5c-ai --project
 ```
 
 If the workspace does not already have an active process-library binding, the
@@ -307,7 +312,7 @@ The Cursor marketplace manifest lives at `.cursor-plugin/plugin.json`:
 
 ```json
 {
-  "name": "babysitter-cursor",
+  "name": "babysitter",
   "version": "0.1.0",
   "description": "Babysitter orchestration plugin for Cursor IDE/CLI ...",
   "author": {
@@ -329,26 +334,25 @@ references the `hooks.json` configuration file.
 
 ### Marketplace Manifest
 
-To distribute through a marketplace, add the plugin to the marketplace's
-`marketplace.json`:
+The repo-root Cursor marketplace manifest lives at `/.cursor-plugin/marketplace.json`:
 
 ```json
 {
-  "name": "a5c.ai",
+  "name": "a5c-ai",
   "owner": {
-    "name": "a5c.ai",
+    "name": "a5c-ai",
     "email": "support@a5c.ai"
   },
   "metadata": {
     "description": "Babysitter orchestration plugins",
-    "version": "1.0.0"
+    "pluginRoot": "plugins"
   },
   "plugins": [
     {
-      "name": "babysitter-cursor",
+      "name": "babysitter",
       "description": "Multi-step workflow orchestration for Cursor IDE",
       "version": "0.1.0",
-      "source": "./plugins/babysitter-cursor"
+      "source": "babysitter-cursor"
     }
   ]
 }
@@ -357,9 +361,9 @@ To distribute through a marketplace, add the plugin to the marketplace's
 ### User Commands
 
 ```bash
-babysitter plugin:add-marketplace --marketplace-url https://github.com/a5c-ai/babysitter --global
-babysitter plugin:list-plugins --marketplace-name a5c.ai --global
-babysitter plugin:install babysitter-cursor --marketplace-name a5c.ai --global
+babysitter plugin:add-marketplace --marketplace-url https://github.com/a5c-ai/babysitter --marketplace-path plugins/a5c/marketplace/marketplace.json --global
+babysitter plugin:list-plugins --marketplace-name a5c-ai --global
+babysitter plugin:install babysitter-cursor --marketplace-name a5c-ai --global
 ```
 
 ## Troubleshooting

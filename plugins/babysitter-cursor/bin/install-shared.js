@@ -140,11 +140,19 @@ function writeJson(filePath, value) {
   writeFileIfChanged(filePath, `${JSON.stringify(value, null, 2)}\n`);
 }
 
+function normalizeMarketplaceName(name) {
+  const raw = String(name || '').trim();
+  const sanitized = raw
+    .replace(/[^A-Za-z0-9_-]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+  return sanitized || DEFAULT_MARKETPLACE.name;
+}
+
 function ensureMarketplaceEntry(marketplacePath, pluginSourcePath) {
   const marketplace = fs.existsSync(marketplacePath)
     ? readJson(marketplacePath)
     : { ...DEFAULT_MARKETPLACE, plugins: [] };
-  marketplace.name = marketplace.name || DEFAULT_MARKETPLACE.name;
+  marketplace.name = normalizeMarketplaceName(marketplace.name);
   marketplace.interface = marketplace.interface || {};
   marketplace.interface.displayName =
     marketplace.interface.displayName || DEFAULT_MARKETPLACE.interface.displayName;
@@ -367,4 +375,5 @@ module.exports = {
   removeMarketplaceEntry,
   warnWindowsHooks,
   writeJson,
+  normalizeMarketplaceName,
 };

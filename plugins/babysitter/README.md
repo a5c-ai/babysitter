@@ -92,7 +92,7 @@ CLI helper:
 
 ```bash
 claude plugin marketplace add a5c-ai/babysitter
-claude plugin install --scope user babysitter@a5c.ai
+claude plugin install --scope user babysitter@a5c-ai
 ```
 
 The SDK helper runs the same published Claude plugin flow:
