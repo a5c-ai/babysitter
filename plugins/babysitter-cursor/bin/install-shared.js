@@ -5,7 +5,7 @@ const os = require('os');
 const path = require('path');
 const { spawnSync } = require('child_process');
 
-const PLUGIN_NAME = 'babysitter-cursor';
+const PLUGIN_NAME = 'babysitter';
 const PLUGIN_CATEGORY = 'Coding';
 const HOOK_SCRIPT_NAMES = [
   'session-start.sh',

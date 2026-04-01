@@ -28,16 +28,16 @@ function registerViaCopilotCli(pluginRoot) {
   });
 
   if (result.status === 0) {
-    console.log(`[babysitter-github] Registered plugin via 'copilot plugin install'`);
+    console.log(`[babysitter] Registered plugin via 'copilot plugin install'`);
     return true;
   }
 
   // CLI not available or failed -- fall back to manual registration
   const stderr = (result.stderr || '').trim();
   if (result.error || stderr.includes('not found') || stderr.includes('not recognized')) {
-    console.log(`[babysitter-github] Copilot CLI not found, using manual registration`);
+    console.log(`[babysitter] Copilot CLI not found, using manual registration`);
   } else {
-    console.warn(`[babysitter-github] 'copilot plugin install' failed: ${stderr || 'unknown error'}, using manual registration`);
+    console.warn(`[babysitter] 'copilot plugin install' failed: ${stderr || 'unknown error'}, using manual registration`);
   }
   return false;
 }
@@ -47,7 +47,7 @@ function main() {
   const pluginRoot = getHomePluginRoot();
   const marketplacePath = getHomeMarketplacePath();
 
-  console.log(`[babysitter-github] Installing plugin to ${pluginRoot}`);
+  console.log(`[babysitter] Installing plugin to ${pluginRoot}`);
 
   try {
     copyPluginBundle(PACKAGE_ROOT, pluginRoot);
@@ -62,18 +62,18 @@ function main() {
     installCopilotSurface(PACKAGE_ROOT, copilotHome);
 
     const active = ensureGlobalProcessLibrary(PACKAGE_ROOT);
-    console.log(`[babysitter-github]   marketplace: ${marketplacePath}`);
-    console.log(`[babysitter-github]   copilot config: ${path.join(copilotHome, 'config.json')}`);
-    console.log(`[babysitter-github]   process library: ${active.binding?.dir}`);
+    console.log(`[babysitter]   marketplace: ${marketplacePath}`);
+    console.log(`[babysitter]   copilot config: ${path.join(copilotHome, 'config.json')}`);
+    console.log(`[babysitter]   process library: ${active.binding?.dir}`);
     if (active.defaultSpec?.cloneDir) {
-      console.log(`[babysitter-github]   process library clone: ${active.defaultSpec.cloneDir}`);
+      console.log(`[babysitter]   process library clone: ${active.defaultSpec.cloneDir}`);
     }
-    console.log(`[babysitter-github]   process library state: ${active.stateFile}`);
+    console.log(`[babysitter]   process library state: ${active.stateFile}`);
     warnWindowsHooks();
-    console.log('[babysitter-github] Installation complete!');
-    console.log('[babysitter-github] Restart GitHub Copilot CLI to pick up the installed plugin and config changes.');
+    console.log('[babysitter] Installation complete!');
+    console.log('[babysitter] Restart GitHub Copilot CLI to pick up the installed plugin and config changes.');
   } catch (err) {
-    console.error(`[babysitter-github] Failed to install plugin: ${err.message}`);
+    console.error(`[babysitter] Failed to install plugin: ${err.message}`);
     process.exitCode = 1;
   }
 }

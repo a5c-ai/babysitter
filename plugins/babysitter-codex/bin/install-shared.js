@@ -5,7 +5,7 @@ const os = require('os');
 const path = require('path');
 const { spawnSync } = require('child_process');
 
-const PLUGIN_NAME = 'babysitter-codex';
+const PLUGIN_NAME = 'babysitter';
 const PLUGIN_CATEGORY = 'Coding';
 const LEGACY_SKILL_NAMES = [
   'babysit',
@@ -489,8 +489,8 @@ function warnWindowsHooks() {
   if (process.platform !== 'win32') {
     return;
   }
-  console.warn('[babysitter-codex] Warning: Codex hooks are currently disabled on native Windows.');
-  console.warn('[babysitter-codex] The plugin will install correctly, but SessionStart/UserPromptSubmit/Stop hooks will not fire until Codex enables Windows hook execution.');
+  console.warn('[babysitter] Warning: Codex hooks are currently disabled on native Windows.');
+  console.warn('[babysitter] The plugin will install correctly, but SessionStart/UserPromptSubmit/Stop hooks will not fire until Codex enables Windows hook execution.');
 }
 
 module.exports = {

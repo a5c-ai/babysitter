@@ -20,7 +20,7 @@ function main() {
   const pluginRoot = getHomePluginRoot();
   const marketplacePath = getHomeMarketplacePath();
 
-  console.log(`[babysitter-cursor] Installing plugin to ${pluginRoot}`);
+  console.log(`[babysitter] Installing plugin to ${pluginRoot}`);
 
   try {
     copyPluginBundle(PACKAGE_ROOT, pluginRoot);
@@ -28,17 +28,17 @@ function main() {
     installCursorSurface(PACKAGE_ROOT, cursorHome);
 
     const active = ensureGlobalProcessLibrary(PACKAGE_ROOT);
-    console.log(`[babysitter-cursor]   marketplace: ${marketplacePath}`);
-    console.log(`[babysitter-cursor]   process library: ${active.binding?.dir}`);
+    console.log(`[babysitter]   marketplace: ${marketplacePath}`);
+    console.log(`[babysitter]   process library: ${active.binding?.dir}`);
     if (active.defaultSpec?.cloneDir) {
-      console.log(`[babysitter-cursor]   process library clone: ${active.defaultSpec.cloneDir}`);
+      console.log(`[babysitter]   process library clone: ${active.defaultSpec.cloneDir}`);
     }
-    console.log(`[babysitter-cursor]   process library state: ${active.stateFile}`);
+    console.log(`[babysitter]   process library state: ${active.stateFile}`);
     warnWindowsHooks();
-    console.log('[babysitter-cursor] Installation complete!');
-    console.log('[babysitter-cursor] Restart Cursor to pick up the installed plugin and config changes.');
+    console.log('[babysitter] Installation complete!');
+    console.log('[babysitter] Restart Cursor to pick up the installed plugin and config changes.');
   } catch (err) {
-    console.error(`[babysitter-cursor] Failed to install plugin: ${err.message}`);
+    console.error(`[babysitter] Failed to install plugin: ${err.message}`);
     process.exitCode = 1;
   }
 }

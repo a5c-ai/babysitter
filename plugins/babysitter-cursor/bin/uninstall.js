@@ -19,10 +19,10 @@ function main() {
   if (fs.existsSync(pluginRoot)) {
     try {
       fs.rmSync(pluginRoot, { recursive: true, force: true });
-      console.log(`[babysitter-cursor] Removed ${pluginRoot}`);
+      console.log(`[babysitter] Removed ${pluginRoot}`);
       removedPlugin = true;
     } catch (err) {
-      console.warn(`[babysitter-cursor] Warning: Could not remove plugin directory ${pluginRoot}: ${err.message}`);
+      console.warn(`[babysitter] Warning: Could not remove plugin directory ${pluginRoot}: ${err.message}`);
     }
   }
 
@@ -30,11 +30,11 @@ function main() {
   removeManagedHooks(cursorHome);
 
   if (!removedPlugin) {
-    console.log('[babysitter-cursor] Plugin directory not found, config and hooks cleaned if present.');
+    console.log('[babysitter] Plugin directory not found, config and hooks cleaned if present.');
     return;
   }
 
-  console.log('[babysitter-cursor] Restart Cursor to complete uninstallation.');
+  console.log('[babysitter] Restart Cursor to complete uninstallation.');
 }
 
 main();

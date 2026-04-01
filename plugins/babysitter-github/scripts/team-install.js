@@ -32,7 +32,7 @@ function main() {
   const args = parseArgs(process.argv);
   const packageRoot = path.resolve(process.env.BABYSITTER_PACKAGE_ROOT || path.join(__dirname, '..'));
   const workspaceRoot = args.workspace;
-  const workspacePluginRoot = path.join(workspaceRoot, 'plugins', 'babysitter-github');
+  const workspacePluginRoot = path.join(workspaceRoot, 'plugins', 'babysitter');
   const workspaceMarketplacePath = path.join(workspaceRoot, '.agents', 'plugins', 'marketplace.json');
   const workspaceCopilotDir = path.join(workspaceRoot, '.copilot');
 

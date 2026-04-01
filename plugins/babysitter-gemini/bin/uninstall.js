@@ -5,7 +5,7 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 
-const EXTENSION_DIR_NAME = 'babysitter-gemini';
+const EXTENSION_DIR_NAME = 'babysitter';
 
 function parseArgs(argv) {
   const args = { workspace: null };
@@ -30,11 +30,11 @@ function main() {
   const args = parseArgs(process.argv);
   const extensionRoot = getExtensionRoot(args.workspace);
   if (!fs.existsSync(extensionRoot)) {
-    console.log('[babysitter-gemini] Nothing to uninstall.');
+    console.log('[babysitter] Nothing to uninstall.');
     return;
   }
   fs.rmSync(extensionRoot, { recursive: true, force: true });
-  console.log(`[babysitter-gemini] Removed ${extensionRoot}`);
+  console.log(`[babysitter] Removed ${extensionRoot}`);
 }
 
 main();

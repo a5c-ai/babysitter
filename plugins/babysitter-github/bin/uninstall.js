@@ -12,7 +12,7 @@ const {
   removeMarketplaceEntry,
 } = require('./install-shared');
 
-const PLUGIN_NAME = 'babysitter-github';
+const PLUGIN_NAME = 'babysitter';
 
 /**
  * Attempt to unregister the plugin via `copilot plugin uninstall`.

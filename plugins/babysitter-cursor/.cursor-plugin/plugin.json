@@ -1,5 +1,5 @@
 {
-  "name": "babysitter-cursor",
+  "name": "babysitter",
   "version": "0.1.0",
   "description": "Babysitter orchestration plugin for Cursor IDE/CLI with lifecycle hooks and SDK-managed process-library bootstrapping",
   "author": {
